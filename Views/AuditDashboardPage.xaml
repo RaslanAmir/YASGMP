@@ -1,0 +1,41 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.AuditDashboardPage"
+             Title="Audit Dashboard">
+
+    <VerticalStackLayout Padding="10">
+        <Label Text="Audit Log" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+
+        <!-- 🔍 Filters -->
+        <HorizontalStackLayout Spacing="5" Margin="0,5">
+            <Entry Placeholder="User..." Text="{Binding FilterUser}" WidthRequest="120"/>
+            <Entry Placeholder="Entity..." Text="{Binding FilterEntity}" WidthRequest="120"/>
+            <Picker ItemsSource="{Binding ActionTypes}" SelectedItem="{Binding SelectedAction}" WidthRequest="120"/>
+            <DatePicker Date="{Binding FilterFrom}" />
+            <DatePicker Date="{Binding FilterTo}" />
+            <Button Text="Apply" Command="{Binding ApplyFilterCommand}"/>
+        </HorizontalStackLayout>
+
+        <!-- 📄 Export Buttons -->
+        <HorizontalStackLayout Spacing="10" Margin="0,5">
+            <Button Text="Export PDF" Command="{Binding ExportPdfCommand}" />
+            <Button Text="Export Excel" Command="{Binding ExportExcelCommand}" />
+        </HorizontalStackLayout>
+
+        <!-- 📌 Audit Log List -->
+        <CollectionView ItemsSource="{Binding FilteredAudits}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="LightGray" CornerRadius="6" Padding="5" Margin="2">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Action}" FontAttributes="Bold"/>
+                            <Label Text="{Binding EntityName}" FontSize="12"/>
+                            <Label Text="{Binding UserFullName}" FontSize="12" TextColor="DarkBlue"/>
+                            <Label Text="{Binding ChangedAt}" FontSize="11" TextColor="Gray"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>

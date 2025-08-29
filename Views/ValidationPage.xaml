@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.ValidationPage"
+             Title="Validacije (IQ/OQ/PQ/URS/DQ/FAT/SAT)">
+
+  <VerticalStackLayout Padding="10" Spacing="10">
+
+    <!-- Header -->
+    <Label Text="Validacije – IQ/OQ/PQ/URS/DQ/FAT/SAT"
+           FontSize="24"
+           FontAttributes="Bold"
+           HorizontalOptions="Center" />
+
+    <!-- Status / Busy bar -->
+    <Grid ColumnDefinitions="Auto,*" Padding="0,0,0,6">
+      <ActivityIndicator IsRunning="{Binding IsBusy}"
+                         IsVisible="{Binding IsBusy}"
+                         WidthRequest="24"
+                         HeightRequest="24" />
+      <Label Grid.Column="1"
+             Text="{Binding StatusMessage}"
+             VerticalTextAlignment="Center"
+             LineBreakMode="TailTruncation" />
+    </Grid>
+
+    <!-- List (CollectionView to match code-behind auto-scroll) -->
+    <CollectionView x:Name="ValidationListView"
+                    HeightRequest="250"
+                    SelectionMode="Single"
+                    ItemsSource="{Binding ValidationList}"
+                    SelectedItem="{Binding SelectedValidation, Mode=TwoWay}">
+      <CollectionView.ItemTemplate>
+        <DataTemplate>
+          <Grid Padding="6" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+            <Label Grid.Row="0" Text="{Binding Code}" FontAttributes="Bold" />
+            <Label Grid.Row="1" Text="{Binding Type}" FontAttributes="Italic" />
+            <Label Grid.Row="2" Text="{Binding Machine.Name}" FontSize="Small" />
+            <Label Grid.Row="3" Text="{Binding Component.Name}" FontSize="Small" />
+            <Label Grid.Row="4" Text="{Binding DateStart, StringFormat='Početak: {0:yyyy-MM-dd}'}" FontSize="Small" />
+            <Label Grid.Row="5" Text="{Binding DateEnd, StringFormat='Kraj: {0:yyyy-MM-dd}'}" FontSize="Small" />
+          </Grid>
+        </DataTemplate>
+      </CollectionView.ItemTemplate>
+    </CollectionView>
+
+    <!-- Edit form -->
+    <Frame Padding="10" BorderColor="Gray">
+      <VerticalStackLayout Spacing="8">
+        <Label Text="Unos/izmjena validacije" FontSize="18" />
+
+        <Entry x:Name="CodeEntry"
+               Placeholder="Interna oznaka (Code)"
+               Text="{Binding EditValidation.Code, Mode=TwoWay}" />
+
+        <Picker x:Name="TypePicker"
+                Title="Tip validacije"
+                SelectedItem="{Binding EditValidation.Type, Mode=TwoWay}">
+          <Picker.ItemsSource>
+            <x:Array Type="{x:Type x:String}">
+              <x:String>IQ</x:String>
+              <x:String>OQ</x:String>
+              <x:String>PQ</x:String>
+              <x:String>URS</x:String>
+              <x:String>DQ</x:String>
+              <x:String>FAT</x:String>
+              <x:String>SAT</x:String>
+            </x:Array>
+          </Picker.ItemsSource>
+        </Picker>
+
+        <Picker x:Name="MachinePicker"
+                Title="Stroj"
+                SelectedItem="{Binding EditValidation.Machine, Mode=TwoWay}" />
+
+        <Picker x:Name="ComponentPicker"
+                Title="Komponenta"
+                SelectedItem="{Binding EditValidation.Component, Mode=TwoWay}" />
+
+        <DatePicker x:Name="DateStartPicker"
+                    Date="{Binding EditValidation.DateStart, Mode=TwoWay}" />
+
+        <DatePicker x:Name="DateEndPicker"
+                    Date="{Binding EditValidation.DateEnd, Mode=TwoWay}" />
+
+        <Entry x:Name="DocEntry"
+               Placeholder="Dokumentacija (PDF putanja)"
+               Text="{Binding EditValidation.Documentation, Mode=TwoWay}" />
+
+        <Editor x:Name="NoteEditor"
+                Placeholder="Napomena"
+                HeightRequest="60"
+                Text="{Binding EditValidation.Note, Mode=TwoWay}" />
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,6,0,0">
+          <Button Text="Spremi"
+                  Clicked="OnSaveClicked" />
+          <Button Grid.Column="1"
+                  Text="Obriši"
+                  Clicked="OnDeleteClicked"
+                  BackgroundColor="Crimson"
+                  TextColor="White"
+                  IsVisible="{Binding CanDelete}" />
+        </Grid>
+      </VerticalStackLayout>
+    </Frame>
+
+  </VerticalStackLayout>
+</ContentPage>

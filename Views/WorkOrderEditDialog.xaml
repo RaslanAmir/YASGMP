@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.WorkOrderEditDialog"
+             Title="Radni Nalog – Uredi / Dodaj"
+             Padding="24">
+
+    <!-- 
+        Dialog za unos/izmjenu radnog naloga.
+        Svi bindingi su povezani na WorkOrderEditDialogViewModel.
+        Dodaj/zamijeni bindinge ovisno o svojoj implementaciji ViewModela i Modela!
+    -->
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16">
+
+            <!-- Naslov -->
+            <Label Text="Radni Nalog"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   ToolTipProperties.Text="Unos ili izmjena radnog naloga za GMP evidenciju" />
+
+            <!-- Tip naloga -->
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Tip naloga:" 
+                       VerticalOptions="Center"
+                       ToolTipProperties.Text="Odaberi vrstu radnog naloga (preventivni, korektivni...)" />
+                <Picker ItemsSource="{Binding TypeList}" 
+                        SelectedItem="{Binding WorkOrder.Type, Mode=TwoWay}"
+                        Title="Odaberi tip"/>
+            </HorizontalStackLayout>
+
+            <!-- Opis zadatka -->
+            <Entry Text="{Binding WorkOrder.TaskDescription, Mode=TwoWay}" 
+                   Placeholder="Opis zadatka"
+                   ToolTipProperties.Text="Unesi kratak opis zadatka" />
+
+            <!-- Stroj/oprema -->
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Stroj:" VerticalOptions="Center"/>
+                <Picker ItemsSource="{Binding Machines}" 
+                        SelectedItem="{Binding WorkOrder.Machine, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Odaberi stroj"
+                        ToolTipProperties.Text="Odaberi stroj na koji se odnosi nalog"/>
+            </HorizontalStackLayout>
+
+            <!-- Komponenta (može biti null) -->
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Komponenta:" VerticalOptions="Center"/>
+                <Picker ItemsSource="{Binding Components}" 
+                        SelectedItem="{Binding WorkOrder.Component, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Odaberi komponentu"
+                        ToolTipProperties.Text="Opcionalno: odaberi komponentu"/>
+            </HorizontalStackLayout>
+
+            <!-- Dodijeljen korisnik -->
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Dodijeljeno:" VerticalOptions="Center"/>
+                <Picker ItemsSource="{Binding Users}" 
+                        SelectedItem="{Binding WorkOrder.AssignedTo, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding FullName}"
+                        Title="Odaberi tehničara"
+                        ToolTipProperties.Text="Odaberi korisnika kojem je nalog dodijeljen"/>
+            </HorizontalStackLayout>
+
+            <!-- Datum otvaranja -->
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Datum otvaranja:" VerticalOptions="Center"/>
+                <DatePicker Date="{Binding WorkOrder.DateOpen, Mode=TwoWay}" 
+                            ToolTipProperties.Text="Datum i vrijeme otvaranja radnog naloga"/>
+            </HorizontalStackLayout>
+
+            <!-- Status naloga -->
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Status:" VerticalOptions="Center"/>
+                <Picker ItemsSource="{Binding StatusList}" 
+                        SelectedItem="{Binding WorkOrder.Status, Mode=TwoWay}"
+                        Title="Odaberi status"
+                        ToolTipProperties.Text="Status naloga (otvoren, u tijeku, završen, odbijen)"/>
+            </HorizontalStackLayout>
+
+            <!-- Rezultat/intervencija -->
+            <Entry Text="{Binding WorkOrder.Result, Mode=TwoWay}" 
+                   Placeholder="Rezultat ili napomena"
+                   ToolTipProperties.Text="Rezultat radnog naloga, završna napomena"/>
+
+            <!-- Digitalni potpis -->
+            <Entry Text="{Binding WorkOrder.DigitalSignature, Mode=TwoWay}" 
+                   Placeholder="Digitalni potpis"
+                   ToolTipProperties.Text="Upiši digitalni potpis ili hash (opcionalno)"/>
+
+            <!-- Gumbi za spremanje/odustajanje -->
+            <HorizontalStackLayout Spacing="24" Margin="0,20,0,0" HorizontalOptions="Center">
+                <Button Text="Spremi" 
+                        Command="{Binding SaveCommand}" 
+                        ToolTipProperties.Text="Spremi radni nalog i zatvori dijalog"/>
+                <Button Text="Odustani" 
+                        Command="{Binding CancelCommand}"
+                        ToolTipProperties.Text="Odustani od izmjena"/>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

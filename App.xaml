@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Application
+    x:Class="YasGMP.App"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:YasGMP.Converters">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Merged dictionaries (hook point for a future Logging.xaml if you add one) -->
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Inline empty dictionary to avoid missing-source crashes; replace with Source="Resources/Logging.xaml" when you add it -->
+                <ResourceDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter" />
+
+            <!-- Theme resources -->
+            <Color x:Key="PrimaryColor">#0067b8</Color>
+            <Color x:Key="DangerColor">#E53935</Color>
+            <Color x:Key="AccentColor">#FFAB00</Color>
+
+            <!-- Global styles -->
+            <Style TargetType="Label" x:Key="TitleLabel">
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource PrimaryColor}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  File: AppShell.xaml
+  Purpose: Application shell, tabs + global toolbar for quick switching between modules.
+  Notes:   The toolbar navigates by route, so pages need not exist at compile-time.
+-->
+<Shell
+    x:Class="YasGMP.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:YasGMP"
+    xmlns:views="clr-namespace:YasGMP.Views"
+    Shell.FlyoutBehavior="Disabled">
+
+    <!-- Global toolbar: always-visible quick navigation -->
+    <Shell.ToolbarItems>
+        <ToolbarItem Text="Dashboard" Priority="0" Order="Primary"
+                     x:Name="ToolbarDashboard"
+                     SemanticProperties.Description="Go to main dashboard"
+                     Clicked="OnToolbarGoDashboard" />
+        <ToolbarItem Text="Machines" Priority="1" Order="Primary"
+                     SemanticProperties.Description="Open Machines / Equipment module"
+                     Clicked="OnToolbarGoMachines" />
+        <ToolbarItem Text="Parts" Priority="2" Order="Primary"
+                     SemanticProperties.Description="Open Parts / Warehouse module"
+                     Clicked="OnToolbarGoParts" />
+        <ToolbarItem Text="Work Orders" Priority="3" Order="Primary"
+                     SemanticProperties.Description="Open Work Orders module"
+                     Clicked="OnToolbarGoWorkOrders" />
+        <ToolbarItem Text="CAPA" Priority="4" Order="Secondary"
+                     SemanticProperties.Description="Open CAPA module"
+                     Clicked="OnToolbarGoCapa" />
+        <ToolbarItem Text="Validation" Priority="5" Order="Secondary"
+                     SemanticProperties.Description="Open Validation (IQ/OQ/PQ) module"
+                     Clicked="OnToolbarGoValidation" />
+        <ToolbarItem Text="Admin" Priority="6" Order="Secondary"
+                     SemanticProperties.Description="Open Admin panel"
+                     Clicked="OnToolbarGoAdmin" />
+    </Shell.ToolbarItems>
+
+    <!-- Primary navigation host -->
+    <TabBar>
+        <!-- Dashboard tab -->
+        <ShellContent
+            Title="Dashboard"
+            Route="routes/dashboard"
+            ContentTemplate="{DataTemplate local:DashboardPage}" />
+
+        <!-- Audit / Events tab (requires AuditLogPage to exist) -->
+        <ShellContent
+            Title="Audit / Events"
+            Route="routes/auditlog"
+            ContentTemplate="{DataTemplate views:AuditLogPage}" />
+    </TabBar>
+
+    <!-- Optional visual tweaks -->
+    <Shell.Resources>
+        <Style TargetType="Shell">
+            <Setter Property="NavBarIsVisible" Value="True" />
+        </Style>
+    </Shell.Resources>
+
+</Shell>

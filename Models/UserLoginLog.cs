@@ -1,0 +1,118 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace YasGMP.Models
+{
+    /// <summary>
+    /// <b>UserLoginLog</b> – Ultra-robust, forensic log for user login and logout activity.
+    /// Covers full audit, device/session/IP tracing, 2FA/SSO/biometric status, geolocation, risk/AI fields, and security event mapping for GMP/CSV/21 CFR/ISO/IT/Banking.
+    /// </summary>
+    public class UserLoginLog
+    {
+        /// <summary>
+        /// Unique log entry ID (Primary Key).
+        /// </summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// ID of the user who logged in (FK).
+        /// </summary>
+        [Required]
+        public int UserId { get; set; }
+
+        /// <summary>
+        /// Navigation to user.
+        /// </summary>
+        public User User { get; set; } = null!;
+
+        /// <summary>
+        /// Timestamp when the login started (UTC).
+        /// </summary>
+        [Required]
+        public DateTime LoginTime { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Timestamp when the logout occurred (nullable if session still open).
+        /// </summary>
+        public DateTime? LogoutTime { get; set; }
+
+        /// <summary>
+        /// IP address used for login (forensic source, may be IPv4 or IPv6).
+        /// </summary>
+        [MaxLength(64)]
+        public string IpAddress { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Device information (browser, OS, device type, user agent).
+        /// </summary>
+        [MaxLength(200)]
+        public string DeviceInfo { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Was login successful? (for attempted/failed logins).
+        /// </summary>
+        public bool LoginSuccess { get; set; }
+
+        /// <summary>
+        /// Was 2FA/MFA completed successfully?
+        /// </summary>
+        public bool TwoFactorAuthSuccess { get; set; }
+
+        /// <summary>
+        /// Was SSO (Single Sign-On) used?
+        /// </summary>
+        public bool IsSsoUsed { get; set; }
+
+        /// <summary>
+        /// Was biometric authentication used?
+        /// </summary>
+        public bool IsBiometricUsed { get; set; }
+
+        /// <summary>
+        /// Session ID or authentication token (for session tracing).
+        /// </summary>
+        [MaxLength(100)]
+        public string SessionId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Geolocation (city/country or coordinates if available).
+        /// </summary>
+        [MaxLength(128)]
+        public string GeoLocation { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Login risk score (AI/ML anomaly detection, future expansion).
+        /// </summary>
+        public double? RiskScore { get; set; }
+
+        /// <summary>
+        /// Result status (success, failed, locked, password_expired, mfa_failed, etc.).
+        /// </summary>
+        [MaxLength(32)]
+        public string Status { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Reason for login failure, lockout, etc. (optional).
+        /// </summary>
+        [MaxLength(255)]
+        public string FailReason { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Time when login/attempt was last modified (audit, UTC).
+        /// </summary>
+        public DateTime LastModified { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Digital signature or hash of this entry (for audit/forensic compliance).
+        /// </summary>
+        [MaxLength(128)]
+        public string DigitalSignature { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Free text note or comment (inspector, security, user feedback).
+        /// </summary>
+        [MaxLength(512)]
+        public string Note { get; set; } = string.Empty;
+    }
+}

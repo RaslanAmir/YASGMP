@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="YasGMP.Views.LoginPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+             Title="Prijava u sustav"
+             BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#1c1c1c}"
+             Shell.NavBarIsVisible="False"
+             AutomationProperties.IsInAccessibleTree="True">
+
+    <!--
+        YasGMP Login Page (GMP/CSV/21 CFR Part 11 compliant)
+        - Tooltips use the built-in MAUI ToolTipProperties (NOT the Toolkit).
+        - ViewModel is resolved via DI in code-behind (no parameterless ctor needed).
+    -->
+
+    <!-- Page resources (add more later if you need) -->
+    <ContentPage.Resources>
+        <ResourceDictionary/>
+    </ContentPage.Resources>
+
+    <Grid Padding="20">
+        <!-- Background Gradient -->
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0,1">
+                <GradientStop Color="#0066cc" Offset="0.0" />
+                <GradientStop Color="#004080" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <Frame Padding="30" Margin="20"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#22272e}"
+                   CornerRadius="16"
+                   HasShadow="True"
+                   BorderColor="#cccccc"
+                   SemanticProperties.Description="Okvir za prijavu u GMP sustav">
+
+                <Grid RowSpacing="18">
+                    <Grid.RowDefinitions>
+                        <!-- define enough rows for all content indexes used below (0..14) -->
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Logo / Branding -->
+                    <Image Grid.Row="0"
+                           Source="logo.png"
+                           HeightRequest="72"
+                           HorizontalOptions="Center"
+                           AutomationId="LogoImage"
+                           maui:ToolTipProperties.Text="YasGMP logo" />
+
+                    <!-- Title -->
+                    <Label Grid.Row="1"
+                           Text="Prijava u YasGMP"
+                           FontAttributes="Bold"
+                           FontSize="30"
+                           TextColor="{AppThemeBinding Light=#000, Dark=#fff}"
+                           HorizontalOptions="Center"
+                           AutomationId="LoginTitle"
+                           SemanticProperties.HeadingLevel="Level1" />
+
+                    <!-- Language Switch -->
+                    <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="8">
+                        <ImageButton Source="flag_croatia.png"
+                                     Command="{Binding SwitchLanguageCommand}"
+                                     CommandParameter="hr"
+                                     maui:ToolTipProperties.Text="Promijeni na hrvatski" />
+                        <ImageButton Source="flag_uk.png"
+                                     Command="{Binding SwitchLanguageCommand}"
+                                     CommandParameter="en"
+                                     maui:ToolTipProperties.Text="Switch to English" />
+                    </HorizontalStackLayout>
+
+                    <!-- Username -->
+                    <VerticalStackLayout Grid.Row="3" Spacing="6">
+                        <Label Text="Korisničko ime:" 
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#000, Dark=#fff}"
+                               SemanticProperties.Description="Korisničko ime" />
+                        <Entry x:Name="UsernameEntry"
+                               Text="{Binding Username, Mode=TwoWay}"
+                               Placeholder="Unesite korisničko ime"
+                               Keyboard="Text"
+                               ClearButtonVisibility="WhileEditing"
+                               AutomationId="UsernameEntry"
+                               maui:ToolTipProperties.Text="Upišite svoje GMP korisničko ime"
+                               ReturnType="Next"
+                               MaxLength="80"
+                               AutomationProperties.IsInAccessibleTree="True" />
+                    </VerticalStackLayout>
+
+                    <!-- Password with show/hide and CapsLock warning -->
+                    <VerticalStackLayout Grid.Row="4" Spacing="6" Margin="0,10,0,0">
+                        <Label Text="Lozinka:" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#000, Dark=#fff}" />
+                        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                            <Entry x:Name="PasswordEntry"
+                                   Text="{Binding Password, Mode=TwoWay}"
+                                   Placeholder="Unesite lozinku"
+                                   IsPassword="{Binding IsPasswordHidden}"
+                                   ClearButtonVisibility="WhileEditing"
+                                   Keyboard="Default"
+                                   AutomationId="PasswordEntry"
+                                   maui:ToolTipProperties.Text="Upišite svoju lozinku (skriveno)"
+                                   ReturnType="Go"
+                                   MaxLength="128"
+                                   AutomationProperties.IsInAccessibleTree="True" />
+                            <ImageButton Grid.Column="1"
+                                         Source="{AppThemeBinding Light=eye.png, Dark=eye_dark.png}"
+                                         Command="{Binding TogglePasswordVisibilityCommand}"
+                                         BackgroundColor="Transparent"
+                                         maui:ToolTipProperties.Text="Prikaži/Sakrij lozinku"
+                                         WidthRequest="36"
+                                         HeightRequest="36" />
+                        </Grid>
+                        <!-- CapsLock warning -->
+                        <Label Text="Upozorenje: Caps Lock je uključen!"
+                               FontSize="12"
+                               TextColor="Red"
+                               IsVisible="{Binding IsCapsLockOn}" />
+                    </VerticalStackLayout>
+
+                    <!-- Two-Factor Authentication input -->
+                    <VerticalStackLayout Grid.Row="5" Spacing="6" IsVisible="{Binding IsTwoFactorRequired}">
+                        <Label Text="2FA kod:" FontAttributes="Bold" TextColor="#c98f00" />
+                        <Entry x:Name="TwoFactorEntry"
+                               Text="{Binding TwoFactorCode, Mode=TwoWay}"
+                               Placeholder="Unesite 2FA kod"
+                               Keyboard="Numeric"
+                               MaxLength="6"
+                               ClearButtonVisibility="WhileEditing"
+                               AutomationId="TwoFactorEntry"
+                               maui:ToolTipProperties.Text="Unesite šesteroznamenkasti 2FA kod" />
+                        <Button Text="Potvrdi 2FA"
+                                Command="{Binding SubmitTwoFactorCommand}"
+                                BackgroundColor="#ffcc00"
+                                TextColor="#222"
+                                FontAttributes="Bold"
+                                CornerRadius="12"
+                                Margin="0,8,0,0"/>
+                    </VerticalStackLayout>
+
+                    <!-- Optional auth methods (visibility controlled by VM) -->
+                    <HorizontalStackLayout Grid.Row="6" Spacing="12">
+                        <Button Text="Prijava putem PIN-a" Command="{Binding PinLoginCommand}" IsVisible="{Binding IsPinSupported}" />
+                        <Button Text="Biometrijska prijava" Command="{Binding BiometricLoginCommand}" IsVisible="{Binding IsBiometricSupported}" />
+                        <Button Text="Smartcard" Command="{Binding SmartcardLoginCommand}" IsVisible="{Binding IsSmartcardSupported}" />
+                        <Button Text="SSO/AD" Command="{Binding SsoLoginCommand}" IsVisible="{Binding IsSsoSupported}" />
+                        <Button Text="QR kod" Command="{Binding QrLoginCommand}" IsVisible="{Binding IsQrSupported}" />
+                    </HorizontalStackLayout>
+
+                    <!-- Links: Forgot password / help / privacy / audit info -->
+                    <HorizontalStackLayout Grid.Row="7" Spacing="18" HorizontalOptions="Center">
+                        <Button Text="Zaboravljena lozinka?" Command="{Binding ForgotPasswordCommand}" StyleClass="LinkButton" />
+                        <Button Text="Podrška" Command="{Binding SupportCommand}" StyleClass="LinkButton" />
+                        <Button Text="Privatnost" Command="{Binding PrivacyCommand}" StyleClass="LinkButton" />
+                        <Button Text="Prikaži audit log" Command="{Binding ShowAuditModalCommand}" StyleClass="LinkButton" />
+                    </HorizontalStackLayout>
+
+                    <!-- Status/Error Message (with triggers for color) -->
+                    <Label Grid.Row="8"
+                           Text="{Binding StatusMessage}"
+                           FontSize="14"
+                           Margin="0,6,0,0"
+                           HorizontalOptions="Center"
+                           AutomationId="StatusMessageLabel"
+                           maui:ToolTipProperties.Text="Poruka statusa prijave"
+                           LineBreakMode="WordWrap"
+                           TextColor="{AppThemeBinding Light=#000, Dark=#fff}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding HasError}" Value="True">
+                                <Setter Property="TextColor" Value="Red"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsAuthenticated}" Value="True">
+                                <Setter Property="TextColor" Value="Green"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <!-- Forensic Info -->
+                    <Label Grid.Row="9"
+                           Text="{Binding DeviceInfo}"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           AutomationId="DeviceInfoLabel"
+                           maui:ToolTipProperties.Text="Forenzički podaci o uređaju / sesiji (za audit trail)" />
+
+                    <Label Grid.Row="10"
+                           Text="{Binding IpAddress}"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           AutomationId="IpAddressLabel"
+                           maui:ToolTipProperties.Text="Vaša IP adresa za GMP forenziku" />
+
+                    <!-- Last login timeline -->
+                    <VerticalStackLayout Grid.Row="11" IsVisible="{Binding HasLoginHistory}">
+                        <Label Text="Zadnje prijave:" FontSize="12" FontAttributes="Bold" TextColor="#555" />
+                        <CollectionView ItemsSource="{Binding LastLogins}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Text="{Binding}" FontSize="11" TextColor="#888" />
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Label Text="{Binding FailedAttempts, StringFormat='Broj neuspjelih pokušaja: {0}'}"
+                               FontSize="11" TextColor="Red" />
+                    </VerticalStackLayout>
+
+                    <!-- Digital signature status -->
+                    <Label Grid.Row="12"
+                           Text="{Binding LoggedInUser.DigitalSignature, StringFormat='E-potpis: {0}'}"
+                           FontSize="13"
+                           TextColor="#007acc"
+                           IsVisible="{Binding IsAuthenticated}"
+                           HorizontalOptions="Center"
+                           AutomationId="DigitalSignatureLabel"
+                           maui:ToolTipProperties.Text="Status vašeg digitalnog potpisa (21 CFR Part 11)" />
+
+                    <!-- Login Button -->
+                    <Button Grid.Row="13"
+                            Text="🔐 Prijavi se"
+                            Command="{Binding LoginCommand}"
+                            Margin="0,18,0,0"
+                            FontAttributes="Bold"
+                            CornerRadius="12"
+                            HeightRequest="50"
+                            BackgroundColor="#007acc"
+                            TextColor="White"
+                            AutomationId="LoginButton"
+                            maui:ToolTipProperties.Text="Kliknite za prijavu u sustav"
+                            SemanticProperties.Hint="Prijava u GMP sustav; Enter = prijava" />
+
+                    <!-- Loading Indicator -->
+                    <ActivityIndicator Grid.Row="14"
+                                       IsRunning="{Binding IsBusy}"
+                                       IsVisible="{Binding IsBusy}"
+                                       Color="#007acc"
+                                       HorizontalOptions="Center"
+                                       Margin="0,10,0,0"
+                                       AutomationId="LoadingIndicator"/>
+                </Grid>
+            </Frame>
+        </ScrollView>
+    </Grid>
+</ContentPage>

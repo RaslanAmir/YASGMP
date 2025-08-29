@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    YasGMP.Pages.PpmPage – Preventive Maintenance Plans (PPM)
+    - Accessible, robust XAML
+    - All event handlers exist in code-behind with correct signatures
+    - Works with your existing PpmViewModel (no hard coupling)
+-->
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:conv="clr-namespace:YasGMP.Converters"
+    x:Class="YasGMP.Pages.PpmPage"
+    Title="Planovi Preventivnog Održavanja (PPM)">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- NullToBoolConverter: Enables/disables buttons based on selection -->
+            <conv:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Padding="20" Spacing="14">
+        <!-- Page Title -->
+        <Label 
+            x:Name="PageTitleLabel"
+            Text="Planovi Preventivnog Održavanja"
+            FontSize="26"
+            FontAttributes="Bold"
+            HorizontalOptions="Center"
+            AutomationId="LblPpmTitle"
+            SemanticProperties.Description="Naslov stranice - Planovi Preventivnog Održavanja" />
+
+        <!-- List of PPM plans -->
+        <CollectionView
+            x:Name="PlansCollectionView"
+            ItemsSource="{Binding PpmPlans}"
+            SelectionMode="Single"
+            SelectedItem="{Binding SelectedPlan, Mode=TwoWay}"
+            HeightRequest="300"
+            AutomationId="PlansCollectionView">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="#bdbdbd" CornerRadius="14" Margin="0,4">
+                        <VerticalStackLayout Spacing="2">
+                            <Label 
+                                Text="{Binding Title}"
+                                FontSize="20"
+                                FontAttributes="Bold"
+                                SemanticProperties.Description="Naziv plana" />
+                            <Label 
+                                Text="{Binding Description}" 
+                                FontSize="14" 
+                                LineBreakMode="WordWrap"
+                                SemanticProperties.Description="Opis plana" />
+                            <Label 
+                                Text="{Binding Frequency}" 
+                                FontSize="13" 
+                                TextColor="#455a64"
+                                SemanticProperties.Description="Frekvencija" />
+                            <Label 
+                                Text="{Binding DueDate, StringFormat='Sljedeće: {0:dd.MM.yyyy}'}" 
+                                FontSize="13"
+                                SemanticProperties.Description="Sljedeći termin održavanja" />
+                            <Label 
+                                Text="{Binding Status}" 
+                                FontSize="13"
+                                FontAttributes="Italic"
+                                SemanticProperties.Description="Status plana" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- CRUD Buttons -->
+        <HorizontalStackLayout Spacing="10" Padding="0,10">
+            <Button 
+                x:Name="AddPlanButton"
+                Text="➕ Dodaj novi plan" 
+                Clicked="OnAddPlanAsync"
+                AutomationId="BtnAddPlan" />
+            <Button 
+                x:Name="SavePlanButton"
+                Text="💾 Spremi"
+                Clicked="OnSavePlanAsync"
+                IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}"
+                AutomationId="BtnSavePlan" />
+            <Button 
+                x:Name="DeletePlanButton"
+                Text="🗑️ Obriši"
+                Clicked="OnDeletePlanAsync"
+                IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}"
+                AutomationId="BtnDeletePlan" />
+        </HorizontalStackLayout>
+
+        <!-- Advanced Features Section -->
+        <Label
+            x:Name="LblAdvanced"
+            Text="Napredne opcije"
+            FontAttributes="Bold"
+            FontSize="16"
+            TextColor="#2962ff"
+            Padding="0,10,0,0"
+            AutomationId="LblAdvancedOptions" />
+
+        <VerticalStackLayout Spacing="8">
+            <!-- Each button named; all handlers exist in code-behind -->
+            <Button x:Name="BtnAddAttachment" Text="📎 Dodaj privitak" Clicked="OnAddAttachmentAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnAddAttachment"/>
+            <Button x:Name="BtnShowAttachments" Text="📂 Prikaz privitaka" Clicked="OnShowAttachmentsAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnShowAttachments"/>
+            <Button x:Name="BtnApprovePlan" Text="✍️ Digitalni potpis (odobri plan)" Clicked="OnApprovePlanAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnApprovePlan"/>
+            <Button x:Name="BtnShowAudit" Text="📝 Prikaz audita" Clicked="OnShowAuditAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnShowAudit"/>
+            <Button x:Name="BtnLinkCapaIncident" Text="🔗 Poveži CAPA/incident" Clicked="OnLinkCapaIncidentAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnLinkCapaIncident"/>
+            <Button x:Name="BtnLinkIoT" Text="🌐 Poveži IoT senzor" Clicked="OnLinkIotSensorAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnLinkIotSensor"/>
+            <Button x:Name="BtnExportPdf" Text="📄 Eksportiraj kao PDF" Clicked="OnExportPlanAsPdfAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnExportPdf"/>
+            <Button x:Name="BtnScheduleReview" Text="⏰ Zakazivanje revizije" Clicked="OnScheduleNextReviewAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnScheduleReview"/>
+            <Button x:Name="BtnAssignExternal" Text="👷 Dodijeli izvođaču" Clicked="OnAssignToExternalContractorAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnAssignExternal"/>
+            <Button x:Name="BtnInspectorComment" Text="🗨️ Komentar inspektora" Clicked="OnAddInspectorCommentAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnInspectorComment"/>
+            <Button x:Name="BtnAttachChecklist" Text="✅ Dodaj checklistu/certifikat" Clicked="OnAttachChecklistCertificateAsync" IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}" AutomationId="BtnAttachChecklist"/>
+        </VerticalStackLayout>
+
+        <!-- Status -->
+        <Label
+            x:Name="LblStatusMessage"
+            Text="{Binding StatusMessage}"
+            TextColor="Green"
+            FontSize="13"
+            Padding="0,14,0,0"
+            AutomationId="LblStatusMessage" />
+    </VerticalStackLayout>
+</ContentPage>

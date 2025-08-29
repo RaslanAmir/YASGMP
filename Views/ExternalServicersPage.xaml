@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="YasGMP.ExternalServicersPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:ui="clr-namespace:YasGMP.UI"
+    xmlns:conv="clr-namespace:YasGMP.Converters"
+    Title="Vanjski serviseri i laboratoriji – YasGMP">
+
+    <!-- Page-scoped resources -->
+    <ContentPage.Resources>
+        <!-- Converter that safely reads one of several possible properties by reflection -->
+        <conv:PropertyOrFallbackConverter x:Key="PropOrFallback" />
+    </ContentPage.Resources>
+
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="28,18,28,18" Spacing="18" BackgroundColor="#f8fafc">
+            <Frame BackgroundColor="White" CornerRadius="14" HasShadow="True" Padding="18">
+                <VerticalStackLayout Spacing="14">
+
+                    <Label
+                        Text="Svi vanjski serviseri, laboratoriji i partneri (audit, certifikat, GMP kontakt)"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#673ab7"
+                        HorizontalOptions="Center"/>
+
+                    <HorizontalStackLayout Spacing="12">
+                        <Button
+                            Text="➕ Novi serviser"
+                            Clicked="OnAddServicerClicked"
+                            BackgroundColor="#ede7f6"
+                            TextColor="#512da8"
+                            FontAttributes="Bold"
+                            ui:ToolTipProperties.Text="Dodaj novog vanjskog partnera" />
+                        <Button
+                            Text="✏️ Uredi"
+                            Clicked="OnEditServicerClicked"
+                            BackgroundColor="#fffde7"
+                            TextColor="#fbc02d"
+                            FontAttributes="Bold"
+                            ui:ToolTipProperties.Text="Uredi odabranog partnera" />
+                        <Button
+                            Text="🗑️ Briši"
+                            Clicked="OnDeleteServicerClicked"
+                            BackgroundColor="#ffebee"
+                            TextColor="#c62828"
+                            FontAttributes="Bold"
+                            ui:ToolTipProperties.Text="Obriši odabranog partnera" />
+                    </HorizontalStackLayout>
+
+                    <CollectionView
+                        x:Name="ServicersListView"
+                        ItemsSource="{Binding ExternalServicers}"
+                        SelectionMode="Single"
+                        HeightRequest="540"
+                        BackgroundColor="#f8fafc">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame
+                                    Margin="0,2,0,2"
+                                    CornerRadius="10"
+                                    Padding="12"
+                                    BackgroundColor="#f5f7fa"
+                                    HasShadow="False"
+                                    BorderColor="#bdbdbd">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Id, StringFormat='#{0}'}" FontSize="13" FontAttributes="Bold" TextColor="#512da8" />
+                                        <Label Text="{Binding Name, StringFormat='Naziv: {0}'}" FontSize="13" TextColor="#1976d2" />
+
+                                        <!-- FIX: Bind to self and let converter find a suitable property:
+                                             tries Code, CompanyCode, ContractorCode, SupplierCode, InternalCode -->
+                                        <Label
+                                            Text="{Binding ., Converter={StaticResource PropOrFallback}, ConverterParameter=Code|CompanyCode|ContractorCode|SupplierCode|InternalCode, StringFormat='Šifra: {0}'}"
+                                            FontSize="12"
+                                            TextColor="#9e9e9e" />
+
+                                        <Label Text="{Binding Type, StringFormat='Vrsta: {0}'}" FontSize="12" TextColor="#7b1fa2" />
+                                        <Label Text="{Binding ContactPerson, StringFormat='Kontakt: {0}'}" FontSize="12" TextColor="#689f38" />
+                                        <Label Text="{Binding Email, StringFormat='Email: {0}'}" FontSize="12" TextColor="#00838f" />
+                                        <Label Text="{Binding Phone, StringFormat='Telefon: {0}'}" FontSize="12" TextColor="#00695c" />
+                                        <Label Text="{Binding Address, StringFormat='Adresa: {0}'}" FontSize="12" TextColor="#bdbdbd" />
+                                        <Label Text="{Binding Status, StringFormat='Status: {0}'}" FontSize="12" TextColor="#fbc02d" />
+                                        <Label Text="{Binding CooperationStart, StringFormat='Suradnja: {0:yyyy-MM-dd}'}" FontSize="12" TextColor="#757575" />
+                                        <Label Text="{Binding CooperationEnd, StringFormat='Istek: {0:yyyy-MM-dd}'}" FontSize="12" TextColor="#b71c1c" />
+                                        <Label Text="{Binding DigitalSignature, StringFormat='Potpis: {0}'}" FontSize="11" TextColor="#fbc02d" />
+                                        <Label Text="{Binding Comment, StringFormat='GMP napomena: {0}'}" FontSize="11" TextColor="#bdbdbd" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label
+                        Text="Svi podatci za GMP audit i povezivanje sa svim GMP modulima (kalibracije, CAPA, inspekcija...)"
+                        FontSize="11"
+                        TextColor="#bdbdbd"
+                        HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>

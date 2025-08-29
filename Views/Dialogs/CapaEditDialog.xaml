@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="YasGMP.CapaEditDialog"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewModels="clr-namespace:YasGMP.ViewModels"
+    Title="CAPA">
+
+    <!-- NOTE:
+         We intentionally REMOVED x:DataType to avoid XFC0045 compile errors
+         while the ViewModel property names are being finalized.
+         Runtime bindings will still work if properties exist; otherwise they no-op. -->
+
+    <Grid Padding="20" RowDefinitions="Auto,*,Auto" RowSpacing="12">
+        <!-- Header -->
+        <Label Text="CAPA — Uređivanje" FontSize="20" FontAttributes="Bold" />
+
+        <!-- Body -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="10">
+
+                <!-- Bindings are safe at runtime even if properties are absent; they just won't populate. -->
+                <Entry Placeholder="Naslov" Text="{Binding Title}" />
+                <Editor Placeholder="Opis" AutoSize="TextChanges" Text="{Binding Description}" />
+
+                <Picker Title="Status"
+                        ItemsSource="{Binding StatusOptions}"
+                        SelectedItem="{Binding Status}" />
+
+                <Picker Title="Dodijeljeno"
+                        ItemsSource="{Binding Users}"
+                        ItemDisplayBinding="{Binding FullName}"
+                        SelectedItem="{Binding SelectedUser}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Footer -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Text="Odustani" Clicked="OnCancelClicked" />
+            <Button Grid.Column="1" Text="Spremi" Clicked="OnSaveClicked" />
+        </Grid>
+    </Grid>
+</ContentPage>

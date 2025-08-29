@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    x:Class="YasGMP.ComponentsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Komponente strojeva – YasGMP">
+
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="28,20,28,20" Spacing="18" BackgroundColor="#f5f7fa">
+            <Frame 
+                BackgroundColor="White"
+                CornerRadius="14"
+                HasShadow="True"
+                Padding="20">
+
+                <VerticalStackLayout Spacing="16">
+                    <Label 
+                        Text="Pregled svih komponenti strojeva"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#2962ff"
+                        HorizontalOptions="Center"/>
+
+                    <HorizontalStackLayout Spacing="14">
+                        <Button 
+                            Text="➕ Dodaj novu komponentu"
+                            Clicked="OnAddComponentClicked"
+                            BackgroundColor="#e3f2fd"
+                            TextColor="#1565c0"
+                            FontAttributes="Bold"
+                            ToolTipProperties.Text="Unos nove komponente za stroj." />
+
+                        <Button 
+                            Text="✏️ Uredi"
+                            Clicked="OnEditComponentClicked"
+                            BackgroundColor="#fffde7"
+                            TextColor="#f9a825"
+                            FontAttributes="Bold"
+                            ToolTipProperties.Text="Uređivanje odabrane komponente." />
+
+                        <Button 
+                            Text="🗑️ Briši"
+                            Clicked="OnDeleteComponentClicked"
+                            BackgroundColor="#ffebee"
+                            TextColor="#c62828"
+                            FontAttributes="Bold"
+                            ToolTipProperties.Text="Brisanje odabrane komponente iz baze." />
+                    </HorizontalStackLayout>
+
+                    <CollectionView 
+                        x:Name="ComponentListView"
+                        ItemsSource="{Binding Components}"
+                        SelectionMode="Single"
+                        HeightRequest="440"
+                        BackgroundColor="#f5f7fa">
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame 
+                                    Margin="0,2,0,2"
+                                    CornerRadius="8"
+                                    Padding="10"
+                                    BackgroundColor="#f8fafc"
+                                    HasShadow="False"
+                                    BorderColor="#cfd8dc">
+
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label 
+                                            Text="{Binding Name}"
+                                            FontSize="17"
+                                            FontAttributes="Bold"
+                                            TextColor="#263238" />
+
+                                        <Label 
+                                            Text="{Binding Code}"
+                                            FontSize="13"
+                                            TextColor="#607d8b"
+                                            ToolTipProperties.Text="Interna oznaka komponente" />
+
+                                        <Label 
+                                            Text="{Binding Type}"
+                                            FontSize="13"
+                                            TextColor="#455a64"
+                                            ToolTipProperties.Text="Tip (Kalibracijski, PPM...)" />
+
+                                        <Label 
+                                            Text="{Binding MachineName}"
+                                            FontSize="13"
+                                            TextColor="#78909c"
+                                            ToolTipProperties.Text="Naziv stroja kojem pripada" />
+
+                                        <Label 
+                                            Text="{Binding SopDoc}"
+                                            FontSize="12"
+                                            TextColor="#b0bec5"
+                                            ToolTipProperties.Text="Putanja SOP dokumenta" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label
+                        Text="Kliknite na redak za odabir komponente. Moguće je uređivati ili brisati samo odabranu komponentu."
+                        FontSize="12"
+                        TextColor="#bdbdbd"
+                        HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>

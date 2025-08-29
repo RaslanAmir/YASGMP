@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="YasGMP.Views.CapaPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewModels="clr-namespace:YasGMP.ViewModels"
+    xmlns:conv="clr-namespace:YasGMP.Converters"
+    Title="CAPA evidencija"
+    BackgroundColor="#f7f9fb">
+
+    <!-- Bind a ViewModel instance created in XAML.
+         Requires a *parameterless* constructor on CapaViewModel (provided). -->
+    <ContentPage.BindingContext>
+        <viewModels:CapaViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Converter: returns true if bound value is NOT null; false otherwise. -->
+            <conv:NullToBoolConverter x:Key="NullToBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.Content>
+        <VerticalStackLayout Spacing="10" Padding="18,12">
+
+            <Label Text="CAPA Evidencija" FontSize="28" FontAttributes="Bold" />
+
+            <!-- Swipe-to-refresh pattern -->
+            <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+                <StackLayout>
+
+                    <!-- Empty-state note -->
+                    <Label
+                        Text="Nema evidentiranih CAPA slučajeva."
+                        FontAttributes="Italic"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding IsEmpty}" />
+
+                    <!-- CAPA list -->
+                    <CollectionView
+                        ItemsSource="{Binding CapaCases}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedCapa, Mode=TwoWay}">
+                        <CollectionView.Header>
+                            <HorizontalStackLayout>
+                                <Label Text="ID" WidthRequest="30" FontAttributes="Bold"/>
+                                <Label Text="Naslov" WidthRequest="120" FontAttributes="Bold"/>
+                                <Label Text="Status" WidthRequest="80" FontAttributes="Bold"/>
+                                <Label Text="Otvoreno" WidthRequest="110" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
+                        </CollectionView.Header>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <HorizontalStackLayout Spacing="16" Padding="4,2">
+                                    <Label Text="{Binding Id}" WidthRequest="30"/>
+                                    <Label Text="{Binding Title}" WidthRequest="120"/>
+                                    <Label Text="{Binding Status}" WidthRequest="80"/>
+                                    <Label Text="{Binding DateOpen, StringFormat='{}{0:dd.MM.yyyy}'}" WidthRequest="110"/>
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                </StackLayout>
+            </RefreshView>
+
+            <!-- CRUD actions -->
+            <HorizontalStackLayout Spacing="16" Padding="0,14,0,0">
+                <Button Text="➕ Dodaj" Command="{Binding AddNewCommand}" AutomationId="btnAdd"/>
+                <Button Text="✏️ Uredi"
+                        Command="{Binding EditCommand}"
+                        IsEnabled="{Binding SelectedCapa, Converter={StaticResource NullToBoolConverter}}"
+                        AutomationId="btnEdit"/>
+                <Button Text="🗑️ Obriši"
+                        Command="{Binding DeleteCommand}"
+                        IsEnabled="{Binding SelectedCapa, Converter={StaticResource NullToBoolConverter}}"
+                        AutomationId="btnDelete"/>
+                <Button Text="🔄 Osvježi" Command="{Binding RefreshCommand}" AutomationId="btnRefresh"/>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>

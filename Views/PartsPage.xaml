@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    x:Class="YasGMP.PartsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:ui="clr-namespace:YasGMP.UI"
+    Title="Rezervni dijelovi – YasGMP">
+
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="28,20,28,20" Spacing="18" BackgroundColor="#f5f7fa">
+            <Frame 
+                BackgroundColor="White"
+                CornerRadius="14"
+                HasShadow="True"
+                Padding="20">
+
+                <VerticalStackLayout Spacing="16">
+                    <Label 
+                        Text="Pregled svih rezervnih dijelova"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#2962ff"
+                        HorizontalOptions="Center"/>
+
+                    <HorizontalStackLayout Spacing="14">
+                        <Button 
+                            Text="➕ Dodaj novi dio"
+                            Clicked="OnAddPartClicked"
+                            BackgroundColor="#e3f2fd"
+                            TextColor="#1565c0"
+                            FontAttributes="Bold"
+                            ui:ToolTipProperties.Text="Unos novog rezervnog dijela." />
+
+                        <Button 
+                            Text="✏️ Uredi"
+                            Clicked="OnEditPartClicked"
+                            BackgroundColor="#fffde7"
+                            TextColor="#f9a825"
+                            FontAttributes="Bold"
+                            ui:ToolTipProperties.Text="Uređivanje odabranog dijela." />
+
+                        <Button 
+                            Text="🗑️ Briši"
+                            Clicked="OnDeletePartClicked"
+                            BackgroundColor="#ffebee"
+                            TextColor="#c62828"
+                            FontAttributes="Bold"
+                            ui:ToolTipProperties.Text="Brisanje odabranog dijela iz baze." />
+                    </HorizontalStackLayout>
+
+                    <CollectionView 
+                        x:Name="PartListView"
+                        ItemsSource="{Binding Parts}"
+                        SelectionMode="Single"
+                        HeightRequest="440"
+                        BackgroundColor="#f5f7fa">
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame 
+                                    Margin="0,2,0,2"
+                                    CornerRadius="8"
+                                    Padding="10"
+                                    BackgroundColor="#f8fafc"
+                                    HasShadow="False"
+                                    BorderColor="#cfd8dc">
+
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label 
+                                            Text="{Binding Name}"
+                                            FontSize="17"
+                                            FontAttributes="Bold"
+                                            TextColor="#263238" />
+                                        <Label 
+                                            Text="{Binding Code}"
+                                            FontSize="13"
+                                            TextColor="#607d8b"
+                                            ui:ToolTipProperties.Text="Interna oznaka dijela" />
+                                        <Label 
+                                            Text="{Binding Supplier}"
+                                            FontSize="13"
+                                            TextColor="#455a64"
+                                            ui:ToolTipProperties.Text="Dobavljač dijela" />
+                                        <Label 
+                                            Text="{Binding Location}"
+                                            FontSize="13"
+                                            TextColor="#78909c"
+                                            ui:ToolTipProperties.Text="Lokacija skladišta" />
+                                        <Label 
+                                            Text="{Binding Price, StringFormat='Cijena: {0:F2} €'}"
+                                            FontSize="12"
+                                            TextColor="#1b5e20" />
+                                        <Label 
+                                            Text="{Binding Stock, StringFormat='Stanje: {0} kom'}"
+                                            FontSize="12"
+                                            TextColor="#0d47a1" />
+                                        <Label 
+                                            Text="{Binding Image}"
+                                            FontSize="12"
+                                            TextColor="#b0bec5"
+                                            ui:ToolTipProperties.Text="Putanja slike dijela" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label
+                        Text="Kliknite na redak za odabir dijela. Moguće je uređivati ili brisati samo odabrani dio."
+                        FontSize="12"
+                        TextColor="#bdbdbd"
+                        HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>

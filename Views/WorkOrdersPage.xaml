@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  YasGMP – Work Orders Page (GMP / 21 CFR Part 11 compliant)
+  This page lists and filters work orders, exposes KPI tiles, and wires to
+  existing ViewModel commands without introducing new dependencies.
+-->
+<ContentPage
+    x:Class="YasGMP.Views.WorkOrderPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Radni nalozi"
+    BackgroundColor="{AppThemeBinding Light=#F7F7F8, Dark=#12161B}">
+
+    <!-- Main layout: scrollable vertical stack -->
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- KPI tiles -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Frame Padding="12" CornerRadius="12" HasShadow="True" BackgroundColor="#0E639C">
+                    <VerticalStackLayout>
+                        <Label Text="Otvoreni" FontSize="12" TextColor="White" />
+                        <Label Text="{Binding CountOpen}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Padding="12" CornerRadius="12" HasShadow="True" BackgroundColor="#C23B22" Grid.Column="1">
+                    <VerticalStackLayout>
+                        <Label Text="Kritični" FontSize="12" TextColor="White" />
+                        <Label Text="{Binding CountCritical}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Padding="12" CornerRadius="12" HasShadow="True" BackgroundColor="#F1A208" Grid.Column="2">
+                    <VerticalStackLayout>
+                        <Label Text="Overdue" FontSize="12" TextColor="White" />
+                        <Label Text="{Binding CountOverdue}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Filters -->
+            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                <!-- Search -->
+                <SearchBar Grid.Row="0" Grid.ColumnSpan="3"
+                           Placeholder="Pretraži (stroj, naslov, opis)"
+                           Text="{Binding SearchTerm, Mode=TwoWay}" />
+
+                <!-- Status -->
+                <Picker Grid.Row="1" Grid.Column="0"
+                        Title="Status"
+                        ItemsSource="{Binding AvailableStatuses}"
+                        SelectedItem="{Binding StatusFilter, Mode=TwoWay}" />
+
+                <!-- Priority -->
+                <Picker Grid.Row="1" Grid.Column="1"
+                        Title="Prioritet"
+                        ItemsSource="{Binding AvailablePriorities}"
+                        SelectedItem="{Binding PriorityFilter, Mode=TwoWay}" />
+
+                <!-- Asset filter (free text; VM exposes AssetFilter as string) -->
+                <Entry Grid.Row="1" Grid.Column="2"
+                       WidthRequest="220"
+                       Placeholder="Stroj/oprema"
+                       Text="{Binding AssetFilter, Mode=TwoWay}" />
+            </Grid>
+
+            <!-- Busy indicator -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <!-- Work orders list -->
+            <CollectionView
+                ItemsSource="{Binding FilteredWorkOrders}"
+                SelectionMode="Single"
+                SelectedItem="{Binding SelectedWorkOrder, Mode=TwoWay}"
+                HeightRequest="420">
+
+                <!-- Header -->
+                <CollectionView.Header>
+                    <Grid ColumnDefinitions="70,*,160,110,110,140,140" Padding="6,0" Margin="0,0,0,6">
+                        <Label Grid.Column="0" Text="ID" FontAttributes="Bold"/>
+                        <Label Grid.Column="1" Text="Naslov" FontAttributes="Bold"/>
+                        <Label Grid.Column="2" Text="Stroj" FontAttributes="Bold"/>
+                        <Label Grid.Column="3" Text="Prioritet" FontAttributes="Bold"/>
+                        <Label Grid.Column="4" Text="Status" FontAttributes="Bold"/>
+                        <Label Grid.Column="5" Text="Otvoren" FontAttributes="Bold"/>
+                        <Label Grid.Column="6" Text="Zatvaranje" FontAttributes="Bold"/>
+                    </Grid>
+                </CollectionView.Header>
+
+                <!-- Rows -->
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="70,*,160,110,110,140,140" Padding="6,4">
+                            <Label Grid.Column="0" Text="{Binding Id}" />
+                            <Label Grid.Column="1" Text="{Binding Title}" LineBreakMode="TailTruncation" />
+                            <Label Grid.Column="2" Text="{Binding Machine.Name}" LineBreakMode="TailTruncation" />
+                            <Label Grid.Column="3" Text="{Binding Priority}" />
+                            <Label Grid.Column="4" Text="{Binding Status}" />
+                            <Label Grid.Column="5" Text="{Binding DateOpen, StringFormat='{0:dd.MM.yyyy HH:mm}'}" />
+                            <Label Grid.Column="6" Text="{Binding DateClose, StringFormat='{0:dd.MM.yyyy HH:mm}'}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Actions -->
+            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="Osvježi"    Command="{Binding LoadWorkOrdersCommand}" />
+                <Button Grid.Column="1" Text="Dodaj"      Command="{Binding AddWorkOrderCommand}" />
+                <Button Grid.Column="2" Text="Uredi"      Command="{Binding UpdateWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
+                <Button Grid.Column="3" Text="Obriši"     Command="{Binding DeleteWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
+                <Button Grid.Column="4" Text="Rollback"   Command="{Binding RollbackWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
+                <Button Grid.Column="5" Text="Export"     Command="{Binding ExportWorkOrdersCommand}" />
+                <Button Grid.Column="6" Text="Odobri"     Command="{Binding ApproveWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
+                <Button Grid.Column="7" Text="Zatvori"    Command="{Binding CloseWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
+                <Button Grid.Column="8" Text="Eskaliraj"  Command="{Binding EscalateWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
+            </Grid>
+
+            <!-- Status message and compliance note -->
+            <Label Text="{Binding StatusMessage}" FontSize="12" TextColor="#0E639C" />
+            <Label Text="Sve akcije se automatski auditiraju (GMP / 21 CFR Part 11)." FontSize="11" TextColor="Gray" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

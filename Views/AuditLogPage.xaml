@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  YasGMP – Audit Log Page (GMP / 21 CFR Part 11 compliant)
+  Shows audit/system events with filters, KPI count, CSV/XLSX/PDF export and status line.
+  Data source: system_event_log (via DatabaseService.GetSystemEventsAsync).
+-->
+<ContentPage
+    x:Class="YasGMP.Views.AuditLogPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Audit Log"
+    BackgroundColor="{AppThemeBinding Light=#F7F7F8, Dark=#12161B}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Header -->
+            <HorizontalStackLayout>
+                <Label Text="Audit / System Events" FontSize="22" FontAttributes="Bold" />
+                <Label Text="{Binding FilteredEvents.Count, StringFormat=' (Prikazano: {0})'}"
+                       FontSize="14" Margin="8,6,0,0"/>
+            </HorizontalStackLayout>
+
+            <!-- Filters -->
+            <Grid ColumnDefinitions="*,*,*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Entry Grid.Row="0" Grid.Column="0" Placeholder="Korisnik (ID)..." Text="{Binding FilterUserIdText, Mode=TwoWay}"/>
+                <Entry Grid.Row="0" Grid.Column="1" Placeholder="Entitet/tablica..." Text="{Binding FilterEntity, Mode=TwoWay}"/>
+                <Picker Grid.Row="0" Grid.Column="2" Title="Akcija"
+                        ItemsSource="{Binding ActionTypes}" SelectedItem="{Binding SelectedAction, Mode=TwoWay}"/>
+                <DatePicker Grid.Row="0" Grid.Column="3" Date="{Binding FilterFrom, Mode=TwoWay}" />
+                <DatePicker Grid.Row="0" Grid.Column="4" Date="{Binding FilterTo, Mode=TwoWay}" />
+
+                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="5" Spacing="10">
+                    <Button Text="Primijeni filter" Command="{Binding ApplyFilterCommand}"/>
+                    <Button Text="Osvježi" Command="{Binding RefreshCommand}"/>
+                    <Button Text="Export CSV" Command="{Binding ExportCsvCommand}"/>
+                    <Button Text="Export XLSX" Command="{Binding ExportXlsxCommand}"/>
+                    <Button Text="Export PDF" Command="{Binding ExportPdfCommand}"/>
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- Busy indicator -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <!-- Audit list -->
+            <CollectionView ItemsSource="{Binding FilteredEvents}">
+                <CollectionView.Header>
+                    <Grid ColumnDefinitions="70,120,*,90,140,170,*,130,160" Padding="6,0" Margin="0,0,0,6">
+                        <Label Grid.Column="0" Text="ID" FontAttributes="Bold"/>
+                        <Label Grid.Column="1" Text="Akcija" FontAttributes="Bold"/>
+                        <Label Grid.Column="2" Text="Entitet" FontAttributes="Bold"/>
+                        <Label Grid.Column="3" Text="Record" FontAttributes="Bold"/>
+                        <Label Grid.Column="4" Text="Korisnik (ID)" FontAttributes="Bold"/>
+                        <Label Grid.Column="5" Text="Vrijeme" FontAttributes="Bold"/>
+                        <Label Grid.Column="6" Text="Opis" FontAttributes="Bold"/>
+                        <Label Grid.Column="7" Text="IP" FontAttributes="Bold"/>
+                        <Label Grid.Column="8" Text="Uređaj" FontAttributes="Bold"/>
+                    </Grid>
+                </CollectionView.Header>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="70,120,*,90,140,170,*,130,160" Padding="6,4">
+                            <Label Grid.Column="0" Text="{Binding Id}" />
+                            <Label Grid.Column="1" Text="{Binding EventType}" />
+                            <Label Grid.Column="2" Text="{Binding TableName}" LineBreakMode="TailTruncation" />
+                            <Label Grid.Column="3" Text="{Binding RecordId}" />
+                            <Label Grid.Column="4" Text="{Binding UserId}" />
+                            <Label Grid.Column="5" Text="{Binding EventTime, StringFormat='{0:dd.MM.yyyy HH:mm}'}" />
+                            <Label Grid.Column="6" Text="{Binding Description}" LineBreakMode="TailTruncation" />
+                            <Label Grid.Column="7" Text="{Binding SourceIp}" />
+                            <Label Grid.Column="8" Text="{Binding DeviceInfo}" LineBreakMode="TailTruncation" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Status line -->
+            <Label Text="{Binding StatusMessage}" FontSize="12" TextColor="#0E639C" />
+            <Label Text="Sve akcije i izmjene se auditiraju prema GMP / 21 CFR Part 11."
+                   FontSize="11" TextColor="Gray" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

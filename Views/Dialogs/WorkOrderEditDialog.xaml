@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
+    xmlns:ui="clr-namespace:YasGMP.UI"
+    x:Class="YasGMP.Dialogs.WorkOrderEditDialog"
+    Title="Radni nalog – uređivanje"
+    BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#22272e}"
+    Padding="0"
+    Shell.NavBarIsVisible="False">
+
+    <!-- BindingContext requires a parameterless VM constructor -->
+    <ContentPage.BindingContext>
+        <vm:WorkOrderEditDialogViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <Frame Padding="22" Margin="20"
+               BackgroundColor="{AppThemeBinding Light=White, Dark=#1c1c1c}"
+               CornerRadius="14"
+               HasShadow="True"
+               BorderColor="#007acc">
+
+            <VerticalStackLayout Spacing="16">
+                <!-- Dialog Title -->
+                <Label Text="{Binding DialogTitle}"
+                       FontAttributes="Bold"
+                       FontSize="23"
+                       HorizontalOptions="Center"
+                       ui:ToolTipProperties.Text="Uređivanje ili dodavanje radnog naloga (GMP compliance)" />
+
+                <!-- Task Type -->
+                <Picker Title="Tip naloga"
+                        ItemsSource="{Binding TypeOptions}"
+                        SelectedItem="{Binding Type, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Odaberi vrstu naloga (preventivni, korektivni, inspekcija...)" />
+
+                <!-- Machine Picker -->
+                <Picker Title="Stroj/oprema"
+                        ItemsSource="{Binding Machines}"
+                        ItemDisplayBinding="{Binding Name}"
+                        SelectedItem="{Binding SelectedMachine, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Odaberi stroj ili opremu na koji se odnosi nalog" />
+
+                <!-- Assigned User Picker -->
+                <Picker Title="Dodijeljeno korisniku"
+                        ItemsSource="{Binding Users}"
+                        ItemDisplayBinding="{Binding FullName}"
+                        SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Osoba odgovorna za izvršenje" />
+
+                <!-- Task Description -->
+                <Entry Text="{Binding TaskDescription, Mode=TwoWay}"
+                       Placeholder="Unesi opis zadatka"
+                       IsEnabled="{Binding !IsBusy}"
+                       ui:ToolTipProperties.Text="Kratak opis zadatka, aktivnosti ili zahtjeva" />
+
+                <!-- Priority -->
+                <Picker Title="Prioritet"
+                        ItemsSource="{Binding PriorityOptions}"
+                        SelectedItem="{Binding Priority, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Odaberi prioritet zadatka (normalno, kritično...)" />
+
+                <!-- Status -->
+                <Picker Title="Status naloga"
+                        ItemsSource="{Binding StatusOptions}"
+                        SelectedItem="{Binding Status, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Trenutni status naloga (otvoren, zatvoren, u tijeku...)" />
+
+                <!-- Dates -->
+                <HorizontalStackLayout Spacing="16">
+                    <DatePicker Date="{Binding DateOpen, Mode=TwoWay}"
+                                IsEnabled="{Binding !IsBusy}"
+                                ui:ToolTipProperties.Text="Datum otvaranja naloga" />
+                    <DatePicker Date="{Binding DateClose, Mode=TwoWay}"
+                                IsEnabled="{Binding !IsBusy}"
+                                ui:ToolTipProperties.Text="Datum zatvaranja (ako je zatvoren)" />
+                </HorizontalStackLayout>
+
+                <!-- CAPA Picker -->
+                <Picker Title="Povezani CAPA slučaj"
+                        ItemsSource="{Binding CapaCases}"
+                        ItemDisplayBinding="{Binding CaseTitle}"
+                        SelectedItem="{Binding SelectedCapaCase, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Odaberi CAPA (ako je ovaj nalog rezultat CAPA akcije)" />
+
+                <!-- Incident Picker -->
+                <Picker Title="Povezani incident"
+                        ItemsSource="{Binding Incidents}"
+                        ItemDisplayBinding="{Binding IncidentTitle}"
+                        SelectedItem="{Binding SelectedIncident, Mode=TwoWay}"
+                        IsEnabled="{Binding !IsBusy}"
+                        ui:ToolTipProperties.Text="Odaberi incident (ako je ovaj nalog rezultat incidenta)" />
+
+                <!-- Digital Signature & Forensics (Display only) -->
+                <Frame BackgroundColor="#f3f3ff" BorderColor="#007acc" CornerRadius="8" Padding="10">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Digitalni potpis:" FontSize="12" TextColor="#007acc" />
+                        <Label Text="{Binding DigitalSignature}" FontSize="12" TextColor="Gray" LineBreakMode="CharacterWrap" />
+                        <Label Text="Uređaj/IP:" FontSize="12" TextColor="#007acc" />
+                        <Label Text="{Binding DeviceInfo}" FontSize="12" TextColor="Gray" />
+                        <Label Text="{Binding IpAddress}" FontSize="12" TextColor="Gray" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Audit Note (reason for change) -->
+                <Editor Text="{Binding AuditNote, Mode=TwoWay}"
+                        Placeholder="Unesi razlog izmjene (GMP zahtjev, npr. zašto je nalog izmijenjen)"
+                        AutoSize="TextChanges"
+                        ui:ToolTipProperties.Text="Obavezno navesti razlog izmjene zbog GMP audita" />
+
+                <!-- Validation/Error message -->
+                <Label Text="{Binding StatusMessage}"
+                       FontSize="13"
+                       TextColor="#cc3434"
+                       HorizontalOptions="Center"
+                       IsVisible="{Binding HasError}"
+                       Margin="0,5,0,0" />
+
+                <!-- Dialog Action Buttons -->
+                <HorizontalStackLayout Spacing="16" Margin="0,10,0,0">
+                    <Button Text="✅ Spremi"
+                            Command="{Binding SaveCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            ui:ToolTipProperties.Text="Spremi sve podatke (ulazi u audit log, potpisuje)" />
+                    <Button Text="Odustani"
+                            Command="{Binding CancelCommand}"
+                            ui:ToolTipProperties.Text="Odustani od izmjena" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Frame>
+    </ScrollView>
+</ContentPage>
