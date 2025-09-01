@@ -31,10 +31,6 @@ namespace YasGMP.ViewModels
         /// <summary>
         /// Initializes the AdminViewModel with required services.
         /// </summary>
-        /// <param name="users">User management service.</param>
-        /// <param name="audit">Audit logging service.</param>
-        /// <param name="rbac">RBAC service abstraction.</param>
-        /// <exception cref="ArgumentNullException">Thrown when any dependency is <see langword="null"/>.</exception>
         public AdminViewModel(UserService users, AuditService audit, IRBACService rbac)
         {
             _users = users ?? throw new ArgumentNullException(nameof(users));
@@ -49,9 +45,6 @@ namespace YasGMP.ViewModels
         #region === Header / System info ===
 
         private string _headerSubtitle = string.Empty;
-        /// <summary>
-        /// Header subtitle showing current signed-in user.
-        /// </summary>
         public string HeaderSubtitle
         {
             get => _headerSubtitle;
@@ -59,9 +52,6 @@ namespace YasGMP.ViewModels
         }
 
         private string _appVersion = string.Empty;
-        /// <summary>
-        /// Application name and version.
-        /// </summary>
         public string AppVersion
         {
             get => _appVersion;
@@ -69,9 +59,6 @@ namespace YasGMP.ViewModels
         }
 
         private string _osVersion = Environment.OSVersion.ToString();
-        /// <summary>
-        /// Operating system version.
-        /// </summary>
         public string OsVersion
         {
             get => _osVersion;
@@ -79,9 +66,6 @@ namespace YasGMP.ViewModels
         }
 
         private string _hostName = Environment.MachineName;
-        /// <summary>
-        /// Host machine name.
-        /// </summary>
         public string HostName
         {
             get => _hostName;
@@ -89,9 +73,6 @@ namespace YasGMP.ViewModels
         }
 
         private string _userName = Environment.UserName;
-        /// <summary>
-        /// Current OS user name.
-        /// </summary>
         public string UserName
         {
             get => _userName;
@@ -99,18 +80,12 @@ namespace YasGMP.ViewModels
         }
 
         private string _localIp = "127.0.0.1";
-        /// <summary>
-        /// Best local IPv4 address detected.
-        /// </summary>
         public string LocalIp
         {
             get => _localIp;
             set => SetProperty(ref _localIp, value);
         }
 
-        /// <summary>
-        /// Refreshes local system info values (IP/OS/Host/User).
-        /// </summary>
         private void RefreshSystemInfo()
         {
             LocalIp   = ResolveBestIpAddress();
@@ -119,9 +94,6 @@ namespace YasGMP.ViewModels
             UserName  = Environment.UserName;
         }
 
-        /// <summary>
-        /// Attempts several strategies to determine a stable local IPv4 address.
-        /// </summary>
         private static string ResolveBestIpAddress()
         {
             try
@@ -146,10 +118,7 @@ namespace YasGMP.ViewModels
                 if (socket.LocalEndPoint is IPEndPoint ep)
                     return ep.Address.ToString();
             }
-            catch
-            {
-                // Ignore and fall through to default.
-            }
+            catch { }
             return "127.0.0.1";
         }
 
@@ -157,15 +126,9 @@ namespace YasGMP.ViewModels
 
         #region === Users ===
 
-        /// <summary>
-        /// Backing collection bound to the Users grid.
-        /// </summary>
         public ObservableCollection<User> Users { get; } = new();
 
         private string _userFilter = string.Empty;
-        /// <summary>
-        /// Filter textbox content to search users by username or role.
-        /// </summary>
         public string UserFilter
         {
             get => _userFilter;
@@ -173,9 +136,6 @@ namespace YasGMP.ViewModels
         }
 
         private User? _selectedUser;
-        /// <summary>
-        /// Currently selected user (updates HasSelectedUser and command CanExecute).
-        /// </summary>
         public User? SelectedUser
         {
             get => _selectedUser;
@@ -183,10 +143,8 @@ namespace YasGMP.ViewModels
             {
                 if (SetProperty(ref _selectedUser, value))
                 {
-                    // Raise derived property
                     OnPropertyChanged(nameof(HasSelectedUser));
 
-                    // Re-evaluate commands depending on selection
                     (LockSelectedCommand as IRelayCommand)?.NotifyCanExecuteChanged();
                     (UnlockSelectedCommand as IRelayCommand)?.NotifyCanExecuteChanged();
                     (ResetPasswordCommand as IRelayCommand)?.NotifyCanExecuteChanged();
@@ -194,21 +152,14 @@ namespace YasGMP.ViewModels
                     (DeleteUserCommand as IRelayCommand)?.NotifyCanExecuteChanged();
                     (LoadSelectedUserPermissionsCommand as IRelayCommand)?.NotifyCanExecuteChanged();
 
-                    // Keep original semantics
                     OnSelectedUserChanged(value);
                 }
             }
         }
 
-        /// <summary>
-        /// True if a user is selected in the grid.
-        /// </summary>
         public bool HasSelectedUser => SelectedUser != null;
 
         private string _editUsername = string.Empty;
-        /// <summary>
-        /// Editor field: username for create/update.
-        /// </summary>
         public string EditUsername
         {
             get => _editUsername;
@@ -216,9 +167,6 @@ namespace YasGMP.ViewModels
         }
 
         private string _editRole = string.Empty;
-        /// <summary>
-        /// Editor field: role for create/update.
-        /// </summary>
         public string EditRole
         {
             get => _editRole;
@@ -226,18 +174,12 @@ namespace YasGMP.ViewModels
         }
 
         private string _editPassword = string.Empty;
-        /// <summary>
-        /// Editor field: password for create/update (service hashes appropriately).
-        /// </summary>
         public string EditPassword
         {
             get => _editPassword;
             set => SetProperty(ref _editPassword, value);
         }
 
-        /// <summary>
-        /// Loads users (optionally filtered) and refreshes the bound collection.
-        /// </summary>
         [RelayCommand]
         public async Task LoadUsersAsync()
         {
@@ -266,9 +208,6 @@ namespace YasGMP.ViewModels
             }
         }
 
-        /// <summary>
-        /// Create a new user or update the selected one based on the editor fields.
-        /// </summary>
         [RelayCommand]
         public async Task SaveUserAsync()
         {
@@ -291,7 +230,7 @@ namespace YasGMP.ViewModels
                         Role         = string.IsNullOrWhiteSpace(EditRole) ? "User" : EditRole.Trim(),
                         Active       = true,
                         IsLocked     = false,
-                        PasswordHash = EditPassword ?? string.Empty // service layer can hash
+                        PasswordHash = EditPassword ?? string.Empty
                     };
 
                     await _users.CreateUserAsync(newUser, adminId).ConfigureAwait(false);
@@ -316,9 +255,6 @@ namespace YasGMP.ViewModels
             }
         }
 
-        /// <summary>
-        /// Locks the selected user.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task LockSelectedAsync()
         {
@@ -328,9 +264,6 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Unlocks the selected user.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task UnlockSelectedAsync()
         {
@@ -341,9 +274,6 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Prompts for and sets a new password for the selected user.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task ResetPasswordAsync()
         {
@@ -359,10 +289,7 @@ namespace YasGMP.ViewModels
                         "Save", "Cancel", "********", -1, Keyboard.Default)!)
                     .ConfigureAwait(false);
             }
-            catch
-            {
-                // Treat prompt failure as cancel
-            }
+            catch { }
 
             if (string.IsNullOrWhiteSpace(newPass)) return;
 
@@ -371,9 +298,6 @@ namespace YasGMP.ViewModels
             await _audit.LogEntityAuditAsync("users", SelectedUser.Id, "RESET_PASSWORD_UI", "Resetirana lozinka kroz Admin UI").ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Deactivates a user.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task DeactivateUserAsync(User? user)
         {
@@ -385,9 +309,6 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Deletes a user after confirmation.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task DeleteUserAsync(User? user)
         {
@@ -404,20 +325,14 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Enables 2FA for the selected user.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task Enable2FaAsync()
         {
             if (SelectedUser is null) return;
             await _users.SetTwoFactorEnabledAsync(SelectedUser.Id, true).ConfigureAwait(false);
-            await _audit.LogEntityAuditAsync(SelectedUser is null ? "users" : "users", SelectedUser?.Id ?? 0, "ENABLE_2FA_UI", "Omogućen 2FA kroz Admin UI").ConfigureAwait(false);
+            await _audit.LogEntityAuditAsync("users", SelectedUser.Id, "ENABLE_2FA_UI", "Omogućen 2FA kroz Admin UI").ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Disables 2FA for the selected user.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task Disable2FaAsync()
         {
@@ -426,9 +341,6 @@ namespace YasGMP.ViewModels
             await _audit.LogEntityAuditAsync("users", SelectedUser.Id, "DISABLE_2FA_UI", "Onemogućen 2FA kroz Admin UI").ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Loads a user into the editor fields.
-        /// </summary>
         [RelayCommand]
         public async Task EditUserAsync(User? user)
         {
@@ -442,9 +354,6 @@ namespace YasGMP.ViewModels
             await Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Placeholder for export action (logs and informs).
-        /// </summary>
         [RelayCommand]
         public async Task ExportUsersAsync()
         {
@@ -457,15 +366,9 @@ namespace YasGMP.ViewModels
 
         #region === RBAC · Roles / Permissions / Assignments ===
 
-        /// <summary>
-        /// All roles to display/edit.
-        /// </summary>
         public ObservableCollection<Role> Roles { get; } = new();
 
         private string _roleFilter = string.Empty;
-        /// <summary>
-        /// Filter for roles by code/name/description.
-        /// </summary>
         public string RoleFilter
         {
             get => _roleFilter;
@@ -473,9 +376,6 @@ namespace YasGMP.ViewModels
         }
 
         private Role? _selectedRole;
-        /// <summary>
-        /// Currently selected role.
-        /// </summary>
         public Role? SelectedRole
         {
             get => _selectedRole;
@@ -489,9 +389,7 @@ namespace YasGMP.ViewModels
         }
 
         private string _editRoleCode = string.Empty;
-        /// <summary>
-        /// Role editor: machine code (mapped to <see cref="Role.Name"/>).
-        /// </summary>
+        /// <summary>Role editor: machine code (mapped to <see cref="Role.Name"/>).</summary>
         public string EditRoleCode
         {
             get => _editRoleCode;
@@ -499,9 +397,7 @@ namespace YasGMP.ViewModels
         }
 
         private string _editRoleName = string.Empty;
-        /// <summary>
-        /// Role editor: display name (mapped to <see cref="Role.Description"/>).
-        /// </summary>
+        /// <summary>Role editor: display name (mapped to <see cref="Role.Description"/>).</summary>
         public string EditRoleName
         {
             get => _editRoleName;
@@ -510,7 +406,7 @@ namespace YasGMP.ViewModels
 
         private string _editRoleDescription = string.Empty;
         /// <summary>
-        /// Role editor: descriptive notes (mapped to <see cref="Role.Note"/>).
+        /// Role editor: descriptive notes (mapped to <see cref="Role.Notes"/>).
         /// </summary>
         public string EditRoleDescription
         {
@@ -520,20 +416,10 @@ namespace YasGMP.ViewModels
 
         private List<Permission> _allPermissions = new();
 
-        /// <summary>
-        /// Permissions not currently assigned to the selected role.
-        /// </summary>
         public ObservableCollection<Permission> AvailablePermissions { get; } = new();
-
-        /// <summary>
-        /// Permissions assigned to the selected role.
-        /// </summary>
         public ObservableCollection<Permission> RolePermissions { get; } = new();
 
         private string _permissionFilter = string.Empty;
-        /// <summary>
-        /// Filter string for available permissions list.
-        /// </summary>
         public string PermissionFilter
         {
             get => _permissionFilter;
@@ -547,9 +433,6 @@ namespace YasGMP.ViewModels
         }
 
         private Permission? _selectedAvailablePermission;
-        /// <summary>
-        /// Selected item in available permissions list.
-        /// </summary>
         public Permission? SelectedAvailablePermission
         {
             get => _selectedAvailablePermission;
@@ -557,29 +440,16 @@ namespace YasGMP.ViewModels
         }
 
         private Permission? _selectedRolePermission;
-        /// <summary>
-        /// Selected item in role permissions list.
-        /// </summary>
         public Permission? SelectedRolePermission
         {
             get => _selectedRolePermission;
             set => SetProperty(ref _selectedRolePermission, value);
         }
 
-        /// <summary>
-        /// Roles currently assigned to the selected user.
-        /// </summary>
         public ObservableCollection<Role> AssignedRolesForUser { get; } = new();
-
-        /// <summary>
-        /// Roles available to assign to the selected user.
-        /// </summary>
         public ObservableCollection<Role> AvailableRolesForUser { get; } = new();
 
         private Role? _selectedAvailableRoleForUser;
-        /// <summary>
-        /// Selected item in available roles (for user assignment).
-        /// </summary>
         public Role? SelectedAvailableRoleForUser
         {
             get => _selectedAvailableRoleForUser;
@@ -587,40 +457,21 @@ namespace YasGMP.ViewModels
         }
 
         private Role? _selectedAssignedRoleForUser;
-        /// <summary>
-        /// Selected item in assigned roles (for user removal).
-        /// </summary>
         public Role? SelectedAssignedRoleForUser
         {
             get => _selectedAssignedRoleForUser;
             set => SetProperty(ref _selectedAssignedRoleForUser, value);
         }
 
-        /// <summary>
-        /// Read-only preview of a user's effective permissions.
-        /// </summary>
         public ObservableCollection<string> SelectedUserPermissions { get; } = new();
 
-        /// <summary>
-        /// When the selected role changes, refresh role permission lists.
-        /// </summary>
-        private void OnSelectedRoleChanged(Role? value)
-        {
-            _ = RefreshRolePermissionListsAsync();
-        }
-
-        /// <summary>
-        /// When the selected user changes, refresh role lists and permission preview.
-        /// </summary>
+        private void OnSelectedRoleChanged(Role? value) => _ = RefreshRolePermissionListsAsync();
         private void OnSelectedUserChanged(User? value)
         {
             _ = RefreshUserRoleListsAsync();
             _ = LoadSelectedUserPermissionsAsync();
         }
 
-        /// <summary>
-        /// Loads roles and all permissions, applies filters, and updates bound collections.
-        /// </summary>
         [RelayCommand]
         public async Task LoadRolesAsync()
         {
@@ -651,9 +502,6 @@ namespace YasGMP.ViewModels
             }
         }
 
-        /// <summary>
-        /// Refreshes lists showing permissions available/assigned for the selected role.
-        /// </summary>
         private async Task RefreshRolePermissionListsAsync()
         {
             if (SelectedRole is null)
@@ -681,9 +529,6 @@ namespace YasGMP.ViewModels
             });
         }
 
-        /// <summary>
-        /// Refreshes lists showing roles available/assigned for the selected user.
-        /// </summary>
         private async Task RefreshUserRoleListsAsync()
         {
             if (SelectedUser is null)
@@ -702,9 +547,6 @@ namespace YasGMP.ViewModels
             });
         }
 
-        /// <summary>
-        /// Clears editor fields to create a new role.
-        /// </summary>
         [RelayCommand]
         public async Task NewRoleAsync()
         {
@@ -715,9 +557,6 @@ namespace YasGMP.ViewModels
             await Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Creates a new role or updates the selected role from the editor fields.
-        /// </summary>
         [RelayCommand]
         public async Task SaveRoleAsync()
         {
@@ -737,7 +576,7 @@ namespace YasGMP.ViewModels
                     {
                         Name        = EditRoleCode.Trim(),        // machine code
                         Description = string.IsNullOrWhiteSpace(EditRoleName) ? null : EditRoleName.Trim(),
-                        Note        = string.IsNullOrWhiteSpace(EditRoleDescription) ? null : EditRoleDescription.Trim()
+                        Notes       = string.IsNullOrWhiteSpace(EditRoleDescription) ? null : EditRoleDescription.Trim()
                     };
 
                     var newId = await _rbac.CreateRoleAsync(role, adminId).ConfigureAwait(false);
@@ -747,7 +586,7 @@ namespace YasGMP.ViewModels
                 {
                     SelectedRole.Name        = string.IsNullOrWhiteSpace(EditRoleCode)        ? SelectedRole.Name        : EditRoleCode.Trim();
                     SelectedRole.Description = string.IsNullOrWhiteSpace(EditRoleName)        ? SelectedRole.Description : EditRoleName.Trim();
-                    SelectedRole.Note        = string.IsNullOrWhiteSpace(EditRoleDescription) ? SelectedRole.Note        : EditRoleDescription.Trim();
+                    SelectedRole.Notes       = string.IsNullOrWhiteSpace(EditRoleDescription) ? SelectedRole.Notes       : EditRoleDescription.Trim();
 
                     await _rbac.UpdateRoleAsync(SelectedRole, adminId).ConfigureAwait(false);
                     await _audit.LogSystemEventAsync("ADMIN_ROLE_UPDATE_UI", $"Updated role {SelectedRole.Id}").ConfigureAwait(false);
@@ -762,9 +601,6 @@ namespace YasGMP.ViewModels
             }
         }
 
-        /// <summary>
-        /// Deletes the provided or currently selected role after confirmation.
-        /// </summary>
         [RelayCommand]
         public async Task DeleteRoleAsync(Role? role)
         {
@@ -781,9 +617,6 @@ namespace YasGMP.ViewModels
             await LoadRolesAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Grants the selected available permission to the selected role.
-        /// </summary>
         [RelayCommand]
         public async Task AddPermissionToRoleAsync(Permission? p)
         {
@@ -794,9 +627,6 @@ namespace YasGMP.ViewModels
             await RefreshRolePermissionListsAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Revokes the selected role permission from the selected role.
-        /// </summary>
         [RelayCommand]
         public async Task RemovePermissionFromRoleAsync(Permission? p)
         {
@@ -807,9 +637,6 @@ namespace YasGMP.ViewModels
             await RefreshRolePermissionListsAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Assigns the selected available role to the selected user.
-        /// </summary>
         [RelayCommand]
         public async Task AssignRoleToUserAsync(Role? r)
         {
@@ -820,9 +647,6 @@ namespace YasGMP.ViewModels
             await RefreshUserRoleListsAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Removes the selected assigned role from the selected user.
-        /// </summary>
         [RelayCommand]
         public async Task RemoveRoleFromUserAsync(Role? r)
         {
@@ -833,9 +657,6 @@ namespace YasGMP.ViewModels
             await RefreshUserRoleListsAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Loads the selected user's effective permissions into a read-only list.
-        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task LoadSelectedUserPermissionsAsync()
         {
@@ -863,18 +684,12 @@ namespace YasGMP.ViewModels
         #region === Diagnostics / Tools ===
 
         private string _dbTestResult = string.Empty;
-        /// <summary>
-        /// Bound label showing database connectivity test result.
-        /// </summary>
         public string DbTestResult
         {
             get => _dbTestResult;
             set => SetProperty(ref _dbTestResult, value);
         }
 
-        /// <summary>
-        /// Simple connectivity test using <see cref="UserService"/>.
-        /// </summary>
         [RelayCommand]
         public async Task TestDbAsync()
         {
@@ -889,9 +704,6 @@ namespace YasGMP.ViewModels
             }
         }
 
-        /// <summary>
-        /// Creates an audit snapshot.
-        /// </summary>
         [RelayCommand]
         public async Task ForceAuditSnapshotAsync()
         {
@@ -899,9 +711,6 @@ namespace YasGMP.ViewModels
             await Services.SafeNavigator.ShowAlertAsync("Tool", "Audit snapshot recorded.", "OK").ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Writes a generic system note to the audit log.
-        /// </summary>
         [RelayCommand]
         public async Task RecordSystemNoteAsync()
         {
@@ -909,9 +718,6 @@ namespace YasGMP.ViewModels
             await Services.SafeNavigator.ShowAlertAsync("Note", "System note recorded.", "OK").ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Refreshes system info, users, roles, and (if applicable) the selected user's permissions.
-        /// </summary>
         [RelayCommand]
         public async Task RefreshAllAsync()
         {
@@ -921,9 +727,6 @@ namespace YasGMP.ViewModels
             if (HasSelectedUser) await LoadSelectedUserPermissionsAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Navigates to the audit log page via Shell route.
-        /// </summary>
         [RelayCommand]
         public async Task OpenAuditAsync()
         {

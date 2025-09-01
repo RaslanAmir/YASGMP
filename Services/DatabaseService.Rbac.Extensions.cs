@@ -574,6 +574,9 @@ VALUES (NULL,@fmt,'permissions',@filter,@path,@ip,'Permissions export')",
         // INTERNAL HELPERS
         // =========================================================================
 
+        /// <summary>
+        /// Maps a <see cref="DataRow"/> to a <see cref="User"/> using schema-tolerant column access.
+        /// </summary>
         private static User ParseUser(DataRow r)
         {
             var u = new User();
@@ -595,16 +598,41 @@ VALUES (NULL,@fmt,'permissions',@filter,@path,@ip,'Permissions export')",
             return u;
         }
 
+        /// <summary>
+        /// Maps a <see cref="DataRow"/> to a <see cref="Role"/> using tolerant access and the
+        /// upgraded <c>roles</c> schema (notes, audit fields, versioning, soft delete).
+        /// </summary>
         private static Role ParseRole(DataRow r)
         {
             var x = new Role();
             SetIfExists(x, "Id", GetInt(r, "id") ?? 0);
             SetIfExists(x, "Name", GetString(r, "name"));
-            SetIfExists(x, "Code", GetString(r, "code"));
+            SetIfExists(x, "Code", GetString(r, "code")); // [NotMapped] alias for Name (kept for XAML bindings)
             SetIfExists(x, "Description", GetString(r, "description"));
+
+            // New/extended fields aligned with YASGMP.sql (schema-tolerant)
+            SetIfExists(x, "OrgUnit",          GetString(r, "org_unit"));
+            SetIfExists(x, "ComplianceTags",   GetString(r, "compliance_tags"));
+            SetIfExists(x, "IsDeleted",        GetBool(r, "is_deleted") ?? false);
+            SetIfExists(x, "Notes",            GetString(r, "notes"));
+
+            // Audit fields (UTC timestamps)
+            SetIfExists(x, "CreatedAt",        GetDate(r, "created_at") ?? DateTime.UtcNow);
+            SetIfExists(x, "UpdatedAt",        GetDate(r, "updated_at") ?? DateTime.UtcNow);
+
+            // Actor references
+            SetIfExists(x, "CreatedById",      GetInt(r, "created_by_id"));
+            SetIfExists(x, "LastModifiedById", GetInt(r, "last_modified_by_id"));
+
+            // Concurrency/version
+            SetIfExists(x, "Version",          GetInt(r, "version") ?? 1);
+
             return x;
         }
 
+        /// <summary>
+        /// Maps a <see cref="DataRow"/> to a <see cref="Permission"/> using tolerant access.
+        /// </summary>
         private static Permission ParsePermission(DataRow r)
         {
             var p = new Permission();

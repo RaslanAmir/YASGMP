@@ -30,6 +30,7 @@ namespace YasGMP
             public const string Validation = "routes/validation";
             public const string AdminPanel = "routes/adminpanel";
             public const string AuditLog   = "routes/auditlog";
+            public const string Users      = "routes/users";       // ← NEW
         }
 
         private static readonly object _routesLock = new();
@@ -78,6 +79,7 @@ namespace YasGMP
             RegisterRouteSafe(AppRoutes.Capa,       "CapaPage");
             RegisterRouteSafe(AppRoutes.Validation, "ValidationPage");
             RegisterRouteSafe(AppRoutes.AdminPanel, "AdminPanelPage");
+            RegisterRouteSafe(AppRoutes.Users,      "UsersPage");   // ← NEW
         }
 
         private static void RegisterRouteSafe(string route, string typeName)

@@ -12,9 +12,9 @@ namespace YasGMP.Services
     /// <b>RBACService</b> – GMP / 21 CFR Part 11 compliant Role-Based Access Control (RBAC) for YasGMP.
     /// Manages users, roles, permissions, delegations, approval workflow and audit-grade security events.
     /// <para>
-    /// This implementation is aligned with the current schema and your <see cref="DatabaseService"/> signatures
-    /// (e.g., <c>LogPermissionChangeAsync(changedBy, changeType, expiresAt)</c>, and
-    /// <c>AddUserPermissionAsync(..., expiresAt, ...)</c>, <c>AddDelegatedPermissionAsync(..., expiresAt, ...)</c>).
+    /// This implementation is aligned with the current schema and your <see cref="DatabaseService"/> signatures.
+    /// It relies on DB helpers surfaced by <c>DatabaseService</c> and (for backward compatibility) the extension
+    /// shims in <c>DatabaseServiceRbacCoreExtensions</c> to ensure builds succeed across schema versions.
     /// </para>
     /// </summary>
     public class RBACService : IRBACService
@@ -39,6 +39,9 @@ namespace YasGMP.Services
         /// <summary>
         /// Asserts that the user has a given permission; throws if not.
         /// </summary>
+        /// <param name="userId">User id.</param>
+        /// <param name="permissionCode">Permission code to check.</param>
+        /// <exception cref="UnauthorizedAccessException">Thrown when the permission is not held.</exception>
         public async Task AssertPermissionAsync(int userId, string permissionCode)
         {
             if (!await HasPermissionAsync(userId, permissionCode).ConfigureAwait(false))
@@ -94,10 +97,8 @@ namespace YasGMP.Services
         /// </summary>
         public async Task GrantRoleAsync(int userId, int roleId, int grantedBy, DateTime? expiresAt = null, string reason = "")
         {
-            // DB inserts to user_roles using assigned_by/assigned_at columns.
             await _db.AddUserRoleAsync(userId, roleId, grantedBy, expiresAt).ConfigureAwait(false);
 
-            // Align to DatabaseService: changedBy / changeType / expiresAt
             await _db.LogPermissionChangeAsync(
                 targetUserId: userId,
                 changedBy: grantedBy,
@@ -160,7 +161,6 @@ namespace YasGMP.Services
         {
             int permId = await _db.GetPermissionIdByCodeAsync(permissionCode).ConfigureAwait(false);
 
-            // Note parameter name: expiresAt (not expiresAtUtc)
             await _db.AddUserPermissionAsync(
                 userId: userId,
                 permissionId: permId,
@@ -218,7 +218,6 @@ namespace YasGMP.Services
         {
             int permId = await _db.GetPermissionIdByCodeAsync(permissionCode).ConfigureAwait(false);
 
-            // Note parameter name: expiresAt (not expiresAtUtc)
             await _db.AddDelegatedPermissionAsync(
                 fromUserId: fromUserId,
                 toUserId: toUserId,
@@ -298,17 +297,20 @@ namespace YasGMP.Services
         /// </summary>
         public async Task AddPermissionToRoleAsync(int roleId, int permissionId, int adminUserId, string reason = "")
         {
-            // Matching your schema: assigned_by/assigned_at (NOT added_by/added_at)
+            // match schema exactly; there is no 'reason' column in role_permissions.
             const string sql = @"
-                INSERT IGNORE INTO role_permissions (role_id, permission_id, allowed, assigned_by, assigned_at, reason)
-                VALUES (@r, @p, 1, @u, UTC_TIMESTAMP(), @reason);";
+                INSERT INTO role_permissions (role_id, permission_id, allowed, assigned_by, assigned_at)
+                VALUES (@r, @p, 1, @u, UTC_TIMESTAMP())
+                ON DUPLICATE KEY UPDATE
+                    allowed=VALUES(allowed),
+                    assigned_by=VALUES(assigned_by),
+                    assigned_at=VALUES(assigned_at);";
 
             await _db.ExecuteNonQueryAsync(sql, new[]
             {
                 new MySqlParameter("@r", roleId),
                 new MySqlParameter("@p", permissionId),
                 new MySqlParameter("@u", adminUserId),
-                new MySqlParameter("@reason", (object?)reason ?? DBNull.Value),
             }).ConfigureAwait(false);
 
             await _db.LogPermissionChangeAsync(
@@ -361,17 +363,18 @@ namespace YasGMP.Services
         public async Task<int> CreateRoleAsync(Role role, int adminUserId)
         {
             const string sql = @"
-              INSERT INTO roles(name, description, org_unit, compliance_tags, created_at, last_modified, last_modified_by_id, is_deleted, note)
-              VALUES (@n,@d,@ou,@ct,UTC_TIMESTAMP(),UTC_TIMESTAMP(),@by,0,@note);
+              INSERT INTO roles(name, description, org_unit, compliance_tags, is_deleted, notes, created_at, updated_at, created_by_id, last_modified_by_id, version)
+              VALUES (@n,@d,@ou,@ct,0,@note,UTC_TIMESTAMP(),UTC_TIMESTAMP(),@by,@by,1);
               SELECT LAST_INSERT_ID();";
+
             var idObj = await _db.ExecuteScalarAsync(sql, new[]
             {
                 new MySqlParameter("@n", role.Name ?? string.Empty),
                 new MySqlParameter("@d", (object?)role.Description ?? DBNull.Value),
                 new MySqlParameter("@ou", (object?)role.OrgUnit ?? DBNull.Value),
                 new MySqlParameter("@ct", (object?)role.ComplianceTags ?? DBNull.Value),
+                new MySqlParameter("@note", (object?)role.Notes ?? DBNull.Value),
                 new MySqlParameter("@by", adminUserId),
-                new MySqlParameter("@note", (object?)role.Note ?? DBNull.Value),
             }).ConfigureAwait(false);
 
             var id = Convert.ToInt32(idObj);
@@ -386,8 +389,10 @@ namespace YasGMP.Services
         {
             const string sql = @"
               UPDATE roles
-              SET name=@n, description=@d, org_unit=@ou, compliance_tags=@ct, last_modified=UTC_TIMESTAMP(), last_modified_by_id=@by, note=@note
-              WHERE id=@id AND is_deleted=0";
+              SET name=@n, description=@d, org_unit=@ou, compliance_tags=@ct,
+                  notes=@note, updated_at=UTC_TIMESTAMP(), last_modified_by_id=@by, version=version+1
+              WHERE id=@id AND is_deleted=0;";
+
             await _db.ExecuteNonQueryAsync(sql, new[]
             {
                 new MySqlParameter("@id", role.Id),
@@ -395,8 +400,8 @@ namespace YasGMP.Services
                 new MySqlParameter("@d",  (object?)role.Description ?? DBNull.Value),
                 new MySqlParameter("@ou", (object?)role.OrgUnit ?? DBNull.Value),
                 new MySqlParameter("@ct", (object?)role.ComplianceTags ?? DBNull.Value),
+                new MySqlParameter("@note", (object?)role.Notes ?? DBNull.Value),
                 new MySqlParameter("@by", adminUserId),
-                new MySqlParameter("@note", (object?)role.Note ?? DBNull.Value),
             }).ConfigureAwait(false);
 
             await _audit.LogSystemEventAsync("ROLE_UPDATE", $"role={role.Id} by={adminUserId}");
@@ -408,7 +413,7 @@ namespace YasGMP.Services
         public async Task DeleteRoleAsync(int roleId, int adminUserId, string reason = "")
         {
             await _db.ExecuteNonQueryAsync(
-                "UPDATE roles SET is_deleted=1, last_modified=UTC_TIMESTAMP(), last_modified_by_id=@by WHERE id=@id",
+                "UPDATE roles SET is_deleted=1, updated_at=UTC_TIMESTAMP(), last_modified_by_id=@by, version=version+1 WHERE id=@id",
                 new[] { new MySqlParameter("@by", adminUserId), new MySqlParameter("@id", roleId) }
             ).ConfigureAwait(false);
 

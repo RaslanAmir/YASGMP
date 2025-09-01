@@ -42,5 +42,17 @@ namespace YasGMP.Views
                 _ = refresh.ExecuteAsync(null);
             }
         }
+
+        /// <summary>
+        /// Opens the dedicated Users page for detailed user, role and permission management.
+        /// </summary>
+        private async void OnToolbarOpenUsers(object sender, EventArgs e)
+        {
+            // Route registered in AppShell.AppRoutes.Users = "routes/users"
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync("routes/users").ConfigureAwait(false);
+            }
+        }
     }
 }

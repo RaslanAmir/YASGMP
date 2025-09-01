@@ -3136,167 +3136,7 @@ public Task LogSystemEventAsync(
 }
 
 #endregion
-#region === 08 · RBAC =======================================================
-
-
-
-/// <summary>
-/// Returns <c>true</c> if the user has a direct, non-expired allow entry in <c>user_permissions</c>
-/// for the given permission <paramref name="permissionCode"/>.
-/// </summary>
-public async Task<bool> HasDirectUserPermissionAsync(int userId, string permissionCode, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT 1
-FROM user_permissions up
-JOIN permissions p ON p.id = up.permission_id
-WHERE up.user_id=@uid
-  AND p.code=@code
-  AND up.allowed=1
-  AND (up.expires_at IS NULL OR up.expires_at > NOW())
-LIMIT 1;";
-    var dt = await ExecuteSelectAsync(sql, new[]
-    {
-        new MySqlParameter("@uid",  userId),
-        new MySqlParameter("@code", permissionCode ?? string.Empty)
-    }, token).ConfigureAwait(false);
-
-    return dt.Rows.Count > 0;
-}
-
-/// <summary>
-/// Returns the active role ids for a user (ignores expired assignments).
-/// </summary>
-public async Task<List<int>> GetUserRoleIdsAsync(int userId, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT role_id
-FROM user_roles
-WHERE user_id=@uid
-  AND (expires_at IS NULL OR expires_at > NOW());";
-    var dt = await ExecuteSelectAsync(sql, new[] { new MySqlParameter("@uid", userId) }, token).ConfigureAwait(false);
-
-    var list = new List<int>();
-    foreach (DataRow r in dt.Rows)
-    {
-        if (r["role_id"] != DBNull.Value) list.Add(Convert.ToInt32(r["role_id"]));
-    }
-    return list;
-}
-
-/// <summary>
-/// Returns <c>true</c> if the given role grants the permission code.
-/// </summary>
-public async Task<bool> HasRolePermissionAsync(int roleId, string permissionCode, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT 1
-FROM role_permissions rp
-JOIN permissions p ON p.id = rp.permission_id
-WHERE rp.role_id=@rid
-  AND p.code=@code
-LIMIT 1;";
-    var dt = await ExecuteSelectAsync(sql, new[]
-    {
-        new MySqlParameter("@rid",  roleId),
-        new MySqlParameter("@code", permissionCode ?? string.Empty)
-    }, token).ConfigureAwait(false);
-
-    return dt.Rows.Count > 0;
-}
-
-/// <summary>
-/// Returns <c>true</c> if user has a live, non-revoked, non-expired delegatation for the permission code.
-/// </summary>
-public async Task<bool> HasDelegatedPermissionAsync(int userId, string permissionCode, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT 1
-FROM delegated_permissions d
-JOIN permissions p ON p.id = d.permission_id
-WHERE d.to_user_id=@uid
-  AND p.code=@code
-  AND (d.revoked IS NULL OR d.revoked=0)
-  AND d.expires_at > NOW()
-LIMIT 1;";
-    var dt = await ExecuteSelectAsync(sql, new[]
-    {
-        new MySqlParameter("@uid",  userId),
-        new MySqlParameter("@code", permissionCode ?? string.Empty)
-    }, token).ConfigureAwait(false);
-
-    return dt.Rows.Count > 0;
-}
-
-/// <summary>
-/// All direct, non-expired permission codes for the user.
-/// </summary>
-public async Task<List<string>> GetUserPermissionCodesAsync(int userId, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT p.code
-FROM user_permissions up
-JOIN permissions p ON p.id = up.permission_id
-WHERE up.user_id=@uid
-  AND up.allowed=1
-  AND (up.expires_at IS NULL OR up.expires_at > NOW())
-ORDER BY p.code;";
-    var dt = await ExecuteSelectAsync(sql, new[] { new MySqlParameter("@uid", userId) }, token).ConfigureAwait(false);
-
-    var list = new List<string>();
-    foreach (DataRow r in dt.Rows)
-    {
-        var code = r["code"]?.ToString();
-        if (!string.IsNullOrWhiteSpace(code)) list.Add(code);
-    }
-    return list;
-}
-
-/// <summary>
-/// All permission codes granted to a role.
-/// </summary>
-public async Task<List<string>> GetRolePermissionCodesAsync(int roleId, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT p.code
-FROM role_permissions rp
-JOIN permissions p ON p.id=rp.permission_id
-WHERE rp.role_id=@rid
-ORDER BY p.code;";
-    var dt = await ExecuteSelectAsync(sql, new[] { new MySqlParameter("@rid", roleId) }, token).ConfigureAwait(false);
-
-    var list = new List<string>();
-    foreach (DataRow r in dt.Rows)
-    {
-        var code = r["code"]?.ToString();
-        if (!string.IsNullOrWhiteSpace(code)) list.Add(code);
-    }
-    return list;
-}
-
-/// <summary>
-/// All live delegated permission codes for the user.
-/// </summary>
-public async Task<List<string>> GetDelegatedPermissionCodesAsync(int userId, CancellationToken token = default)
-{
-    const string sql = @"
-SELECT p.code
-FROM delegated_permissions d
-JOIN permissions p ON p.id = d.permission_id
-WHERE d.to_user_id=@uid
-  AND (d.revoked IS NULL OR d.revoked=0)
-  AND d.expires_at > NOW()
-ORDER BY p.code;";
-    var dt = await ExecuteSelectAsync(sql, new[] { new MySqlParameter("@uid", userId) }, token).ConfigureAwait(false);
-
-    var list = new List<string>();
-    foreach (DataRow r in dt.Rows)
-    {
-        var code = r["code"]?.ToString();
-        if (!string.IsNullOrWhiteSpace(code)) list.Add(code);
-    }
-    return list;
-}
+#region === 08 · RBAC (patched: schema‑tolerant permission_change_log) ==========================
 
 /// <summary>
 /// Adds (or refreshes) a user→role mapping. Will upsert and log the change.
@@ -3326,17 +3166,20 @@ ON DUPLICATE KEY UPDATE
         new MySqlParameter("@exp",   (object?)expiresAt ?? DBNull.Value)
     }, token).ConfigureAwait(false);
 
+    var details = expiresAt.HasValue ? $"expires_at={expiresAt:O}" : null;
+
     await LogPermissionChangeAsync(
-        targetUserId: userId,
-        changedBy: actorUserId,
-        changeType: "role",
+        userId: userId,
         roleId: roleId,
         permissionId: null,
-        action: "grant",
-        reason: string.Empty,
-        expiresAt: expiresAt,
-        sourceIp: sourceIp,
+        changeType: "role",
+        changedByUserId: actorUserId,
+        ip: sourceIp ?? string.Empty,
+        deviceInfo: string.Empty,
         sessionId: sessionId,
+        action: "grant",
+        details: details,
+        reason: string.Empty,
         token: token).ConfigureAwait(false);
 
     await LogSystemEventAsync(actorUserId, "RBAC_GRANT_ROLE", "user_roles", "RBAC",
@@ -3365,41 +3208,18 @@ public async Task RemoveUserRoleAsync(
         }, token).ConfigureAwait(false);
 
     await LogPermissionChangeAsync(
-        targetUserId: userId,
-        changedBy: actorUserId,
-        changeType: "role",
+        userId: userId,
         roleId: roleId,
         permissionId: null,
-        action: "revoke",
-        reason: reason ?? string.Empty,
-        expiresAt: null,
-        sourceIp: sourceIp,
+        changeType: "role",
+        changedByUserId: actorUserId,
+        ip: sourceIp ?? string.Empty,
+        deviceInfo: string.Empty,
         sessionId: sessionId,
+        action: "revoke",
+        details: null,
+        reason: reason ?? string.Empty,
         token: token).ConfigureAwait(false);
-}
-
-/// <summary>
-/// Resolves a permission id from code. Optionally creates it if missing.
-/// </summary>
-public async Task<int> GetPermissionIdByCodeAsync(string permissionCode, bool createIfMissing = false, string? displayName = null, CancellationToken token = default)
-{
-    var dt = await ExecuteSelectAsync("SELECT id FROM permissions WHERE code=@code LIMIT 1",
-        new[] { new MySqlParameter("@code", permissionCode ?? string.Empty) }, token).ConfigureAwait(false);
-
-    if (dt.Rows.Count > 0) return Convert.ToInt32(dt.Rows[0]["id"]);
-
-    if (!createIfMissing)
-        throw new KeyNotFoundException($"Permission code not found: '{permissionCode}'.");
-
-    await ExecuteNonQueryAsync(
-        "INSERT INTO permissions (code, name) VALUES (@code,@name)",
-        new[]
-        {
-            new MySqlParameter("@code", permissionCode ?? string.Empty),
-            new MySqlParameter("@name", (object?)(displayName ?? permissionCode ?? string.Empty) ?? DBNull.Value)
-        }, token).ConfigureAwait(false);
-
-    return Convert.ToInt32(await ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false));
 }
 
 /// <summary>
@@ -3436,17 +3256,20 @@ ON DUPLICATE KEY UPDATE
         new MySqlParameter("@exp",   (object?)expiresAt ?? DBNull.Value)
     }, token).ConfigureAwait(false);
 
+    var details = expiresAt.HasValue ? $"expires_at={expiresAt:O}" : null;
+
     await LogPermissionChangeAsync(
-        targetUserId: userId,
-        changedBy: grantedBy,
-        changeType: "permission",
+        userId: userId,
         roleId: null,
         permissionId: permissionId,
-        action: allowed ? "grant" : "deny",
-        reason: reason ?? string.Empty,
-        expiresAt: expiresAt,
-        sourceIp: sourceIp,
+        changeType: "permission",
+        changedByUserId: grantedBy,
+        ip: sourceIp ?? string.Empty,
+        deviceInfo: string.Empty,
         sessionId: sessionId,
+        action: allowed ? "grant" : "deny",
+        details: details,
+        reason: reason ?? string.Empty,
         token: token).ConfigureAwait(false);
 }
 
@@ -3471,16 +3294,17 @@ public async Task RemoveUserPermissionAsync(
         }, token).ConfigureAwait(false);
 
     await LogPermissionChangeAsync(
-        targetUserId: userId,
-        changedBy: actorUserId,
-        changeType: "permission",
+        userId: userId,
         roleId: null,
         permissionId: permissionId,
-        action: "revoke",
-        reason: reason ?? string.Empty,
-        expiresAt: null,
-        sourceIp: sourceIp,
+        changeType: "permission",
+        changedByUserId: actorUserId,
+        ip: sourceIp ?? string.Empty,
+        deviceInfo: string.Empty,
         sessionId: sessionId,
+        action: "revoke",
+        details: null,
+        reason: reason ?? string.Empty,
         token: token).ConfigureAwait(false);
 }
 
@@ -3512,22 +3336,25 @@ VALUES (@from,@to,@pid,@exp,@reason,@by);";
         new MySqlParameter("@by",     grantedBy)
     }, token).ConfigureAwait(false);
 
+    var details = $"expires_at={expiresAt:O}";
+
     await LogPermissionChangeAsync(
-        targetUserId: toUserId,
-        changedBy: grantedBy,
-        changeType: "delegation",
+        userId: toUserId,
         roleId: null,
         permissionId: permissionId,
-        action: "grant",
-        reason: reason ?? string.Empty,
-        expiresAt: expiresAt,
-        sourceIp: sourceIp,
+        changeType: "delegation",
+        changedByUserId: grantedBy,
+        ip: sourceIp ?? string.Empty,
+        deviceInfo: string.Empty,
         sessionId: sessionId,
+        action: "grant",
+        details: details,
+        reason: reason ?? string.Empty,
         token: token).ConfigureAwait(false);
 }
 
 /// <summary>
-/// Revokes a live delegation (requires actor id). Keeps your existing implementation + logging.
+/// Revokes a live delegation (requires actor id). Now uses schema‑tolerant logger.
 /// </summary>
 public async Task RevokeDelegatedPermissionAsync(
     int delegationId, int actorUserId, string? reason = null, CancellationToken token = default)
@@ -3538,145 +3365,38 @@ SET revoked=1, revoked_at=NOW()
 WHERE id=@id",
         new[] { new MySqlParameter("@id", delegationId) }, token).ConfigureAwait(false);
 
-    await ExecuteNonQueryAsync(@"
-INSERT INTO permission_change_log
-(user_id, changed_by, change_type, action, reason)
-SELECT to_user_id, @actor, 'delegation', 'revoke', @reason
-FROM delegated_permissions WHERE id=@id",
-        new[]
-        {
-            new MySqlParameter("@id",    delegationId),
-            new MySqlParameter("@actor", actorUserId),
-            new MySqlParameter("@reason", reason ?? string.Empty)
-        }, token).ConfigureAwait(false);
+    // Fetch target and permission for logging
+    var dt = await ExecuteSelectAsync(
+        "SELECT to_user_id, permission_id FROM delegated_permissions WHERE id=@id",
+        new[] { new MySqlParameter("@id", delegationId) }, token).ConfigureAwait(false);
+
+    int? toUserId = null; int? permissionId = null;
+    if (dt.Rows.Count == 1)
+    {
+        if (dt.Rows[0]["to_user_id"] != DBNull.Value) toUserId = Convert.ToInt32(dt.Rows[0]["to_user_id"]);
+        if (dt.Rows[0]["permission_id"] != DBNull.Value) permissionId = Convert.ToInt32(dt.Rows[0]["permission_id"]);
+    }
+
+    await LogPermissionChangeAsync(
+        userId: toUserId,
+        roleId: null,
+        permissionId: permissionId,
+        changeType: "delegation",
+        changedByUserId: actorUserId,
+        ip: string.Empty,
+        deviceInfo: string.Empty,
+        sessionId: null,
+        action: "revoke",
+        details: $"delegation_id={delegationId}",
+        reason: reason ?? string.Empty,
+        token: token).ConfigureAwait(false);
 }
 
 /// <summary>
-/// Overload to support callers that don't pass actor id (fixes CS7036 from RBACService).
+/// Overload to support callers that don't pass actor id (keeps signature parity).
 /// </summary>
 public Task RevokeDelegatedPermissionAsync(int delegationId, CancellationToken token = default)
     => RevokeDelegatedPermissionAsync(delegationId, actorUserId: 0, reason: null, token);
-
-/// <summary>
-/// Writes a permission change record into <c>permission_change_log</c>.
-/// </summary>
-public async Task LogPermissionChangeAsync(
-    int targetUserId,
-    int changedBy,
-    string changeType,
-    int? roleId,
-    int? permissionId,
-    string action,
-    string? reason,
-    DateTime? expiresAt,
-    string? sourceIp = null,
-    string? sessionId = null,
-    CancellationToken token = default)
-{
-    const string sql = @"
-INSERT INTO permission_change_log
-(user_id, changed_by, change_type, role_id, permission_id, action, reason, expires_at, source_ip, session_id, changed_at)
-VALUES
-(@uid,@actor,@ctype,@rid,@pid,@act,@reason,@exp,@ip,@sess,NOW());";
-
-    await ExecuteNonQueryAsync(sql, new[]
-    {
-        new MySqlParameter("@uid",   targetUserId),
-        new MySqlParameter("@actor", changedBy),
-        new MySqlParameter("@ctype", changeType ?? string.Empty),
-        new MySqlParameter("@rid",   (object?)roleId ?? DBNull.Value),
-        new MySqlParameter("@pid",   (object?)permissionId ?? DBNull.Value),
-        new MySqlParameter("@act",   action ?? string.Empty),
-        new MySqlParameter("@reason",(object?)(reason ?? string.Empty) ?? DBNull.Value),
-        new MySqlParameter("@exp",   (object?)expiresAt ?? DBNull.Value),
-        new MySqlParameter("@ip",    (object?)(sourceIp ?? string.Empty) ?? DBNull.Value),
-        new MySqlParameter("@sess",  (object?)(sessionId ?? string.Empty) ?? DBNull.Value)
-    }, token).ConfigureAwait(false);
-}
-
-/// <summary>
-/// Returns all roles. Schema-tolerant mapping.
-/// </summary>
-public async Task<List<Role>> GetAllRolesAsync(CancellationToken token = default)
-{
-    var dt = await ExecuteSelectAsync("SELECT * FROM roles ORDER BY name, id", null, token).ConfigureAwait(false);
-    var list = new List<Role>();
-    foreach (DataRow r in dt.Rows)
-    {
-        var role = Activator.CreateInstance<Role>();
-        if (r.Table.Columns.Contains("id") && r["id"] != DBNull.Value)                SetIfExists(role, "Id", Convert.ToInt32(r["id"]));
-        if (r.Table.Columns.Contains("name"))                                         SetIfExists(role, "Name", r["name"]?.ToString());
-        if (r.Table.Columns.Contains("code"))                                         SetIfExists(role, "Code", r["code"]?.ToString());
-        if (r.Table.Columns.Contains("description"))                                  SetIfExists(role, "Description", r["description"]?.ToString());
-        list.Add(role);
-    }
-    return list;
-}
-
-/// <summary>
-/// Returns all permissions. Schema-tolerant mapping.
-/// </summary>
-public async Task<List<Permission>> GetAllPermissionsAsync(CancellationToken token = default)
-{
-    var dt = await ExecuteSelectAsync("SELECT * FROM permissions ORDER BY code, id", null, token).ConfigureAwait(false);
-    var list = new List<Permission>();
-    foreach (DataRow r in dt.Rows)
-    {
-        var p = Activator.CreateInstance<Permission>();
-        if (r.Table.Columns.Contains("id") && r["id"] != DBNull.Value)                SetIfExists(p, "Id", Convert.ToInt32(r["id"]));
-        if (r.Table.Columns.Contains("code"))                                         SetIfExists(p, "Code", r["code"]?.ToString());
-        if (r.Table.Columns.Contains("name"))                                         SetIfExists(p, "Name", r["name"]?.ToString());
-        if (r.Table.Columns.Contains("description"))                                  SetIfExists(p, "Description", r["description"]?.ToString());
-        list.Add(p);
-    }
-    return list;
-}
-
-/// <summary>
-/// Adds a permission request (user → permission) and returns its id.
-/// </summary>
-public async Task<int> AddPermissionRequestAsync(int userId, int permissionId, string? reason, CancellationToken token = default)
-{
-    const string sql = @"
-INSERT INTO permission_requests (user_id, permission_id, reason, status, requested_at)
-VALUES (@uid,@pid,@reason,'pending',NOW());";
-    await ExecuteNonQueryAsync(sql, new[]
-    {
-        new MySqlParameter("@uid", userId),
-        new MySqlParameter("@pid", permissionId),
-        new MySqlParameter("@reason", reason ?? string.Empty)
-    }, token).ConfigureAwait(false);
-
-    return Convert.ToInt32(await ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false));
-}
-
-/// <summary>
-/// Approves a pending permission request, grants a direct permission override, and logs the decision.
-/// </summary>
-public async Task ApprovePermissionRequestAsync(int requestId, int approvedBy, string? comment, DateTime? expiresAt = null, CancellationToken token = default)
-{
-    var dt = await ExecuteSelectAsync("SELECT * FROM permission_requests WHERE id=@id",
-        new[] { new MySqlParameter("@id", requestId) }, token).ConfigureAwait(false);
-    if (dt.Rows.Count == 0) return;
-
-    int userId       = Convert.ToInt32(dt.Rows[0]["user_id"]);
-    int permissionId = Convert.ToInt32(dt.Rows[0]["permission_id"]);
-
-    await ExecuteNonQueryAsync(@"
-UPDATE permission_requests
-SET status='approved', reviewed_by=@rev, reviewed_at=NOW(), review_comment=@cmt
-WHERE id=@id",
-        new[]
-        {
-            new MySqlParameter("@rev", approvedBy),
-            new MySqlParameter("@cmt", comment ?? string.Empty),
-            new MySqlParameter("@id",  requestId)
-        }, token).ConfigureAwait(false);
-
-    // Grant direct override
-    await AddUserPermissionAsync(userId, permissionId, approvedBy, expiresAt, allowed: true, reason: $"Approved request #{requestId}: {comment}", token: token)
-        .ConfigureAwait(false);
-}
 
 /// <summary>
 /// Denies a pending permission request and logs the decision.
@@ -3702,21 +3422,23 @@ WHERE id=@id",
         }, token).ConfigureAwait(false);
 
     await LogPermissionChangeAsync(
-        targetUserId: userId,
-        changedBy: deniedBy,
-        changeType: "request",
+        userId: userId,
         roleId: null,
         permissionId: permissionId,
+        changeType: "request",
+        changedByUserId: deniedBy,
+        ip: string.Empty,
+        deviceInfo: string.Empty,
+        sessionId: null,
         action: "deny",
+        details: $"request_id={requestId}",
         reason: comment ?? string.Empty,
-        expiresAt: null,
         token: token).ConfigureAwait(false);
 }
 
-/* ========================= Back-compat shims (kept) ========================= */
-
 /// <summary>
 /// Grants or revokes a single permission override for a user by upserting into <c>user_permissions</c>, and logs the change.
+/// (Back‑compat shim, now using tolerant logger.)
 /// </summary>
 public async Task SetUserPermissionOverrideAsync(
     int userId,
@@ -3749,21 +3471,21 @@ ON DUPLICATE KEY UPDATE
         new MySqlParameter("@exp",   (object?)expires ?? DBNull.Value)
     }, token).ConfigureAwait(false);
 
-    await ExecuteNonQueryAsync(@"
-INSERT INTO permission_change_log
-(user_id, changed_by, change_type, permission_id, action, reason, source_ip, session_id)
-VALUES
-(@uid,@actor,'permission',@pid,@action,@reason,@ip,@sess)",
-        new[]
-        {
-            new MySqlParameter("@uid",   userId),
-            new MySqlParameter("@actor", actorUserId),
-            new MySqlParameter("@pid",   permissionId),
-            new MySqlParameter("@action", allowed ? "grant" : "deny"),
-            new MySqlParameter("@reason", reason ?? string.Empty),
-            new MySqlParameter("@ip",     sourceIp ?? string.Empty),
-            new MySqlParameter("@sess",   sessionId ?? string.Empty)
-        }, token).ConfigureAwait(false);
+    var details = expires.HasValue ? $"expires_at={expires:O}" : null;
+
+    await LogPermissionChangeAsync(
+        userId: userId,
+        roleId: null,
+        permissionId: permissionId,
+        changeType: "permission",
+        changedByUserId: actorUserId,
+        ip: sourceIp ?? string.Empty,
+        deviceInfo: string.Empty,
+        sessionId: sessionId,
+        action: allowed ? "grant" : "deny",
+        details: details,
+        reason: reason ?? string.Empty,
+        token: token).ConfigureAwait(false);
 
     await LogSystemEventAsync(actorUserId, "RBAC_OVERRIDE", "user_permissions", "RBAC",
         recordId: null,
@@ -3773,26 +3495,7 @@ VALUES
         sessionId: sessionId).ConfigureAwait(false);
 }
 
-/// <summary>Legacy name → wraps <see cref="AddPermissionRequestAsync"/>.</summary>
-public Task<int> SubmitPermissionRequestAsync(int userId, int permissionId, string? reason, CancellationToken token = default)
-    => AddPermissionRequestAsync(userId, permissionId, reason, token);
-
-/// <summary>Legacy combined review → calls approve/deny paths.</summary>
-public async Task ReviewPermissionRequestAsync(
-    int requestId,
-    int reviewerUserId,
-    bool approve,
-    string? reviewComment = null,
-    DateTime? expires     = null,
-    CancellationToken token = default)
-{
-    if (approve)
-        await ApprovePermissionRequestAsync(requestId, reviewerUserId, reviewComment, expires, token).ConfigureAwait(false);
-    else
-        await DenyPermissionRequestAsync(requestId, reviewerUserId, reviewComment, token).ConfigureAwait(false);
-}
-
-/// <summary>Legacy delegation insert returning id (kept).</summary>
+/// <summary>Legacy delegation insert returning id (kept, but logging uses tolerant API).</summary>
 public async Task<int> DelegatePermissionAsync(
     int fromUserId,
     int toUserId,
@@ -3818,19 +3521,166 @@ VALUES (@from,@to,@pid,@exp,@reason,@by)";
 
     int id = Convert.ToInt32(await ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false));
 
-    await ExecuteNonQueryAsync(@"
-INSERT INTO permission_change_log
-(user_id, changed_by, change_type, permission_id, action, reason)
-VALUES (@uid,@actor,'delegation',@pid,'delegate',@reason)",
-        new[]
-        {
-            new MySqlParameter("@uid",   toUserId),
-            new MySqlParameter("@actor", grantedBy),
-            new MySqlParameter("@pid",   permissionId),
-            new MySqlParameter("@reason", reason ?? string.Empty)
-        }, token).ConfigureAwait(false);
+    await LogPermissionChangeAsync(
+        userId: toUserId,
+        roleId: null,
+        permissionId: permissionId,
+        changeType: "delegation",
+        changedByUserId: grantedBy,
+        ip: string.Empty,
+        deviceInfo: string.Empty,
+        sessionId: null,
+        action: "delegate",
+        details: $"delegation_id={id}; expires_at={expiresAt:O}",
+        reason: reason ?? string.Empty,
+        token: token).ConfigureAwait(false);
 
     return id;
+}
+
+
+// ===========================================================================
+// NEW tolerant logger (drop‑in replacement for old LogPermissionChangeAsync)
+// ===========================================================================
+
+/// <summary>
+/// Writes a row into <c>permission_change_log</c> in a schema-tolerant way.
+/// <para>
+/// This method probes <c>information_schema</c> to detect which columns are present in the
+/// current database and constructs the <c>INSERT</c> accordingly, so older/newer dumps
+/// (that may omit or rename columns like <c>changed_at</c>/<c>change_time</c> or <c>reason</c>)
+/// won’t cause <c>Unknown column ... in 'field list'</c> errors.
+/// </para>
+/// <para>
+/// If the table itself is missing, the method falls back to <see cref="LogSystemEventAsync(int?,string,string,string,int?,string,string,string,string,System.Threading.CancellationToken)"/>
+/// to ensure an audit trail is still recorded.
+/// </para>
+/// </summary>
+/// <param name="userId">Target user id (nullable).</param>
+/// <param name="roleId">Target role id (nullable).</param>
+/// <param name="permissionId">Target permission id (nullable).</param>
+/// <param name="changeType">Free-form change type (e.g., <c>GRANT</c>, <c>REVOKE</c>, <c>ASSIGN_ROLE</c>).</param>
+/// <param name="changedByUserId">Actor (who performed the change).</param>
+/// <param name="ip">Source IP address.</param>
+/// <param name="deviceInfo">Compact device fingerprint (<=255 chars recommended).</param>
+/// <param name="sessionId">Optional session correlation id.</param>
+/// <param name="action">Human-friendly action (e.g., <c>ASSIGN</c>, <c>REMOVE</c>).</param>
+/// <param name="details">Longer description/details (nullable).</param>
+/// <param name="reason">Business reason / justification (nullable).</param>
+/// <param name="token">Cancellation token.</param>
+public async Task LogPermissionChangeAsync(
+    int? userId,
+    int? roleId,
+    int? permissionId,
+    string changeType,
+    int changedByUserId,
+    string ip,
+    string deviceInfo,
+    string? sessionId,
+    string action,
+    string? details,
+    string? reason,
+    CancellationToken token = default)
+{
+    // --- local helpers (no external deps, keep everything self-contained) ---
+    async Task<int> ScalarAsync(string sql, MySqlParameter[]? pars = null)
+    {
+        var obj = await ExecuteScalarAsync(sql, pars, token).ConfigureAwait(false);
+        return Convert.ToInt32(obj);
+    }
+
+    async Task<bool> TableExistsAsync(string table)
+    {
+        const string sql = @"SELECT COUNT(*) FROM information_schema.TABLES
+                             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME=@t;";
+        return await ScalarAsync(sql, new[] { new MySqlParameter("@t", table) }).ConfigureAwait(false) > 0;
+    }
+
+    async Task<bool> ColumnExistsAsync(string table, string column)
+    {
+        const string sql = @"SELECT COUNT(*) FROM information_schema.COLUMNS
+                             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME=@t AND COLUMN_NAME=@c;";
+        return await ScalarAsync(sql, new[]
+        {
+            new MySqlParameter("@t", table),
+            new MySqlParameter("@c", column)
+        }).ConfigureAwait(false) > 0;
+    }
+
+    // -----------------------------------------------------------------------
+
+    changeType ??= "UPDATE";
+    action     ??= string.Empty;
+
+    // If the table itself is missing, never throw – mirror to system log and return.
+    if (!await TableExistsAsync("permission_change_log").ConfigureAwait(false))
+    {
+        var subjectId = permissionId ?? roleId ?? userId;
+        var desc = $"type={changeType}; action={action}; details={details ?? ""}; reason={reason ?? ""}; " +
+                   $"uid={(userId?.ToString() ?? "-")}; rid={(roleId?.ToString() ?? "-")}; pid={(permissionId?.ToString() ?? "-")}";
+        await LogSystemEventAsync(
+            changedByUserId,
+            "PERMISSION_CHANGE",
+            "permission_change_log",
+            "RBAC",
+            subjectId,
+            desc,
+            ip ?? string.Empty,
+            "audit",
+            deviceInfo ?? string.Empty,
+            sessionId,
+            token: token
+        ).ConfigureAwait(false);
+        return;
+    }
+
+    // Probe live schema to decide which columns we can write safely.
+    bool hasReason     = await ColumnExistsAsync("permission_change_log", "reason").ConfigureAwait(false);
+    bool hasSessionId  = await ColumnExistsAsync("permission_change_log", "session_id").ConfigureAwait(false);
+    bool hasDeviceInfo = await ColumnExistsAsync("permission_change_log", "device_info").ConfigureAwait(false);
+    bool hasChangeTime = await ColumnExistsAsync("permission_change_log", "change_time").ConfigureAwait(false); // YASGMP.sql
+    bool hasChangedAt  = await ColumnExistsAsync("permission_change_log", "changed_at").ConfigureAwait(false);  // older dumps
+    bool hasCreatedAt  = await ColumnExistsAsync("permission_change_log", "created_at").ConfigureAwait(false);  // generic fallback
+
+    // Build INSERT column/value lists based on the probed schema.
+    var columns = new List<string>
+    {
+        "user_id", "role_id", "permission_id", "change_type", "changed_by", "source_ip", "action", "details"
+    };
+    var values  = new List<string>
+    {
+        "@uid", "@rid", "@pid", "@ctype", "@by", "@ip", "@act", "@details"
+    };
+
+    if (hasReason)     { columns.Add("reason");     values.Add("@reason"); }
+    if (hasDeviceInfo) { columns.Add("device_info");values.Add("@device"); }
+    if (hasSessionId)  { columns.Add("session_id"); values.Add("@sid"); }
+
+    // Timestamp preference: change_time (new) → changed_at (legacy) → created_at (generic)
+    if (hasChangeTime)      { columns.Add("change_time"); values.Add("NOW()"); }
+    else if (hasChangedAt)  { columns.Add("changed_at");  values.Add("NOW()"); }
+    else if (hasCreatedAt)  { columns.Add("created_at");  values.Add("NOW()"); }
+
+    var sqlInsert = $"INSERT INTO permission_change_log ({string.Join(", ", columns)}) VALUES ({string.Join(", ", values)});";
+
+    // Add only the parameters actually present in the INSERT.
+    var pars = new List<MySqlParameter>
+    {
+        new("@uid",     (object?)userId      ?? DBNull.Value),
+        new("@rid",     (object?)roleId      ?? DBNull.Value),
+        new("@pid",     (object?)permissionId?? DBNull.Value),
+        new("@ctype",   changeType),
+        new("@by",      changedByUserId),
+        new("@ip",      ip ?? string.Empty),
+        new("@act",     action),
+        new("@details", (object?)details     ?? DBNull.Value)
+    };
+
+    if (hasReason)     pars.Add(new MySqlParameter("@reason", (object?)reason ?? DBNull.Value));
+    if (hasDeviceInfo) pars.Add(new MySqlParameter("@device", deviceInfo ?? string.Empty));
+    if (hasSessionId)  pars.Add(new MySqlParameter("@sid",    (object?)sessionId ?? DBNull.Value));
+
+    await ExecuteNonQueryAsync(sqlInsert, pars.ToArray(), token).ConfigureAwait(false);
 }
 
 #endregion

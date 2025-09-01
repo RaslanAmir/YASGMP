@@ -51,6 +51,18 @@
             Title="Audit / Events"
             Route="routes/auditlog"
             ContentTemplate="{DataTemplate views:AuditLogPage}" />
+
+        <!-- Users management page -->
+        <ShellContent
+            Title="Users"
+            Route="routes/users"
+            ContentTemplate="{DataTemplate views:UsersPage}" />
+
+        <!-- Admin panel -->
+        <ShellContent
+            Title="Admin"
+            Route="routes/adminpanel"
+            ContentTemplate="{DataTemplate views:AdminPanelPage}" />
     </TabBar>
 
     <!-- Optional visual tweaks -->

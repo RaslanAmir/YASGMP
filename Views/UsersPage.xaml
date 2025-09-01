@@ -1,120 +1,69 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage 
-    x:Class="YasGMP.UsersPage"
+<ContentPage
+    x:Class="YasGMP.Views.UsersPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:ui="clr-namespace:YasGMP.UI"
-    Title="Korisnici – YasGMP">
+    xmlns:conv="clr-namespace:YasGMP.Converters"
+    Title="Users">
 
-    <ContentPage.Content>
-        <VerticalStackLayout Padding="28,20,28,20" Spacing="18" BackgroundColor="#f5f7fa">
-            <Frame 
-                BackgroundColor="White"
-                CornerRadius="14"
-                HasShadow="True"
-                Padding="20">
+    <ContentPage.Resources>
+        <!-- Requires a converter class: public class NullToBoolConverter : IValueConverter -->
+        <conv:NullToBoolConverter x:Key="NullToBool" />
+    </ContentPage.Resources>
 
-                <VerticalStackLayout Spacing="16">
-                    <Label 
-                        Text="Pregled svih korisnika sustava"
-                        FontSize="22"
-                        FontAttributes="Bold"
-                        TextColor="#2962ff"
-                        HorizontalOptions="Center"/>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label Text="User Data" FontSize="20" FontAttributes="Bold" />
 
-                    <HorizontalStackLayout Spacing="14">
-                        <Button 
-                            Text="➕ Dodaj novog korisnika"
-                            Clicked="OnAddUserClicked"
-                            BackgroundColor="#e3f2fd"
-                            TextColor="#1565c0"
-                            FontAttributes="Bold"
-                            ui:ToolTipProperties.Text="Unos novog korisnika." />
+            <Entry Placeholder="Username"
+                   Text="{Binding UserVM.SelectedUser.Username}" />
 
-                        <Button 
-                            Text="✏️ Uredi"
-                            Clicked="OnEditUserClicked"
-                            BackgroundColor="#fffde7"
-                            TextColor="#f9a825"
-                            FontAttributes="Bold"
-                            ui:ToolTipProperties.Text="Uređivanje odabranog korisnika." />
+            <Entry Placeholder="Full Name"
+                   Text="{Binding UserVM.SelectedUser.FullName}" />
 
-                        <Button 
-                            Text="🗑️ Briši"
-                            Clicked="OnDeleteUserClicked"
-                            BackgroundColor="#ffebee"
-                            TextColor="#c62828"
-                            FontAttributes="Bold"
-                            ui:ToolTipProperties.Text="Brisanje odabranog korisnika iz baze." />
-                    </HorizontalStackLayout>
+            <Entry Placeholder="Email"
+                   Keyboard="Email"
+                   Text="{Binding UserVM.SelectedUser.Email}" />
 
-                    <CollectionView 
-                        x:Name="UserListView"
-                        ItemsSource="{Binding Users}"
-                        SelectionMode="Single"
-                        HeightRequest="440"
-                        BackgroundColor="#f5f7fa">
+            <!-- If you store password hashes, consider a separate secure setter in the VM -->
+            <Entry Placeholder="Password"
+                   IsPassword="True"
+                   Text="{Binding UserVM.SelectedUser.PasswordHash}" />
 
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame 
-                                    Margin="0,2,0,2"
-                                    CornerRadius="8"
-                                    Padding="10"
-                                    BackgroundColor="#f8fafc"
-                                    HasShadow="False"
-                                    BorderColor="#cfd8dc">
+            <Label Text="Role" FontAttributes="Bold" Margin="0,12,0,0" />
+            <Picker ItemsSource="{Binding RolePermVM.Roles}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding RolePermVM.SelectedRole}" />
 
-                                    <VerticalStackLayout Spacing="3">
-                                        <Label 
-                                            Text="{Binding FullName}"
-                                            FontSize="17"
-                                            FontAttributes="Bold"
-                                            TextColor="#263238" />
-                                        <Label 
-                                            Text="{Binding Username}"
-                                            FontSize="13"
-                                            TextColor="#607d8b"
-                                            ui:ToolTipProperties.Text="Korisničko ime za prijavu" />
-                                        <Label 
-                                            Text="{Binding Role}"
-                                            FontSize="13"
-                                            TextColor="#00796b"
-                                            ui:ToolTipProperties.Text="Uloga (admin, sef, tehnicar, auditor...)" />
-                                        <Label 
-                                            Text="{Binding Active, StringFormat='Aktivan: {0}'}"
-                                            FontSize="12"
-                                            TextColor="#388e3c" />
-                                        <Label 
-                                            Text="{Binding Email}"
-                                            FontSize="12"
-                                            TextColor="#2962ff" />
-                                        <Label 
-                                            Text="{Binding Phone}"
-                                            FontSize="12"
-                                            TextColor="#bdbdbd" />
-                                        <Label 
-                                            Text="{Binding LastLogin, StringFormat='Zadnja prijava: {0:yyyy-MM-dd HH:mm}'}"
-                                            FontSize="12"
-                                            TextColor="#b0bec5" />
-                                        <Label 
-                                            Text="{Binding DigitalSignature}"
-                                            FontSize="12"
-                                            TextColor="#fbc02d"
-                                            ui:ToolTipProperties.Text="Digitalni potpis (za audit, validaciju)" />
-                                    </VerticalStackLayout>
-                                </Frame>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+            <Button Text="Assign Role"
+                    Margin="0,4,0,8"
+                    Command="{Binding RolePermVM.AssignRoleCommand}"
+                    IsEnabled="{Binding RolePermVM.SelectedRole, Converter={StaticResource NullToBool}}" />
 
-                    <Label
-                        Text="Kliknite na redak za odabir korisnika. Moguće je uređivati ili brisati samo odabranog."
-                        FontSize="12"
-                        TextColor="#bdbdbd"
-                        HorizontalOptions="Center"/>
-                </VerticalStackLayout>
-            </Frame>
+            <Label Text="Permissions" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding RolePermVM.Permissions}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding RolePermVM.SelectedPermission}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding Name}" Padding="8,4" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+                <Button Text="Assign Permission"
+                        Command="{Binding RolePermVM.AssignPermissionCommand}"
+                        IsEnabled="{Binding RolePermVM.SelectedPermission, Converter={StaticResource NullToBool}}" />
+                <Button Text="Remove Permission"
+                        Command="{Binding RolePermVM.RemovePermissionCommand}"
+                        IsEnabled="{Binding RolePermVM.SelectedPermission, Converter={StaticResource NullToBool}}" />
+            </HorizontalStackLayout>
+
+            <Button Text="Save User"
+                    Margin="0,12,0,0"
+                    Command="{Binding UserVM.AddUserCommand}"
+                    IsEnabled="{Binding UserVM.SelectedUser, Converter={StaticResource NullToBool}}" />
         </VerticalStackLayout>
-    </ContentPage.Content>
+    </ScrollView>
 </ContentPage>

@@ -14,6 +14,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Admin">
 
+  <TabbedPage.ToolbarItems>
+    <ToolbarItem Text="Users"
+                 Priority="0" Order="Primary"
+                 Clicked="OnToolbarOpenUsers" />
+  </TabbedPage.ToolbarItems>
+
   <TabbedPage.Resources>
     <Style TargetType="Button">
       <Setter Property="Margin" Value="4,2" />

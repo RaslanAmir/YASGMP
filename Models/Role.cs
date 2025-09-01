@@ -87,10 +87,19 @@ namespace YasGMP.Models
         [Display(Name = "Kreirano")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>Date/time this role was last modified (UTC).</summary>
-        [Column("last_modified")]
+        /// <summary>User who created this role.</summary>
+        [Column("created_by_id")]
+        [Display(Name = "Kreirao")]
+        public int? CreatedById { get; set; }
+
+        /// <summary>Navigation to the user who created this role.</summary>
+        [ForeignKey(nameof(CreatedById))]
+        public virtual User? CreatedBy { get; set; }
+
+        /// <summary>Date/time this role was last updated (UTC).</summary>
+        [Column("updated_at")]
         [Display(Name = "Zadnja izmjena")]
-        public DateTime? LastModified { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>User who last modified this role (for audit chain).</summary>
         [Column("last_modified_by_id")]
@@ -98,7 +107,7 @@ namespace YasGMP.Models
         public int? LastModifiedById { get; set; }
 
         /// <summary>Navigation to the user who last modified this role.</summary>
-        [ForeignKey("LastModifiedById")]
+        [ForeignKey(nameof(LastModifiedById))]
         public virtual User? LastModifiedBy { get; set; }
 
         /// <summary>Soft delete flag (GDPR/retention support).</summary>
@@ -106,16 +115,21 @@ namespace YasGMP.Models
         [Display(Name = "Obrisano")]
         public bool IsDeleted { get; set; } = false;
 
-        /// <summary>Freeform audit note (incidents, CAPA, risk, escalation, etc).</summary>
+        /// <summary>Freeform audit notes (incidents, CAPA, risk, escalation, etc.).</summary>
         [MaxLength(512)]
-        [Column("note")]
-        [Display(Name = "Napomena")]
-        public string? Note
+        [Column("notes")]
+        [Display(Name = "Napomene")]
+        public string? Notes
         {
-            get => _note;
-            set => _note = value?.Trim();
+            get => _notes;
+            set => _notes = value?.Trim();
         }
-        private string? _note;
+        private string? _notes;
+
+        /// <summary>Row version for optimistic concurrency/audit.</summary>
+        [Column("version")]
+        [Display(Name = "Verzija")]
+        public int Version { get; set; } = 1;
 
         // ===================== UI/VM COMPATIBILITY HELPERS =====================
 
