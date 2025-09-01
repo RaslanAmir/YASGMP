@@ -36,6 +36,9 @@
         <ToolbarItem Text="Admin" Priority="6" Order="Secondary"
                      SemanticProperties.Description="Open Admin panel"
                      Clicked="OnToolbarGoAdmin" />
+		<ToolbarItem Text="RBAC" Priority="7" Order="Secondary"
+                     SemanticProperties.Description="Manage users, roles and permissions"
+                     Clicked="OnToolbarGoRbac" />			 
     </Shell.ToolbarItems>
 
     <!-- Primary navigation host -->

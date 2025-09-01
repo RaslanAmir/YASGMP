@@ -31,7 +31,8 @@ namespace YasGMP
             public const string AdminPanel = "routes/adminpanel";
             public const string AuditLog   = "routes/auditlog";
             public const string Users      = "routes/users";       // ← NEW
-        }
+            public const string Rbac       = "routes/rbac";       
+	   }
 
         private static readonly object _routesLock = new();
         private static bool _routesRegistered;

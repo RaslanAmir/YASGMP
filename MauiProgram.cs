@@ -95,7 +95,7 @@ namespace YasGMP
             builder.Services.AddTransient<YasGMP.Views.AuditLogPage>();
             builder.Services.AddTransient<YasGMP.Views.AdminPanelPage>();
             builder.Services.AddTransient<YasGMP.Views.UsersPage>();
-
+            builder.Services.AddTransient<YasGMP.Views.UserRolePermissionPage>();
             // Global exception hooks → JSONL framework log (DEBUG)
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
