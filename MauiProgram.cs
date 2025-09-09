@@ -19,7 +19,6 @@ using Microsoft.Maui.Storage;
 using YasGMP.Diagnostics;
 using YasGMP.Diagnostics.LogSinks;
 using Microsoft.Extensions.Configuration;
-using ZXing.Net.Maui;                              // QR/barcode (ZXing.Net.Maui)
 
 namespace YasGMP
 {
@@ -41,7 +40,7 @@ namespace YasGMP
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
-                .UseBarcodeReader() // ZXing.Net.Maui initialization
+                // NOTE: No ZXing.Net.Maui init needed; QR generation uses ZXing core + System.Drawing
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -319,10 +318,8 @@ namespace YasGMP
     {
         private readonly object _sync = new();
 
-        /// <inheritdoc />
         public ILogger CreateLogger(string categoryName) => new AppDataFileLogger(categoryName, _sync);
 
-        /// <inheritdoc />
         public void Dispose() { }
 
         internal static void WriteFrameworkLine(string category, string level, string message)
@@ -348,8 +345,7 @@ namespace YasGMP
 
     /// <summary>
     /// File-backed logger writing JSON lines to AppData (DEBUG only).
-    /// Uses explicit interface implementations (no generic constraints here),
-    /// so it matches <see cref="ILogger"/> across packages and avoids CS0460/CS8633.
+    /// Uses explicit interface implementations to avoid generic constraint warnings.
     /// </summary>
     internal sealed class AppDataFileLogger : ILogger
     {
@@ -368,14 +364,10 @@ namespace YasGMP
             _sync = sync;
         }
 
-        /// <inheritdoc />
         public bool IsEnabled(LogLevel logLevel) => true;
 
-        /// <inheritdoc />
-        IDisposable ILogger.BeginScope<TState>(TState state)
-            => NullScope.Instance; // constraints inherited from interface; do not repeat
+        IDisposable ILogger.BeginScope<TState>(TState state) => NullScope.Instance;
 
-        /// <inheritdoc />
         void ILogger.Log<TState>(
             LogLevel logLevel,
             EventId eventId,

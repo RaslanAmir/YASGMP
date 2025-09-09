@@ -25,6 +25,7 @@
 //   will NOT collide with RBAC's LogUserAuditAsync(User?, ...) even when call sites pass null.
 // ==============================================================================
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -57,10 +58,23 @@ namespace YasGMP.Services
             int id,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+            const string sqlPreferred = @"SELECT id, username, password_hash, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
        last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
 FROM users WHERE id=@id LIMIT 1;";
-            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            const string sqlLegacy = @"SELECT id, username, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+FROM users WHERE id=@id LIMIT 1;";
+
+            DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054) // unknown column -> legacy
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
+
             return dt.Rows.Count == 1 ? MapUser(dt.Rows[0]) : null;
         }
 
@@ -74,11 +88,22 @@ FROM users WHERE id=@id LIMIT 1;";
         {
             if (string.IsNullOrWhiteSpace(username)) return null;
 
-            const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+            const string sqlPreferred = @"SELECT id, username, password_hash, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
        last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
 FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
-            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@u", username.Trim()) }, token)
-                             .ConfigureAwait(false);
+            const string sqlLegacy = @"SELECT id, username, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
+
+            DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, new[] { new MySqlParameter("@u", username.Trim()) }, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054) // unknown column -> legacy
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, new[] { new MySqlParameter("@u", username.Trim()) }, token).ConfigureAwait(false);
+            }
 
             return dt.Rows.Count == 1 ? MapUser(dt.Rows[0]) : null;
         }
@@ -95,7 +120,10 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
             bool includeAudit,
             CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync("SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled, last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id FROM users ORDER BY username", null, token).ConfigureAwait(false);
+            var dt = await db.ExecuteSelectAsync(
+                "SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled, last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id FROM users ORDER BY username",
+                null, token).ConfigureAwait(false);
+
             var list = new List<User>(dt.Rows.Count);
             foreach (DataRow r in dt.Rows) list.Add(MapUser(r));
             return list;
@@ -299,9 +327,9 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
         /// </summary>
         private static User MapUser(DataRow r)
         {
-            int  GetInt(string c)   => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
-            bool GetBool(string c)  => r.Table.Columns.Contains(c) && r[c] != DBNull.Value && Convert.ToBoolean(r[c]);
-            string S(string c)      => r.Table.Columns.Contains(c) ? r[c]?.ToString() ?? string.Empty : string.Empty;
+            int GetInt(string c)   => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
+            bool GetBool(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value && Convert.ToBoolean(r[c]);
+            string S(string c)     => r.Table.Columns.Contains(c) ? r[c]?.ToString() ?? string.Empty : string.Empty;
 
             string pwd = S("password_hash");
             if (string.IsNullOrEmpty(pwd)) pwd = S("password"); // legacy tolerance

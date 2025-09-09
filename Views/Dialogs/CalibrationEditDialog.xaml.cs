@@ -9,7 +9,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
@@ -76,20 +75,21 @@ namespace YasGMP.Views.Dialogs
         {
             base.OnDisappearing();
             if (_vm is not null)
-                _vm.DialogResult -= OnDialogResultAsync;
+                _vm.DialogResult -= OnDialogResult; // match handler signature
         }
 
         private void WireViewModel(CalibrationEditDialogViewModel vm)
         {
             _vm = vm;
             // Bridge VM DialogResult to our simple OnSave callback + close.
-            _vm.DialogResult += OnDialogResultAsync;
+            _vm.DialogResult += OnDialogResult; // subscribe async-void handler
         }
 
         /// <summary>
         /// Handles the VM result, invoking <see cref="OnSave"/> on the UI thread and closing once.
+        /// NOTE: The VM event is an Action-like delegate, so we use async void here.
         /// </summary>
-        private async Task OnDialogResultAsync(bool saved, Calibration? result)
+        private async void OnDialogResult(bool saved, Calibration? result)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace YasGMP.Views.Dialogs
         /// <summary>
         /// Ensures the modal is popped only once (guards against double event raises).
         /// </summary>
-        private async Task CloseOnceAsync()
+        private async System.Threading.Tasks.Task CloseOnceAsync()
         {
             if (_isClosing) return;
             _isClosing = true;

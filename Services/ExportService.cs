@@ -9,8 +9,9 @@ using OfficeOpenXml;
 using iText.Kernel.Pdf;
 using iText.Kernel.Font;
 using iText.IO.Font.Constants;
-using iText.Layout;
+
 using iText.Layout.Element;
+using ITextDocument = iText.Layout.Document; // disambiguate from YasGMP.Models.Document
 
 using YasGMP.Models;
 using YasGMP.Models.DTO;
@@ -140,7 +141,7 @@ namespace YasGMP.Services
 
             using var writer = new PdfWriter(filePath);
             using var pdfDoc = new PdfDocument(writer);
-            using var doc = new Document(pdfDoc);
+            using var doc = new ITextDocument(pdfDoc);
 
             PdfFont fontRegular = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
             PdfFont fontBold    = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
@@ -257,7 +258,7 @@ namespace YasGMP.Services
 
             using var writer = new PdfWriter(filePath);
             using var pdfDoc = new PdfDocument(writer);
-            using var doc = new Document(pdfDoc);
+            using var doc = new ITextDocument(pdfDoc);
 
             PdfFont fontRegular = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
             PdfFont fontBold    = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
