@@ -2691,6 +2691,39 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `components`
+--
+
+DROP TABLE IF EXISTS `components`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `components` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `component_type` varchar(120) DEFAULT NULL,
+  `manufacturer_id` int DEFAULT NULL,
+  `serial_number` varchar(120) DEFAULT NULL,
+  `calibration_required` tinyint(1) NOT NULL DEFAULT '0',
+  `status_id` int DEFAULT NULL,
+  `notes` text,
+  PRIMARY KEY (`id`),
+  KEY `fk_components_mfr` (`manufacturer_id`),
+  KEY `fk_components_status` (`status_id`),
+  CONSTRAINT `fk_components_mfr` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_components_status` FOREIGN KEY (`status_id`) REFERENCES `lkp_status` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `components`
+--
+
+LOCK TABLES `components` WRITE;
+/*!40000 ALTER TABLE `components` DISABLE KEYS */;
+/*!40000 ALTER TABLE `components` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `config_change_log`
 --
 
@@ -3822,6 +3855,36 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `document_links`
+--
+
+DROP TABLE IF EXISTS `document_links`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `document_links` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `document_id` int NOT NULL,
+  `entity_type` enum('Machine','Component','WorkOrder','Calibration','Validation','Vendor','Department') NOT NULL,
+  `entity_id` int NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `ix_doclinks_entity` (`entity_type`,`entity_id`),
+  KEY `fk_doclinks_doc` (`document_id`),
+  CONSTRAINT `fk_doclinks_doc` FOREIGN KEY (`document_id`) REFERENCES `documents` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `document_links`
+--
+
+LOCK TABLES `document_links` WRITE;
+/*!40000 ALTER TABLE `document_links` DISABLE KEYS */;
+/*!40000 ALTER TABLE `document_links` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `document_versions`
 --
 
@@ -3955,6 +4018,37 @@ CREATE TABLE `documentcontrol` (
 LOCK TABLES `documentcontrol` WRITE;
 /*!40000 ALTER TABLE `documentcontrol` DISABLE KEYS */;
 /*!40000 ALTER TABLE `documentcontrol` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `documents`
+--
+
+DROP TABLE IF EXISTS `documents`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `documents` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `file_name` varchar(255) NOT NULL,
+  `content_type` varchar(120) DEFAULT NULL,
+  `storage_provider` enum('FileSystem','S3','Blob') NOT NULL DEFAULT 'FileSystem',
+  `storage_path` varchar(500) NOT NULL,
+  `sha256` char(64) DEFAULT NULL,
+  `uploaded_by` int DEFAULT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_docs_user` (`uploaded_by`),
+  CONSTRAINT `fk_docs_user` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `documents`
+--
+
+LOCK TABLES `documents` WRITE;
+/*!40000 ALTER TABLE `documents` DISABLE KEYS */;
+/*!40000 ALTER TABLE `documents` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -5110,6 +5204,33 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `inventory_locations`
+--
+
+DROP TABLE IF EXISTS `inventory_locations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `inventory_locations` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `location_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `fk_inv_loc_location` (`location_id`),
+  CONSTRAINT `fk_inv_loc_location` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `inventory_locations`
+--
+
+LOCK TABLES `inventory_locations` WRITE;
+/*!40000 ALTER TABLE `inventory_locations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `inventory_locations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `inventory_transactions`
 --
 
@@ -5925,6 +6046,85 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `lkp_machine_types`
+--
+
+DROP TABLE IF EXISTS `lkp_machine_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lkp_machine_types` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `code` varchar(16) GENERATED ALWAYS AS (upper(left(`name`,3))) VIRTUAL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lkp_machine_types`
+--
+
+LOCK TABLES `lkp_machine_types` WRITE;
+/*!40000 ALTER TABLE `lkp_machine_types` DISABLE KEYS */;
+/*!40000 ALTER TABLE `lkp_machine_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lkp_status`
+--
+
+DROP TABLE IF EXISTS `lkp_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lkp_status` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(60) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lkp_status`
+--
+
+LOCK TABLES `lkp_status` WRITE;
+/*!40000 ALTER TABLE `lkp_status` DISABLE KEYS */;
+INSERT INTO `lkp_status` VALUES (1,'U pogonu',1),(2,'Van pogona',1),(3,'U validaciji',1),(4,'Otvoreno',1),(5,'U tijeku',1),(6,'Zatvoreno',1);
+/*!40000 ALTER TABLE `lkp_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lkp_work_order_types`
+--
+
+DROP TABLE IF EXISTS `lkp_work_order_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lkp_work_order_types` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(60) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lkp_work_order_types`
+--
+
+LOCK TABLES `lkp_work_order_types` WRITE;
+/*!40000 ALTER TABLE `lkp_work_order_types` DISABLE KEYS */;
+INSERT INTO `lkp_work_order_types` VALUES (1,'Korektivno'),(2,'Preventivno'),(3,'Vanredno');
+/*!40000 ALTER TABLE `lkp_work_order_types` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `locations`
@@ -6815,6 +7015,9 @@ CREATE TABLE `machines` (
   `icollection<attachment>` varchar(255) DEFAULT NULL,
   `user?` varchar(255) DEFAULT NULL,
   `icollection<calibration>` varchar(255) DEFAULT NULL,
+  `responsible_party_id` int DEFAULT NULL,
+  `internal_code` varchar(40) DEFAULT NULL,
+  `qr_payload` varchar(120) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `fk_m_last_modified_by` (`last_modified_by_id`),
@@ -6825,6 +7028,7 @@ CREATE TABLE `machines` (
   KEY `fk_machines_tenant_id` (`tenant_id`),
   KEY `fk_machine_room` (`room_id`),
   KEY `fk_mach_machine_type` (`machine_type_id`),
+  KEY `ix_machines_party` (`responsible_party_id`),
   CONSTRAINT `fk_m_last_modified_by` FOREIGN KEY (`last_modified_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_m_phase` FOREIGN KEY (`lifecycle_phase_id`) REFERENCES `ref_value` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_m_status` FOREIGN KEY (`status_id`) REFERENCES `ref_value` (`id`) ON DELETE SET NULL,
@@ -6833,6 +7037,7 @@ CREATE TABLE `machines` (
   CONSTRAINT `fk_machine_room` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`),
   CONSTRAINT `fk_machines_location` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_machines_manufacturer` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_machines_party` FOREIGN KEY (`responsible_party_id`) REFERENCES `responsible_parties` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_machines_tenant_id` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`),
   CONSTRAINT `fk_machines_type` FOREIGN KEY (`machine_type_id`) REFERENCES `machine_types` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -6876,34 +7081,29 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_bi` BEFORE INSERT ON `machines` FOR EACH ROW BEGIN
-  SET NEW.status = fn_normalize_machine_status(NEW.status);
-  -- If your schema has last_modified (it does in the app), set it if caller didn't provide it
-  SET NEW.last_modified = COALESCE(NEW.last_modified, NOW());
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_ai` AFTER INSERT ON `machines` FOR EACH ROW BEGIN
-  INSERT INTO system_event_log
-    (user_id, event_type, table_name, related_module, record_id,
-     field_name, old_value, new_value, description, source_ip,
-     device_info, session_id, severity)
-  VALUES
-    (NULL, 'MCH_CREATE_DBTRG', 'machines', 'MachineModule', NEW.id,
-     NULL, NULL, NULL,
-     CONCAT('Machine created (db trigger). code=', COALESCE(NEW.code,'')),
-     'db-trigger', 'server', '', 'audit');
+  DECLARE v_type_code VARCHAR(3);
+  DECLARE v_mfr_code  VARCHAR(3);
+  DECLARE v_next_id   BIGINT;
+
+  SELECT UPPER(LEFT(name,3)) INTO v_type_code
+  FROM lkp_machine_types WHERE id = NEW.machine_type_id;
+  IF v_type_code IS NULL OR v_type_code = '' THEN SET v_type_code = 'MCH'; END IF;
+
+  SELECT UPPER(LEFT(name,3)) INTO v_mfr_code
+  FROM manufacturers WHERE id = NEW.manufacturer_id;
+  IF v_mfr_code IS NULL OR v_mfr_code = '' THEN SET v_mfr_code = 'GEN'; END IF;
+
+  SELECT AUTO_INCREMENT INTO v_next_id
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'machines';
+
+  IF NEW.internal_code IS NULL OR NEW.internal_code = '' THEN
+    SET NEW.internal_code = CONCAT(v_type_code,'-',v_mfr_code,'-',LPAD(v_next_id,5,'0'));
+  END IF;
+
+  IF NEW.qr_payload IS NULL OR NEW.qr_payload = '' THEN
+    SET NEW.qr_payload = CONCAT('yasgmp://machine/', v_next_id);
+  END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -6920,12 +7120,22 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_ai_audit` AFTER INSERT ON `machines` FOR EACH ROW BEGIN
-  INSERT INTO system_event_log
-    (user_id, event_type, table_name, related_module, record_id, field_name,
-     old_value, new_value, description, source_ip, device_info, session_id, severity)
-  VALUES
-    (NULL, 'INSERT', 'machines', 'MachinesPage', NEW.id, NULL,
-     NULL, NULL, CONCAT('machines insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+  INSERT INTO row_audit_log(table_name,row_pk,operation,before_json,after_json,actor_user_id)
+  VALUES(
+    'machines',
+    NEW.id,
+    'INSERT',
+    NULL,
+    JSON_OBJECT(
+      'id',NEW.id,
+      'name',NEW.name,
+      'type',NEW.machine_type_id,
+      'serial',NEW.serial_number,
+      'internal_code',NEW.internal_code,
+      'qr',NEW.qr_payload
+    ),
+    NULL
+  );
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -6983,31 +7193,6 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_au` AFTER UPDATE ON `machines` FOR EACH ROW BEGIN
-  INSERT INTO system_event_log
-    (user_id, event_type, table_name, related_module, record_id,
-     field_name, old_value, new_value, description, source_ip,
-     device_info, session_id, severity)
-  VALUES
-    (NULL, 'MCH_UPDATE_DBTRG', 'machines', 'MachineModule', NEW.id,
-     NULL, NULL, NULL,
-     CONCAT('Machine updated (db trigger). code=', COALESCE(NEW.code,'')),
-     'db-trigger', 'server', '', 'audit');
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_au_audit` AFTER UPDATE ON `machines` FOR EACH ROW BEGIN
   INSERT INTO system_event_log
     (user_id, event_type, table_name, related_module, record_id, field_name,
@@ -7033,6 +7218,59 @@ DELIMITER ;;
       (NULL, 'UPDATE', 'machines', 'MachinesPage', NEW.id, 'name',
        OLD.name, NEW.name, 'machines update: name changed', 'system', 'server', '', 'info');
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_au` AFTER UPDATE ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO row_audit_log(table_name,row_pk,operation,before_json,after_json,actor_user_id)
+  VALUES(
+    'machines',
+    NEW.id,
+    'UPDATE',
+    JSON_OBJECT('name',OLD.name,'status',OLD.status_id,'loc',OLD.location_id,
+                'internal_code',OLD.internal_code,'qr',OLD.qr_payload),
+    JSON_OBJECT('name',NEW.name,'status',NEW.status_id,'loc',NEW.location_id,
+                'internal_code',NEW.internal_code,'qr',NEW.qr_payload),
+    NULL
+  );
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_bd` BEFORE DELETE ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO row_audit_log(table_name,row_pk,operation,before_json,after_json,actor_user_id)
+  VALUES(
+    'machines',
+    OLD.id,
+    'DELETE',
+    JSON_OBJECT('name',OLD.name,'type',OLD.machine_type_id,'serial',OLD.serial_number,
+                'internal_code',OLD.internal_code,'qr',OLD.qr_payload),
+    NULL,
+    NULL
+  );
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -7717,6 +7955,36 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `part_stocks`
+--
+
+DROP TABLE IF EXISTS `part_stocks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `part_stocks` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `part_id` int NOT NULL,
+  `inventory_location_id` int NOT NULL,
+  `qty` int NOT NULL DEFAULT '0',
+  `min_qty` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_part_stock` (`part_id`,`inventory_location_id`),
+  KEY `fk_stock_loc` (`inventory_location_id`),
+  CONSTRAINT `fk_stock_loc` FOREIGN KEY (`inventory_location_id`) REFERENCES `inventory_locations` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_stock_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `part_stocks`
+--
+
+LOCK TABLES `part_stocks` WRITE;
+/*!40000 ALTER TABLE `part_stocks` DISABLE KEYS */;
+/*!40000 ALTER TABLE `part_stocks` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `part_supplier_prices`
 --
 
@@ -7883,9 +8151,13 @@ CREATE TABLE `parts` (
   `note` varchar(255) DEFAULT NULL,
   `anomaly_score` decimal(10,2) DEFAULT NULL,
   `supplier` varchar(255) DEFAULT NULL,
+  `sku` varchar(100) DEFAULT NULL,
+  `sku_norm` varchar(100) GENERATED ALWAYS AS (coalesce(`sku`,_utf8mb4'')) STORED,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
+  UNIQUE KEY `uq_parts_name_sku` (`name`,`sku_norm`),
   KEY `fk_p_supplier` (`default_supplier_id`),
+  KEY `ix_parts_sku` (`sku`),
   CONSTRAINT `fk_p_supplier` FOREIGN KEY (`default_supplier_id`) REFERENCES `suppliers` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -7896,7 +8168,7 @@ CREATE TABLE `parts` (
 
 LOCK TABLES `parts` WRITE;
 /*!40000 ALTER TABLE `parts` DISABLE KEYS */;
-INSERT INTO `parts` VALUES (1,'xxx','xxx',NULL,NULL,'active','2025-09-05 13:28:23','2025-09-05 13:28:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'xxx','xxx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'xxx'),(2,'sxsxsx','sxsx',NULL,NULL,'active','2025-09-05 13:28:56','2025-09-05 13:28:56',NULL,NULL,NULL,NULL,NULL,NULL,3.00,3,NULL,NULL,NULL,'2','3',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'sdcsc');
+INSERT INTO `parts` (`id`, `code`, `name`, `default_supplier_id`, `description`, `status`, `created_at`, `updated_at`, `category`, `barcode`, `rfid`, `serial_or_lot`, `default_supplier`, `supplier_prices`, `price`, `stock`, `min_stock_alert`, `warehouse_stocks`, `stock_history`, `location`, `image`, `images`, `documents`, `warranty_until`, `expiry_date`, `blocked`, `regulatory_certificates`, `digital_signature`, `last_modified`, `last_modified_by_id`, `last_modified_by`, `source_ip`, `change_logs`, `work_order_parts`, `warehouses`, `note`, `anomaly_score`, `supplier`, `sku`) VALUES (1,'xxx','xxx',NULL,NULL,'active','2025-09-05 13:28:23','2025-09-05 13:28:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'xxx','xxx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'xxx',NULL),(2,'sxsxsx','sxsx',NULL,NULL,'active','2025-09-05 13:28:56','2025-09-05 13:28:56',NULL,NULL,NULL,NULL,NULL,NULL,3.00,3,NULL,NULL,NULL,'2','3',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'sdcsc',NULL);
 /*!40000 ALTER TABLE `parts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -9126,6 +9398,39 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `responsible_parties`
+--
+
+DROP TABLE IF EXISTS `responsible_parties`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `responsible_parties` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `party_type` enum('User','Department','Vendor') NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `department_id` int DEFAULT NULL,
+  `vendor_id` int DEFAULT NULL,
+  `display_name` varchar(200) GENERATED ALWAYS AS ((case `party_type` when _utf8mb4'User' then concat(_utf8mb4'User#',ifnull(`user_id`,_utf8mb4'?')) when _utf8mb4'Department' then concat(_utf8mb4'Dept#',ifnull(`department_id`,_utf8mb4'?')) when _utf8mb4'Vendor' then concat(_utf8mb4'Vendor#',ifnull(`vendor_id`,_utf8mb4'?')) else _utf8mb4'Party' end)) VIRTUAL,
+  PRIMARY KEY (`id`),
+  KEY `fk_party_user` (`user_id`),
+  KEY `fk_party_dept` (`department_id`),
+  KEY `fk_party_vendor` (`vendor_id`),
+  CONSTRAINT `fk_party_dept` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_party_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_party_vendor` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `responsible_parties`
+--
+
+LOCK TABLES `responsible_parties` WRITE;
+/*!40000 ALTER TABLE `responsible_parties` DISABLE KEYS */;
+/*!40000 ALTER TABLE `responsible_parties` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `risk_assessments`
 --
 
@@ -9621,6 +9926,38 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `row_audit_log`
+--
+
+DROP TABLE IF EXISTS `row_audit_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `row_audit_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `table_name` varchar(120) NOT NULL,
+  `row_pk` varchar(120) NOT NULL,
+  `operation` enum('INSERT','UPDATE','DELETE') NOT NULL,
+  `before_json` json DEFAULT NULL,
+  `after_json` json DEFAULT NULL,
+  `actor_user_id` int DEFAULT NULL,
+  `occured_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `ix_audit_tbl` (`table_name`,`occured_at` DESC),
+  KEY `fk_audit_user` (`actor_user_id`),
+  CONSTRAINT `fk_audit_user` FOREIGN KEY (`actor_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `row_audit_log`
+--
+
+LOCK TABLES `row_audit_log` WRITE;
+/*!40000 ALTER TABLE `row_audit_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `row_audit_log` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `scheduled_job_audit_log`
@@ -13005,6 +13342,70 @@ LOCK TABLES `validation_audit` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `validation_records`
+--
+
+DROP TABLE IF EXISTS `validation_records`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `validation_records` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `validation_set_id` int NOT NULL,
+  `phase` enum('URS','IQ','OQ','PQ') NOT NULL,
+  `date_done` date DEFAULT NULL,
+  `document_id` int DEFAULT NULL,
+  `notes` text,
+  PRIMARY KEY (`id`),
+  KEY `fk_vrec_set` (`validation_set_id`),
+  KEY `fk_vrec_doc` (`document_id`),
+  CONSTRAINT `fk_vrec_doc` FOREIGN KEY (`document_id`) REFERENCES `documents` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_vrec_set` FOREIGN KEY (`validation_set_id`) REFERENCES `validation_sets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `validation_records`
+--
+
+LOCK TABLES `validation_records` WRITE;
+/*!40000 ALTER TABLE `validation_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `validation_records` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `validation_sets`
+--
+
+DROP TABLE IF EXISTS `validation_sets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `validation_sets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) NOT NULL,
+  `machine_id` int DEFAULT NULL,
+  `component_id` int DEFAULT NULL,
+  `lead_party_id` int DEFAULT NULL,
+  `pq_renewal_due` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_valset_mach` (`machine_id`),
+  KEY `fk_valset_comp` (`component_id`),
+  KEY `fk_valset_lead` (`lead_party_id`),
+  CONSTRAINT `fk_valset_comp` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_valset_lead` FOREIGN KEY (`lead_party_id`) REFERENCES `responsible_parties` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_valset_mach` FOREIGN KEY (`machine_id`) REFERENCES `machines` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `validation_sets`
+--
+
+LOCK TABLES `validation_sets` WRITE;
+/*!40000 ALTER TABLE `validation_sets` DISABLE KEYS */;
+/*!40000 ALTER TABLE `validation_sets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `validations`
 --
 
@@ -13131,6 +13532,36 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `vendors`
+--
+
+DROP TABLE IF EXISTS `vendors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `vendors` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `vat_no` varchar(50) DEFAULT NULL,
+  `contact_name` varchar(120) DEFAULT NULL,
+  `phone` varchar(60) DEFAULT NULL,
+  `email` varchar(160) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `is_external_service_provider` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `vendors`
+--
+
+LOCK TABLES `vendors` WRITE;
+/*!40000 ALTER TABLE `vendors` DISABLE KEYS */;
+/*!40000 ALTER TABLE `vendors` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Temporary view structure for view `vw_admin_activity_log_audit`
@@ -16153,6 +16584,35 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `work_order_photos`
+--
+
+DROP TABLE IF EXISTS `work_order_photos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `work_order_photos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `work_order_id` int NOT NULL,
+  `document_id` int NOT NULL,
+  `tag` enum('Before','After','Other') DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_woph_wo` (`work_order_id`),
+  KEY `fk_woph_doc` (`document_id`),
+  CONSTRAINT `fk_woph_doc` FOREIGN KEY (`document_id`) REFERENCES `documents` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_woph_wo` FOREIGN KEY (`work_order_id`) REFERENCES `work_orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `work_order_photos`
+--
+
+LOCK TABLES `work_order_photos` WRITE;
+/*!40000 ALTER TABLE `work_order_photos` DISABLE KEYS */;
+/*!40000 ALTER TABLE `work_order_photos` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `work_order_signatures`
@@ -19510,4 +19970,4 @@ USE `yasgmp`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-09  9:36:53
+-- Dump completed on 2025-09-09 11:08:27
