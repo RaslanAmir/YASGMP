@@ -1,4 +1,7 @@
-///===== FILE: Models/Notification.cs =====
+// ==============================================================================
+// File: Models/Notification.cs
+// Purpose: Notification entities and channel events
+// ==============================================================================
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -50,43 +50,18 @@ namespace YasGMP.Helpers
 
             return new AuditLogEntry
             {
-                /// <inheritdoc cref="AuditLogEntry.Id"/>
                 Id = TryGetId(dto),
-
-                /// <inheritdoc cref="AuditLogEntry.EntityType"/>
                 EntityType = entityType,
-
-                /// <inheritdoc cref="AuditLogEntry.EntityId"/>
                 EntityId = ParseEntityId(dto.EntityId),
-
-                /// <inheritdoc cref="AuditLogEntry.PerformedBy"/>
                 PerformedBy = dto.Username ?? dto.UserFullName ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.Action"/>
                 Action = dto.Action ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.OldValue"/>
                 OldValue = dto.OldValue ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.NewValue"/>
                 NewValue = dto.NewValue ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.ChangedAt"/>
                 ChangedAt = TryGetTimestamp(dto),
-
-                /// <inheritdoc cref="AuditLogEntry.DeviceInfo"/>
                 DeviceInfo = dto.DeviceInfo ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.IpAddress"/>
                 IpAddress = dto.IpAddress ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.SessionId"/>
                 SessionId = dto.SessionId ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.DigitalSignature"/>
                 DigitalSignature = dto.DigitalSignature ?? dto.SignatureHash ?? string.Empty,
-
-                /// <inheritdoc cref="AuditLogEntry.Note"/>
                 Note = details
             };
         }

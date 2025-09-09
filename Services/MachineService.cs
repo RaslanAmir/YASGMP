@@ -8,40 +8,46 @@ using YasGMP.Models;
 namespace YasGMP.Services
 {
     /// <summary>
-    /// MachineService – GMP compliant servis za upravljanje strojevima.
-    /// ✅ Pruža CRUD operacije, validaciju, digitalne potpise i integraciju s audit logovima.
-    /// ✅ Svaka akcija se bilježi u <see cref="AuditService"/> za potpunu sljedivost.
-    /// ✅ Usklađeno s EU GMP Annex 11 i 21 CFR Part 11.
+    /// <b>MachineService</b> – GMP compliant servis za upravljanje strojevima/opremom.
+    /// <para>
+    /// • Pruža CRUD, validaciju i digitalne potpise<br/>
+    /// • Svaka akcija se bilježi u <see cref="AuditService"/> (Annex 11 / 21 CFR Part 11)<br/>
+    /// • Sadrži kanonsku normalizaciju statusa (vidi <see cref="NormalizeStatus(string?)"/>)
+    /// </para>
     /// </summary>
     public class MachineService
     {
         private readonly DatabaseService _db;
         private readonly AuditService _audit;
 
+        /// <summary>DI konstruktor.</summary>
         public MachineService(DatabaseService databaseService, AuditService auditService)
         {
             _db = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
             _audit = auditService ?? throw new ArgumentNullException(nameof(auditService));
         }
 
-        #region === CRUD OPERATIONS ===
+        #region === CRUD OPERATIONS ===========================================================
 
-        /// <summary>Dohvati sve strojeve iz baze.</summary>
+        /// <summary>
+        /// Dohvati sve strojeve iz baze.
+        /// </summary>
         public async Task<List<Machine>> GetAllAsync() => await _db.GetAllMachinesAsync();
 
-        /// <summary>Dohvati stroj po ID-u.</summary>
+        /// <summary>
+        /// Dohvati stroj po ID-u ili baci <see cref="InvalidOperationException"/> ako ne postoji.
+        /// </summary>
         public async Task<Machine> GetByIdAsync(int id)
             => await _db.GetMachineByIdAsync(id) ?? throw new InvalidOperationException("Machine not found.");
 
         /// <summary>
-        /// Kreira novi stroj i upisuje audit log.
-        /// ✅ Generira digitalni potpis prije spremanja.
+        /// Kreira novi stroj (potpis + audit). Status se normalizira na kanonsku vrijednost.
         /// </summary>
         public async Task CreateAsync(Machine machine, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
         {
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             ValidateMachine(machine);
-
+            machine.Status = NormalizeStatus(machine.Status);
             machine.DigitalSignature = GenerateDigitalSignature(machine);
 
             await _db.InsertOrUpdateMachineAsync(machine, update: false, actorUserId: userId, ip: ip, deviceInfo: deviceInfo, sessionId: sessionId);
@@ -51,14 +57,13 @@ namespace YasGMP.Services
         }
 
         /// <summary>
-        /// Ažurira postojeći stroj i bilježi promjene u audit log.
-        /// ✅ Generira novi digitalni potpis nakon ažuriranja.
+        /// Ažurira postojeći stroj (novi potpis + audit). Status se normalizira.
         /// </summary>
         public async Task UpdateAsync(Machine machine, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
         {
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             ValidateMachine(machine);
-
+            machine.Status = NormalizeStatus(machine.Status);
             machine.DigitalSignature = GenerateDigitalSignature(machine);
 
             await _db.InsertOrUpdateMachineAsync(machine, update: true, actorUserId: userId, ip: ip, deviceInfo: deviceInfo, sessionId: sessionId);
@@ -68,8 +73,7 @@ namespace YasGMP.Services
         }
 
         /// <summary>
-        /// Briše stroj po ID-u (uz audit trail).
-        /// ✅ GMP zahtijeva evidenciju brisanja u audit log.
+        /// Briše stroj po ID-u (audit trail).
         /// </summary>
         public async Task DeleteAsync(int machineId, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
         {
@@ -81,13 +85,17 @@ namespace YasGMP.Services
 
         #endregion
 
-        #region === STATUS & VALIDATION ===
+        #region === STATUS & VALIDATION =======================================================
 
+        /// <summary>Vraća <c>true</c> ako je stroj aktivan.</summary>
         public bool IsActive(Machine machine) =>
             machine != null &&
             !string.IsNullOrEmpty(machine.Status) &&
-            machine.Status.Equals("ACTIVE", StringComparison.OrdinalIgnoreCase);
+            NormalizeStatus(machine.Status).Equals("active", StringComparison.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Poslovna validacija minimalnih GMP polja.
+        /// </summary>
         public void ValidateMachine(Machine machine)
         {
             if (string.IsNullOrWhiteSpace(machine.Name))
@@ -104,20 +112,52 @@ namespace YasGMP.Services
                 throw new InvalidOperationException("❌ Datum instalacije ne može biti u budućnosti.");
         }
 
+        /// <summary>
+        /// Kanonska normalizacija statusa na skup:
+        /// <c>active</c>, <c>maintenance</c>, <c>decommissioned</c>, <c>reserved</c>, <c>scrapped</c>.
+        /// Sadrži i uobičajene lokalizirane sinonime (npr. <i>u pogonu</i>, <i>van pogona</i>).
+        /// </summary>
+        public static string NormalizeStatus(string? raw)
+        {
+            string s = (raw ?? string.Empty).Trim().ToLowerInvariant();
+
+            return s switch
+            {
+                // canonical English
+                "active" => "active",
+                "maintenance" or "maint" or "service" => "maintenance",
+                "decommissioned" or "decom" or "retired" => "decommissioned",
+                "reserved" => "reserved",
+                "scrapped" or "scrap" => "scrapped",
+
+                // common localized synonyms
+                "u pogonu" or "operativan" or "operational" => "active",
+                "van pogona" or "neispravan" or "kvar" or "servis" => "maintenance",
+                "otpisan" or "rashodovan" => "scrapped",
+                "rezerviran" => "reserved",
+                "dekomisioniran" => "decommissioned",
+
+                // fallback
+                _ => "active"
+            };
+        }
+
         #endregion
 
-        #region === DIGITAL SIGNATURE ===
+        #region === DIGITAL SIGNATURE =========================================================
 
+        /// <summary>Generira deterministički potpis (SHA-256) koji uključuje i normalizirani status.</summary>
         private string GenerateDigitalSignature(Machine machine)
         {
-            string raw = $"{machine.Id}|{machine.Name}|{machine.Location}|{machine.UrsDoc}|{DateTime.UtcNow:O}";
+            string status = NormalizeStatus(machine.Status);
+            string raw = $"{machine.Id}|{machine.Name}|{machine.Location}|{machine.UrsDoc}|{status}|{DateTime.UtcNow:O}";
             using var sha = SHA256.Create();
             return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
         }
 
         #endregion
 
-        #region === FUTURE EXTENSIBILITY HOOKS ===
+        #region === EXTENSIBILITY HOOKS =======================================================
 
         public async Task LinkToPpmPlanAsync(int machineId, int ppmPlanId)
             => await _audit.LogSystemEventAsync("MACHINE_PPM_LINK", $"🔗 Povezan PPM Plan ID={ppmPlanId} sa strojem ID={machineId}");

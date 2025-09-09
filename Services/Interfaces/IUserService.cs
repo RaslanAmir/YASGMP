@@ -1,14 +1,19 @@
+// ==============================================================================
+// File: Services/Interfaces/IUserService.cs
+// Purpose: Interface for GMP-compliant user management
+// ==============================================================================
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
 
-/// <summary>
-/// <b>IUserService</b> – Interface for ultra-robust, GMP-compliant user management.
-/// <para>Supports authentication, secure password hashing, CRUD, role/permission checks, digital signatures, 2FA, and audit logging.</para>
-/// </summary>
 namespace YasGMP.Services.Interfaces
 {
+    /// <summary>
+    /// Interface for robust, GMP-compliant user management including authentication,
+    /// secure password hashing, CRUD, role/permission checks, digital signatures,
+    /// two-factor, and audit logging.
+    /// </summary>
     public interface IUserService
     {
         // === AUTHENTICATION & SECURITY ===
@@ -17,30 +22,21 @@ namespace YasGMP.Services.Interfaces
         /// Authenticates a user using secure GMP/CSV-compliant logic.
         /// Returns <c>null</c> when authentication fails.
         /// </summary>
-        /// <param name="username">Username (unique).</param>
-        /// <param name="password">Plaintext password to verify.</param>
-        /// <returns>The authenticated <see cref="User"/> or <c>null</c>.</returns>
         Task<User?> AuthenticateAsync(string username, string password);
 
         /// <summary>
         /// GMP-compliant SHA256 password hashing.
         /// </summary>
-        /// <param name="password">Plaintext password.</param>
-        /// <returns>Base64-encoded SHA256 hash.</returns>
         string HashPassword(string password);
 
         /// <summary>
         /// Two-factor code verification hook.
         /// </summary>
-        /// <param name="username">User to verify.</param>
-        /// <param name="code">One-time code.</param>
-        /// <returns><c>true</c> if code is valid; otherwise <c>false</c>.</returns>
         Task<bool> VerifyTwoFactorCodeAsync(string username, string code);
 
         /// <summary>
         /// Locks out the user after repeated failed attempts.
         /// </summary>
-        /// <param name="userId">User identifier.</param>
         Task LockUserAsync(int userId);
 
         // === CRUD OPERATIONS ===
@@ -106,3 +102,4 @@ namespace YasGMP.Services.Interfaces
         Task UpdateUserProfileAsync(User user, int adminId = 0);
     }
 }
+

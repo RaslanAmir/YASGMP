@@ -10,7 +10,7 @@ namespace YasGMP.Models
     /// <para>
     /// • Fully supports multi-level RBAC, workflow, escalation, legal/audit traceability, SoD (Segregation of Duties), delegation, and incident forensics.<br/>
     /// • Used for permission mapping, user-role assignments, workflow routing, and regulatory reporting.<br/>
-    /// • Recommended: Map to <see cref="UserRole"/> (assignment), <see cref="Permission"/> (access), and <see cref="RolePermission"/> (role-right mapping).
+    /// • Recommended: Map to <see cref="UserRoleAssignment"/> (assignment), <see cref="Permission"/> (access), and <see cref="RolePermission"/> (role-right mapping).
     /// </para>
     /// <remarks>
     /// - Extend for multi-org, jurisdiction, contract/vendor, and special regulatory modules.<br/>

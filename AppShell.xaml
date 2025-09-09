@@ -1,78 +1,112 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!--
-  File: AppShell.xaml
-  Purpose: Application shell, tabs + global toolbar for quick switching between modules.
-  Notes:   The toolbar navigates by route, so pages need not exist at compile-time.
--->
 <Shell
     x:Class="YasGMP.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:YasGMP"
     xmlns:views="clr-namespace:YasGMP.Views"
-    Shell.FlyoutBehavior="Disabled">
+    xmlns:debug="clr-namespace:YasGMP.Views.Debug"
+    xmlns:pages="clr-namespace:YasGMP.Pages"
+    Shell.FlyoutBehavior="Flyout">
 
-    <!-- Global toolbar: always-visible quick navigation -->
-    <Shell.ToolbarItems>
-        <ToolbarItem Text="Dashboard" Priority="0" Order="Primary"
-                     x:Name="ToolbarDashboard"
-                     SemanticProperties.Description="Go to main dashboard"
-                     Clicked="OnToolbarGoDashboard" />
-        <ToolbarItem Text="Machines" Priority="1" Order="Primary"
-                     SemanticProperties.Description="Open Machines / Equipment module"
-                     Clicked="OnToolbarGoMachines" />
-        <ToolbarItem Text="Parts" Priority="2" Order="Primary"
-                     SemanticProperties.Description="Open Parts / Warehouse module"
-                     Clicked="OnToolbarGoParts" />
-        <ToolbarItem Text="Work Orders" Priority="3" Order="Primary"
-                     SemanticProperties.Description="Open Work Orders module"
-                     Clicked="OnToolbarGoWorkOrders" />
-        <ToolbarItem Text="CAPA" Priority="4" Order="Secondary"
-                     SemanticProperties.Description="Open CAPA module"
-                     Clicked="OnToolbarGoCapa" />
-        <ToolbarItem Text="Validation" Priority="5" Order="Secondary"
-                     SemanticProperties.Description="Open Validation (IQ/OQ/PQ) module"
-                     Clicked="OnToolbarGoValidation" />
-        <ToolbarItem Text="Admin" Priority="6" Order="Secondary"
-                     SemanticProperties.Description="Open Admin panel"
-                     Clicked="OnToolbarGoAdmin" />
-		<ToolbarItem Text="RBAC" Priority="7" Order="Secondary"
-                     SemanticProperties.Description="Manage users, roles and permissions"
-                     Clicked="OnToolbarGoRbac" />			 
-    </Shell.ToolbarItems>
+  <!-- Top toolbar -->
+  <Shell.ToolbarItems>
+    <ToolbarItem Text="Dashboard" Clicked="OnToolbarGoDashboard" />
+    <ToolbarItem Text="Work Orders" Clicked="OnToolbarGoWorkOrders" />
+    <ToolbarItem Text="Machines" Clicked="OnToolbarGoMachines" />
+    <ToolbarItem Text="Parts" Clicked="OnToolbarGoParts" />
+    <ToolbarItem Text="Suppliers" Clicked="OnToolbarGoSuppliers" />
+    <ToolbarItem Text="Components" Clicked="OnToolbarGoComponents" />
+    <ToolbarItem Text="External" Clicked="OnToolbarGoExternal" />
+    <ToolbarItem Text="PPM" Clicked="OnToolbarGoPpm" />
+    <ToolbarItem Text="Calibrations" Clicked="OnToolbarGoCalibrations" />
+    <ToolbarItem Text="CAPA" Clicked="OnToolbarGoCapa" />
+    <ToolbarItem Text="Validation" Clicked="OnToolbarGoValidation" />
+    <ToolbarItem Text="Audit Dash" Clicked="OnToolbarGoAuditDash" />
+    <ToolbarItem Text="Audit Log" Clicked="OnToolbarGoAuditLog" />
+    <ToolbarItem Text="Users" Clicked="OnToolbarGoUsers" />
+    <ToolbarItem Text="RBAC" Clicked="OnToolbarGoRbac" />
+    <ToolbarItem Text="Admin" Clicked="OnToolbarGoAdmin" />
+    <ToolbarItem Text="Rollback" Clicked="OnToolbarGoRollback" />
+    <ToolbarItem Text="Diagnostics" Clicked="OnToolbarGoDebug" />
+  </Shell.ToolbarItems>
 
-    <!-- Primary navigation host -->
-    <TabBar>
-        <!-- Dashboard tab -->
-        <ShellContent
-            Title="Dashboard"
-            Route="routes/dashboard"
-            ContentTemplate="{DataTemplate local:DashboardPage}" />
+  <!-- Tabbed navigation -->
+  <TabBar
+      Shell.BackgroundColor="{StaticResource YtSurfaceCard}"
+      Shell.ForegroundColor="{StaticResource YtOnSurface}"
+      Shell.TitleColor="{StaticResource YtOnSurface}">
 
-        <!-- Audit / Events tab (requires AuditLogPage to exist) -->
-        <ShellContent
-            Title="Audit / Events"
-            Route="routes/auditlog"
-            ContentTemplate="{DataTemplate views:AuditLogPage}" />
+    <!-- HOME -->
+    <Tab Title="Home">
+      <!-- FIX: DashboardPage lives in namespace YasGMP (not YasGMP.Views) -->
+      <ShellContent Title="Dashboard" Route="routes/dashboard"
+                    ContentTemplate="{DataTemplate local:DashboardPage}" />
+    </Tab>
 
-        <!-- Users management page -->
-        <ShellContent
-            Title="Users"
-            Route="routes/users"
-            ContentTemplate="{DataTemplate views:UsersPage}" />
+    <!-- OPERATIONS -->
+    <Tab Title="Operations">
+      <ShellContent Title="Work Orders" Route="routes/workorders"
+                    ContentTemplate="{DataTemplate views:WorkOrdersPage}" />
+      <ShellContent Title="Machines" Route="routes/machines"
+                    ContentTemplate="{DataTemplate views:MachinesPage}" />
+      <ShellContent Title="Calibrations" Route="routes/calibrations"
+                    ContentTemplate="{DataTemplate views:CalibrationsPage}" />
+      <ShellContent Title="Parts" Route="routes/parts"
+                    ContentTemplate="{DataTemplate views:PartsPage}" />
+      <ShellContent Title="Suppliers" Route="routes/suppliers"
+                    ContentTemplate="{DataTemplate views:SuppliersPage}" />
+      <ShellContent Title="Components" Route="routes/components"
+                    ContentTemplate="{DataTemplate views:ComponentsPage}" />
+      <ShellContent Title="External Servicers" Route="routes/externalservicers"
+                    ContentTemplate="{DataTemplate local:ExternalServicersPage}" />
+      <ShellContent Title="PPM" Route="routes/ppm"
+                    ContentTemplate="{DataTemplate pages:PpmPage}" />
+    </Tab>
 
-        <!-- Admin panel -->
-        <ShellContent
-            Title="Admin"
-            Route="routes/adminpanel"
-            ContentTemplate="{DataTemplate views:AdminPanelPage}" />
-    </TabBar>
+    <!-- QUALITY / COMPLIANCE -->
+    <Tab Title="Quality">
+      <ShellContent Title="CAPA" Route="routes/capa"
+                    ContentTemplate="{DataTemplate views:CapaPage}" />
+      <ShellContent Title="Validation" Route="routes/validation"
+                    ContentTemplate="{DataTemplate views:ValidationPage}" />
+      <ShellContent Title="Audit Dashboard" Route="routes/auditdashboard"
+                    ContentTemplate="{DataTemplate views:AuditDashboardPage}" />
+      <ShellContent Title="Audit Log" Route="routes/auditlog"
+                    ContentTemplate="{DataTemplate views:AuditLogPage}" />
+    </Tab>
 
-    <!-- Optional visual tweaks -->
-    <Shell.Resources>
-        <Style TargetType="Shell">
-            <Setter Property="NavBarIsVisible" Value="True" />
-        </Style>
-    </Shell.Resources>
+    <!-- ADMIN -->
+    <Tab Title="Admin">
+      <ShellContent Title="Users" Route="routes/users"
+                    ContentTemplate="{DataTemplate views:UsersPage}" />
+      <ShellContent Title="RBAC" Route="routes/rbac"
+                    ContentTemplate="{DataTemplate views:UserRolePermissionPage}" />
+      <ShellContent Title="Admin Panel" Route="routes/adminpanel"
+                    ContentTemplate="{DataTemplate views:AdminPanelPage}" />
+      <ShellContent Title="Rollback Preview" Route="routes/rollbackpreview"
+                    ContentTemplate="{DataTemplate views:RollbackPreviewPage}" />
+    </Tab>
+
+    <!-- DEBUG: always visible while app is in development -->
+    <Tab Title="Debug">
+      <ShellContent Title="Diagnostics" Route="routes/debug"
+                    ContentTemplate="{DataTemplate debug:DebugDashboardPage}" />
+      <ShellContent Title="Logs" Route="routes/logviewer"
+                    ContentTemplate="{DataTemplate debug:LogViewerPage}" />
+      <ShellContent Title="Health" Route="routes/health"
+                    ContentTemplate="{DataTemplate debug:HealthPage}" />
+    </Tab>
+  </TabBar>
+
+  <!-- Global Shell visuals -->
+  <Shell.Resources>
+    <Style TargetType="Shell">
+      <Setter Property="Shell.BackgroundColor" Value="{StaticResource YtSurface}" />
+      <Setter Property="Shell.ForegroundColor" Value="{StaticResource YtOnSurface}" />
+      <Setter Property="Shell.TitleColor"      Value="{StaticResource YtOnSurface}" />
+      <Setter Property="NavBarIsVisible"       Value="True" />
+    </Style>
+  </Shell.Resources>
 
 </Shell>

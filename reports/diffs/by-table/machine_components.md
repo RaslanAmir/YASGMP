@@ -1,0 +1,5 @@
+﻿# Table `machine_components`
+Schema columns: change_version, code, component_type_id, created_at, deleted_at, deleted_by, description, digital_signature, documents, icollection<calibration>, icollection<capa_case>, icollection<photo>, icollection<work_order>, id, install_date, io_tdevice_id, is_critical, is_deleted, last_modified, last_modified_by_id, lifecycle_phase, machine?, machine_id, model, name, note, notes, purchase_date, rfid_tag, serial_number, sop_doc, source_ip, status, status_id, supplier, type, updated_at, user?, warranty_expiry, warranty_until
+Code-used columns: code, deleted_at, id, install_date, is_deleted, last_modified_by_id, machine_id, name, sop_doc, status, type
+Missing in schema: 
+Extra in schema (unused by code): change_version, component_type_id, created_at, deleted_by, description, digital_signature, documents, icollection<calibration>, icollection<capa_case>, icollection<photo>, icollection<work_order>, io_tdevice_id, is_critical, last_modified, lifecycle_phase, machine?, model, note, notes, purchase_date, rfid_tag, serial_number, source_ip, status_id, supplier, updated_at, user?, warranty_expiry, warranty_until

@@ -286,13 +286,14 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
-        /// <summary>Exports training records for compliance/audit.</summary>
+        /// <summary>Exports training records for compliance/audit (format chosen by user).</summary>
         public async Task ExportTrainingRecordsAsync()
         {
             IsBusy = true;
             try
             {
-                await _dbService.ExportTrainingRecordsAsync(FilteredTrainingRecords.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId).ConfigureAwait(false);
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
+                await _dbService.ExportTrainingRecordsAsync(FilteredTrainingRecords.ToList(), fmt, _currentIpAddress, _currentDeviceInfo, _currentSessionId).ConfigureAwait(false);
                 await _dbService.LogTrainingRecordAuditAsync(null, "EXPORT", _currentIpAddress, _currentDeviceInfo, _currentSessionId, null).ConfigureAwait(false);
                 StatusMessage = "Training records exported successfully.";
             }
@@ -377,3 +378,5 @@ namespace YasGMP.ViewModels
         #endregion
     }
 }
+
+

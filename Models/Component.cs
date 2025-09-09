@@ -99,7 +99,9 @@ namespace YasGMP.Models
         /// Initialized with the null-forgiving operator because EF will hydrate this at runtime.
         /// </summary>
         [ForeignKey(nameof(LastModifiedById))]
-        public virtual User LastModifiedBy { get; set; } = null!;
+        public virtual User LastModifiedBy { get; set; } = null!
+
+            ;
 
         /// <summary>Forensic: IP address/device from which this component was last modified.</summary>
         [StringLength(128)]

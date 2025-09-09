@@ -3,11 +3,11 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Maui;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Extensions.Configuration;
 using YasGMP.Models;
 using YasGMP.Views;
 
@@ -19,8 +19,33 @@ namespace YasGMP
     /// </summary>
     public partial class App : Application
     {
+        /// <summary>Application configuration (merged from AppData and app folder).</summary>
         public IConfiguration AppConfig { get; private set; } = default!;
-        public User? LoggedUser { get; set; }
+
+        /// <summary>Currently authenticated user (null before login).</summary>
+        private User? _loggedUser;
+        public User? LoggedUser
+        {
+            get => _loggedUser;
+            set
+            {
+                _loggedUser = value;
+                try
+                {
+                    var sp = Application.Current?.Handler?.MauiContext?.Services;
+                    var ctx = sp?.GetService(typeof(YasGMP.Diagnostics.DiagnosticContext)) as YasGMP.Diagnostics.DiagnosticContext;
+                    if (ctx != null && value != null)
+                    {
+                        ctx.UserId = value.Id;
+                        ctx.Username = value.Username;
+                        ctx.RoleIdsCsv = value.Role ?? string.Empty;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>Unique session id (used in logs and audit correlating).</summary>
         public string SessionId { get; } = Guid.NewGuid().ToString("N");
 
         public App()
@@ -28,6 +53,20 @@ namespace YasGMP
             InitializeComponent();
 
             AppConfig = LoadConfiguration();
+
+            try
+            {
+                var sp = Application.Current?.Handler?.MauiContext?.Services;
+                var ctx = sp?.GetService(typeof(YasGMP.Diagnostics.DiagnosticContext)) as YasGMP.Diagnostics.DiagnosticContext;
+                if (ctx != null)
+                {
+                    ctx.SessionId = SessionId;
+                    YasGMP.Diagnostics.ReplayHarness.SaveReplayToken(SessionId);
+                }
+            }
+            catch { }
+
+            // Start at Login; your LoginPage binds VM via DI in OnHandlerChanged (code-behind).
             MainPage = new NavigationPage(new LoginPage());
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -45,11 +84,13 @@ namespace YasGMP
             var builder = new ConfigurationBuilder();
             try
             {
+                // AppData first
                 var appData = FileSystem.AppDataDirectory;
                 var path = Path.Combine(appData, "appsettings.json");
                 if (File.Exists(path))
                     builder.AddJsonFile(path, optional: true, reloadOnChange: true);
 
+                // App base next (deployed)
                 var exePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
                 if (File.Exists(exePath))
                     builder.AddJsonFile(exePath, optional: true, reloadOnChange: true);
@@ -65,7 +106,6 @@ namespace YasGMP
             var ex = e.ExceptionObject as Exception ?? new Exception("Unknown fatal exception");
             await WriteAppLogAsync("error", "UnhandledException", ex.Message, ex);
 
-            // Always marshal dialog to UI thread; never "await Application.Current?.MainPage?...".
             _ = MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 try
@@ -123,6 +163,7 @@ namespace YasGMP
             return Path.Combine(dir, $"{date}_app.log");
         }
 
+        /// <summary>Writes a one-line JSON entry to AppData\logs\yyyy-MM-dd_app.log.</summary>
         public Task WriteAppLogAsync(string level, string eventName, string message, Exception? ex = null)
         {
             try
@@ -153,4 +194,3 @@ namespace YasGMP
         #endregion
     }
 }
-

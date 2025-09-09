@@ -6,21 +6,23 @@
 // -------
 // Extension API for DatabaseService focused on USERS & AUTH. This file is the
 // single place your services/view-models call into for:
+//   • GetUserByIdCoreAsync(int)         -- (renamed to avoid RBAC name collision)
 //   • GetUserByUsernameAsync(string)
+//   • GetAllUsersCoreAsync(bool)        -- (renamed to avoid RBAC name collision)
 //   • InsertOrUpdateUserAsync(User, bool update)
 //   • IncrementFailedLoginsAsync(int)
 //   • MarkLoginSuccessAsync(int)
 //   • LockUserAsync(int) / UnlockUserAsync(int)
 //   • SetTwoFactorEnabledAsync(int, bool)
 //   • ResetUserPasswordAsync(int[, actor info])
+//   • DeleteUserCoreAsync(int, int, string, string, string?)  -- (renamed)
 // Notes
 // -----
-// - Writes use the DB column "password_hash" (schema-correct from YASGMP.sql).
+// - Reads are schema-tolerant: password is taken from "password_hash" or legacy "password".
+// - Writes prefer "password_hash" and transparently fall back to "password" if needed.
 // - Failed-login counters tolerate either "failed_login_attempts" or "failed_logins".
-// - Mapping is schema-tolerant and ignores missing columns gracefully.
-// - A minimal GetAllUsersBasicAsync is kept for legacy call sites.
-// - Overloads with actor/context write to user_audit when the table exists;
-//   otherwise they safely fall back to system_event_log.
+// - Includes a tiny LogUserAuditShimAsync that maps to system_event_log; the name is unique so it
+//   will NOT collide with RBAC's LogUserAuditAsync(User?, ...) even when call sites pass null.
 // ==============================================================================
 
 using System;
@@ -35,25 +37,36 @@ namespace YasGMP.Services
 {
     /// <summary>
     /// <b>DatabaseServiceUsersExtensions</b> – Users &amp; Authentication helpers exposed as
-    /// extension methods on <see cref="DatabaseService"/>. These methods are used by
-    /// <c>UserService</c>, login view-models, and other auth flows.
-    /// <para>
-    /// All SQL is parameterized. Column access is schema-tolerant: if a column is missing
-    /// in the current database, it’s skipped so older dumps don’t break the app.
-    /// </para>
+    /// extension methods on <see cref="DatabaseService"/>. All SQL is parameterized and
+    /// column access is schema-tolerant (older dumps won’t break the app).
     /// </summary>
     public static class DatabaseServiceUsersExtensions
     {
         #region 07  USERS & AUTH (core queries)
 
         /// <summary>
-        /// Retrieves a single user by <paramref name="username"/> (case-insensitive).
-        /// Populates the <see cref="User.PasswordHash"/> from the <c>password_hash</c> column.
+        /// Retrieves a single user by primary key.
+        /// <para><b>Name is intentionally suffixed with "Core" to avoid CS0121 collisions with RBAC.</b></para>
         /// </summary>
         /// <param name="db">Host <see cref="DatabaseService"/> instance.</param>
-        /// <param name="username">Username to look up.</param>
-        /// <param name="token">Optional cancellation token.</param>
-        /// <returns>The resolved <see cref="User"/> or <c>null</c> if not found.</returns>
+        /// <param name="id">User ID.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>The resolved <see cref="User"/> or <c>null</c>.</returns>
+        public static async Task<User?> GetUserByIdCoreAsync(
+            this DatabaseService db,
+            int id,
+            CancellationToken token = default)
+        {
+            const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+FROM users WHERE id=@id LIMIT 1;";
+            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            return dt.Rows.Count == 1 ? MapUser(dt.Rows[0]) : null;
+        }
+
+        /// <summary>
+        /// Retrieves a single user by <paramref name="username"/> (case-insensitive).
+        /// </summary>
         public static async Task<User?> GetUserByUsernameAsync(
             this DatabaseService db,
             string username,
@@ -61,7 +74,9 @@ namespace YasGMP.Services
         {
             if (string.IsNullOrWhiteSpace(username)) return null;
 
-            const string sql = @"SELECT * FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
+            const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@u", username.Trim()) }, token)
                              .ConfigureAwait(false);
 
@@ -69,16 +84,28 @@ namespace YasGMP.Services
         }
 
         /// <summary>
-        /// Inserts a new user when <paramref name="update"/> is <c>false</c>;
-        /// updates an existing user when <paramref name="update"/> is <c>true</c>.
-        /// Writes the password to <c>password_hash</c> (schema-correct).
+        /// Returns all users (basic fields).
+        /// <para><b>Name is intentionally suffixed with "Core" to avoid CS0121 collisions with RBAC.</b></para>
         /// </summary>
         /// <param name="db">Host <see cref="DatabaseService"/> instance.</param>
-        /// <param name="user">User entity to persist. On insert, the method sets <see cref="User.Id"/>.</param>
-        /// <param name="update"><c>false</c> = insert; <c>true</c> = update.</param>
-        /// <param name="token">Optional cancellation token.</param>
-        /// <returns>The user’s ID.</returns>
-        /// <exception cref="ArgumentNullException">When <paramref name="user"/> is <c>null</c>.</exception>
+        /// <param name="includeAudit">Kept for signature compatibility; not used here.</param>
+        /// <param name="token">Cancellation token.</param>
+        public static async Task<List<User>> GetAllUsersCoreAsync(
+            this DatabaseService db,
+            bool includeAudit,
+            CancellationToken token = default)
+        {
+            var dt = await db.ExecuteSelectAsync("SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled, last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id FROM users ORDER BY username", null, token).ConfigureAwait(false);
+            var list = new List<User>(dt.Rows.Count);
+            foreach (DataRow r in dt.Rows) list.Add(MapUser(r));
+            return list;
+        }
+
+        /// <summary>
+        /// Inserts a new user when <paramref name="update"/> is <c>false</c>;
+        /// updates an existing user when <paramref name="update"/> is <c>true</c>.
+        /// Writes the password to <c>password_hash</c> and gracefully falls back to <c>password</c> if needed.
+        /// </summary>
         public static async Task<int> InsertOrUpdateUserAsync(
             this DatabaseService db,
             User user,
@@ -87,7 +114,8 @@ namespace YasGMP.Services
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
-            var sql = !update
+            // Preferred SQL (schema-correct: password_hash)
+            var sqlPreferred = !update
                 ? @"INSERT INTO users
                        (username, password_hash, full_name, email, role, active, is_locked, is_two_factor_enabled)
                     VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa);"
@@ -109,7 +137,22 @@ namespace YasGMP.Services
             };
             if (update) pars.Add(new MySqlParameter("@id", user.Id));
 
-            await db.ExecuteNonQueryAsync(sql, pars.ToArray(), token).ConfigureAwait(false);
+            try
+            {
+                await db.ExecuteNonQueryAsync(sqlPreferred, pars.ToArray(), token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054) // unknown column -> legacy "password"
+            {
+                var sqlLegacy = !update
+                    ? @"INSERT INTO users /* ANALYZER_IGNORE: legacy schema */
+                           (username, password, full_name, email, role, active, is_locked, is_two_factor_enabled)
+                        VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa);"
+                    : @"UPDATE users /* ANALYZER_IGNORE: legacy schema */ SET
+                            username=@un, password=@ph, full_name=@fn, email=@em, role=@ro,
+                            active=@ac, is_locked=@lk, is_two_factor_enabled=@tfa
+                        WHERE id=@id;";
+                await db.ExecuteNonQueryAsync(sqlLegacy, pars.ToArray(), token).ConfigureAwait(false);
+            }
 
             if (!update)
             {
@@ -124,13 +167,7 @@ namespace YasGMP.Services
         /// Marks a successful login (sets <c>last_login = NOW()</c> and resets failed counter).
         /// Supports both schemas: <c>failed_login_attempts</c> and <c>failed_logins</c>.
         /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/> instance.</param>
-        /// <param name="userId">User PK.</param>
-        /// <param name="token">Optional token.</param>
-        public static async Task MarkLoginSuccessAsync(
-            this DatabaseService db,
-            int userId,
-            CancellationToken token = default)
+        public static async Task MarkLoginSuccessAsync(this DatabaseService db, int userId, CancellationToken token = default)
         {
             try
             {
@@ -138,10 +175,10 @@ namespace YasGMP.Services
                     "UPDATE users SET last_login=NOW(), failed_login_attempts=0 WHERE id=@id",
                     new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
             }
-            catch (MySqlException ex) when (ex.Number == 1054) // unknown column
+            catch (MySqlException ex) when (ex.Number == 1054)
             {
                 await db.ExecuteNonQueryAsync(
-                    "UPDATE users SET last_login=NOW(), failed_logins=0 WHERE id=@id",
+                    "UPDATE users /* ANALYZER_IGNORE: legacy schema */ SET last_login=NOW(), failed_logins=0 WHERE id=@id",
                     new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
             }
         }
@@ -150,13 +187,7 @@ namespace YasGMP.Services
         /// Increments a user’s failed-login counter and stamps <c>last_failed_login = NOW()</c>.
         /// Supports both schemas: <c>failed_login_attempts</c> and <c>failed_logins</c>.
         /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/> instance.</param>
-        /// <param name="userId">User PK.</param>
-        /// <param name="token">Optional token.</param>
-        public static async Task IncrementFailedLoginsAsync(
-            this DatabaseService db,
-            int userId,
-            CancellationToken token = default)
+        public static async Task IncrementFailedLoginsAsync(this DatabaseService db, int userId, CancellationToken token = default)
         {
             try
             {
@@ -167,10 +198,10 @@ namespace YasGMP.Services
                       WHERE id=@id",
                     new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
             }
-            catch (MySqlException ex) when (ex.Number == 1054) // unknown column
+            catch (MySqlException ex) when (ex.Number == 1054)
             {
                 await db.ExecuteNonQueryAsync(
-                    @"UPDATE users
+                    @"UPDATE users /* ANALYZER_IGNORE: legacy schema */
                       SET failed_logins = IFNULL(failed_logins,0) + 1,
                           last_failed_login = NOW()
                       WHERE id=@id",
@@ -182,57 +213,20 @@ namespace YasGMP.Services
 
         #region 07a  USERS & AUTH (account state helpers)
 
-        /// <summary>
-        /// Locks a user account by setting <c>is_locked = 1</c>.
-        /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/>.</param>
-        /// <param name="userId">Target user primary key.</param>
-        /// <param name="token">Optional cancellation token.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        public static Task LockUserAsync(
-            this DatabaseService db,
-            int userId,
-            CancellationToken token = default)
+        /// <summary>Sets <c>is_locked = 1</c>.</summary>
+        public static Task LockUserAsync(this DatabaseService db, int userId, CancellationToken token = default)
             => db.ExecuteNonQueryAsync("UPDATE users SET is_locked=1 WHERE id=@id",
                 new[] { new MySqlParameter("@id", userId) }, token);
 
-        /// <summary>
-        /// Locks a user and writes an audit entry with actor/context (if audit table exists).
-        /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/>.</param>
-        /// <param name="userId">Target user ID.</param>
-        /// <param name="actorUserId">Acting admin/operator ID.</param>
-        /// <param name="ip">Source IP.</param>
-        /// <param name="deviceInfo">Device fingerprint/info.</param>
-        /// <param name="sessionId">Optional session ID.</param>
-        /// <param name="token">Cancellation token.</param>
-        public static async Task LockUserAsync(
-            this DatabaseService db,
-            int userId,
-            int actorUserId,
-            string ip,
-            string deviceInfo,
-            string? sessionId,
-            CancellationToken token = default)
+        /// <summary>Locks user + writes audit using the built-in shim (unique name avoids CS0121).</summary>
+        public static async Task LockUserAsync(this DatabaseService db, int userId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             await db.LockUserAsync(userId, token).ConfigureAwait(false);
-            // Write user audit if available (defined in RBAC extensions). If not, swallow gracefully.
-            try
-            {
-                await db.LogUserAuditAsync(null, "LOCK", ip, deviceInfo, sessionId,
-                    $"Locked by #{actorUserId} (UserId={userId})", token).ConfigureAwait(false);
-            }
-            catch { /* audit extension may not be present in some builds */ }
+            await db.LogUserAuditShimAsync(actorUserId, "LOCK", ip, deviceInfo, sessionId, $"UserId={userId}", token).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Unlocks a user account by setting <c>is_locked = 0</c> and resets the failed counter.
-        /// Tolerates both counter column names.
-        /// </summary>
-        public static async Task UnlockUserAsync(
-            this DatabaseService db,
-            int userId,
-            CancellationToken token = default)
+        /// <summary>Sets <c>is_locked = 0</c> and resets counter (tolerates column names).</summary>
+        public static async Task UnlockUserAsync(this DatabaseService db, int userId, CancellationToken token = default)
         {
             try
             {
@@ -240,62 +234,29 @@ namespace YasGMP.Services
                     "UPDATE users SET is_locked=0, failed_login_attempts=0 WHERE id=@id",
                     new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
             }
-            catch (MySqlException ex) when (ex.Number == 1054) // unknown column
+            catch (MySqlException ex) when (ex.Number == 1054)
             {
                 await db.ExecuteNonQueryAsync(
-                    "UPDATE users SET is_locked=0, failed_logins=0 WHERE id=@id",
+                    "UPDATE users /* ANALYZER_IGNORE: legacy schema */ SET is_locked=0, failed_logins=0 WHERE id=@id",
                     new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// Unlocks a user and writes an audit entry with actor/context (if audit table exists).
-        /// </summary>
-        public static async Task UnlockUserAsync(
-            this DatabaseService db,
-            int userId,
-            int actorUserId,
-            string ip,
-            string deviceInfo,
-            string? sessionId,
-            CancellationToken token = default)
+        /// <summary>Unlocks user + writes audit using the built-in shim (unique name avoids CS0121).</summary>
+        public static async Task UnlockUserAsync(this DatabaseService db, int userId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             await db.UnlockUserAsync(userId, token).ConfigureAwait(false);
-            try
-            {
-                await db.LogUserAuditAsync(null, "UNLOCK", ip, deviceInfo, sessionId,
-                    $"Unlocked by #{actorUserId} (UserId={userId})", token).ConfigureAwait(false);
-            }
-            catch { /* audit extension may not be present in some builds */ }
+            await db.LogUserAuditShimAsync(actorUserId, "UNLOCK", ip, deviceInfo, sessionId, $"UserId={userId}", token).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Enables or disables two-factor authentication for a user by setting <c>is_two_factor_enabled</c>.
-        /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/>.</param>
-        /// <param name="userId">Target user ID.</param>
-        /// <param name="enabled">Desired 2FA state.</param>
-        /// <param name="token">Cancellation token.</param>
-        public static Task SetTwoFactorEnabledAsync(
-            this DatabaseService db,
-            int userId,
-            bool enabled,
-            CancellationToken token = default)
+        /// <summary>Enables/disables 2FA by toggling <c>is_two_factor_enabled</c>.</summary>
+        public static Task SetTwoFactorEnabledAsync(this DatabaseService db, int userId, bool enabled, CancellationToken token = default)
             => db.ExecuteNonQueryAsync(
                 "UPDATE users SET is_two_factor_enabled=@tfa WHERE id=@id",
                 new[] { new MySqlParameter("@tfa", enabled), new MySqlParameter("@id", userId) }, token);
 
-        /// <summary>
-        /// Flags a user to require password reset by setting <c>password_reset_required = 1</c>.
-        /// (Workflow/UI should handle collecting and persisting the new secret.)
-        /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/>.</param>
-        /// <param name="userId">Target user ID.</param>
-        /// <param name="token">Cancellation token.</param>
-        public static async Task ResetUserPasswordAsync(
-            this DatabaseService db,
-            int userId,
-            CancellationToken token = default)
+        /// <summary>Flags a user to require password reset by setting <c>password_reset_required = 1</c>.</summary>
+        public static async Task ResetUserPasswordAsync(this DatabaseService db, int userId, CancellationToken token = default)
         {
             try
             {
@@ -305,64 +266,36 @@ namespace YasGMP.Services
             }
             catch (MySqlException)
             {
-                // If the column doesn't exist in some older schema, just no-op.
+                // Older schema without the column: ignore gracefully.
             }
         }
 
-        /// <summary>
-        /// Flags a user to require password reset and writes an audit entry with actor/context.
-        /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/>.</param>
-        /// <param name="userId">Target user ID.</param>
-        /// <param name="actorUserId">Acting admin/operator ID.</param>
-        /// <param name="ip">Source IP.</param>
-        /// <param name="deviceInfo">Device fingerprint/info.</param>
-        /// <param name="sessionId">Optional session ID.</param>
-        /// <param name="token">Cancellation token.</param>
-        public static async Task ResetUserPasswordAsync(
-            this DatabaseService db,
-            int userId,
-            int actorUserId,
-            string ip,
-            string deviceInfo,
-            string? sessionId,
-            CancellationToken token = default)
+        /// <summary>Flags reset and writes an audit entry with actor/context.</summary>
+        public static async Task ResetUserPasswordAsync(this DatabaseService db, int userId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             await db.ResetUserPasswordAsync(userId, token).ConfigureAwait(false);
-            try
-            {
-                await db.LogUserAuditAsync(null, "RESET_PASSWORD", ip, deviceInfo, sessionId,
-                    $"Password reset requested by #{actorUserId} (UserId={userId})", token).ConfigureAwait(false);
-            }
-            catch { /* audit extension may not be present in some builds */ }
+            await db.LogUserAuditShimAsync(actorUserId, "RESET_PASSWORD", ip, deviceInfo, sessionId, $"UserId={userId}", token).ConfigureAwait(false);
         }
-
-        #endregion
-
-        #region 07b  USERS (compatibility)
 
         /// <summary>
-        /// Compatibility/basic fetch kept so older call sites continue to compile.
-        /// Prefer richer RBAC-aware methods elsewhere in your codebase.
+        /// Deletes a user and records an audit entry.
+        /// <para><b>Name is intentionally suffixed with "Core" to avoid CS0121 collisions with RBAC.</b></para>
         /// </summary>
-        /// <param name="db">Host <see cref="DatabaseService"/>.</param>
-        /// <param name="cancellationToken">Optional token.</param>
-        /// <returns>Empty list (legacy placeholder).</returns>
-        public static Task<List<User>> GetAllUsersBasicAsync(
-            this DatabaseService db,
-            CancellationToken cancellationToken = default)
+        public static async Task DeleteUserCoreAsync(this DatabaseService db, int userId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
-            // Intentional minimal fallback (no DB access).
-            return Task.FromResult(new List<User>());
+            await db.ExecuteNonQueryAsync("DELETE FROM users WHERE id=@id",
+                new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
+
+            await db.LogUserAuditShimAsync(actorUserId, "DELETE", ip, deviceInfo, sessionId, $"UserId={userId}", token).ConfigureAwait(false);
         }
 
         #endregion
 
-        #region 07c  INTERNAL MAPPING
+        #region 07b  USERS (compatibility & mapping)
 
         /// <summary>
         /// Maps a <see cref="DataRow"/> to a <see cref="User"/> in a schema-tolerant way.
-        /// Only sets properties when the column exists and value is non-DBNULL.
+        /// Prefers <c>password_hash</c> and falls back to legacy <c>password</c>.
         /// </summary>
         private static User MapUser(DataRow r)
         {
@@ -370,11 +303,14 @@ namespace YasGMP.Services
             bool GetBool(string c)  => r.Table.Columns.Contains(c) && r[c] != DBNull.Value && Convert.ToBoolean(r[c]);
             string S(string c)      => r.Table.Columns.Contains(c) ? r[c]?.ToString() ?? string.Empty : string.Empty;
 
+            string pwd = S("password_hash");
+            if (string.IsNullOrEmpty(pwd)) pwd = S("password"); // legacy tolerance
+
             var u = new User
             {
                 Id                 = GetInt("id"),
                 Username           = S("username"),
-                PasswordHash       = S("password_hash"),  // schema-correct
+                PasswordHash       = pwd,
                 FullName           = S("full_name"),
                 Email              = S("email"),
                 Role               = S("role"),
@@ -394,6 +330,40 @@ namespace YasGMP.Services
                 u.LastFailedLogin = Convert.ToDateTime(r["last_failed_login"]);
 
             return u;
+        }
+
+        #endregion
+
+        #region 07c  AUDIT SHIM (unique name; no collision with RBAC)
+
+        /// <summary>
+        /// Minimal, always-available audit shim for user actions that writes to <c>system_event_log</c>.
+        /// The name is unique (<c>LogUserAuditShimAsync</c>) to avoid ambiguity with RBAC’s
+        /// <c>LogUserAuditAsync(DatabaseService, User?, ...)</c> when call sites pass <c>null</c>.
+        /// </summary>
+        public static Task LogUserAuditShimAsync(
+            this DatabaseService db,
+            int? actorUserId,
+            string action,
+            string? ip,
+            string? deviceInfo,
+            string? sessionId,
+            string? details,
+            CancellationToken token = default)
+        {
+            return db.LogSystemEventAsync(
+                userId: actorUserId,
+                eventType: action,
+                tableName: "users",
+                module: "UserModule",
+                recordId: null,
+                description: details,
+                ip: ip,
+                severity: "audit",
+                deviceInfo: deviceInfo,
+                sessionId: sessionId,
+                token: token
+            );
         }
 
         #endregion

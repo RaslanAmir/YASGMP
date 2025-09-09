@@ -1,0 +1,24 @@
+{
+  "Version": 1,
+  "Baseline": {
+    "CombinedSha256": "d6a931bcbbcb9da2b2294f1bdd1a06512197a6335f71144175c56b71ef998fc2",
+    "FrozenAt": "2025-09-04T12:33:56Z",
+    "Scope": {
+      "DbTables": 247
+    },
+    "Parts": {
+      "schema.json": {
+        "Sha256": "cf5a62fb8ac50ede1e8102135070678d0e310ba548247719bf061752b36819d1",
+        "Size": 1018142,
+        "Mtime": "2025-09-04T12:24:50Z"
+      },
+      "schema.sql": {
+        "Sha256": "b6087f0297303d68129474ce47883bb7aace37de82dc545563fe8536ac15a7bd",
+        "Size": 128218,
+        "Mtime": "2025-09-04T08:58:59Z"
+      }
+    },
+    "Notes": "Do not edit manually; kept in sync with reports/SYNC_REPORT.md §5."
+  }
+}
+

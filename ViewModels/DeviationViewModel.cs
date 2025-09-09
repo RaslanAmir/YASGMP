@@ -383,7 +383,7 @@ namespace YasGMP.ViewModels
 
         /// <summary>
         /// Exports the currently filtered list as CSV and writes a unified export log + system event.
-        /// Uses <see cref="DatabaseService.SaveExportPrintLogAsync(int,string,string,string,string,string?,string?,System.Threading.CancellationToken)"/>.
+        /// Uses DatabaseService.SaveExportPrintLogAsync.
         /// </summary>
         public async Task ExportDeviationsAsync()
         {

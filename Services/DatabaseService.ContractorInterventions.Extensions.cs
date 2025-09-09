@@ -36,7 +36,9 @@ namespace YasGMP.Services
             CancellationToken cancellationToken = default)
         {
             const string sql = @"
-SELECT *
+SELECT 
+    id, contractor_id, component_id, intervention_date, reason, result, gmp_compliance,
+    doc_file, contractor_name, asset_name, intervention_type, status, start_date, end_date, notes
 FROM contractor_interventions
 ORDER BY intervention_date DESC, id DESC;";
 
@@ -103,6 +105,52 @@ ORDER BY timestamp DESC, id DESC;";
             string? device = null,
             CancellationToken cancellationToken = default)
             => db.InsertOrUpdateContractorInterventionUltraAsync(intervention, update, actorUserId, ip, device, cancellationToken);
+
+        /// <summary>
+        /// Ultra method performing actual insert/update against contractor_interventions table and writing audit.
+        /// </summary>
+        public static async Task<int> InsertOrUpdateContractorInterventionUltraAsync(
+            this DatabaseService db,
+            ContractorIntervention intervention,
+            bool update,
+            int actorUserId,
+            string? ip,
+            string? device,
+            CancellationToken cancellationToken = default)
+        {
+            if (intervention == null) throw new ArgumentNullException(nameof(intervention));
+            string insert = @"INSERT INTO contractor_interventions (contractor_id, component_id, intervention_date, reason, result, gmp_compliance, doc_file)
+                             VALUES (@cid,@comp,@date,@reason,@result,@gmp,@doc)";
+            string updateSql = @"UPDATE contractor_interventions SET contractor_id=@cid, component_id=@comp, intervention_date=@date, reason=@reason, result=@result, gmp_compliance=@gmp, doc_file=@doc WHERE id=@id";
+
+            var pars = new List<MySqlParameter>
+            {
+                new("@cid", intervention.ContractorId),
+                new("@comp", intervention.ComponentId),
+                new("@date", intervention.InterventionDate),
+                new("@reason", (object?)intervention.Reason ?? DBNull.Value),
+                new("@result", (object?)intervention.Result ?? DBNull.Value),
+                new("@gmp", intervention.GmpCompliance),
+                new("@doc", (object?)intervention.DocFile ?? DBNull.Value)
+            };
+            if (update) pars.Add(new MySqlParameter("@id", intervention.Id));
+
+            if (!update)
+            {
+                await db.ExecuteNonQueryAsync(insert, pars, cancellationToken).ConfigureAwait(false);
+                var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, cancellationToken).ConfigureAwait(false);
+                intervention.Id = Convert.ToInt32(idObj);
+            }
+            else
+            {
+                await db.ExecuteNonQueryAsync(updateSql, pars, cancellationToken).ConfigureAwait(false);
+            }
+
+            await db.LogSystemEventAsync(actorUserId, update ? "CONTR_INT_UPDATE" : "CONTR_INT_CREATE", "contractor_interventions", "ContractorModule",
+                intervention.Id, intervention.Reason, ip, "audit", device, null, token: cancellationToken).ConfigureAwait(false);
+
+            return intervention.Id;
+        }
 
         /// <summary>Create intervention (actor/comment overload). Writes a system event and returns the new id.</summary>
         public static async Task<int> AddContractorInterventionAsync(

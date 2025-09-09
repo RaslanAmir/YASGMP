@@ -138,7 +138,9 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                var controls = await _dbService.ExecuteSelectAsync("SELECT * FROM change_controls").ConfigureAwait(false);
+                var controls = await _dbService.ExecuteSelectAsync(
+                    "SELECT id, code, title, description, status, requested_by_id, date_requested FROM change_controls")
+                    .ConfigureAwait(false);
                 var list = new ObservableCollection<ChangeControl>();
                 foreach (System.Data.DataRow row in controls.Rows)
                 {

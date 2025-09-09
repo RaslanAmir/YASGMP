@@ -1,112 +1,76 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage 
-    x:Class="YasGMP.MachinesPage"
+<ContentPage
+    x:Class="YasGMP.Views.MachinesPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:ui="clr-namespace:YasGMP.UI"
+    xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
     Title="Strojevi / Oprema – YasGMP">
 
-    <ContentPage.Content>
-        <VerticalStackLayout Padding="28,20,28,20" Spacing="18" BackgroundColor="#f5f7fa">
-            <Frame 
-                BackgroundColor="White"
-                CornerRadius="14"
-                HasShadow="True"
-                Padding="20">
+  <ContentPage.Content>
+    <VerticalStackLayout Padding="28,20,28,20" Spacing="18"
+                         BackgroundColor="{StaticResource YtSurface}">
+      <Frame BackgroundColor="{StaticResource YtSurfaceCard}" CornerRadius="14" HasShadow="True" Padding="20"
+             BorderColor="{StaticResource YtRowBorder}">
 
-                <VerticalStackLayout Spacing="16">
-                    <Label 
-                        Text="Pregled svih strojeva / opreme"
-                        FontSize="22"
-                        FontAttributes="Bold"
-                        TextColor="#2962ff"
-                        HorizontalOptions="Center"/>
+        <VerticalStackLayout Spacing="16">
+          <Label Text="Pregled svih strojeva / opreme"
+                 FontSize="22" FontAttributes="Bold"
+                 TextColor="{StaticResource YtPrimary700}"
+                 HorizontalOptions="Center"/>
 
-                    <HorizontalStackLayout Spacing="14">
-                        <Button 
-                            Text="➕ Dodaj novi stroj"
-                            Clicked="OnAddMachineClicked"
-                            BackgroundColor="#e3f2fd"
-                            TextColor="#1565c0"
-                            FontAttributes="Bold"
-                            ui:ToolTipProperties.Text="Unos novog stroja ili opreme u sustav." />
+          <HorizontalStackLayout Spacing="14">
+            <Button Text="➕ Dodaj novi stroj"
+                    Clicked="OnAddMachineClicked"
+                    BackgroundColor="{StaticResource YtPrimary600}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    maui:ToolTipProperties.Text="Unos novog stroja ili opreme u sustav." />
+            <Button Text="✏️ Uredi"
+                    Clicked="OnEditMachineClicked"
+                    BackgroundColor="{StaticResource YtAccent50}"
+                    TextColor="{StaticResource YtAccent700}"
+                    FontAttributes="Bold"
+                    maui:ToolTipProperties.Text="Uređivanje odabranog stroja." />
+            <Button Text="🗑️ Briši"
+                    Clicked="OnDeleteMachineClicked"
+                    BackgroundColor="{StaticResource YtDanger700}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    maui:ToolTipProperties.Text="Brisanje odabranog stroja iz baze." />
+          </HorizontalStackLayout>
 
-                        <Button 
-                            Text="✏️ Uredi"
-                            Clicked="OnEditMachineClicked"
-                            BackgroundColor="#fffde7"
-                            TextColor="#f9a825"
-                            FontAttributes="Bold"
-                            ui:ToolTipProperties.Text="Uređivanje odabranog stroja." />
+          <CollectionView x:Name="MachineListView"
+                          ItemsSource="{Binding Machines}"
+                          SelectionMode="Single"
+                          HeightRequest="440"
+                          BackgroundColor="{StaticResource YtSurface}">
+            <CollectionView.ItemTemplate>
+              <DataTemplate>
+                <Frame Margin="0,2,0,2" CornerRadius="8" Padding="10"
+                       BackgroundColor="{StaticResource YtSurface}"
+                       HasShadow="False"
+                       BorderColor="{StaticResource YtRowBorder}">
+                  <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Name}" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource YtOnSurface}" />
+                    <Label Text="{Binding Code}" FontSize="13" TextColor="{StaticResource YtOnSurfaceDim}"
+                           maui:ToolTipProperties.Text="Interna oznaka stroja" />
+                    <Label Text="{Binding Manufacturer}" FontSize="13" TextColor="{StaticResource YtOnSurface}" />
+                    <Label Text="{Binding Location}" FontSize="13" TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Label Text="{Binding InstallDate, StringFormat='Instalacija: {0:yyyy-MM-dd}'}"
+                           FontSize="12" TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Label Text="{Binding Status}" FontSize="12" TextColor="{StaticResource YtAccent700}"
+                           maui:ToolTipProperties.Text="Status (active, maintenance…)" />
+                  </VerticalStackLayout>
+                </Frame>
+              </DataTemplate>
+            </CollectionView.ItemTemplate>
+          </CollectionView>
 
-                        <Button 
-                            Text="🗑️ Briši"
-                            Clicked="OnDeleteMachineClicked"
-                            BackgroundColor="#ffebee"
-                            TextColor="#c62828"
-                            FontAttributes="Bold"
-                            ui:ToolTipProperties.Text="Brisanje odabranog stroja iz baze." />
-                    </HorizontalStackLayout>
-
-                    <CollectionView 
-                        x:Name="MachineListView"
-                        ItemsSource="{Binding Machines}"
-                        SelectionMode="Single"
-                        HeightRequest="440"
-                        BackgroundColor="#f5f7fa"
-                        SelectionChangedCommand="{Binding SelectionChangedCommand}">
-
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame 
-                                    Margin="0,2,0,2"
-                                    CornerRadius="8"
-                                    Padding="10"
-                                    BackgroundColor="#f8fafc"
-                                    HasShadow="False"
-                                    BorderColor="#cfd8dc">
-
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label 
-                                            Text="{Binding Name}"
-                                            FontSize="17"
-                                            FontAttributes="Bold"
-                                            TextColor="#263238" />
-                                        <Label 
-                                            Text="{Binding Code}"
-                                            FontSize="13"
-                                            TextColor="#607d8b"
-                                            ui:ToolTipProperties.Text="Interna oznaka stroja" />
-                                        <Label 
-                                            Text="{Binding Manufacturer}"
-                                            FontSize="13"
-                                            TextColor="#455a64" />
-                                        <Label 
-                                            Text="{Binding Location}"
-                                            FontSize="13"
-                                            TextColor="#78909c" />
-                                        <Label 
-                                            Text="{Binding InstallDate, StringFormat='Instalacija: {0:yyyy-MM-dd}'}"
-                                            FontSize="12"
-                                            TextColor="#b0bec5" />
-                                        <Label 
-                                            Text="{Binding Status}"
-                                            FontSize="12"
-                                            TextColor="#ef6c00"
-                                            ui:ToolTipProperties.Text="Status (u pogonu, van pogona...)" />
-                                    </VerticalStackLayout>
-                                </Frame>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                    <Label
-                        Text="Kliknite na redak za odabir stroja. Moguće je uređivati ili brisati samo odabrani stroj."
-                        FontSize="12"
-                        TextColor="#bdbdbd"
-                        HorizontalOptions="Center"/>
-                </VerticalStackLayout>
-            </Frame>
+          <Label Text="Kliknite na redak za odabir stroja. Moguće je uređivati ili brisati samo odabrani stroj."
+                 FontSize="12" TextColor="{StaticResource YtOnSurfaceDim}" HorizontalOptions="Center"/>
         </VerticalStackLayout>
-    </ContentPage.Content>
+
+      </Frame>
+    </VerticalStackLayout>
+  </ContentPage.Content>
 </ContentPage>

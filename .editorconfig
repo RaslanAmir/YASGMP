@@ -1,0 +1,28 @@
+﻿root = true
+
+[*.cs]
+# Prefer 'var' for brevity when obvious
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Expression-bodied members when concise
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+
+# File encoding and end-of-line
+insert_final_newline = true
+end_of_line = crlf
+charset = utf-8
+
+# Naming (PascalCase for public members)
+dotnet_naming_rule.public_members_should_be_pascalcase.severity = suggestion
+dotnet_naming_rule.public_members_should_be_pascalcase.symbols = public_symbols
+dotnet_naming_rule.public_members_should_be_pascalcase.style = pascal_case_style
+
+dotnet_naming_symbols.public_symbols.applicable_accessibilities = public, protected
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Require docs (advisory, not enforced as error)
+dotnet_diagnostic.SA1600.severity = suggestion

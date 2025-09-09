@@ -19,7 +19,7 @@ namespace YasGMP.Views
     /// <remarks>
     /// • Data sources are resolved via DI first, then AppConfig (connection string fallback).<br/>
     /// • <see cref="IsBusy"/> intentionally shadows <see cref="Page.IsBusy"/> and keeps it synchronized to avoid ambiguity.<br/>
-    /// • Auto-reselect and scroll-to-selected is supported via <see cref="CollectionView.ScrollTo(object, ScrollToPosition, bool)"/>.
+    /// • Auto-reselect and scroll-to-selected is supported via CollectionView.ScrollTo.
     /// </remarks>
     /// </summary>
     public partial class ValidationPage : ContentPage
@@ -160,7 +160,7 @@ namespace YasGMP.Views
         }
 
         /// <summary>
-        /// Loads data (validations + lookup lists) and optionally attempts to reselect & scroll to an item by Id.
+        /// Loads data (validations + lookup lists) and optionally attempts to reselect &amp; scroll to an item by Id.
         /// </summary>
         /// <param name="reselectId">
         /// Optional target Id to reselect and scroll to. If omitted, the current selection Id (if any) is used.

@@ -1,107 +1,148 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="YasGMP.Views.WorkOrderEditDialog"
-             Title="Radni Nalog – Uredi / Dodaj"
-             Padding="24">
+<!--
+  WorkOrderEditDialog.xaml
+  YASTECH-styled modal dialog for creating/updating Work Orders.
+  - Uses implicit theme styles (Theme.YASTECH.xaml)
+  - Tooltips via built-in MAUI ToolTipProperties
+-->
+<ContentPage
+    x:Class="YasGMP.Views.WorkOrderEditDialog"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+    Title="Radni Nalog – Uredi / Dodaj"
+    Padding="24">
 
-    <!-- 
-        Dialog za unos/izmjenu radnog naloga.
-        Svi bindingi su povezani na WorkOrderEditDialogViewModel.
-        Dodaj/zamijeni bindinge ovisno o svojoj implementaciji ViewModela i Modela!
-    -->
+  <ScrollView>
+    <Grid ColumnDefinitions="*"
+          RowDefinitions="Auto,Auto"
+          RowSpacing="16">
 
-    <ScrollView>
+      <!-- Header Card -->
+      <Frame Grid.Row="0" Padding="20">
+        <VerticalStackLayout Spacing="8">
+          <Label Text="Radni Nalog"
+                 Style="{StaticResource YtH1}"
+                 HorizontalOptions="Center"
+                 maui:ToolTipProperties.Text="Unos ili izmjena radnog naloga za GMP evidenciju" />
+          <Label Text="Obavezna polja: Tip, Opis, Stroj, Status."
+                 Style="{StaticResource YtCaption}"
+                 HorizontalOptions="Center" />
+        </VerticalStackLayout>
+      </Frame>
+
+      <!-- Form Card -->
+      <Frame Grid.Row="1" Padding="20">
         <VerticalStackLayout Spacing="16">
 
-            <!-- Naslov -->
-            <Label Text="Radni Nalog"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   ToolTipProperties.Text="Unos ili izmjena radnog naloga za GMP evidenciju" />
+          <!-- Tip naloga -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Tip naloga:"
+                   VerticalOptions="Center"
+                   maui:ToolTipProperties.Text="Odaberi vrstu radnog naloga (preventivni, korektivni, hitni…)" />
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding TypeList}"
+                    SelectedItem="{Binding WorkOrder.Type, Mode=TwoWay}"
+                    Title="Odaberi tip" />
+          </Grid>
 
-            <!-- Tip naloga -->
-            <HorizontalStackLayout Spacing="12">
-                <Label Text="Tip naloga:" 
-                       VerticalOptions="Center"
-                       ToolTipProperties.Text="Odaberi vrstu radnog naloga (preventivni, korektivni...)" />
-                <Picker ItemsSource="{Binding TypeList}" 
-                        SelectedItem="{Binding WorkOrder.Type, Mode=TwoWay}"
-                        Title="Odaberi tip"/>
-            </HorizontalStackLayout>
+          <!-- Opis zadatka -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Opis zadatka:" VerticalOptions="Center" />
+            <Entry Grid.Column="1"
+                   Text="{Binding WorkOrder.TaskDescription, Mode=TwoWay}"
+                   Placeholder="Sažeti opis zadatka"
+                   maui:ToolTipProperties.Text="Unesi kratak, jasan opis zadatka" />
+          </Grid>
 
-            <!-- Opis zadatka -->
-            <Entry Text="{Binding WorkOrder.TaskDescription, Mode=TwoWay}" 
-                   Placeholder="Opis zadatka"
-                   ToolTipProperties.Text="Unesi kratak opis zadatka" />
+          <!-- Stroj/oprema -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Stroj:" VerticalOptions="Center" />
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding Machines}"
+                    SelectedItem="{Binding WorkOrder.Machine, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding Name}"
+                    Title="Odaberi stroj"
+                    maui:ToolTipProperties.Text="Odaberi stroj na koji se odnosi nalog" />
+          </Grid>
 
-            <!-- Stroj/oprema -->
-            <HorizontalStackLayout Spacing="12">
-                <Label Text="Stroj:" VerticalOptions="Center"/>
-                <Picker ItemsSource="{Binding Machines}" 
-                        SelectedItem="{Binding WorkOrder.Machine, Mode=TwoWay}"
-                        ItemDisplayBinding="{Binding Name}"
-                        Title="Odaberi stroj"
-                        ToolTipProperties.Text="Odaberi stroj na koji se odnosi nalog"/>
-            </HorizontalStackLayout>
+          <!-- Komponenta (opcionalno) -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Komponenta:" VerticalOptions="Center" />
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding Components}"
+                    SelectedItem="{Binding WorkOrder.Component, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding Name}"
+                    Title="Odaberi komponentu"
+                    maui:ToolTipProperties.Text="Opcionalno: odaberi komponentu ako je poznata" />
+          </Grid>
 
-            <!-- Komponenta (može biti null) -->
-            <HorizontalStackLayout Spacing="12">
-                <Label Text="Komponenta:" VerticalOptions="Center"/>
-                <Picker ItemsSource="{Binding Components}" 
-                        SelectedItem="{Binding WorkOrder.Component, Mode=TwoWay}"
-                        ItemDisplayBinding="{Binding Name}"
-                        Title="Odaberi komponentu"
-                        ToolTipProperties.Text="Opcionalno: odaberi komponentu"/>
-            </HorizontalStackLayout>
+          <!-- Dodijeljen korisnik -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Dodijeljeno:" VerticalOptions="Center" />
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding Users}"
+                    SelectedItem="{Binding WorkOrder.AssignedTo, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding FullName}"
+                    Title="Odaberi tehničara"
+                    maui:ToolTipProperties.Text="Odaberi korisnika kojem je nalog dodijeljen" />
+          </Grid>
 
-            <!-- Dodijeljen korisnik -->
-            <HorizontalStackLayout Spacing="12">
-                <Label Text="Dodijeljeno:" VerticalOptions="Center"/>
-                <Picker ItemsSource="{Binding Users}" 
-                        SelectedItem="{Binding WorkOrder.AssignedTo, Mode=TwoWay}"
-                        ItemDisplayBinding="{Binding FullName}"
-                        Title="Odaberi tehničara"
-                        ToolTipProperties.Text="Odaberi korisnika kojem je nalog dodijeljen"/>
-            </HorizontalStackLayout>
+          <!-- Datum otvaranja -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Datum otvaranja:" VerticalOptions="Center" />
+            <DatePicker Grid.Column="1"
+                        Date="{Binding WorkOrder.DateOpen, Mode=TwoWay}"
+                        maui:ToolTipProperties.Text="Datum i vrijeme otvaranja radnog naloga" />
+          </Grid>
 
-            <!-- Datum otvaranja -->
-            <HorizontalStackLayout Spacing="12">
-                <Label Text="Datum otvaranja:" VerticalOptions="Center"/>
-                <DatePicker Date="{Binding WorkOrder.DateOpen, Mode=TwoWay}" 
-                            ToolTipProperties.Text="Datum i vrijeme otvaranja radnog naloga"/>
-            </HorizontalStackLayout>
+          <!-- Status naloga -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Status:" VerticalOptions="Center" />
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding StatusList}"
+                    SelectedItem="{Binding WorkOrder.Status, Mode=TwoWay}"
+                    Title="Odaberi status"
+                    maui:ToolTipProperties.Text="Status naloga (otvoren, u tijeku, završen, odbijen…)" />
+          </Grid>
 
-            <!-- Status naloga -->
-            <HorizontalStackLayout Spacing="12">
-                <Label Text="Status:" VerticalOptions="Center"/>
-                <Picker ItemsSource="{Binding StatusList}" 
-                        SelectedItem="{Binding WorkOrder.Status, Mode=TwoWay}"
-                        Title="Odaberi status"
-                        ToolTipProperties.Text="Status naloga (otvoren, u tijeku, završen, odbijen)"/>
-            </HorizontalStackLayout>
-
-            <!-- Rezultat/intervencija -->
-            <Entry Text="{Binding WorkOrder.Result, Mode=TwoWay}" 
+          <!-- Rezultat/intervencija -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="Rezultat:" VerticalOptions="Center" />
+            <Entry Grid.Column="1"
+                   Text="{Binding WorkOrder.Result, Mode=TwoWay}"
                    Placeholder="Rezultat ili napomena"
-                   ToolTipProperties.Text="Rezultat radnog naloga, završna napomena"/>
+                   maui:ToolTipProperties.Text="Sažmi rezultat intervencije; koristi CAPA referencu po potrebi" />
+          </Grid>
 
-            <!-- Digitalni potpis -->
-            <Entry Text="{Binding WorkOrder.DigitalSignature, Mode=TwoWay}" 
-                   Placeholder="Digitalni potpis"
-                   ToolTipProperties.Text="Upiši digitalni potpis ili hash (opcionalno)"/>
+          <!-- Digitalni potpis -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Label Text="E-potpis:" VerticalOptions="Center" />
+            <Entry Grid.Column="1"
+                   Text="{Binding WorkOrder.DigitalSignature, Mode=TwoWay}"
+                   Placeholder="Digitalni potpis / hash"
+                   maui:ToolTipProperties.Text="Opcionalno: digitalni potpis korisnika (21 CFR Part 11)" />
+          </Grid>
 
-            <!-- Gumbi za spremanje/odustajanje -->
-            <HorizontalStackLayout Spacing="24" Margin="0,20,0,0" HorizontalOptions="Center">
-                <Button Text="Spremi" 
-                        Command="{Binding SaveCommand}" 
-                        ToolTipProperties.Text="Spremi radni nalog i zatvori dijalog"/>
-                <Button Text="Odustani" 
-                        Command="{Binding CancelCommand}"
-                        ToolTipProperties.Text="Odustani od izmjena"/>
-            </HorizontalStackLayout>
+          <!-- Actions -->
+          <HorizontalStackLayout Spacing="16" HorizontalOptions="Center" Margin="0,8,0,0">
+            <Button Text="Spremi"
+                    Command="{Binding SaveCommand}"
+                    Style="{StaticResource YtButton.Primary}"
+                    maui:ToolTipProperties.Text="Spremi radni nalog i zatvori dijalog" />
+            <Button Text="Odustani"
+                    Command="{Binding CancelCommand}"
+                    Style="{StaticResource YtButton.Flat}"
+                    maui:ToolTipProperties.Text="Odustani od izmjena i zatvori dijalog" />
+          </HorizontalStackLayout>
 
+          <!-- Status line (optional binding from VM) -->
+          <Label Text="{Binding StatusMessage}"
+                 Style="{StaticResource YtCaption}"
+                 HorizontalOptions="Center" />
         </VerticalStackLayout>
-    </ScrollView>
+      </Frame>
+
+    </Grid>
+  </ScrollView>
 </ContentPage>

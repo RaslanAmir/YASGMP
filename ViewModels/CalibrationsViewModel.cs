@@ -254,8 +254,12 @@ namespace YasGMP.ViewModels
                 _allCalibrations.Clear();
                 await MainThread.InvokeOnMainThreadAsync(() => Calibrations.Clear());
 
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
                 DataTable dt = await _dbService
-                    .ExecuteSelectAsync("SELECT * FROM calibrations ORDER BY calibration_date DESC")
+                    .ExecuteSelectAsync(
+                        "SELECT id, component_id, supplier_id, calibration_date, next_due, cert_doc, result, comment, digital_signature, last_modified, last_modified_by_id FROM calibrations ORDER BY calibration_date DESC",
+                        null,
+                        cts.Token)
                     .ConfigureAwait(false);
 
                 foreach (DataRow row in dt.Rows)

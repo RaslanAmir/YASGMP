@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using Microsoft.Maui.Controls;
 
@@ -18,17 +19,18 @@ namespace YasGMP.Converters
     /// <code lang="xml"><![CDATA[
     /// <ContentPage.Resources>
     ///   <ResourceDictionary>
-    ///     <converters:NullToBoolConverter x:Key="NullToBool" />
+    ///     <conv:NullToBoolConverter x:Key="NullToBoolConverter" />
     ///   </ResourceDictionary>
     /// </ContentPage.Resources>
     ///
     /// <!-- Enabled only when SelectedItem is not null -->
-    /// <Button IsEnabled="{Binding SelectedItem, Converter={StaticResource NullToBool}}" />
+    /// <Button IsEnabled="{Binding SelectedItem, Converter={StaticResource NullToBoolConverter}}" />
     ///
     /// <!-- Visible only when SelectedItem is null (invert) -->
-    /// <Label IsVisible="{Binding SelectedItem, Converter={StaticResource NullToBool}, ConverterParameter=invert}" />
+    /// <Label IsVisible="{Binding SelectedItem, Converter={StaticResource NullToBoolConverter}, ConverterParameter=invert}" />
     /// ]]></code>
     /// </example>
+    [EditorBrowsable(EditorBrowsableState.Always)]
     public sealed class NullToBoolConverter : IValueConverter
     {
         /// <summary>
@@ -36,18 +38,7 @@ namespace YasGMP.Converters
         /// </summary>
         public bool Invert { get; set; }
 
-        /// <summary>
-        /// Converts the specified <paramref name="value"/> to a <see cref="bool"/> indicating whether it is non-<c>null</c>.
-        /// Honors <see cref="Invert"/> and a string parameter <c>"invert"</c> to reverse the result.
-        /// </summary>
-        /// <param name="value">The bound value; may be <c>null</c>.</param>
-        /// <param name="targetType">The target type (typically <see cref="bool"/>).</param>
-        /// <param name="parameter">
-        /// Optional parameter. If a string equal to <c>"invert"</c> (case-insensitive) is provided,
-        /// the result will be logically inverted (takes precedence over <see cref="Invert"/>).
-        /// </param>
-        /// <param name="culture">The current culture (unused).</param>
-        /// <returns><c>true</c> if <paramref name="value"/> is non-<c>null</c> (or inverted); otherwise <c>false</c>.</returns>
+        /// <inheritdoc />
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             bool isNotNull = value is not null;
@@ -59,10 +50,7 @@ namespace YasGMP.Converters
             return Invert ? !isNotNull : isNotNull;
         }
 
-        /// <summary>
-        /// Not supported for this converter.
-        /// </summary>
-        /// <exception cref="NotSupportedException">Always thrown.</exception>
+        /// <inheritdoc />
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
             throw new NotSupportedException($"{nameof(NullToBoolConverter)} does not support ConvertBack.");
     }

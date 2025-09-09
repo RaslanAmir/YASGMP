@@ -1,109 +1,100 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Text;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace YasGMP.Helpers
 {
-    /// <summary>
-    /// Minimal PDF (1.4) text exporter with no external libraries.
-    /// Generates a single-page PDF with monospaced text lines.
-    /// </summary>
     public static class PdfExporter
     {
-        /// <summary>
-        /// Writes a simple one-page PDF with a title and multiple text lines.
-        /// </summary>
-        /// <param name="path">Destination file path (.pdf).</param>
-        /// <param name="title">Document title (metadata & header).</param>
-        /// <param name="lines">Lines of text to draw (monospaced, left aligned).</param>
-        public static void WriteSimpleTextPdf(string path, string title, IList<string> lines)
+        public static string WriteTable<T>(IEnumerable<T> rows, string filePrefix, IEnumerable<(string Header, Func<T, object?> Selector)> columns, string? title = null)
         {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            string dir = CsvExportHelper.EnsureExportDirectory();
+            string path = Path.Combine(dir, $"{filePrefix}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf");
 
-            // Basic page size: A4 portrait in points (72 dpi)
-            const int pageWidth = 595;
-            const int pageHeight = 842;
-            const int marginLeft = 40;
-            const int marginTop = 40;
-            const int lineHeight = 14;
-            const int startY = pageHeight - marginTop;
+            rows ??= Array.Empty<T>();
+            var rowsList = new List<T>(rows);
 
-            var objects = new List<string>();
-            var xref = new List<long>();
+            // Configure QuestPDF
+            QuestPDF.Settings.License = LicenseType.Community;
 
-            // 1. Catalog
-            objects.Add("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
-
-            // 2. Pages
-            objects.Add("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
-
-            // 3. Page
-            objects.Add($"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {pageWidth} {pageHeight}] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n");
-
-            // 4. Contents stream (built later with actual text)
-            var content = new StringBuilder();
-            content.Append("BT\n/F1 10 Tf\n");
-
-            // Title
-            content.AppendFormat(CultureInfo.InvariantCulture, "{0} {1} {2} {3}\n",
-                "1 0 0 1", marginLeft, startY, "Tm"); // set text matrix
-            content.Append($"({PdfEsc(title)}) Tj\n");
-
-            int y = startY - (lineHeight * 2);
-            foreach (var line in lines)
+            Document.Create(container =>
             {
-                if (y < marginTop + lineHeight) break; // single-page limiter
-                content.AppendFormat(CultureInfo.InvariantCulture, "{0} {1} {2} {3}\n",
-                    "1 0 0 1", marginLeft, y, "Tm");
-                content.Append($"({PdfEsc(line)}) Tj\n");
-                y -= lineHeight;
-            }
+                container.Page(page =>
+                {
+                    page.Margin(20);
+                    page.Size(PageSizes.A4);
+                    page.PageColor(QuestPDF.Helpers.Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(9));
 
-            content.Append("ET\n");
-            var contentBytes = Encoding.ASCII.GetBytes(content.ToString());
-            objects.Add($"4 0 obj\n<< /Length {contentBytes.Length} >>\nstream\n{content}\nendstream\nendobj\n");
+                    page.Header()
+                        .Text(title ?? filePrefix)
+                        .SemiBold().FontSize(14).FontColor(QuestPDF.Helpers.Colors.Blue.Medium);
 
-            // 5. Font
-            objects.Add("5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n");
+                    page.Content().Table(table =>
+                    {
+                        // Columns
+                        var colArray = new List<(string Header, Func<T, object?> Selector)>(columns);
+                        table.ColumnsDefinition(cols =>
+                        {
+                            for (int i = 0; i < colArray.Count; i++) cols.RelativeColumn();
+                        });
 
-            // 6. Info
-            var now = DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-            objects.Add($"6 0 obj\n<< /Title ({PdfEsc(title)}) /Creator (YasGMP) /Producer (YasGMP PdfExporter) /CreationDate (D:{now}) >>\nendobj\n");
+                        // Header row
+                        table.Header(header =>
+                        {
+                            int ci = 0;
+                            foreach (var col in colArray)
+                            {
+                                header.Cell().Element(CellStyle).Text(col.Header).SemiBold();
+                                ci++;
+                            }
+                            static QuestPDF.Infrastructure.IContainer CellStyle(QuestPDF.Infrastructure.IContainer container)
+                                => container.DefaultTextStyle(x => x.FontSize(10)).PaddingVertical(4).PaddingHorizontal(2);
+                        });
 
-            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-            using var bw = new BinaryWriter(fs, Encoding.ASCII);
+                        // Data rows
+                        foreach (var item in rowsList)
+                        {
+                            foreach (var col in colArray)
+                            {
+                                var v = col.Selector(item);
+                                table.Cell().Element(c => c.PaddingVertical(2).PaddingHorizontal(2))
+                                    .Text(v?.ToString() ?? string.Empty);
+                            }
+                        }
+                    });
 
-            // Header
-            bw.Write(Encoding.ASCII.GetBytes("%PDF-1.4\n"));
+                    page.Footer().AlignRight().Text($"Generated {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+                });
+            }).GeneratePdf(path);
 
-            // Objects with xref positions
-            foreach (var obj in objects)
-            {
-                xref.Add(fs.Position);
-                bw.Write(Encoding.ASCII.GetBytes(obj));
-            }
-
-            // XRef
-            long xrefPos = fs.Position;
-            bw.Write(Encoding.ASCII.GetBytes($"xref\n0 {objects.Count + 1}\n"));
-            bw.Write(Encoding.ASCII.GetBytes("0000000000 65535 f \n"));
-            foreach (var pos in xref)
-            {
-                bw.Write(Encoding.ASCII.GetBytes($"{pos.ToString("D10", CultureInfo.InvariantCulture)} 00000 n \n"));
-            }
-
-            // Trailer
-            bw.Write(Encoding.ASCII.GetBytes($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R /Info 6 0 R >>\nstartxref\n{xrefPos}\n%%EOF"));
+            return path;
         }
 
-        private static string PdfEsc(string s)
+        public static void WriteSimpleTextPdf(string filePath, string title, IEnumerable<string> lines)
         {
-            if (s == null) return string.Empty;
-            return s.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)")
-                    .Replace("\r", " ").Replace("\n", " ");
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            Document.Create(c =>
+            {
+                c.Page(p =>
+                {
+                    p.Margin(20);
+                    p.Size(PageSizes.A4);
+                    p.PageColor(QuestPDF.Helpers.Colors.White);
+                    p.Header().Text(title).SemiBold().FontSize(14).FontColor(QuestPDF.Helpers.Colors.Blue.Medium);
+                    p.Content().Text(text =>
+                    {
+                        text.DefaultTextStyle(x => x.FontSize(9).FontFamily(Fonts.Consolas));
+                        foreach (var line in (lines ?? Array.Empty<string>()))
+                            text.Line(line ?? string.Empty);
+                    });
+                    p.Footer().AlignRight().Text($"Generated {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+                });
+            }).GeneratePdf(filePath);
         }
     }
 }

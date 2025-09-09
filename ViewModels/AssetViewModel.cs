@@ -309,7 +309,7 @@ namespace YasGMP.ViewModels
             try
             {
                 int userId = _authService.CurrentUser?.Id ?? 1;
-                await _dbService.ExportAssetsAsync(FilteredAssets.ToList(), SafeIp, SafeDeviceInfo, SafeSessionId, userId).ConfigureAwait(false);
+                await _dbService.ExportAssetsAsync(FilteredAssets.ToList(), await YasGMP.Helpers.ExportFormatPrompt.PromptAsync(), SafeIp, SafeDeviceInfo, SafeSessionId, userId).ConfigureAwait(false);
                 await _dbService.LogAssetAuditAsync(0, "EXPORT", userId, SafeIp, SafeDeviceInfo, SafeSessionId, $"Exported {FilteredAssets.Count} assets.").ConfigureAwait(false);
                 StatusMessage = "Assets exported successfully.";
             }
@@ -373,3 +373,5 @@ namespace YasGMP.ViewModels
         #endregion
     }
 }
+
+

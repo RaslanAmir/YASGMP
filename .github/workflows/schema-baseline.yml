@@ -1,0 +1,86 @@
+name: Schema Baseline Check
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  baseline:
+    name: Verify schema baseline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute combined snapshot hash
+        id: compute
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f tools/schema/snapshots/schema.json ] || [ ! -f tools/schema/snapshots/schema.sql ]; then
+            echo "::error title=Missing schema snapshots::Expected tools/schema/snapshots/schema.json and schema.sql";
+            exit 1
+          fi
+          sha=$(cat tools/schema/snapshots/schema.json tools/schema/snapshots/schema.sql | sha256sum | awk '{print $1}')
+          echo "computed=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Load baseline.lock
+        id: lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f tools/schema/baseline.lock ]; then
+            echo "::error title=Missing baseline.lock::Add tools/schema/baseline.lock with CombinedSha256."
+            exit 1
+          fi
+          python3 - << 'PY'
+import json, os, sys
+with open('tools/schema/baseline.lock','r',encoding='utf-8') as f:
+    j=json.load(f)
+combined=j.get('Baseline',{}).get('CombinedSha256','')
+if not combined:
+    print('::error title=Invalid baseline.lock::Missing Baseline.CombinedSha256', flush=True)
+    sys.exit(1)
+with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+    out.write(f"recorded={combined}\n")
+PY
+
+      - name: Compare baseline to snapshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Recorded: ${{ steps.lock.outputs.recorded }}"
+          echo "Computed: ${{ steps.compute.outputs.computed }}"
+          if [ "${{ steps.lock.outputs.recorded }}" != "${{ steps.compute.outputs.computed }}" ]; then
+            echo "::error title=Schema baseline mismatch::Snapshots hash does not match tools/schema/baseline.lock. If intentional, update baseline.lock and reports/SYNC_REPORT.md §5."
+            exit 1
+          fi
+          echo "Baseline matches."
+
+      - name: Check mismatch report (informational)
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=reports/mismatch-matrix.csv
+          if [ -f "$f" ]; then
+            rows=$(awk -F, 'NR>1 && NF>1{c++} END{print (c+0)}' "$f")
+            if [ "$rows" -gt 0 ]; then
+              echo "::warning title=Potential drift::reports/mismatch-matrix.csv contains $rows data rows. Investigate before merging."
+            else
+              echo "No mismatches detected in reports/mismatch-matrix.csv."
+            fi
+          else
+            echo "::notice title=Missing mismatch report::reports/mismatch-matrix.csv not found; skipping."
+          fi
+
+      - name: Ensure report baseline matches lock (informational)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f reports/SYNC_REPORT.md ]; then
+            rec=$(grep -n "^- Baseline ID" reports/SYNC_REPORT.md | head -n1 | awk -F'`' '{print $6}') || rec=
+            if [ -n "$rec" ] && [ "$rec" != "${{ steps.lock.outputs.recorded }}" ]; then
+              echo "::warning title=Report baseline differs::SYNC_REPORT.md shows $rec; baseline.lock is ${{ steps.lock.outputs.recorded }}."
+            fi
+          fi
+

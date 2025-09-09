@@ -5,67 +5,90 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="RBAC Manager">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="12">
-            <!-- Status message for operations -->
-            <Label Text="{Binding StatusMessage}" TextColor="Gray" FontSize="12" />
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="12">
 
-            <!-- USERS -->
-            <Label Text="Users" FontAttributes="Bold" FontSize="18" />
-            <CollectionView ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Padding="8" Margin="0,2" CornerRadius="8" BackgroundColor="#f5f7fa" BorderColor="#cfd8dc">
-                            <VerticalStackLayout>
-                                <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
-                                <Label Text="{Binding Role}" FontSize="12" TextColor="#607d8b" />
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-            <HorizontalStackLayout Spacing="10">
-                <Button Text="Add" Command="{Binding AddUserCommand}" />
-                <Button Text="Delete" Command="{Binding DeleteUserCommand}" />
-            </HorizontalStackLayout>
+      <!-- Status message -->
+      <Label Text="{Binding StatusMessage}"
+             TextColor="{AppThemeBinding Light=#666, Dark=#aaa}"
+             FontSize="12"
+             SemanticProperties.Description="Status i poruke operacija u RBAC sučelju" />
 
-            <!-- ROLES -->
-            <Label Text="Roles" FontAttributes="Bold" FontSize="18" Margin="0,20,0,0" />
-            <CollectionView ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Padding="8" Margin="0,2" CornerRadius="8" BackgroundColor="#f5f7fa" BorderColor="#cfd8dc">
-                            <VerticalStackLayout>
-                                <Label Text="{Binding Name}" FontAttributes="Bold" />
-                                <Label Text="{Binding Description}" FontSize="12" TextColor="#607d8b" />
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-            <HorizontalStackLayout Spacing="10">
-                <Button Text="Assign Role" Command="{Binding AssignRoleCommand}" />
-                <Button Text="Remove Role" Command="{Binding RemoveRoleCommand}" />
-            </HorizontalStackLayout>
+      <!-- ================= USERS ================= -->
+      <Label Text="Users" FontAttributes="Bold" FontSize="18" />
+      <CollectionView ItemsSource="{Binding Users}"
+                      SelectedItem="{Binding SelectedUser}"
+                      SelectionMode="Single"
+                      HeightRequest="220">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Frame Padding="8" Margin="0,2" CornerRadius="8"
+                   BackgroundColor="{AppThemeBinding Light=#f5f7fa, Dark=#1f2630}"
+                   BorderColor="#cfd8dc">
+              <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
+                <Label Text="{Binding Role}" FontSize="12" TextColor="#607d8b" />
+              </VerticalStackLayout>
+            </Frame>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
 
-            <!-- PERMISSIONS -->
-            <Label Text="Permissions" FontAttributes="Bold" FontSize="18" Margin="0,20,0,0" />
-            <CollectionView ItemsSource="{Binding Permissions}" SelectedItem="{Binding SelectedPermission}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Padding="8" Margin="0,2" CornerRadius="8" BackgroundColor="#f5f7fa" BorderColor="#cfd8dc">
-                            <VerticalStackLayout>
-                                <Label Text="{Binding Code}" FontAttributes="Bold" />
-                                <Label Text="{Binding Description}" FontSize="12" TextColor="#607d8b" />
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-            <HorizontalStackLayout Spacing="10">
-                <Button Text="Assign Perm" Command="{Binding AssignPermissionCommand}" />
-                <Button Text="Remove Perm" Command="{Binding RemovePermissionCommand}" />
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+      <HorizontalStackLayout Spacing="10">
+        <Button Text="Add"    Command="{Binding AddUserCommand}" />
+        <Button Text="Delete" Command="{Binding DeleteUserCommand}" />
+      </HorizontalStackLayout>
+
+      <!-- ================= ROLES ================= -->
+      <Label Text="Roles" FontAttributes="Bold" FontSize="18" Margin="0,20,0,0" />
+      <CollectionView ItemsSource="{Binding Roles}"
+                      SelectedItem="{Binding SelectedRole}"
+                      SelectionMode="Single"
+                      HeightRequest="220">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Frame Padding="8" Margin="0,2" CornerRadius="8"
+                   BackgroundColor="{AppThemeBinding Light=#f5f7fa, Dark=#1f2630}"
+                   BorderColor="#cfd8dc">
+              <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding Name}" FontAttributes="Bold" />
+                <Label Text="{Binding Description}" FontSize="12" TextColor="#607d8b" />
+              </VerticalStackLayout>
+            </Frame>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+
+      <HorizontalStackLayout Spacing="10">
+        <Button Text="Assign Role" Command="{Binding AssignRoleCommand}" />
+        <Button Text="Remove Role" Command="{Binding RemoveRoleCommand}" />
+      </HorizontalStackLayout>
+
+      <!-- ============== PERMISSIONS ============== -->
+      <Label Text="Permissions" FontAttributes="Bold" FontSize="18" Margin="0,20,0,0" />
+      <CollectionView ItemsSource="{Binding Permissions}"
+                      SelectedItem="{Binding SelectedPermission}"
+                      SelectionMode="Single"
+                      HeightRequest="220">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Frame Padding="8" Margin="0,2" CornerRadius="8"
+                   BackgroundColor="{AppThemeBinding Light=#f5f7fa, Dark=#1f2630}"
+                   BorderColor="#cfd8dc">
+              <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding Code}" FontAttributes="Bold" />
+                <Label Text="{Binding Description}" FontSize="12" TextColor="#607d8b" />
+              </VerticalStackLayout>
+            </Frame>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+
+      <HorizontalStackLayout Spacing="10">
+        <Button Text="Assign Perm" Command="{Binding AssignPermissionCommand}" />
+        <Button Text="Remove Perm" Command="{Binding RemovePermissionCommand}" />
+      </HorizontalStackLayout>
+
+    </VerticalStackLayout>
+  </ScrollView>
 </ContentPage>

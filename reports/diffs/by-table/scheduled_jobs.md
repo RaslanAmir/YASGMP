@@ -1,0 +1,5 @@
+﻿# Table `scheduled_jobs`
+Schema columns: acknowledged_at, acknowledged_by, alert_on_failure, chain_job_id, comment, created_at, created_by, cron_expression, device_info, digital_signature, entity_id, entity_type, escalation_level, escalation_note, extra_params, id, iot_device_id, ip_address, is_critical, job_type, last_error, last_executed, last_modified, last_modified_at, last_modified_by, last_result, max_retries, name, needs_acknowledgment, next_due, recurrence_pattern, retries, session_id, status, updated_at
+Code-used columns: 
+Missing in schema: 
+Extra in schema (unused by code): acknowledged_at, acknowledged_by, alert_on_failure, chain_job_id, comment, created_at, created_by, cron_expression, device_info, digital_signature, entity_id, entity_type, escalation_level, escalation_note, extra_params, id, iot_device_id, ip_address, is_critical, job_type, last_error, last_executed, last_modified, last_modified_at, last_modified_by, last_result, max_retries, name, needs_acknowledgment, next_due, recurrence_pattern, retries, session_id, status, updated_at

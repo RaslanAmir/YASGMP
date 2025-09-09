@@ -7,7 +7,10 @@
 //      • Tolerantno na promjene modela (refleksija TrySet/GetString/GetInt)
 //      • Robusno dohvaćanje konekcijskog stringa iz App.AppConfig
 //      • Potpuna XML dokumentacija za IntelliSense
+//      • Ne oslanja se na generirana x:Name polja (koristi FindByName).
 // ==============================================================================
+
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -38,12 +41,18 @@ namespace YasGMP
         private List<User> _users = new();
 
         /// <summary>
+        /// Sigurno dohvaća <see cref="CollectionView"/> iz XAML-a prema nazivu <c>ServicersListView</c>,
+        /// bez ovisnosti o generiranom polju. Vraća <c>null</c> ako nije nađen.
+        /// </summary>
+        private CollectionView? ServicersListViewControl => this.FindByName<CollectionView>("ServicersListView");
+
+        /// <summary>
         /// Inicijalizira stranicu, validira konfiguraciju i učitava podatke.
         /// </summary>
         /// <exception cref="InvalidOperationException">Ako konfiguracija ili konekcijski string nisu dostupni.</exception>
         public ExternalServicersPage()
         {
-            InitializeComponent();
+            InitializeComponent(); // use source-generated InitializeComponent
 
             var app = Application.Current as App ?? throw new InvalidOperationException("Application.Current nije tipa App.");
 
@@ -63,9 +72,6 @@ namespace YasGMP
 
         #region === Reflection helpers (schema tolerant) ===
 
-        /// <summary>
-        /// Pokušava postaviti vrijednost svojstva refleksijom, s konverzijama osnovnih tipova (int/double/DateTime).
-        /// </summary>
         private static bool TrySet(object obj, string propName, object? value)
         {
             if (obj == null) return false;
@@ -107,9 +113,6 @@ namespace YasGMP
             }
         }
 
-        /// <summary>
-        /// Vraća prvo nenull/nenull-blank svojstvo kao string (po redu prioriteta).
-        /// </summary>
         private static string GetString(object obj, params string[] propNames)
         {
             if (obj == null) return string.Empty;
@@ -123,9 +126,6 @@ namespace YasGMP
             return string.Empty;
         }
 
-        /// <summary>
-        /// Vraća prvo cjelobrojno svojstvo prema prioritetu (podržava int/long/short/string).
-        /// </summary>
         private static int GetInt(object obj, params string[] propNames)
         {
             if (obj == null) return 0;
@@ -149,7 +149,6 @@ namespace YasGMP
 
         #region === Data Loading ===
 
-        /// <summary>Učitava pomoćne entitete (trenutno korisnike) uz tolerantno rukovanje iznimkama.</summary>
         private async Task LoadLookupsAsync()
         {
             try
@@ -162,9 +161,6 @@ namespace YasGMP
             }
         }
 
-        /// <summary>
-        /// Učitava i puni kolekciju vanjskih servisera. UI ažuriranja se izvršavaju na UI threadu.
-        /// </summary>
         private async Task LoadExternalServicersAsync()
         {
             try
@@ -188,7 +184,6 @@ namespace YasGMP
 
         #region === CRUD Handlers ===
 
-        /// <summary>Dodaje novog servisera putem UI dijaloga, postavlja osnovne metapodatke i sprema u bazu.</summary>
         private async void OnAddServicerClicked(object? sender, EventArgs e)
         {
             try
@@ -217,14 +212,11 @@ namespace YasGMP
             }
         }
 
-        /// <summary>Uređuje odabranog servisera; ako ništa nije odabrano, prikazuje poruku.</summary>
         private async void OnEditServicerClicked(object? sender, EventArgs e)
         {
             try
             {
-                ExternalServicer? selected = null;
-                if (ServicersListView != null)
-                    selected = ServicersListView.SelectedItem as ExternalServicer;
+                ExternalServicer? selected = ServicersListViewControl?.SelectedItem as ExternalServicer;
 
                 if (selected is null)
                 {
@@ -249,14 +241,11 @@ namespace YasGMP
             }
         }
 
-        /// <summary>Briše odabranog servisera nakon potvrde korisnika.</summary>
         private async void OnDeleteServicerClicked(object? sender, EventArgs e)
         {
             try
             {
-                ExternalServicer? selected = null;
-                if (ServicersListView != null)
-                    selected = ServicersListView.SelectedItem as ExternalServicer;
+                ExternalServicer? selected = ServicersListViewControl?.SelectedItem as ExternalServicer;
 
                 if (selected is null)
                 {
@@ -282,15 +271,8 @@ namespace YasGMP
 
         #region === Form ===
 
-        /// <summary>
-        /// Prikazuje seriju promptova za unos/uređivanje servisera; svi UI pozivi su na UI threadu.
-        /// </summary>
-        /// <param name="ext">Objekt servisera koji se puni vrijednostima.</param>
-        /// <param name="title">Naslov dijaloga.</param>
-        /// <returns><c>true</c> ako je unos valjan i potvrđen; inače <c>false</c>.</returns>
         private async Task<bool> ShowServicerFormAsync(ExternalServicer ext, string title)
         {
-            // Naziv je obavezan
             var currentName = GetString(ext, "Name", "CompanyName");
             var name = await MainThread.InvokeOnMainThreadAsync(async () =>
                 await DisplayPromptAsync(title, "Naziv firme/servisera/laba:", initialValue: currentName));

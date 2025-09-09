@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Theme.YASTECH.xaml
+  Global YASTECH design system for .NET MAUI (MySQL-backed YasGMP).
+  - Safe for AOT, no 3rd-party dependencies.
+  - Implicit styles keep XAML concise; explicit keys allow overrides.
+  - Includes Shell/TabBar styles (avoid unsupported setters).
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+  <!-- =================== YASTECH CORE PALETTE =================== -->
+  <Color x:Key="YtPrimary50">#E6F0FF</Color>
+  <Color x:Key="YtPrimary500">#2D7CF0</Color>
+  <Color x:Key="YtPrimary600">#1F68DC</Color>
+  <Color x:Key="YtPrimary700">#1557C2</Color>
+
+  <Color x:Key="YtAccent50">#FFF4D6</Color>
+  <Color x:Key="YtAccent700">#C98F00</Color>
+
+  <Color x:Key="YtDanger50">#FFE5E7</Color>
+  <Color x:Key="YtDanger700">#E53935</Color>
+
+  <Color x:Key="YtSuccess50">#E8F5E9</Color>
+  <Color x:Key="YtSuccess700">#2E7D32</Color>
+
+  <Color x:Key="YtSurface">#F6F7FB</Color>
+  <Color x:Key="YtSurfaceCard">#FFFFFF</Color>
+  <Color x:Key="YtRow">#F8FAFC</Color>
+  <Color x:Key="YtRowBorder">#CFD8DC</Color>
+  <Color x:Key="YtOnSurface">#212121</Color>
+  <Color x:Key="YtOnSurfaceDim">#6B6F76</Color>
+
+  <!-- =================== BRUSHES (for Border/Background when Brush is required) =================== -->
+  <SolidColorBrush x:Key="YtPrimary50Brush" Color="{StaticResource YtPrimary50}" />
+  <SolidColorBrush x:Key="YtPrimary500Brush" Color="{StaticResource YtPrimary500}" />
+  <SolidColorBrush x:Key="YtPrimary600Brush" Color="{StaticResource YtPrimary600}" />
+  <SolidColorBrush x:Key="YtPrimary700Brush" Color="{StaticResource YtPrimary700}" />
+
+  <SolidColorBrush x:Key="YtAccent50Brush"  Color="{StaticResource YtAccent50}" />
+  <SolidColorBrush x:Key="YtAccent700Brush" Color="{StaticResource YtAccent700}" />
+
+  <SolidColorBrush x:Key="YtDanger50Brush"  Color="{StaticResource YtDanger50}" />
+  <SolidColorBrush x:Key="YtDanger700Brush" Color="{StaticResource YtDanger700}" />
+
+  <SolidColorBrush x:Key="YtSuccess50Brush"  Color="{StaticResource YtSuccess50}" />
+  <SolidColorBrush x:Key="YtSuccess700Brush" Color="{StaticResource YtSuccess700}" />
+
+  <SolidColorBrush x:Key="YtOnSurfaceBrush"     Color="{StaticResource YtOnSurface}" />
+  <SolidColorBrush x:Key="YtOnSurfaceDimBrush"  Color="{StaticResource YtOnSurfaceDim}" />
+  <SolidColorBrush x:Key="YtSurfaceBrush"       Color="{StaticResource YtSurface}" />
+  <SolidColorBrush x:Key="YtSurfaceCardBrush"   Color="{StaticResource YtSurfaceCard}" />
+  <SolidColorBrush x:Key="YtRowBrush"           Color="{StaticResource YtRow}" />
+  <SolidColorBrush x:Key="YtRowBorderBrush"     Color="{StaticResource YtRowBorder}" />
+
+  <!-- =================== TYPOGRAPHY HELPERS =================== -->
+  <Style x:Key="YtH1" TargetType="Label">
+    <Setter Property="FontSize" Value="24"/>
+    <Setter Property="FontAttributes" Value="Bold"/>
+    <Setter Property="TextColor" Value="{StaticResource YtPrimary700}"/>
+  </Style>
+
+  <Style x:Key="YtH2" TargetType="Label">
+    <Setter Property="FontSize" Value="20"/>
+    <Setter Property="FontAttributes" Value="Bold"/>
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurface}"/>
+  </Style>
+
+  <Style x:Key="YtCaption" TargetType="Label">
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurfaceDim}"/>
+  </Style>
+
+  <!-- =================== BASE + IMPLICIT CONTROL STYLES =================== -->
+  <Style TargetType="ContentPage">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtSurface}" />
+    <Setter Property="Padding" Value="0"/>
+  </Style>
+
+  <!-- Create a BASE button style we can reference (avoid {x:Type} which MAUI doesn't support) -->
+  <Style x:Key="YtButton.Base" TargetType="Button">
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="BackgroundColor" Value="{StaticResource YtPrimary500}" />
+    <Setter Property="TextColor" Value="White" />
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+
+  <!-- Implicit Button style based on our base -->
+  <Style TargetType="Button" BasedOn="{StaticResource YtButton.Base}" />
+
+  <!-- Button variants -->
+  <Style x:Key="YtButton.Primary" TargetType="Button" BasedOn="{StaticResource YtButton.Base}">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtPrimary600}" />
+  </Style>
+
+  <Style x:Key="YtButton.Secondary" TargetType="Button" BasedOn="{StaticResource YtButton.Base}">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtAccent50}" />
+    <Setter Property="TextColor" Value="{StaticResource YtAccent700}" />
+  </Style>
+
+  <Style x:Key="YtButton.Danger" TargetType="Button" BasedOn="{StaticResource YtButton.Base}">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtDanger700}" />
+    <Setter Property="TextColor" Value="White" />
+  </Style>
+
+  <Style x:Key="YtButton.Flat" TargetType="Button" BasedOn="{StaticResource YtButton.Base}">
+    <Setter Property="BackgroundColor" Value="{x:Null}" />
+    <Setter Property="TextColor" Value="{StaticResource YtPrimary700}" />
+    <Setter Property="Padding" Value="8,6" />
+  </Style>
+
+  <Style TargetType="Label">
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
+  </Style>
+
+  <Style TargetType="Entry">
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
+    <Setter Property="PlaceholderColor" Value="{StaticResource YtOnSurfaceDim}" />
+    <Setter Property="ClearButtonVisibility" Value="WhileEditing" />
+  </Style>
+
+  <Style TargetType="Editor">
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
+    <Setter Property="PlaceholderColor" Value="{StaticResource YtOnSurfaceDim}" />
+  </Style>
+
+  <Style TargetType="Picker">
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
+    <Setter Property="TitleColor" Value="{StaticResource YtOnSurfaceDim}" />
+  </Style>
+
+  <Style TargetType="DatePicker">
+    <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
+  </Style>
+
+  <Style TargetType="Frame">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtSurfaceCard}" />
+    <Setter Property="BorderColor" Value="{StaticResource YtRowBorder}" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="HasShadow" Value="True" />
+    <Setter Property="Padding" Value="20" />
+  </Style>
+
+  <Style TargetType="CollectionView">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtSurface}" />
+  </Style>
+
+  <!-- =================== NAV (Shell/TabBar) =================== -->
+  <Style TargetType="Shell">
+    <Setter Property="BackgroundColor" Value="{StaticResource YtSurface}" />
+    <Setter Property="ForegroundColor" Value="{StaticResource YtOnSurface}" />
+    <Setter Property="NavBarIsVisible" Value="True" />
+  </Style>
+
+  <!-- Use Shell attached properties for TabBar styling -->
+  <Style TargetType="TabBar">
+    <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource YtSurfaceCard}" />
+    <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource YtOnSurface}" />
+    <Setter Property="Shell.TabBarTitleColor"       Value="{StaticResource YtOnSurface}" />
+    <Setter Property="Shell.TabBarUnselectedColor"  Value="{StaticResource YtOnSurfaceDim}" />
+  </Style>
+
+</ResourceDictionary>

@@ -4,19 +4,14 @@ using YasGMP.ViewModels;
 namespace YasGMP.Views
 {
     /// <summary>
-    /// Code-behind za glavni dashboard (MainPage).
-    /// Povezuje ViewModel i upravlja osnovnom logikom prikaza.
+    /// Glavni dashboard (MainPage). Povezuje ViewModel i upravlja osnovnom logikom prikaza.
     /// </summary>
     public partial class MainPage : ContentPage
     {
-        /// <summary>
-        /// Inicijalizira dashboard i postavlja DataContext na MainPageViewModel.
-        /// </summary>
         public MainPage()
         {
             InitializeComponent();
-
-            // Ako već koristiš Dependency Injection, zamijeni ovdje!
+            // If you use DI for this VM, replace with DI resolve.
             BindingContext = new MainPageViewModel();
         }
     }

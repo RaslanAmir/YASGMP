@@ -14,6 +14,9 @@ using YasGMP.Services;
 using YasGMP.Services.Interfaces;                  // IRBACService
 using YasGMP.ViewModels;
 using Microsoft.Maui.Storage;
+using YasGMP.Diagnostics;
+using YasGMP.Diagnostics.LogSinks;
+using Microsoft.Extensions.Configuration;
 
 namespace YasGMP
 {
@@ -46,6 +49,29 @@ namespace YasGMP
             builder.Logging.AddProvider(new AppDataFileLoggerProvider());
 #endif
 
+            // Diagnostics wiring (lightweight, configurable via appsettings + env YAS_DIAG_*)
+            var diagConfig = AppConfigurationHelper.LoadMerged();
+            var diagCtx = new DiagnosticContext(diagConfig);
+            var sinksList = DiagnosticsSinksFactory.CreateSinks(diagConfig, diagCtx).ToList();
+            var logWriter = new LogWriter(
+                DiagnosticsConstants.QueueCapacity,
+                DiagnosticsConstants.QueueDrainBatch,
+                DiagnosticsConstants.QueueDrainIntervalMs,
+                sinksList);
+            var traceMgr = new TraceManager(diagCtx, logWriter);
+            traceMgr.Log(DiagLevel.Info, "diag", "diagnostics_boot", "Diagnostics initialized");
+            var profiler = new Profiler(traceMgr);
+            var crash = new CrashHandler(traceMgr, diagCtx);
+            crash.RegisterGlobal();
+            // Expose diagnostics components via DI
+            builder.Services.AddSingleton(diagConfig);
+            builder.Services.AddSingleton(diagCtx);
+            builder.Services.AddSingleton<ILogWriter>(logWriter);
+            builder.Services.AddSingleton<ITrace>(traceMgr);
+            builder.Services.AddSingleton<IProfiler>(profiler);
+            builder.Services.AddSingleton<IEnumerable<YasGMP.Diagnostics.ILogSink>>(sinksList);
+            builder.Services.AddSingleton(new DiagnosticsHub(diagCtx, sinksList));
+
             // Resolve connection string (env → bin\AppSettings.json → AppData\AppSettings.json → fallback)
             string mysqlConnStr = ResolveMySqlConnString();
 
@@ -53,6 +79,12 @@ namespace YasGMP
             builder.Services.AddDbContext<YasGmpDbContext>((sp, options) =>
             {
                 options.UseMySql(mysqlConnStr, ServerVersion.AutoDetect(mysqlConnStr));
+                var ctx = sp.GetService<DiagnosticContext>();
+                var tr  = sp.GetService<ITrace>();
+                if (ctx != null && tr != null)
+                {
+                    options.AddInterceptors(new EfSqlInterceptor(ctx, tr));
+                }
 #if DEBUG
                 var provider = sp.GetService<ILoggerFactory>();
                 options.LogTo(sql =>
@@ -69,7 +101,18 @@ namespace YasGMP
             });
 
             // Core Services
-            builder.Services.AddSingleton(sp => new DatabaseService(mysqlConnStr));
+            builder.Services.AddSingleton(sp =>
+            {
+                var db = new DatabaseService(mysqlConnStr);
+                // Attach diagnostics to the central DB service
+                var ctx = sp.GetService<DiagnosticContext>();
+                var tr  = sp.GetService<ITrace>();
+                if (ctx != null && tr != null) db.SetDiagnostics(ctx, tr);
+                // Set global fallbacks for ad-hoc DatabaseService instantiation
+                DatabaseService.GlobalDiagnosticContext = ctx;
+                DatabaseService.GlobalTrace = tr;
+                return db;
+            });
             builder.Services.AddSingleton<AuditService>();
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<ExportService>();
@@ -96,6 +139,11 @@ namespace YasGMP
             builder.Services.AddTransient<YasGMP.Views.AdminPanelPage>();
             builder.Services.AddTransient<YasGMP.Views.UsersPage>();
             builder.Services.AddTransient<YasGMP.Views.UserRolePermissionPage>();
+            // Debug pages (RBAC-gated in page code-behind)
+            builder.Services.AddTransient<YasGMP.Views.Debug.DebugDashboardPage>();
+            builder.Services.AddTransient<YasGMP.Views.Debug.LogViewerPage>();
+            builder.Services.AddTransient<YasGMP.Views.Debug.HealthPage>();
+            builder.Services.AddSingleton<YasGMP.Diagnostics.SelfTestRunner>();
             // Global exception hooks → JSONL framework log (DEBUG)
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -214,6 +262,48 @@ namespace YasGMP
         }
     }
 
+    internal static class AppConfigurationHelper
+    {
+        public static Microsoft.Extensions.Configuration.IConfiguration LoadMerged()
+        {
+            var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
+            try
+            {
+                var appData = Microsoft.Maui.Storage.FileSystem.AppDataDirectory;
+                var path = System.IO.Path.Combine(appData, "appsettings.json");
+                if (System.IO.File.Exists(path))
+                    builder.AddJsonFile(path, optional: true, reloadOnChange: true);
+
+                var exePath = System.IO.Path.Combine(System.AppContext.BaseDirectory, "appsettings.json");
+                if (System.IO.File.Exists(exePath))
+                    builder.AddJsonFile(exePath, optional: true, reloadOnChange: true);
+            }
+            catch { }
+            return builder.Build();
+        }
+    }
+
+    internal static class DiagnosticsSinksFactory
+    {
+        public static System.Collections.Generic.IEnumerable<YasGMP.Diagnostics.ILogSink> CreateSinks(
+            Microsoft.Extensions.Configuration.IConfiguration cfg,
+            YasGMP.Diagnostics.DiagnosticContext ctx)
+        {
+            var names = (cfg[DiagnosticsConstants.KeySinks] ?? "file,stdout")
+                .Split(',', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries);
+            foreach (var n in names)
+            {
+                switch (n.ToLowerInvariant())
+                {
+                    case "file": yield return new FileLogSink(ctx); break;
+                    case "stdout": yield return new StdoutLogSink(); break;
+                    case "sqlite": yield return new SQLiteLogSink(); break;
+                    case "elastic": yield return new ElasticCompatibleSink(cfg); break;
+                }
+            }
+        }
+    }
+
 #if DEBUG
     /// <summary>
     /// Minimal logger provider that mirrors framework/EF logs to AppData/logs as JSON lines (DEBUG only).
@@ -312,3 +402,6 @@ namespace YasGMP
     }
 #endif
 }
+
+
+

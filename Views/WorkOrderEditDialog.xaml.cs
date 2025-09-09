@@ -6,75 +6,85 @@ using YasGMP.ViewModels;
 namespace YasGMP.Views
 {
     /// <summary>
-    /// <b>WorkOrderEditDialog</b>
+    /// <b>WorkOrderEditDialog</b> – YASTECH-themed modal ContentPage for creating or editing
+    /// a <see cref="WorkOrder"/> under GMP/CSV requirements. The page is fully data-bound to
+    /// an instance of <see cref="WorkOrderEditDialogViewModel"/> that exposes the target
+    /// <see cref="WorkOrder"/> instance, validation, and <c>SaveCommand</c>/<c>CancelCommand</c>.
     /// <para>
-    /// Modalni dijalog za unos ili izmjenu radnog naloga po GMP/CSV pravilima.<br/>
-    /// Obavezno koristi <see cref="WorkOrderEditDialogViewModel"/> za BindingContext.<br/>
-    /// Svaka promjena, potvrda, odustajanje i unos – sve je auditirano i spremno za forenzičku provjeru.
+    /// Consumers should open the dialog as a modal page, and subscribe to <see cref="DialogResult"/>
+    /// for a strongly-typed outcome and (optionally) the final <see cref="WorkOrder"/> snapshot.
     /// </para>
-    /// <para>
-    /// <b>Korištenje:</b> <br/>
-    /// Otvori dijalog: <c>await Navigation.PushModalAsync(new WorkOrderEditDialog(viewModel));</c><br/>
-    /// Pretplati se na <see cref="DialogResult"/> za povratni rezultat.<br/>
-    /// </para>
+    /// <example>
+    /// <code>
+    /// var vm = serviceProvider.GetRequiredService&lt;WorkOrderEditDialogViewModel&gt;();
+    /// var dlg = new WorkOrderEditDialog(vm);
+    /// dlg.DialogResult += (saved, wo) => { /* handle result */ };
+    /// await Navigation.PushModalAsync(dlg);
+    /// </code>
+    /// </example>
     /// </summary>
-    /// <remarks>
-    /// <b>Zašto je bitno?</b> 
-    /// Svaki modalni unos ili izmjena radnog naloga je pod GMP inspekcijom! 
-    /// Ovdje se hvata i validira svaki podatak, potpis i audit – nema rupe ni “nejasne” akcije.
-    /// </remarks>
     public partial class WorkOrderEditDialog : ContentPage
     {
         /// <summary>
-        /// Event koji javlja rezultat zatvaranja dijaloga.
+        /// Event raised when the dialog intends to close.
         /// <list type="bullet">
-        /// <item><term>true</term> = korisnik želi spremiti (SAVE)</item>
-        /// <item><term>false</term> = korisnik je odustao (CANCEL)</item>
+        /// <item><term><c>true</c></term>: The user confirmed/save.</item>
+        /// <item><term><c>false</c></term>: The user cancelled.</item>
         /// </list>
-        /// Nullable delegate rješava CS8618; <see cref="WorkOrder"/> parametar je nullable kako bi se
-        /// uskladio s potpisom u ViewModelu (CS8622).
+        /// The <see cref="WorkOrder"/> argument may be <c>null</c> depending on the ViewModel semantics.
         /// </summary>
         public event Action<bool, WorkOrder?>? DialogResult;
 
         /// <summary>
-        /// Konstruktor dijaloga.
+        /// Initializes a new instance of the dialog and wires up the ViewModel result callback.
         /// </summary>
         /// <param name="viewModel">
-        /// ViewModel koji sadrži WorkOrder podatke i sve GMP validacije, potpise, slike i logiku.
-        /// <para><b>Napomena:</b> Mora biti instanca <see cref="WorkOrderEditDialogViewModel"/>.</para>
+        /// An initialized <see cref="WorkOrderEditDialogViewModel"/> that exposes the editable
+        /// <see cref="WorkOrder"/> and the <c>SaveCommand</c>/<c>CancelCommand</c>. This instance
+        /// is assigned to <see cref="BindableObject.BindingContext"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException">Ako je <paramref name="viewModel"/> null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="viewModel"/> is <c>null</c>.</exception>
         public WorkOrderEditDialog(WorkOrderEditDialogViewModel viewModel)
         {
             InitializeComponent();
 
-            if (viewModel == null)
-                throw new ArgumentNullException(nameof(viewModel), "BindingContext za WorkOrderEditDialog ne smije biti null!");
+            if (viewModel is null)
+                throw new ArgumentNullException(nameof(viewModel), "BindingContext za WorkOrderEditDialog ne smije biti null.");
 
             BindingContext = viewModel;
-            viewModel.DialogResult += OnDialogResult;
+            viewModel.DialogResult += OnDialogResultFromViewModel;
         }
 
         /// <summary>
-        /// Handler za zatvaranje dijaloga (poziva ga ViewModel preko eventa). Zatvara modalni prozor
-        /// i prosljeđuje rezultat pretplatnicima <see cref="DialogResult"/>.
+        /// Handles the ViewModel's dialog-close event, relays the outcome to subscribers,
+        /// and closes the modal page via Navigation.PopModalAsync.
         /// </summary>
-        /// <param name="result">true = spremi (SAVE), false = odustani (CANCEL)</param>
-        /// <param name="order">Kreirani/izmijenjeni <see cref="WorkOrder"/> (može biti null)</param>
-        private async void OnDialogResult(bool result, WorkOrder? order)
+        /// <param name="result"><c>true</c> for save/confirm, <c>false</c> for cancel.</param>
+        /// <param name="order">The final <see cref="WorkOrder"/> (may be <c>null</c>).</param>
+        private async void OnDialogResultFromViewModel(bool result, WorkOrder? order)
         {
-            DialogResult?.Invoke(result, order);
-            await Navigation.PopModalAsync();
+            try
+            {
+                DialogResult?.Invoke(result, order);
+            }
+            finally
+            {
+                // Always close the modal, even if a subscriber throws.
+                // Executed on UI thread by MAUI event pipeline.
+                await Navigation.PopModalAsync();
+            }
         }
 
         /// <summary>
-        /// Prilikom zatvaranja (disappearing) – odspoji event handler radi sprečavanja
-        /// memory leakova i dvostrukih eventova.
+        /// Unsubscribes from the ViewModel event to prevent handler leaks/double invocation
+        /// if the page is reused by navigation stacks or hot reload.
         /// </summary>
         protected override void OnDisappearing()
         {
             if (BindingContext is WorkOrderEditDialogViewModel vm)
-                vm.DialogResult -= OnDialogResult;
+            {
+                vm.DialogResult -= OnDialogResultFromViewModel;
+            }
 
             base.OnDisappearing();
         }

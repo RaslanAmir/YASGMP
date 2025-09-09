@@ -279,7 +279,8 @@ namespace YasGMP.ViewModels
             try
             {
                 int actor = _authService.CurrentUser?.Id ?? 0;
-                await _dbService.ExportSparePartsAsync(FilteredSpareParts.ToList(), "csv", actor, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
+                await _dbService.ExportSparePartsAsync(FilteredSpareParts.ToList(), fmt, actor, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
                 await _dbService.LogSparePartAuditAsync(0, "EXPORT", actor, null, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
                 StatusMessage = "Spare parts exported successfully.";
             }

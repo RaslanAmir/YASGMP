@@ -315,20 +315,20 @@ namespace YasGMP.Services
         /// </summary>
         private async Task LogFallbackAuditAsync(string action, string details)
         {
-            const string sql = @"INSERT INTO audit_log (action, details, user_id, timestamp)
-                                 VALUES (@action, @details, @uid, NOW())";
-
             var app = Application.Current as App; // null-safe cast
-            int userId = app?.LoggedUser?.Id ?? 0;
-
-            var pars = new[]
-            {
-                new MySqlParameter("@action", action ?? string.Empty),
-                new MySqlParameter("@details", details ?? string.Empty),
-                new MySqlParameter("@uid", userId)
-            };
-
-            await _dbService.ExecuteNonQueryAsync(sql, pars, CancellationToken.None).ConfigureAwait(false);
+            int? userId = app?.LoggedUser?.Id;
+            await _dbService.LogSystemEventAsync(
+                userId: userId,
+                eventType: action ?? string.Empty,
+                tableName: "export",
+                module: "ExportService",
+                recordId: null,
+                description: details ?? string.Empty,
+                ip: DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
+                severity: "audit",
+                deviceInfo: string.Empty,
+                sessionId: app?.SessionId
+            ).ConfigureAwait(false);
         }
     }
 }

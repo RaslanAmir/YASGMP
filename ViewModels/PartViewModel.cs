@@ -333,7 +333,7 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>
-        /// Exports the current filtered list to a file (format decided by DB layer), with audit logging.
+        /// Exports the current filtered list to a file using a chosen format, with audit logging.
         /// </summary>
         public async Task ExportPartsAsync()
         {
@@ -341,7 +341,8 @@ namespace YasGMP.ViewModels
             try
             {
                 int actorUserId = _authService.CurrentUser?.Id ?? 1;
-                await _dbService.ExportPartsAsync(FilteredParts.ToList(), "csv", actorUserId, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
+                await _dbService.ExportPartsAsync(FilteredParts.ToList(), fmt, actorUserId, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
                 StatusMessage = "Parts exported successfully.";
             }
             catch (Exception ex)

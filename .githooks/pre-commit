@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root_dir="$(git rev-parse --show-toplevel)"
+cd "$root_dir"
+
+run_ps1() {
+  if command -v pwsh >/dev/null 2>&1; then
+    pwsh -NoProfile -File scripts/analyze_db_sync.ps1
+  elif command -v powershell >/dev/null 2>&1; then
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/analyze_db_sync.ps1
+  else
+    echo "[pre-commit] PowerShell not found; skipping DB analyzer." >&2
+    return 0
+  fi
+}
+
+echo "[pre-commit] Running DB sync analyzer..."
+if ! run_ps1; then
+  echo "[pre-commit] Analyzer failed." >&2
+  exit 1
+fi
+
+mm_file="reports/mismatch-matrix.csv"
+if [ -f "$mm_file" ]; then
+  # Count data lines (exclude header)
+  lines=$(wc -l < "$mm_file" | tr -d '[:space:]' || echo 0)
+  mismatches=0
+  if [ "$lines" -gt 1 ]; then mismatches=$((lines - 1)); fi
+  if [ "${ALLOW_DB_MISMATCH:-0}" != "1" ] && [ "$mismatches" -gt 0 ]; then
+    echo "[pre-commit] Found $mismatches DB/code mismatches. See reports/SYNC_REPORT.md and reports/mismatch-matrix.csv" >&2
+    echo "[pre-commit] Set ALLOW_DB_MISMATCH=1 to bypass once (not recommended)." >&2
+    exit 1
+  fi
+fi
+
+exit 0
+

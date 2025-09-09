@@ -298,12 +298,13 @@ namespace YasGMP.ViewModels
             try
             {
                 // Disambiguate overloads by naming 'format'; also null-safe ToList
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
                 await _dbService.ExportScheduledJobsAsync(
                     FilteredJobs?.ToList() ?? new System.Collections.Generic.List<ScheduledJob>(),
                     _currentIpAddress,
                     _currentDeviceInfo,
                     _currentSessionId,
-                    format: "csv").ConfigureAwait(false);
+                    format: fmt).ConfigureAwait(false);
 
                 await _dbService.LogScheduledJobAuditAsync(null, "EXPORT", _currentIpAddress, _currentDeviceInfo, _currentSessionId, null).ConfigureAwait(false);
                 StatusMessage = "Scheduled jobs exported successfully.";

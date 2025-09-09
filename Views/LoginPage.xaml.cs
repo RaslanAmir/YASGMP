@@ -6,14 +6,14 @@ namespace YasGMP.Views
 {
     /// <summary>
     /// Login ekran za prijavu korisnika u YasGMP sustav.
-    /// ViewModel se dohvaća iz DI spremnika (nema potrebe za parametarskimless ctor-om).
+    /// ViewModel se dohvaća iz DI spremnika (nema parametarskogless ctor-a).
     /// </summary>
     public partial class LoginPage : ContentPage
     {
         public LoginPage()
         {
             InitializeComponent();
-            // BindingContext se postavlja kada Handler bude spreman
+            // BindingContext se postavlja kada Handler bude spreman (DI safe).
         }
 
         /// <summary>

@@ -34,7 +34,7 @@ namespace YasGMP.Services
         {
             const string sql = @"
 SELECT *
-FROM training_records
+FROM user_training
 ORDER BY training_date DESC, id DESC;";
 
             var list = new List<TrainingRecord>();
@@ -66,25 +66,22 @@ ORDER BY training_date DESC, id DESC;";
             record.PlannedAt = record.PlannedAt == default ? DateTime.UtcNow : record.PlannedAt;
 
             const string sql = @"
-INSERT INTO training_records
-(code, name, type, status, training_date, expiry_date, trainee_id, trainer_id, format, description, certificate_number, note)
+INSERT INTO user_training
+(user_id, training_type, training_date, valid_until, provider, status, certificate_file, notes)
 VALUES
-(@code,@name,@type,@status,@tdate,@exp,@trainee,@trainer,@format,@desc,@cert,@note);";
+(@uid,@ttype,@tdate,@valid,@provider,@status,@cert_file,@notes);";
 
+            // Map model to existing schema columns
             var pars = new[]
             {
-                new MySqlParameter("@code",   (object?)record.Code ?? DBNull.Value),
-                new MySqlParameter("@name",   (object?)record.Name ?? DBNull.Value),
-                new MySqlParameter("@type",   (object?)record.Type ?? DBNull.Value),
-                new MySqlParameter("@status", (object?)record.Status ?? "planned"),
-                new MySqlParameter("@tdate",  (object?)record.TrainingDate == null ? DBNull.Value : record.TrainingDate),
-                new MySqlParameter("@exp",    (object?)record.ExpiryDate ?? DBNull.Value),
-                new MySqlParameter("@trainee",(object?)record.TraineeId ?? DBNull.Value),
-                new MySqlParameter("@trainer",(object?)record.TrainerId ?? DBNull.Value),
-                new MySqlParameter("@format", (object?)record.Format ?? DBNull.Value),
-                new MySqlParameter("@desc",   (object?)record.Description ?? DBNull.Value),
-                new MySqlParameter("@cert",   (object?)record.CertificateNumber ?? DBNull.Value),
-                new MySqlParameter("@note",   (object?)record.Note ?? DBNull.Value),
+                new MySqlParameter("@uid",       (object?)record.TraineeId ?? DBNull.Value),
+                new MySqlParameter("@ttype",     (object?) (string.IsNullOrWhiteSpace(record.Type) ? record.Name : record.Type) ?? DBNull.Value),
+                new MySqlParameter("@tdate",     (object?)record.TrainingDate == null ? DBNull.Value : record.TrainingDate),
+                new MySqlParameter("@valid",     (object?)record.ExpiryDate ?? DBNull.Value),
+                new MySqlParameter("@provider",   (object?)record.Format ?? DBNull.Value),
+                new MySqlParameter("@status",     (object?)record.Status ?? "planned"),
+                new MySqlParameter("@cert_file",  (object?)record.CertificateNumber ?? DBNull.Value),
+                new MySqlParameter("@notes",      (object?)record.Note ?? DBNull.Value),
             };
 
             await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
@@ -108,8 +105,8 @@ VALUES
             CancellationToken token = default)
         {
             const string sql = @"
-UPDATE training_records
-SET trainee_id=@uid, status='assigned'
+UPDATE user_training
+SET user_id=@uid, status='assigned'
 WHERE id=@id;";
 
             var pars = new[]
@@ -136,7 +133,7 @@ WHERE id=@id;";
             CancellationToken token = default)
         {
             const string sql = @"
-UPDATE training_records
+UPDATE user_training
 SET status='pending_approval'
 WHERE id=@id;";
 
@@ -160,7 +157,7 @@ WHERE id=@id;";
             CancellationToken token = default)
         {
             const string sql = @"
-UPDATE training_records
+UPDATE user_training
 SET status='completed'
 WHERE id=@id;";
 
@@ -184,7 +181,7 @@ WHERE id=@id;";
             CancellationToken token = default)
         {
             const string sql = @"
-UPDATE training_records
+UPDATE user_training
 SET status='closed'
 WHERE id=@id;";
 
@@ -211,14 +208,14 @@ WHERE id=@id;";
             string sessionId,
             CancellationToken token = default)
         {
-            string filePath = $"/export/training_records_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+            string filePath = $"/export/user_training_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
 
             // Log to generic export/print log if present
             try
             {
                 await db.ExecuteNonQueryAsync(@"
 INSERT INTO export_print_log (user_id, format, table_name, filter_used, file_path, source_ip, note)
-VALUES (NULL,'csv','training_records',@filter,@path,@ip,'Training export')",
+VALUES (NULL,'csv','user_training',@filter,@path,@ip,'Training export')",
                     new[]
                     {
                         new MySqlParameter("@filter", $"count={(rows?.Count ?? 0)}"),
@@ -232,7 +229,7 @@ VALUES (NULL,'csv','training_records',@filter,@path,@ip,'Training export')",
             await db.LogSystemEventAsync(
                 userId: null,
                 eventType: "EXPORT",
-                tableName: "training_records",
+                tableName: "user_training",
                 module: "TrainingModule",
                 recordId: null,
                 description: $"Exported {(rows?.Count ?? 0)} training records → {filePath}",
@@ -243,6 +240,95 @@ VALUES (NULL,'csv','training_records',@filter,@path,@ip,'Training export')",
                 token: token).ConfigureAwait(false);
 
             return filePath;
+        }
+
+        /// <summary>
+        /// Exports training records in the requested format (csv/xlsx/pdf) and logs the export.
+        /// </summary>
+        public static async Task ExportTrainingRecordsAsync(
+            this DatabaseService db,
+            IList<TrainingRecord> rows,
+            string format,
+            string ipAddress,
+            string deviceInfo,
+            string sessionId,
+            CancellationToken token = default)
+        {
+            string fmt = string.IsNullOrWhiteSpace(format) ? "csv" : format.ToLowerInvariant();
+
+            string? path;
+            var list = rows ?? Array.Empty<TrainingRecord>();
+
+            if (fmt == "xlsx")
+            {
+                path = YasGMP.Helpers.XlsxExporter.WriteSheet(list, "user_training",
+                    new (string, Func<TrainingRecord, object?>)[]
+                    {
+                        ("Id", t => t.Id),
+                        ("Name", t => t.Name ?? t.TrainingType),
+                        ("Type", t => t.TrainingType ?? t.Type),
+                        ("Status", t => t.Status),
+                        ("TrainingDate", t => t.TrainingDate),
+                        ("ExpiryDate", t => t.ExpiryDate),
+                        ("TraineeId", t => t.TraineeId)
+                    });
+            }
+            else if (fmt == "pdf")
+            {
+                path = YasGMP.Helpers.PdfExporter.WriteTable(list, "user_training",
+                    new (string, Func<TrainingRecord, object?>)[]
+                    {
+                        ("Id", t => t.Id),
+                        ("Name", t => t.Name ?? t.TrainingType),
+                        ("Type", t => t.TrainingType ?? t.Type),
+                        ("Status", t => t.Status),
+                        ("TrainingDate", t => t.TrainingDate),
+                        ("ExpiryDate", t => t.ExpiryDate)
+                    }, title: "Training Records Export");
+            }
+            else
+            {
+                path = YasGMP.Helpers.CsvExportHelper.WriteCsv(list, "user_training",
+                    new (string, Func<TrainingRecord, object?>)[]
+                    {
+                        ("Id", t => t.Id),
+                        ("Name", t => t.Name ?? t.TrainingType),
+                        ("Type", t => t.TrainingType ?? t.Type),
+                        ("Status", t => t.Status),
+                        ("TrainingDate", t => t.TrainingDate),
+                        ("ExpiryDate", t => t.ExpiryDate),
+                        ("TraineeId", t => t.TraineeId)
+                    });
+            }
+
+            // Write export_print_log when present
+            try
+            {
+                await db.ExecuteNonQueryAsync(@"
+INSERT INTO export_print_log (user_id, format, table_name, filter_used, file_path, source_ip, note)
+VALUES (NULL,@fmt,'user_training',@filter,@path,@ip,'Training export')",
+                    new[]
+                    {
+                        new MySqlConnector.MySqlParameter("@fmt", fmt),
+                        new MySqlConnector.MySqlParameter("@filter", $"count={(rows?.Count ?? 0)}"),
+                        new MySqlConnector.MySqlParameter("@path", path ?? string.Empty),
+                        new MySqlConnector.MySqlParameter("@ip", ipAddress ?? string.Empty)
+                    }, token).ConfigureAwait(false);
+            }
+            catch (MySqlConnector.MySqlException) { /* table may not exist */ }
+
+            await db.LogSystemEventAsync(
+                userId: null,
+                eventType: "EXPORT",
+                tableName: "user_training",
+                module: "TrainingModule",
+                recordId: null,
+                description: $"Exported {(rows?.Count ?? 0)} training records → {path}",
+                ip: ipAddress,
+                severity: "audit",
+                deviceInfo: deviceInfo,
+                sessionId: sessionId,
+                token: token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -263,7 +349,7 @@ VALUES (NULL,'csv','training_records',@filter,@path,@ip,'Training export')",
             try
             {
                 const string sql = @"
-INSERT INTO training_record_audit
+INSERT INTO training_record_audit /* ANALYZER_IGNORE: audit table */
 (training_record_id, action, description, timestamp, source_ip, device_info, session_id)
 VALUES (@id,@act,@desc,NOW(),@ip,@dev,@sid);";
 
@@ -285,7 +371,7 @@ VALUES (@id,@act,@desc,NOW(),@ip,@dev,@sid);";
                 await db.LogSystemEventAsync(
                     userId: null,
                     eventType: $"TRAINING_{action}",
-                    tableName: "training_records",
+                    tableName: "user_training",
                     module: "TrainingModule",
                     recordId: id == 0 ? null : id,
                     description: description,
@@ -305,22 +391,26 @@ VALUES (@id,@act,@desc,NOW(),@ip,@dev,@sid);";
         {
             var t = Activator.CreateInstance<TrainingRecord>();
 
-            // core fields
+            // core fields (schema-tolerant: support both training_records and user_training shapes)
             SetIfExists(t, "Id", GetInt(r, "id") ?? 0);
-            SetIfExists(t, "Code", GetString(r, "code"));
-            SetIfExists(t, "Name", GetString(r, "name"));
-            SetIfExists(t, "Type", GetString(r, "type"));
-            SetIfExists(t, "Format", GetString(r, "format"));
-            SetIfExists(t, "Description", GetString(r, "description"));
+            // Name/Type fallbacks
+            var name = GetString(r, "name") ?? GetString(r, "training_type") ?? GetString(r, "type");
+            var type = GetString(r, "type") ?? GetString(r, "training_type");
+            SetIfExists(t, "Name", name);
+            SetIfExists(t, "Type", type);
+            // Format/provider
+            SetIfExists(t, "Format", GetString(r, "format") ?? GetString(r, "provider"));
+            // Description/notes
+            SetIfExists(t, "Description", GetString(r, "description") ?? GetString(r, "provider"));
             SetIfExists(t, "Status", GetString(r, "status"));
             SetIfExists(t, "TrainingDate", GetDate(r, "training_date") ?? GetDate(r, "date"));
-            SetIfExists(t, "ExpiryDate", GetDate(r, "expiry_date"));
-            SetIfExists(t, "CertificateNumber", GetString(r, "certificate_number"));
-            SetIfExists(t, "Note", GetString(r, "note"));
+            SetIfExists(t, "ExpiryDate", GetDate(r, "expiry_date") ?? GetDate(r, "valid_until"));
+            SetIfExists(t, "CertificateNumber", GetString(r, "certificate_number") ?? GetString(r, "certificate_file"));
+            SetIfExists(t, "Note", GetString(r, "note") ?? GetString(r, "notes"));
 
             // relationships (best-effort)
             SetIfExists(t, "TrainerId", GetInt(r, "trainer_id"));
-            SetIfExists(t, "TraineeId", GetInt(r, "trainee_id"));
+            SetIfExists(t, "TraineeId", GetInt(r, "trainee_id") ?? GetInt(r, "user_id"));
             SetIfExists(t, "RoleId", GetInt(r, "role_id"));
             SetIfExists(t, "DocumentId", GetInt(r, "document_id"));
 

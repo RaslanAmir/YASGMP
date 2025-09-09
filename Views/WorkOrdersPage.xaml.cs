@@ -1,40 +1,44 @@
 // ==============================================================================
-//  File: Views/WorkOrderPage.xaml.cs
+//  File: Views/WorkOrdersPage.xaml.cs
 //  Project: YasGMP
 //  Summary:
-//      Code-behind for WorkOrderPage. Wires the BindingContext to WorkOrderViewModel
-//      via DI when available, or falls back to parameterless construction.
-//      Defensive and design-time safe.
+//      Code-behind for WorkOrdersPage (plural). Wires BindingContext from DI (if
+//      available) and safely attempts initial refresh. No external dependencies;
+//      design-time safe. All navigation/alerts handled elsewhere (SafeNavigator).
 //  Author: YasGMP
 //  © 2025 YasGMP. All rights reserved.
 // ==============================================================================
+#nullable enable
+
 using System;
+using System.Reflection;
+using System.Windows.Input;
 using Microsoft.Maui.Controls;
 
 namespace YasGMP.Views
 {
     /// <summary>
-    /// Work orders list and filter page.
-    /// <para>
-    /// This page binds to <c>YasGMP.ViewModels.WorkOrderViewModel</c> and relies only on
-    /// properties and commands that already exist in your ViewModel to avoid breaking changes.
-    /// </para>
+    /// <b>WorkOrdersPage</b> — YASTECH-themed overview of work orders with filters,
+    /// KPI tiles, and action commands. The page binds to a ViewModel resolved from DI.
+    /// By default it looks for <c>YasGMP.ViewModels.WorkOrderViewModel</c> and
+    /// <c>YasGMP.ViewModels.WorkOrdersViewModel</c> (both supported).
     /// </summary>
-    public partial class WorkOrderPage : ContentPage
+    public partial class WorkOrdersPage : ContentPage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WorkOrderPage"/> class and
-        /// safely wires the BindingContext.
+        /// Initializes a new instance of the <see cref="WorkOrdersPage"/> and wires
+        /// the ViewModel from MAUI DI or a default constructor without throwing.
         /// </summary>
-        public WorkOrderPage()
+        public WorkOrdersPage()
         {
             InitializeComponent();
             TryWireViewModel();
         }
 
         /// <summary>
-        /// Attempts to resolve the ViewModel through the MAUI DI container first,
-        /// then falls back to a default constructor if available.
+        /// Tries to resolve the Work Order ViewModel using the MAUI
+        /// service provider first, falling back to parameterless construction.
+        /// Swallows all exceptions to keep the page design-time safe.
         /// </summary>
         private void TryWireViewModel()
         {
@@ -42,39 +46,73 @@ namespace YasGMP.Views
             {
                 var services = Application.Current?.Handler?.MauiContext?.Services;
 
-                // Prefer the canonical name:
-                var vm = TryResolveByFullName(services, "YasGMP.ViewModels.WorkOrderViewModel");
+                // Try common VM names (singular and plural)
+                var vm = TryResolveByFullName(services, "YasGMP.ViewModels.WorkOrderViewModel")
+                      ?? TryResolveByFullName(services, "YasGMP.ViewModels.WorkOrdersViewModel");
 
                 if (vm != null)
-                {
                     BindingContext = vm;
-                }
-                // If nothing resolves, the page remains design-time friendly.
             }
             catch
             {
-                // Swallow exceptions to keep the page render-safe at design time.
+                // No-op: design-time safety.
             }
         }
 
         /// <summary>
-        /// Resolves a type by full name using DI first, then by default constructor.
-        /// Returns null if resolution fails.
+        /// Attempts to resolve a type by its full name:
+        /// 1) via DI container, 2) via default ctor if available.
         /// </summary>
-        /// <param name="services">Optional DI service provider.</param>
-        /// <param name="fullName">Full type name to resolve.</param>
+        /// <param name="services">Optional service provider.</param>
+        /// <param name="fullName">Full type name.</param>
+        /// <returns>Instance or null.</returns>
         private static object? TryResolveByFullName(IServiceProvider? services, string fullName)
         {
             var type = Type.GetType(fullName);
-            if (type == null) return null;
+            if (type is null) return null;
 
-            // DI first (if configured)
-            var fromDi = services?.GetService(type);
-            if (fromDi != null) return fromDi;
+            // 1) Service provider
+            var viaDi = services?.GetService(type);
+            if (viaDi != null) return viaDi;
 
-            // Fallback to default constructor (if present)
+            // 2) Default constructor
             try { return Activator.CreateInstance(type); }
             catch { return null; }
+        }
+
+        /// <summary>
+        /// On appearing, attempts a safe initial refresh by invoking a compatible
+        /// command (if available) on the ViewModel:
+        /// <list type="bullet">
+        /// <item><description><c>LoadWorkOrdersCommand</c> (preferred)</description></item>
+        /// <item><description><c>LoadCommand</c> (fallback)</description></item>
+        /// </list>
+        /// This is best-effort and never throws.
+        /// </summary>
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            try
+            {
+                var vm = BindingContext;
+                if (vm == null) return;
+
+                ICommand? cmd = GetCommand(vm, "LoadWorkOrdersCommand") ?? GetCommand(vm, "LoadCommand");
+                if (cmd?.CanExecute(null) == true)
+                    cmd.Execute(null);
+            }
+            catch
+            {
+                // Intentionally ignore: keep UI responsive and safe.
+            }
+        }
+
+        /// <summary>Helper to get an <see cref="ICommand"/> property by name via reflection.</summary>
+        private static ICommand? GetCommand(object vm, string propertyName)
+        {
+            var p = vm.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+            return p?.GetValue(vm) as ICommand;
         }
     }
 }

@@ -52,7 +52,9 @@ namespace YasGMP.Services
             this DatabaseService db,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT * FROM users ORDER BY full_name, username, id;";
+            const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+FROM users ORDER BY full_name, username, id;";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
 
             var list = new List<User>();
@@ -103,7 +105,9 @@ namespace YasGMP.Services
             int id,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT * FROM users WHERE id=@id LIMIT 1;";
+            const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+FROM users WHERE id=@id LIMIT 1;";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 1 ? ParseUser(dt.Rows[0]) : null;
         }

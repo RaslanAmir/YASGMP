@@ -1,0 +1,2 @@
+﻿"Type","Table","Column","Suggestion","SuggestedTarget"
+"TABLE_NOT_IN_SCHEMA","logs","","Map to existing table 'vw_sensor_data_logs_audit' or rename code reference to 'vw_sensor_data_logs_audit'","vw_sensor_data_logs_audit"

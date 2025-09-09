@@ -1,125 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   YasGMP – Work Orders Page (GMP / 21 CFR Part 11 compliant)
-  This page lists and filters work orders, exposes KPI tiles, and wires to
-  existing ViewModel commands without introducing new dependencies.
+  YASTECH-styled list with KPI tiles, filters and actions.
+  - No external dependencies (AOT-friendly)
+  - Tooltips via built-in MAUI ToolTipProperties (xmlns:maui)
+  - Works with your existing ViewModel contract (no new members required)
 -->
 <ContentPage
-    x:Class="YasGMP.Views.WorkOrderPage"
+    x:Class="YasGMP.Views.WorkOrdersPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
     Title="Radni nalozi"
-    BackgroundColor="{AppThemeBinding Light=#F7F7F8, Dark=#12161B}">
+    BackgroundColor="{StaticResource YtSurface}">
 
-    <!-- Main layout: scrollable vertical stack -->
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="16">
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="18">
 
-            <!-- KPI tiles -->
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                <Frame Padding="12" CornerRadius="12" HasShadow="True" BackgroundColor="#0E639C">
-                    <VerticalStackLayout>
-                        <Label Text="Otvoreni" FontSize="12" TextColor="White" />
-                        <Label Text="{Binding CountOpen}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
-                    </VerticalStackLayout>
-                </Frame>
+      <!-- Title -->
+      <Label Text="Radni nalozi"
+             Style="{StaticResource YtH1}"
+             HorizontalOptions="Center"
+             maui:ToolTipProperties.Text="Pregled, filtriranje i upravljanje radnim nalozima (GMP/CSV)"/>
 
-                <Frame Padding="12" CornerRadius="12" HasShadow="True" BackgroundColor="#C23B22" Grid.Column="1">
-                    <VerticalStackLayout>
-                        <Label Text="Kritični" FontSize="12" TextColor="White" />
-                        <Label Text="{Binding CountCritical}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
-                    </VerticalStackLayout>
-                </Frame>
+      <!-- KPI tiles -->
+      <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
+        <Frame Padding="14" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtPrimary600}">
+          <VerticalStackLayout Spacing="2">
+            <Label Text="Otvoreni" FontSize="12" TextColor="White"/>
+            <Label Text="{Binding CountOpen}" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+          </VerticalStackLayout>
+        </Frame>
 
-                <Frame Padding="12" CornerRadius="12" HasShadow="True" BackgroundColor="#F1A208" Grid.Column="2">
-                    <VerticalStackLayout>
-                        <Label Text="Overdue" FontSize="12" TextColor="White" />
-                        <Label Text="{Binding CountOverdue}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
-                    </VerticalStackLayout>
-                </Frame>
-            </Grid>
+        <Frame Grid.Column="1" Padding="14" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtDanger700}">
+          <VerticalStackLayout Spacing="2">
+            <Label Text="Kritični" FontSize="12" TextColor="White"/>
+            <Label Text="{Binding CountCritical}" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+          </VerticalStackLayout>
+        </Frame>
 
-            <!-- Filters -->
-            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
-                <!-- Search -->
-                <SearchBar Grid.Row="0" Grid.ColumnSpan="3"
-                           Placeholder="Pretraži (stroj, naslov, opis)"
-                           Text="{Binding SearchTerm, Mode=TwoWay}" />
+        <Frame Grid.Column="2" Padding="14" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtAccent700}">
+          <VerticalStackLayout Spacing="2">
+            <Label Text="Overdue" FontSize="12" TextColor="White"/>
+            <Label Text="{Binding CountOverdue}" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+          </VerticalStackLayout>
+        </Frame>
+      </Grid>
 
-                <!-- Status -->
-                <Picker Grid.Row="1" Grid.Column="0"
-                        Title="Status"
-                        ItemsSource="{Binding AvailableStatuses}"
-                        SelectedItem="{Binding StatusFilter, Mode=TwoWay}" />
+      <!-- Filters -->
+      <Frame Padding="16" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtSurfaceCard}">
+        <VerticalStackLayout Spacing="12">
+          <SearchBar
+              Placeholder="Pretraži (stroj, naslov, opis)"
+              Text="{Binding SearchTerm, Mode=TwoWay}"
+              maui:ToolTipProperties.Text="Upišite ključnu riječ za pretragu radnih naloga"/>
 
-                <!-- Priority -->
-                <Picker Grid.Row="1" Grid.Column="1"
-                        Title="Prioritet"
-                        ItemsSource="{Binding AvailablePriorities}"
-                        SelectedItem="{Binding PriorityFilter, Mode=TwoWay}" />
+          <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="12">
+            <!-- Status -->
+            <Picker Grid.Column="0"
+                    Title="Status"
+                    ItemsSource="{Binding AvailableStatuses}"
+                    SelectedItem="{Binding StatusFilter, Mode=TwoWay}"
+                    maui:ToolTipProperties.Text="Filtriraj po statusu (otvoren, u tijeku, zatvoren, odbijen)"/>
 
-                <!-- Asset filter (free text; VM exposes AssetFilter as string) -->
-                <Entry Grid.Row="1" Grid.Column="2"
-                       WidthRequest="220"
-                       Placeholder="Stroj/oprema"
-                       Text="{Binding AssetFilter, Mode=TwoWay}" />
-            </Grid>
+            <!-- Prioritet -->
+            <Picker Grid.Column="1"
+                    Title="Prioritet"
+                    ItemsSource="{Binding AvailablePriorities}"
+                    SelectedItem="{Binding PriorityFilter, Mode=TwoWay}"
+                    maui:ToolTipProperties.Text="Filtriraj po prioritetu (nizak, srednji, visoki, kritični)"/>
 
-            <!-- Busy indicator -->
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
-
-            <!-- Work orders list -->
-            <CollectionView
-                ItemsSource="{Binding FilteredWorkOrders}"
-                SelectionMode="Single"
-                SelectedItem="{Binding SelectedWorkOrder, Mode=TwoWay}"
-                HeightRequest="420">
-
-                <!-- Header -->
-                <CollectionView.Header>
-                    <Grid ColumnDefinitions="70,*,160,110,110,140,140" Padding="6,0" Margin="0,0,0,6">
-                        <Label Grid.Column="0" Text="ID" FontAttributes="Bold"/>
-                        <Label Grid.Column="1" Text="Naslov" FontAttributes="Bold"/>
-                        <Label Grid.Column="2" Text="Stroj" FontAttributes="Bold"/>
-                        <Label Grid.Column="3" Text="Prioritet" FontAttributes="Bold"/>
-                        <Label Grid.Column="4" Text="Status" FontAttributes="Bold"/>
-                        <Label Grid.Column="5" Text="Otvoren" FontAttributes="Bold"/>
-                        <Label Grid.Column="6" Text="Zatvaranje" FontAttributes="Bold"/>
-                    </Grid>
-                </CollectionView.Header>
-
-                <!-- Rows -->
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid ColumnDefinitions="70,*,160,110,110,140,140" Padding="6,4">
-                            <Label Grid.Column="0" Text="{Binding Id}" />
-                            <Label Grid.Column="1" Text="{Binding Title}" LineBreakMode="TailTruncation" />
-                            <Label Grid.Column="2" Text="{Binding Machine.Name}" LineBreakMode="TailTruncation" />
-                            <Label Grid.Column="3" Text="{Binding Priority}" />
-                            <Label Grid.Column="4" Text="{Binding Status}" />
-                            <Label Grid.Column="5" Text="{Binding DateOpen, StringFormat='{0:dd.MM.yyyy HH:mm}'}" />
-                            <Label Grid.Column="6" Text="{Binding DateClose, StringFormat='{0:dd.MM.yyyy HH:mm}'}" />
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <!-- Actions -->
-            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
-                <Button Grid.Column="0" Text="Osvježi"    Command="{Binding LoadWorkOrdersCommand}" />
-                <Button Grid.Column="1" Text="Dodaj"      Command="{Binding AddWorkOrderCommand}" />
-                <Button Grid.Column="2" Text="Uredi"      Command="{Binding UpdateWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
-                <Button Grid.Column="3" Text="Obriši"     Command="{Binding DeleteWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
-                <Button Grid.Column="4" Text="Rollback"   Command="{Binding RollbackWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
-                <Button Grid.Column="5" Text="Export"     Command="{Binding ExportWorkOrdersCommand}" />
-                <Button Grid.Column="6" Text="Odobri"     Command="{Binding ApproveWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
-                <Button Grid.Column="7" Text="Zatvori"    Command="{Binding CloseWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
-                <Button Grid.Column="8" Text="Eskaliraj"  Command="{Binding EscalateWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" />
-            </Grid>
-
-            <!-- Status message and compliance note -->
-            <Label Text="{Binding StatusMessage}" FontSize="12" TextColor="#0E639C" />
-            <Label Text="Sve akcije se automatski auditiraju (GMP / 21 CFR Part 11)." FontSize="11" TextColor="Gray" />
+            <!-- Asset filter (free text) -->
+            <Entry Grid.Column="2"
+                   WidthRequest="220"
+                   Placeholder="Stroj/oprema"
+                   Text="{Binding AssetFilter, Mode=TwoWay}"
+                   maui:ToolTipProperties.Text="Neobavezno: upišite ime stroja/opreme"/>
+          </Grid>
         </VerticalStackLayout>
-    </ScrollView>
+      </Frame>
+
+      <!-- Busy -->
+      <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource YtPrimary700}"/>
+
+      <!-- Work orders list -->
+      <Frame Padding="0" HasShadow="True">
+        <VerticalStackLayout Spacing="0">
+
+          <!-- Header -->
+          <Grid Padding="10,8"
+                BackgroundColor="{StaticResource YtPrimary50}"
+                ColumnDefinitions="70,*,160,110,110,160,160">
+            <Label Grid.Column="0" Text="ID" FontAttributes="Bold"/>
+            <Label Grid.Column="1" Text="Naslov" FontAttributes="Bold"/>
+            <Label Grid.Column="2" Text="Stroj" FontAttributes="Bold"/>
+            <Label Grid.Column="3" Text="Prioritet" FontAttributes="Bold"/>
+            <Label Grid.Column="4" Text="Status" FontAttributes="Bold"/>
+            <Label Grid.Column="5" Text="Otvoren" FontAttributes="Bold"/>
+            <Label Grid.Column="6" Text="Zatvaranje" FontAttributes="Bold"/>
+          </Grid>
+
+          <CollectionView
+              ItemsSource="{Binding FilteredWorkOrders}"
+              SelectionMode="Single"
+              SelectedItem="{Binding SelectedWorkOrder, Mode=TwoWay}"
+              BackgroundColor="{StaticResource YtSurface}"
+              HeightRequest="440"
+              maui:ToolTipProperties.Text="Kliknite na redak za odabir radnog naloga">
+
+            <CollectionView.EmptyView>
+              <Label Text="Nema rezultata za zadane filtere."
+                     HorizontalOptions="Center" Margin="0,16,0,16"
+                     TextColor="{StaticResource YtOnSurfaceDim}"/>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+              <DataTemplate>
+                <!-- Border supports Stroke/StrokeShape; Grid does not -->
+                <Border Stroke="{StaticResource YtRowBorderBrush}"
+                        StrokeThickness="1"
+                        Background="{StaticResource YtRowBrush}"
+                        Margin="0,0,0,4">
+                  <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                  </Border.StrokeShape>
+
+                  <Grid Padding="10,8" ColumnDefinitions="70,*,160,110,110,160,160">
+                    <Label Grid.Column="0" Text="{Binding Id}" TextColor="{StaticResource YtOnSurface}"/>
+                    <Label Grid.Column="1" Text="{Binding Title}" LineBreakMode="TailTruncation" TextColor="{StaticResource YtOnSurface}"/>
+                    <Label Grid.Column="2" Text="{Binding Machine.Name}" LineBreakMode="TailTruncation" TextColor="{StaticResource YtOnSurface}"/>
+                    <Label Grid.Column="3" Text="{Binding Priority}" TextColor="{StaticResource YtOnSurface}"/>
+                    <Label Grid.Column="4" Text="{Binding Status}" TextColor="{StaticResource YtOnSurface}"/>
+                    <Label Grid.Column="5" Text="{Binding DateOpen, StringFormat='{0:dd.MM.yyyy HH:mm}'}" TextColor="{StaticResource YtOnSurfaceDim}"/>
+                    <Label Grid.Column="6" Text="{Binding DateClose, StringFormat='{0:dd.MM.yyyy HH:mm}'}" TextColor="{StaticResource YtOnSurfaceDim}"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </CollectionView.ItemTemplate>
+          </CollectionView>
+        </VerticalStackLayout>
+      </Frame>
+
+      <!-- Actions -->
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+        <Button Grid.Column="0" Text="Osvježi"    Command="{Binding LoadWorkOrdersCommand}" Style="{StaticResource YtButton.Secondary}" maui:ToolTipProperties.Text="Ponovno učitaj listu radnih naloga"/>
+        <Button Grid.Column="1" Text="Dodaj"      Command="{Binding AddWorkOrderCommand}"    Style="{StaticResource YtButton.Primary}"   maui:ToolTipProperties.Text="Otvori dijalog za unos novog naloga"/>
+        <Button Grid.Column="2" Text="Uredi"      Command="{Binding UpdateWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" maui:ToolTipProperties.Text="Uredi odabrani nalog"/>
+        <Button Grid.Column="3" Text="Obriši"     Command="{Binding DeleteWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" Style="{StaticResource YtButton.Danger}" maui:ToolTipProperties.Text="Trajno izbriši odabrani nalog (auditirano)"/>
+        <Button Grid.Column="4" Text="Rollback"   Command="{Binding RollbackWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" maui:ToolTipProperties.Text="Vrati na prethodno stanje (ako je omogućeno)"/>
+        <Button Grid.Column="5" Text="Export"     Command="{Binding ExportWorkOrdersCommand}" maui:ToolTipProperties.Text="Izvezi listu u CSV/Excel/PDF (ovisno o implementaciji)"/>
+        <Button Grid.Column="6" Text="Odobri"     Command="{Binding ApproveWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" maui:ToolTipProperties.Text="Odobri odabrani nalog (e-potpis, audit)"/>
+        <Button Grid.Column="7" Text="Zatvori"    Command="{Binding CloseWorkOrderCommand}"   IsEnabled="{Binding IsWorkOrderSelected}" maui:ToolTipProperties.Text="Zatvori nalog i evidentiraj rezultat"/>
+        <Button Grid.Column="8" Text="Eskaliraj"  Command="{Binding EscalateWorkOrderCommand}" IsEnabled="{Binding IsWorkOrderSelected}" maui:ToolTipProperties.Text="Označi kao eskalirano i obavijesti nadležne"/>
+      </Grid>
+
+      <!-- Status & compliance note -->
+      <Label Text="{Binding StatusMessage}" FontSize="12" TextColor="{StaticResource YtPrimary700}" LineBreakMode="WordWrap"/>
+      <Label Text="Sve akcije se automatski auditiraju (GMP / 21 CFR Part 11)." FontSize="11" TextColor="{StaticResource YtOnSurfaceDim}"/>
+    </VerticalStackLayout>
+  </ScrollView>
 </ContentPage>

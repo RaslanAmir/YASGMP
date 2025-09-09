@@ -1,0 +1,22 @@
+[2025-09-04T08:59:13.1566202Z] STEP OBS-001 — Schema snapshot captured to tools/schema/snapshots (db: yasgmp, alias checked).
+[2025-09-04T12:30:58.3352514Z] STEP OBS-002 — Code scan completed; zero drift (Mismatches: 0).
+[2025-09-04T12:33:56Z] STEP DEC-001 - Finalized source-of-truth (zero drift); baseline frozen (d6a931bcbbcb9da2); allowlist unchanged.
+[] STEP VAL-001 - Baseline reproducibility ok; mismatch files clean (rows=0); table_diffs: Missing=0, NonExists=0; allowlist entries: tables=0, columns=0.
+[2025-09-04T12:41:31Z] STEP VAL-001B - Timestamp check.
+[2025-09-04T12:41:43Z] STEP VAL-001 - Validation complete: baseline matches report; mismatch-matrix rows=0; table_diffs Missing=0 NonExists=0; allowlist unchanged.
+[2025-09-04T12:52:52Z] STEP VAL-002 - Created baseline.lock and CI workflow (schema-baseline.yml).
+[2025-09-05T06:20:59.6461754Z] STEP OBS-003 — Decisions finalized; baseline frozen and allowlist reviewed.
+[2025-09-05T06:26:40Z] sync: generated migrations/20250905_0626_sync.sql (idempotent). Baseline d6a931bcbbcb; drift=0; hardening=audit+utc_ts+soft_delete
+[2025-09-05T07:34:24.2371213Z] STEP OBS-001 â€” Schema snapshot captured for yasgmp
+[2025-09-05T08:15:59.5668768Z] STEP OBS-002 â€” Code scan & inventory complete
+[2025-09-05T08:20:23Z] STEP OBS-003 — Decisions recorded: suppress MySQL creation of  (SQLite diagnostic sink only); no other actionable mismatches. Added migrations/20250905_0819_sync.sql (idempotent no-op) and updated SYNC_REPORT.md.
+[2025-09-05T08:20:23Z] STEP OBS-003 — Decisions recorded: suppress MySQL creation of  (SQLite diagnostic sink only); no other actionable mismatches. Added migrations/20250905_0819_sync.sql (idempotent no-op) and updated SYNC_REPORT.md.
+[2025-09-05T08:20:23Z] STEP OBS-003 — Decisions recorded: suppress MySQL creation of  (SQLite diagnostic sink only); no other actionable mismatches. Added migrations/20250905_0819_sync.sql (idempotent no-op) and updated SYNC_REPORT.md.
+[2025-09-05T08:20:23Z] STEP OBS-003 – Decisions recorded: suppress MySQL creation of logs (SQLite diagnostic sink only); no other actionable mismatches. Added migrations/20250905_0819_sync.sql (idempotent no-op) and updated SYNC_REPORT.md.
+[2025-09-05T08:35:13Z] STEP OBS-004 – Added guarded compatibility views (warehouse→warehouses, role→roles, incidents→incident_log, units→measurement_units); no destructive changes. Generated migrations/20250905_0835_sync.sql and updated reports/SYNC_REPORT.md.
+[2025-09-05T08:53:53Z] STEP OBS-004 – Expanded compatibility views (notifications→notification_queue, audit_log→system_event_log, capa_audit_log→capa_status_history). Maintained guards and idempotency; SQLite-only `logs` remains a no-op.
+[2025-09-05T08:59:00Z] STEP OBS-004 – Verified complete. Added transaction disclaimer to migration and a simple apply/verify guide to SYNC_REPORT.md.
+[2025-09-05T09:05:00Z] STEP VAL-003 – Dry verification run against live DB: all 7 compatibility views missing (as expected pre-apply). Attempted apply failed: CREATE VIEW denied for user 'yasgmp_app'@'localhost'. Next: grant CREATE VIEW, SHOW VIEW on yasgmp.* or run migration with admin user; then re-verify.
+[2025-09-05T10:47:16Z] STEP VAL-004 – Applied migration as admin and verified: all 7 compatibility views present and selectable (warehouse, role, incidents, units, notifications, audit_log, capa_audit_log). Guarded statements executed successfully.
+[2025-09-05T10:50:11Z] STEP VAL-005 – Re-verified as app user (yasgmp_app): all views SELECT OK; SHOW CREATE VIEW not required. Read access confirmed.
+[2025-09-05 13:21:40Z] OBS-005: Replaced SELECT *, added timeouts/tokens, updated services/viewmodels. Patch at patches/code/.patch

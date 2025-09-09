@@ -1,0 +1,46 @@
+SET NAMES utf8mb4;
+USE yasgmp;
+
+-- Align system_event_log with model extras used by the app
+ALTER TABLE `system_event_log`
+  ADD COLUMN IF NOT EXISTS `username`           varchar(128) NULL,
+  ADD COLUMN IF NOT EXISTS `digital_signature`  varchar(256) NULL,
+  ADD COLUMN IF NOT EXISTS `entry_hash`         varchar(256) NULL,
+  ADD COLUMN IF NOT EXISTS `mac_address`        varchar(64)  NULL,
+  ADD COLUMN IF NOT EXISTS `geo_location`       varchar(128) NULL,
+  ADD COLUMN IF NOT EXISTS `regulator`          varchar(64)  NULL,
+  ADD COLUMN IF NOT EXISTS `related_case_id`    int          NULL,
+  ADD COLUMN IF NOT EXISTS `related_case_type`  varchar(64)  NULL,
+  ADD COLUMN IF NOT EXISTS `anomaly_score`      double       NULL;
+
+-- Align user_login_audit with model extras used by the app
+ALTER TABLE `user_login_audit`
+  ADD COLUMN IF NOT EXISTS `two_factor_ok`      tinyint(1)   NULL,
+  ADD COLUMN IF NOT EXISTS `sso_used`           tinyint(1)   NULL,
+  ADD COLUMN IF NOT EXISTS `biometric_used`     tinyint(1)   NULL,
+  ADD COLUMN IF NOT EXISTS `geo_location`       varchar(128) NULL,
+  ADD COLUMN IF NOT EXISTS `risk_score`         double       NULL,
+  ADD COLUMN IF NOT EXISTS `status`             varchar(32)  NULL,
+  ADD COLUMN IF NOT EXISTS `digital_signature`  varchar(128) NULL,
+  ADD COLUMN IF NOT EXISTS `note`               text         NULL;
+
+-- CAPA: standardize status values; adjust if you already use a broader set
+ALTER TABLE `capa_cases`
+  MODIFY COLUMN `status` enum('otvoren','zatvoren','u_tijeku') NULL;
+
+-- CAPA: ensure expected columns exist
+ALTER TABLE `capa_cases`
+  ADD COLUMN IF NOT EXISTS `component_id` int NULL,
+  ADD COLUMN IF NOT EXISTS `date_open`    date NULL,
+  ADD COLUMN IF NOT EXISTS `date_close`   date NULL,
+  ADD COLUMN IF NOT EXISTS `reason`       text NULL,
+  ADD COLUMN IF NOT EXISTS `actions`      text NULL,
+  ADD COLUMN IF NOT EXISTS `doc_file`     varchar(255) NULL,
+  ADD COLUMN IF NOT EXISTS `status_id`    int NULL;
+
+-- Deviations: ensure minimal timestamps exist
+ALTER TABLE `deviations`
+  ADD COLUMN IF NOT EXISTS `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN IF NOT EXISTS `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+

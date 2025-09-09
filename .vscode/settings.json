@@ -1,0 +1,37 @@
+{
+    "chat.tools.terminal.autoApprove":  {
+                                            "bash":  true,
+                                            "powershell":  true,
+                                            "pwsh":  true,
+                                            "node":  true,
+                                            "sh":  true,
+                                            "dotnet":  true,
+                                            "/^Remove-Item\\b/i":  true,
+                                            "npm":  true,
+                                            "cmd":  true,
+                                            "rm":  true,
+                                            "rmdir":  true,
+                                            "npx":  true,
+                                            "python":  true,
+                                            "del":  true
+                                        },
+    "chat.tools.autoApprove":  true,
+    "security.workspace.trust.untrustedFiles":  "open",
+    "chat.agent.maxRequests": 999,
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "database": "yasgmp",
+            "username": "root",
+            "name": "yasgmp"
+        }
+    ]
+}

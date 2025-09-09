@@ -7,7 +7,7 @@ namespace YasGMP.Helpers
 {
     /// <summary>
     /// Lightweight reflection-based mapper for copying matching public properties
-    /// from a source object to a new instance of <typeparamref name="TTarget"/>.
+    /// from a source object to a new instance created by the generic MapTo method.
     /// </summary>
     public static class ObjectMapper
     {
@@ -18,7 +18,7 @@ namespace YasGMP.Helpers
         /// </summary>
         /// <typeparam name="TTarget">Destination type with a public parameterless constructor.</typeparam>
         /// <param name="source">Source instance. Must not be <c>null</c>.</param>
-        /// <returns>A new, populated <typeparamref name="TTarget"/> instance.</returns>
+        /// <returns>A new, populated instance of TTarget.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="source"/> is <c>null</c>.</exception>
         public static TTarget MapTo<TTarget>(this object source)
             where TTarget : class, new()

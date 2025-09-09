@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
   File: YasGMP/Views/AdminPanelPage.xaml
-  Purpose: Admin console with Users, RBAC, System, Tools — implemented using built-in MAUI TabbedPage
-           to avoid third-party control resolution issues (fixes XFC0000 once and for all).
-  Notes:
-    - Shared header (title + actions) is included at the top of each tab for a consistent UX.
-    - Tooltips replaced with SemanticProperties.Description to remain dependency-free and AOT-friendly.
+  Purpose: Admin console with Users, RBAC, System, Tools — stock MAUI TabbedPage.
+  Theme : YASTECH colors; AOT-friendly (no 3rd party tooltips).
 -->
 <TabbedPage
     x:Class="YasGMP.Views.AdminPanelPage"
     x:Name="AdminPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Admin">
+    Title="Admin"
+    BackgroundColor="{StaticResource YtSurface}">
 
   <TabbedPage.ToolbarItems>
     <ToolbarItem Text="Users"
@@ -24,24 +22,32 @@
     <Style TargetType="Button">
       <Setter Property="Margin" Value="4,2" />
       <Setter Property="Padding" Value="10,6" />
+      <Setter Property="BackgroundColor" Value="{StaticResource YtPrimary50}" />
+      <Setter Property="TextColor" Value="{StaticResource YtPrimary700}" />
     </Style>
     <Style TargetType="Entry">
       <Setter Property="Margin" Value="4,2" />
+      <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
+      <Setter Property="PlaceholderColor" Value="{StaticResource YtOnSurfaceDim}" />
     </Style>
     <Style TargetType="Label">
       <Setter Property="Margin" Value="2,0" />
+      <Setter Property="TextColor" Value="{StaticResource YtOnSurface}" />
     </Style>
     <Style TargetType="Frame">
       <Setter Property="CornerRadius" Value="12"/>
       <Setter Property="HasShadow" Value="True"/>
       <Setter Property="Padding" Value="12"/>
       <Setter Property="Margin" Value="0,8"/>
+      <Setter Property="BackgroundColor" Value="{StaticResource YtSurfaceCard}" />
+      <Setter Property="BorderColor" Value="{StaticResource YtRowBorder}" />
     </Style>
+
     <!-- Shared header as a ControlTemplate for reuse across tabs -->
     <ControlTemplate x:Key="AdminHeaderTemplate">
       <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
         <!-- Header bar -->
-        <Grid BackgroundColor="#F7F7F7" Padding="16,12" RowSpacing="0">
+        <Grid BackgroundColor="{StaticResource YtSurfaceCard}" Padding="16,12" RowSpacing="0">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -51,10 +57,11 @@
             <Label Text="YasGMP — Admin Console"
                    FontSize="22"
                    FontAttributes="Bold"
+                   TextColor="{StaticResource YtPrimary700}"
                    SemanticProperties.Description="Centralna administracija: korisnici, RBAC, sustav, alati" />
             <Label Text="{Binding HeaderSubtitle}"
                    FontSize="12"
-                   TextColor="Gray" />
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
           </VerticalStackLayout>
 
           <HorizontalStackLayout Grid.Column="1" Spacing="8">
@@ -142,8 +149,7 @@
         <!-- Create / Update -->
         <Frame>
           <VerticalStackLayout Spacing="6">
-            <Label Text="Create / Update user"
-                   FontAttributes="Bold" />
+            <Label Text="Create / Update user" FontAttributes="Bold" />
             <Grid ColumnDefinitions="*,*,*,Auto" RowDefinitions="Auto,Auto">
               <Entry Grid.Row="0" Grid.Column="0" Placeholder="Username"
                      Text="{Binding EditUsername}" />
@@ -152,8 +158,7 @@
               <Entry Grid.Row="0" Grid.Column="2" Placeholder="Password (new/initial)"
                      IsPassword="True" Text="{Binding EditPassword}" />
               <HorizontalStackLayout Grid.Row="0" Grid.Column="3" Spacing="6">
-                <Button Text="Save"
-                        Command="{Binding SaveUserCommand}" />
+                <Button Text="Save" Command="{Binding SaveUserCommand}" />
               </HorizontalStackLayout>
 
               <Grid Grid.Row="1" Grid.ColumnSpan="4" ColumnDefinitions="*,*,*,*,Auto">
@@ -199,7 +204,6 @@
           <VerticalStackLayout Spacing="8">
             <Label Text="Roles" FontAttributes="Bold" />
             <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
-              <!-- Search + actions -->
               <Entry Grid.Row="0" Grid.Column="0"
                      Placeholder="Filter roles (code/name)"
                      Text="{Binding RoleFilter, Mode=TwoWay}" />
@@ -210,7 +214,6 @@
               <Button Grid.Row="0" Grid.Column="3" Text="Save"
                       Command="{Binding SaveRoleCommand}" />
 
-              <!-- Roles list -->
               <CollectionView Grid.Row="1" Grid.ColumnSpan="4"
                               ItemsSource="{Binding Roles}"
                               SelectionMode="Single"
@@ -219,7 +222,6 @@
                   <DataTemplate>
                     <Grid Padding="6,2" ColumnDefinitions="80,*,*,Auto">
                       <Label Text="{Binding Id}" />
-                      <!-- UI 'Code' = Role.Name -->
                       <Label Grid.Column="1" Text="{Binding Name}" />
                       <Label Grid.Column="2" Text="{Binding Description}" />
                       <Button Grid.Column="3" Text="Delete"
@@ -230,7 +232,6 @@
                 </CollectionView.ItemTemplate>
               </CollectionView>
 
-              <!-- Role editor -->
               <Grid Grid.Row="2" Grid.ColumnSpan="4" ColumnDefinitions="*,*,2*,Auto">
                 <Entry Grid.Column="0" Placeholder="Code"
                        Text="{Binding EditRoleCode}" />
@@ -313,7 +314,6 @@
                 <CollectionView.ItemTemplate>
                   <DataTemplate>
                     <Grid Padding="6,2" ColumnDefinitions="160,*,Auto">
-                      <!-- UI 'Code' = Role.Name -->
                       <Label Text="{Binding Name}" />
                       <Label Grid.Column="1" Text="{Binding Description}" />
                     </Grid>
@@ -337,7 +337,6 @@
                 <CollectionView.ItemTemplate>
                   <DataTemplate>
                     <Grid Padding="6,2" ColumnDefinitions="160,*,Auto">
-                      <!-- UI 'Code' = Role.Name -->
                       <Label Text="{Binding Name}" />
                       <Label Grid.Column="1" Text="{Binding Description}" />
                     </Grid>

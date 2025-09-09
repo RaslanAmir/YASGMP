@@ -14,13 +14,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.Maui.ApplicationModel; // MainThread
+using Microsoft.Maui.ApplicationModel;             // MainThread
 using Microsoft.Maui.Controls;
 using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.Services;
 
-namespace YasGMP
+namespace YasGMP.Views
 {
     /// <summary>
     /// <b>PartsPage</b> – pregled, unos, uređivanje i brisanje rezervnih dijelova (Parts).
@@ -113,7 +113,7 @@ namespace YasGMP
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Učitavanje dijelova nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Učitavanje dijelova nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -146,7 +146,7 @@ namespace YasGMP
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Spremanje dijela nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Spremanje dijela nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -159,7 +159,7 @@ namespace YasGMP
             {
                 if (PartListView.SelectedItem is not Part selected)
                 {
-                    await Services.SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite rezervni dio iz liste za uređivanje.", "OK");
+                    await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite rezervni dio iz liste za uređivanje.", "OK");
                     return;
                 }
 
@@ -199,7 +199,7 @@ namespace YasGMP
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Ažuriranje dijela nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Ažuriranje dijela nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -212,11 +212,11 @@ namespace YasGMP
             {
                 if (PartListView.SelectedItem is not Part selected)
                 {
-                    await Services.SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite rezervni dio iz liste za brisanje.", "OK");
+                    await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite rezervni dio iz liste za brisanje.", "OK");
                     return;
                 }
 
-                bool confirm = await Services.SafeNavigator.ConfirmAsync("Potvrda brisanja", $"Želite li izbrisati dio: {selected.Name}?", "Da", "Ne");
+                bool confirm = await SafeNavigator.ConfirmAsync("Potvrda brisanja", $"Želite li izbrisati dio: {selected.Name}?", "Da", "Ne");
                 if (!confirm) return;
 
                 const string sql = "DELETE FROM parts WHERE id=@id";
@@ -227,12 +227,12 @@ namespace YasGMP
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Brisanje dijela nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Brisanje dijela nije uspjelo: {ex.Message}", "OK");
             }
         }
 
         /// <summary>
-        /// Jednostavna forma preko <see cref="DisplayPromptAsync(string,string,string,string,string,int?,Keyboard)"/> za unos/uređivanje.
+        /// Jednostavna forma preko DisplayPromptAsync za unos/uređivanje.
         /// Svi promptovi se izvršavaju na glavnoj niti kako bi se izbjegle COM/WinUI greške.
         /// </summary>
         /// <param name="part">Model koji se puni/uređuje.</param>

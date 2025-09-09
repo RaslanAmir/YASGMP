@@ -11,6 +11,25 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceAuditHelpers
     {
+        public static Task LogExceptionAsync(
+            this DatabaseService db,
+            Exception ex,
+            string module,
+            string table,
+            int? recordId = null,
+            CancellationToken token = default)
+            => db.LogSystemEventAsync(
+                userId: null,
+                eventType: "EXCEPTION",
+                tableName: table,
+                module: module,
+                recordId: recordId,
+                description: ex?.ToString(),
+                ip: null,
+                severity: "error",
+                deviceInfo: null,
+                sessionId: null,
+                token: token);
         /// <summary>
         /// Writes a user-centric audit/system event entry without colliding with any Asset/other-domain
         /// <c>Log*AuditAsync</c> extension signatures.

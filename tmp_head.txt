@@ -1,0 +1,70 @@
+param(
+  [string]$SchemaJson = "tools/schema/snapshots/schema.json",
+  [string]$CodeRoot = ".",
+  [string]$ReportsDir = "reports"
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+function Ensure-Dir {
+  param([string]$Path)
+  if (-not (Test-Path $Path)) { New-Item -ItemType Directory -Path $Path | Out-Null }
+}
+
+Ensure-Dir -Path $ReportsDir
+
+# 1) Load DB schema (table -> columns)
+if (-not (Test-Path $SchemaJson)) { throw "Schema JSON not found: $SchemaJson" }
+$schema = Get-Content $SchemaJson -Raw | ConvertFrom-Json
+$tables = @{}
+
+# Support multiple snapshot formats:
+#  - Old:   $schema.Tables = array of { Name, Columns: [{ Name, ... }] }
+#  - New:   $schema.tables = object map { tableName: { columns: [{ COLUMN_NAME, ... }], ... } }
+if ($schema.PSObject.Properties.Name -contains 'Tables' -and $schema.Tables) {
+  foreach ($t in $schema.Tables) {
+    $cols = @{}
+    foreach ($c in $t.Columns) {
+      $colName = $null
+      if ($c.PSObject.Properties.Name -contains 'Name') { $colName = $c.Name }
+      elseif ($c.PSObject.Properties.Name -contains 'COLUMN_NAME') { $colName = $c.COLUMN_NAME }
+      if ($colName) { $cols[$colName.ToLowerInvariant()] = $true }
+    }
+    $tables[$t.Name.ToLowerInvariant()] = [pscustomobject]@{ Name = $t.Name; Columns = $cols }
+  }
+}
+elseif ($schema.PSObject.Properties.Name -contains 'tables' -and $schema.tables) {
+  $tmap = $schema.tables
+  foreach ($prop in $tmap.PSObject.Properties) {
+    $tname = $prop.Name
+    $tobj = $prop.Value
+    $cols = @{}
+    if ($tobj -and ($tobj.PSObject.Properties.Name -contains 'columns')) {
+      foreach ($c in $tobj.columns) {
+        $colName = $null
+        if ($c -and ($c.PSObject.Properties.Name -contains 'Name')) { $colName = $c.Name }
+        elseif ($c -and ($c.PSObject.Properties.Name -contains 'COLUMN_NAME')) { $colName = $c.COLUMN_NAME }
+        if ($colName) { $cols[$colName.ToLowerInvariant()] = $true }
+      }
+    }
+    $tables[$tname.ToLowerInvariant()] = [pscustomobject]@{ Name = $tname; Columns = $cols }
+  }
+}
+else {
+  throw "Unrecognized schema JSON format: expected 'Tables' array or 'tables' map."
+}
+
+# 1b) Include view names as schema-known (and derive columns when possible)
+$viewsPath = Join-Path (Split-Path $SchemaJson) 'views.sql'
+if (Test-Path $viewsPath) {
+  $viewsText = Get-Content $viewsPath -Raw
+  $rxViewWithSelect = [regex]'(?is)CREATE\s+(?:OR\s+REPLACE\s+)?VIEW\s+[`"\[]?(\w+)[`"\]]?\s+AS\s+SELECT\s+(.+?)\s+FROM\s+'
+  $rxViewName = [regex]'(?is)CREATE\s+(?:OR\s+REPLACE\s+)?VIEW\s+[`"\[]?(\w+)[`"\]]?\b'
+  $mAll = $rxViewWithSelect.Matches($viewsText)
+  foreach ($m in $mAll) {
+    $vname = $m.Groups[1].Value
+    $sel = $m.Groups[2].Value
+    $vcolsArr = @(Parse-ColumnsList $sel)
+    $vcols = @{}
+    foreach ($cc in $vcolsArr) { if (-not $vcols.ContainsKey($cc)) { $vcols[$cc] = $true } }

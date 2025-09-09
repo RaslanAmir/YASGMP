@@ -1,0 +1,25 @@
+*** Begin Patch
+*** Update File: Services/DatabaseService.Scheduler.Extensions.cs
+@@
+-        public static Task ExportScheduledJobsAsync(this DatabaseService db, List<ScheduledJob> items, string ip, string deviceInfo, string? sessionId, string format = "csv", CancellationToken token = default)
+-            => db.LogSystemEventAsync(0, "SCHED_EXPORT", "scheduled_jobs", "SchedulerModule", null, $"count={items?.Count ?? 0}; fmt={format}", ip, "info", deviceInfo, sessionId, token: token);
++        public static Task ExportScheduledJobsAsync(this DatabaseService db, List<ScheduledJob> items, string ip, string deviceInfo, string? sessionId, string format = "csv", CancellationToken token = default)
++        {
++            string? path = null;
++            if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
++            {
++                path = YasGMP.Helpers.CsvExportHelper.WriteCsv(items ?? new List<ScheduledJob>(), "scheduled_jobs",
++                    new (string, Func<ScheduledJob, object?>)[]
++                    {
++                        ("Id", j => j.Id),
++                        ("Name", j => j.Name),
++                        ("JobType", j => j.JobType),
++                        ("Status", j => j.Status),
++                        ("NextDue", j => j.NextDue),
++                        ("EntityType", j => j.EntityType),
++                        ("EntityId", j => j.EntityId)
++                    });
++            }
++            return db.LogSystemEventAsync(0, "SCHED_EXPORT", "scheduled_jobs", "SchedulerModule", null, $"count={items?.Count ?? 0}; fmt={format}; file={path}", ip, "info", deviceInfo, sessionId, token: token);
++        }
+*** End Patch

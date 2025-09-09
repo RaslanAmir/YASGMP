@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>ContractorIntervention</b> — GMP/CSV/21 CFR Part 11 compliant record for external contractor interventions.
+    /// <b>ContractorIntervention</b> â€” GMP/CSV/21 CFR Part 11 compliant record for external contractor interventions.
     /// <para>
     /// Links contractor (<see cref="User"/>), component, asset, reason, outcome, full audit, GMP status,
     /// digital signatures, forensics, versioning, document linkage, and future extensibility.
@@ -21,7 +21,7 @@ namespace YasGMP.Models
 
         /// <summary>Foreign Key to contractor user (User with "Contractor" role).</summary>
         [Required]
-        [Display(Name = "Vanjski izvođač")]
+        [Display(Name = "Vanjski izvoÄ‘aÄŤ")]
         [Column("contractor_id")]
         public int ContractorId { get; set; }
 
@@ -78,13 +78,13 @@ namespace YasGMP.Models
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>Start date/time of the intervention (for scheduling & duration tracking).</summary>
-        [Display(Name = "Početak intervencije")]
+        /// <summary>Start date/time of the intervention (for scheduling &amp; duration tracking).</summary>
+        [Display(Name = "PoÄŤetak intervencije")]
         [Column("start_date")]
         public DateTime? StartDate { get; set; }
 
-        /// <summary>End date/time of the intervention (for scheduling & duration tracking).</summary>
-        [Display(Name = "Završetak intervencije")]
+        /// <summary>End date/time of the intervention (for scheduling &amp; duration tracking).</summary>
+        [Display(Name = "ZavrĹˇetak intervencije")]
         [Column("end_date")]
         public DateTime? EndDate { get; set; }
 
@@ -116,7 +116,7 @@ namespace YasGMP.Models
 
         /// <summary>Comments or notes (bonus: for inspection, CAPA, incident context).</summary>
         [StringLength(500)]
-        [Display(Name = "Bilješke")]
+        [Display(Name = "BiljeĹˇke")]
         [Column("comments")]
         public string Comments { get; set; } = string.Empty;
 
@@ -155,3 +155,4 @@ namespace YasGMP.Models
             => $"ContractorIntervention [Id={Id}, Contractor={ContractorName ?? ContractorId.ToString()}, Date={InterventionDate:yyyy-MM-dd}, Component={ComponentId}, Status={Status}]";
     }
 }
+

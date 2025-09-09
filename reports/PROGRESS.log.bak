@@ -1,0 +1,11 @@
+[2025-09-04T08:59:13.1566202Z] STEP OBS-001 — Schema snapshot captured to tools/schema/snapshots (db: yasgmp, alias checked).
+[2025-09-04T12:30:58.3352514Z] STEP OBS-002 — Code scan completed; zero drift (Mismatches: 0).
+[2025-09-04T12:33:56Z] STEP DEC-001 - Finalized source-of-truth (zero drift); baseline frozen (d6a931bcbbcb9da2); allowlist unchanged.
+[] STEP VAL-001 - Baseline reproducibility ok; mismatch files clean (rows=0); table_diffs: Missing=0, NonExists=0; allowlist entries: tables=0, columns=0.
+[2025-09-04T12:41:31Z] STEP VAL-001B - Timestamp check.
+[2025-09-04T12:41:43Z] STEP VAL-001 - Validation complete: baseline matches report; mismatch-matrix rows=0; table_diffs Missing=0 NonExists=0; allowlist unchanged.
+[2025-09-04T12:52:52Z] STEP VAL-002 - Created baseline.lock and CI workflow (schema-baseline.yml).
+[2025-09-05T06:20:59.6461754Z] STEP OBS-003 — Decisions finalized; baseline frozen and allowlist reviewed.
+[2025-09-05T06:26:40Z] sync: generated migrations/20250905_0626_sync.sql (idempotent). Baseline d6a931bcbbcb; drift=0; hardening=audit+utc_ts+soft_delete
+[2025-09-05T07:34:24.2371213Z] STEP OBS-001 â€” Schema snapshot captured for yasgmp
+[2025-09-05T08:15:59.5668768Z] STEP OBS-002 â€” Code scan & inventory complete

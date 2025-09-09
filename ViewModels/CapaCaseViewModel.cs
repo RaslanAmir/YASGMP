@@ -334,15 +334,16 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
-        /// <summary>Exports filtered CAPA cases (CSV by default) and logs the action.</summary>
+        /// <summary>Exports filtered CAPA cases using a chosen format and logs the action.</summary>
         public async Task ExportCapaCasesAsync()
         {
             IsBusy = true;
             try
             {
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
                 await _dbService.ExportCapaCasesAsync(
                     FilteredCapaCases.ToList(),
-                    "csv"
+                    fmt
                 ).ConfigureAwait(false);
 
                 await _dbService.LogCapaCaseAuditAsync(

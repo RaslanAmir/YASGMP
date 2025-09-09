@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Debug.DebugDashboardPage"
+             Title="Diagnostics">
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="12">
+      <Label Text="Forensic Debugger &amp; Observability" FontSize="20" />
+      <Frame Padding="8" BorderColor="LightGray" CornerRadius="6">
+        <VerticalStackLayout Spacing="2">
+          <Label Text="Log directories:" FontAttributes="Bold" />
+          <Label x:Name="PrimaryDirLabel" />
+          <Label x:Name="SecondaryDirLabel" />
+        </VerticalStackLayout>
+      </Frame>
+      <Label x:Name="StatusLabel" Text="Ready" />
+      <HorizontalStackLayout Spacing="8">
+        <Button Text="Run Self Tests" Clicked="OnRunTests" />
+        <Button Text="View Logs" Clicked="OnViewLogs" />
+        <Button Text="Health" Clicked="OnHealth" />
+        <Button Text="Flush Elastic" Clicked="OnFlushElastic" />
+      </HorizontalStackLayout>
+      <Label x:Name="SchemaHashLabel" Text="Schema hash: (unknown)" />
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>

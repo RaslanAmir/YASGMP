@@ -31,7 +31,8 @@ namespace YasGMP.Services
             bool includeAttachments = false,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT * FROM validations
+            const string sql = @"SELECT id, code, type, machine_id, component_id, date_start, date_end, documentation, comment, status, digital_signature, next_due
+                                 FROM validations
                                  ORDER BY date_start IS NULL, date_start DESC, id DESC";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
 
@@ -47,7 +48,8 @@ namespace YasGMP.Services
             int id,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT * FROM validations WHERE id=@id LIMIT 1";
+            const string sql = @"SELECT id, code, type, machine_id, component_id, date_start, date_end, documentation, comment, status, digital_signature, next_due
+                                 FROM validations WHERE id=@id LIMIT 1";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 0 ? null : ParseValidation(dt.Rows[0]);
         }

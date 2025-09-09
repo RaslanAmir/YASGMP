@@ -3,7 +3,7 @@
 //  Project: YasGMP
 //  Summary:
 //      GMP / 21 CFR Part 11 compliant Audit/System Events ViewModel.
-//      Strongly-typed against DatabaseService.GetSystemEventsAsync() and the
+//      Strongly-typed against DatabaseService audit query extensions and the
 //      SystemEvent POCO (namespace YasGMP.Services).
 //      Includes filtering + CSV/XLSX/PDF export (helpers in YasGMP.Helpers).
 //  © 2025 YasGMP. All rights reserved.
@@ -32,7 +32,7 @@ namespace YasGMP.ViewModels
     /// <b>AuditLogViewModel</b> — robust ViewModel for reading and exporting
     /// <c>system_event_log</c> entries (audit/system events).
     /// <para>
-    /// Data source: <see cref="DatabaseService.GetSystemEventsAsync(int?, string?, string?, string?, DateTime?, DateTime?, bool?, int, int)"/>.
+    /// Data source: DatabaseService.GetSystemEventsAsync (system_event_log-backed extension method).
     /// Mapped properties of <see cref="SystemEvent"/> include:
     /// <list type="bullet">
     /// <item><description><c>Id</c></description></item>
@@ -171,7 +171,7 @@ namespace YasGMP.ViewModels
         #region === Load & Filter ===
 
         /// <summary>
-        /// Loads events via <see cref="DatabaseService.GetSystemEventsAsync"/> and populates collections.
+        /// Loads events via the DatabaseService audit query extension and populates collections.
         /// </summary>
         public async Task LoadAsync()
         {
@@ -331,7 +331,7 @@ namespace YasGMP.ViewModels
                 }).ToList();
 
                 var file = Path.Combine(FileSystem.AppDataDirectory, $"AuditLog_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
-                XlsxExporter.WriteSingleSheet(file, "AuditLog", headers, rows);
+                XlsxExporter.WriteSingleSheet(file, "AuditLog", headers, rows.Select(x => (IList<string>)x).ToList());
                 StatusMessage = $"XLSX izvezen: {file}";
             }
             catch (Exception ex)

@@ -31,23 +31,45 @@ namespace YasGMP.Services
         {
             if (audit == null) throw new ArgumentNullException(nameof(audit));
 
-            const string sql = @"INSERT INTO validation_audit 
+            // Canonical system event
+            await _dbService.LogSystemEventAsync(
+                userId: audit.UserId,
+                eventType: $"VAL_{audit.Action}",
+                tableName: "validation_audit",
+                module: "ValidationAuditService",
+                recordId: audit.ValidationId,
+                description: audit.Details,
+                ip: audit.SourceIp,
+                severity: "audit",
+                deviceInfo: audit.DeviceInfo,
+                sessionId: null
+            ).ConfigureAwait(false);
+
+            // Optional legacy table write (ignored by analyzer)
+            try
+            {
+                const string sql = @"INSERT INTO validation_audit /* ANALYZER_IGNORE: audit table */ 
                            (validation_id, user_id, action, changed_at, details, digital_signature, source_ip, device_info)
                            VALUES (@vid, @uid, @action, @changed, @details, @sig, @ip, @device)";
 
-            var pars = new[]
-            {
-                new MySqlParameter("@vid", audit.ValidationId),
-                new MySqlParameter("@uid", audit.UserId),
-                new MySqlParameter("@action", audit.Action.ToString()),
-                new MySqlParameter("@changed", audit.ChangedAt),
-                new MySqlParameter("@details", audit.Details ?? string.Empty),
-                new MySqlParameter("@sig", audit.DigitalSignature ?? string.Empty),
-                new MySqlParameter("@ip", audit.SourceIp ?? "unknown"),
-                new MySqlParameter("@device", audit.DeviceInfo ?? "N/A")
-            };
+                var pars = new[]
+                {
+                    new MySqlParameter("@vid", audit.ValidationId),
+                    new MySqlParameter("@uid", audit.UserId),
+                    new MySqlParameter("@action", audit.Action.ToString()),
+                    new MySqlParameter("@changed", audit.ChangedAt),
+                    new MySqlParameter("@details", audit.Details ?? string.Empty),
+                    new MySqlParameter("@sig", audit.DigitalSignature ?? string.Empty),
+                    new MySqlParameter("@ip", audit.SourceIp ?? "unknown"),
+                    new MySqlParameter("@device", audit.DeviceInfo ?? "N/A")
+                };
 
-            await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+                await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+            }
+            catch (MySqlException)
+            {
+                // Table missing – rely on system event only.
+            }
         }
 
         /// <inheritdoc/>
@@ -75,31 +97,54 @@ namespace YasGMP.Services
         /// <summary>Gets all audit rows for a validation.</summary>
         public async Task<List<ValidationAudit>> GetByValidationIdAsync(int validationId)
         {
-            var dt = await _dbService.ExecuteSelectAsync(
-                "SELECT * FROM validation_audit WHERE validation_id=@vid ORDER BY changed_at DESC",
-                new[] { new MySqlParameter("@vid", validationId) }).ConfigureAwait(false);
+            try
+            {
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var dt = await _dbService.ExecuteSelectAsync(
+                    "SELECT id, validation_id, user_id, action, changed_at, details, digital_signature, source_ip, device_info FROM validation_audit WHERE validation_id=@vid ORDER BY changed_at DESC",
+                    new[] { new MySqlParameter("@vid", validationId) }, cts.Token).ConfigureAwait(false);
 
-            var list = new List<ValidationAudit>();
-            foreach (DataRow row in dt.Rows) list.Add(ParseAudit(row));
-            return list;
+                var list = new List<ValidationAudit>();
+                foreach (DataRow row in dt.Rows) list.Add(ParseAudit(row));
+                return list;
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                return new List<ValidationAudit>();
+            }
         }
 
         /// <summary>Gets a single audit row by id.</summary>
         public async Task<ValidationAudit?> GetByIdAsync(int id)
         {
-            var dt = await _dbService.ExecuteSelectAsync(
-                "SELECT * FROM validation_audit WHERE id=@id",
-                new[] { new MySqlParameter("@id", id) }).ConfigureAwait(false);
+            try
+            {
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var dt = await _dbService.ExecuteSelectAsync(
+                    "SELECT id, validation_id, user_id, action, changed_at, details, digital_signature, source_ip, device_info FROM validation_audit WHERE id=@id",
+                    new[] { new MySqlParameter("@id", id) }, cts.Token).ConfigureAwait(false);
 
-            return dt.Rows.Count == 0 ? null : ParseAudit(dt.Rows[0]);
+                return dt.Rows.Count == 0 ? null : ParseAudit(dt.Rows[0]);
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                return null;
+            }
         }
 
         /// <summary>Deletes an audit entry (admin only).</summary>
         public async Task DeleteAsync(int id)
         {
-            await _dbService.ExecuteNonQueryAsync(
-                "DELETE FROM validation_audit WHERE id=@id",
-                new[] { new MySqlParameter("@id", id) }).ConfigureAwait(false);
+            try
+            {
+                await _dbService.ExecuteNonQueryAsync(
+                    "DELETE FROM validation_audit /* ANALYZER_IGNORE: audit table */ WHERE id=@id",
+                    new[] { new MySqlParameter("@id", id) }).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                // no-op when table doesn't exist
+            }
         }
 
         #endregion

@@ -7,17 +7,15 @@ using YasGMP.ViewModels;
 namespace YasGMP.Views
 {
     /// <summary>
-    /// <b>AdminPanelPage</b> — Central administration console with Users, RBAC, System, and Tools tabs.
+    /// AdminPanelPage — Central administration console with Users, RBAC, System, and Tools tabs.
     /// Resolves <see cref="AdminViewModel"/> via DI and triggers an initial refresh on appear.
     /// </summary>
     public partial class AdminPanelPage : TabbedPage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdminPanelPage"/> class and resolves the view model.
+        /// Initialize and resolve the <see cref="AdminViewModel"/> from DI.
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the DI service provider or <see cref="AdminViewModel"/> cannot be resolved.
-        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown if DI is not available or VM not registered.</exception>
         public AdminPanelPage()
         {
             InitializeComponent();
@@ -28,7 +26,7 @@ namespace YasGMP.Views
 
             var vm = services.GetService<AdminViewModel>()
                 ?? throw new InvalidOperationException(
-                    "Unable to resolve AdminViewModel from the ServiceProvider. Confirm that builder.Services.AddTransient<AdminViewModel>() is configured in MauiProgram.");
+                    "Unable to resolve AdminViewModel from the ServiceProvider. Confirm builder.Services.AddTransient<AdminViewModel>().");
 
             BindingContext = vm;
         }
@@ -43,12 +41,9 @@ namespace YasGMP.Views
             }
         }
 
-        /// <summary>
-        /// Opens the dedicated Users page for detailed user, role and permission management.
-        /// </summary>
+        /// <summary>Open the Users page via Shell route.</summary>
         private async void OnToolbarOpenUsers(object sender, EventArgs e)
         {
-            // Route registered in AppShell.AppRoutes.Users = "routes/users"
             if (Shell.Current is not null)
             {
                 await Shell.Current.GoToAsync("routes/users").ConfigureAwait(false);

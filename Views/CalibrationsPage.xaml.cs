@@ -77,8 +77,12 @@ namespace YasGMP.Views
             try
             {
                 // 1) Dohvati sve iz baze (u pozadini)
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
                 var dt = await _dbService
-                    .ExecuteSelectAsync("SELECT * FROM calibrations ORDER BY calibration_date DESC")
+                    .ExecuteSelectAsync(
+                        "SELECT id, component_id, supplier_id, calibration_date, next_due, cert_doc, result, comment, digital_signature, last_modified, last_modified_by_id FROM calibrations ORDER BY calibration_date DESC",
+                        null,
+                        cts.Token)
                     .ConfigureAwait(false);
 
                 // 2) Izgradi privremenu listu modela (izvan UI threada)
@@ -229,7 +233,8 @@ namespace YasGMP.Views
                     new MySqlParameter("@modby", updatedCal.LastModifiedById)
                 };
 
-                await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await _dbService.ExecuteNonQueryAsync(sql, pars, cts.Token).ConfigureAwait(false);
                 await LogAudit("CREATE", updatedCal.Id, signature).ConfigureAwait(false);
                 await LoadCalibrationsAsync().ConfigureAwait(false);
             };
@@ -283,7 +288,8 @@ namespace YasGMP.Views
                     new MySqlParameter("@id",    updatedCal.Id)
                 };
 
-                await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await _dbService.ExecuteNonQueryAsync(sql, pars, cts.Token).ConfigureAwait(false);
                 await LogAudit("UPDATE", updatedCal.Id, signature).ConfigureAwait(false);
                 await LoadCalibrationsAsync().ConfigureAwait(false);
             };
@@ -324,18 +330,21 @@ namespace YasGMP.Views
 
         #region Audit
 
-        /// <summary>Upis u <c>audit_log</c> (generički, bez dupliranja triggera).</summary>
+        /// <summary>Audit via canonical system events (replaces legacy audit_log table).</summary>
         private async Task LogAudit(string action, int entityId, string user)
         {
-            const string sql = @"INSERT INTO audit_log (entity, entity_id, action, user_name, timestamp) 
-                                 VALUES ('calibration', @eid, @act, @usr, NOW())";
-            var pars = new[]
-            {
-                new MySqlParameter("@eid", entityId),
-                new MySqlParameter("@act", action),
-                new MySqlParameter("@usr", user ?? "Nepoznat")
-            };
-            await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+            await _dbService.LogSystemEventAsync(
+                userId: (Application.Current as App)?.LoggedUser?.Id,
+                eventType: action ?? string.Empty,
+                tableName: "calibrations",
+                module: "CalibrationsPage",
+                recordId: entityId == 0 ? null : entityId,
+                description: $"user={user ?? "Nepoznat"}",
+                ip: DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
+                severity: "audit",
+                deviceInfo: string.Empty,
+                sessionId: (Application.Current as App)?.SessionId
+            ).ConfigureAwait(false);
         }
 
         #endregion

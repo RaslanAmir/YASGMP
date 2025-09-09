@@ -44,6 +44,12 @@ CREATE TABLE `admin_activity_log` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `timestamp` datetime GENERATED ALWAYS AS (`activity_time`) VIRTUAL,
   `action` varchar(255) GENERATED ALWAYS AS (`activity`) VIRTUAL,
+  `user?` varchar(255) DEFAULT NULL,
+  `device_name` varchar(128) DEFAULT NULL,
+  `session_id` varchar(64) DEFAULT NULL,
+  `digital_signature` varchar(256) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_adminact_user` (`admin_id`),
   CONSTRAINT `fk_adminact_user` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -73,6 +79,73 @@ DELIMITER ;;
       SET NEW.admin_id = NULL;
     END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_admin_activity_log_ai_audit` AFTER INSERT ON `admin_activity_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'admin_activity_log', 'AdminActivityLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('admin_activity_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_admin_activity_log_au_audit` AFTER UPDATE ON `admin_activity_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'admin_activity_log', 'AdminActivityLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('admin_activity_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_admin_activity_log_ad_audit` AFTER DELETE ON `admin_activity_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'admin_activity_log', 'AdminActivityLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('admin_activity_log delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -114,6 +187,73 @@ LOCK TABLES `api_audit_log` WRITE;
 /*!40000 ALTER TABLE `api_audit_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `api_audit_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_audit_log_ai_audit` AFTER INSERT ON `api_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'api_audit_log', 'ApiAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('api_audit_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_audit_log_au_audit` AFTER UPDATE ON `api_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'api_audit_log', 'ApiAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('api_audit_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_audit_log_ad_audit` AFTER DELETE ON `api_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'api_audit_log', 'ApiAuditLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('api_audit_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `api_keys`
@@ -131,11 +271,12 @@ CREATE TABLE `api_keys` (
   `is_active` tinyint(1) DEFAULT '1',
   `last_used_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `usage_logs` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_value` (`key_value`),
   KEY `fk_apikey_owner` (`owner_id`),
   CONSTRAINT `fk_apikey_owner` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,6 +287,73 @@ LOCK TABLES `api_keys` WRITE;
 /*!40000 ALTER TABLE `api_keys` DISABLE KEYS */;
 /*!40000 ALTER TABLE `api_keys` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_keys_ai_audit` AFTER INSERT ON `api_keys` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'api_keys', 'ApiKeysPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('api_keys insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_keys_au_audit` AFTER UPDATE ON `api_keys` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'api_keys', 'ApiKeysPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('api_keys update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_keys_ad_audit` AFTER DELETE ON `api_keys` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'api_keys', 'ApiKeysPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('api_keys delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `api_usage_log`
@@ -172,12 +380,14 @@ CREATE TABLE `api_usage_log` (
   `timestamp` datetime GENERATED ALWAYS AS (`call_time`) VIRTUAL,
   `action` varchar(20) GENERATED ALWAYS AS (`method`) VIRTUAL,
   `details` text GENERATED ALWAYS AS (coalesce(`error_message`,`params`)) VIRTUAL,
+  `api_key` varchar(255) DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_api_usage_key` (`api_key_id`),
   KEY `fk_api_usage_user` (`user_id`),
   CONSTRAINT `fk_api_usage_key` FOREIGN KEY (`api_key_id`) REFERENCES `api_keys` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_api_usage_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -188,6 +398,73 @@ LOCK TABLES `api_usage_log` WRITE;
 /*!40000 ALTER TABLE `api_usage_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `api_usage_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_usage_log_ai_audit` AFTER INSERT ON `api_usage_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'api_usage_log', 'ApiUsageLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('api_usage_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_usage_log_au_audit` AFTER UPDATE ON `api_usage_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'api_usage_log', 'ApiUsageLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('api_usage_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_api_usage_log_ad_audit` AFTER DELETE ON `api_usage_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'api_usage_log', 'ApiUsageLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('api_usage_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `attachments`
@@ -208,6 +485,30 @@ CREATE TABLE `attachments` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `name` varchar(255) DEFAULT NULL,
+  `file_size` bigint DEFAULT NULL,
+  `entity_type` varchar(255) DEFAULT NULL,
+  `entity_id` int DEFAULT NULL,
+  `file_content` longblob,
+  `ocr_text` varchar(255) DEFAULT NULL,
+  `file_hash` varchar(255) DEFAULT NULL,
+  `uploaded_by_id` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `is_approved` tinyint(1) DEFAULT NULL,
+  `approved_by_id` int DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `expiry_date` datetime DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `session_id` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
+  `ai_score` decimal(10,2) DEFAULT NULL,
+  `chain_id` varchar(255) DEFAULT NULL,
+  `version_uid` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_att_user` (`uploaded_by`),
   CONSTRAINT `fk_att_user` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -222,6 +523,118 @@ LOCK TABLES `attachments` WRITE;
 /*!40000 ALTER TABLE `attachments` DISABLE KEYS */;
 /*!40000 ALTER TABLE `attachments` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_attachments_ai_audit` AFTER INSERT ON `attachments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'attachments', 'AttachmentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('attachments insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_attachments_au_audit` AFTER UPDATE ON `attachments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'attachments', 'AttachmentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('attachments update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_attachments_ad_audit` AFTER DELETE ON `attachments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'attachments', 'AttachmentsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('attachments delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `audit_log`
+--
+
+DROP TABLE IF EXISTS `audit_log`;
+/*!50001 DROP VIEW IF EXISTS `audit_log`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `audit_log` AS SELECT 
+ 1 AS `id`,
+ 1 AS `event_time`,
+ 1 AS `timestamp`,
+ 1 AS `user_id`,
+ 1 AS `event_type`,
+ 1 AS `action`,
+ 1 AS `table_name`,
+ 1 AS `related_module`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `details`,
+ 1 AS `source_ip`,
+ 1 AS `device_info`,
+ 1 AS `session_id`,
+ 1 AS `severity`,
+ 1 AS `processed`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`,
+ 1 AS `ts_utc`,
+ 1 AS `username`,
+ 1 AS `digital_signature`,
+ 1 AS `entry_hash`,
+ 1 AS `mac_address`,
+ 1 AS `geo_location`,
+ 1 AS `regulator`,
+ 1 AS `related_case_id`,
+ 1 AS `related_case_type`,
+ 1 AS `anomaly_score`,
+ 1 AS `user`,
+ 1 AS `change_version`,
+ 1 AS `is_deleted`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `buildings`
@@ -251,6 +664,90 @@ LOCK TABLES `buildings` WRITE;
 /*!40000 ALTER TABLE `buildings` DISABLE KEYS */;
 /*!40000 ALTER TABLE `buildings` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_buildings_ai_audit` AFTER INSERT ON `buildings` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'buildings', 'BuildingsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('buildings insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_buildings_au_audit` AFTER UPDATE ON `buildings` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'buildings', 'BuildingsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('buildings update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'buildings', 'BuildingsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'buildings update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'buildings', 'BuildingsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'buildings update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_buildings_ad_audit` AFTER DELETE ON `buildings` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'buildings', 'BuildingsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('buildings delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `calibration_audit_log`
@@ -273,6 +770,8 @@ CREATE TABLE `calibration_audit_log` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `timestamp` datetime GENERATED ALWAYS AS (`changed_at`) VIRTUAL,
   `details` text GENERATED ALWAYS AS (`note`) VIRTUAL,
+  `calibration` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cal_audit_cal` (`calibration_id`),
   KEY `fk_cal_audit_user` (`user_id`),
@@ -289,6 +788,73 @@ LOCK TABLES `calibration_audit_log` WRITE;
 /*!40000 ALTER TABLE `calibration_audit_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `calibration_audit_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_audit_log_ai_audit` AFTER INSERT ON `calibration_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'calibration_audit_log', 'CalibrationAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibration_audit_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_audit_log_au_audit` AFTER UPDATE ON `calibration_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'calibration_audit_log', 'CalibrationAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibration_audit_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_audit_log_ad_audit` AFTER DELETE ON `calibration_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'calibration_audit_log', 'CalibrationAuditLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('calibration_audit_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `calibration_export_log`
@@ -310,6 +876,7 @@ CREATE TABLE `calibration_export_log` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `timestamp` datetime GENERATED ALWAYS AS (`export_time`) VIRTUAL,
   `details` text GENERATED ALWAYS AS (`file_path`) VIRTUAL,
+  `user?` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cel_user` (`user_id`),
   CONSTRAINT `fk_cel_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -324,6 +891,73 @@ LOCK TABLES `calibration_export_log` WRITE;
 /*!40000 ALTER TABLE `calibration_export_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `calibration_export_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_export_log_ai_audit` AFTER INSERT ON `calibration_export_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'calibration_export_log', 'CalibrationExportLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibration_export_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_export_log_au_audit` AFTER UPDATE ON `calibration_export_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'calibration_export_log', 'CalibrationExportLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibration_export_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_export_log_ad_audit` AFTER DELETE ON `calibration_export_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'calibration_export_log', 'CalibrationExportLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('calibration_export_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `calibration_sensors`
@@ -382,6 +1016,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_sensors_ai_audit` AFTER INSERT ON `calibration_sensors` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'calibration_sensors', 'CalibrationSensorsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibration_sensors insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -393,6 +1049,51 @@ DELIMITER ;;
     CALL ref_touch('sensor_type', NEW.sensor_type, NEW.sensor_type);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.sensor_type_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_sensors_au_audit` AFTER UPDATE ON `calibration_sensors` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'calibration_sensors', 'CalibrationSensorsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibration_sensors update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibration_sensors_ad_audit` AFTER DELETE ON `calibration_sensors` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'calibration_sensors', 'CalibrationSensorsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('calibration_sensors delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -423,6 +1124,17 @@ CREATE TABLE `calibrations` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `result_id` int DEFAULT NULL,
+  `machine_component` varchar(255) DEFAULT NULL,
+  `supplier?` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `approved` tinyint(1) DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `approved_by_id` int DEFAULT NULL,
+  `previous_calibration_id` int DEFAULT NULL,
+  `calibration?` varchar(255) DEFAULT NULL,
+  `next_calibration_id` int DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cal_component` (`component_id`),
   KEY `fk_cal_supplier` (`supplier_id`),
@@ -491,6 +1203,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibrations_ai_audit` AFTER INSERT ON `calibrations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'calibrations', 'CalibrationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibrations insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -536,6 +1270,29 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibrations_au_audit` AFTER UPDATE ON `calibrations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'calibrations', 'CalibrationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('calibrations update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -552,6 +1309,28 @@ DELIMITER ;;
     INSERT INTO system_event_log(user_id, event_type, table_name, related_module, record_id, description, source_ip, severity)
     VALUES (OLD.last_modified_by_id, 'DELETE', 'calibrations', 'CalibrationModule', OLD.id,
             CONCAT('Deleted calibration record ID=', OLD.id), 'system', 'critical');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_calibrations_ad_audit` AFTER DELETE ON `calibrations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'calibrations', 'CalibrationsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('calibrations delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -577,6 +1356,13 @@ CREATE TABLE `capa_action_log` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `capa_case` varchar(255) DEFAULT NULL,
+  `performed_by_id` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cal_case` (`capa_case_id`),
   KEY `fk_cal_user` (`performed_by`),
@@ -593,6 +1379,73 @@ LOCK TABLES `capa_action_log` WRITE;
 /*!40000 ALTER TABLE `capa_action_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `capa_action_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_action_log_ai_audit` AFTER INSERT ON `capa_action_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'capa_action_log', 'CapaActionLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_action_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_action_log_au_audit` AFTER UPDATE ON `capa_action_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'capa_action_log', 'CapaActionLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_action_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_action_log_ad_audit` AFTER DELETE ON `capa_action_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'capa_action_log', 'CapaActionLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('capa_action_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `capa_actions`
@@ -624,6 +1477,98 @@ LOCK TABLES `capa_actions` WRITE;
 /*!40000 ALTER TABLE `capa_actions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `capa_actions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_actions_ai_audit` AFTER INSERT ON `capa_actions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'capa_actions', 'CapaActionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_actions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_actions_au_audit` AFTER UPDATE ON `capa_actions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'capa_actions', 'CapaActionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_actions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_actions_ad_audit` AFTER DELETE ON `capa_actions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'capa_actions', 'CapaActionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('capa_actions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `capa_audit_log`
+--
+
+DROP TABLE IF EXISTS `capa_audit_log`;
+/*!50001 DROP VIEW IF EXISTS `capa_audit_log`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `capa_audit_log` AS SELECT 
+ 1 AS `id`,
+ 1 AS `capa_case_id`,
+ 1 AS `old_status`,
+ 1 AS `new_status`,
+ 1 AS `changed_by`,
+ 1 AS `changed_at`,
+ 1 AS `note`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`,
+ 1 AS `capa_case`,
+ 1 AS `source_ip`,
+ 1 AS `digital_signature`,
+ 1 AS `change_version`,
+ 1 AS `is_deleted`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `capa_cases`
@@ -644,12 +1589,34 @@ CREATE TABLE `capa_cases` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status_id` int DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `machine_component` varchar(255) DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `priority` varchar(255) DEFAULT NULL,
+  `root_cause` varchar(255) DEFAULT NULL,
+  `corrective_action` varchar(255) DEFAULT NULL,
+  `preventive_action` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `approved` tinyint(1) DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `approved_by_id` int DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `root_cause_reference` varchar(255) DEFAULT NULL,
+  `linked_findings` varchar(255) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `comments` varchar(255) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
+  `assigned_to_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_capa_component` (`component_id`),
   KEY `idx_capa_status_id` (`status_id`),
   CONSTRAINT `fk_capa_component` FOREIGN KEY (`component_id`) REFERENCES `machine_components` (`id`),
   CONSTRAINT `fk_capa_status` FOREIGN KEY (`status_id`) REFERENCES `ref_value` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -681,6 +1648,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_cases_ai_audit` AFTER INSERT ON `capa_cases` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'capa_cases', 'CapaCasesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_cases insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -692,6 +1681,51 @@ DELIMITER ;;
     CALL ref_touch('capa_status', NEW.status, NEW.status);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.status_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_cases_au_audit` AFTER UPDATE ON `capa_cases` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'capa_cases', 'CapaCasesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_cases update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_cases_ad_audit` AFTER DELETE ON `capa_cases` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'capa_cases', 'CapaCasesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('capa_cases delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -716,6 +1750,11 @@ CREATE TABLE `capa_status_history` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `capa_case` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_csh_case` (`capa_case_id`),
   KEY `fk_csh_user` (`changed_by`),
@@ -731,6 +1770,103 @@ CREATE TABLE `capa_status_history` (
 LOCK TABLES `capa_status_history` WRITE;
 /*!40000 ALTER TABLE `capa_status_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `capa_status_history` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_status_history_ai_audit` AFTER INSERT ON `capa_status_history` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'capa_status_history', 'CapaStatusHistoryPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_status_history insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_status_history_au_audit` AFTER UPDATE ON `capa_status_history` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'capa_status_history', 'CapaStatusHistoryPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('capa_status_history update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_capa_status_history_ad_audit` AFTER DELETE ON `capa_status_history` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'capa_status_history', 'CapaStatusHistoryPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('capa_status_history delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `change_controls`
+--
+
+DROP TABLE IF EXISTS `change_controls`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `change_controls` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `date_requested` varchar(255) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `requested_by_id` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `change_controls`
+--
+
+LOCK TABLES `change_controls` WRITE;
+/*!40000 ALTER TABLE `change_controls` DISABLE KEYS */;
+/*!40000 ALTER TABLE `change_controls` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -763,6 +1899,73 @@ LOCK TABLES `checklist_items` WRITE;
 /*!40000 ALTER TABLE `checklist_items` DISABLE KEYS */;
 /*!40000 ALTER TABLE `checklist_items` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_checklist_items_ai_audit` AFTER INSERT ON `checklist_items` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'checklist_items', 'ChecklistItemsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('checklist_items insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_checklist_items_au_audit` AFTER UPDATE ON `checklist_items` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'checklist_items', 'ChecklistItemsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('checklist_items update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_checklist_items_ad_audit` AFTER DELETE ON `checklist_items` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'checklist_items', 'ChecklistItemsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('checklist_items delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `checklist_templates`
@@ -794,6 +1997,90 @@ LOCK TABLES `checklist_templates` WRITE;
 /*!40000 ALTER TABLE `checklist_templates` DISABLE KEYS */;
 /*!40000 ALTER TABLE `checklist_templates` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_checklist_templates_ai_audit` AFTER INSERT ON `checklist_templates` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'checklist_templates', 'ChecklistTemplatesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('checklist_templates insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_checklist_templates_au_audit` AFTER UPDATE ON `checklist_templates` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'checklist_templates', 'ChecklistTemplatesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('checklist_templates update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'checklist_templates', 'ChecklistTemplatesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'checklist_templates update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'checklist_templates', 'ChecklistTemplatesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'checklist_templates update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_checklist_templates_ad_audit` AFTER DELETE ON `checklist_templates` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'checklist_templates', 'ChecklistTemplatesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('checklist_templates delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `comments`
@@ -824,6 +2111,73 @@ LOCK TABLES `comments` WRITE;
 /*!40000 ALTER TABLE `comments` DISABLE KEYS */;
 /*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_comments_ai_audit` AFTER INSERT ON `comments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'comments', 'CommentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('comments insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_comments_au_audit` AFTER UPDATE ON `comments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'comments', 'CommentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('comments update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_comments_ad_audit` AFTER DELETE ON `comments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'comments', 'CommentsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('comments delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `component_devices`
@@ -859,6 +2213,73 @@ LOCK TABLES `component_devices` WRITE;
 /*!40000 ALTER TABLE `component_devices` DISABLE KEYS */;
 /*!40000 ALTER TABLE `component_devices` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_devices_ai_audit` AFTER INSERT ON `component_devices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'component_devices', 'ComponentDevicesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_devices insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_devices_au_audit` AFTER UPDATE ON `component_devices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'component_devices', 'ComponentDevicesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_devices update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_devices_ad_audit` AFTER DELETE ON `component_devices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'component_devices', 'ComponentDevicesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('component_devices delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `component_models`
@@ -889,6 +2310,73 @@ LOCK TABLES `component_models` WRITE;
 INSERT INTO `component_models` VALUES (1,1,'IEC-IE3-2.2kW','IEC IE3 Motor 2.2kW','2025-08-28 12:36:24','2025-08-28 12:36:24'),(2,7,'SINAMICS-G120','SINAMICS G120 VFD','2025-08-28 12:36:24','2025-08-28 12:36:24'),(3,6,'S7-1200','Siemens S7-1200 PLC','2025-08-28 12:36:24','2025-08-28 12:36:24'),(4,3,'ASCO-2W160','ASCO 2/2 Solenoid Valve 2W160','2025-08-28 12:36:24','2025-08-28 12:36:24'),(5,4,'PALL-0.2UM','Pall 0.2 ╬╝m Filter','2025-08-28 12:36:24','2025-08-28 12:36:24');
 /*!40000 ALTER TABLE `component_models` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_models_ai_audit` AFTER INSERT ON `component_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'component_models', 'ComponentModelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_models insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_models_au_audit` AFTER UPDATE ON `component_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'component_models', 'ComponentModelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_models update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_models_ad_audit` AFTER DELETE ON `component_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'component_models', 'ComponentModelsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('component_models delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `component_parts`
@@ -920,6 +2408,73 @@ LOCK TABLES `component_parts` WRITE;
 /*!40000 ALTER TABLE `component_parts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `component_parts` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_parts_ai_audit` AFTER INSERT ON `component_parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'component_parts', 'ComponentPartsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_parts insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_parts_au_audit` AFTER UPDATE ON `component_parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'component_parts', 'ComponentPartsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_parts update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_parts_ad_audit` AFTER DELETE ON `component_parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'component_parts', 'ComponentPartsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('component_parts delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `component_qualifications`
@@ -939,6 +2494,8 @@ CREATE TABLE `component_qualifications` (
   `signed_by` varchar(128) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `certificate_number` varchar(255) DEFAULT NULL,
+  `supplier_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cq_component` (`component_id`),
   CONSTRAINT `fk_cq_component` FOREIGN KEY (`component_id`) REFERENCES `machine_components` (`id`)
@@ -953,6 +2510,73 @@ LOCK TABLES `component_qualifications` WRITE;
 /*!40000 ALTER TABLE `component_qualifications` DISABLE KEYS */;
 /*!40000 ALTER TABLE `component_qualifications` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_qualifications_ai_audit` AFTER INSERT ON `component_qualifications` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'component_qualifications', 'ComponentQualificationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_qualifications insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_qualifications_au_audit` AFTER UPDATE ON `component_qualifications` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'component_qualifications', 'ComponentQualificationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_qualifications update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_qualifications_ad_audit` AFTER DELETE ON `component_qualifications` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'component_qualifications', 'ComponentQualificationsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('component_qualifications delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `component_types`
@@ -981,6 +2605,90 @@ LOCK TABLES `component_types` WRITE;
 INSERT INTO `component_types` VALUES (1,'MOTOR','Electric Motor','2025-08-28 12:36:24','2025-08-28 12:36:24'),(2,'PUMP_HEAD','Pump Head','2025-08-28 12:36:24','2025-08-28 12:36:24'),(3,'VALVE','Valve','2025-08-28 12:36:24','2025-08-28 12:36:24'),(4,'FILTER','Filter Housing/Element','2025-08-28 12:36:24','2025-08-28 12:36:24'),(5,'SENSOR','Process Sensor','2025-08-28 12:36:24','2025-08-28 12:36:24'),(6,'PLC','PLC/Controller','2025-08-28 12:36:24','2025-08-28 12:36:24'),(7,'VFD','Variable Frequency Drive','2025-08-28 12:36:24','2025-08-28 12:36:24'),(8,'GEARBOX','Gearbox/Reducer','2025-08-28 12:36:24','2025-08-28 12:36:24'),(9,'CONVEYOR','Conveyor Module','2025-08-28 12:36:24','2025-08-28 12:36:24'),(10,'HEAT_EXCHANGER','Heat Exchanger','2025-08-28 12:36:24','2025-08-28 12:36:24');
 /*!40000 ALTER TABLE `component_types` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_types_ai_audit` AFTER INSERT ON `component_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'component_types', 'ComponentTypesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_types insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_types_au_audit` AFTER UPDATE ON `component_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'component_types', 'ComponentTypesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('component_types update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'component_types', 'ComponentTypesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'component_types update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'component_types', 'ComponentTypesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'component_types update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_component_types_ad_audit` AFTER DELETE ON `component_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'component_types', 'ComponentTypesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('component_types delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `config_change_log`
@@ -1018,6 +2726,73 @@ LOCK TABLES `config_change_log` WRITE;
 /*!40000 ALTER TABLE `config_change_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `config_change_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_config_change_log_ai_audit` AFTER INSERT ON `config_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'config_change_log', 'ConfigChangeLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('config_change_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_config_change_log_au_audit` AFTER UPDATE ON `config_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'config_change_log', 'ConfigChangeLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('config_change_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_config_change_log_ad_audit` AFTER DELETE ON `config_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'config_change_log', 'ConfigChangeLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('config_change_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `contractor_intervention_audit`
@@ -1042,6 +2817,8 @@ CREATE TABLE `contractor_intervention_audit` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `description` varchar(255) DEFAULT NULL,
+  `timestamp` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_cia_intervention` (`intervention_id`),
   KEY `fk_cia_user` (`user_id`),
@@ -1058,6 +2835,73 @@ LOCK TABLES `contractor_intervention_audit` WRITE;
 /*!40000 ALTER TABLE `contractor_intervention_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `contractor_intervention_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_contractor_intervention_audit_ai_audit` AFTER INSERT ON `contractor_intervention_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'contractor_intervention_audit', 'ContractorInterventionAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('contractor_intervention_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_contractor_intervention_audit_au_audit` AFTER UPDATE ON `contractor_intervention_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'contractor_intervention_audit', 'ContractorInterventionAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('contractor_intervention_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_contractor_intervention_audit_ad_audit` AFTER DELETE ON `contractor_intervention_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'contractor_intervention_audit', 'ContractorInterventionAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('contractor_intervention_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `contractor_interventions`
@@ -1077,6 +2921,19 @@ CREATE TABLE `contractor_interventions` (
   `doc_file` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user` varchar(255) DEFAULT NULL,
+  `component` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `comments` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_ci_contractor` (`contractor_id`),
   KEY `fk_ci_component` (`component_id`),
@@ -1093,6 +2950,73 @@ LOCK TABLES `contractor_interventions` WRITE;
 /*!40000 ALTER TABLE `contractor_interventions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `contractor_interventions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_contractor_interventions_ai_audit` AFTER INSERT ON `contractor_interventions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'contractor_interventions', 'ContractorInterventionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('contractor_interventions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_contractor_interventions_au_audit` AFTER UPDATE ON `contractor_interventions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'contractor_interventions', 'ContractorInterventionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('contractor_interventions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_contractor_interventions_ad_audit` AFTER DELETE ON `contractor_interventions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'contractor_interventions', 'ContractorInterventionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('contractor_interventions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `dashboards`
@@ -1125,6 +3049,73 @@ LOCK TABLES `dashboards` WRITE;
 /*!40000 ALTER TABLE `dashboards` DISABLE KEYS */;
 /*!40000 ALTER TABLE `dashboards` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_dashboards_ai_audit` AFTER INSERT ON `dashboards` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'dashboards', 'DashboardsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('dashboards insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_dashboards_au_audit` AFTER UPDATE ON `dashboards` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'dashboards', 'DashboardsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('dashboards update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_dashboards_ad_audit` AFTER DELETE ON `dashboards` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'dashboards', 'DashboardsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('dashboards delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `delegated_permissions`
@@ -1146,6 +3137,19 @@ CREATE TABLE `delegated_permissions` (
   `revoked_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `permission?` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `start_at` datetime DEFAULT NULL,
+  `end_at` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `is_revoked` tinyint(1) DEFAULT NULL,
+  `approved_by` int DEFAULT NULL,
+  `note` varchar(512) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `session_id` varchar(64) DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_dp_from` (`from_user_id`),
   KEY `fk_dp_to` (`to_user_id`),
@@ -1166,6 +3170,73 @@ LOCK TABLES `delegated_permissions` WRITE;
 /*!40000 ALTER TABLE `delegated_permissions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `delegated_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_delegated_permissions_ai_audit` AFTER INSERT ON `delegated_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'delegated_permissions', 'DelegatedPermissionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('delegated_permissions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_delegated_permissions_au_audit` AFTER UPDATE ON `delegated_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'delegated_permissions', 'DelegatedPermissionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('delegated_permissions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_delegated_permissions_ad_audit` AFTER DELETE ON `delegated_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'delegated_permissions', 'DelegatedPermissionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('delegated_permissions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `delete_log`
@@ -1205,6 +3276,73 @@ LOCK TABLES `delete_log` WRITE;
 /*!40000 ALTER TABLE `delete_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `delete_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_delete_log_ai_audit` AFTER INSERT ON `delete_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'delete_log', 'DeleteLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('delete_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_delete_log_au_audit` AFTER UPDATE ON `delete_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'delete_log', 'DeleteLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('delete_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_delete_log_ad_audit` AFTER DELETE ON `delete_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'delete_log', 'DeleteLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('delete_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `departments`
@@ -1235,6 +3373,90 @@ LOCK TABLES `departments` WRITE;
 /*!40000 ALTER TABLE `departments` DISABLE KEYS */;
 /*!40000 ALTER TABLE `departments` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_departments_ai_audit` AFTER INSERT ON `departments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'departments', 'DepartmentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('departments insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_departments_au_audit` AFTER UPDATE ON `departments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'departments', 'DepartmentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('departments update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'departments', 'DepartmentsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'departments update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'departments', 'DepartmentsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'departments update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_departments_ad_audit` AFTER DELETE ON `departments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'departments', 'DepartmentsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('departments delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `deviation_audit`
@@ -1306,6 +3528,73 @@ LOCK TABLES `deviation_audit` WRITE;
 /*!40000 ALTER TABLE `deviation_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `deviation_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_deviation_audit_ai_audit` AFTER INSERT ON `deviation_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'deviation_audit', 'DeviationAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('deviation_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_deviation_audit_au_audit` AFTER UPDATE ON `deviation_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'deviation_audit', 'DeviationAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('deviation_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_deviation_audit_ad_audit` AFTER DELETE ON `deviation_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'deviation_audit', 'DeviationAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('deviation_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `deviations`
@@ -1318,8 +3607,38 @@ CREATE TABLE `deviations` (
   `id` int NOT NULL AUTO_INCREMENT,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `code` varchar(40) DEFAULT NULL,
+  `title` varchar(200) DEFAULT NULL,
+  `description` varchar(4000) DEFAULT NULL,
+  `reported_at` datetime DEFAULT NULL,
+  `reported_by_id` int DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `severity` varchar(16) DEFAULT NULL,
+  `is_critical` tinyint(1) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `assigned_investigator_id` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `assigned_investigator_name` varchar(100) DEFAULT NULL,
+  `investigation_started_at` datetime DEFAULT NULL,
+  `root_cause` varchar(800) DEFAULT NULL,
+  `corrective_actions` varchar(255) DEFAULT NULL,
+  `linked_capa_id` int DEFAULT NULL,
+  `capa_case?` varchar(255) DEFAULT NULL,
+  `closure_comment` varchar(2000) DEFAULT NULL,
+  `closed_at` datetime DEFAULT NULL,
+  `attachment_ids` varchar(255) DEFAULT NULL,
+  `attachments` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `risk_score` int DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `audit_note` varchar(1000) DEFAULT NULL,
+  `audit_trail` varchar(255) DEFAULT NULL,
+  `string>` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1330,6 +3649,73 @@ LOCK TABLES `deviations` WRITE;
 /*!40000 ALTER TABLE `deviations` DISABLE KEYS */;
 /*!40000 ALTER TABLE `deviations` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_deviations_ai_audit` AFTER INSERT ON `deviations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'deviations', 'DeviationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('deviations insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_deviations_au_audit` AFTER UPDATE ON `deviations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'deviations', 'DeviationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('deviations update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_deviations_ad_audit` AFTER DELETE ON `deviations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'deviations', 'DeviationsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('deviations delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `digital_signatures`
@@ -1352,6 +3738,7 @@ CREATE TABLE `digital_signatures` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `public_key` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_dsig_user` (`user_id`),
   CONSTRAINT `fk_dsig_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -1366,6 +3753,73 @@ LOCK TABLES `digital_signatures` WRITE;
 /*!40000 ALTER TABLE `digital_signatures` DISABLE KEYS */;
 /*!40000 ALTER TABLE `digital_signatures` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_digital_signatures_ai_audit` AFTER INSERT ON `digital_signatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'digital_signatures', 'DigitalSignaturesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('digital_signatures insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_digital_signatures_au_audit` AFTER UPDATE ON `digital_signatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'digital_signatures', 'DigitalSignaturesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('digital_signatures update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_digital_signatures_ad_audit` AFTER DELETE ON `digital_signatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'digital_signatures', 'DigitalSignaturesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('digital_signatures delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `document_versions`
@@ -1385,6 +3839,10 @@ CREATE TABLE `document_versions` (
   `status` enum('active','archived','obsolete','review') DEFAULT NULL,
   `note` text,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `documentcontrol_id` int DEFAULT NULL,
+  `document` varchar(255) DEFAULT NULL,
+  `revision` varchar(255) DEFAULT NULL,
+  `created_by_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_docv_user` (`created_by`),
   CONSTRAINT `fk_docv_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -1398,6 +3856,105 @@ CREATE TABLE `document_versions` (
 LOCK TABLES `document_versions` WRITE;
 /*!40000 ALTER TABLE `document_versions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `document_versions` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_document_versions_ai_audit` AFTER INSERT ON `document_versions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'document_versions', 'DocumentVersionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('document_versions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_document_versions_au_audit` AFTER UPDATE ON `document_versions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'document_versions', 'DocumentVersionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('document_versions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_document_versions_ad_audit` AFTER DELETE ON `document_versions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'document_versions', 'DocumentVersionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('document_versions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `documentcontrol`
+--
+
+DROP TABLE IF EXISTS `documentcontrol`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `documentcontrol` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `device_info` varchar(255) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `linked_change_controls` varchar(255) DEFAULT NULL,
+  `revision` varchar(255) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `documentcontrol`
+--
+
+LOCK TABLES `documentcontrol` WRITE;
+/*!40000 ALTER TABLE `documentcontrol` DISABLE KEYS */;
+/*!40000 ALTER TABLE `documentcontrol` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1430,7 +3987,7 @@ CREATE TABLE `entity_audit_log` (
   KEY `idx_eal_action` (`action`),
   KEY `idx_eal_entity_id` (`entity_id`),
   CONSTRAINT `fk_eal_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1439,8 +3996,76 @@ CREATE TABLE `entity_audit_log` (
 
 LOCK TABLES `entity_audit_log` WRITE;
 /*!40000 ALTER TABLE `entity_audit_log` DISABLE KEYS */;
+INSERT INTO `entity_audit_log` VALUES (1,'2025-08-29 09:15:52',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=31f7ecac078042c692a8c4ef; IPv4=192.168.108.54','users',1,'CHANGE_PASSWORD','Korisnik darko promijenio lozinku (admin ID=1).','31f7ecac078042c692a8c4efad1ddca5',NULL,NULL,NULL,'2025-08-29 09:15:52','2025-08-29 09:15:52'),(2,'2025-08-29 09:15:52',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=31f7ecac078042c692a8c4ef; IPv4=192.168.108.54','users',1,'RESET_PASSWORD_UI','Resetirana lozinka kroz Admin UI','31f7ecac078042c692a8c4efad1ddca5',NULL,NULL,NULL,'2025-08-29 09:15:52','2025-08-29 09:15:52'),(3,'2025-08-29 09:16:56',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=31f7ecac078042c692a8c4ef; IPv4=192.168.108.54','users',8,'CHANGE_PASSWORD','Korisnik amir promijenio lozinku (admin ID=1).','31f7ecac078042c692a8c4efad1ddca5',NULL,NULL,NULL,'2025-08-29 09:16:56','2025-08-29 09:16:56'),(4,'2025-08-29 09:16:56',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=31f7ecac078042c692a8c4ef; IPv4=192.168.108.54','users',8,'RESET_PASSWORD_UI','Resetirana lozinka kroz Admin UI','31f7ecac078042c692a8c4efad1ddca5',NULL,NULL,NULL,'2025-08-29 09:16:56','2025-08-29 09:16:56'),(5,'2025-09-01 10:39:30',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=5ce555cdba7346cca79aaa78; IPv4=192.168.108.54','users',1,'CHANGE_PASSWORD','Korisnik darko promijenio lozinku (admin ID=1).','5ce555cdba7346cca79aaa78f207dccb',NULL,NULL,NULL,'2025-09-01 10:39:30','2025-09-01 10:39:30'),(6,'2025-09-01 10:39:38',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=5ce555cdba7346cca79aaa78; IPv4=192.168.108.54','users',1,'CHANGE_PASSWORD','Korisnik darko promijenio lozinku (admin ID=1).','5ce555cdba7346cca79aaa78f207dccb',NULL,NULL,NULL,'2025-09-01 10:39:38','2025-09-01 10:39:38'),(7,'2025-09-01 10:39:38',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=5ce555cdba7346cca79aaa78; IPv4=192.168.108.54','users',1,'RESET_PASSWORD_UI','Resetirana lozinka kroz Admin UI','5ce555cdba7346cca79aaa78f207dccb',NULL,NULL,NULL,'2025-09-01 10:39:38','2025-09-01 10:39:38'),(8,'2025-09-01 10:40:59',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=5ce555cdba7346cca79aaa78; IPv4=192.168.108.54','calibrations',0,'LOAD','Loaded 0 calibrations','5ce555cdba7346cca79aaa78f207dccb',NULL,NULL,NULL,'2025-09-01 10:40:59','2025-09-01 10:40:59'),(9,'2025-09-01 15:06:50',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=f1a4f63a969044a188ab1144; IPv4=192.168.108.54','calibrations',0,'LOAD','Loaded 0 calibrations','f1a4f63a969044a188ab11448c92e3ed',NULL,NULL,NULL,'2025-09-01 15:06:50','2025-09-01 15:06:50'),(10,'2025-09-04 09:40:24',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=fb3a111a4b8646ada13ad1b9; IPv4=192.168.108.54','calibrations',0,'LOAD','Loaded 0 calibrations','fb3a111a4b8646ada13ad1b9c9230f4c',NULL,NULL,NULL,'2025-09-04 09:40:24','2025-09-04 09:40:24'),(11,'2025-09-04 14:09:23',1,'192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=1e6a417d52e7484794b34047; IPv4=192.168.108.54','calibrations',0,'LOAD','Loaded 0 calibrations','1e6a417d52e7484794b340478565f128',NULL,NULL,NULL,'2025-09-04 14:09:23','2025-09-04 14:09:23');
 /*!40000 ALTER TABLE `entity_audit_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_entity_audit_log_ai_audit` AFTER INSERT ON `entity_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'entity_audit_log', 'EntityAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('entity_audit_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_entity_audit_log_au_audit` AFTER UPDATE ON `entity_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'entity_audit_log', 'EntityAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('entity_audit_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_entity_audit_log_ad_audit` AFTER DELETE ON `entity_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'entity_audit_log', 'EntityAuditLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('entity_audit_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `entity_tags`
@@ -1470,6 +4095,104 @@ CREATE TABLE `entity_tags` (
 LOCK TABLES `entity_tags` WRITE;
 /*!40000 ALTER TABLE `entity_tags` DISABLE KEYS */;
 /*!40000 ALTER TABLE `entity_tags` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_entity_tags_ai_audit` AFTER INSERT ON `entity_tags` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'entity_tags', 'EntityTagsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('entity_tags insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_entity_tags_au_audit` AFTER UPDATE ON `entity_tags` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'entity_tags', 'EntityTagsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('entity_tags update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_entity_tags_ad_audit` AFTER DELETE ON `entity_tags` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'entity_tags', 'EntityTagsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('entity_tags delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `export_audit_log`
+--
+
+DROP TABLE IF EXISTS `export_audit_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `export_audit_log` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `device_info` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `filter_criteria` varchar(255) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `timestamp` varchar(255) DEFAULT NULL,
+  `export_type` varchar(255) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `export_audit_log`
+--
+
+LOCK TABLES `export_audit_log` WRITE;
+/*!40000 ALTER TABLE `export_audit_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `export_audit_log` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1507,6 +4230,73 @@ LOCK TABLES `export_print_log` WRITE;
 /*!40000 ALTER TABLE `export_print_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `export_print_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_export_print_log_ai_audit` AFTER INSERT ON `export_print_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'export_print_log', 'ExportPrintLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('export_print_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_export_print_log_au_audit` AFTER UPDATE ON `export_print_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'export_print_log', 'ExportPrintLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('export_print_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_export_print_log_ad_audit` AFTER DELETE ON `export_print_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'export_print_log', 'ExportPrintLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('export_print_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `external_contractors`
@@ -1525,6 +4315,27 @@ CREATE TABLE `external_contractors` (
   `doc_file` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `company_name` varchar(255) DEFAULT NULL,
+  `registration_number` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `certificates` varchar(255) DEFAULT NULL,
+  `is_blacklisted` tinyint(1) DEFAULT NULL,
+  `blacklist_reason` varchar(255) DEFAULT NULL,
+  `risk_score` decimal(10,2) DEFAULT NULL,
+  `supplier_id` int DEFAULT NULL,
+  `supplier?` varchar(255) DEFAULT NULL,
+  `interventions` varchar(255) DEFAULT NULL,
+  `attachments` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `audit_logs` varchar(255) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `cooperation_start` varchar(255) DEFAULT NULL,
+  `cooperation_end` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1537,6 +4348,81 @@ LOCK TABLES `external_contractors` WRITE;
 /*!40000 ALTER TABLE `external_contractors` DISABLE KEYS */;
 /*!40000 ALTER TABLE `external_contractors` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_external_contractors_ai_audit` AFTER INSERT ON `external_contractors` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'external_contractors', 'ExternalContractorsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('external_contractors insert', CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_external_contractors_au_audit` AFTER UPDATE ON `external_contractors` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'external_contractors', 'ExternalContractorsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('external_contractors update', CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'external_contractors', 'ExternalContractorsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'external_contractors update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_external_contractors_ad_audit` AFTER DELETE ON `external_contractors` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'external_contractors', 'ExternalContractorsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('external_contractors delete', CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `failure_modes`
@@ -1567,6 +4453,81 @@ LOCK TABLES `failure_modes` WRITE;
 /*!40000 ALTER TABLE `failure_modes` DISABLE KEYS */;
 /*!40000 ALTER TABLE `failure_modes` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_failure_modes_ai_audit` AFTER INSERT ON `failure_modes` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'failure_modes', 'FailureModesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('failure_modes insert', CONCAT('; code=', COALESCE(NEW.code,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_failure_modes_au_audit` AFTER UPDATE ON `failure_modes` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'failure_modes', 'FailureModesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('failure_modes update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'failure_modes', 'FailureModesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'failure_modes update: code changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_failure_modes_ad_audit` AFTER DELETE ON `failure_modes` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'failure_modes', 'FailureModesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('failure_modes delete', CONCAT('; code=', COALESCE(OLD.code,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `forensic_user_change_log`
@@ -1591,6 +4552,11 @@ CREATE TABLE `forensic_user_change_log` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `timestamp` datetime GENERATED ALWAYS AS (`changed_at`) VIRTUAL,
   `details` text GENERATED ALWAYS AS (`note`) VIRTUAL,
+  `changed_by_user` varchar(255) DEFAULT NULL,
+  `target_user` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_fucl_changed_by` (`changed_by`),
   KEY `fk_fucl_target_user` (`target_user_id`),
@@ -1606,6 +4572,97 @@ CREATE TABLE `forensic_user_change_log` (
 LOCK TABLES `forensic_user_change_log` WRITE;
 /*!40000 ALTER TABLE `forensic_user_change_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `forensic_user_change_log` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_forensic_user_change_log_ai_audit` AFTER INSERT ON `forensic_user_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'forensic_user_change_log', 'ForensicUserChangeLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('forensic_user_change_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_forensic_user_change_log_au_audit` AFTER UPDATE ON `forensic_user_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'forensic_user_change_log', 'ForensicUserChangeLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('forensic_user_change_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_forensic_user_change_log_ad_audit` AFTER DELETE ON `forensic_user_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'forensic_user_change_log', 'ForensicUserChangeLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('forensic_user_change_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `incident_audit`
+--
+
+DROP TABLE IF EXISTS `incident_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `incident_audit` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `incident_audit`
+--
+
+LOCK TABLES `incident_audit` WRITE;
+/*!40000 ALTER TABLE `incident_audit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `incident_audit` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1632,6 +4689,16 @@ CREATE TABLE `incident_log` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `severity_id` int DEFAULT NULL,
+  `reported_by_id` int DEFAULT NULL,
+  `resolved_by_id` int DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `root_cause` varchar(255) DEFAULT NULL,
+  `capa_case_id` int DEFAULT NULL,
+  `capa_case` varchar(255) DEFAULT NULL,
+  `attachments` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_inc_reported_by` (`reported_by`),
   KEY `fk_inc_resolved_by` (`resolved_by`),
@@ -1671,6 +4738,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_incident_log_ai_audit` AFTER INSERT ON `incident_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'incident_log', 'IncidentLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('incident_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -1688,6 +4777,88 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_incident_log_au_audit` AFTER UPDATE ON `incident_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'incident_log', 'IncidentLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('incident_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_incident_log_ad_audit` AFTER DELETE ON `incident_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'incident_log', 'IncidentLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('incident_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `incidents`
+--
+
+DROP TABLE IF EXISTS `incidents`;
+/*!50001 DROP VIEW IF EXISTS `incidents`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `incidents` AS SELECT 
+ 1 AS `id`,
+ 1 AS `detected_at`,
+ 1 AS `reported_by`,
+ 1 AS `severity`,
+ 1 AS `title`,
+ 1 AS `description`,
+ 1 AS `resolved`,
+ 1 AS `resolved_at`,
+ 1 AS `resolved_by`,
+ 1 AS `actions_taken`,
+ 1 AS `follow_up`,
+ 1 AS `note`,
+ 1 AS `source_ip`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`,
+ 1 AS `severity_id`,
+ 1 AS `reported_by_id`,
+ 1 AS `resolved_by_id`,
+ 1 AS `digital_signature`,
+ 1 AS `root_cause`,
+ 1 AS `capa_case_id`,
+ 1 AS `capa_case`,
+ 1 AS `attachments`,
+ 1 AS `last_modified`,
+ 1 AS `last_modified_by_id`,
+ 1 AS `last_modified_by`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `inspections`
@@ -1750,6 +4921,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_inspections_ai_audit` AFTER INSERT ON `inspections` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'inspections', 'InspectionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('inspections insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -1765,6 +4958,51 @@ DELIMITER ;;
     CALL ref_touch('inspection_result', NEW.result, NEW.result);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.result_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_inspections_au_audit` AFTER UPDATE ON `inspections` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'inspections', 'InspectionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('inspections update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_inspections_ad_audit` AFTER DELETE ON `inspections` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'inspections', 'InspectionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('inspections delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1803,6 +5041,73 @@ LOCK TABLES `integration_log` WRITE;
 /*!40000 ALTER TABLE `integration_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `integration_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_integration_log_ai_audit` AFTER INSERT ON `integration_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'integration_log', 'IntegrationLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('integration_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_integration_log_au_audit` AFTER UPDATE ON `integration_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'integration_log', 'IntegrationLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('integration_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_integration_log_ad_audit` AFTER DELETE ON `integration_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'integration_log', 'IntegrationLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('integration_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `inventory_transactions`
@@ -1823,6 +5128,10 @@ CREATE TABLE `inventory_transactions` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `performed_by_id` int DEFAULT NULL,
+  `spare_part?` varchar(255) DEFAULT NULL,
+  `warehouse?` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_it_part` (`part_id`),
   KEY `fk_it_warehouse` (`warehouse_id`),
@@ -1842,6 +5151,73 @@ LOCK TABLES `inventory_transactions` WRITE;
 /*!40000 ALTER TABLE `inventory_transactions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `inventory_transactions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_inventory_transactions_ai_audit` AFTER INSERT ON `inventory_transactions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'inventory_transactions', 'InventoryTransactionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('inventory_transactions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_inventory_transactions_au_audit` AFTER UPDATE ON `inventory_transactions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'inventory_transactions', 'InventoryTransactionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('inventory_transactions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_inventory_transactions_ad_audit` AFTER DELETE ON `inventory_transactions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'inventory_transactions', 'InventoryTransactionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('inventory_transactions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `iot_anomaly_log`
@@ -1876,6 +5252,73 @@ LOCK TABLES `iot_anomaly_log` WRITE;
 /*!40000 ALTER TABLE `iot_anomaly_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `iot_anomaly_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_anomaly_log_ai_audit` AFTER INSERT ON `iot_anomaly_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'iot_anomaly_log', 'IotAnomalyLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_anomaly_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_anomaly_log_au_audit` AFTER UPDATE ON `iot_anomaly_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'iot_anomaly_log', 'IotAnomalyLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_anomaly_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_anomaly_log_ad_audit` AFTER DELETE ON `iot_anomaly_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'iot_anomaly_log', 'IotAnomalyLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('iot_anomaly_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `iot_devices`
@@ -1909,6 +5352,73 @@ LOCK TABLES `iot_devices` WRITE;
 /*!40000 ALTER TABLE `iot_devices` DISABLE KEYS */;
 /*!40000 ALTER TABLE `iot_devices` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_devices_ai_audit` AFTER INSERT ON `iot_devices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'iot_devices', 'IotDevicesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_devices insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_devices_au_audit` AFTER UPDATE ON `iot_devices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'iot_devices', 'IotDevicesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_devices update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_devices_ad_audit` AFTER DELETE ON `iot_devices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'iot_devices', 'IotDevicesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('iot_devices delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `iot_event_audit`
@@ -1933,6 +5443,73 @@ LOCK TABLES `iot_event_audit` WRITE;
 /*!40000 ALTER TABLE `iot_event_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `iot_event_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_event_audit_ai_audit` AFTER INSERT ON `iot_event_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'iot_event_audit', 'IotEventAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_event_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_event_audit_au_audit` AFTER UPDATE ON `iot_event_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'iot_event_audit', 'IotEventAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_event_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_event_audit_ad_audit` AFTER DELETE ON `iot_event_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'iot_event_audit', 'IotEventAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('iot_event_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `iot_gateways`
@@ -1963,6 +5540,90 @@ LOCK TABLES `iot_gateways` WRITE;
 /*!40000 ALTER TABLE `iot_gateways` DISABLE KEYS */;
 /*!40000 ALTER TABLE `iot_gateways` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_gateways_ai_audit` AFTER INSERT ON `iot_gateways` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'iot_gateways', 'IotGatewaysPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_gateways insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_gateways_au_audit` AFTER UPDATE ON `iot_gateways` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'iot_gateways', 'IotGatewaysPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_gateways update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'iot_gateways', 'IotGatewaysPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'iot_gateways update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'iot_gateways', 'IotGatewaysPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'iot_gateways update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_gateways_ad_audit` AFTER DELETE ON `iot_gateways` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'iot_gateways', 'IotGatewaysPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('iot_gateways delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `iot_sensor_data`
@@ -2003,6 +5664,73 @@ LOCK TABLES `iot_sensor_data` WRITE;
 /*!40000 ALTER TABLE `iot_sensor_data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `iot_sensor_data` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_sensor_data_ai_audit` AFTER INSERT ON `iot_sensor_data` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'iot_sensor_data', 'IotSensorDataPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_sensor_data insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_sensor_data_au_audit` AFTER UPDATE ON `iot_sensor_data` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'iot_sensor_data', 'IotSensorDataPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('iot_sensor_data update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_iot_sensor_data_ad_audit` AFTER DELETE ON `iot_sensor_data` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'iot_sensor_data', 'IotSensorDataPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('iot_sensor_data delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `irregularities_log`
@@ -2037,6 +5765,73 @@ LOCK TABLES `irregularities_log` WRITE;
 /*!40000 ALTER TABLE `irregularities_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `irregularities_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_irregularities_log_ai_audit` AFTER INSERT ON `irregularities_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'irregularities_log', 'IrregularitiesLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('irregularities_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_irregularities_log_au_audit` AFTER UPDATE ON `irregularities_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'irregularities_log', 'IrregularitiesLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('irregularities_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_irregularities_log_ad_audit` AFTER DELETE ON `irregularities_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'irregularities_log', 'IrregularitiesLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('irregularities_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `job_titles`
@@ -2063,6 +5858,73 @@ LOCK TABLES `job_titles` WRITE;
 /*!40000 ALTER TABLE `job_titles` DISABLE KEYS */;
 /*!40000 ALTER TABLE `job_titles` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_job_titles_ai_audit` AFTER INSERT ON `job_titles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'job_titles', 'JobTitlesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('job_titles insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_job_titles_au_audit` AFTER UPDATE ON `job_titles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'job_titles', 'JobTitlesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('job_titles update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_job_titles_ad_audit` AFTER DELETE ON `job_titles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'job_titles', 'JobTitlesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('job_titles delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `locations`
@@ -2099,6 +5961,90 @@ LOCK TABLES `locations` WRITE;
 /*!40000 ALTER TABLE `locations` DISABLE KEYS */;
 /*!40000 ALTER TABLE `locations` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_locations_ai_audit` AFTER INSERT ON `locations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'locations', 'LocationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('locations insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_locations_au_audit` AFTER UPDATE ON `locations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'locations', 'LocationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('locations update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'locations', 'LocationsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'locations update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'locations', 'LocationsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'locations update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_locations_ad_audit` AFTER DELETE ON `locations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'locations', 'LocationsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('locations delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `lookup_domain`
@@ -2127,6 +6073,73 @@ LOCK TABLES `lookup_domain` WRITE;
 INSERT INTO `lookup_domain` VALUES (1,'status','Generic status','2025-08-28 07:24:44','2025-08-28 12:36:25'),(2,'priority','Work-order priority','2025-08-28 07:24:44','2025-08-28 12:36:25'),(3,'severity','Incident / anomaly severity','2025-08-28 07:24:44','2025-08-28 12:36:25'),(4,'result','Pass / fail style','2025-08-28 07:24:44','2025-08-28 12:36:25'),(5,'document_type','Attachment / photo type','2025-08-28 07:24:44','2025-08-28 12:36:25'),(6,'inspection_result',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(7,'calibration_result',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(8,'asset_status',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(9,'lifecycle_phase',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(10,'component_status',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(11,'sensor_type',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(12,'quality_event_type',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(13,'quality_status',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(14,'capa_status',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(15,'capa_action_type',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(16,'supplier_status',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(17,'supplier_type',NULL,'2025-08-28 10:24:01','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `lookup_domain` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_lookup_domain_ai_audit` AFTER INSERT ON `lookup_domain` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'lookup_domain', 'LookupDomainPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('lookup_domain insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_lookup_domain_au_audit` AFTER UPDATE ON `lookup_domain` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'lookup_domain', 'LookupDomainPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('lookup_domain update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_lookup_domain_ad_audit` AFTER DELETE ON `lookup_domain` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'lookup_domain', 'LookupDomainPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('lookup_domain delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `lookup_value`
@@ -2159,6 +6172,73 @@ LOCK TABLES `lookup_value` WRITE;
 INSERT INTO `lookup_value` VALUES (1,1,'active','Active',1,1,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(2,1,'maintenance','Maintenance',1,2,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(3,1,'decommissioned','Decommissioned',1,3,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(4,1,'open','Open',1,4,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(5,1,'closed','Closed',1,5,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(6,2,'low','Low',1,1,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(7,2,'medium','Medium',1,2,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(8,2,'high','High',1,3,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(9,2,'critical','Critical',1,4,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(10,3,'low','Low',1,1,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(11,3,'medium','Medium',1,2,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(12,3,'high','High',1,3,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(13,3,'critical','Critical',1,4,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(14,3,'gmp','GMP',1,5,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(15,4,'pass','Pass',1,1,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(16,4,'fail','Fail',1,2,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(17,4,'note','Note',1,3,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(18,5,'sop','SOP',1,1,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(19,5,'inspection','Inspection',1,2,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(20,5,'before','Before',1,3,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(21,5,'after','After',1,4,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(22,5,'other','Other',1,5,'2025-08-28 07:24:44','2025-08-28 12:36:25'),(24,6,'prolaz','Prolaz',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(25,6,'pao','Pao',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(26,6,'napomena','Napomena',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(27,7,'prolaz','Prolaz',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(28,7,'pao','Pao',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(29,7,'uvjetno','Uvjetno',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(30,7,'napomena','Napomena',1,40,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(31,8,'active','Active',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(32,8,'maintenance','Maintenance',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(33,8,'decommissioned','Decommissioned',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(34,8,'reserved','Reserved',1,40,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(35,8,'scrapped','Scrapped',1,50,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(36,9,'concept','Concept',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(37,9,'commissioning','Commissioning',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(38,9,'operation','Operation',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(39,9,'retirement','Retirement',1,40,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(40,10,'active','Active',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(41,10,'removed','Removed',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(42,10,'maintenance','Maintenance',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(43,11,'temperatura','Temperatura',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(44,11,'tlak','Tlak',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(45,11,'vlaga','Vlaga',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(46,11,'protok','Protok',1,40,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(47,11,'drugo','Drugo',1,50,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(48,12,'deviation','Deviation',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(49,12,'complaint','Complaint',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(50,12,'recall','Recall',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(51,12,'out_of_spec','Out of spec',1,40,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(52,12,'change_control','Change control',1,50,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(53,12,'audit','Audit',1,60,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(54,12,'training','Training',1,70,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(55,13,'open','Open',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(56,13,'under_review','Under review',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(57,13,'closed','Closed',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(58,14,'otvoren','Otvoren',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(59,14,'u_tijeku','U tijeku',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(60,14,'zatvoren','Zatvoren',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(61,15,'korektivna','Korektivna',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(62,15,'preventivna','Preventivna',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(63,16,'active','Active',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(64,16,'suspended','Suspended',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(65,16,'obsolete','Obsolete',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(66,17,'manufacturer','Manufacturer',1,10,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(67,17,'distributor','Distributor',1,20,'2025-08-28 10:24:01','2025-08-28 12:36:25'),(68,17,'service','Service',1,30,'2025-08-28 10:24:01','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `lookup_value` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_lookup_value_ai_audit` AFTER INSERT ON `lookup_value` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'lookup_value', 'LookupValuePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('lookup_value insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_lookup_value_au_audit` AFTER UPDATE ON `lookup_value` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'lookup_value', 'LookupValuePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('lookup_value update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_lookup_value_ad_audit` AFTER DELETE ON `lookup_value` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'lookup_value', 'LookupValuePage', OLD.id, NULL,
+     NULL, NULL, CONCAT('lookup_value delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `machine_components`
@@ -2183,16 +6263,42 @@ CREATE TABLE `machine_components` (
   `is_deleted` tinyint(1) DEFAULT '0',
   `deleted_at` datetime DEFAULT NULL,
   `deleted_by` int DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `machine?` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `purchase_date` datetime DEFAULT NULL,
+  `warranty_until` datetime DEFAULT NULL,
+  `warranty_expiry` datetime DEFAULT NULL,
+  `serial_number` varchar(255) DEFAULT NULL,
+  `supplier` varchar(255) DEFAULT NULL,
+  `rfid_tag` varchar(255) DEFAULT NULL,
+  `io_tdevice_id` varchar(255) DEFAULT NULL,
+  `lifecycle_phase` varchar(255) DEFAULT NULL,
+  `is_critical` tinyint(1) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `documents` varchar(255) DEFAULT NULL,
+  `icollection<photo>` varchar(255) DEFAULT NULL,
+  `icollection<calibration>` varchar(255) DEFAULT NULL,
+  `icollection<capa_case>` varchar(255) DEFAULT NULL,
+  `icollection<work_order>` varchar(255) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
-  KEY `fk_mc_machine` (`machine_id`),
   KEY `fk_mc_status` (`status_id`),
   KEY `fk_comp_component_type` (`component_type_id`),
+  KEY `ix_machine_components_machine_id` (`machine_id`),
+  KEY `ix_machine_components_code` (`code`),
   CONSTRAINT `fk_comp_component_type` FOREIGN KEY (`component_type_id`) REFERENCES `component_types` (`id`),
   CONSTRAINT `fk_mc_machine` FOREIGN KEY (`machine_id`) REFERENCES `machines` (`id`),
   CONSTRAINT `fk_mc_status` FOREIGN KEY (`status_id`) REFERENCES `ref_value` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_mc_type` FOREIGN KEY (`component_type_id`) REFERENCES `component_types` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2203,6 +6309,90 @@ LOCK TABLES `machine_components` WRITE;
 /*!40000 ALTER TABLE `machine_components` DISABLE KEYS */;
 /*!40000 ALTER TABLE `machine_components` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_components_ai_audit` AFTER INSERT ON `machine_components` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'machine_components', 'MachineComponentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_components insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_components_au_audit` AFTER UPDATE ON `machine_components` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'machine_components', 'MachineComponentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_components update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'machine_components', 'MachineComponentsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'machine_components update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'machine_components', 'MachineComponentsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'machine_components update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_components_ad_audit` AFTER DELETE ON `machine_components` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'machine_components', 'MachineComponentsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('machine_components delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `machine_lifecycle_event`
@@ -2222,6 +6412,13 @@ CREATE TABLE `machine_lifecycle_event` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `event_type_id` int DEFAULT NULL,
+  `machine` varchar(255) DEFAULT NULL,
+  `performed_by_id` int DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_mle_machine` (`machine_id`),
   KEY `fk_mle_user` (`performed_by`),
@@ -2261,6 +6458,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_lifecycle_event_ai_audit` AFTER INSERT ON `machine_lifecycle_event` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'machine_lifecycle_event', 'MachineLifecycleEventPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_lifecycle_event insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -2272,6 +6491,51 @@ DELIMITER ;;
     CALL ref_touch('lifecycle_phase', NEW.event_type, NEW.event_type);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.event_type_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_lifecycle_event_au_audit` AFTER UPDATE ON `machine_lifecycle_event` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'machine_lifecycle_event', 'MachineLifecycleEventPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_lifecycle_event update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_lifecycle_event_ad_audit` AFTER DELETE ON `machine_lifecycle_event` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'machine_lifecycle_event', 'MachineLifecycleEventPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('machine_lifecycle_event delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2311,6 +6575,73 @@ LOCK TABLES `machine_models` WRITE;
 INSERT INTO `machine_models` VALUES (1,4,4,'GA30','GA 30 Compressor','2025-08-28 12:36:25','2025-08-28 12:36:25'),(2,3,2,'RAA-500','RAA 500 Chiller','2025-08-28 12:36:25','2025-08-28 12:36:25'),(3,5,5,'STE-6060','STE 6060 Sterilizer','2025-08-28 12:36:25','2025-08-28 12:36:25'),(4,1,1,'S7-1200-HVAC','S7-1200 HVAC Controller','2025-08-28 12:36:25','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `machine_models` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_models_ai_audit` AFTER INSERT ON `machine_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'machine_models', 'MachineModelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_models insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_models_au_audit` AFTER UPDATE ON `machine_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'machine_models', 'MachineModelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_models update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_models_ad_audit` AFTER DELETE ON `machine_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'machine_models', 'MachineModelsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('machine_models delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `machine_types`
@@ -2339,6 +6670,90 @@ LOCK TABLES `machine_types` WRITE;
 INSERT INTO `machine_types` VALUES (1,'HVAC','HVAC System','2025-08-28 12:36:25','2025-08-28 12:36:25'),(2,'CHILLER','Chiller','2025-08-28 12:36:25','2025-08-28 12:36:25'),(3,'PUMP','Pump','2025-08-28 12:36:25','2025-08-28 12:36:25'),(4,'COMPRESSOR','Air Compressor','2025-08-28 12:36:25','2025-08-28 12:36:25'),(5,'STERILIZER','Sterilizer/Autoclave','2025-08-28 12:36:25','2025-08-28 12:36:25'),(6,'FILLING_LINE','Filling/Packaging Line','2025-08-28 12:36:25','2025-08-28 12:36:25'),(7,'BLISTER_PKG','Blister Packaging Machine','2025-08-28 12:36:25','2025-08-28 12:36:25'),(8,'TABLET_PRESS','Tablet Press','2025-08-28 12:36:25','2025-08-28 12:36:25'),(9,'MIXER','Mixer/Agitator','2025-08-28 12:36:25','2025-08-28 12:36:25'),(10,'BIOREACTOR','Bioreactor','2025-08-28 12:36:25','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `machine_types` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_types_ai_audit` AFTER INSERT ON `machine_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'machine_types', 'MachineTypesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_types insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_types_au_audit` AFTER UPDATE ON `machine_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'machine_types', 'MachineTypesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machine_types update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'machine_types', 'MachineTypesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'machine_types update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'machine_types', 'MachineTypesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'machine_types update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machine_types_ad_audit` AFTER DELETE ON `machine_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'machine_types', 'MachineTypesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('machine_types delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `machines`
@@ -2361,12 +6776,13 @@ CREATE TABLE `machines` (
   `warranty_until` date DEFAULT NULL,
   `acquisition_cost` decimal(18,2) DEFAULT NULL,
   `rfid_tag` varchar(64) DEFAULT NULL,
+  `qr_code` varchar(128) DEFAULT NULL,
   `iot_device_id` varchar(64) DEFAULT NULL,
   `cloud_device_guid` varchar(64) DEFAULT NULL,
   `is_critical` tinyint(1) DEFAULT '0',
   `lifecycle_phase` varchar(30) DEFAULT NULL,
   `note` varchar(200) DEFAULT NULL,
-  `status` enum('active','maintenance','decommissioned','reserved','scrapped') DEFAULT 'active',
+  `status` varchar(30) NOT NULL DEFAULT 'active',
   `urs_doc` varchar(255) DEFAULT NULL,
   `decommission_date` date DEFAULT NULL,
   `decommission_reason` text,
@@ -2385,6 +6801,20 @@ CREATE TABLE `machines` (
   `deleted_by` int DEFAULT NULL,
   `tenant_id` int DEFAULT NULL,
   `room_id` int DEFAULT NULL,
+  `purchase_date` datetime DEFAULT NULL,
+  `warranty_expiry` datetime DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `icollection<machine_component>` varchar(255) DEFAULT NULL,
+  `icollection<machine_lifecycle_event>` varchar(255) DEFAULT NULL,
+  `icollection<capa_case>` varchar(255) DEFAULT NULL,
+  `icollection<quality_event>` varchar(255) DEFAULT NULL,
+  `icollection<validation>` varchar(255) DEFAULT NULL,
+  `icollection<inspection>` varchar(255) DEFAULT NULL,
+  `icollection<work_order>` varchar(255) DEFAULT NULL,
+  `icollection<photo>` varchar(255) DEFAULT NULL,
+  `icollection<attachment>` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `icollection<calibration>` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `fk_m_last_modified_by` (`last_modified_by_id`),
@@ -2439,6 +6869,72 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_bi` BEFORE INSERT ON `machines` FOR EACH ROW BEGIN
+  SET NEW.status = fn_normalize_machine_status(NEW.status);
+  -- If your schema has last_modified (it does in the app), set it if caller didn't provide it
+  SET NEW.last_modified = COALESCE(NEW.last_modified, NOW());
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_ai` AFTER INSERT ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id,
+     field_name, old_value, new_value, description, source_ip,
+     device_info, session_id, severity)
+  VALUES
+    (NULL, 'MCH_CREATE_DBTRG', 'machines', 'MachineModule', NEW.id,
+     NULL, NULL, NULL,
+     CONCAT('Machine created (db trigger). code=', COALESCE(NEW.code,'')),
+     'db-trigger', 'server', '', 'audit');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_ai_audit` AFTER INSERT ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'machines', 'MachinesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machines insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -2454,6 +6950,111 @@ DELIMITER ;;
     CALL ref_touch('lifecycle_phase', NEW.lifecycle_phase, NEW.lifecycle_phase);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.lifecycle_phase_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_bu` BEFORE UPDATE ON `machines` FOR EACH ROW BEGIN
+  SET NEW.status = fn_normalize_machine_status(NEW.status);
+  SET NEW.last_modified = NOW();
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_au` AFTER UPDATE ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id,
+     field_name, old_value, new_value, description, source_ip,
+     device_info, session_id, severity)
+  VALUES
+    (NULL, 'MCH_UPDATE_DBTRG', 'machines', 'MachineModule', NEW.id,
+     NULL, NULL, NULL,
+     CONCAT('Machine updated (db trigger). code=', COALESCE(NEW.code,'')),
+     'db-trigger', 'server', '', 'audit');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_au_audit` AFTER UPDATE ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'machines', 'MachinesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('machines update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'machines', 'MachinesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'machines update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'machines', 'MachinesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'machines update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_machines_ad_audit` AFTER DELETE ON `machines` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'machines', 'MachinesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('machines delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2488,6 +7089,81 @@ LOCK TABLES `manufacturers` WRITE;
 INSERT INTO `manufacturers` VALUES (1,'Siemens','https://www.siemens.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(2,'ABB','https://global.abb','2025-08-28 07:24:01','2025-08-28 12:36:25'),(3,'GEA','https://www.gea.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(4,'Atlas Copco','https://www.atlascopco.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(5,'Binder','https://www.binder-world.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(6,'Bosch Rexroth','https://www.boschrexroth.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(7,'IFM','https://www.ifm.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(8,'Honeywell','https://www.honeywell.com','2025-08-28 07:24:01','2025-08-28 12:36:25'),(9,'Sensirion','https://sensirion.com','2025-08-28 07:24:01','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `manufacturers` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_manufacturers_ai_audit` AFTER INSERT ON `manufacturers` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'manufacturers', 'ManufacturersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('manufacturers insert', CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_manufacturers_au_audit` AFTER UPDATE ON `manufacturers` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'manufacturers', 'ManufacturersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('manufacturers update', CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'manufacturers', 'ManufacturersPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'manufacturers update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_manufacturers_ad_audit` AFTER DELETE ON `manufacturers` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'manufacturers', 'ManufacturersPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('manufacturers delete', CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `measurement_units`
@@ -2516,6 +7192,90 @@ LOCK TABLES `measurement_units` WRITE;
 INSERT INTO `measurement_units` VALUES (1,'┬░C','Degree Celsius','2025-08-28 12:36:25','2025-08-28 12:36:25'),(2,'Pa','Pascal','2025-08-28 12:36:25','2025-08-28 12:36:25'),(3,'%','Percent','2025-08-28 12:36:25','2025-08-28 12:36:25'),(4,'L/min','Liters per minute','2025-08-28 12:36:25','2025-08-28 12:36:25'),(5,'V','Volt','2025-08-28 12:36:25','2025-08-28 12:36:25'),(6,'A','Ampere','2025-08-28 12:36:25','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `measurement_units` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_measurement_units_ai_audit` AFTER INSERT ON `measurement_units` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'measurement_units', 'MeasurementUnitsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('measurement_units insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_measurement_units_au_audit` AFTER UPDATE ON `measurement_units` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'measurement_units', 'MeasurementUnitsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('measurement_units update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'measurement_units', 'MeasurementUnitsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'measurement_units update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'measurement_units', 'MeasurementUnitsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'measurement_units update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_measurement_units_ad_audit` AFTER DELETE ON `measurement_units` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'measurement_units', 'MeasurementUnitsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('measurement_units delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `mobile_device_log`
@@ -2549,6 +7309,73 @@ LOCK TABLES `mobile_device_log` WRITE;
 /*!40000 ALTER TABLE `mobile_device_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `mobile_device_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_mobile_device_log_ai_audit` AFTER INSERT ON `mobile_device_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'mobile_device_log', 'MobileDeviceLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('mobile_device_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_mobile_device_log_au_audit` AFTER UPDATE ON `mobile_device_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'mobile_device_log', 'MobileDeviceLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('mobile_device_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_mobile_device_log_ad_audit` AFTER DELETE ON `mobile_device_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'mobile_device_log', 'MobileDeviceLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('mobile_device_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `notification_queue`
@@ -2585,6 +7412,73 @@ LOCK TABLES `notification_queue` WRITE;
 /*!40000 ALTER TABLE `notification_queue` DISABLE KEYS */;
 /*!40000 ALTER TABLE `notification_queue` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notification_queue_ai_audit` AFTER INSERT ON `notification_queue` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'notification_queue', 'NotificationQueuePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('notification_queue insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notification_queue_au_audit` AFTER UPDATE ON `notification_queue` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'notification_queue', 'NotificationQueuePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('notification_queue update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notification_queue_ad_audit` AFTER DELETE ON `notification_queue` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'notification_queue', 'NotificationQueuePage', OLD.id, NULL,
+     NULL, NULL, CONCAT('notification_queue delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `notification_templates`
@@ -2616,6 +7510,112 @@ LOCK TABLES `notification_templates` WRITE;
 INSERT INTO `notification_templates` VALUES (1,'WO_ASSIGNED','Work Order Assigned','WO #{work_order_id} assigned','Hello {{assignee}}, Work Order #{{work_order_id}} was assigned. Machine: {{machine_name}} / Component: {{component_name}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(2,'WO_OVERDUE','Work Order Overdue','WO #{work_order_id} is overdue','Work Order #{{work_order_id}} is overdue. Status: {{status_name}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(3,'CALIB_DUE','Calibration Due','Calibration due: {{component_name}}','Calibration for {{component_name}} is due on {{next_due}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(4,'STOCK_BELOW_MIN','Stock Below Min','Stock alert: {{part_code}}','Part {{part_code}} is below minimum in {{warehouse_name}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(5,'INCIDENT_REPORTED','Incident Reported','Incident {{severity}} reported','Incident \"{{title}}\" reported by {{reported_by}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(6,'QE_STATUS_CHANGE','Quality Event Status','Quality event status changed','Quality Event #{{qe_id}} is now {{status_name}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(7,'CAPA_DUE','CAPA Action Due','CAPA action due','CAPA #{{capa_id}} action due {{due_date}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25'),(8,'SENSOR_ANOMALY','Sensor Anomaly','Anomaly on {{component_name}}','Anomaly detected by {{algorithm}} at {{timestamp}}. Value: {{value}} {{unit}}.','email','2025-08-28 12:36:25','2025-08-28 12:36:25');
 /*!40000 ALTER TABLE `notification_templates` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notification_templates_ai_audit` AFTER INSERT ON `notification_templates` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'notification_templates', 'NotificationTemplatesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('notification_templates insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notification_templates_au_audit` AFTER UPDATE ON `notification_templates` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'notification_templates', 'NotificationTemplatesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('notification_templates update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'notification_templates', 'NotificationTemplatesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'notification_templates update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'notification_templates', 'NotificationTemplatesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'notification_templates update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notification_templates_ad_audit` AFTER DELETE ON `notification_templates` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'notification_templates', 'NotificationTemplatesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('notification_templates delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `notifications`
+--
+
+DROP TABLE IF EXISTS `notifications`;
+/*!50001 DROP VIEW IF EXISTS `notifications`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `notifications` AS SELECT 
+ 1 AS `id`,
+ 1 AS `template_id`,
+ 1 AS `recipient_user_id`,
+ 1 AS `channel`,
+ 1 AS `payload`,
+ 1 AS `scheduled_at`,
+ 1 AS `sent_at`,
+ 1 AS `status`,
+ 1 AS `last_error`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `part_bom`
@@ -2648,6 +7648,73 @@ LOCK TABLES `part_bom` WRITE;
 /*!40000 ALTER TABLE `part_bom` DISABLE KEYS */;
 /*!40000 ALTER TABLE `part_bom` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_part_bom_ai_audit` AFTER INSERT ON `part_bom` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'part_bom', 'PartBomPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('part_bom insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_part_bom_au_audit` AFTER UPDATE ON `part_bom` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'part_bom', 'PartBomPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('part_bom update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_part_bom_ad_audit` AFTER DELETE ON `part_bom` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'part_bom', 'PartBomPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('part_bom delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `part_supplier_prices`
@@ -2665,6 +7732,27 @@ CREATE TABLE `part_supplier_prices` (
   `valid_until` date DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `part` varchar(255) DEFAULT NULL,
+  `supplier` varchar(255) DEFAULT NULL,
+  `supplier_name` varchar(255) DEFAULT NULL,
+  `vat_percent` decimal(10,2) DEFAULT NULL,
+  `price_with_vat` decimal(10,2) DEFAULT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  `discount_percent` decimal(10,2) DEFAULT NULL,
+  `surcharge` decimal(10,2) DEFAULT NULL,
+  `min_order_quantity` int DEFAULT NULL,
+  `lead_time_days` int DEFAULT NULL,
+  `valid_from` datetime DEFAULT NULL,
+  `is_blocked` tinyint(1) DEFAULT NULL,
+  `block_reason` varchar(255) DEFAULT NULL,
+  `contract_document` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_psp_part` (`part_id`),
   KEY `fk_psp_supplier` (`supplier_id`),
@@ -2681,6 +7769,73 @@ LOCK TABLES `part_supplier_prices` WRITE;
 /*!40000 ALTER TABLE `part_supplier_prices` DISABLE KEYS */;
 /*!40000 ALTER TABLE `part_supplier_prices` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_part_supplier_prices_ai_audit` AFTER INSERT ON `part_supplier_prices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'part_supplier_prices', 'PartSupplierPricesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('part_supplier_prices insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_part_supplier_prices_au_audit` AFTER UPDATE ON `part_supplier_prices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'part_supplier_prices', 'PartSupplierPricesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('part_supplier_prices update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_part_supplier_prices_ad_audit` AFTER DELETE ON `part_supplier_prices` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'part_supplier_prices', 'PartSupplierPricesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('part_supplier_prices delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `parts`
@@ -2698,11 +7853,41 @@ CREATE TABLE `parts` (
   `status` enum('active','obsolete','reorder') DEFAULT 'active',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `category` varchar(255) DEFAULT NULL,
+  `barcode` varchar(255) DEFAULT NULL,
+  `rfid` varchar(255) DEFAULT NULL,
+  `serial_or_lot` varchar(255) DEFAULT NULL,
+  `default_supplier` varchar(255) DEFAULT NULL,
+  `supplier_prices` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `stock` int DEFAULT NULL,
+  `min_stock_alert` int DEFAULT NULL,
+  `warehouse_stocks` varchar(255) DEFAULT NULL,
+  `stock_history` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `images` varchar(255) DEFAULT NULL,
+  `documents` varchar(255) DEFAULT NULL,
+  `warranty_until` datetime DEFAULT NULL,
+  `expiry_date` datetime DEFAULT NULL,
+  `blocked` tinyint(1) DEFAULT NULL,
+  `regulatory_certificates` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `change_logs` varchar(255) DEFAULT NULL,
+  `work_order_parts` varchar(255) DEFAULT NULL,
+  `warehouses` varchar(255) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `supplier` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `fk_p_supplier` (`default_supplier_id`),
   CONSTRAINT `fk_p_supplier` FOREIGN KEY (`default_supplier_id`) REFERENCES `suppliers` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2711,8 +7896,93 @@ CREATE TABLE `parts` (
 
 LOCK TABLES `parts` WRITE;
 /*!40000 ALTER TABLE `parts` DISABLE KEYS */;
+INSERT INTO `parts` VALUES (1,'xxx','xxx',NULL,NULL,'active','2025-09-05 13:28:23','2025-09-05 13:28:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'xxx','xxx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'xxx'),(2,'sxsxsx','sxsx',NULL,NULL,'active','2025-09-05 13:28:56','2025-09-05 13:28:56',NULL,NULL,NULL,NULL,NULL,NULL,3.00,3,NULL,NULL,NULL,'2','3',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'sdcsc');
 /*!40000 ALTER TABLE `parts` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_parts_ai_audit` AFTER INSERT ON `parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'parts', 'PartsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('parts insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_parts_au_audit` AFTER UPDATE ON `parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'parts', 'PartsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('parts update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'parts', 'PartsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'parts update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'parts', 'PartsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'parts update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_parts_ad_audit` AFTER DELETE ON `parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'parts', 'PartsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('parts delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `permission_change_log`
@@ -2757,6 +8027,73 @@ LOCK TABLES `permission_change_log` WRITE;
 /*!40000 ALTER TABLE `permission_change_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `permission_change_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permission_change_log_ai_audit` AFTER INSERT ON `permission_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'permission_change_log', 'PermissionChangeLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('permission_change_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permission_change_log_au_audit` AFTER UPDATE ON `permission_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'permission_change_log', 'PermissionChangeLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('permission_change_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permission_change_log_ad_audit` AFTER DELETE ON `permission_change_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'permission_change_log', 'PermissionChangeLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('permission_change_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `permission_requests`
@@ -2795,6 +8132,73 @@ LOCK TABLES `permission_requests` WRITE;
 /*!40000 ALTER TABLE `permission_requests` DISABLE KEYS */;
 /*!40000 ALTER TABLE `permission_requests` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permission_requests_ai_audit` AFTER INSERT ON `permission_requests` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'permission_requests', 'PermissionRequestsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('permission_requests insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permission_requests_au_audit` AFTER UPDATE ON `permission_requests` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'permission_requests', 'PermissionRequestsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('permission_requests update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permission_requests_ad_audit` AFTER DELETE ON `permission_requests` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'permission_requests', 'PermissionRequestsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('permission_requests delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `permissions`
@@ -2811,6 +8215,27 @@ CREATE TABLE `permissions` (
   `critical` tinyint(1) DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `permission_type` varchar(255) DEFAULT NULL,
+  `name` varchar(120) DEFAULT NULL,
+  `group` varchar(80) DEFAULT NULL,
+  `parent_id` int DEFAULT NULL,
+  `permission?` varchar(255) DEFAULT NULL,
+  `icollection<permission>` varchar(255) DEFAULT NULL,
+  `compliance_tags` varchar(120) DEFAULT NULL,
+  `created_by` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
+  `note` varchar(512) DEFAULT NULL,
+  `icollection<role>` varchar(255) DEFAULT NULL,
+  `icollection<user>` varchar(255) DEFAULT NULL,
+  `icollection<role_permission>` varchar(255) DEFAULT NULL,
+  `icollection<user_permission>` varchar(255) DEFAULT NULL,
+  `icollection<delegated_permission>` varchar(255) DEFAULT NULL,
+  `string` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -2822,9 +8247,84 @@ CREATE TABLE `permissions` (
 
 LOCK TABLES `permissions` WRITE;
 /*!40000 ALTER TABLE `permissions` DISABLE KEYS */;
-INSERT INTO `permissions` VALUES (1,'manage_system','Full system administration',NULL,0,'2025-08-25 11:36:22','2025-08-25 11:36:22'),(2,'manage_team','Manage team operations',NULL,0,'2025-08-25 11:36:22','2025-08-25 11:36:22'),(3,'use_system','Standard system usage',NULL,0,'2025-08-25 11:36:22','2025-08-25 11:36:22'),(4,'user.change_password','Allows changing user passwords (self/others).','users',1,'2025-08-28 14:05:44','2025-08-28 14:05:44');
+INSERT INTO `permissions` VALUES (1,'manage_system','Full system administration',NULL,0,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(2,'manage_team','Manage team operations',NULL,0,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,'use_system','Standard system usage',NULL,0,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(4,'user.change_password','Allows changing user passwords (self/others).','users',1,'2025-08-28 14:05:44','2025-08-28 14:05:44',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `permissions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permissions_ai_audit` AFTER INSERT ON `permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'permissions', 'PermissionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('permissions insert', CONCAT('; code=', COALESCE(NEW.code,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permissions_au_audit` AFTER UPDATE ON `permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'permissions', 'PermissionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('permissions update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'permissions', 'PermissionsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'permissions update: code changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_permissions_ad_audit` AFTER DELETE ON `permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'permissions', 'PermissionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('permissions delete', CONCAT('; code=', COALESCE(OLD.code,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `photos`
@@ -2864,6 +8364,173 @@ LOCK TABLES `photos` WRITE;
 /*!40000 ALTER TABLE `photos` DISABLE KEYS */;
 /*!40000 ALTER TABLE `photos` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_photos_ai_audit` AFTER INSERT ON `photos` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'photos', 'PhotosPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('photos insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_photos_au_audit` AFTER UPDATE ON `photos` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'photos', 'PhotosPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('photos update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_photos_ad_audit` AFTER DELETE ON `photos` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'photos', 'PhotosPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('photos delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `ppm_plans`
+--
+
+DROP TABLE IF EXISTS `ppm_plans`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ppm_plans` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `machine_id` int NOT NULL,
+  `title` varchar(200) NOT NULL,
+  `plan_json` json DEFAULT NULL,
+  `effective_from` date DEFAULT NULL,
+  `effective_to` date DEFAULT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_ppm_plans_machine` (`machine_id`),
+  CONSTRAINT `fk_ppm_plans_machine` FOREIGN KEY (`machine_id`) REFERENCES `machines` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ppm_plans`
+--
+
+LOCK TABLES `ppm_plans` WRITE;
+/*!40000 ALTER TABLE `ppm_plans` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ppm_plans` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_ppm_plans_ai_audit` AFTER INSERT ON `ppm_plans` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'ppm_plans', 'PpmPlansPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('ppm_plans insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_ppm_plans_au_audit` AFTER UPDATE ON `ppm_plans` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'ppm_plans', 'PpmPlansPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('ppm_plans update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_ppm_plans_ad_audit` AFTER DELETE ON `ppm_plans` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'ppm_plans', 'PpmPlansPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('ppm_plans delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `preventive_maintenance_plans`
@@ -2889,6 +8556,28 @@ CREATE TABLE `preventive_maintenance_plans` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `checklist_template_id` int DEFAULT NULL,
+  `machine` varchar(255) DEFAULT NULL,
+  `component` varchar(255) DEFAULT NULL,
+  `responsible_user` varchar(255) DEFAULT NULL,
+  `execution_history` varchar(255) DEFAULT NULL,
+  `risk_score` decimal(10,2) DEFAULT NULL,
+  `ai_recommendation` varchar(2048) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `session_id` varchar(80) DEFAULT NULL,
+  `geo_location` varchar(100) DEFAULT NULL,
+  `attachments` varchar(255) DEFAULT NULL,
+  `version` int DEFAULT NULL,
+  `previous_version_id` int DEFAULT NULL,
+  `previous_version` varchar(255) DEFAULT NULL,
+  `is_active_version` tinyint(1) DEFAULT NULL,
+  `linked_work_orders` varchar(255) DEFAULT NULL,
+  `is_automated` tinyint(1) DEFAULT NULL,
+  `requires_notification` tinyint(1) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `note` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `fk_pmp_machine` (`machine_id`),
@@ -2910,6 +8599,90 @@ LOCK TABLES `preventive_maintenance_plans` WRITE;
 /*!40000 ALTER TABLE `preventive_maintenance_plans` DISABLE KEYS */;
 /*!40000 ALTER TABLE `preventive_maintenance_plans` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_preventive_maintenance_plans_ai_audit` AFTER INSERT ON `preventive_maintenance_plans` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'preventive_maintenance_plans', 'PreventiveMaintenancePlansPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('preventive_maintenance_plans insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_preventive_maintenance_plans_au_audit` AFTER UPDATE ON `preventive_maintenance_plans` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'preventive_maintenance_plans', 'PreventiveMaintenancePlansPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('preventive_maintenance_plans update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'preventive_maintenance_plans', 'PreventiveMaintenancePlansPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'preventive_maintenance_plans update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'preventive_maintenance_plans', 'PreventiveMaintenancePlansPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'preventive_maintenance_plans update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_preventive_maintenance_plans_ad_audit` AFTER DELETE ON `preventive_maintenance_plans` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'preventive_maintenance_plans', 'PreventiveMaintenancePlansPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('preventive_maintenance_plans delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `quality_events`
@@ -2933,6 +8706,14 @@ CREATE TABLE `quality_events` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `type_id` int DEFAULT NULL,
   `status_id` int DEFAULT NULL,
+  `related_machine_id` int DEFAULT NULL,
+  `related_component_id` int DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `created_by_id` int DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_qe_machine` (`related_machine`),
   KEY `fk_qe_component` (`related_component`),
@@ -2976,6 +8757,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_quality_events_ai_audit` AFTER INSERT ON `quality_events` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'quality_events', 'QualityEventsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('quality_events insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -2997,6 +8800,112 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_quality_events_au_audit` AFTER UPDATE ON `quality_events` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'quality_events', 'QualityEventsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('quality_events update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_quality_events_ad_audit` AFTER DELETE ON `quality_events` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'quality_events', 'QualityEventsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('quality_events delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `ref_domain`
+--
+
+DROP TABLE IF EXISTS `ref_domain`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ref_domain` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_ref_domain_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ref_domain`
+--
+
+LOCK TABLES `ref_domain` WRITE;
+/*!40000 ALTER TABLE `ref_domain` DISABLE KEYS */;
+INSERT INTO `ref_domain` VALUES (1,'capa_status',NULL,'2025-09-03 13:06:39','2025-09-03 13:06:39');
+/*!40000 ALTER TABLE `ref_domain` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ref_value`
+--
+
+DROP TABLE IF EXISTS `ref_value`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ref_value` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `domain_id` int NOT NULL,
+  `code` varchar(255) NOT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `sort_order` int DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_ref_value_domain_code` (`domain_id`,`code`),
+  KEY `ix_ref_value_domain` (`domain_id`),
+  CONSTRAINT `fk_ref_value_domain` FOREIGN KEY (`domain_id`) REFERENCES `ref_domain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ref_value`
+--
+
+LOCK TABLES `ref_value` WRITE;
+/*!40000 ALTER TABLE `ref_value` DISABLE KEYS */;
+INSERT INTO `ref_value` VALUES (1,1,'otvoren','otvoren',1,0,'2025-09-03 13:06:39','2025-09-03 13:06:39'),(2,1,'u_tijeku','u_tijeku',1,0,'2025-09-03 13:06:39','2025-09-03 13:06:39'),(3,1,'zatvoren','zatvoren',1,0,'2025-09-03 13:06:39','2025-09-03 13:06:39');
+/*!40000 ALTER TABLE `ref_value` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `report_schedule`
@@ -3031,6 +8940,73 @@ LOCK TABLES `report_schedule` WRITE;
 /*!40000 ALTER TABLE `report_schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `report_schedule` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_report_schedule_ai_audit` AFTER INSERT ON `report_schedule` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'report_schedule', 'ReportSchedulePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('report_schedule insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_report_schedule_au_audit` AFTER UPDATE ON `report_schedule` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'report_schedule', 'ReportSchedulePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('report_schedule update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_report_schedule_ad_audit` AFTER DELETE ON `report_schedule` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'report_schedule', 'ReportSchedulePage', OLD.id, NULL,
+     NULL, NULL, CONCAT('report_schedule delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `requalification_schedule`
@@ -3049,6 +9025,24 @@ CREATE TABLE `requalification_schedule` (
   `notes` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `component` varchar(255) DEFAULT NULL,
+  `responsible_user_id` int DEFAULT NULL,
+  `responsible_user` varchar(255) DEFAULT NULL,
+  `protocol_file` varchar(255) DEFAULT NULL,
+  `status` varchar(30) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `session_id` varchar(100) DEFAULT NULL,
+  `geo_location` varchar(128) DEFAULT NULL,
+  `attachments_json` varchar(255) DEFAULT NULL,
+  `regulator` varchar(40) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `analytics_json` varchar(2048) DEFAULT NULL,
+  `related_case_id` int DEFAULT NULL,
+  `related_case_type` varchar(40) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_requal_component` (`component_id`),
   CONSTRAINT `fk_requal_component` FOREIGN KEY (`component_id`) REFERENCES `machine_components` (`id`)
@@ -3063,6 +9057,124 @@ LOCK TABLES `requalification_schedule` WRITE;
 /*!40000 ALTER TABLE `requalification_schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `requalification_schedule` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_requalification_schedule_ai_audit` AFTER INSERT ON `requalification_schedule` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'requalification_schedule', 'RequalificationSchedulePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('requalification_schedule insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_requalification_schedule_au_audit` AFTER UPDATE ON `requalification_schedule` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'requalification_schedule', 'RequalificationSchedulePage', NEW.id, NULL,
+     NULL, NULL, CONCAT('requalification_schedule update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_requalification_schedule_ad_audit` AFTER DELETE ON `requalification_schedule` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'requalification_schedule', 'RequalificationSchedulePage', OLD.id, NULL,
+     NULL, NULL, CONCAT('requalification_schedule delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `risk_assessments`
+--
+
+DROP TABLE IF EXISTS `risk_assessments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `risk_assessments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `risk_assessments`
+--
+
+LOCK TABLES `risk_assessments` WRITE;
+/*!40000 ALTER TABLE `risk_assessments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `risk_assessments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `role`
+--
+
+DROP TABLE IF EXISTS `role`;
+/*!50001 DROP VIEW IF EXISTS `role`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `role` AS SELECT 
+ 1 AS `id`,
+ 1 AS `name`,
+ 1 AS `description`,
+ 1 AS `org_unit`,
+ 1 AS `compliance_tags`,
+ 1 AS `is_deleted`,
+ 1 AS `notes`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`,
+ 1 AS `created_by_id`,
+ 1 AS `last_modified_by_id`,
+ 1 AS `version`,
+ 1 AS `icollection<permission>`,
+ 1 AS `icollection<user>`,
+ 1 AS `icollection<role_permission>`,
+ 1 AS `user?`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `role_audit`
@@ -3085,7 +9197,7 @@ CREATE TABLE `role_audit` (
   PRIMARY KEY (`id`),
   KEY `fk_ra_role` (`role_id`),
   CONSTRAINT `fk_ra_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3096,6 +9208,73 @@ LOCK TABLES `role_audit` WRITE;
 /*!40000 ALTER TABLE `role_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `role_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_role_audit_ai_audit` AFTER INSERT ON `role_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'role_audit', 'RoleAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('role_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_role_audit_au_audit` AFTER UPDATE ON `role_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'role_audit', 'RoleAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('role_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_role_audit_ad_audit` AFTER DELETE ON `role_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'role_audit', 'RoleAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('role_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `role_permissions`
@@ -3110,10 +9289,25 @@ CREATE TABLE `role_permissions` (
   `allowed` tinyint(1) DEFAULT '1',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `assigned_by` int DEFAULT NULL,
+  `assigned_by_id` int DEFAULT NULL,
   `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `change_version` int DEFAULT '1',
+  `role?` varchar(255) DEFAULT NULL,
+  `permission?` varchar(255) DEFAULT NULL,
+  `assigned_by` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `session_id` varchar(64) DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `note` varchar(512) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`role_id`,`permission_id`),
   KEY `fk_rp_perm` (`permission_id`),
+  KEY `fk_rp_assigned_by_id` (`assigned_by_id`),
+  CONSTRAINT `fk_rp_assigned_by_id` FOREIGN KEY (`assigned_by_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_rp_perm` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_rp_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -3125,9 +9319,76 @@ CREATE TABLE `role_permissions` (
 
 LOCK TABLES `role_permissions` WRITE;
 /*!40000 ALTER TABLE `role_permissions` DISABLE KEYS */;
-INSERT INTO `role_permissions` VALUES (1,1,1,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-27 12:08:25'),(1,4,1,'2025-08-28 14:05:44','2025-08-28 14:05:44',NULL,'2025-08-28 14:05:44'),(2,2,1,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-27 12:08:25'),(3,3,1,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-27 12:08:25');
+INSERT INTO `role_permissions` VALUES (1,1,1,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-27 12:08:25',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,2,1,'2025-08-29 12:08:02','2025-08-29 12:08:02',1,'2025-08-29 10:08:02',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,3,1,'2025-08-29 12:08:13','2025-08-29 12:08:13',1,'2025-08-29 10:08:13',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,4,1,'2025-08-28 14:05:44','2025-08-28 14:05:44',NULL,'2025-08-28 14:05:44',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(2,2,1,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-27 12:08:25',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,2,1,'2025-09-01 14:22:06','2025-09-01 14:22:06',NULL,'2025-09-01 14:22:06',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,3,1,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-27 12:08:25',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `role_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_role_permissions_ai_audit` AFTER INSERT ON `role_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'role_permissions', 'RolePermissionsPage', NEW.role_id, NULL,
+     NULL, NULL, CONCAT('role_permissions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_role_permissions_au_audit` AFTER UPDATE ON `role_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'role_permissions', 'RolePermissionsPage', NEW.role_id, NULL,
+     NULL, NULL, CONCAT('role_permissions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_role_permissions_ad_audit` AFTER DELETE ON `role_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'role_permissions', 'RolePermissionsPage', OLD.role_id, NULL,
+     NULL, NULL, CONCAT('role_permissions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `roles`
@@ -3140,11 +9401,26 @@ CREATE TABLE `roles` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
+  `org_unit` varchar(80) DEFAULT NULL,
+  `compliance_tags` varchar(120) DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `notes` varchar(512) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_by_id` int DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `version` int NOT NULL DEFAULT '1',
+  `icollection<permission>` varchar(255) DEFAULT NULL,
+  `icollection<user>` varchar(255) DEFAULT NULL,
+  `icollection<role_permission>` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `name` (`name`),
+  KEY `fk_roles_created_by` (`created_by_id`),
+  KEY `fk_roles_last_modified_by` (`last_modified_by_id`),
+  CONSTRAINT `fk_roles_created_by` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_roles_last_modified_by` FOREIGN KEY (`last_modified_by_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3153,9 +9429,84 @@ CREATE TABLE `roles` (
 
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
-INSERT INTO `roles` VALUES (1,'admin','System Administrator','2025-08-25 11:36:22','2025-08-25 11:36:22'),(2,'manager','Department Manager','2025-08-25 11:36:22','2025-08-25 11:36:22'),(3,'user','Standard User','2025-08-25 11:36:22','2025-08-25 11:36:22');
+INSERT INTO `roles` VALUES (1,'admin','System Administrator','IT','SOX',0,'Initial admin role','2025-08-25 11:36:22','2025-08-29 13:49:52',NULL,1,6,NULL,NULL,NULL,NULL),(2,'manager','Department Manager','Operations','ISO9001',0,'Department manager role','2025-08-25 11:36:22','2025-08-29 13:49:52',NULL,1,6,NULL,NULL,NULL,NULL),(3,'user','Standard User','General','None',0,'Standard user role','2025-08-25 11:36:22','2025-08-29 13:49:52',NULL,1,6,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_roles_ai_audit` AFTER INSERT ON `roles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'roles', 'RolesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('roles insert', CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_roles_au_audit` AFTER UPDATE ON `roles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'roles', 'RolesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('roles update', CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'roles', 'RolesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'roles update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_roles_ad_audit` AFTER DELETE ON `roles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'roles', 'RolesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('roles delete', CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `rooms`
@@ -3186,6 +9537,90 @@ LOCK TABLES `rooms` WRITE;
 /*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
 /*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_rooms_ai_audit` AFTER INSERT ON `rooms` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'rooms', 'RoomsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('rooms insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_rooms_au_audit` AFTER UPDATE ON `rooms` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'rooms', 'RoomsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('rooms update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'rooms', 'RoomsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'rooms update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'rooms', 'RoomsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'rooms update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_rooms_ad_audit` AFTER DELETE ON `rooms` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'rooms', 'RoomsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('rooms delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `scheduled_job_audit_log`
@@ -3227,6 +9662,73 @@ LOCK TABLES `scheduled_job_audit_log` WRITE;
 /*!40000 ALTER TABLE `scheduled_job_audit_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `scheduled_job_audit_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_scheduled_job_audit_log_ai_audit` AFTER INSERT ON `scheduled_job_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'scheduled_job_audit_log', 'ScheduledJobAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('scheduled_job_audit_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_scheduled_job_audit_log_au_audit` AFTER UPDATE ON `scheduled_job_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'scheduled_job_audit_log', 'ScheduledJobAuditLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('scheduled_job_audit_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_scheduled_job_audit_log_ad_audit` AFTER DELETE ON `scheduled_job_audit_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'scheduled_job_audit_log', 'ScheduledJobAuditLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('scheduled_job_audit_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `scheduled_jobs`
@@ -3270,6 +9772,7 @@ CREATE TABLE `scheduled_jobs` (
   `ip_address` varchar(45) DEFAULT NULL,
   `comment` text,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_modified_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sj_created_by` (`created_by`),
   KEY `fk_sj_last_modified_by` (`last_modified_by`),
@@ -3319,6 +9822,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_scheduled_jobs_ai_audit` AFTER INSERT ON `scheduled_jobs` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'scheduled_jobs', 'ScheduledJobsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('scheduled_jobs insert', CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -3333,6 +9858,37 @@ DELIMITER ;;
         OLD.comment, NEW.comment,
         NEW.ip_address, NEW.device_info, NEW.session_id, NEW.digital_signature, NEW.comment
     );
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_scheduled_jobs_au_audit` AFTER UPDATE ON `scheduled_jobs` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'scheduled_jobs', 'ScheduledJobsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('scheduled_jobs update', CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'scheduled_jobs', 'ScheduledJobsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'scheduled_jobs update: name changed', 'system', 'server', '', 'info');
+  END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3361,6 +9917,28 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_scheduled_jobs_ad_audit` AFTER DELETE ON `scheduled_jobs` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'scheduled_jobs', 'ScheduledJobsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('scheduled_jobs delete', CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `schema_migration_log`
@@ -3382,6 +9960,16 @@ CREATE TABLE `schema_migration_log` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `timestamp` datetime GENERATED ALWAYS AS (`migration_time`) VIRTUAL,
+  `migrated_by_id` int DEFAULT NULL,
+  `username` varchar(80) DEFAULT NULL,
+  `rollback_script` varchar(255) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `entry_hash` varchar(128) DEFAULT NULL,
+  `attachments_json` varchar(255) DEFAULT NULL,
+  `regulator` varchar(40) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `note` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_mig_user` (`migrated_by`),
   CONSTRAINT `fk_mig_user` FOREIGN KEY (`migrated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -3396,6 +9984,73 @@ LOCK TABLES `schema_migration_log` WRITE;
 /*!40000 ALTER TABLE `schema_migration_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `schema_migration_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_schema_migration_log_ai_audit` AFTER INSERT ON `schema_migration_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'schema_migration_log', 'SchemaMigrationLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('schema_migration_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_schema_migration_log_au_audit` AFTER UPDATE ON `schema_migration_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'schema_migration_log', 'SchemaMigrationLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('schema_migration_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_schema_migration_log_ad_audit` AFTER DELETE ON `schema_migration_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'schema_migration_log', 'SchemaMigrationLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('schema_migration_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `sensitive_data_access_log`
@@ -3422,6 +10077,19 @@ CREATE TABLE `sensitive_data_access_log` (
   `timestamp` datetime GENERATED ALWAYS AS (`access_time`) VIRTUAL,
   `action` varchar(30) GENERATED ALWAYS AS (`access_type`) VIRTUAL,
   `details` text GENERATED ALWAYS AS (coalesce(`purpose`,`note`)) VIRTUAL,
+  `user` varchar(255) DEFAULT NULL,
+  `username` varchar(80) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `session_id` varchar(100) DEFAULT NULL,
+  `approved_by_id` int DEFAULT NULL,
+  `approver_name` varchar(100) DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `approval_method` varchar(40) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `entry_hash` varchar(128) DEFAULT NULL,
+  `geo_location` varchar(100) DEFAULT NULL,
+  `severity` varchar(24) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sdal_user` (`user_id`),
   KEY `fk_sdal_appr` (`approved_by`),
@@ -3458,6 +10126,73 @@ DELIMITER ;;
       SET NEW.approved_by = NULL;
     END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensitive_data_access_log_ai_audit` AFTER INSERT ON `sensitive_data_access_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sensitive_data_access_log', 'SensitiveDataAccessLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensitive_data_access_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensitive_data_access_log_au_audit` AFTER UPDATE ON `sensitive_data_access_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sensitive_data_access_log', 'SensitiveDataAccessLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensitive_data_access_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensitive_data_access_log_ad_audit` AFTER DELETE ON `sensitive_data_access_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sensitive_data_access_log', 'SensitiveDataAccessLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sensitive_data_access_log delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3529,6 +10264,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_data_logs_ai_audit` AFTER INSERT ON `sensor_data_logs` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sensor_data_logs', 'SensorDataLogsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensor_data_logs insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -3546,6 +10303,51 @@ DELIMITER ;;
     ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id), name=VALUES(name);
     SET NEW.unit_id = LAST_INSERT_ID();
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_data_logs_au_audit` AFTER UPDATE ON `sensor_data_logs` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sensor_data_logs', 'SensorDataLogsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensor_data_logs update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_data_logs_ad_audit` AFTER DELETE ON `sensor_data_logs` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sensor_data_logs', 'SensorDataLogsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sensor_data_logs delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3582,6 +10384,73 @@ LOCK TABLES `sensor_models` WRITE;
 INSERT INTO `sensor_models` VALUES (1,'Sensirion','SHT31-TEMP','temperatura','┬░C','2025-08-28 12:36:26','2025-08-28 12:36:26'),(2,'Sensirion','SHT31-RH','vlaga','%','2025-08-28 12:36:26','2025-08-28 12:36:26'),(3,'Bosch','BMP280','tlak','Pa','2025-08-28 12:36:26','2025-08-28 12:36:26'),(4,'Omega','PT100','temperatura','┬░C','2025-08-28 12:36:26','2025-08-28 12:36:26'),(5,'Siemens','SITRANS-F','protok','L/min','2025-08-28 12:36:26','2025-08-28 12:36:26'),(6,'IFM','PN2094','tlak','Pa','2025-08-28 12:36:26','2025-08-28 12:36:26'),(7,'Honeywell','ABP-PA','tlak','Pa','2025-08-28 12:36:26','2025-08-28 12:36:26'),(8,'Keyence','FT50','protok','L/min','2025-08-28 12:36:26','2025-08-28 12:36:26');
 /*!40000 ALTER TABLE `sensor_models` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_models_ai_audit` AFTER INSERT ON `sensor_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sensor_models', 'SensorModelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensor_models insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_models_au_audit` AFTER UPDATE ON `sensor_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sensor_models', 'SensorModelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensor_models update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_models_ad_audit` AFTER DELETE ON `sensor_models` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sensor_models', 'SensorModelsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sensor_models delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `sensor_types`
@@ -3615,6 +10484,90 @@ LOCK TABLES `sensor_types` WRITE;
 /*!40000 ALTER TABLE `sensor_types` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sensor_types` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_types_ai_audit` AFTER INSERT ON `sensor_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sensor_types', 'SensorTypesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensor_types insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_types_au_audit` AFTER UPDATE ON `sensor_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sensor_types', 'SensorTypesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sensor_types update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'sensor_types', 'SensorTypesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'sensor_types update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'sensor_types', 'SensorTypesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'sensor_types update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sensor_types_ad_audit` AFTER DELETE ON `sensor_types` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sensor_types', 'SensorTypesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sensor_types delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `session_log`
@@ -3640,6 +10593,15 @@ CREATE TABLE `session_log` (
   `timestamp` datetime GENERATED ALWAYS AS (`login_time`) VIRTUAL,
   `action` varchar(20) GENERATED ALWAYS AS (if((`is_terminated` = 1),_cp852'TERMINATE',_cp852'SESSION')) VIRTUAL,
   `details` text GENERATED ALWAYS AS (`reason`) VIRTUAL,
+  `user` varchar(255) DEFAULT NULL,
+  `session_id` varchar(100) DEFAULT NULL,
+  `login_at` datetime DEFAULT NULL,
+  `logout_at` datetime DEFAULT NULL,
+  `is_impersonated` tinyint(1) DEFAULT NULL,
+  `impersonated_by_id` int DEFAULT NULL,
+  `impersonated_by` varchar(255) DEFAULT NULL,
+  `is_temporary_escalation` tinyint(1) DEFAULT NULL,
+  `note` varchar(400) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sl_user` (`user_id`),
   KEY `fk_sl_by` (`terminated_by`),
@@ -3655,6 +10617,99 @@ CREATE TABLE `session_log` (
 LOCK TABLES `session_log` WRITE;
 /*!40000 ALTER TABLE `session_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `session_log` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_session_log_ai_audit` AFTER INSERT ON `session_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'session_log', 'SessionLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('session_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_session_log_au_audit` AFTER UPDATE ON `session_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'session_log', 'SessionLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('session_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_session_log_ad_audit` AFTER DELETE ON `session_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'session_log', 'SessionLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('session_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `settings`
+--
+
+DROP TABLE IF EXISTS `settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `settings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `updated_at` datetime DEFAULT NULL,
+  `updated_by_id` int DEFAULT NULL,
+  `value` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `settings`
+--
+
+LOCK TABLES `settings` WRITE;
+/*!40000 ALTER TABLE `settings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3684,6 +10739,90 @@ LOCK TABLES `sites` WRITE;
 /*!40000 ALTER TABLE `sites` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sites` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sites_ai_audit` AFTER INSERT ON `sites` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sites', 'SitesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sites insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sites_au_audit` AFTER UPDATE ON `sites` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sites', 'SitesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sites update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'sites', 'SitesPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'sites update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'sites', 'SitesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'sites update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sites_ad_audit` AFTER DELETE ON `sites` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sites', 'SitesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sites delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `sop_document_log`
@@ -3717,6 +10856,73 @@ LOCK TABLES `sop_document_log` WRITE;
 /*!40000 ALTER TABLE `sop_document_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sop_document_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sop_document_log_ai_audit` AFTER INSERT ON `sop_document_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sop_document_log', 'SopDocumentLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sop_document_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sop_document_log_au_audit` AFTER UPDATE ON `sop_document_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sop_document_log', 'SopDocumentLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sop_document_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sop_document_log_ad_audit` AFTER DELETE ON `sop_document_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sop_document_log', 'SopDocumentLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sop_document_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `sop_documents`
@@ -3738,6 +10944,33 @@ CREATE TABLE `sop_documents` (
   `file_path` varchar(255) DEFAULT NULL,
   `notes` text,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `description` varchar(400) DEFAULT NULL,
+  `process` varchar(80) DEFAULT NULL,
+  `language` varchar(10) DEFAULT NULL,
+  `date_issued` datetime DEFAULT NULL,
+  `date_expiry` datetime DEFAULT NULL,
+  `next_review_date` datetime DEFAULT NULL,
+  `attachments` varchar(255) DEFAULT NULL,
+  `responsible_user_id` int DEFAULT NULL,
+  `responsible_user` varchar(255) DEFAULT NULL,
+  `created_by_id` int DEFAULT NULL,
+  `version_no` int DEFAULT NULL,
+  `file_hash` varchar(128) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `chain_hash` varchar(128) DEFAULT NULL,
+  `approver_ids` varchar(255) DEFAULT NULL,
+  `approvers` varchar(255) DEFAULT NULL,
+  `approval_timestamps` varchar(255) DEFAULT NULL,
+  `review_notes` varchar(1000) DEFAULT NULL,
+  `pdf_metadata` varchar(1024) DEFAULT NULL,
+  `related_type` varchar(40) DEFAULT NULL,
+  `related_id` int DEFAULT NULL,
+  `comment` varchar(400) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `ai_tags` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `fk_sop_created` (`created_by`),
@@ -3755,6 +10988,90 @@ LOCK TABLES `sop_documents` WRITE;
 /*!40000 ALTER TABLE `sop_documents` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sop_documents` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sop_documents_ai_audit` AFTER INSERT ON `sop_documents` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'sop_documents', 'SopDocumentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sop_documents insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sop_documents_au_audit` AFTER UPDATE ON `sop_documents` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'sop_documents', 'SopDocumentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('sop_documents update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'sop_documents', 'SopDocumentsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'sop_documents update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'sop_documents', 'SopDocumentsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'sop_documents update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_sop_documents_ad_audit` AFTER DELETE ON `sop_documents` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'sop_documents', 'SopDocumentsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('sop_documents delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `stock_levels`
@@ -3772,6 +11089,26 @@ CREATE TABLE `stock_levels` (
   `max_threshold` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `part` varchar(255) DEFAULT NULL,
+  `warehouse` varchar(255) DEFAULT NULL,
+  `auto_reorder_triggered` tinyint(1) DEFAULT NULL,
+  `days_below_min` int DEFAULT NULL,
+  `alarm_status` varchar(30) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `geo_location` varchar(100) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `entry_hash` varchar(128) DEFAULT NULL,
+  `old_state_snapshot` varchar(255) DEFAULT NULL,
+  `new_state_snapshot` varchar(255) DEFAULT NULL,
+  `is_automated` tinyint(1) DEFAULT NULL,
+  `session_id` varchar(80) DEFAULT NULL,
+  `related_case_id` int DEFAULT NULL,
+  `related_case_type` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sl_part` (`part_id`),
   KEY `fk_sl_warehouse` (`warehouse_id`),
@@ -3789,6 +11126,129 @@ CREATE TABLE `stock_levels` (
 LOCK TABLES `stock_levels` WRITE;
 /*!40000 ALTER TABLE `stock_levels` DISABLE KEYS */;
 /*!40000 ALTER TABLE `stock_levels` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_stock_levels_ai_audit` AFTER INSERT ON `stock_levels` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'stock_levels', 'StockLevelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('stock_levels insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_stock_levels_au_audit` AFTER UPDATE ON `stock_levels` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'stock_levels', 'StockLevelsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('stock_levels update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_stock_levels_ad_audit` AFTER DELETE ON `stock_levels` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'stock_levels', 'StockLevelsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('stock_levels delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `supplier`
+--
+
+DROP TABLE IF EXISTS `supplier`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `supplier` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `supplier`
+--
+
+LOCK TABLES `supplier` WRITE;
+/*!40000 ALTER TABLE `supplier` DISABLE KEYS */;
+/*!40000 ALTER TABLE `supplier` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `supplier_audit`
+--
+
+DROP TABLE IF EXISTS `supplier_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `supplier_audit` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `changed_at` datetime DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `details` varchar(255) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `supplier_id` int DEFAULT NULL,
+  `action` varchar(255) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `supplier_audit`
+--
+
+LOCK TABLES `supplier_audit` WRITE;
+/*!40000 ALTER TABLE `supplier_audit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `supplier_audit` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3824,6 +11284,73 @@ LOCK TABLES `supplier_risk_audit` WRITE;
 /*!40000 ALTER TABLE `supplier_risk_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `supplier_risk_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_supplier_risk_audit_ai_audit` AFTER INSERT ON `supplier_risk_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'supplier_risk_audit', 'SupplierRiskAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('supplier_risk_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_supplier_risk_audit_au_audit` AFTER UPDATE ON `supplier_risk_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'supplier_risk_audit', 'SupplierRiskAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('supplier_risk_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_supplier_risk_audit_ad_audit` AFTER DELETE ON `supplier_risk_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'supplier_risk_audit', 'SupplierRiskAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('supplier_risk_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `suppliers`
@@ -3835,12 +11362,19 @@ DROP TABLE IF EXISTS `suppliers`;
 CREATE TABLE `suppliers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
+  `vat_number` varchar(40) DEFAULT NULL,
   `code` varchar(50) DEFAULT NULL,
   `oib` varchar(40) DEFAULT NULL,
   `contact` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
+  `website` varchar(200) DEFAULT NULL,
+  `supplier_type` varchar(40) DEFAULT NULL,
+  `notes` text,
+  `contract_file` varchar(255) DEFAULT NULL,
   `address` text,
+  `city` varchar(80) DEFAULT NULL,
+  `country` varchar(80) DEFAULT NULL,
   `type` varchar(40) DEFAULT NULL,
   `status` varchar(40) DEFAULT NULL,
   `contract_start` date DEFAULT NULL,
@@ -3894,6 +11428,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_suppliers_ai_audit` AFTER INSERT ON `suppliers` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'suppliers', 'SuppliersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('suppliers insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -3909,6 +11465,68 @@ DELIMITER ;;
     CALL ref_touch('supplier_type', NEW.type, NEW.type);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.type_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_suppliers_au_audit` AFTER UPDATE ON `suppliers` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'suppliers', 'SuppliersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('suppliers update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'suppliers', 'SuppliersPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'suppliers update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'suppliers', 'SuppliersPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'suppliers update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_suppliers_ad_audit` AFTER DELETE ON `suppliers` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'suppliers', 'SuppliersPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('suppliers delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3945,11 +11563,27 @@ CREATE TABLE `system_event_log` (
   `processed` tinyint(1) DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ts_utc` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `username` varchar(128) DEFAULT NULL,
+  `digital_signature` varchar(256) DEFAULT NULL,
+  `entry_hash` varchar(256) DEFAULT NULL,
+  `mac_address` varchar(64) DEFAULT NULL,
+  `geo_location` varchar(128) DEFAULT NULL,
+  `regulator` varchar(64) DEFAULT NULL,
+  `related_case_id` int DEFAULT NULL,
+  `related_case_type` varchar(64) DEFAULT NULL,
+  `anomaly_score` double DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sel_user` (`user_id`),
   KEY `idx_sel_time_sev` (`timestamp`,`severity`),
+  KEY `ix_system_event_log_ts` (`ts_utc`),
+  KEY `ix_event_table_record_ts` (`table_name`,`record_id`,`ts_utc`),
+  KEY `ix_event_type_ts` (`event_type`,`ts_utc`),
   CONSTRAINT `fk_sel_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=14939 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15309 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3958,7 +11592,7 @@ CREATE TABLE `system_event_log` (
 
 LOCK TABLES `system_event_log` WRITE;
 /*!40000 ALTER TABLE `system_event_log` DISABLE KEYS */;
-INSERT INTO `system_event_log` VALUES (14933,'2025-08-29 07:52:22','2025-08-29 07:52:22',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users','',1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=560db2f41abe4bbb8f45f96a; IPv4=192.168.108.54','560db2f41abe4bbb8f45f96ab872f8fc','info',0,'2025-08-29 07:52:22','2025-08-29 07:52:22'),(14934,'2025-08-29 07:52:22','2025-08-29 07:52:22',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users','',1,NULL,NULL,NULL,'username=darko; auth=local','username=darko; auth=local','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=560db2f41abe4bbb8f45f96a; IPv4=192.168.108.54','560db2f41abe4bbb8f45f96ab872f8fc','info',0,'2025-08-29 07:52:22','2025-08-29 07:52:22'),(14935,'2025-08-29 07:56:05','2025-08-29 07:56:05',NULL,'DbError','DbError','-','DatabaseService',NULL,NULL,NULL,NULL,'Unknown column \'password\' in \'field list\'','Unknown column \'password\' in \'field list\'','system','server','','warning',0,'2025-08-29 07:56:05','2025-08-29 07:56:05'),(14936,'2025-08-29 07:56:06','2025-08-29 07:56:06',NULL,'DbError','DbError','-','DatabaseService',NULL,NULL,NULL,NULL,'Unknown column \'password\' in \'field list\'','Unknown column \'password\' in \'field list\'','system','server','','warning',0,'2025-08-29 07:56:06','2025-08-29 07:56:06'),(14937,'2025-08-29 07:56:06','2025-08-29 07:56:06',NULL,'DbError','DbError','-','DatabaseService',NULL,NULL,NULL,NULL,'Unknown column \'password\' in \'field list\'','Unknown column \'password\' in \'field list\'','system','server','','warning',0,'2025-08-29 07:56:06','2025-08-29 07:56:06'),(14938,'2025-08-29 07:56:06','2025-08-29 07:56:06',NULL,'DbError','DbError','-','DatabaseService',NULL,NULL,NULL,NULL,'Unknown column \'password\' in \'field list\'','Unknown column \'password\' in \'field list\'','system','server','','error',0,'2025-08-29 07:56:06','2025-08-29 07:56:06');
+INSERT INTO `system_event_log` VALUES (15258,'2025-09-03 13:01:31','2025-09-03 13:01:31',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users','',1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=8c1cc965362c4b34b9ab7dab; IPv4=192.168.108.54','8c1cc965362c4b34b9ab7dab1a3a9c26','info',0,'2025-09-03 13:01:31','2025-09-03 13:01:31','2025-09-03 13:01:31',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15259,'2025-09-03 13:01:31','2025-09-03 13:01:31',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users','',1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=8c1cc965362c4b34b9ab7dab; IPv4=192.168.108.54','8c1cc965362c4b34b9ab7dab1a3a9c26','info',0,'2025-09-03 13:01:31','2025-09-03 13:01:31','2025-09-03 13:01:31',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15260,'2025-09-03 13:01:31','2025-09-03 13:01:31',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-03 13:01:31','2025-09-03 13:01:31','2025-09-03 13:01:31',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15261,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'INSERT','INSERT','capa_cases','CapaCasesPage',1,NULL,NULL,NULL,'capa_cases insert','capa_cases insert','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15262,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'UPDATE','UPDATE','capa_cases','CapaCasesPage',1,NULL,NULL,NULL,'capa_cases update','capa_cases update','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15263,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'UPDATE','UPDATE','capa_cases','CapaCasesPage',1,NULL,NULL,NULL,'capa_cases update','capa_cases update','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15264,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'DELETE','DELETE','capa_cases','CapaCasesPage',1,NULL,NULL,NULL,'capa_cases delete','capa_cases delete','system','server','','warning',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15265,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'INSERT','INSERT','deviations','DeviationsPage',1,NULL,NULL,NULL,'deviations insert','deviations insert','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15266,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'UPDATE','UPDATE','deviations','DeviationsPage',1,NULL,NULL,NULL,'deviations update','deviations update','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15267,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'DELETE','DELETE','deviations','DeviationsPage',1,NULL,NULL,NULL,'deviations delete','deviations delete','system','server','','warning',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15268,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'INSERT','INSERT','system_parameters','SystemParametersPage',1,NULL,NULL,NULL,'system_parameters insert','system_parameters insert','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15269,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'DELETE','DELETE','system_parameters','SystemParametersPage',1,NULL,NULL,NULL,'system_parameters delete','system_parameters delete','system','server','','warning',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15270,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'INSERT','INSERT','api_keys','ApiKeysPage',1,NULL,NULL,NULL,'api_keys insert','api_keys insert','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15271,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'INSERT','INSERT','api_usage_log','ApiUsageLogPage',1,NULL,NULL,NULL,'api_usage_log insert','api_usage_log insert','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15272,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'DELETE','DELETE','api_usage_log','ApiUsageLogPage',1,NULL,NULL,NULL,'api_usage_log delete','api_usage_log delete','system','server','','warning',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15273,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'DELETE','DELETE','api_keys','ApiKeysPage',1,NULL,NULL,NULL,'api_keys delete','api_keys delete','system','server','','warning',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15274,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'INSERT','INSERT','user_login_audit','UserLoginAuditPage',1,NULL,NULL,NULL,'user_login_audit insert','user_login_audit insert','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15275,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'UPDATE','UPDATE','user_login_audit','UserLoginAuditPage',1,NULL,NULL,NULL,'user_login_audit update','user_login_audit update','system','server','','info',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15276,'2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,'DELETE','DELETE','user_login_audit','UserLoginAuditPage',1,NULL,NULL,NULL,'user_login_audit delete','user_login_audit delete','system','server','','warning',0,'2025-09-03 13:06:39','2025-09-03 13:06:39','2025-09-03 13:06:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15277,'2025-09-04 09:28:38','2025-09-04 09:28:38',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=fb3a111a4b8646ada13ad1b9; IPv4=192.168.108.54','fb3a111a4b8646ada13ad1b9c9230f4c','info',0,'2025-09-04 09:28:38','2025-09-04 09:28:38','2025-09-04 09:28:38',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15278,'2025-09-04 09:28:39','2025-09-04 09:28:39',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=fb3a111a4b8646ada13ad1b9; IPv4=192.168.108.54','fb3a111a4b8646ada13ad1b9c9230f4c','info',0,'2025-09-04 09:28:39','2025-09-04 09:28:39','2025-09-04 09:28:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15279,'2025-09-04 09:28:39','2025-09-04 09:28:39',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-04 09:28:39','2025-09-04 09:28:39','2025-09-04 09:28:39',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15280,'2025-09-04 09:40:24','2025-09-04 09:40:24',NULL,'INSERT','INSERT','entity_audit_log','EntityAuditLogPage',10,NULL,NULL,NULL,'entity_audit_log insert','entity_audit_log insert','system','server','','info',0,'2025-09-04 09:40:24','2025-09-04 09:40:24','2025-09-04 09:40:24',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15281,'2025-09-04 09:40:24','2025-09-04 09:40:24',1,'LOAD','LOAD','calibrations',NULL,0,NULL,NULL,NULL,'Loaded 0 calibrations','Loaded 0 calibrations','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=fb3a111a4b8646ada13ad1b9; IPv4=192.168.108.54','fb3a111a4b8646ada13ad1b9c9230f4c','info',0,'2025-09-04 09:40:24','2025-09-04 09:40:24','2025-09-04 09:40:24',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15282,'2025-09-04 10:50:30','2025-09-04 10:50:30',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=cdd0b82dffc148718130bb26; IPv4=192.168.108.54','cdd0b82dffc148718130bb262335b2d4','info',0,'2025-09-04 10:50:30','2025-09-04 10:50:30','2025-09-04 10:50:30',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15283,'2025-09-04 10:50:30','2025-09-04 10:50:30',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=cdd0b82dffc148718130bb26; IPv4=192.168.108.54','cdd0b82dffc148718130bb262335b2d4','info',0,'2025-09-04 10:50:30','2025-09-04 10:50:30','2025-09-04 10:50:30',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15284,'2025-09-04 10:50:30','2025-09-04 10:50:30',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-04 10:50:30','2025-09-04 10:50:30','2025-09-04 10:50:30',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15285,'2025-09-04 11:56:17','2025-09-04 11:56:17',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=21a0fd3d656c4075b00ba774; IPv4=192.168.108.54','21a0fd3d656c4075b00ba77499b86f1d','info',0,'2025-09-04 11:56:17','2025-09-04 11:56:17','2025-09-04 11:56:17',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15286,'2025-09-04 11:56:17','2025-09-04 11:56:17',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=21a0fd3d656c4075b00ba774; IPv4=192.168.108.54','21a0fd3d656c4075b00ba77499b86f1d','info',0,'2025-09-04 11:56:17','2025-09-04 11:56:17','2025-09-04 11:56:17',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15287,'2025-09-04 11:56:17','2025-09-04 11:56:17',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-04 11:56:17','2025-09-04 11:56:17','2025-09-04 11:56:17',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15288,'2025-09-04 14:00:19','2025-09-04 14:00:19',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=1e6a417d52e7484794b34047; IPv4=192.168.108.54','1e6a417d52e7484794b340478565f128','info',0,'2025-09-04 14:00:19','2025-09-04 14:00:19','2025-09-04 14:00:19',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15289,'2025-09-04 14:00:19','2025-09-04 14:00:19',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=1e6a417d52e7484794b34047; IPv4=192.168.108.54','1e6a417d52e7484794b340478565f128','info',0,'2025-09-04 14:00:19','2025-09-04 14:00:19','2025-09-04 14:00:19',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15290,'2025-09-04 14:00:19','2025-09-04 14:00:19',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-04 14:00:19','2025-09-04 14:00:19','2025-09-04 14:00:19',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15291,'2025-09-04 14:09:23','2025-09-04 14:09:23',NULL,'INSERT','INSERT','entity_audit_log','EntityAuditLogPage',11,NULL,NULL,NULL,'entity_audit_log insert','entity_audit_log insert','system','server','','info',0,'2025-09-04 14:09:23','2025-09-04 14:09:23','2025-09-04 14:09:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15292,'2025-09-04 14:09:23','2025-09-04 14:09:23',1,'LOAD','LOAD','calibrations',NULL,0,NULL,NULL,NULL,'Loaded 0 calibrations','Loaded 0 calibrations','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=1e6a417d52e7484794b34047; IPv4=192.168.108.54','1e6a417d52e7484794b340478565f128','info',0,'2025-09-04 14:09:23','2025-09-04 14:09:23','2025-09-04 14:09:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15293,'2025-09-05 07:25:25','2025-09-05 07:25:25',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=3b0cbe8bd9c34744b6502aae; IPv4=192.168.108.54','3b0cbe8bd9c34744b6502aaed1239949','info',0,'2025-09-05 07:25:25','2025-09-05 07:25:25','2025-09-05 07:25:25',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15294,'2025-09-05 07:25:25','2025-09-05 07:25:25',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=3b0cbe8bd9c34744b6502aae; IPv4=192.168.108.54','3b0cbe8bd9c34744b6502aaed1239949','info',0,'2025-09-05 07:25:25','2025-09-05 07:25:25','2025-09-05 07:25:25',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15295,'2025-09-05 07:25:25','2025-09-05 07:25:25',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-05 07:25:25','2025-09-05 07:25:25','2025-09-05 07:25:25',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15296,'2025-09-05 08:12:33','2025-09-05 08:12:33',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=23aa18f776b8494bbeaaf018; IPv4=192.168.108.54','23aa18f776b8494bbeaaf0186fa10eeb','info',0,'2025-09-05 08:12:33','2025-09-05 08:12:33','2025-09-05 08:12:33',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15297,'2025-09-05 08:12:33','2025-09-05 08:12:33',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=23aa18f776b8494bbeaaf018; IPv4=192.168.108.54','23aa18f776b8494bbeaaf0186fa10eeb','info',0,'2025-09-05 08:12:33','2025-09-05 08:12:33','2025-09-05 08:12:33',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15298,'2025-09-05 08:12:33','2025-09-05 08:12:33',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-05 08:12:33','2025-09-05 08:12:33','2025-09-05 08:12:33',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15299,'2025-09-05 13:26:21','2025-09-05 13:26:21',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=693229253c5c4827942618bc; IPv4=192.168.108.54','693229253c5c4827942618bc54be1749','info',0,'2025-09-05 13:26:21','2025-09-05 13:26:21','2025-09-05 13:26:21',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15300,'2025-09-05 13:26:22','2025-09-05 13:26:22',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=693229253c5c4827942618bc; IPv4=192.168.108.54','693229253c5c4827942618bc54be1749','info',0,'2025-09-05 13:26:22','2025-09-05 13:26:22','2025-09-05 13:26:22',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15301,'2025-09-05 13:26:22','2025-09-05 13:26:22',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-05 13:26:22','2025-09-05 13:26:22','2025-09-05 13:26:22',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15302,'2025-09-05 13:27:17','2025-09-05 13:27:17',NULL,'INSERT','INSERT','validations','ValidationsPage',1,NULL,NULL,NULL,'validations insert','validations insert','system','server','','info',0,'2025-09-05 13:27:17','2025-09-05 13:27:17','2025-09-05 13:27:17',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15303,'2025-09-05 13:27:17','2025-09-05 13:27:17',1,'VALIDATION_CREATE','VALIDATION_CREATE','validations','ValidationModule',0,NULL,NULL,NULL,'Created validation  (DQ)','Created validation  (DQ)','','N/A','','audit',0,'2025-09-05 13:27:17','2025-09-05 13:27:17','2025-09-05 13:27:17',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15304,'2025-09-05 13:28:23','2025-09-05 13:28:23',NULL,'INSERT','INSERT','parts','PartsPage',1,NULL,NULL,NULL,'parts insert; code=xxx; name=xxx','parts insert; code=xxx; name=xxx','system','server','','info',0,'2025-09-05 13:28:23','2025-09-05 13:28:23','2025-09-05 13:28:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15305,'2025-09-05 13:28:56','2025-09-05 13:28:56',NULL,'INSERT','INSERT','parts','PartsPage',2,NULL,NULL,NULL,'parts insert; code=sxsxsx; name=sxsx','parts insert; code=sxsxsx; name=sxsx','system','server','','info',0,'2025-09-05 13:28:56','2025-09-05 13:28:56','2025-09-05 13:28:56',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15306,'2025-09-09 08:32:34','2025-09-09 08:32:34',1,'LOGIN_ATTEMPT','LOGIN_ATTEMPT','users',NULL,1,NULL,NULL,NULL,'username=darko; note=attempt','username=darko; note=attempt','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=54771d410f1240c9b1af9b6b; IPv4=192.168.108.54','54771d410f1240c9b1af9b6b44ba637b','info',0,'2025-09-09 08:32:34','2025-09-09 08:32:34','2025-09-09 08:32:34',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15307,'2025-09-09 08:32:34','2025-09-09 08:32:34',1,'LOGIN_SUCCESS','LOGIN_SUCCESS','users',NULL,1,NULL,NULL,NULL,'username=darko; auth=local; shape=base64-sha256','username=darko; auth=local; shape=base64-sha256','192.168.108.54','OS=Microsoft Windows NT 10.0.26100.0; FW=.NET 8.0.19; Arch=X64/X64; Platform=WinUI; Mfr=LENOVO; Model=11ED002CCR; Host=Y-077; User=amir; Domain=yasenka; App=1.0.0.0(0); Sess=54771d410f1240c9b1af9b6b; IPv4=192.168.108.54','54771d410f1240c9b1af9b6b44ba637b','info',0,'2025-09-09 08:32:34','2025-09-09 08:32:34','2025-09-09 08:32:34',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(15308,'2025-09-09 08:32:34','2025-09-09 08:32:34',NULL,'UPDATE','UPDATE','users','UsersPage',1,NULL,NULL,NULL,'users update; username: darko → darko','users update; username: darko → darko','system','server','','info',0,'2025-09-09 08:32:34','2025-09-09 08:32:34','2025-09-09 08:32:34',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `system_event_log` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -4063,11 +11697,12 @@ CREATE TABLE `system_parameters` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `digital_signature` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `param_name` (`param_name`),
   KEY `fk_sysparam_user` (`updated_by`),
   CONSTRAINT `fk_sysparam_user` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4078,6 +11713,73 @@ LOCK TABLES `system_parameters` WRITE;
 /*!40000 ALTER TABLE `system_parameters` DISABLE KEYS */;
 /*!40000 ALTER TABLE `system_parameters` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_system_parameters_ai_audit` AFTER INSERT ON `system_parameters` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'system_parameters', 'SystemParametersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('system_parameters insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_system_parameters_au_audit` AFTER UPDATE ON `system_parameters` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'system_parameters', 'SystemParametersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('system_parameters update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_system_parameters_ad_audit` AFTER DELETE ON `system_parameters` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'system_parameters', 'SystemParametersPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('system_parameters delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `tags`
@@ -4104,6 +11806,73 @@ LOCK TABLES `tags` WRITE;
 /*!40000 ALTER TABLE `tags` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tags` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_tags_ai_audit` AFTER INSERT ON `tags` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'tags', 'TagsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('tags insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_tags_au_audit` AFTER UPDATE ON `tags` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'tags', 'TagsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('tags update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_tags_ad_audit` AFTER DELETE ON `tags` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'tags', 'TagsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('tags delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `tenants`
@@ -4133,6 +11902,106 @@ LOCK TABLES `tenants` WRITE;
 /*!40000 ALTER TABLE `tenants` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tenants` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_tenants_ai_audit` AFTER INSERT ON `tenants` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'tenants', 'TenantsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('tenants insert', CONCAT('; code=', COALESCE(NEW.code,'')), CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_tenants_au_audit` AFTER UPDATE ON `tenants` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'tenants', 'TenantsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('tenants update', CONCAT('; code: ', COALESCE(OLD.code,''), ' → ', COALESCE(NEW.code,'')), CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.code,'') <> COALESCE(NEW.code,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'tenants', 'TenantsPage', NEW.id, 'code',
+       OLD.code, NEW.code, 'tenants update: code changed', 'system', 'server', '', 'info');
+  END IF;
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'tenants', 'TenantsPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'tenants update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_tenants_ad_audit` AFTER DELETE ON `tenants` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'tenants', 'TenantsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('tenants delete', CONCAT('; code=', COALESCE(OLD.code,'')), CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `units`
+--
+
+DROP TABLE IF EXISTS `units`;
+/*!50001 DROP VIEW IF EXISTS `units`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `units` AS SELECT 
+ 1 AS `id`,
+ 1 AS `code`,
+ 1 AS `name`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `user_audit`
@@ -4155,7 +12024,7 @@ CREATE TABLE `user_audit` (
   PRIMARY KEY (`id`),
   KEY `fk_ua_user` (`user_id`),
   CONSTRAINT `fk_ua_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4166,6 +12035,73 @@ LOCK TABLES `user_audit` WRITE;
 /*!40000 ALTER TABLE `user_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_audit_ai_audit` AFTER INSERT ON `user_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_audit', 'UserAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_audit_au_audit` AFTER UPDATE ON `user_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_audit', 'UserAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_audit_ad_audit` AFTER DELETE ON `user_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_audit', 'UserAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('user_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `user_esignatures`
@@ -4201,6 +12137,73 @@ LOCK TABLES `user_esignatures` WRITE;
 /*!40000 ALTER TABLE `user_esignatures` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user_esignatures` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_esignatures_ai_audit` AFTER INSERT ON `user_esignatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_esignatures', 'UserEsignaturesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_esignatures insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_esignatures_au_audit` AFTER UPDATE ON `user_esignatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_esignatures', 'UserEsignaturesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_esignatures update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_esignatures_ad_audit` AFTER DELETE ON `user_esignatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_esignatures', 'UserEsignaturesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('user_esignatures delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `user_login_audit`
@@ -4224,10 +12227,19 @@ CREATE TABLE `user_login_audit` (
   `timestamp` datetime GENERATED ALWAYS AS (`login_time`) VIRTUAL,
   `action` varchar(20) GENERATED ALWAYS AS (if((`success` = 1),_cp852'LOGIN',_cp852'LOGIN_FAIL')) VIRTUAL,
   `details` text GENERATED ALWAYS AS (`reason`) VIRTUAL,
+  `two_factor_ok` tinyint(1) DEFAULT NULL,
+  `sso_used` tinyint(1) DEFAULT NULL,
+  `biometric_used` tinyint(1) DEFAULT NULL,
+  `geo_location` varchar(128) DEFAULT NULL,
+  `risk_score` double DEFAULT NULL,
+  `status` varchar(32) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `note` text,
+  `user` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_ula_user` (`user_id`),
   CONSTRAINT `fk_ula_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4238,6 +12250,73 @@ LOCK TABLES `user_login_audit` WRITE;
 /*!40000 ALTER TABLE `user_login_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user_login_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_login_audit_ai_audit` AFTER INSERT ON `user_login_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_login_audit', 'UserLoginAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_login_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_login_audit_au_audit` AFTER UPDATE ON `user_login_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_login_audit', 'UserLoginAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_login_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_login_audit_ad_audit` AFTER DELETE ON `user_login_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_login_audit', 'UserLoginAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('user_login_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `user_permissions`
@@ -4256,6 +12335,17 @@ CREATE TABLE `user_permissions` (
   `expires_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user` varchar(255) DEFAULT NULL,
+  `permission` varchar(255) DEFAULT NULL,
+  `assigned_at` datetime DEFAULT NULL,
+  `assigned_by` int DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `change_version` int DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `session_id` varchar(64) DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `note` varchar(512) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`,`permission_id`),
   KEY `fk_up_perm` (`permission_id`),
   KEY `fk_up_by` (`granted_by`),
@@ -4271,9 +12361,76 @@ CREATE TABLE `user_permissions` (
 
 LOCK TABLES `user_permissions` WRITE;
 /*!40000 ALTER TABLE `user_permissions` DISABLE KEYS */;
-INSERT INTO `user_permissions` VALUES (1,4,1,'bootstrap grant',NULL,'2025-08-28 14:05:44',NULL,'2025-08-28 14:05:44','2025-08-28 14:05:44');
+INSERT INTO `user_permissions` VALUES (1,1,1,NULL,1,'2025-09-01 14:57:53',NULL,'2025-09-01 14:57:53','2025-09-01 14:57:53',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,2,1,NULL,1,'2025-09-01 14:57:53',NULL,'2025-09-01 14:57:53','2025-09-01 14:57:53',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,3,1,NULL,1,'2025-09-01 14:57:53',NULL,'2025-09-01 14:57:53','2025-09-01 14:57:53',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,4,1,'bootstrap grant',NULL,'2025-08-28 14:05:44',NULL,'2025-08-28 14:05:44','2025-08-28 14:05:44',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `user_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_permissions_ai_audit` AFTER INSERT ON `user_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_permissions', 'UserPermissionsPage', NEW.user_id, NULL,
+     NULL, NULL, CONCAT('user_permissions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_permissions_au_audit` AFTER UPDATE ON `user_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_permissions', 'UserPermissionsPage', NEW.user_id, NULL,
+     NULL, NULL, CONCAT('user_permissions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_permissions_ad_audit` AFTER DELETE ON `user_permissions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_permissions', 'UserPermissionsPage', OLD.user_id, NULL,
+     NULL, NULL, CONCAT('user_permissions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `user_roles`
@@ -4286,17 +12443,27 @@ CREATE TABLE `user_roles` (
   `user_id` int NOT NULL,
   `role_id` int NOT NULL,
   `assigned_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `assigned_by` int DEFAULT NULL,
+  `assigned_by_id` int DEFAULT NULL,
   `expires_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `granted_by` int DEFAULT NULL,
   `granted_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `is_active` tinyint(1) DEFAULT '1',
+  `change_version` int DEFAULT '1',
+  `digital_signature` varchar(256) DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `assigned_by` int DEFAULT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `session_id` varchar(64) DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `note` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`user_id`,`role_id`),
   KEY `fk_ur_role` (`role_id`),
-  KEY `fk_ur_assigned_by` (`assigned_by`),
   KEY `ix_user_roles_granted_by` (`granted_by`),
-  CONSTRAINT `fk_ur_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`id`),
+  KEY `fk_ur_assigned_by_id` (`assigned_by_id`),
+  CONSTRAINT `fk_ur_assigned_by_id` FOREIGN KEY (`assigned_by_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_ur_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_ur_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_user_roles_granted_by` FOREIGN KEY (`granted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -4309,9 +12476,76 @@ CREATE TABLE `user_roles` (
 
 LOCK TABLES `user_roles` WRITE;
 /*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
-INSERT INTO `user_roles` VALUES (1,1,'2025-08-25 11:36:22',NULL,NULL,'2025-08-25 11:36:22','2025-08-25 11:36:22',NULL,'2025-08-28 11:52:14'),(8,1,'2025-08-28 12:07:05',NULL,NULL,'2025-08-28 12:07:05','2025-08-28 12:07:05',1,'2025-08-28 12:07:05');
+INSERT INTO `user_roles` VALUES (1,1,'2025-08-25 11:36:22',NULL,NULL,'2025-08-25 11:36:22','2025-09-02 10:26:59',NULL,'2025-08-28 11:52:14',1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,2,'2025-08-29 09:18:00',NULL,NULL,'2025-08-29 09:18:00','2025-08-29 09:18:00',1,'2025-08-29 09:18:00',1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(1,3,'2025-08-29 09:18:06',NULL,NULL,'2025-08-29 09:18:06','2025-08-29 09:18:06',1,'2025-08-29 09:18:06',1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(8,1,'2025-08-28 12:07:05',NULL,NULL,'2025-08-28 12:07:05','2025-08-28 12:07:05',1,'2025-08-28 12:07:05',1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_roles_ai_audit` AFTER INSERT ON `user_roles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_roles', 'UserRolesPage', NEW.user_id, NULL,
+     NULL, NULL, CONCAT('user_roles insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_roles_au_audit` AFTER UPDATE ON `user_roles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_roles', 'UserRolesPage', NEW.user_id, NULL,
+     NULL, NULL, CONCAT('user_roles update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_roles_ad_audit` AFTER DELETE ON `user_roles` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_roles', 'UserRolesPage', OLD.user_id, NULL,
+     NULL, NULL, CONCAT('user_roles delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `user_subscriptions`
@@ -4344,6 +12578,73 @@ LOCK TABLES `user_subscriptions` WRITE;
 INSERT INTO `user_subscriptions` VALUES (1,1,3,1,'2025-08-28 12:36:27','2025-08-28 12:36:27'),(2,1,8,1,'2025-08-28 12:36:27','2025-08-28 12:36:27'),(3,1,1,1,'2025-08-28 12:36:27','2025-08-28 12:36:27'),(4,1,2,1,'2025-08-28 12:36:27','2025-08-28 12:36:27');
 /*!40000 ALTER TABLE `user_subscriptions` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_subscriptions_ai_audit` AFTER INSERT ON `user_subscriptions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_subscriptions', 'UserSubscriptionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_subscriptions insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_subscriptions_au_audit` AFTER UPDATE ON `user_subscriptions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_subscriptions', 'UserSubscriptionsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_subscriptions update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_subscriptions_ad_audit` AFTER DELETE ON `user_subscriptions` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_subscriptions', 'UserSubscriptionsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('user_subscriptions delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `user_training`
@@ -4378,6 +12679,106 @@ LOCK TABLES `user_training` WRITE;
 /*!40000 ALTER TABLE `user_training` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user_training` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_training_ai_audit` AFTER INSERT ON `user_training` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'user_training', 'UserTrainingPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_training insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_training_au_audit` AFTER UPDATE ON `user_training` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'user_training', 'UserTrainingPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('user_training update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_user_training_ad_audit` AFTER DELETE ON `user_training` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'user_training', 'UserTrainingPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('user_training delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `user_window_layouts`
+--
+
+DROP TABLE IF EXISTS `user_window_layouts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_window_layouts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `page_type` varchar(200) NOT NULL,
+  `pos_x` int DEFAULT NULL,
+  `pos_y` int DEFAULT NULL,
+  `width` int NOT NULL,
+  `height` int NOT NULL,
+  `saved_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ux_user_page` (`user_id`,`page_type`),
+  CONSTRAINT `fk_uwl_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_window_layouts`
+--
+
+LOCK TABLES `user_window_layouts` WRITE;
+/*!40000 ALTER TABLE `user_window_layouts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_window_layouts` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
@@ -4389,12 +12790,13 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `password_hash` varchar(128) NOT NULL,
+  `password` varchar(128) NOT NULL,
+  `password_hash` varchar(256) DEFAULT NULL,
   `full_name` varchar(100) NOT NULL,
   `role` varchar(30) DEFAULT NULL,
+  `role_id` int DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
   `is_locked` tinyint(1) DEFAULT '0',
-  `failed_logins` int DEFAULT '0',
   `last_failed_login` datetime DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(40) DEFAULT NULL,
@@ -4422,21 +12824,36 @@ CREATE TABLE `users` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `last_modified_by_id` int DEFAULT NULL,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `change_version` int NOT NULL DEFAULT '1',
   `failed_login_attempts` int DEFAULT '0',
   `tenant_id` int DEFAULT NULL,
   `job_title_id` int DEFAULT NULL,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user?` varchar(255) DEFAULT NULL,
+  `icollection<role>` varchar(255) DEFAULT NULL,
+  `icollection<permission>` varchar(255) DEFAULT NULL,
+  `icollection<delegated_permission>` varchar(255) DEFAULT NULL,
+  `icollection<audit_log>` varchar(255) DEFAULT NULL,
+  `icollection<digital_signature>` varchar(255) DEFAULT NULL,
+  `icollection<session_log>` varchar(255) DEFAULT NULL,
+  `icollection<work_order>` varchar(255) DEFAULT NULL,
+  `icollection<photo>` varchar(255) DEFAULT NULL,
+  `icollection<attachment>` varchar(255) DEFAULT NULL,
+  `icollection<admin_activity_log>` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ux_users_username_lower` ((lower(`username`))),
   KEY `fk_users_last_modified_by` (`last_modified_by_id`),
   KEY `fk_users_department` (`department_id`),
   KEY `fk_users_tenant_id` (`tenant_id`),
   KEY `fk_users_job_title` (`job_title_id`),
+  KEY `fk_users_role` (`role_id`),
+  KEY `idx_users_username_insensitive` ((lower(`username`))),
   CONSTRAINT `fk_users_department` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_users_job_title` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles` (`id`),
   CONSTRAINT `fk_users_last_modified_by` FOREIGN KEY (`last_modified_by_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`),
   CONSTRAINT `fk_users_tenant_id` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4445,21 +12862,25 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'darko','B0gPuehbk5avBvAGzxyVAkryUxxl+1Bc+9Ct0eLzFXM=','Darko M.',NULL,1,0,0,NULL,NULL,NULL,'2025-08-29 07:52:22',0,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2025-08-25 09:36:22','2025-08-29 05:52:22',NULL,'2025-08-29 07:52:22',0,NULL,NULL),(7,'system','B0gPuehbk5avBvAGzxyVAkryUxxl+1Bc+9Ct0eLzFXM=','System Account',NULL,1,0,0,NULL,NULL,NULL,NULL,0,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2025-08-25 11:15:25','2025-08-25 11:15:25',NULL,'2025-08-25 13:15:25',0,NULL,NULL),(8,'amir','B0gPuehbk5avBvAGzxyVAkryUxxl+1Bc+9Ct0eLzFXM=','Amir Reslan',NULL,1,0,0,NULL,NULL,NULL,NULL,0,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2025-08-25 11:15:25','2025-08-25 11:15:25',NULL,'2025-08-25 13:15:25',0,NULL,NULL);
+INSERT INTO `users` VALUES (1,'darko','9uCh4qxBlFqap/+KiqoM68EqO8yYGpKa1c+BCgkOEa4=','9uCh4qxBlFqap/+KiqoM68EqO8yYGpKa1c+BCgkOEa4=','Darko M.','Admin',1,1,0,'2025-09-02 10:23:22','',NULL,'2025-09-09 08:32:34',0,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2025-08-25 09:36:22','2025-09-09 06:32:34',NULL,1,0,NULL,NULL,'2025-09-09 08:32:34',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(7,'system','B0gPuehbk5avBvAGzxyVAkryUxxl+1Bc+9Ct0eLzFXM=',NULL,'System Account',NULL,1,1,0,'2025-08-29 14:09:12',NULL,NULL,NULL,0,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2025-08-25 11:15:25','2025-08-29 12:15:04',NULL,1,1,NULL,NULL,'2025-08-30 12:36:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(8,'amir','B0gPuehbk5avBvAGzxyVAkryUxxl+1Bc+9Ct0eLzFXM=',NULL,'Amir Reslan','',1,1,0,'2025-08-29 14:09:44','',NULL,NULL,0,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2025-08-25 11:15:25','2025-08-29 12:16:53',NULL,1,3,NULL,NULL,'2025-08-30 12:36:23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = cp852 */ ;
-/*!50003 SET character_set_results = cp852 */ ;
-/*!50003 SET collation_connection  = cp852_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_users_bi_login_attempts_sync` BEFORE INSERT ON `users` FOR EACH ROW BEGIN
-  SET NEW.failed_login_attempts = COALESCE(NEW.failed_login_attempts, NEW.failed_logins, 0);
-  SET NEW.failed_logins         = COALESCE(NEW.failed_login_attempts, NEW.failed_logins, 0);
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_users_ai_audit` AFTER INSERT ON `users` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'users', 'UsersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('users insert', CONCAT('; username=', COALESCE(NEW.username,''))), 'system', 'server', '', 'info');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4469,25 +12890,119 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = cp852 */ ;
-/*!50003 SET character_set_results = cp852 */ ;
-/*!50003 SET collation_connection  = cp852_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_users_bu_login_attempts_sync` BEFORE UPDATE ON `users` FOR EACH ROW BEGIN
-  IF (NEW.failed_login_attempts <=> OLD.failed_login_attempts) = 0
-     OR (NEW.failed_logins <=> OLD.failed_logins) = 0 THEN
-    SET @v := COALESCE(NEW.failed_login_attempts, NEW.failed_logins, 0);
-    SET NEW.failed_login_attempts = @v;
-    SET NEW.failed_logins         = @v;
-  END IF;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_users_au_audit` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'users', 'UsersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('users update', CONCAT('; username: ', COALESCE(OLD.username,''), ' → ', COALESCE(NEW.username,''))), 'system', 'server', '', 'info');
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_users_ad_audit` AFTER DELETE ON `users` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'users', 'UsersPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('users delete', CONCAT('; username=', COALESCE(OLD.username,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `v_machine_components_ui`
+--
+
+DROP TABLE IF EXISTS `v_machine_components_ui`;
+/*!50001 DROP VIEW IF EXISTS `v_machine_components_ui`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `v_machine_components_ui` AS SELECT 
+ 1 AS `id`,
+ 1 AS `machine_id`,
+ 1 AS `code`,
+ 1 AS `name`,
+ 1 AS `type`,
+ 1 AS `sop_doc`,
+ 1 AS `status`,
+ 1 AS `install_date`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `v_suppliers_ui`
+--
+
+DROP TABLE IF EXISTS `v_suppliers_ui`;
+/*!50001 DROP VIEW IF EXISTS `v_suppliers_ui`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `v_suppliers_ui` AS SELECT 
+ 1 AS `id`,
+ 1 AS `name`,
+ 1 AS `vat_number`,
+ 1 AS `address`,
+ 1 AS `supplier_type`,
+ 1 AS `email`,
+ 1 AS `phone`,
+ 1 AS `contract_file`,
+ 1 AS `notes`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `validation_audit`
+--
+
+DROP TABLE IF EXISTS `validation_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `validation_audit` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `changed_at` datetime DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `details` varchar(255) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `validation_id` int DEFAULT NULL,
+  `action` varchar(255) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `validation_audit`
+--
+
+LOCK TABLES `validation_audit` WRITE;
+/*!40000 ALTER TABLE `validation_audit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `validation_audit` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `validations`
@@ -4510,12 +13025,34 @@ CREATE TABLE `validations` (
   `digital_signature` varchar(128) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `code` varchar(40) DEFAULT NULL,
+  `machine?` varchar(255) DEFAULT NULL,
+  `machine_component?` varchar(255) DEFAULT NULL,
+  `date_start` datetime DEFAULT NULL,
+  `date_end` datetime DEFAULT NULL,
+  `signed_by_id` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `signed_by_name` varchar(100) DEFAULT NULL,
+  `entry_hash` varchar(128) DEFAULT NULL,
+  `created_by_id` int DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `source_ip` varchar(64) DEFAULT NULL,
+  `workflow_status` varchar(40) DEFAULT NULL,
+  `additional_signers` varchar(512) DEFAULT NULL,
+  `regulator` varchar(60) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `linked_capa_id` int DEFAULT NULL,
+  `capa_case?` varchar(255) DEFAULT NULL,
+  `signature_timestamp` datetime DEFAULT NULL,
+  `session_id` varchar(80) DEFAULT NULL,
+  `documentation` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_val_machine` (`machine_id`),
   KEY `fk_val_component` (`component_id`),
   CONSTRAINT `fk_val_component` FOREIGN KEY (`component_id`) REFERENCES `machine_components` (`id`),
   CONSTRAINT `fk_val_machine` FOREIGN KEY (`machine_id`) REFERENCES `machines` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4524,8 +13061,276 @@ CREATE TABLE `validations` (
 
 LOCK TABLES `validations` WRITE;
 /*!40000 ALTER TABLE `validations` DISABLE KEYS */;
+INSERT INTO `validations` VALUES (1,'DQ',NULL,NULL,NULL,'',NULL,NULL,NULL,'scxs','','2025-09-05 13:27:17','2025-09-05 13:27:17','',NULL,NULL,'2025-09-24 00:00:00','2025-09-30 00:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'');
 /*!40000 ALTER TABLE `validations` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_validations_ai_audit` AFTER INSERT ON `validations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'validations', 'ValidationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('validations insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_validations_au_audit` AFTER UPDATE ON `validations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'validations', 'ValidationsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('validations update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_validations_ad_audit` AFTER DELETE ON `validations` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'validations', 'ValidationsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('validations delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary view structure for view `vw_admin_activity_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_admin_activity_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_admin_activity_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_admin_activity_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_api_audit_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_api_audit_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_api_audit_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_api_audit_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_api_keys_audit`
+--
+
+DROP TABLE IF EXISTS `vw_api_keys_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_api_keys_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_api_keys_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_api_usage_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_api_usage_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_api_usage_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_api_usage_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_attachments_audit`
+--
+
+DROP TABLE IF EXISTS `vw_attachments_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_attachments_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_attachments_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_buildings_audit`
+--
+
+DROP TABLE IF EXISTS `vw_buildings_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_buildings_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_buildings_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_calibration_audit_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_calibration_audit_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_calibration_audit_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_calibration_audit_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_calibration_export_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_calibration_export_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_calibration_export_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_calibration_export_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_calibration_sensors_audit`
+--
+
+DROP TABLE IF EXISTS `vw_calibration_sensors_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_calibration_sensors_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_calibration_sensors_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_calibrations_audit`
+--
+
+DROP TABLE IF EXISTS `vw_calibrations_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_calibrations_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_calibrations_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Temporary view structure for view `vw_calibrations_filter`
@@ -4544,6 +13349,1426 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `result`,
  1 AS `comment`,
  1 AS `digital_signature`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_capa_action_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_capa_action_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_capa_action_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_capa_action_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_capa_actions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_capa_actions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_capa_actions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_capa_actions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_capa_cases_audit`
+--
+
+DROP TABLE IF EXISTS `vw_capa_cases_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_capa_cases_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_capa_cases_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_capa_status_history_audit`
+--
+
+DROP TABLE IF EXISTS `vw_capa_status_history_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_capa_status_history_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_capa_status_history_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_checklist_items_audit`
+--
+
+DROP TABLE IF EXISTS `vw_checklist_items_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_checklist_items_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_checklist_items_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_checklist_templates_audit`
+--
+
+DROP TABLE IF EXISTS `vw_checklist_templates_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_checklist_templates_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_checklist_templates_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_comments_audit`
+--
+
+DROP TABLE IF EXISTS `vw_comments_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_comments_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_comments_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_component_devices_audit`
+--
+
+DROP TABLE IF EXISTS `vw_component_devices_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_component_devices_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_component_devices_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_component_models_audit`
+--
+
+DROP TABLE IF EXISTS `vw_component_models_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_component_models_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_component_models_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_component_parts_audit`
+--
+
+DROP TABLE IF EXISTS `vw_component_parts_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_component_parts_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_component_parts_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_component_qualifications_audit`
+--
+
+DROP TABLE IF EXISTS `vw_component_qualifications_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_component_qualifications_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_component_qualifications_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_component_types_audit`
+--
+
+DROP TABLE IF EXISTS `vw_component_types_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_component_types_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_component_types_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_config_change_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_config_change_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_config_change_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_config_change_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_contractor_intervention_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_contractor_intervention_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_contractor_intervention_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_contractor_intervention_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_contractor_interventions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_contractor_interventions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_contractor_interventions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_contractor_interventions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_dashboards_audit`
+--
+
+DROP TABLE IF EXISTS `vw_dashboards_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_dashboards_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_dashboards_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_delegated_permissions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_delegated_permissions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_delegated_permissions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_delegated_permissions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_delete_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_delete_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_delete_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_delete_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_departments_audit`
+--
+
+DROP TABLE IF EXISTS `vw_departments_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_departments_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_departments_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_deviation_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_deviation_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_deviation_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_deviation_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_deviations_audit`
+--
+
+DROP TABLE IF EXISTS `vw_deviations_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_deviations_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_deviations_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_digital_signatures_audit`
+--
+
+DROP TABLE IF EXISTS `vw_digital_signatures_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_digital_signatures_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_digital_signatures_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_document_versions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_document_versions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_document_versions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_document_versions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_entity_audit_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_entity_audit_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_entity_audit_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_entity_audit_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_entity_tags_audit`
+--
+
+DROP TABLE IF EXISTS `vw_entity_tags_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_entity_tags_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_entity_tags_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_export_print_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_export_print_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_export_print_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_export_print_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_external_contractors_audit`
+--
+
+DROP TABLE IF EXISTS `vw_external_contractors_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_external_contractors_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_external_contractors_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_failure_modes_audit`
+--
+
+DROP TABLE IF EXISTS `vw_failure_modes_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_failure_modes_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_failure_modes_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_forensic_user_change_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_forensic_user_change_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_forensic_user_change_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_forensic_user_change_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_incident_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_incident_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_incident_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_incident_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_inspections_audit`
+--
+
+DROP TABLE IF EXISTS `vw_inspections_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_inspections_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_inspections_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_integration_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_integration_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_integration_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_integration_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_inventory_transactions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_inventory_transactions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_inventory_transactions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_inventory_transactions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_iot_anomaly_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_iot_anomaly_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_iot_anomaly_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_iot_anomaly_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_iot_devices_audit`
+--
+
+DROP TABLE IF EXISTS `vw_iot_devices_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_iot_devices_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_iot_devices_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_iot_event_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_iot_event_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_iot_event_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_iot_event_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_iot_gateways_audit`
+--
+
+DROP TABLE IF EXISTS `vw_iot_gateways_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_iot_gateways_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_iot_gateways_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_iot_sensor_data_audit`
+--
+
+DROP TABLE IF EXISTS `vw_iot_sensor_data_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_iot_sensor_data_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_iot_sensor_data_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_irregularities_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_irregularities_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_irregularities_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_irregularities_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_job_titles_audit`
+--
+
+DROP TABLE IF EXISTS `vw_job_titles_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_job_titles_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_job_titles_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_locations_audit`
+--
+
+DROP TABLE IF EXISTS `vw_locations_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_locations_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_locations_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_lookup_domain_audit`
+--
+
+DROP TABLE IF EXISTS `vw_lookup_domain_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_lookup_domain_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_lookup_domain_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_lookup_value_audit`
+--
+
+DROP TABLE IF EXISTS `vw_lookup_value_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_lookup_value_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_lookup_value_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_machine_components_audit`
+--
+
+DROP TABLE IF EXISTS `vw_machine_components_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_machine_components_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_machine_components_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_machine_lifecycle_event_audit`
+--
+
+DROP TABLE IF EXISTS `vw_machine_lifecycle_event_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_machine_lifecycle_event_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_machine_lifecycle_event_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_machine_models_audit`
+--
+
+DROP TABLE IF EXISTS `vw_machine_models_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_machine_models_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_machine_models_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_machine_types_audit`
+--
+
+DROP TABLE IF EXISTS `vw_machine_types_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_machine_types_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_machine_types_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_machines_audit`
+--
+
+DROP TABLE IF EXISTS `vw_machines_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_machines_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_machines_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_manufacturers_audit`
+--
+
+DROP TABLE IF EXISTS `vw_manufacturers_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_manufacturers_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_manufacturers_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_measurement_units_audit`
+--
+
+DROP TABLE IF EXISTS `vw_measurement_units_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_measurement_units_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_measurement_units_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_mobile_device_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_mobile_device_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_mobile_device_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_mobile_device_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_notification_queue_audit`
+--
+
+DROP TABLE IF EXISTS `vw_notification_queue_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_notification_queue_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_notification_queue_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_notification_templates_audit`
+--
+
+DROP TABLE IF EXISTS `vw_notification_templates_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_notification_templates_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_notification_templates_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_part_bom_audit`
+--
+
+DROP TABLE IF EXISTS `vw_part_bom_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_part_bom_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_part_bom_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_part_supplier_prices_audit`
+--
+
+DROP TABLE IF EXISTS `vw_part_supplier_prices_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_part_supplier_prices_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_part_supplier_prices_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_parts_audit`
+--
+
+DROP TABLE IF EXISTS `vw_parts_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_parts_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_parts_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_permission_change_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_permission_change_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_permission_change_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_permission_change_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_permission_requests_audit`
+--
+
+DROP TABLE IF EXISTS `vw_permission_requests_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_permission_requests_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_permission_requests_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_permissions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_permissions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_permissions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_permissions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_photos_audit`
+--
+
+DROP TABLE IF EXISTS `vw_photos_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_photos_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_photos_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_ppm_plans_audit`
+--
+
+DROP TABLE IF EXISTS `vw_ppm_plans_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_ppm_plans_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_ppm_plans_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_preventive_maintenance_plans_audit`
+--
+
+DROP TABLE IF EXISTS `vw_preventive_maintenance_plans_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_preventive_maintenance_plans_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_preventive_maintenance_plans_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_quality_events_audit`
+--
+
+DROP TABLE IF EXISTS `vw_quality_events_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_quality_events_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_quality_events_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_report_schedule_audit`
+--
+
+DROP TABLE IF EXISTS `vw_report_schedule_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_report_schedule_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_report_schedule_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_requalification_schedule_audit`
+--
+
+DROP TABLE IF EXISTS `vw_requalification_schedule_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_requalification_schedule_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_requalification_schedule_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_role_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_role_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_role_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_role_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_role_permissions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_role_permissions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_role_permissions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_role_permissions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_roles_audit`
+--
+
+DROP TABLE IF EXISTS `vw_roles_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_roles_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_roles_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_rooms_audit`
+--
+
+DROP TABLE IF EXISTS `vw_rooms_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_rooms_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_rooms_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_scheduled_job_audit_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_scheduled_job_audit_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_scheduled_job_audit_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_scheduled_job_audit_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_scheduled_jobs_audit`
+--
+
+DROP TABLE IF EXISTS `vw_scheduled_jobs_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_scheduled_jobs_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_scheduled_jobs_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -4591,6 +14816,46 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `vw_schema_migration_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_schema_migration_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_schema_migration_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_schema_migration_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_sensitive_data_access_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sensitive_data_access_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sensitive_data_access_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sensitive_data_access_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary view structure for view `vw_sensor_data_enriched`
 --
 
@@ -4611,6 +14876,146 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `vw_sensor_data_logs_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sensor_data_logs_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sensor_data_logs_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sensor_data_logs_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_sensor_models_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sensor_models_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sensor_models_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sensor_models_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_sensor_types_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sensor_types_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sensor_types_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sensor_types_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_session_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_session_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_session_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_session_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_sites_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sites_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sites_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sites_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_sop_document_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sop_document_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sop_document_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sop_document_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_sop_documents_audit`
+--
+
+DROP TABLE IF EXISTS `vw_sop_documents_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_sop_documents_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_sop_documents_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary view structure for view `vw_stock_current`
 --
 
@@ -4627,6 +15032,466 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `quantity`,
  1 AS `min_threshold`,
  1 AS `max_threshold`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_stock_levels_audit`
+--
+
+DROP TABLE IF EXISTS `vw_stock_levels_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_stock_levels_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_stock_levels_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_supplier_risk_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_supplier_risk_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_supplier_risk_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_supplier_risk_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_suppliers_audit`
+--
+
+DROP TABLE IF EXISTS `vw_suppliers_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_suppliers_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_suppliers_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_system_parameters_audit`
+--
+
+DROP TABLE IF EXISTS `vw_system_parameters_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_system_parameters_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_system_parameters_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_tags_audit`
+--
+
+DROP TABLE IF EXISTS `vw_tags_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_tags_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_tags_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_tenants_audit`
+--
+
+DROP TABLE IF EXISTS `vw_tenants_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_tenants_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_tenants_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_esignatures_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_esignatures_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_esignatures_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_esignatures_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_login_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_login_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_login_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_login_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_permissions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_permissions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_permissions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_permissions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_roles_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_roles_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_roles_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_roles_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_subscriptions_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_subscriptions_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_subscriptions_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_subscriptions_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_user_training_audit`
+--
+
+DROP TABLE IF EXISTS `vw_user_training_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_user_training_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_user_training_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_users_audit`
+--
+
+DROP TABLE IF EXISTS `vw_users_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_users_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_users_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_validations_audit`
+--
+
+DROP TABLE IF EXISTS `vw_validations_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_validations_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_validations_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_warehouses_audit`
+--
+
+DROP TABLE IF EXISTS `vw_warehouses_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_warehouses_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_warehouses_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_order_audit_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_order_audit_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_audit_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_order_audit_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_order_checklist_item_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_order_checklist_item_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_checklist_item_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_order_checklist_item_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_order_comments_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_order_comments_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_comments_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_order_comments_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_order_parts_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_order_parts_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_parts_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_order_parts_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_order_signatures_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_order_signatures_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_signatures_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_order_signatures_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_order_status_log_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_order_status_log_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_status_log_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_order_status_log_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_work_orders_audit`
+--
+
+DROP TABLE IF EXISTS `vw_work_orders_audit`;
+/*!50001 DROP VIEW IF EXISTS `vw_work_orders_audit`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_work_orders_audit` AS SELECT 
+ 1 AS `id`,
+ 1 AS `ts_utc`,
+ 1 AS `event_type`,
+ 1 AS `record_id`,
+ 1 AS `field_name`,
+ 1 AS `old_value`,
+ 1 AS `new_value`,
+ 1 AS `description`,
+ 1 AS `severity`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -4697,6 +15562,44 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `warehouse`
+--
+
+DROP TABLE IF EXISTS `warehouse`;
+/*!50001 DROP VIEW IF EXISTS `warehouse`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `warehouse` AS SELECT 
+ 1 AS `id`,
+ 1 AS `name`,
+ 1 AS `location`,
+ 1 AS `responsible_id`,
+ 1 AS `created_at`,
+ 1 AS `updated_at`,
+ 1 AS `location_id`,
+ 1 AS `responsible`,
+ 1 AS `qr_code`,
+ 1 AS `note`,
+ 1 AS `created_by_id`,
+ 1 AS `created_by`,
+ 1 AS `last_modified`,
+ 1 AS `last_modified_by_id`,
+ 1 AS `last_modified_by`,
+ 1 AS `digital_signature`,
+ 1 AS `status`,
+ 1 AS `io_tdevice_id`,
+ 1 AS `climate_mode`,
+ 1 AS `compliance_docs`,
+ 1 AS `entry_hash`,
+ 1 AS `source_ip`,
+ 1 AS `is_qualified`,
+ 1 AS `last_qualified`,
+ 1 AS `session_id`,
+ 1 AS `anomaly_score`,
+ 1 AS `is_deleted`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `warehouses`
 --
 
@@ -4711,6 +15614,26 @@ CREATE TABLE `warehouses` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `location_id` int DEFAULT NULL,
+  `responsible` varchar(255) DEFAULT NULL,
+  `qr_code` varchar(255) DEFAULT NULL,
+  `note` varchar(500) DEFAULT NULL,
+  `created_by_id` int DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `last_modified_by` varchar(255) DEFAULT NULL,
+  `digital_signature` varchar(128) DEFAULT NULL,
+  `status` varchar(30) DEFAULT NULL,
+  `io_tdevice_id` varchar(64) DEFAULT NULL,
+  `climate_mode` varchar(60) DEFAULT NULL,
+  `compliance_docs` varchar(255) DEFAULT NULL,
+  `entry_hash` varchar(128) DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `is_qualified` tinyint(1) DEFAULT NULL,
+  `last_qualified` datetime DEFAULT NULL,
+  `session_id` varchar(80) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_wh_user` (`responsible_id`),
   KEY `fk_wh_location` (`location_id`),
@@ -4727,6 +15650,81 @@ LOCK TABLES `warehouses` WRITE;
 /*!40000 ALTER TABLE `warehouses` DISABLE KEYS */;
 /*!40000 ALTER TABLE `warehouses` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_warehouses_ai_audit` AFTER INSERT ON `warehouses` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'warehouses', 'WarehousesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('warehouses insert', CONCAT('; name=', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_warehouses_au_audit` AFTER UPDATE ON `warehouses` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'warehouses', 'WarehousesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('warehouses update', CONCAT('; name: ', COALESCE(OLD.name,''), ' → ', COALESCE(NEW.name,''))), 'system', 'server', '', 'info');
+
+  IF COALESCE(OLD.name,'') <> COALESCE(NEW.name,'') THEN
+    INSERT INTO system_event_log
+      (user_id, event_type, table_name, related_module, record_id, field_name,
+       old_value, new_value, description, source_ip, device_info, session_id, severity)
+    VALUES
+      (NULL, 'UPDATE', 'warehouses', 'WarehousesPage', NEW.id, 'name',
+       OLD.name, NEW.name, 'warehouses update: name changed', 'system', 'server', '', 'info');
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_warehouses_ad_audit` AFTER DELETE ON `warehouses` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'warehouses', 'WarehousesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('warehouses delete', CONCAT('; name=', COALESCE(OLD.name,''))), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_order_audit`
@@ -4750,6 +15748,11 @@ CREATE TABLE `work_order_audit` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `work_order` varchar(255) DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `session_id` varchar(64) DEFAULT NULL,
+  `digital_signature` varchar(256) DEFAULT NULL,
+  `integrity_hash` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_woa_wo` (`work_order_id`),
   KEY `fk_woa_user` (`user_id`),
@@ -4766,6 +15769,73 @@ LOCK TABLES `work_order_audit` WRITE;
 /*!40000 ALTER TABLE `work_order_audit` DISABLE KEYS */;
 /*!40000 ALTER TABLE `work_order_audit` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_audit_ai_audit` AFTER INSERT ON `work_order_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_order_audit', 'WorkOrderAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_audit insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_audit_au_audit` AFTER UPDATE ON `work_order_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_order_audit', 'WorkOrderAuditPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_audit update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_audit_ad_audit` AFTER DELETE ON `work_order_audit` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_order_audit', 'WorkOrderAuditPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('work_order_audit delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_order_checklist_item`
@@ -4799,6 +15869,73 @@ LOCK TABLES `work_order_checklist_item` WRITE;
 /*!40000 ALTER TABLE `work_order_checklist_item` DISABLE KEYS */;
 /*!40000 ALTER TABLE `work_order_checklist_item` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_checklist_item_ai_audit` AFTER INSERT ON `work_order_checklist_item` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_order_checklist_item', 'WorkOrderChecklistItemPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_checklist_item insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_checklist_item_au_audit` AFTER UPDATE ON `work_order_checklist_item` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_order_checklist_item', 'WorkOrderChecklistItemPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_checklist_item update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_checklist_item_ad_audit` AFTER DELETE ON `work_order_checklist_item` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_order_checklist_item', 'WorkOrderChecklistItemPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('work_order_checklist_item delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_order_comments`
@@ -4831,6 +15968,73 @@ LOCK TABLES `work_order_comments` WRITE;
 /*!40000 ALTER TABLE `work_order_comments` DISABLE KEYS */;
 /*!40000 ALTER TABLE `work_order_comments` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_comments_ai_audit` AFTER INSERT ON `work_order_comments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_order_comments', 'WorkOrderCommentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_comments insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_comments_au_audit` AFTER UPDATE ON `work_order_comments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_order_comments', 'WorkOrderCommentsPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_comments update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_comments_ad_audit` AFTER DELETE ON `work_order_comments` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_order_comments', 'WorkOrderCommentsPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('work_order_comments delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_order_parts`
@@ -4845,6 +16049,28 @@ CREATE TABLE `work_order_parts` (
   `quantity` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` int DEFAULT NULL,
+  `unit_of_measure` varchar(255) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `currency` varchar(255) DEFAULT NULL,
+  `warehouse_id` int DEFAULT NULL,
+  `capa_case_id` int DEFAULT NULL,
+  `incident_id` int DEFAULT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `used_by_id` int DEFAULT NULL,
+  `digital_signature` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `session_id` varchar(255) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `last_modified_at` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `work_order?` varchar(255) DEFAULT NULL,
+  `part?` varchar(255) DEFAULT NULL,
+  `warehouse?` varchar(255) DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `capa_case?` varchar(255) DEFAULT NULL,
+  `incident?` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`work_order_id`,`part_id`),
   KEY `fk_wop_part` (`part_id`),
   CONSTRAINT `fk_wop_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
@@ -4860,6 +16086,73 @@ LOCK TABLES `work_order_parts` WRITE;
 /*!40000 ALTER TABLE `work_order_parts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `work_order_parts` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_parts_ai_audit` AFTER INSERT ON `work_order_parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_order_parts', 'WorkOrderPartsPage', NEW.work_order_id, NULL,
+     NULL, NULL, CONCAT('work_order_parts insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_parts_au_audit` AFTER UPDATE ON `work_order_parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_order_parts', 'WorkOrderPartsPage', NEW.work_order_id, NULL,
+     NULL, NULL, CONCAT('work_order_parts update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_parts_ad_audit` AFTER DELETE ON `work_order_parts` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_order_parts', 'WorkOrderPartsPage', OLD.work_order_id, NULL,
+     NULL, NULL, CONCAT('work_order_parts delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_order_signatures`
@@ -4895,6 +16188,73 @@ LOCK TABLES `work_order_signatures` WRITE;
 /*!40000 ALTER TABLE `work_order_signatures` DISABLE KEYS */;
 /*!40000 ALTER TABLE `work_order_signatures` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_signatures_ai_audit` AFTER INSERT ON `work_order_signatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_order_signatures', 'WorkOrderSignaturesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_signatures insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_signatures_au_audit` AFTER UPDATE ON `work_order_signatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_order_signatures', 'WorkOrderSignaturesPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_signatures update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_signatures_ad_audit` AFTER DELETE ON `work_order_signatures` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_order_signatures', 'WorkOrderSignaturesPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('work_order_signatures delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_order_status_log`
@@ -4913,6 +16273,12 @@ CREATE TABLE `work_order_status_log` (
   `note` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `work_order` varchar(255) DEFAULT NULL,
+  `changed_by_id` int DEFAULT NULL,
+  `reason` varchar(400) DEFAULT NULL,
+  `is_incident` tinyint(1) DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_wosl_wo` (`work_order_id`),
   KEY `fk_wosl_user` (`changed_by`),
@@ -4929,6 +16295,73 @@ LOCK TABLES `work_order_status_log` WRITE;
 /*!40000 ALTER TABLE `work_order_status_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `work_order_status_log` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_status_log_ai_audit` AFTER INSERT ON `work_order_status_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_order_status_log', 'WorkOrderStatusLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_status_log insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_status_log_au_audit` AFTER UPDATE ON `work_order_status_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_order_status_log', 'WorkOrderStatusLogPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_order_status_log update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_order_status_log_ad_audit` AFTER DELETE ON `work_order_status_log` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_order_status_log', 'WorkOrderStatusLogPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('work_order_status_log delete'), 'system', 'server', '', 'warning');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `work_orders`
@@ -4958,6 +16391,40 @@ CREATE TABLE `work_orders` (
   `type_id` int DEFAULT NULL,
   `priority_id` int DEFAULT NULL,
   `tenant_id` int DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `task_description` varchar(255) DEFAULT NULL,
+  `due_date` datetime DEFAULT NULL,
+  `closed_at` datetime DEFAULT NULL,
+  `requested_by_id` int DEFAULT NULL,
+  `user?` varchar(255) DEFAULT NULL,
+  `created_by_id` int DEFAULT NULL,
+  `assigned_to_id` int DEFAULT NULL,
+  `machine?` varchar(255) DEFAULT NULL,
+  `machine_component?` varchar(255) DEFAULT NULL,
+  `capa_case_id` int DEFAULT NULL,
+  `capa_case?` varchar(255) DEFAULT NULL,
+  `incident_id` int DEFAULT NULL,
+  `incident?` varchar(255) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
+  `device_info` varchar(255) DEFAULT NULL,
+  `source_ip` varchar(255) DEFAULT NULL,
+  `session_id` varchar(255) DEFAULT NULL,
+  `document_path` varchar(255) DEFAULT NULL,
+  `next_due` datetime DEFAULT NULL,
+  `external_ref` varchar(255) DEFAULT NULL,
+  `entry_hash` varchar(255) DEFAULT NULL,
+  `audit_flag` tinyint(1) DEFAULT NULL,
+  `anomaly_score` decimal(10,2) DEFAULT NULL,
+  `photo_before_ids` varchar(255) DEFAULT NULL,
+  `photo_after_ids` varchar(255) DEFAULT NULL,
+  `icollection<work_order_part>` varchar(255) DEFAULT NULL,
+  `icollection<photo>` varchar(255) DEFAULT NULL,
+  `icollection<work_order_comment>` varchar(255) DEFAULT NULL,
+  `icollection<work_order_status_log>` varchar(255) DEFAULT NULL,
+  `icollection<work_order_signature>` varchar(255) DEFAULT NULL,
+  `icollection<work_order_audit>` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_wo_comp` (`component_id`),
   KEY `fk_wo_created` (`created_by`),
@@ -5016,6 +16483,28 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_orders_ai_audit` AFTER INSERT ON `work_orders` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'INSERT', 'work_orders', 'WorkOrdersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_orders insert'), 'system', 'server', '', 'info');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = cp852 */ ;
 /*!50003 SET character_set_results = cp852 */ ;
 /*!50003 SET collation_connection  = cp852_general_ci */ ;
@@ -5035,6 +16524,51 @@ DELIMITER ;;
     CALL ref_touch('priority', NEW.priority, NEW.priority);
     IF LAST_INSERT_ID() IS NOT NULL THEN SET NEW.priority_id = LAST_INSERT_ID(); END IF;
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_orders_au_audit` AFTER UPDATE ON `work_orders` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'UPDATE', 'work_orders', 'WorkOrdersPage', NEW.id, NULL,
+     NULL, NULL, CONCAT('work_orders update'), 'system', 'server', '', 'info');
+
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_work_orders_ad_audit` AFTER DELETE ON `work_orders` FOR EACH ROW BEGIN
+  INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity)
+  VALUES
+    (NULL, 'DELETE', 'work_orders', 'WorkOrdersPage', OLD.id, NULL,
+     NULL, NULL, CONCAT('work_orders delete'), 'system', 'server', '', 'warning');
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -5092,28 +16626,62 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fn_normalize_machine_status` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fn_normalize_machine_status`(raw VARCHAR(64)) RETURNS varchar(32) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
+    DETERMINISTIC
+BEGIN
+  DECLARE s VARCHAR(64) DEFAULT TRIM(LOWER(IFNULL(raw,'')));
+  RETURN
+    CASE
+      WHEN s IN ('maintenance','maint','service','van pogona','neispravan','kvar','servis') THEN 'maintenance'
+      WHEN s IN ('decommissioned','decom','retired','dekomisioniran') THEN 'decommissioned'
+      WHEN s IN ('reserved','rezerviran') THEN 'reserved'
+      WHEN s IN ('scrapped','scrap','otpisan','rashodovan') THEN 'scrapped'
+      WHEN s IN ('u pogonu','operativan','operational','active','') THEN 'active'
+      ELSE 'active'
+    END;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `add_column_if_missing` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = cp852 */ ;
-/*!50003 SET character_set_results = cp852 */ ;
-/*!50003 SET collation_connection  = cp852_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `add_column_if_missing`(IN p_tbl VARCHAR(64), IN p_col VARCHAR(64), IN p_def TEXT)
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.tables
-              WHERE table_schema = DATABASE() AND table_name = p_tbl) THEN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-                    WHERE table_schema = DATABASE()
-                      AND table_name   = p_tbl
-                      AND column_name  = p_col) THEN
-      SET @sql := CONCAT('ALTER TABLE `',p_tbl,'` ADD COLUMN `',p_col,'` ',p_def);
-      PREPARE ps FROM @sql; EXECUTE ps; DEALLOCATE PREPARE ps;
-    END IF;
-  END IF;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `add_column_if_missing`(
+    IN p_table  VARCHAR(64),
+    IN p_column VARCHAR(64),
+    IN p_def    TEXT
+)
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME   = p_table
+           AND COLUMN_NAME  = p_column
+    ) THEN
+        SET @ddl = CONCAT('ALTER TABLE `', p_table, '` ADD COLUMN `', p_column, '` ', p_def);
+        PREPARE stmt FROM @ddl;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -5389,25 +16957,203 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = cp852 */ ;
-/*!50003 SET character_set_results = cp852 */ ;
-/*!50003 SET collation_connection  = cp852_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ref_touch`(IN p_domain_code VARCHAR(60), IN p_code VARCHAR(80), IN p_name VARCHAR(160))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ref_touch`(
+    IN p_domain VARCHAR(64),
+    IN p_code   VARCHAR(255),
+    IN p_label  VARCHAR(255)
+)
+BEGIN
+    DECLARE v_domain_id INT;
+    DECLARE v_value_id  INT;
+
+    -- ensure domain exists; set LAST_INSERT_ID to its id
+    INSERT INTO ref_domain(`name`) VALUES (p_domain)
+    ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`);
+    SET v_domain_id = LAST_INSERT_ID();
+
+    -- ensure value exists; set LAST_INSERT_ID to its id (inserted or existing)
+    INSERT INTO ref_value(`domain_id`,`code`,`label`,`is_active`)
+    VALUES (v_domain_id, p_code, COALESCE(p_label, p_code), 1)
+    ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`), `label`=VALUES(`label`), `is_active`=1;
+    SET v_value_id = LAST_INSERT_ID();
+
+    -- expose value id via session LAST_INSERT_ID() without returning a result set
+    DO LAST_INSERT_ID(v_value_id);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_emit_audit_triggers` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_emit_audit_triggers`(IN p_table VARCHAR(64))
 BEGIN
-  IF p_code IS NULL OR p_code = '' THEN
-    SELECT NULL;
-  ELSE
-    INSERT INTO ref_domain(code,name) VALUES (p_domain_code,p_domain_code)
-      ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id);
-    SET @dom_id := LAST_INSERT_ID();
+  /*
+    Emits a suggested 3-trigger audit block for p_table as a single TEXT column (ddl).
+    Usage:
+      CALL sp_emit_audit_triggers('your_table');
+    Notes:
+      - MySQL cannot PREPARE CREATE TRIGGER; copy the result into a script and run.
+      - related_module defaults to CONCAT(p_table, 'Page').
+  */
+  DECLARE has_id        BOOL DEFAULT FALSE;
+  DECLARE has_code      BOOL DEFAULT FALSE;
+  DECLARE has_name      BOOL DEFAULT FALSE;
+  DECLARE has_number    BOOL DEFAULT FALSE;
+  DECLARE has_username  BOOL DEFAULT FALSE;
 
-    INSERT INTO ref_value(domain_id,code,name,is_active)
-      VALUES (@dom_id,p_code,COALESCE(p_name,p_code),1)
-      ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id), name=VALUES(name), is_active=1;
-  END IF;
+  SELECT COUNT(*)>0 INTO has_id       FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = p_table AND column_name = 'id';
+  SELECT COUNT(*)>0 INTO has_code     FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = p_table AND column_name = 'code';
+  SELECT COUNT(*)>0 INTO has_name     FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = p_table AND column_name = 'name';
+  SELECT COUNT(*)>0 INTO has_number   FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = p_table AND column_name = 'number';
+  SELECT COUNT(*)>0 INTO has_username FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = p_table AND column_name = 'username';
+
+  SELECT CONCAT(
+'-- ===== Triggers for ', p_table, ' =====\n',
+'DROP TRIGGER IF EXISTS trg_', p_table, '_ai_audit;\n',
+'DROP TRIGGER IF EXISTS trg_', p_table, '_au_audit;\n',
+'DROP TRIGGER IF EXISTS trg_', p_table, '_ad_audit;\n',
+'DELIMITER $$\n\n',
+
+'CREATE TRIGGER trg_', p_table, '_ai_audit\n',
+'AFTER INSERT ON ', p_table, '\nFOR EACH ROW\nBEGIN\n',
+'  INSERT INTO system_event_log\n',
+'    (user_id, event_type, table_name, related_module, record_id, field_name,\n',
+'     old_value, new_value, description, source_ip, device_info, session_id, severity)\n',
+'  VALUES\n',
+'    (NULL, ''INSERT'', ''', p_table, ''', ''', p_table, 'Page'', NEW.', IF(has_id,'id','id'), ', NULL,\n',
+'     NULL, NULL, CONCAT(''', p_table, ' insert''',
+IF(has_code,     ', CONCAT(''; code='', COALESCE(NEW.code, ''''))', ''),
+IF(has_name,     ', CONCAT(''; name='', COALESCE(NEW.name, ''''))', ''),
+IF(has_number,   ', CONCAT(''; number='', COALESCE(NEW.number, ''''))', ''),
+IF(has_username, ', CONCAT(''; username='', COALESCE(NEW.username, ''''))', ''),
+'), ''system'', ''server'', '''', ''info'');\n',
+'END$$\n\n',
+
+'CREATE TRIGGER trg_', p_table, '_au_audit\n',
+'AFTER UPDATE ON ', p_table, '\nFOR EACH ROW\nBEGIN\n',
+'  INSERT INTO system_event_log\n',
+'    (user_id, event_type, table_name, related_module, record_id, field_name,\n',
+'     old_value, new_value, description, source_ip, device_info, session_id, severity)\n',
+'  VALUES\n',
+'    (NULL, ''UPDATE'', ''', p_table, ''', ''', p_table, 'Page'', NEW.', IF(has_id,'id','id'), ', NULL,\n',
+'     NULL, NULL, CONCAT(''', p_table, ' update''',
+IF(has_code,     ', CONCAT(''; code: '', COALESCE(OLD.code, ''''), '' → '', COALESCE(NEW.code, ''''))', ''),
+IF(has_name,     ', CONCAT(''; name: '', COALESCE(OLD.name, ''''), '' → '', COALESCE(NEW.name, ''''))', ''),
+IF(has_number,   ', CONCAT(''; number: '', COALESCE(OLD.number, ''''), '' → '', COALESCE(NEW.number, ''''))', ''),
+IF(has_username, ', CONCAT(''; username: '', COALESCE(OLD.username, ''''), '' → '', COALESCE(NEW.username, ''''))', ''),
+'), ''system'', ''server'', '''', ''info'');\n',
+IF(has_code, CONCAT(
+'  IF COALESCE(OLD.code, '''') <> COALESCE(NEW.code, '''') THEN\n',
+'    INSERT INTO system_event_log (user_id, event_type, table_name, related_module, record_id, field_name, old_value, new_value, description, source_ip, device_info, session_id, severity)\n',
+'    VALUES (NULL, ''UPDATE'', ''', p_table, ''', ''', p_table, 'Page'', NEW.', IF(has_id,'id','id'), ', ''code'', OLD.code, NEW.code, ''', p_table, ' update: code changed'', ''system'', ''server'', '''', ''info'');\n',
+'  END IF;\n'), ''),
+IF(has_name, CONCAT(
+'  IF COALESCE(OLD.name, '''') <> COALESCE(NEW.name, '''') THEN\n',
+'    INSERT INTO system_event_log (user_id, event_type, table_name, related_module, record_id, field_name, old_value, new_value, description, source_ip, device_info, session_id, severity)\n',
+'    VALUES (NULL, ''UPDATE'', ''', p_table, ''', ''', p_table, 'Page'', NEW.', IF(has_id,'id','id'), ', ''name'', OLD.name, NEW.name, ''', p_table, ' update: name changed'', ''system'', ''server'', '''', ''info'');\n',
+'  END IF;\n'), ''),
+'END$$\n\n',
+
+'CREATE TRIGGER trg_', p_table, '_ad_audit\n',
+'AFTER DELETE ON ', p_table, '\nFOR EACH ROW\nBEGIN\n',
+'  INSERT INTO system_event_log\n',
+'    (user_id, event_type, table_name, related_module, record_id, field_name,\n',
+'     old_value, new_value, description, source_ip, device_info, session_id, severity)\n',
+'  VALUES\n',
+'    (NULL, ''DELETE'', ''', p_table, ''', ''', p_table, 'Page'', OLD.', IF(has_id,'id','id'), ', NULL,\n',
+'     NULL, NULL, CONCAT(''', p_table, ' delete''',
+IF(has_code,     ', CONCAT(''; code='', COALESCE(OLD.code, ''''))', ''),
+IF(has_name,     ', CONCAT(''; name='', COALESCE(OLD.name, ''''))', ''),
+'), ''system'', ''server'', '''', ''warning'');\n',
+'END$$\n\n',
+'DELIMITER ;\n'
+  ) AS ddl;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_inspect_triggers_for_resultsets` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_inspect_triggers_for_resultsets`(IN p_table VARCHAR(64))
+BEGIN
+  /*
+    Scans trigger bodies for suspicious tokens that could emit result sets or do admin ops.
+    Usage:
+      CALL sp_inspect_triggers_for_resultsets('machines');
+      CALL sp_inspect_triggers_for_resultsets(NULL); -- all tables
+  */
+  SELECT
+      TRIGGER_NAME,
+      EVENT_OBJECT_TABLE AS table_name,
+      ACTION_TIMING,
+      EVENT_MANIPULATION AS event_op,
+      ACTION_STATEMENT
+  FROM INFORMATION_SCHEMA.TRIGGERS
+  WHERE TRIGGER_SCHEMA = DATABASE()
+    AND (p_table IS NULL OR EVENT_OBJECT_TABLE = p_table)
+    AND (
+      ACTION_STATEMENT REGEXP '\\bSELECT\\b'
+      OR ACTION_STATEMENT REGEXP '\\bSHOW\\b'
+      OR ACTION_STATEMENT REGEXP '\\bCREATE\\s+TEMPORARY\\s+TABLE\\b'
+      OR ACTION_STATEMENT REGEXP '\\bALTER\\s+TABLE\\b'
+      OR ACTION_STATEMENT REGEXP '\\bDROP\\s+TABLE\\b'
+    )
+  ORDER BY EVENT_OBJECT_TABLE, TRIGGER_NAME;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_list_table_triggers` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_list_table_triggers`(IN p_table VARCHAR(64))
+BEGIN
+  /*
+    CALL sp_list_table_triggers('machines');
+  */
+  SELECT
+      TRIGGER_NAME,
+      ACTION_TIMING,
+      EVENT_MANIPULATION AS event_op
+  FROM INFORMATION_SCHEMA.TRIGGERS
+  WHERE TRIGGER_SCHEMA = DATABASE()
+    AND EVENT_OBJECT_TABLE = p_table
+  ORDER BY TRIGGER_NAME;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -5452,6 +17198,330 @@ DELIMITER ;
 USE `yasgmp`;
 
 --
+-- Final view structure for view `audit_log`
+--
+
+/*!50001 DROP VIEW IF EXISTS `audit_log`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `audit_log` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`event_time` AS `event_time`,`system_event_log`.`timestamp` AS `timestamp`,`system_event_log`.`user_id` AS `user_id`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`action` AS `action`,`system_event_log`.`table_name` AS `table_name`,`system_event_log`.`related_module` AS `related_module`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`details` AS `details`,`system_event_log`.`source_ip` AS `source_ip`,`system_event_log`.`device_info` AS `device_info`,`system_event_log`.`session_id` AS `session_id`,`system_event_log`.`severity` AS `severity`,`system_event_log`.`processed` AS `processed`,`system_event_log`.`created_at` AS `created_at`,`system_event_log`.`updated_at` AS `updated_at`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`username` AS `username`,`system_event_log`.`digital_signature` AS `digital_signature`,`system_event_log`.`entry_hash` AS `entry_hash`,`system_event_log`.`mac_address` AS `mac_address`,`system_event_log`.`geo_location` AS `geo_location`,`system_event_log`.`regulator` AS `regulator`,`system_event_log`.`related_case_id` AS `related_case_id`,`system_event_log`.`related_case_type` AS `related_case_type`,`system_event_log`.`anomaly_score` AS `anomaly_score`,`system_event_log`.`user` AS `user`,`system_event_log`.`change_version` AS `change_version`,`system_event_log`.`is_deleted` AS `is_deleted` from `system_event_log` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `capa_audit_log`
+--
+
+/*!50001 DROP VIEW IF EXISTS `capa_audit_log`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `capa_audit_log` AS select `capa_status_history`.`id` AS `id`,`capa_status_history`.`capa_case_id` AS `capa_case_id`,`capa_status_history`.`old_status` AS `old_status`,`capa_status_history`.`new_status` AS `new_status`,`capa_status_history`.`changed_by` AS `changed_by`,`capa_status_history`.`changed_at` AS `changed_at`,`capa_status_history`.`note` AS `note`,`capa_status_history`.`created_at` AS `created_at`,`capa_status_history`.`updated_at` AS `updated_at`,`capa_status_history`.`capa_case` AS `capa_case`,`capa_status_history`.`source_ip` AS `source_ip`,`capa_status_history`.`digital_signature` AS `digital_signature`,`capa_status_history`.`change_version` AS `change_version`,`capa_status_history`.`is_deleted` AS `is_deleted` from `capa_status_history` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `incidents`
+--
+
+/*!50001 DROP VIEW IF EXISTS `incidents`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `incidents` AS select `incident_log`.`id` AS `id`,`incident_log`.`detected_at` AS `detected_at`,`incident_log`.`reported_by` AS `reported_by`,`incident_log`.`severity` AS `severity`,`incident_log`.`title` AS `title`,`incident_log`.`description` AS `description`,`incident_log`.`resolved` AS `resolved`,`incident_log`.`resolved_at` AS `resolved_at`,`incident_log`.`resolved_by` AS `resolved_by`,`incident_log`.`actions_taken` AS `actions_taken`,`incident_log`.`follow_up` AS `follow_up`,`incident_log`.`note` AS `note`,`incident_log`.`source_ip` AS `source_ip`,`incident_log`.`created_at` AS `created_at`,`incident_log`.`updated_at` AS `updated_at`,`incident_log`.`severity_id` AS `severity_id`,`incident_log`.`reported_by_id` AS `reported_by_id`,`incident_log`.`resolved_by_id` AS `resolved_by_id`,`incident_log`.`digital_signature` AS `digital_signature`,`incident_log`.`root_cause` AS `root_cause`,`incident_log`.`capa_case_id` AS `capa_case_id`,`incident_log`.`capa_case` AS `capa_case`,`incident_log`.`attachments` AS `attachments`,`incident_log`.`last_modified` AS `last_modified`,`incident_log`.`last_modified_by_id` AS `last_modified_by_id`,`incident_log`.`last_modified_by` AS `last_modified_by` from `incident_log` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `notifications`
+--
+
+/*!50001 DROP VIEW IF EXISTS `notifications`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `notifications` AS select `notification_queue`.`id` AS `id`,`notification_queue`.`template_id` AS `template_id`,`notification_queue`.`recipient_user_id` AS `recipient_user_id`,`notification_queue`.`channel` AS `channel`,`notification_queue`.`payload` AS `payload`,`notification_queue`.`scheduled_at` AS `scheduled_at`,`notification_queue`.`sent_at` AS `sent_at`,`notification_queue`.`status` AS `status`,`notification_queue`.`last_error` AS `last_error`,`notification_queue`.`created_at` AS `created_at`,`notification_queue`.`updated_at` AS `updated_at` from `notification_queue` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `role`
+--
+
+/*!50001 DROP VIEW IF EXISTS `role`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `role` AS select `roles`.`id` AS `id`,`roles`.`name` AS `name`,`roles`.`description` AS `description`,`roles`.`org_unit` AS `org_unit`,`roles`.`compliance_tags` AS `compliance_tags`,`roles`.`is_deleted` AS `is_deleted`,`roles`.`notes` AS `notes`,`roles`.`created_at` AS `created_at`,`roles`.`updated_at` AS `updated_at`,`roles`.`created_by_id` AS `created_by_id`,`roles`.`last_modified_by_id` AS `last_modified_by_id`,`roles`.`version` AS `version`,`roles`.`icollection<permission>` AS `icollection<permission>`,`roles`.`icollection<user>` AS `icollection<user>`,`roles`.`icollection<role_permission>` AS `icollection<role_permission>`,`roles`.`user?` AS `user?` from `roles` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `units`
+--
+
+/*!50001 DROP VIEW IF EXISTS `units`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `units` AS select `measurement_units`.`id` AS `id`,`measurement_units`.`code` AS `code`,`measurement_units`.`name` AS `name`,`measurement_units`.`created_at` AS `created_at`,`measurement_units`.`updated_at` AS `updated_at` from `measurement_units` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `v_machine_components_ui`
+--
+
+/*!50001 DROP VIEW IF EXISTS `v_machine_components_ui`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_machine_components_ui` AS select `machine_components`.`id` AS `id`,`machine_components`.`machine_id` AS `machine_id`,`machine_components`.`code` AS `code`,`machine_components`.`name` AS `name`,`machine_components`.`type` AS `type`,`machine_components`.`sop_doc` AS `sop_doc`,`machine_components`.`status` AS `status`,`machine_components`.`install_date` AS `install_date` from `machine_components` where ((`machine_components`.`is_deleted` = 0) or (`machine_components`.`is_deleted` is null)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `v_suppliers_ui`
+--
+
+/*!50001 DROP VIEW IF EXISTS `v_suppliers_ui`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_suppliers_ui` AS select `suppliers`.`id` AS `id`,`suppliers`.`name` AS `name`,`suppliers`.`oib` AS `vat_number`,`suppliers`.`address` AS `address`,`suppliers`.`type` AS `supplier_type`,`suppliers`.`email` AS `email`,`suppliers`.`phone` AS `phone`,`suppliers`.`cert_doc` AS `contract_file`,`suppliers`.`comment` AS `notes` from `suppliers` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_admin_activity_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_admin_activity_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_admin_activity_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'admin_activity_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_api_audit_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_api_audit_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_api_audit_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'api_audit_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_api_keys_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_api_keys_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_api_keys_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'api_keys') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_api_usage_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_api_usage_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_api_usage_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'api_usage_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_attachments_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_attachments_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_attachments_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'attachments') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_buildings_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_buildings_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_buildings_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'buildings') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_calibration_audit_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_calibration_audit_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_calibration_audit_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'calibration_audit_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_calibration_export_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_calibration_export_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_calibration_export_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'calibration_export_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_calibration_sensors_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_calibration_sensors_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_calibration_sensors_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'calibration_sensors') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_calibrations_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_calibrations_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_calibrations_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'calibrations') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vw_calibrations_filter`
 --
 
@@ -5465,6 +17535,1284 @@ USE `yasgmp`;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `vw_calibrations_filter` AS select `c`.`id` AS `id`,`mc`.`name` AS `component_name`,`s`.`name` AS `supplier_name`,`c`.`calibration_date` AS `calibration_date`,`c`.`next_due` AS `next_due`,`c`.`result` AS `result`,`c`.`comment` AS `comment`,`c`.`digital_signature` AS `digital_signature` from ((`calibrations` `c` left join `machine_components` `mc` on((`c`.`component_id` = `mc`.`id`))) left join `suppliers` `s` on((`c`.`supplier_id` = `s`.`id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_capa_action_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_capa_action_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_capa_action_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'capa_action_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_capa_actions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_capa_actions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_capa_actions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'capa_actions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_capa_cases_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_capa_cases_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_capa_cases_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'capa_cases') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_capa_status_history_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_capa_status_history_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_capa_status_history_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'capa_status_history') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_checklist_items_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_checklist_items_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_checklist_items_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'checklist_items') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_checklist_templates_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_checklist_templates_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_checklist_templates_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'checklist_templates') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_comments_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_comments_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_comments_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'comments') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_component_devices_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_component_devices_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_component_devices_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'component_devices') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_component_models_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_component_models_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_component_models_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'component_models') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_component_parts_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_component_parts_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_component_parts_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'component_parts') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_component_qualifications_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_component_qualifications_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_component_qualifications_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'component_qualifications') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_component_types_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_component_types_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_component_types_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'component_types') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_config_change_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_config_change_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_config_change_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'config_change_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_contractor_intervention_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_contractor_intervention_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_contractor_intervention_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'contractor_intervention_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_contractor_interventions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_contractor_interventions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_contractor_interventions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'contractor_interventions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_dashboards_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_dashboards_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_dashboards_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'dashboards') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_delegated_permissions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_delegated_permissions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_delegated_permissions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'delegated_permissions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_delete_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_delete_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_delete_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'delete_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_departments_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_departments_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_departments_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'departments') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_deviation_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_deviation_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_deviation_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'deviation_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_deviations_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_deviations_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_deviations_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'deviations') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_digital_signatures_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_digital_signatures_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_digital_signatures_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'digital_signatures') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_document_versions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_document_versions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_document_versions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'document_versions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_entity_audit_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_entity_audit_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_entity_audit_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'entity_audit_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_entity_tags_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_entity_tags_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_entity_tags_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'entity_tags') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_export_print_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_export_print_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_export_print_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'export_print_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_external_contractors_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_external_contractors_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_external_contractors_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'external_contractors') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_failure_modes_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_failure_modes_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_failure_modes_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'failure_modes') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_forensic_user_change_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_forensic_user_change_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_forensic_user_change_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'forensic_user_change_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_incident_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_incident_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_incident_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'incident_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_inspections_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_inspections_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_inspections_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'inspections') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_integration_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_integration_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_integration_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'integration_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_inventory_transactions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_inventory_transactions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_inventory_transactions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'inventory_transactions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_iot_anomaly_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_iot_anomaly_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_iot_anomaly_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'iot_anomaly_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_iot_devices_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_iot_devices_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_iot_devices_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'iot_devices') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_iot_event_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_iot_event_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_iot_event_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'iot_event_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_iot_gateways_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_iot_gateways_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_iot_gateways_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'iot_gateways') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_iot_sensor_data_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_iot_sensor_data_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_iot_sensor_data_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'iot_sensor_data') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_irregularities_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_irregularities_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_irregularities_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'irregularities_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_job_titles_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_job_titles_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_job_titles_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'job_titles') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_locations_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_locations_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_locations_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'locations') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_lookup_domain_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_lookup_domain_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_lookup_domain_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'lookup_domain') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_lookup_value_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_lookup_value_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_lookup_value_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'lookup_value') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_machine_components_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_machine_components_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_machine_components_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'machine_components') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_machine_lifecycle_event_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_machine_lifecycle_event_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_machine_lifecycle_event_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'machine_lifecycle_event') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_machine_models_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_machine_models_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_machine_models_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'machine_models') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_machine_types_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_machine_types_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_machine_types_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'machine_types') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_machines_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_machines_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_machines_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'machines') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_manufacturers_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_manufacturers_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_manufacturers_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'manufacturers') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_measurement_units_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_measurement_units_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_measurement_units_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'measurement_units') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_mobile_device_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_mobile_device_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_mobile_device_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'mobile_device_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_notification_queue_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_notification_queue_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_notification_queue_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'notification_queue') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_notification_templates_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_notification_templates_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_notification_templates_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'notification_templates') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_part_bom_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_part_bom_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_part_bom_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'part_bom') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_part_supplier_prices_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_part_supplier_prices_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_part_supplier_prices_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'part_supplier_prices') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_parts_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_parts_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_parts_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'parts') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_permission_change_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_permission_change_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_permission_change_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'permission_change_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_permission_requests_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_permission_requests_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_permission_requests_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'permission_requests') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_permissions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_permissions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_permissions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'permissions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_photos_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_photos_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_photos_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'photos') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_ppm_plans_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_ppm_plans_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_ppm_plans_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'ppm_plans') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_preventive_maintenance_plans_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_preventive_maintenance_plans_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_preventive_maintenance_plans_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'preventive_maintenance_plans') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_quality_events_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_quality_events_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_quality_events_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'quality_events') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_report_schedule_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_report_schedule_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_report_schedule_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'report_schedule') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_requalification_schedule_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_requalification_schedule_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_requalification_schedule_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'requalification_schedule') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_role_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_role_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_role_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'role_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_role_permissions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_role_permissions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_role_permissions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'role_permissions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_roles_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_roles_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_roles_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'roles') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_rooms_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_rooms_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_rooms_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'rooms') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_scheduled_job_audit_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_scheduled_job_audit_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_scheduled_job_audit_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'scheduled_job_audit_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_scheduled_jobs_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_scheduled_jobs_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_scheduled_jobs_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'scheduled_jobs') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -5488,6 +18836,42 @@ USE `yasgmp`;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vw_schema_migration_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_schema_migration_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_schema_migration_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'schema_migration_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_sensitive_data_access_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sensitive_data_access_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sensitive_data_access_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sensitive_data_access_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vw_sensor_data_enriched`
 --
 
@@ -5506,6 +18890,132 @@ USE `yasgmp`;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vw_sensor_data_logs_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sensor_data_logs_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sensor_data_logs_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sensor_data_logs') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_sensor_models_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sensor_models_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sensor_models_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sensor_models') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_sensor_types_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sensor_types_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sensor_types_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sensor_types') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_session_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_session_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_session_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'session_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_sites_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sites_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sites_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sites') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_sop_document_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sop_document_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sop_document_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sop_document_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_sop_documents_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_sop_documents_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_sop_documents_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'sop_documents') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vw_stock_current`
 --
 
@@ -5519,6 +19029,420 @@ USE `yasgmp`;
 /*!50001 CREATE ALGORITHM=MERGE */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY INVOKER */
 /*!50001 VIEW `vw_stock_current` AS select `p`.`id` AS `part_id`,`p`.`code` AS `part_code`,`p`.`name` AS `part_name`,`w`.`id` AS `warehouse_id`,coalesce(`w`.`name`,`l`.`name`) AS `warehouse_name`,`sl`.`quantity` AS `quantity`,`sl`.`min_threshold` AS `min_threshold`,`sl`.`max_threshold` AS `max_threshold` from (((`stock_levels` `sl` join `parts` `p` on((`p`.`id` = `sl`.`part_id`))) left join `warehouses` `w` on((`w`.`id` = `sl`.`warehouse_id`))) left join `locations` `l` on((`l`.`id` = `w`.`location_id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_stock_levels_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_stock_levels_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_stock_levels_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'stock_levels') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_supplier_risk_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_supplier_risk_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_supplier_risk_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'supplier_risk_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_suppliers_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_suppliers_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_suppliers_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'suppliers') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_system_parameters_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_system_parameters_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_system_parameters_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'system_parameters') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_tags_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_tags_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_tags_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'tags') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_tenants_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_tenants_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_tenants_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'tenants') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_esignatures_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_esignatures_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_esignatures_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_esignatures') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_login_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_login_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_login_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_login_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_permissions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_permissions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_permissions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_permissions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_roles_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_roles_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_roles_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_roles') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_subscriptions_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_subscriptions_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_subscriptions_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_subscriptions') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_user_training_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_user_training_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_user_training_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'user_training') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_users_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_users_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_users_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'users') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_validations_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_validations_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_validations_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'validations') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_warehouses_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_warehouses_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_warehouses_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'warehouses') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_order_audit_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_audit_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_order_audit_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_order_audit') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_order_checklist_item_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_checklist_item_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_order_checklist_item_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_order_checklist_item') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_order_comments_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_comments_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_order_comments_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_order_comments') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_order_parts_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_parts_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_order_parts_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_order_parts') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_order_signatures_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_signatures_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_order_signatures_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_order_signatures') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_order_status_log_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_order_status_log_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_order_status_log_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_order_status_log') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_work_orders_audit`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_work_orders_audit`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_work_orders_audit` AS select `system_event_log`.`id` AS `id`,`system_event_log`.`ts_utc` AS `ts_utc`,`system_event_log`.`event_type` AS `event_type`,`system_event_log`.`record_id` AS `record_id`,`system_event_log`.`field_name` AS `field_name`,`system_event_log`.`old_value` AS `old_value`,`system_event_log`.`new_value` AS `new_value`,`system_event_log`.`description` AS `description`,`system_event_log`.`severity` AS `severity` from `system_event_log` where (`system_event_log`.`table_name` = 'work_orders') order by `system_event_log`.`ts_utc` desc,`system_event_log`.`id` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -5558,6 +19482,24 @@ USE `yasgmp`;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `warehouse`
+--
+
+/*!50001 DROP VIEW IF EXISTS `warehouse`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `warehouse` AS select `warehouses`.`id` AS `id`,`warehouses`.`name` AS `name`,`warehouses`.`location` AS `location`,`warehouses`.`responsible_id` AS `responsible_id`,`warehouses`.`created_at` AS `created_at`,`warehouses`.`updated_at` AS `updated_at`,`warehouses`.`location_id` AS `location_id`,`warehouses`.`responsible` AS `responsible`,`warehouses`.`qr_code` AS `qr_code`,`warehouses`.`note` AS `note`,`warehouses`.`created_by_id` AS `created_by_id`,`warehouses`.`created_by` AS `created_by`,`warehouses`.`last_modified` AS `last_modified`,`warehouses`.`last_modified_by_id` AS `last_modified_by_id`,`warehouses`.`last_modified_by` AS `last_modified_by`,`warehouses`.`digital_signature` AS `digital_signature`,`warehouses`.`status` AS `status`,`warehouses`.`io_tdevice_id` AS `io_tdevice_id`,`warehouses`.`climate_mode` AS `climate_mode`,`warehouses`.`compliance_docs` AS `compliance_docs`,`warehouses`.`entry_hash` AS `entry_hash`,`warehouses`.`source_ip` AS `source_ip`,`warehouses`.`is_qualified` AS `is_qualified`,`warehouses`.`last_qualified` AS `last_qualified`,`warehouses`.`session_id` AS `session_id`,`warehouses`.`anomaly_score` AS `anomaly_score`,`warehouses`.`is_deleted` AS `is_deleted` from `warehouses` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -5568,4 +19510,4 @@ USE `yasgmp`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-29  8:29:53
+-- Dump completed on 2025-09-09  9:36:53

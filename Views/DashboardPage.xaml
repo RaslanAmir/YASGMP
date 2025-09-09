@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Dashboard – YasGMP
-    Single, clean XAML. Uses built-in Microsoft.Maui.Controls ToolTipProperties via the "maui" xmlns alias.
--->
 <ContentPage
     x:Class="YasGMP.DashboardPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -10,132 +6,71 @@
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
     Title="Dashboard – YasGMP">
 
-    <ContentPage.Content>
-        <ScrollView>
-            <VerticalStackLayout Spacing="28" Padding="32,32,32,32" BackgroundColor="#f7fafc">
+  <ContentPage.Content>
+    <ScrollView>
+      <VerticalStackLayout Spacing="28" Padding="32" BackgroundColor="{StaticResource YtSurface}">
 
-                <Frame
-                    CornerRadius="16"
-                    Padding="28"
-                    HasShadow="True"
-                    BackgroundColor="White"
-                    VerticalOptions="CenterAndExpand"
-                    HorizontalOptions="CenterAndExpand"
-                    WidthRequest="540">
+        <Frame CornerRadius="16"
+               Padding="28"
+               HasShadow="True"
+               BackgroundColor="{StaticResource YtSurfaceCard}"
+               BorderColor="{StaticResource YtRowBorder}"
+               VerticalOptions="CenterAndExpand"
+               HorizontalOptions="CenterAndExpand"
+               WidthRequest="540">
 
-                    <VerticalStackLayout Spacing="20">
+          <VerticalStackLayout Spacing="20">
 
-                        <Label
-                            Text="YasGMP – GMP Dashboard"
-                            FontSize="24"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
-                            TextColor="#2962ff" />
+            <!-- FIX: TextColor now uses a valid theme key (YtPrimary700) instead of missing 'YtPrimary' -->
+            <Label Text="YasGMP – GMP Dashboard"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="{StaticResource YtPrimary700}" />
 
-                        <BoxView HeightRequest="2" Color="#e3e3e3" />
+            <BoxView HeightRequest="2" Color="{StaticResource YtRowBorder}" />
 
-                        <!-- User header -->
-                        <Label
-                            x:Name="UserNameLabel"
-                            FontSize="16"
-                            TextColor="#263238"
-                            FontAttributes="Bold"
-                            maui:ToolTipProperties.Text="Ime i prezime prijavljenog korisnika." />
+            <!-- User header -->
+            <Label x:Name="UserNameLabel"
+                   FontSize="16"
+                   TextColor="{StaticResource YtOnSurface}"
+                   FontAttributes="Bold"
+                   maui:ToolTipProperties.Text="Ime i prezime prijavljenog korisnika." />
 
-                        <Label
-                            x:Name="UserRoleLabel"
-                            FontSize="15"
-                            TextColor="#607d8b"
-                            FontAttributes="Italic"
-                            maui:ToolTipProperties.Text="Trenutna GMP uloga korisnika." />
+            <Label x:Name="UserRoleLabel"
+                   FontSize="15"
+                   TextColor="{StaticResource YtOnSurfaceDim}"
+                   FontAttributes="Italic"
+                   maui:ToolTipProperties.Text="Trenutna GMP uloga korisnika." />
 
-                        <BoxView HeightRequest="8" Color="Transparent" />
+            <BoxView HeightRequest="8" Color="Transparent" />
 
-                        <Label Text="Brzi izbornik:" FontSize="15" TextColor="#2962ff" FontAttributes="Bold" />
+            <Label Text="Brzi izbornik:" FontSize="15" TextColor="{StaticResource YtPrimary700}" FontAttributes="Bold" />
 
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*" ColumnSpacing="14" RowSpacing="12">
+            <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*" ColumnSpacing="14" RowSpacing="12">
 
-                            <Button
-                                x:Name="MachinesButton"
-                                Text="Strojevi / Oprema"
-                                Clicked="OnMachinesClicked"
-                                BackgroundColor="#e3f2fd"
-                                TextColor="#1976d2"
-                                FontAttributes="Bold"
-                                Grid.Row="0" Grid.Column="0"
-                                maui:ToolTipProperties.Text="Pregled i upravljanje svim strojevima, uređajima i komponentama." />
+              <Button x:Name="MachinesButton"   Text="Strojevi / Oprema"     Clicked="OnMachinesClicked"   />
+              <Button x:Name="PartsButton"      Grid.Column="1" Text="Dijelovi / Skladište" Clicked="OnPartsClicked" />
+              <Button x:Name="WorkOrdersButton" Grid.Row="1"   Text="Radni nalozi"         Clicked="OnWorkOrdersClicked" />
+              <Button x:Name="CapaButton"       Grid.Row="1" Grid.Column="1" Text="CAPA (Korektivne akcije)" Clicked="OnCapaClicked" />
+              <Button x:Name="ValidationButton" Grid.Row="2"   Text="Validacije (IQ/OQ/PQ)" Clicked="OnValidationClicked" />
+              <Button x:Name="AdminPanelButton" Grid.Row="2" Grid.Column="1" Text="Admin panel" Clicked="OnAdminPanelClicked" />
+            </Grid>
 
-                            <Button
-                                x:Name="PartsButton"
-                                Text="Dijelovi / Skladište"
-                                Clicked="OnPartsClicked"
-                                BackgroundColor="#e8f5e9"
-                                TextColor="#388e3c"
-                                FontAttributes="Bold"
-                                Grid.Row="0" Grid.Column="1"
-                                maui:ToolTipProperties.Text="Pregled i upravljanje svim rezervnim dijelovima i skladištem." />
+            <BoxView HeightRequest="12" Color="Transparent" />
 
-                            <Button
-                                x:Name="WorkOrdersButton"
-                                Text="Radni nalozi"
-                                Clicked="OnWorkOrdersClicked"
-                                BackgroundColor="#fffde7"
-                                TextColor="#fbc02d"
-                                FontAttributes="Bold"
-                                Grid.Row="1" Grid.Column="0"
-                                maui:ToolTipProperties.Text="Otvaranje i praćenje svih naloga za održavanje." />
+            <Button x:Name="LogoutButton"
+                    Text="Odjava"
+                    Clicked="OnLogoutClicked" />
 
-                            <Button
-                                x:Name="CapaButton"
-                                Text="CAPA (Korektivne akcije)"
-                                Clicked="OnCapaClicked"
-                                BackgroundColor="#ffebee"
-                                TextColor="#d32f2f"
-                                FontAttributes="Bold"
-                                Grid.Row="1" Grid.Column="1"
-                                maui:ToolTipProperties.Text="Evidencija i upravljanje CAPA slučajevima." />
+            <Label Text="YasGMP – GMP Maintenance, Audit &amp; Compliance"
+                   FontSize="12"
+                   HorizontalOptions="Center"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+          </VerticalStackLayout>
+        </Frame>
 
-                            <Button
-                                x:Name="ValidationButton"
-                                Text="Validacije (IQ/OQ/PQ)"
-                                Clicked="OnValidationClicked"
-                                BackgroundColor="#f3e5f5"
-                                TextColor="#7b1fa2"
-                                FontAttributes="Bold"
-                                Grid.Row="2" Grid.Column="0"
-                                maui:ToolTipProperties.Text="Sve validacijske aktivnosti i dokumenti." />
-
-                            <Button
-                                x:Name="AdminPanelButton"
-                                Text="Admin panel"
-                                Clicked="OnAdminPanelClicked"
-                                BackgroundColor="#f5f5f5"
-                                TextColor="#607d8b"
-                                FontAttributes="Bold"
-                                Grid.Row="2" Grid.Column="1"
-                                maui:ToolTipProperties.Text="Upravljanje korisnicima, pravima i postavkama." />
-                        </Grid>
-
-                        <BoxView HeightRequest="12" Color="Transparent" />
-
-                        <Button
-                            x:Name="LogoutButton"
-                            Text="Odjava"
-                            Clicked="OnLogoutClicked"
-                            BackgroundColor="#cfd8dc"
-                            TextColor="#37474f"
-                            FontAttributes="Bold"
-                            maui:ToolTipProperties.Text="Odjava iz aplikacije." />
-
-                        <Label
-                            Text="YasGMP – GMP Maintenance, Audit &amp; Compliance"
-                            FontSize="12"
-                            HorizontalOptions="Center"
-                            TextColor="#bdbdbd" />
-                    </VerticalStackLayout>
-                </Frame>
-
-            </VerticalStackLayout>
-        </ScrollView>
-    </ContentPage.Content>
+      </VerticalStackLayout>
+    </ScrollView>
+  </ContentPage.Content>
 </ContentPage>

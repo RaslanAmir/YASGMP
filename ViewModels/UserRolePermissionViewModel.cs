@@ -424,7 +424,7 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                await _dbService.ExportUsersAsync(FilteredUsers.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId).ConfigureAwait(false);
+                await _dbService.ExportUsersAsync(FilteredUsers.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId, await YasGMP.Helpers.ExportFormatPrompt.PromptAsync()).ConfigureAwait(false);
                 StatusMessage = "Users exported successfully.";
             }
             catch (Exception ex)
@@ -439,7 +439,7 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                await _dbService.ExportRolesAsync(FilteredRoles.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId).ConfigureAwait(false);
+                await _dbService.ExportRolesAsync(FilteredRoles.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId, await YasGMP.Helpers.ExportFormatPrompt.PromptAsync()).ConfigureAwait(false);
                 StatusMessage = "Roles exported successfully.";
             }
             catch (Exception ex)
@@ -454,7 +454,7 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                await _dbService.ExportPermissionsAsync(FilteredPermissions.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId).ConfigureAwait(false);
+                await _dbService.ExportPermissionsAsync(FilteredPermissions.ToList(), _currentIpAddress, _currentDeviceInfo, _currentSessionId, await YasGMP.Helpers.ExportFormatPrompt.PromptAsync()).ConfigureAwait(false);
                 StatusMessage = "Permissions exported successfully.";
             }
             catch (Exception ex)
@@ -563,3 +563,4 @@ namespace YasGMP.ViewModels
         #endregion
     }
 }
+

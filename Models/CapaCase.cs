@@ -46,9 +46,9 @@ namespace YasGMP.Models
         [ForeignKey(nameof(ComponentId))]
         public virtual MachineComponent Component { get; set; } = null!;
 
-        /// <summary>Date and time when CAPA was opened (DB field).</summary>
+        /// <summary>Date when CAPA was opened (maps to SQL column 'date_open').</summary>
         [Required]
-        [Column("opened_at")]
+        [Column("date_open")]
         public DateTime OpenedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
@@ -61,8 +61,8 @@ namespace YasGMP.Models
             set => OpenedAt = value;
         }
 
-        /// <summary>Date and time when CAPA was closed (nullable, DB field).</summary>
-        [Column("closed_at")]
+        /// <summary>Date when CAPA was closed (nullable; maps to SQL column 'date_close').</summary>
+        [Column("date_close")]
         public DateTime? ClosedAt { get; set; }
 
         /// <summary>
@@ -159,8 +159,14 @@ namespace YasGMP.Models
 
         /// <summary>Source IP address or device for forensics/audit.</summary>
         [StringLength(45)]
-        [Column("source_ip")]
         public string SourceIp { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Normalized status ID (FK to ref_value in SQL; nullable).
+        /// Present in SQL as 'status_id'. Optional here for schema parity.
+        /// </summary>
+        [Column("status_id")]
+        public int? StatusId { get; set; }
 
         /// <summary>Linked root cause reference (legacy/compatibility field).</summary>
         [StringLength(200)]

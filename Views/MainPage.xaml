@@ -4,73 +4,45 @@
              x:Class="YasGMP.Views.MainPage"
              Title="YasGMP Dashboard">
 
-    <!--
-        Glavna kontrolna ploča (dashboard) za YasGMP MAUI aplikaciju.
-        Povezano s MainPageViewModel, prikazuje korisnički info, prečace za glavne module i statusne informacije.
-    -->
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="28" BackgroundColor="{StaticResource YtSurface}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="28">
+      <Label Text="YasGMP – Glavna Kontrolna Ploča"
+             FontSize="26" FontAttributes="Bold"
+             HorizontalOptions="Center"
+             TextColor="{StaticResource YtPrimary}"
+             ToolTipProperties.Text="Glavna ploča za sve GMP module" />
 
-            <!-- Naslov aplikacije -->
-            <Label Text="YasGMP – Glavna Kontrolna Ploča"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   ToolTipProperties.Text="Glavna ploča za sve GMP module" />
+      <Label Text="{Binding WelcomeText}"
+             FontSize="16"
+             TextColor="{StaticResource YtOnSurface}"
+             HorizontalOptions="Center"
+             Margin="0,8,0,18"
+             ToolTipProperties.Text="Trenutno prijavljeni korisnik i uloga" />
 
-            <!-- Prijavljeni korisnik i dobrodošlica -->
-            <Label Text="{Binding WelcomeText}"
-                   FontSize="16"
-                   TextColor="DarkSlateGray"
-                   HorizontalOptions="Center"
-                   Margin="0,8,0,18"
-                   ToolTipProperties.Text="Trenutno prijavljeni korisnik i uloga" />
-
-            <!-- Brzi pristup modulima (prečaci) -->
-            <Frame HasShadow="True" CornerRadius="12" Padding="12" Margin="0,0,0,16" BackgroundColor="#F7F7F7">
-                <VerticalStackLayout Spacing="14">
-                    <Button Text="Radni Nalozi"
-                            Command="{Binding OpenWorkOrdersCommand}"
-                            ToolTipProperties.Text="Upravljanje radnim nalozima (Work Orders)" />
-                    <Button Text="Kalibracije"
-                            Command="{Binding OpenCalibrationsCommand}"
-                            ToolTipProperties.Text="Prikaz i unos kalibracija opreme" />
-                    <Button Text="Korisnici"
-                            Command="{Binding OpenUsersCommand}"
-                            ToolTipProperties.Text="Administracija korisnika i prava" />
-                    <Button Text="Audit log"
-                            Command="{Binding OpenAuditLogCommand}"
-                            ToolTipProperties.Text="Pregled GMP audit trail zapisa" />
-                    <Button Text="SOP / Dokumentacija"
-                            Command="{Binding OpenSopCommand}"
-                            ToolTipProperties.Text="Pristup SOP i pratećoj dokumentaciji" />
-                    <Button Text="Inspekcije"
-                            Command="{Binding OpenInspectionsCommand}"
-                            ToolTipProperties.Text="Pregled i unos inspekcija" />
-                    <Button Text="Dijelovi (Parts)"
-                            Command="{Binding OpenPartsCommand}"
-                            ToolTipProperties.Text="Pregled i unos dijelova/opreme" />
-                    <Button Text="CAPA"
-                            Command="{Binding OpenCapaCommand}"
-                            ToolTipProperties.Text="Pregled i unos CAPA slučajeva" />
-                    <Button Text="Dobavljači i Serviseri"
-                            Command="{Binding OpenSuppliersCommand}"
-                            ToolTipProperties.Text="Administracija dobavljača i vanjskih servisa" />
-                    <Button Text="Izvještaji / Dashboard"
-                            Command="{Binding OpenReportsCommand}"
-                            ToolTipProperties.Text="Sumarni prikaz i eksport izvještaja" />
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- Status, verzija i autorska info -->
-            <Label Text="Verzija: 1.0.0   |   Powered by YasTech   |   © 2025"
-                   FontSize="12"
-                   HorizontalOptions="Center"
-                   TextColor="Gray"
-                   Margin="0,18,0,0"
-                   ToolTipProperties.Text="Ažuriraj aplikaciju za nove funkcionalnosti" />
-
+      <Frame HasShadow="True" CornerRadius="12" Padding="12" Margin="0,0,0,16"
+             BackgroundColor="{StaticResource YtSurfaceCard}">
+        <VerticalStackLayout Spacing="14">
+          <Button Text="Radni Nalozi"             Command="{Binding OpenWorkOrdersCommand}"  />
+          <Button Text="Kalibracije"              Command="{Binding OpenCalibrationsCommand}"/>
+          <Button Text="Korisnici"                 Command="{Binding OpenUsersCommand}"      />
+          <Button Text="Audit log"                 Command="{Binding OpenAuditLogCommand}"   />
+          <Button Text="SOP / Dokumentacija"      Command="{Binding OpenSopCommand}"        />
+          <Button Text="Inspekcije"               Command="{Binding OpenInspectionsCommand}"/>
+          <Button Text="Dijelovi (Parts)"         Command="{Binding OpenPartsCommand}"      />
+          <Button Text="CAPA"                      Command="{Binding OpenCapaCommand}"       />
+          <Button Text="Dobavljači i Serviseri"   Command="{Binding OpenSuppliersCommand}"  />
+          <Button Text="Izvještaji / Dashboard"   Command="{Binding OpenReportsCommand}"    />
         </VerticalStackLayout>
-    </ScrollView>
+      </Frame>
+
+      <Label Text="Verzija: 1.0.0   |   Powered by YasTech   |   © 2025"
+             FontSize="12"
+             HorizontalOptions="Center"
+             TextColor="{StaticResource YtOnSurfaceDim}"
+             Margin="0,18,0,0"
+             ToolTipProperties.Text="Ažuriraj aplikaciju za nove funkcionalnosti" />
+
+    </VerticalStackLayout>
+  </ScrollView>
 </ContentPage>

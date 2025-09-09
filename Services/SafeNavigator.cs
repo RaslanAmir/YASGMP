@@ -9,22 +9,13 @@ namespace YasGMP.Services
 {
     /// <summary>
     /// <b>SafeNavigator</b> – Centralized, exception-safe navigation + alerts for Shell-based apps.
-    /// <para>
-    /// Guarantees UI-thread execution for navigation and dialogs, registers routes once via
-    /// <see cref="AppShell.EnsureRoutesRegistered"/>, and never throws UI-thread COM exceptions.
-    /// </para>
-    /// <para>
-    /// All methods return a boolean success flag (where meaningful) and surface user-friendly messages
-    /// instead of crashing. Errors are also written to <see cref="Debug"/> in <c>DEBUG</c> builds.
-    /// </para>
+    /// UI-thread marshalled calls to avoid COM exceptions on WinUI. All APIs are no-throw.
     /// </summary>
     public static class SafeNavigator
     {
         /// <summary>
-        /// Navigates to a registered Shell route in a fault-tolerant, UI-thread-safe way.
+        /// Navigate to a Shell route in a UI-thread-safe manner.
         /// </summary>
-        /// <param name="route">Shell route (e.g., <c>"routes/dashboard"</c>).</param>
-        /// <returns><c>true</c> if navigation started; otherwise <c>false</c>.</returns>
         public static async Task<bool> GoToAsync(string route)
         {
             if (string.IsNullOrWhiteSpace(route))
@@ -32,17 +23,14 @@ namespace YasGMP.Services
 
             try
             {
-                // Ensure known routes are registered (idempotent).
                 AppShell.EnsureRoutesRegistered();
 
                 if (Shell.Current is null)
                 {
-                    await TryShowAlertAsync("Navigation",
-                        $"Shell nije aktivan. Ruta: {route}", "OK").ConfigureAwait(false);
+                    await TryShowAlertAsync("Navigation", $"Shell nije aktivan. Ruta: {route}", "OK").ConfigureAwait(false);
                     return false;
                 }
 
-                // Always marshal navigation onto the UI thread to avoid COM/XAML dialog issues.
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
                     await Shell.Current.GoToAsync(route).ConfigureAwait(false);
@@ -61,11 +49,8 @@ namespace YasGMP.Services
         }
 
         /// <summary>
-        /// Navigates to a route with query dictionary (Shell navigation parameters), UI-thread safe.
+        /// Navigate to a route with parameters (Shell query).
         /// </summary>
-        /// <param name="route">Shell route (e.g., <c>"routes/machines"</c>).</param>
-        /// <param name="parameters">Key/value parameters to pass to the target page.</param>
-        /// <returns><c>true</c> on success; otherwise <c>false</c>.</returns>
         public static async Task<bool> GoToAsync(string route, IDictionary<string, object>? parameters)
         {
             if (string.IsNullOrWhiteSpace(route))
@@ -77,8 +62,7 @@ namespace YasGMP.Services
 
                 if (Shell.Current is null)
                 {
-                    await TryShowAlertAsync("Navigation",
-                        $"Shell nije aktivan. Ruta: {route}", "OK").ConfigureAwait(false);
+                    await TryShowAlertAsync("Navigation", $"Shell nije aktivan. Ruta: {route}", "OK").ConfigureAwait(false);
                     return false;
                 }
 
@@ -103,9 +87,8 @@ namespace YasGMP.Services
         }
 
         /// <summary>
-        /// Navigates back using Shell, UI-thread safe.
+        /// Navigate back using Shell ("..").
         /// </summary>
-        /// <returns><c>true</c> if a back navigation was attempted; <c>false</c> if not available.</returns>
         public static async Task<bool> GoBackAsync()
         {
             try
@@ -134,23 +117,11 @@ namespace YasGMP.Services
             }
         }
 
-        /// <summary>
-        /// Shows a simple alert in a UI-thread safe manner. No-throw.
-        /// </summary>
-        /// <param name="title">Dialog title.</param>
-        /// <param name="message">Message body.</param>
-        /// <param name="cancel">Cancel button text (default <c>OK</c>).</param>
+        /// <summary>Show a simple alert (no-throw).</summary>
         public static async Task ShowAlertAsync(string title, string message, string cancel = "OK")
             => await TryShowAlertAsync(title, message, cancel).ConfigureAwait(false);
 
-        /// <summary>
-        /// Shows a confirmation dialog (OK/Cancel) in a UI-thread safe manner. No-throw.
-        /// </summary>
-        /// <param name="title">Dialog title.</param>
-        /// <param name="message">Message body.</param>
-        /// <param name="accept">Accept button text.</param>
-        /// <param name="cancel">Cancel button text.</param>
-        /// <returns><c>true</c> if accepted; otherwise <c>false</c> (or if dialog unavailable).</returns>
+        /// <summary>Confirmation dialog (no-throw).</summary>
         public static async Task<bool> ConfirmAsync(string title, string message, string accept = "OK", string cancel = "Cancel")
         {
             try
@@ -171,9 +142,6 @@ namespace YasGMP.Services
             }
         }
 
-        /// <summary>
-        /// Attempts to display an alert without throwing. Always marshals to the UI thread.
-        /// </summary>
         private static async Task TryShowAlertAsync(string title, string message, string cancel)
         {
             try
@@ -190,7 +158,7 @@ namespace YasGMP.Services
 #if DEBUG
                 Debug.WriteLine($"[NAV WARN] TryShowAlertAsync('{title}') → {ex.Message}");
 #endif
-                // Swallow alert errors – never let dialogs crash the app.
+                // swallow
             }
         }
     }

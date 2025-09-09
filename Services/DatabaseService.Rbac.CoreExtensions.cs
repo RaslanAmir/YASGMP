@@ -630,7 +630,7 @@ WHERE id=@id",
         /// <summary>Returns all roles. Schema-tolerant mapping.</summary>
         public static async Task<List<Role>> GetAllRolesAsync(this DatabaseService db, CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync("SELECT * FROM roles ORDER BY name, id", null, token).ConfigureAwait(false);
+            var dt = await db.ExecuteSelectAsync("SELECT id, name, description, org_unit, compliance_tags, is_deleted, notes FROM roles ORDER BY name, id", null, token).ConfigureAwait(false);
             var list = new List<Role>();
             foreach (DataRow r in dt.Rows)
             {
@@ -647,7 +647,7 @@ WHERE id=@id",
         /// <summary>Returns all permissions. Schema-tolerant mapping.</summary>
         public static async Task<List<Permission>> GetAllPermissionsAsync(this DatabaseService db, CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync("SELECT * FROM permissions ORDER BY code, id", null, token).ConfigureAwait(false);
+            var dt = await db.ExecuteSelectAsync("SELECT id, code, name, description, module, permission_type, critical, is_deleted FROM permissions ORDER BY code, id", null, token).ConfigureAwait(false);
             var list = new List<Permission>();
             foreach (DataRow r in dt.Rows)
             {

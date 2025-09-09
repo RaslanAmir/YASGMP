@@ -1,35 +1,34 @@
+// File: YASGMP/Services/ComponentService.cs
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using YasGMP.Models;
 using YasGMP.Helpers;
 
 namespace YasGMP.Services
 {
     /// <summary>
-    /// <b>ComponentService</b> – Ultra robust, GMP-compliant service for managing machine components.
+    /// <b>ComponentService</b> — GMP/Annex 11 &amp; 21 CFR Part 11 aligned service for managing machine components.
     /// <para>
-    /// ✅ Full CRUD, deep validation, digital signatures, and audit logging.<br/>
-    /// ✅ All actions logged via <see cref="AuditService.LogEntityAuditAsync"/> for full traceability and 21 CFR Part 11/Annex 11 compliance.<br/>
-    /// ✅ Extensible: CAPA link, risk scoring, bonus hooks.
+    /// • Full CRUD with validation and digital signatures.<br/>
+    /// • All actions recorded via <see cref="AuditService"/> for complete traceability.<br/>
+    /// • Calls are aligned with <see cref="DatabaseService"/> Region “03 · MACHINE / COMPONENT”.
     /// </para>
     /// </summary>
     public class ComponentService
     {
-        #region === Fields & Constructor ===
+        #region === Fields & Constructor ======================================================
 
         private readonly DatabaseService _db;
         private readonly AuditService _audit;
 
-        /// <summary>
-        /// Initializes <see cref="ComponentService"/> with required dependencies.
-        /// </summary>
-        /// <param name="databaseService">Injected database service (must not be null).</param>
-        /// <param name="auditService">Injected audit service (must not be null).</param>
-        /// <exception cref="ArgumentNullException">Thrown if any dependency is null.</exception>
+        /// <summary>Initializes a new <see cref="ComponentService"/>.</summary>
+        /// <param name="databaseService">Data access service (must not be <c>null</c>).</param>
+        /// <param name="auditService">Audit logging service (must not be <c>null</c>).</param>
+        /// <exception cref="ArgumentNullException">Thrown when any dependency is <c>null</c>.</exception>
         public ComponentService(DatabaseService databaseService, AuditService auditService)
         {
             _db = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
@@ -38,20 +37,13 @@ namespace YasGMP.Services
 
         #endregion
 
-        #region === CRUD Operations ===
+        #region === CRUD Operations ===========================================================
 
-        /// <summary>
-        /// Fetches all components from the database (raw list, no filters).
-        /// </summary>
-        /// <returns>List of <see cref="Component"/>.</returns>
+        /// <summary>Fetches all components from the database (no filtering).</summary>
         public async Task<List<Component>> GetAllAsync()
             => ComponentMapper.ToComponentList(await _db.GetAllComponentsAsync());
 
-        /// <summary>
-        /// Fetches a component by its unique ID.
-        /// </summary>
-        /// <param name="id">Component ID.</param>
-        /// <returns>The found <see cref="Component"/> or <c>null</c> if not found.</returns>
+        /// <summary>Fetches a single component by its primary key.</summary>
         public async Task<Component?> GetByIdAsync(int id)
         {
             var mc = await _db.GetComponentByIdAsync(id);
@@ -59,13 +51,13 @@ namespace YasGMP.Services
         }
 
         /// <summary>
-        /// Creates a new component and logs an audit entry.
+        /// Creates a new component, generates a digital signature, persists it, and writes an audit entry.
         /// </summary>
-        /// <param name="component">The <see cref="Component"/> to create.</param>
-        /// <param name="userId">User ID performing the action (for audit and as actor).</param>
+        /// <param name="component">Domain component to create.</param>
+        /// <param name="userId">Acting user id (audit trail).</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="component"/> is null.</exception>
-        /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="component"/> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">If validation fails.</exception>
         public async Task CreateAsync(Component component, int userId, CancellationToken cancellationToken = default)
         {
             if (component == null) throw new ArgumentNullException(nameof(component));
@@ -75,31 +67,31 @@ namespace YasGMP.Services
             component.LastModified = DateTime.UtcNow;
             component.LastModifiedById = userId;
 
-            // Align with DatabaseService: update/actorUserId/ip/token (no sessionId/note)
+            // Call the domain overload (avoids MachineComponent binding issues).
             await _db.InsertOrUpdateComponentAsync(
-                ComponentMapper.ToMachineComponent(component),
-                update: false,
-                actorUserId: userId,
-                ip: "system",
-                token: cancellationToken
-            );
+                component,
+                false,                 // update?
+                userId,                // actorUserId
+                "system",              // ip
+                cancellationToken      // token
+            ).ConfigureAwait(false);
 
             await _audit.LogEntityAuditAsync(
                 "components",
                 component.Id,
                 "CREATE",
                 $"Created component: MachineID={component.MachineId}, Name={component.Name}, By UserID={userId}"
-            );
+            ).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Updates a component and logs an audit entry.
+        /// Updates an existing component, regenerates the digital signature, persists changes, and writes an audit entry.
         /// </summary>
-        /// <param name="component">The <see cref="Component"/> to update.</param>
-        /// <param name="userId">User ID performing the update.</param>
+        /// <param name="component">Domain component to update.</param>
+        /// <param name="userId">Acting user id (audit trail).</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="component"/> is null.</exception>
-        /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="component"/> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">If validation fails.</exception>
         public async Task UpdateAsync(Component component, int userId, CancellationToken cancellationToken = default)
         {
             if (component == null) throw new ArgumentNullException(nameof(component));
@@ -110,49 +102,49 @@ namespace YasGMP.Services
             component.LastModifiedById = userId;
 
             await _db.InsertOrUpdateComponentAsync(
-                ComponentMapper.ToMachineComponent(component),
-                update: true,
-                actorUserId: userId,
-                ip: "system",
-                token: cancellationToken
-            );
+                component,
+                true,                  // update?
+                userId,                // actorUserId
+                "system",              // ip
+                cancellationToken      // token
+            ).ConfigureAwait(false);
 
             await _audit.LogEntityAuditAsync(
                 "components",
                 component.Id,
                 "UPDATE",
                 $"Updated component: MachineID={component.MachineId}, Name={component.Name}, By UserID={userId}"
-            );
+            ).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Deletes a component and logs an audit entry.
-        /// </summary>
-        /// <param name="componentId">ID of the component to delete.</param>
-        /// <param name="userId">User ID performing the delete.</param>
+        /// <summary>Deletes a component and writes an audit entry.</summary>
+        /// <param name="componentId">Primary key of the component to delete.</param>
+        /// <param name="userId">Acting user id (for audit trail).</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         public async Task DeleteAsync(int componentId, int userId, CancellationToken cancellationToken = default)
         {
-            await _db.DeleteComponentAsync(componentId, actorUserId: userId, ip: "system", token: cancellationToken);
+            // Target the device-context delete overload (id, actorUserId, ip, deviceInfo, token)
+            await _db.DeleteComponentAsync(
+                componentId,
+                userId,            // actorUserId
+                "system",          // ip
+                "server",          // deviceInfo
+                cancellationToken  // token
+            ).ConfigureAwait(false);
 
             await _audit.LogEntityAuditAsync(
                 "components",
                 componentId,
                 "DELETE",
                 $"Deleted component ID={componentId}, By UserID={userId}"
-            );
+            ).ConfigureAwait(false);
         }
 
         #endregion
 
-        #region === Validation ===
+        #region === Validation =================================================================
 
-        /// <summary>
-        /// Validates all required GMP/Annex 11 fields for a component.
-        /// Throws exception on any invalid/missing field.
-        /// </summary>
-        /// <param name="c">Component to validate.</param>
-        /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
+        /// <summary>Validates required fields for a component in accordance with GMP/Annex 11.</summary>
         private static void ValidateComponent(Component c)
         {
             if (string.IsNullOrWhiteSpace(c.Name))
@@ -167,14 +159,9 @@ namespace YasGMP.Services
 
         #endregion
 
-        #region === Digital Signature ===
+        #region === Digital Signature ===========================================================
 
-        /// <summary>
-        /// Generates a digital signature (SHA-256) for a component and timestamp.
-        /// </summary>
-        /// <param name="c">Component to sign.</param>
-        /// <param name="utc">Timestamp (UTC) to ensure consistent signatures for update/audit.</param>
-        /// <returns>Base64 string digital signature.</returns>
+        /// <summary>Generates a SHA-256 based digital signature for the supplied component and timestamp.</summary>
         private static string GenerateDigitalSignature(Component c, DateTime utc)
         {
             string raw = $"{c.Id}|{c.MachineId}|{c.Name}|{c.SopDoc}|{utc:O}";
@@ -184,22 +171,12 @@ namespace YasGMP.Services
 
         #endregion
 
-        #region === Future Extensibility Hooks ===
+        #region === Extensibility Hooks =========================================================
 
-        /// <summary>
-        /// Calculates a risk score for a component (future extensibility, placeholder logic).
-        /// </summary>
-        /// <param name="c">Component to score.</param>
-        /// <returns>Risk score (int).</returns>
-        public int CalculateRiskScore(Component c)
-            => string.IsNullOrWhiteSpace(c.SopDoc) ? 90 : 10;
+        /// <summary>Simple risk score (illustrative).</summary>
+        public int CalculateRiskScore(Component c) => string.IsNullOrWhiteSpace(c.SopDoc) ? 90 : 10;
 
-        /// <summary>
-        /// Links a CAPA record to a component (audit trail only; real implementation in future).
-        /// </summary>
-        /// <param name="componentId">Component ID.</param>
-        /// <param name="capaId">CAPA record ID.</param>
-        /// <returns>Task representing the async operation.</returns>
+        /// <summary>Links a CAPA record (audit trail only).</summary>
         public async Task LinkCapaRecordAsync(int componentId, int capaId)
         {
             await _audit.LogEntityAuditAsync(
@@ -207,7 +184,7 @@ namespace YasGMP.Services
                 componentId,
                 "CAPA_LINK",
                 $"Linked CAPA ID={capaId} to component ID={componentId}"
-            );
+            ).ConfigureAwait(false);
         }
 
         #endregion

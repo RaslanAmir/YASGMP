@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -12,7 +12,7 @@ using YasGMP.Services.Interfaces;
 namespace YasGMP.Services
 {
     /// <summary>
-    /// <b>CalibrationService</b> – Ultra robust, GMP &amp; ISO 17025 compliant service for managing calibrations.
+    /// <b>CalibrationService</b> â€“ Ultra robust, GMP &amp; ISO 17025 compliant service for managing calibrations.
     /// <para>Implements full CRUD, certificate management, digital signatures, audit trail, AI prediction, IoT, and CAPA integration.</para>
     /// <para>All actions are digitally signed and audit-logged.</para>
     /// </summary>
@@ -297,7 +297,7 @@ namespace YasGMP.Services
 
         /// <summary>
         /// Safely obtains the value of <c>NextDue</c> as a nullable <see cref="DateTime"/>.
-        /// Works whether the model declares the property as <see cref="DateTime"/> or <see cref="DateTime?"/>.
+        /// Works whether the model declares the property as <see cref="DateTime"/> or <see cref="System.DateTime"/>.
         /// Returns <c>null</c> when the property is missing, null, or equal to <see cref="DateTime.MinValue"/>.
         /// </summary>
         private static DateTime? GetNextDueNullable(Calibration cal)
@@ -351,3 +351,4 @@ namespace YasGMP.Services
         #endregion
     }
 }
+

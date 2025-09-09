@@ -487,16 +487,18 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>
-        /// Exports the current <see cref="FilteredIncidentReports"/> set. The DB service writes an
-        /// <c>export_print_log</c> entry and a system event (IR_EXPORT) with file path metadata.
+        /// Exports the current <see cref="FilteredIncidentReports"/> set using a chosen format.
+        /// The DB service writes an export_print_log entry and a system event (IR_EXPORT).
         /// </summary>
         public async Task ExportIncidentReportsAsync()
         {
             IsBusy = true;
             try
             {
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
                 await _dbService.ExportIncidentReportsAsync(
                     FilteredIncidentReports.ToList(),
+                    fmt,
                     _currentIpAddress,
                     _currentDeviceInfo,
                     _currentSessionId);

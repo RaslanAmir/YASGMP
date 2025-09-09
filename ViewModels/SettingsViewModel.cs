@@ -238,15 +238,17 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
-        /// <summary>Exports filtered settings and logs an export entry.</summary>
+        /// <summary>Exports filtered settings (format chosen by user) and logs an export entry.</summary>
         public async Task ExportSettingsAsync()
         {
             IsBusy = true;
             try
             {
                 var userId = _authService.CurrentUser?.Id ?? 1; // Avoid CS8602
+                var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
                 await _dbService.ExportSettingsAsync(
                     FilteredSettings.ToList(),
+                    fmt,
                     userId,
                     _currentIpAddress,
                     _currentDeviceInfo,

@@ -15,8 +15,7 @@ namespace YasGMP.Services
     {
         /// <summary>
         /// Creates a new <see cref="Machine"/> and returns its primary key.
-        /// Routes to <see cref="DatabaseService.InsertOrUpdateMachineAsync(Machine, bool, int, string, string, string?, CancellationToken)"/>
-        /// with <paramref name="update"/> set to <see langword="false"/>.
+        /// Routes to the Machine core InsertOrUpdate method with update=false.
         /// </summary>
         /// <param name="db">The database service instance.</param>
         /// <param name="m">Machine to persist.</param>
@@ -44,8 +43,7 @@ namespace YasGMP.Services
 
         /// <summary>
         /// Updates an existing <see cref="Machine"/> and returns its primary key.
-        /// Routes to <see cref="DatabaseService.InsertOrUpdateMachineAsync(Machine, bool, int, string, string, string?, CancellationToken)"/>
-        /// with <paramref name="update"/> set to <see langword="true"/>.
+        /// Routes to the Machine core InsertOrUpdate method with update=true.
         /// </summary>
         /// <param name="db">The database service instance.</param>
         /// <param name="m">Machine to update.</param>
@@ -73,7 +71,6 @@ namespace YasGMP.Services
 
         /// <summary>
         /// Rolls back a machine by re-applying the provided <paramref name="snapshot"/> via update.
-        /// Routes to <see cref="DatabaseService.RollbackMachineAsync(Machine, int, string, string, string?, CancellationToken)"/>.
         /// </summary>
         /// <param name="db">The database service instance.</param>
         /// <param name="snapshot">Snapshot of the machine to re-apply.</param>
@@ -101,7 +98,7 @@ namespace YasGMP.Services
 
         /// <summary>
         /// Exports the provided machine rows and returns the file path recorded in the export log.
-        /// Routes to <see cref="DatabaseService.ExportMachinesAsync(IEnumerable{Machine}, string, string, string?, string, int, CancellationToken)"/>.
+        /// Routes to the Machine export helper and returns the file path.
         /// </summary>
         /// <param name="db">The database service instance.</param>
         /// <param name="rows">Rows to export (an empty sequence is used if <see langword="null"/>).</param>
@@ -128,5 +125,28 @@ namespace YasGMP.Services
 
             return db.ExportMachinesAsync(rows, ip, deviceInfo, sessionId, format, actorUserId, token);
         }
+
+        // Overload matching MachineViewModel invocation order (rows, actorUserId, ip, device, session)
+        public static Task<string> ExportMachinesFromViewAsync(
+            this DatabaseService db,
+            IEnumerable<Machine> rows,
+            int actorUserId,
+            string ip,
+            string deviceInfo,
+            string? sessionId,
+            CancellationToken token = default)
+            => db.ExportMachinesFromViewAsync(rows, ip, deviceInfo, sessionId, format: "zip", actorUserId: actorUserId, token: token);
+
+        public static Task LogMachineAuditAsync(
+            this DatabaseService db,
+            int machineId,
+            int userId,
+            string action,
+            string? note,
+            string ip,
+            string deviceInfo,
+            string? sessionId,
+            CancellationToken token = default)
+            => db.LogSystemEventAsync(userId, $"MACHINE_{action}", "machines", "MachineModule", machineId == 0 ? null : machineId, note, ip, "audit", deviceInfo, sessionId, token: token);
     }
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Debug.LogViewerPage"
+             Title="Log Viewer">
+  <Grid RowDefinitions="Auto,*" Padding="8">
+    <HorizontalStackLayout Spacing="8">
+      <Entry x:Name="SearchBox" Placeholder="Filter contains..." WidthRequest="260" />
+      <Button Text="Reload" Clicked="OnReload" />
+    </HorizontalStackLayout>
+    <CollectionView Grid.Row="1" x:Name="LogList">
+      <CollectionView.ItemTemplate>
+        <DataTemplate>
+          <Label Text="{Binding}" LineBreakMode="WordWrap" />
+        </DataTemplate>
+      </CollectionView.ItemTemplate>
+    </CollectionView>
+  </Grid>
+</ContentPage>
+

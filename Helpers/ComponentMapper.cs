@@ -1,4 +1,13 @@
-// File: Helpers/ComponentMapper.cs
+// ==============================================================================
+//  File: Helpers/ComponentMapper.cs
+//  Project: YasGMP
+//  Summary:
+//      Robust mapping helpers between domain model MachineComponent and UI model Component.
+//      • Handles nullable MachineId from domain safely when UI requires non-nullable int
+//      • Fixes CS0266/CS8629 (int? -> int) and CS0019 (?? on non-nullable int)
+//      • Round-trips SOP document and linked documents
+//      • Rich XML docs for IntelliSense
+// ==============================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,133 +16,135 @@ using YasGMP.Models;
 namespace YasGMP.Helpers
 {
     /// <summary>
-    /// Utility class for mapping between <see cref="MachineComponent"/> and <see cref="Component"/> models.
-    /// Ensures robust bi-directional conversion for full GMP, traceability, and UI/business logic needs.
+    /// Utility class for mapping between <see cref="MachineComponent"/> (domain) and <see cref="Component"/> (UI).
     /// <para>
-    /// ⚙️ Null-safety: All methods validate inputs and avoid returning null for non-nullable return types.
+    /// <b>Null-safety:</b> Methods avoid returning <c>null</c> for non-nullable members and coerce uncertain
+    /// values to safe defaults where the target contract requires a value.
     /// </para>
     /// </summary>
     public static class ComponentMapper
     {
         /// <summary>
-        /// Converts a <see cref="MachineComponent"/> to a <see cref="Component"/>.
+        /// Converts a domain <see cref="MachineComponent"/> to a UI <see cref="Component"/>.
         /// </summary>
-        /// <param name="mc">The <see cref="MachineComponent"/> to convert. Must not be <c>null</c>.</param>
-        /// <returns>A new, fully populated <see cref="Component"/> instance.</returns>
+        /// <param name="mc">Source domain component (must not be <c>null</c>).</param>
+        /// <returns>Mapped UI component with lists and metadata populated.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="mc"/> is <c>null</c>.</exception>
         public static Component ToComponent(MachineComponent mc)
         {
             if (mc is null)
                 throw new ArgumentNullException(nameof(mc));
 
-            var docs = mc.Documents?.ToList() ?? new List<string>();
-            var sopDoc = docs.Count > 0 ? docs[0] : string.Empty;
+            // Prefer explicit SOP path on the domain; otherwise fall back to first document if any.
+            var docs   = mc.Documents?.ToList() ?? new List<string>();
+            var sopDoc = !string.IsNullOrWhiteSpace(mc.SopDoc)
+                         ? mc.SopDoc!
+                         : (docs.Count > 0 ? docs[0] : string.Empty);
 
             return new Component
             {
-                Id = mc.Id,
-                MachineId = mc.MachineId,
-                // If the target property is non-nullable in your model, '!' prevents CS8601 while preserving existing semantics.
-                Machine = mc.Machine!,
-                MachineName = mc.Machine?.Name ?? string.Empty,
-                Code = mc.Code ?? string.Empty,
-                Name = mc.Name ?? string.Empty,
-                Type = mc.Type ?? string.Empty,
-                SopDoc = sopDoc,
-                LinkedDocuments = docs,
-                InstallDate = mc.InstallDate,
-                Status = mc.Status ?? string.Empty,
-                SerialNumber = mc.SerialNumber ?? string.Empty,
-                Supplier = mc.Supplier!,
-                LastModified = mc.LastModified,
+                Id               = mc.Id,
+                // ---- CS0266/CS8629 fix: domain is int?; UI requires int -> coerce null to 0
+                MachineId        = mc.MachineId ?? 0,
+                Machine          = mc.Machine!, // optional at runtime; null-forgiving for UI contract
+                MachineName      = mc.Machine?.Name ?? string.Empty,
+                Code             = mc.Code ?? string.Empty,
+                Name             = mc.Name ?? string.Empty,
+                Type             = mc.Type ?? string.Empty,
+                SopDoc           = sopDoc,
+                LinkedDocuments  = docs,
+                InstallDate      = mc.InstallDate,
+                Status           = mc.Status ?? string.Empty,
+                SerialNumber     = mc.SerialNumber ?? string.Empty,
+                Supplier         = mc.Supplier ?? string.Empty,
+                LastModified     = mc.LastModified,
                 LastModifiedById = mc.LastModifiedById,
-                LastModifiedBy = mc.LastModifiedBy!,
-                SourceIp = mc.SourceIp ?? string.Empty,
-                WarrantyUntil = mc.WarrantyUntil,
-                Comments = mc.Note ?? string.Empty,
-                LifecycleState = mc.LifecyclePhase ?? string.Empty,
+                LastModifiedBy   = mc.LastModifiedBy!, // optional; UI keeps reference
+                SourceIp         = mc.SourceIp ?? string.Empty,
+                WarrantyUntil    = mc.WarrantyUntil,
+                Comments         = mc.Note ?? string.Empty,
+                LifecycleState   = mc.LifecyclePhase ?? string.Empty,
                 DigitalSignature = mc.DigitalSignature ?? string.Empty,
-                IsDeleted = mc.IsDeleted,
-                Calibrations = mc.Calibrations?.ToList() ?? new List<Calibration>(),
-                CapaCases = mc.CapaCases?.ToList() ?? new List<CapaCase>(),
-                WorkOrders = mc.WorkOrders?.ToList() ?? new List<WorkOrder>(),
-                ChangeVersion = mc.ChangeVersion
+                IsDeleted        = mc.IsDeleted,
+                Calibrations     = mc.Calibrations?.ToList() ?? new List<Calibration>(),
+                CapaCases        = mc.CapaCases?.ToList() ?? new List<CapaCase>(),
+                WorkOrders       = mc.WorkOrders?.ToList() ?? new List<WorkOrder>(),
+                ChangeVersion    = mc.ChangeVersion
             };
         }
 
         /// <summary>
-        /// Converts a <see cref="Component"/> to a <see cref="MachineComponent"/>.
+        /// Converts a UI <see cref="Component"/> to a domain <see cref="MachineComponent"/>.
         /// </summary>
-        /// <param name="c">The <see cref="Component"/> to convert. Must not be <c>null</c>.</param>
-        /// <returns>A new, fully populated <see cref="MachineComponent"/> instance.</returns>
+        /// <param name="c">Source UI component (must not be <c>null</c>).</param>
+        /// <remarks>
+        /// The UI model uses non-nullable <c>int</c> for <see cref="Component.MachineId"/>. The domain model
+        /// allows <c>null</c> (<c>int?</c>) to match the database schema. We assign the UI value directly.
+        /// </remarks>
+        /// <returns>Mapped domain component.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="c"/> is <c>null</c>.</exception>
         public static MachineComponent ToMachineComponent(Component c)
         {
             if (c is null)
                 throw new ArgumentNullException(nameof(c));
 
-            // Normalize documents to avoid CS8604 and ensure deterministic content.
+            // Normalize documents from UI (ensure deterministic content).
             List<string> docs = c.LinkedDocuments?.ToList() ?? new List<string>();
             if (docs.Count == 0 && !string.IsNullOrWhiteSpace(c.SopDoc))
             {
                 docs = new List<string> { c.SopDoc! };
             }
 
+            // ---- CS0019 fix: c.MachineId is non-nullable int; assign directly (no ?? operator)
+            int machineIdFromUi = c.MachineId;
+
             return new MachineComponent
             {
-                Id = c.Id,
-                MachineId = c.MachineId,
-                Machine = c.Machine!,
-                Code = c.Code ?? string.Empty,
-                Name = c.Name ?? string.Empty,
-                Type = c.Type ?? string.Empty,
-                Documents = docs,
-                InstallDate = c.InstallDate,
-                Status = c.Status ?? string.Empty,
-                SerialNumber = c.SerialNumber ?? string.Empty,
-                Supplier = c.Supplier!,
-                LastModified = c.LastModified,
+                Id               = c.Id,
+                MachineId        = machineIdFromUi, // implicit int -> int? is allowed
+                Machine          = c.Machine!, // may be null at runtime; kept for UI convenience
+                Code             = c.Code ?? string.Empty,
+                Name             = c.Name ?? string.Empty,
+                Type             = c.Type ?? string.Empty,
+                // Round-trip SOP: write explicit property and maintain docs collection.
+                SopDoc           = string.IsNullOrWhiteSpace(c.SopDoc) ? null : c.SopDoc,
+                Documents        = docs,
+                InstallDate      = c.InstallDate,
+                Status           = c.Status ?? string.Empty,
+                SerialNumber     = c.SerialNumber ?? string.Empty,
+                Supplier         = c.Supplier ?? string.Empty,
+                LastModified     = c.LastModified,
                 LastModifiedById = c.LastModifiedById,
-                LastModifiedBy = c.LastModifiedBy!,
-                SourceIp = c.SourceIp ?? string.Empty,
-                WarrantyUntil = c.WarrantyUntil,
-                Note = c.Comments ?? string.Empty,
-                LifecyclePhase = c.LifecycleState ?? string.Empty,
+                LastModifiedBy   = c.LastModifiedBy!,
+                SourceIp         = c.SourceIp ?? string.Empty,
+                WarrantyUntil    = c.WarrantyUntil,
+                Note             = c.Comments ?? string.Empty,
+                LifecyclePhase   = c.LifecycleState ?? string.Empty,
                 DigitalSignature = c.DigitalSignature ?? string.Empty,
-                IsDeleted = c.IsDeleted,
-                Calibrations = c.Calibrations?.ToList() ?? new List<Calibration>(),
-                CapaCases = c.CapaCases?.ToList() ?? new List<CapaCase>(),
-                WorkOrders = c.WorkOrders?.ToList() ?? new List<WorkOrder>(),
-                ChangeVersion = c.ChangeVersion
+                IsDeleted        = c.IsDeleted,
+                Calibrations     = c.Calibrations?.ToList() ?? new List<Calibration>(),
+                CapaCases        = c.CapaCases?.ToList() ?? new List<CapaCase>(),
+                WorkOrders       = c.WorkOrders?.ToList() ?? new List<WorkOrder>(),
+                ChangeVersion    = c.ChangeVersion
             };
         }
 
         /// <summary>
-        /// Converts a list of <see cref="MachineComponent"/> to a list of <see cref="Component"/>.
+        /// Batch converts a sequence of domain <see cref="MachineComponent"/> instances to UI <see cref="Component"/> models.
         /// </summary>
-        /// <param name="list">Source list (nullable, null-safe).</param>
-        /// <returns>List of mapped <see cref="Component"/> objects.</returns>
         public static List<Component> ToComponentList(IEnumerable<MachineComponent> list)
-        {
-            var safe = (list ?? Enumerable.Empty<MachineComponent>())
-                       .Where(x => x is not null)
-                       .Select(x => ToComponent(x!))
-                       .ToList();
-            return safe;
-        }
+            => (list ?? Enumerable.Empty<MachineComponent>())
+               .Where(x => x is not null)
+               .Select(x => ToComponent(x!))
+               .ToList();
 
         /// <summary>
-        /// Converts a list of <see cref="Component"/> to a list of <see cref="MachineComponent"/>.
+        /// Batch converts a sequence of UI <see cref="Component"/> instances to domain <see cref="MachineComponent"/> models.
         /// </summary>
-        /// <param name="list">Source list (nullable, null-safe).</param>
-        /// <returns>List of mapped <see cref="MachineComponent"/> objects.</returns>
         public static List<MachineComponent> ToMachineComponentList(IEnumerable<Component> list)
-        {
-            var safe = (list ?? Enumerable.Empty<Component>())
-                       .Where(x => x is not null)
-                       .Select(x => ToMachineComponent(x!))
-                       .ToList();
-            return safe;
-        }
+            => (list ?? Enumerable.Empty<Component>())
+               .Where(x => x is not null)
+               .Select(x => ToMachineComponent(x!))
+               .ToList();
     }
 }
