@@ -77,6 +77,10 @@
                 Title="Komponenta"
                 SelectedItem="{Binding EditValidation.Component, Mode=TwoWay}" />
 
+        <!-- Documents section -->
+        <Label Text="Dokumenti" FontAttributes="Bold" />
+        <Button Text="Dodaj dokument" Clicked="OnAddDocumentClicked" />
+
         <DatePicker x:Name="DateStartPicker"
                     Date="{Binding EditValidation.DateStart, Mode=TwoWay}" />
 

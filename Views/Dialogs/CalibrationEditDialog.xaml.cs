@@ -3,11 +3,14 @@
 //  Project: YasGMP
 //  Summary:
 //      Modal dialog for entering/editing a Calibration record. Exposes a simple
-//      OnSave callback and a DI-friendly constructor used by callers.
+//      OnSave callback and DI-friendly constructors used by callers.
 // ==============================================================================
 
+#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
 using YasGMP.ViewModels;
@@ -24,12 +27,25 @@ namespace YasGMP.Views.Dialogs
         /// </summary>
         public Action<Calibration>? OnSave { get; set; }
 
+        private CalibrationEditDialogViewModel? _vm;
+        private bool _isClosing;
+
         /// <summary>
         /// Parameterless constructor required for XAML/Shell/Hot Reload.
         /// </summary>
         public CalibrationEditDialog()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// DI-friendly constructor. Provide an initialized ViewModel instance.
+        /// </summary>
+        public CalibrationEditDialog(CalibrationEditDialogViewModel viewModel) : this()
+        {
+            if (viewModel is null) throw new ArgumentNullException(nameof(viewModel));
+            WireViewModel(viewModel);
+            BindingContext = _vm = viewModel;
         }
 
         /// <summary>
@@ -49,17 +65,66 @@ namespace YasGMP.Views.Dialogs
             if (suppliers  is null) throw new ArgumentNullException(nameof(suppliers));
 
             var vm = new CalibrationEditDialogViewModel(calibration, components, suppliers);
+            WireViewModel(vm);
+            BindingContext = _vm = vm;
+        }
 
+        /// <summary>
+        /// Ensure we unsubscribe to avoid leaks.
+        /// </summary>
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            if (_vm is not null)
+                _vm.DialogResult -= OnDialogResultAsync;
+        }
+
+        private void WireViewModel(CalibrationEditDialogViewModel vm)
+        {
+            _vm = vm;
             // Bridge VM DialogResult to our simple OnSave callback + close.
-            vm.DialogResult += async (saved, result) =>
+            _vm.DialogResult += OnDialogResultAsync;
+        }
+
+        /// <summary>
+        /// Handles the VM result, invoking <see cref="OnSave"/> on the UI thread and closing once.
+        /// </summary>
+        private async Task OnDialogResultAsync(bool saved, Calibration? result)
+        {
+            try
             {
-                if (saved && result is not null)
-                    OnSave?.Invoke(result);
+                if (saved && result is not null && OnSave is not null)
+                {
+                    // Invoke client callback on UI thread (safer for collection updates/bindings)
+                    await MainThread.InvokeOnMainThreadAsync(() => OnSave?.Invoke(result));
+                }
+            }
+            finally
+            {
+                await CloseOnceAsync();
+            }
+        }
 
-                await Navigation.PopModalAsync(animated: true);
-            };
+        /// <summary>
+        /// Ensures the modal is popped only once (guards against double event raises).
+        /// </summary>
+        private async Task CloseOnceAsync()
+        {
+            if (_isClosing) return;
+            _isClosing = true;
 
-            BindingContext = vm;
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    if (Navigation?.ModalStack?.Count > 0)
+                        await Navigation.PopModalAsync(animated: true);
+                });
+            }
+            catch
+            {
+                // Never throw from closing logic.
+            }
         }
     }
 }

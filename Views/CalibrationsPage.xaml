@@ -57,10 +57,12 @@
                 <Button Text="🗑️ Briši" Command="{Binding DeleteCommand}" 
                         IsEnabled="{Binding SelectedCalibration, Converter={StaticResource NullToBoolConverter}}" 
                         BackgroundColor="#ffebee" TextColor="#c62828" />
-                <Button Text="📤 Export Excel" Command="{Binding ExportExcelCommand}" 
+                <Button Text="📤 Export Excel" Command="{Binding ExportExcelCommand}"
                         BackgroundColor="#dcedc8" TextColor="#33691e" />
-                <Button Text="📄 Export PDF" Command="{Binding ExportPdfCommand}" 
+                <Button Text="📄 Export PDF" Command="{Binding ExportPdfCommand}"
                         BackgroundColor="#ffe0b2" TextColor="#e65100" />
+                <Button Text="📎 Certifikat" Command="{Binding AddCertificateCommand}"
+                        BackgroundColor="#e8eaf6" TextColor="#303f9f" />
             </HorizontalStackLayout>
 
             <!-- 📋 LISTA KALIBRACIJA -->

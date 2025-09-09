@@ -1,3 +1,4 @@
+// MauiProgram.cs
 using CommunityToolkit.Maui;                       // builder.UseMauiCommunityToolkit()
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;    // DI registration
@@ -9,6 +10,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;                  // IEnumerable<>
 using YasGMP.Data;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;                  // IRBACService
@@ -17,6 +19,7 @@ using Microsoft.Maui.Storage;
 using YasGMP.Diagnostics;
 using YasGMP.Diagnostics.LogSinks;
 using Microsoft.Extensions.Configuration;
+using ZXing.Net.Maui;                              // QR/barcode (ZXing.Net.Maui)
 
 namespace YasGMP
 {
@@ -38,6 +41,7 @@ namespace YasGMP
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .UseBarcodeReader() // ZXing.Net.Maui initialization
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -117,6 +121,8 @@ namespace YasGMP
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<ExportService>();
             builder.Services.AddSingleton<WorkOrderAuditService>();
+            builder.Services.AddSingleton<DocumentService>();   // documents/attachments
+            builder.Services.AddSingleton<QRCodeService>();     // QR generation
 
             // RBAC + Users
             builder.Services.AddSingleton<IRBACService, RBACService>();
@@ -144,6 +150,7 @@ namespace YasGMP
             builder.Services.AddTransient<YasGMP.Views.Debug.LogViewerPage>();
             builder.Services.AddTransient<YasGMP.Views.Debug.HealthPage>();
             builder.Services.AddSingleton<YasGMP.Diagnostics.SelfTestRunner>();
+
             // Global exception hooks → JSONL framework log (DEBUG)
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -402,6 +409,3 @@ namespace YasGMP
     }
 #endif
 }
-
-
-

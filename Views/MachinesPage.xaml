@@ -37,6 +37,24 @@
                     TextColor="White"
                     FontAttributes="Bold"
                     maui:ToolTipProperties.Text="Brisanje odabranog stroja iz baze." />
+            <Button Text="📄 Dokumenti"
+                    Clicked="OnDocumentsClicked"
+                    BackgroundColor="{StaticResource YtPrimary50}"
+                    TextColor="{StaticResource YtPrimary700}"
+                    FontAttributes="Bold"
+                    maui:ToolTipProperties.Text="Priloženi dokumenti za stroj" />
+            <Button Text="🔗 QR"
+                    Clicked="OnQrClicked"
+                    BackgroundColor="{StaticResource YtPrimary50}"
+                    TextColor="{StaticResource YtPrimary700}"
+                    FontAttributes="Bold"
+                    maui:ToolTipProperties.Text="Pregled ili generiranje QR koda" />
+            <Button Text="🧩 Komponente"
+                    Clicked="OnComponentsClicked"
+                    BackgroundColor="{StaticResource YtPrimary50}"
+                    TextColor="{StaticResource YtPrimary700}"
+                    FontAttributes="Bold"
+                    maui:ToolTipProperties.Text="Pregled povezanih komponenti" />
           </HorizontalStackLayout>
 
           <CollectionView x:Name="MachineListView"

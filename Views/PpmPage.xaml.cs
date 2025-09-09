@@ -209,6 +209,14 @@ namespace YasGMP.Pages
             }
         }
 
+        /// <summary>
+        /// Generates a work order from the currently selected plan (stub).
+        /// </summary>
+        private async void OnGenerateWorkOrderAsync(object? sender, EventArgs e)
+        {
+            await DisplayInfoStubAsync("Generiranje radnog naloga");
+        }
+
         #endregion
 
         #region === Advanced Buttons (Clicked handlers) ===

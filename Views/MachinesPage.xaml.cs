@@ -276,5 +276,50 @@ WHERE id=@id";
                 _ => "active"
             };
         }
+
+        /// <summary>
+        /// Otvaranje/vezanje dokumenata za odabrani stroj (placeholder).
+        /// </summary>
+        private async void OnDocumentsClicked(object? sender, EventArgs e)
+        {
+            if (MachineListView?.SelectedItem is not Machine selected)
+            {
+                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste vidjeli/pridružili dokumente.", "OK");
+                return;
+            }
+            await SafeNavigator.ShowAlertAsync("Info",
+                $"Priloženi dokumenti za: {selected.Name}\n(Funkcionalnost će biti dodana u sljedećoj fazi.)",
+                "OK");
+        }
+
+        /// <summary>
+        /// Pregled ili generiranje QR koda za odabrani stroj (placeholder).
+        /// </summary>
+        private async void OnQrClicked(object? sender, EventArgs e)
+        {
+            if (MachineListView?.SelectedItem is not Machine selected)
+            {
+                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste otvorili QR.", "OK");
+                return;
+            }
+            await SafeNavigator.ShowAlertAsync("Info",
+                $"QR za: {selected.Name}\nVrijednost: {(string.IsNullOrWhiteSpace(selected.QrCode) ? "(nije postavljeno)" : selected.QrCode)}",
+                "OK");
+        }
+
+        /// <summary>
+        /// Pregled povezanih komponenti za odabrani stroj (placeholder).
+        /// </summary>
+        private async void OnComponentsClicked(object? sender, EventArgs e)
+        {
+            if (MachineListView?.SelectedItem is not Machine selected)
+            {
+                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste vidjeli komponente.", "OK");
+                return;
+            }
+            await SafeNavigator.ShowAlertAsync("Info",
+                $"Komponente za: {selected.Name}\n(Pregled komponenti će biti dodan.)",
+                "OK");
+        }
     }
 }

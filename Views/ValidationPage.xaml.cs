@@ -1,9 +1,24 @@
+// ==============================================================================
+//  File: Views/ValidationPage.xaml.cs
+//  Project: YasGMP
+//  Summary:
+//      GMP/Annex 11–compliant editor for validation records (IQ/OQ/PQ/URS/DQ/FAT/SAT).
+//      • Safe UI-thread dialogs via SafeNavigator/MainThread (fixes 0x8001010E)
+//      • DI-friendly + parameterless constructors
+//      • Robust connection-string resolution from App.AppConfig (with DI fallback)
+//      • Auto-reselect & center-in-view after save
+//      • PDF add/import via FilePicker (local copy into AppData)
+// ==============================================================================
+
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;         // Dictionary<,>, IEnumerable<>
+using System.IO;                           // File IO
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Maui.ApplicationModel; // MainThread
+using Microsoft.Maui.ApplicationModel;     // MainThread
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;              // FilePicker, FileSystem
 using Microsoft.Extensions.DependencyInjection;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -26,9 +41,7 @@ namespace YasGMP.Views
     {
         private readonly DatabaseService _db;
 
-        /// <summary>
-        /// Bindable, observable list of all validation items for the CollectionView.
-        /// </summary>
+        /// <summary>Bindable, observable list of all validation items for the CollectionView.</summary>
         public ObservableCollection<Validation> ValidationList { get; } = new();
 
         /// <summary>
@@ -38,10 +51,10 @@ namespace YasGMP.Views
 
         private Validation? _selectedValidation;
 
-        // Backing store for our local busy-state.
+        // Local busy-state backing store (kept in sync with Page.IsBusy)
         private bool _isBusy;
 
-        // Backing store for the status bar text.
+        // Status bar text
         private string _statusMessage = string.Empty;
 
         /// <summary>
@@ -64,10 +77,7 @@ namespace YasGMP.Views
 
         /// <summary>
         /// Busy flag for the page and UI throttling.
-        /// <para>
-        /// This property intentionally <b>shadows</b> <see cref="Page.IsBusy"/> to keep existing XAML bindings simple.
-        /// The setter synchronizes its value to <see cref="Page.IsBusy"/> to maintain platform semantics and avoid warnings.
-        /// </para>
+        /// This property intentionally <b>shadows</b> <see cref="Page.IsBusy"/>.
         /// </summary>
         public new bool IsBusy
         {
@@ -76,15 +86,12 @@ namespace YasGMP.Views
             {
                 if (_isBusy == value) return;
                 _isBusy = value;
-                // Keep the base Page.IsBusy in sync so platform indicators (if any) remain consistent.
-                base.IsBusy = value;
+                base.IsBusy = value; // keep platform indicators consistent
                 OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Text shown in the status area under the header (e.g., progress, errors, confirmations).
-        /// </summary>
+        /// <summary>Text shown in the status area under the header.</summary>
         public string StatusMessage
         {
             get => _statusMessage;
@@ -97,35 +104,26 @@ namespace YasGMP.Views
             }
         }
 
-        /// <summary>
-        /// Indicates whether the current selection can be deleted (requires a persisted Id).
-        /// </summary>
+        /// <summary>Whether the current selection can be deleted (requires persisted Id).</summary>
         public bool CanDelete => (SelectedValidation?.Id ?? 0) > 0;
 
-        /// <summary>
-        /// Shell/HotReload friendly constructor: resolves the database via DI, falling back to AppConfig if necessary.
-        /// </summary>
+        /// <summary>Shell/HotReload-friendly ctor: resolves DB via DI, with AppConfig fallback.</summary>
         public ValidationPage() : this(ResolveDb()) { }
 
-        /// <summary>
-        /// DI-friendly constructor.
-        /// </summary>
-        /// <param name="db">Instance of <see cref="DatabaseService"/> used to load and persist validation data.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="db"/> is null.</exception>
+        /// <summary>DI-friendly constructor.</summary>
         public ValidationPage(DatabaseService db)
         {
             InitializeComponent();
             _db = db ?? throw new ArgumentNullException(nameof(db));
             BindingContext = this;
+
             // Fire-and-forget: initial data load on the UI thread.
             MainThread.BeginInvokeOnMainThread(async () => await LoadDataAsync());
         }
 
         /// <summary>
-        /// Resolves a <see cref="DatabaseService"/> from DI or from <c>App.AppConfig</c> as a fallback.
+        /// Resolves a <see cref="DatabaseService"/> from DI or from App.AppConfig as a fallback.
         /// </summary>
-        /// <returns>A constructed, ready-to-use <see cref="DatabaseService"/>.</returns>
-        /// <exception cref="InvalidOperationException">If no connection string can be resolved.</exception>
         private static DatabaseService ResolveDb()
         {
             var sp = Application.Current?.Handler?.MauiContext?.Services;
@@ -160,18 +158,16 @@ namespace YasGMP.Views
         }
 
         /// <summary>
-        /// Loads data (validations + lookup lists) and optionally attempts to reselect &amp; scroll to an item by Id.
+        /// Loads data (validations + lookup lists) and optionally attempts to reselect & scroll to an item by Id.
         /// </summary>
-        /// <param name="reselectId">
-        /// Optional target Id to reselect and scroll to. If omitted, the current selection Id (if any) is used.
-        /// </param>
+        /// <param name="reselectId">Optional Id to reselect and scroll to; falls back to current selection.</param>
         private async Task LoadDataAsync(int? reselectId = null)
         {
             if (IsBusy) return;
             IsBusy = true;
             try
             {
-                // Keep the current selection id if none is explicitly provided.
+                // Keep current selection id if none explicitly provided
                 reselectId ??= SelectedValidation?.Id;
 
                 var list = await _db.GetAllValidationsAsync().ConfigureAwait(false) ?? new();
@@ -181,7 +177,7 @@ namespace YasGMP.Views
                     foreach (var v in list) ValidationList.Add(v);
                 });
 
-                // Reselect & scroll if possible
+                // Reselect & center
                 if (reselectId is int id && id > 0)
                 {
                     var target = ValidationList.FirstOrDefault(v => v.Id == id);
@@ -191,10 +187,7 @@ namespace YasGMP.Views
                         {
                             SelectedValidation = target;
                             if (FindByName("ValidationListView") is CollectionView cv)
-                            {
-                                // ✅ CS1061 FIX: CollectionView uses ScrollTo (non-async) in .NET MAUI
                                 cv.ScrollTo(target, position: ScrollToPosition.Center, animate: true);
-                            }
                         });
                     }
                     else
@@ -244,8 +237,7 @@ namespace YasGMP.Views
         }
 
         /// <summary>
-        /// Handles the Save button click: inserts or updates the current <see cref="EditValidation"/>.
-        /// Reselects and centers the saved record in the list on success.
+        /// Save: insert or update <see cref="EditValidation"/>; then reselect and center the saved record.
         /// </summary>
         private async void OnSaveClicked(object sender, EventArgs e)
         {
@@ -264,8 +256,7 @@ namespace YasGMP.Views
 
                 await _db.InsertOrUpdateValidationAsync(EditValidation, update, userId).ConfigureAwait(false);
 
-                var savedId = EditValidation.Id; // Assumes the service sets Id on insert.
-
+                var savedId = EditValidation.Id; // service should set Id on insert
                 SetStatusMessage(update ? "Validacija ažurirana!" : "Validacija spremljena!");
                 await LoadDataAsync(savedId).ConfigureAwait(false);
             }
@@ -280,7 +271,7 @@ namespace YasGMP.Views
         }
 
         /// <summary>
-        /// Handles the Delete button click: confirms and deletes the current <see cref="SelectedValidation"/>.
+        /// Delete selected validation after confirmation.
         /// </summary>
         private async void OnDeleteClicked(object sender, EventArgs e)
         {
@@ -318,9 +309,70 @@ namespace YasGMP.Views
         }
 
         /// <summary>
-        /// Sets the status bar message in a single place, ensuring change notification.
+        /// Add document: open a PDF picker, copy into app storage, set EditValidation.Documentation.
         /// </summary>
-        /// <param name="message">Message text to display under the header.</param>
+        private async void OnAddDocumentClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Let users attach even before selecting a persisted record; we write to EditValidation
+                var fileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.iOS,         new[] { "com.adobe.pdf" } },
+                    { DevicePlatform.MacCatalyst, new[] { "com.adobe.pdf" } },
+                    { DevicePlatform.Android,     new[] { "application/pdf" } },
+                    { DevicePlatform.WinUI,       new[] { ".pdf" } }
+                });
+
+                var pickOptions = new PickOptions
+                {
+                    PickerTitle = "Odaberite PDF dokument",
+                    FileTypes   = fileTypes
+                };
+
+                var file = await FilePicker.Default.PickAsync(pickOptions);
+                if (file is null)
+                {
+                    SetStatusMessage("Odabir dokumenta je otkazan.");
+                    return;
+                }
+
+                // Copy into app data for durable access
+                var docsDir  = Path.Combine(FileSystem.AppDataDirectory, "validation_docs");
+                Directory.CreateDirectory(docsDir);
+
+                var safeName = SanitizeFileName(string.IsNullOrWhiteSpace(file.FileName) ? "dokument.pdf" : file.FileName);
+                var stamp    = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+                var destPath = Path.Combine(docsDir, $"{stamp}_{safeName}");
+
+                using (var src = await file.OpenReadAsync())
+                using (var dst = File.Create(destPath))
+                    await src.CopyToAsync(dst).ConfigureAwait(false);
+
+                // Update model & notify bindings (UI thread)
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    EditValidation.Documentation = destPath;
+                    OnPropertyChanged(nameof(EditValidation));
+                });
+
+                SetStatusMessage("Dokument dodan. Spremite zapis za trajno pohranjivanje.");
+            }
+            catch (Exception ex)
+            {
+                await SafeNavigator.ShowAlertAsync("Greška", $"Dodavanje dokumenta nije uspjelo: {ex.Message}", "OK");
+            }
+        }
+
+        /// <summary>Replace invalid filename characters with '_'.</summary>
+        private static string SanitizeFileName(string name)
+        {
+            var invalid = Path.GetInvalidFileNameChars();
+            var cleaned = new string(name.Select(ch => invalid.Contains(ch) ? '_' : ch).ToArray());
+            return string.IsNullOrWhiteSpace(cleaned) ? "dokument.pdf" : cleaned;
+        }
+
+        /// <summary>Set status bar text (with change notification).</summary>
         private void SetStatusMessage(string message) => StatusMessage = message;
     }
 }

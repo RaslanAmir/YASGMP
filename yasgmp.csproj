@@ -20,6 +20,7 @@
     <WindowsPackageType>None</WindowsPackageType>
     <EnablePreviewMsixTooling>false</EnablePreviewMsixTooling>
   </PropertyGroup>
+
   <!-- ====== NuGet packages (pinned per your constraints) ====== -->
   <ItemGroup>
     <!-- EF Core 8 stack -->
@@ -29,33 +30,44 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.1" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.1" />
+
     <!-- MAUI base -->
     <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
+
     <!-- CommunityToolkit -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
+
     <!-- Infra -->
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageReference Include="MySqlConnector" Version="2.4.0" />
+
     <!-- Keep .NET 8 line -->
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.7" />
     <PackageReference Include="QuestPDF" Version="2025.7.1" />
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
+
     <!-- Office/PDF -->
     <PackageReference Include="EPPlus" Version="8.0.8" />
     <PackageReference Include="itext7" Version="9.2.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" />
+
+    <!-- QR generation -->
+    <PackageReference Include="ZXing.Net.Maui" Version="0.4.0" />
   </ItemGroup>
+
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
   <ItemGroup>
     <!-- Exclude tooling sources from the main app build -->
     <Compile Remove="tools\**\*.cs" />
     <None Include="tools\**\*.cs" />
   </ItemGroup>
+
   <Target Name="DbSyncAnalyzer" BeforeTargets="Build" Condition="'$(RUN_DB_ANALYZER_ON_BUILD)'=='true'">
     <Exec Command="pwsh -NoProfile -File scripts/analyze_db_sync.ps1" />
   </Target>

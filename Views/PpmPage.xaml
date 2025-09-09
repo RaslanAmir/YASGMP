@@ -85,12 +85,18 @@
                 Clicked="OnSavePlanAsync"
                 IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}"
                 AutomationId="BtnSavePlan" />
-            <Button 
+            <Button
                 x:Name="DeletePlanButton"
                 Text="🗑️ Obriši"
                 Clicked="OnDeletePlanAsync"
                 IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}"
                 AutomationId="BtnDeletePlan" />
+            <Button
+                x:Name="BtnGenerateWo"
+                Text="Generiraj WO"
+                Clicked="OnGenerateWorkOrderAsync"
+                IsEnabled="{Binding SelectedPlan, Converter={StaticResource NullToBoolConverter}}"
+                AutomationId="BtnGenerateWo" />
         </HorizontalStackLayout>
 
         <!-- Advanced Features Section -->
