@@ -87,6 +87,8 @@ namespace YasGMP.Data
                 .HasMaxLength(64)
                 .IsRequired();
 
+            // --- WorkOrder relacije ---
+
             // WorkOrder -> Comments (1:N, cascade)
             modelBuilder.Entity<WorkOrderComment>()
                 .HasOne(c => c.WorkOrder)
@@ -95,10 +97,19 @@ namespace YasGMP.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // WorkOrder -> Attachments (1:N, cascade)
+            // (Ako WorkOrder nema navigaciju za Attachments, koristimo .WithMany() bez izraza)
             modelBuilder.Entity<WorkOrderAttachment>()
                 .HasOne(a => a.WorkOrder)
-                .WithMany(w => w.Attachments)
+                .WithMany()
                 .HasForeignKey(a => a.WorkOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // WorkOrder -> StatusLogs (1:N, cascade)
+            // (Ako WorkOrder navigacija za logove glasi StatusTimeline)
+            modelBuilder.Entity<WorkOrderStatusLog>()
+                .HasOne(l => l.WorkOrder)
+                .WithMany(w => w.StatusTimeline)
+                .HasForeignKey(l => l.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // WorkOrder -> Signatures (1:N, cascade)
@@ -108,12 +119,7 @@ namespace YasGMP.Data
                 .HasForeignKey(s => s.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // WorkOrder -> StatusLogs (1:N, cascade)
-            modelBuilder.Entity<WorkOrderStatusLog>()
-                .HasOne(s => s.WorkOrder)
-                .WithMany(w => w.StatusLogs)
-                .HasForeignKey(s => s.WorkOrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // --- Machine relacije i ograničenja ---
 
             // Machine -> MachineComponents (1:N, cascade)
             modelBuilder.Entity<MachineComponent>()
@@ -122,7 +128,7 @@ namespace YasGMP.Data
                 .HasForeignKey(mc => mc.MachineId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Jednostavni indeksi/dužine stringova da se izbjegnu predugi varchars (opcionalno, prilagodi prema shemi)
+            // Jednostavni indeksi/dužine stringova
             modelBuilder.Entity<Machine>()
                 .Property(m => m.Code)
                 .HasMaxLength(128);
@@ -154,7 +160,7 @@ namespace YasGMP.Data
                 .Property(x => x.Name)
                 .HasMaxLength(256)
                 .IsRequired();
-
         }
     }
 }
+
