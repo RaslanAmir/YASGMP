@@ -364,7 +364,7 @@ namespace YasGMP.ViewModels
         private void EnsureCodeAndQr(Machine machine)
         {
             if (string.IsNullOrWhiteSpace(machine.Code))
-                machine.Code = _codeService.GenerateMachineCode();
+                machine.Code = _codeService.GenerateMachineCode(machine.Name, machine.Manufacturer);
 
             if (string.IsNullOrWhiteSpace(machine.QrCode))
             {

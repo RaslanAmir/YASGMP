@@ -6,11 +6,15 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
             <Entry Text="{Binding Name}" Placeholder="Naziv stroja" />
-            <Picker x:Name="TypePicker" Title="Tip" SelectedIndexChanged="OnTypeChanged" />
-            <Picker x:Name="ManufacturerPicker" Title="Proizvođač" SelectedIndexChanged="OnManufacturerChanged" />
-            <Picker x:Name="LocationPicker" Title="Lokacija" SelectedIndexChanged="OnLocationChanged" />
-            <Picker x:Name="ResponsiblePicker" Title="Odgovorna osoba" SelectedIndexChanged="OnResponsibleChanged" />
-            <Picker x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" />
+            <Entry Text="{Binding SerialNumber}" Placeholder="Serijski broj" />
+            <Picker x:Name="TypePicker" Title="Tip" SelectedIndexChanged="OnTypeChanged" ItemDisplayBinding="{Binding Name}" />
+            <Picker x:Name="ManufacturerPicker" Title="Proizvođač" SelectedIndexChanged="OnManufacturerChanged" ItemDisplayBinding="{Binding Name}" />
+            <Picker x:Name="LocationPicker" Title="Lokacija" SelectedIndexChanged="OnLocationChanged" ItemDisplayBinding="{Binding Name}" />
+            <Picker x:Name="ResponsiblePicker" Title="Odgovorna osoba" SelectedIndexChanged="OnResponsibleChanged" ItemDisplayBinding="{Binding Name}" />
+            <Picker x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" ItemDisplayBinding="{Binding Name}" />
+            <DatePicker Date="{Binding InstallDate}" />
+            <Button Text="Dodaj dokument" Clicked="OnPickDocumentClicked" />
+            <Button Text="Preuzmi QR" Clicked="OnOpenQrClicked" />
             <HorizontalStackLayout Spacing="16" Margin="0,20,0,0">
                 <Button Text="Spremi" Clicked="OnSaveClicked" />
                 <Button Text="Odustani" Clicked="OnCancelClicked" />

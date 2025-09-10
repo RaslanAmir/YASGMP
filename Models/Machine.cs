@@ -29,6 +29,11 @@ namespace YasGMP.Models
         [Display(Name = "Naziv stroja")]
         public string Name { get; set; } = string.Empty;
 
+        [StringLength(100)]
+        [Column("machine_type")]
+        [Display(Name = "Tip stroja")]
+        public string? MachineType { get; set; }
+
         [StringLength(512)]
         [Column("description")]
         [Display(Name = "Opis stroja")]
@@ -48,6 +53,11 @@ namespace YasGMP.Models
         [Column("location")]
         [Display(Name = "Lokacija")]
         public string? Location { get; set; }
+
+        [StringLength(100)]
+        [Column("responsible_entity")]
+        [Display(Name = "Odgovorna osoba/entitet")]
+        public string? ResponsibleEntity { get; set; }
 
         [Column("install_date")]
         [Display(Name = "Datum instalacije")]
@@ -188,10 +198,12 @@ namespace YasGMP.Models
                 Id                 = this.Id,
                 Code               = this.Code,
                 Name               = this.Name,
+                MachineType        = this.MachineType,
                 Description        = this.Description,
                 Model              = this.Model,
                 Manufacturer       = this.Manufacturer,
                 Location           = this.Location,
+                ResponsibleEntity  = this.ResponsibleEntity,
                 InstallDate        = this.InstallDate,
                 ProcurementDate    = this.ProcurementDate,
                 WarrantyUntil      = this.WarrantyUntil,
