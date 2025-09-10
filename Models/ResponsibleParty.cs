@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// Represents a person or department responsible for a machine.
+    /// Represents a person, department, or external party responsible for a machine.
     /// </summary>
-    [Table("responsible_entities")]
-    public class ResponsibleEntity
+    [Table("responsible_parties")]
+    public class ResponsibleParty
     {
         [Key]
         [Column("id")]

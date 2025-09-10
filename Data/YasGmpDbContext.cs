@@ -34,7 +34,7 @@ namespace YasGMP.Data
         public DbSet<MachineType> MachineTypes { get; set; }
         public DbSet<Manufacturer> Manufacturers { get; set; }
         public DbSet<Models.Location> Locations { get; set; }
-        public DbSet<ResponsibleEntity> ResponsibleEntities { get; set; }
+        public DbSet<ResponsibleParty> ResponsibleParties { get; set; }
         public DbSet<Models.MachineStatus> MachineStatuses { get; set; }
 
         public DbSet<Supplier> Suppliers { get; set; }

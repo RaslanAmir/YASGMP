@@ -65,7 +65,7 @@ namespace YasGMP.Views
         {
             try
             {
-                const string sql = @"SELECT id, code, name, machine_type, manufacturer, location, responsible_entity, serial_number, install_date, urs_doc, status, qr_code
+                const string sql = @"SELECT id, code, name, machine_type, manufacturer, location, responsible_party, serial_number, install_date, urs_doc, status, qr_code
                                      FROM machines";
                 DataTable dt = await _dbService.ExecuteSelectAsync(sql).ConfigureAwait(false);
 
@@ -76,18 +76,18 @@ namespace YasGMP.Views
 
                     list.Add(new Machine
                     {
-                        Id                = row["id"] == DBNull.Value ? 0 : Convert.ToInt32(row["id"]),
-                        Code              = S(row["code"]),
-                        Name              = S(row["name"]),
-                        MachineType       = S(row["machine_type"]),
-                        Manufacturer      = S(row["manufacturer"]),
-                        Location          = S(row["location"]),
-                        ResponsibleEntity = S(row["responsible_entity"]),
-                        SerialNumber      = S(row["serial_number"]),
-                        InstallDate       = row["install_date"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["install_date"]),
-                        UrsDoc            = S(row["urs_doc"]),
-                        Status            = S(row["status"]),
-                        QrCode            = S(row["qr_code"])
+                        Id           = row["id"] == DBNull.Value ? 0 : Convert.ToInt32(row["id"]),
+                        Code         = S(row["code"]),
+                        Name         = S(row["name"]),
+                        MachineType  = S(row["machine_type"]),
+                        Manufacturer = S(row["manufacturer"]),
+                        Location     = S(row["location"]),
+                        ResponsibleParty = S(row["responsible_party"]),
+                        SerialNumber = S(row["serial_number"]),
+                        InstallDate  = row["install_date"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["install_date"]),
+                        UrsDoc       = S(row["urs_doc"]),
+                        Status       = S(row["status"]),
+                        QrCode       = S(row["qr_code"])
                     });
                 }
 
@@ -104,7 +104,7 @@ namespace YasGMP.Views
             }
         }
 
-        /// <summary>Dodavanje novog stroja – vodi korisnika kroz formu i sprema u bazu.</summary>
+        /// <summary>Dodavanje novog stroja – vodi korisnika kroz promptove i sprema u bazu.</summary>
         private async void OnAddMachineClicked(object? sender, EventArgs e)
         {
             try
@@ -114,7 +114,6 @@ namespace YasGMP.Views
                 var ok = await ShowMachineFormAsync(newMachine, "Unesi novi stroj");
                 if (!ok) return;
 
-                // Osiguraj Code i QR prije spremanja
                 if (string.IsNullOrWhiteSpace(newMachine.Code))
                     newMachine.Code = _codeService.GenerateMachineCode(newMachine.Name, newMachine.Manufacturer);
 
@@ -132,7 +131,7 @@ namespace YasGMP.Views
                 newMachine.Status = NormalizeStatus(newMachine.Status);
 
                 const string sql = @"
-INSERT INTO machines (code, name, machine_type, manufacturer, location, responsible_entity, serial_number, install_date, urs_doc, status, qr_code)
+INSERT INTO machines (code, name, machine_type, manufacturer, location, responsible_party, serial_number, install_date, urs_doc, status, qr_code)
 VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @serial, @install_date, @urs_doc, @status, @qr_code)";
 
                 var pars = new MySqlParameter[]
@@ -142,7 +141,7 @@ VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @se
                     new("@machine_type", newMachine.MachineType ?? string.Empty),
                     new("@manufacturer", newMachine.Manufacturer ?? string.Empty),
                     new("@location",     newMachine.Location ?? string.Empty),
-                    new("@responsible",  newMachine.ResponsibleEntity ?? string.Empty),
+                    new("@responsible",  newMachine.ResponsibleParty ?? string.Empty),
                     new("@serial",       newMachine.SerialNumber ?? string.Empty),
                     new("@install_date", newMachine.InstallDate ?? (object)DBNull.Value) { MySqlDbType = MySqlDbType.DateTime },
                     new("@urs_doc",      newMachine.UrsDoc ?? string.Empty),
@@ -168,25 +167,13 @@ VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @se
                 {
                     await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite stroj iz liste za uređivanje.", "OK");
                     return;
-                }
-
-                var m = new Machine
-                {
-                    Id           = selected.Id,
-                    Code         = selected.Code,
-                    Name         = selected.Name,
-                    Manufacturer = selected.Manufacturer,
-                    Location     = selected.Location,
-                    InstallDate  = selected.InstallDate,
-                    UrsDoc       = selected.UrsDoc,
-                    Status       = selected.Status,
+@@ -180,62 +180,62 @@ VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @se
                     QrCode       = selected.QrCode
                 };
 
                 var ok = await ShowMachineFormAsync(m, "Uredi stroj");
                 if (!ok) return;
 
-                // Osiguraj Code i QR prije spremanja
                 if (string.IsNullOrWhiteSpace(m.Code))
                     m.Code = _codeService.GenerateMachineCode(m.Name, m.Manufacturer);
 
@@ -206,7 +193,7 @@ VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @se
                 const string sql = @"
 UPDATE machines SET
     code=@code, name=@name, machine_type=@machine_type, manufacturer=@manufacturer,
-    location=@location, responsible_entity=@responsible, serial_number=@serial, install_date=@install_date,
+    location=@location, responsible_party=@responsible, serial_number=@serial, install_date=@install_date,
     urs_doc=@urs_doc, status=@status, qr_code=@qr_code
 WHERE id=@id";
 
@@ -217,7 +204,7 @@ WHERE id=@id";
                     new("@machine_type", m.MachineType ?? string.Empty),
                     new("@manufacturer", m.Manufacturer ?? string.Empty),
                     new("@location",     m.Location ?? string.Empty),
-                    new("@responsible",  m.ResponsibleEntity ?? string.Empty),
+                    new("@responsible",  m.ResponsibleParty ?? string.Empty),
                     new("@serial",       m.SerialNumber ?? string.Empty),
                     new("@install_date", m.InstallDate ?? (object)DBNull.Value) { MySqlDbType = MySqlDbType.DateTime },
                     new("@urs_doc",      m.UrsDoc ?? string.Empty),

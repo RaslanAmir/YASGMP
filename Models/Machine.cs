@@ -55,9 +55,9 @@ namespace YasGMP.Models
         public string? Location { get; set; }
 
         [StringLength(100)]
-        [Column("responsible_entity")]
+        [Column("responsible_party")]
         [Display(Name = "Odgovorna osoba/entitet")]
-        public string? ResponsibleEntity { get; set; }
+        public string? ResponsibleParty { get; set; }
 
         [Column("install_date")]
         [Display(Name = "Datum instalacije")]
@@ -203,7 +203,7 @@ namespace YasGMP.Models
                 Model              = this.Model,
                 Manufacturer       = this.Manufacturer,
                 Location           = this.Location,
-                ResponsibleEntity  = this.ResponsibleEntity,
+                ResponsibleParty   = this.ResponsibleParty,
                 InstallDate        = this.InstallDate,
                 ProcurementDate    = this.ProcurementDate,
                 WarrantyUntil      = this.WarrantyUntil,
