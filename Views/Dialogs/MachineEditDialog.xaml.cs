@@ -6,6 +6,12 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using YasGMP.Models;
 using YasGMP.Services;
+// ---- Resolve type collisions with aliases ----
+using MachineType = YasGMP.Models.MachineType;
+using Manufacturer = YasGMP.Models.Manufacturer;
+using LocationModel = YasGMP.Models.Location;              // <-- alias your model
+using ResponsibleEntity = YasGMP.Models.ResponsibleEntity;
+using MachineStatus = YasGMP.Models.MachineStatus;
 
 namespace YasGMP.Views.Dialogs
 {
@@ -18,7 +24,7 @@ namespace YasGMP.Views.Dialogs
 
         public ObservableCollection<MachineType> TypeItems { get; } = new();
         public ObservableCollection<Manufacturer> ManufacturerItems { get; } = new();
-        public ObservableCollection<Location> LocationItems { get; } = new();
+        public ObservableCollection<LocationModel> LocationItems { get; } = new();   // <-- use alias
         public ObservableCollection<ResponsibleEntity> ResponsibleItems { get; } = new();
         public ObservableCollection<MachineStatus> StatusItems { get; } = new();
 
@@ -45,7 +51,7 @@ namespace YasGMP.Views.Dialogs
 
             LocationItems.Clear();
             foreach (var l in await _db.GetLocationsAsync()) LocationItems.Add(l);
-            LocationItems.Add(new Location { Id = 0, Name = "Dodaj novi..." });
+            LocationItems.Add(new LocationModel { Id = 0, Name = "Dodaj novi..." });  // <-- use alias
             LocationPicker.ItemsSource = LocationItems;
 
             ResponsibleItems.Clear();
@@ -60,44 +66,47 @@ namespace YasGMP.Views.Dialogs
         }
 
         private async void OnTypeChanged(object? sender, EventArgs e)
-            => await HandleAddNewAsync(TypePicker, TypeItems, _db.AddMachineTypeAsync, v => Machine.MachineType = v);
+            => await HandleAddNewAsync(TypePicker, TypeItems, name => _db.AddMachineTypeAsync(name), v => Machine.MachineType = v);
 
         private async void OnManufacturerChanged(object? sender, EventArgs e)
-            => await HandleAddNewAsync(ManufacturerPicker, ManufacturerItems, _db.AddManufacturerAsync, v => Machine.Manufacturer = v);
+            => await HandleAddNewAsync(ManufacturerPicker, ManufacturerItems, name => _db.AddManufacturerAsync(name), v => Machine.Manufacturer = v);
 
         private async void OnLocationChanged(object? sender, EventArgs e)
-            => await HandleAddNewAsync(LocationPicker, LocationItems, _db.AddLocationAsync, v => Machine.Location = v);
+            => await HandleAddNewAsync(LocationPicker, LocationItems, name => _db.AddLocationAsync(name), v => Machine.Location = v);
 
         private async void OnResponsibleChanged(object? sender, EventArgs e)
-            => await HandleAddNewAsync(ResponsiblePicker, ResponsibleItems, _db.AddResponsibleEntityAsync, v => Machine.ResponsibleEntity = v);
+            => await HandleAddNewAsync(ResponsiblePicker, ResponsibleItems, name => _db.AddResponsibleEntityAsync(name), v => Machine.ResponsibleEntity = v);
 
         private async void OnStatusChanged(object? sender, EventArgs e)
-            => await HandleAddNewAsync(StatusPicker, StatusItems, _db.AddMachineStatusAsync, v => Machine.Status = v);
+            => await HandleAddNewAsync(StatusPicker, StatusItems, name => _db.AddMachineStatusAsync(name), v => Machine.Status = v);
 
         private async Task HandleAddNewAsync<T>(Picker picker, ObservableCollection<T> list, Func<string, Task<int>> addFunc, Action<string> assign)
-            where T : class
+            where T : class, new()
         {
-            if (picker.SelectedItem is dynamic item && item.Id == 0)
+            var selected = picker.SelectedItem;
+            if (selected is null)
+                return;
+
+            dynamic item = selected;
+            if (item.Id == 0)
             {
                 var entry = await DisplayPromptAsync(picker.Title, "Unesi novu vrijednost");
                 if (!string.IsNullOrWhiteSpace(entry))
                 {
                     int id = await addFunc(entry);
-                    var newItem = Activator.CreateInstance<T>();
-                    if (newItem is MachineType mt) { mt.Id = id; mt.Name = entry; }
-                    else if (newItem is Manufacturer mf) { mf.Id = id; mf.Name = entry; }
-                    else if (newItem is Location loc) { loc.Id = id; loc.Name = entry; }
-                    else if (newItem is ResponsibleEntity re) { re.Id = id; re.Name = entry; }
-                    else if (newItem is MachineStatus st) { st.Id = id; st.Name = entry; }
-                    list.Insert(list.Count - 1, (T)(object)newItem);
+                    var newItem = new T();
+                    dynamic dynItem = newItem;
+                    dynItem.Id = id;
+                    dynItem.Name = entry;
+                    list.Insert(list.Count - 1, newItem);
                     picker.SelectedItem = newItem;
                     assign(entry);
                 }
                 else picker.SelectedIndex = -1;
             }
-            else if (picker.SelectedItem is dynamic existing)
+            else
             {
-                assign(existing.Name);
+                assign((string)item.Name);
             }
         }
 

@@ -9,7 +9,11 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
-using YasGMP.Models;
+using MachineType = YasGMP.Models.MachineType;
+using Manufacturer = YasGMP.Models.Manufacturer;
+using LocationModel = YasGMP.Models.Location;
+using ResponsibleEntity = YasGMP.Models.ResponsibleEntity;
+using MachineStatusModel = YasGMP.Models.MachineStatus;
 
 namespace YasGMP.Services
 {
@@ -49,10 +53,10 @@ namespace YasGMP.Services
             return Convert.ToInt32(id);
         }
 
-        public static async Task<List<Location>> GetLocationsAsync(this DatabaseService db, CancellationToken token = default)
+        public static async Task<List<LocationModel>> GetLocationsAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await db.ExecuteSelectAsync("SELECT id, name FROM locations ORDER BY name, id", null, token).ConfigureAwait(false);
-            return MapList(dt, r => new Location { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
+            return MapList(dt, r => new LocationModel { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
 
         public static async Task<int> AddLocationAsync(this DatabaseService db, string name, CancellationToken token = default)
@@ -75,10 +79,10 @@ namespace YasGMP.Services
             return Convert.ToInt32(id);
         }
 
-        public static async Task<List<MachineStatus>> GetMachineStatusesAsync(this DatabaseService db, CancellationToken token = default)
+        public static async Task<List<MachineStatusModel>> GetMachineStatusesAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await db.ExecuteSelectAsync("SELECT id, name FROM machine_statuses ORDER BY name, id", null, token).ConfigureAwait(false);
-            return MapList(dt, r => new MachineStatus { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
+            return MapList(dt, r => new MachineStatusModel { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
 
         public static async Task<int> AddMachineStatusAsync(this DatabaseService db, string name, CancellationToken token = default)
