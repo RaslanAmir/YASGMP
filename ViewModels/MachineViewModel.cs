@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Maui.Storage;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -368,7 +369,9 @@ namespace YasGMP.ViewModels
             if (string.IsNullOrWhiteSpace(machine.QrCode))
             {
                 using var stream = _qrService.GeneratePng(machine.Code);
-                var path = Path.Combine(Environment.CurrentDirectory, $"{machine.Code}.png");
+                var dir = FileSystem.AppDataDirectory;
+                Directory.CreateDirectory(dir);
+                var path = Path.Combine(dir, $"{machine.Code}.png");
                 using var fs = File.Create(path);
                 stream.CopyTo(fs);
                 machine.QrCode = path;

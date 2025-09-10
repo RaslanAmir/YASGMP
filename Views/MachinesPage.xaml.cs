@@ -13,8 +13,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading.Tasks;
+using System.IO;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
 using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -32,6 +34,10 @@ namespace YasGMP.Views
 
         /// <summary>Servis baze podataka (MySqlConnector).</summary>
         private readonly DatabaseService _dbService;
+
+        /// <summary>Generatori kôda i QR-a (lokalno za ovu stranicu).</summary>
+        private readonly CodeGeneratorService _codeService = new();
+        private readonly QRCodeService _qrService = new();
 
         /// <summary>
         /// Konstruktor – priprema servis i učitava podatke.
@@ -105,6 +111,21 @@ namespace YasGMP.Views
                 var ok = await ShowMachineFormAsync(newMachine, "Unesi novi stroj");
                 if (!ok) return;
 
+                // Osiguraj Code i QR prije spremanja
+                if (string.IsNullOrWhiteSpace(newMachine.Code))
+                    newMachine.Code = _codeService.GenerateMachineCode();
+
+                if (string.IsNullOrWhiteSpace(newMachine.QrCode))
+                {
+                    using var stream = _qrService.GeneratePng(newMachine.Code);
+                    var dir = FileSystem.AppDataDirectory;
+                    Directory.CreateDirectory(dir);
+                    var path = Path.Combine(dir, $"{newMachine.Code}.png");
+                    using var fs = File.Create(path);
+                    stream.CopyTo(fs);
+                    newMachine.QrCode = path;
+                }
+
                 newMachine.Status = NormalizeStatus(newMachine.Status);
 
                 const string sql = @"
@@ -158,6 +179,21 @@ VALUES (@code, @name, @manufacturer, @location, @install_date, @urs_doc, @status
 
                 var ok = await ShowMachineFormAsync(m, "Uredi stroj");
                 if (!ok) return;
+
+                // Osiguraj Code i QR prije spremanja
+                if (string.IsNullOrWhiteSpace(m.Code))
+                    m.Code = _codeService.GenerateMachineCode();
+
+                if (string.IsNullOrWhiteSpace(m.QrCode))
+                {
+                    using var stream = _qrService.GeneratePng(m.Code);
+                    var dir = FileSystem.AppDataDirectory;
+                    Directory.CreateDirectory(dir);
+                    var path = Path.Combine(dir, $"{m.Code}.png");
+                    using var fs = File.Create(path);
+                    stream.CopyTo(fs);
+                    m.QrCode = path;
+                }
 
                 m.Status = NormalizeStatus(m.Status);
 
