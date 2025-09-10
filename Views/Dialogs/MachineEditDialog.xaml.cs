@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
+using Microsoft.Maui.ApplicationModel;
 using YasGMP.Models;
 using YasGMP.Services;
 // ---- Resolve type collisions with aliases ----

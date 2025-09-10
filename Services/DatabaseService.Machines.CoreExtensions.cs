@@ -195,7 +195,7 @@ FROM machines WHERE id=@id LIMIT 1";
             {
                 await db.ExecuteNonQueryAsync(
                     "DELETE FROM machines WHERE id=@id",
-                    new[] { new MySqlConnector.MySqlParameter("@id", machineId) },
+                    new[] { new MySqlParameter("@id", machineId) },
                     token
                 ).ConfigureAwait(false);
             }
