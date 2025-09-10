@@ -18,6 +18,7 @@ using Microsoft.Maui.Controls;
 using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Views.Dialogs;
 
 namespace YasGMP.Views
 {
@@ -94,7 +95,7 @@ namespace YasGMP.Views
             }
         }
 
-        /// <summary>Dodavanje novog stroja – vodi korisnika kroz promptove i sprema u bazu.</summary>
+        /// <summary>Dodavanje novog stroja – vodi korisnika kroz formu i sprema u bazu.</summary>
         private async void OnAddMachineClicked(object? sender, EventArgs e)
         {
             try
@@ -220,41 +221,9 @@ WHERE id=@id";
         /// </summary>
         private async Task<bool> ShowMachineFormAsync(Machine machine, string title)
         {
-            Task<string?> PromptAsync(string caption, string msg, string? initial = null) =>
-                MainThread.InvokeOnMainThreadAsync(() => DisplayPromptAsync(caption, msg, initialValue: initial));
-
-            var code = await PromptAsync(title, "Interna oznaka (Code):", machine.Code);
-            if (code is null) return false;
-            machine.Code = code;
-
-            var name = await PromptAsync(title, "Naziv stroja:", machine.Name);
-            if (name is null) return false;
-            machine.Name = name;
-
-            var manufacturer = await PromptAsync(title, "Proizvođač:", machine.Manufacturer);
-            if (manufacturer is null) return false;
-            machine.Manufacturer = manufacturer;
-
-            var location = await PromptAsync(title, "Lokacija:", machine.Location);
-            if (location is null) return false;
-            machine.Location = location;
-
-            var dateStr = await PromptAsync(title, "Datum instalacije (YYYY-MM-DD):", machine.InstallDate?.ToString("yyyy-MM-dd"));
-            if (!string.IsNullOrWhiteSpace(dateStr) && DateTime.TryParse(dateStr, out var dt))
-                machine.InstallDate = dt;
-            else
-                machine.InstallDate = null;
-
-            var ursDoc = await PromptAsync(title, "Putanja do URS PDF-a:", machine.UrsDoc);
-            machine.UrsDoc = ursDoc ?? machine.UrsDoc;
-
-            var status = await PromptAsync(title, "Status (npr. 'active', 'maintenance' / 'u pogonu', 'van pogona'):", machine.Status);
-            machine.Status = status ?? machine.Status;
-
-            var qr = await PromptAsync(title, "QR kod (tekstualni kod ili URL):", machine.QrCode);
-            machine.QrCode = qr ?? machine.QrCode;
-
-            return true;
+            var dialog = new MachineEditDialog(machine) { Title = title };
+            await Navigation.PushModalAsync(dialog);
+            return await dialog.Result;
         }
 
         /// <summary>Kanonska normalizacija statusa (isti mapping kao u servisnom sloju).</summary>

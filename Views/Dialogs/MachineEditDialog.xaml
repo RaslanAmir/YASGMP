@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.MachineEditDialog"
+             Title="Stroj">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Entry Text="{Binding Name}" Placeholder="Naziv stroja" />
+            <Picker x:Name="TypePicker" Title="Tip" SelectedIndexChanged="OnTypeChanged" />
+            <Picker x:Name="ManufacturerPicker" Title="Proizvođač" SelectedIndexChanged="OnManufacturerChanged" />
+            <Picker x:Name="LocationPicker" Title="Lokacija" SelectedIndexChanged="OnLocationChanged" />
+            <Picker x:Name="ResponsiblePicker" Title="Odgovorna osoba" SelectedIndexChanged="OnResponsibleChanged" />
+            <Picker x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" />
+            <HorizontalStackLayout Spacing="16" Margin="0,20,0,0">
+                <Button Text="Spremi" Clicked="OnSaveClicked" />
+                <Button Text="Odustani" Clicked="OnCancelClicked" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

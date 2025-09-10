@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -29,6 +30,8 @@ namespace YasGMP.ViewModels
 
         private readonly DatabaseService _dbService = null!;
         private readonly AuthService _authService = null!;
+        private readonly CodeGeneratorService _codeService = null!;
+        private readonly QRCodeService _qrService = null!;
 
         private ObservableCollection<Machine> _machines = new();
         private ObservableCollection<Machine> _filteredMachines = new();
@@ -52,10 +55,16 @@ namespace YasGMP.ViewModels
         private readonly AsyncRelayCommand _exportCmd = null!;
 
         /// <summary>DI konstruktor.</summary>
-        public MachineViewModel(DatabaseService dbService, AuthService authService)
+        public MachineViewModel(
+            DatabaseService dbService,
+            AuthService authService,
+            CodeGeneratorService codeService,
+            QRCodeService qrService)
         {
             _dbService   = dbService   ?? throw new ArgumentNullException(nameof(dbService));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _codeService = codeService ?? throw new ArgumentNullException(nameof(codeService));
+            _qrService   = qrService   ?? throw new ArgumentNullException(nameof(qrService));
 
             _currentSessionId = _authService.CurrentSessionId  ?? string.Empty;
             _currentDeviceInfo = _authService.CurrentDeviceInfo ?? string.Empty;
@@ -185,6 +194,8 @@ namespace YasGMP.ViewModels
                 // Sigurnost: normaliziraj status prije slanja u servis
                 SelectedMachine.Status = MachineService.NormalizeStatus(SelectedMachine.Status);
 
+                EnsureCodeAndQr(SelectedMachine);
+
                 string sig = DigitalSignatureHelper.GenerateSignatureHash(SelectedMachine, _currentSessionId, _currentDeviceInfo);
 
                 int newId = await _dbService.SaveMachineAsync(
@@ -221,6 +232,8 @@ namespace YasGMP.ViewModels
                 int actorUserId = _authService.CurrentUser?.Id ?? 0;
 
                 SelectedMachine.Status = MachineService.NormalizeStatus(SelectedMachine.Status);
+
+                EnsureCodeAndQr(SelectedMachine);
 
                 string sig = DigitalSignatureHelper.GenerateSignatureHash(SelectedMachine, _currentSessionId, _currentDeviceInfo);
 
@@ -345,6 +358,21 @@ namespace YasGMP.ViewModels
                     string.Equals(MachineService.NormalizeStatus(m.Status), StatusFilter, StringComparison.OrdinalIgnoreCase)));
 
             FilteredMachines = new ObservableCollection<Machine>(filtered);
+        }
+
+        private void EnsureCodeAndQr(Machine machine)
+        {
+            if (string.IsNullOrWhiteSpace(machine.Code))
+                machine.Code = _codeService.GenerateMachineCode();
+
+            if (string.IsNullOrWhiteSpace(machine.QrCode))
+            {
+                using var stream = _qrService.GeneratePng(machine.Code);
+                var path = Path.Combine(Environment.CurrentDirectory, $"{machine.Code}.png");
+                using var fs = File.Create(path);
+                stream.CopyTo(fs);
+                machine.QrCode = path;
+            }
         }
 
         /// <summary>Učitava audit povijest za zadani stroj.</summary>

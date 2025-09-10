@@ -122,6 +122,7 @@ namespace YasGMP
             builder.Services.AddSingleton<WorkOrderAuditService>();
             builder.Services.AddSingleton<DocumentService>();   // documents/attachments
             builder.Services.AddSingleton<QRCodeService>();     // QR generation
+            builder.Services.AddSingleton<CodeGeneratorService>(); // NEW
 
             // RBAC + Users
             builder.Services.AddSingleton<IRBACService, RBACService>();
@@ -136,6 +137,7 @@ namespace YasGMP
             builder.Services.AddTransient<AdminViewModel>();
             builder.Services.AddTransient<UserViewModel>();
             builder.Services.AddTransient<UserRolePermissionViewModel>();
+            builder.Services.AddTransient<MachineViewModel>(); // NEW
 
             // Pages
             builder.Services.AddTransient<YasGMP.Views.LoginPage>();
