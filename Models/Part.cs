@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
@@ -152,6 +153,10 @@ namespace YasGMP.Models
         /// <summary>ML/AI supply risk or anomaly score (optional).</summary>
         public double? AnomalyScore { get; set; }
 
+        /// <summary>Broj povezanih radnih naloga (UI pomoćno polje, ne mapira se u DB).</summary>
+        [NotMapped]
+        public int LinkedWorkOrdersCount { get; set; }
+
         /// <summary>
         /// <b>Legacy/UI compat:</b> Free-text supplier name for simple grids/forms.
         /// When using relational suppliers, keep this as a denormalized display value (e.g., from <see cref="DefaultSupplier"/> or <see cref="SupplierPrices"/>).
@@ -164,6 +169,15 @@ namespace YasGMP.Models
 
         /// <summary>Returns true if stock is below the alert threshold.</summary>
         public bool IsStockCritical => MinStockAlert.HasValue && Stock < MinStockAlert.Value;
+
+        [NotMapped]
+        public int LowWarehouseCount { get; set; }
+
+        [NotMapped]
+        public bool IsWarehouseStockCritical { get; set; }
+
+        [NotMapped]
+        public string WarehouseSummary { get; set; } = string.Empty;
 
         /// <summary>Returns true if the part is blocked for use.</summary>
         public bool IsBlocked => Blocked || (!string.IsNullOrWhiteSpace(Status) && Status.ToLowerInvariant().Contains("block"));

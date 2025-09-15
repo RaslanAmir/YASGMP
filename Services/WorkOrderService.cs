@@ -11,8 +11,8 @@ namespace YasGMP.Services
     /// <summary>
     /// <b>WorkOrderService</b> – Ultra-robustan GMP-compliant servis za upravljanje radnim nalozima.
     /// <para>
-    /// ✅ Validacija, digitalni potpis, audit trail putem <see cref="WorkOrderAuditService"/>.<br/>
-    /// ✅ Usklađeno s 21 CFR Part 11, EU GMP Annex 11 i ISO 13485.
+    /// âś… Validacija, digitalni potpis, audit trail putem <see cref="WorkOrderAuditService"/>.<br/>
+    /// âś… Usklađeno s 21 CFR Part 11, EU GMP Annex 11 i ISO 13485.
     /// </para>
     /// </summary>
     public class WorkOrderService
@@ -38,11 +38,11 @@ namespace YasGMP.Services
         /// Dohvaća sve radne naloge iz baze.
         /// </summary>
         /// <remarks>
-        /// Metoda je asinhrona i koristi <c>ConfigureAwait(false)</c> radi optimalnog schedulinga u MAUI okruženju.
+        /// Metoda je asinhrona i koristi <c>ConfigureAwait(false)</c> radi optimalnog schedulinga u MAUI okruĹľenju.
         /// </remarks>
         /// <returns>Lista svih <see cref="WorkOrder"/> entiteta.</returns>
         public async Task<List<WorkOrder>> GetAllAsync() =>
-            await _db.GetAllWorkOrdersAsync().ConfigureAwait(false);
+            await _db.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
 
         /// <summary>
         /// Dohvaća radni nalog po primarnom ključu.
@@ -50,13 +50,13 @@ namespace YasGMP.Services
         /// <param name="id">Jedinstveni identifikator radnog naloga.</param>
         /// <returns>Pronadjeni <see cref="WorkOrder"/> entitet.</returns>
         /// <exception cref="KeyNotFoundException">
-        /// Baca se ako radni nalog s navedenim <paramref name="id"/> ne postoji (rješava CS8603).
+        /// Baca se ako radni nalog s navedenim <paramref name="id"/> ne postoji (rjeĹˇava CS8603).
         /// </exception>
         public async Task<WorkOrder> GetByIdAsync(int id)
         {
             var order = await _db.GetWorkOrderByIdAsync(id).ConfigureAwait(false);
             if (order is null)
-                throw new KeyNotFoundException($"Radni nalog (ID={id}) nije pronađen.");
+                throw new KeyNotFoundException($"Radni nalog (ID={id}) nije pronaÄ‘en.");
             return order;
         }
 
@@ -75,14 +75,14 @@ namespace YasGMP.Services
             order.DigitalSignature = GenerateDigitalSignature(order);
 
             // DatabaseService API (InsertOrUpdate...): (workorder, update, actorUserId, ip, device)
-            await _db.InsertOrUpdateWorkOrderAsync(order, update: false, actorUserId: userId, ip: "system", device: Environment.MachineName).ConfigureAwait(false);
+            await _db.InsertOrUpdateWorkOrderAsync(order, update: false, actorUserId: userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null).ConfigureAwait(false);
             await LogAudit(order.Id, userId, WorkOrderActionType.Create, $"Kreiran radni nalog {order.Type} za stroj {order.MachineId}").ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Ažurira postojeći radni nalog i bilježi promjene u GMP audit trail.
+        /// AĹľurira postojeći radni nalog i biljeĹľi promjene u GMP audit trail.
         /// </summary>
-        /// <param name="order">Model radnog naloga sa željenim izmjenama.</param>
+        /// <param name="order">Model radnog naloga sa Ĺľeljenim izmjenama.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="ArgumentNullException">Ako je <paramref name="order"/> <c>null</c>.</exception>
@@ -92,41 +92,41 @@ namespace YasGMP.Services
             ValidateOrder(order);
             order.DigitalSignature = GenerateDigitalSignature(order);
 
-            await _db.InsertOrUpdateWorkOrderAsync(order, update: true, actorUserId: userId, ip: "system", device: Environment.MachineName).ConfigureAwait(false);
-            await LogAudit(order.Id, userId, WorkOrderActionType.Update, $"Ažuriran radni nalog ID={order.Id}").ConfigureAwait(false);
+            await _db.InsertOrUpdateWorkOrderAsync(order, update: true, actorUserId: userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null).ConfigureAwait(false);
+            await LogAudit(order.Id, userId, WorkOrderActionType.Update, $"AĹľuriran radni nalog ID={order.Id}").ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Zatvara radni nalog (ako je otvoren) i bilježi akciju u audit trail.
+        /// Zatvara radni nalog (ako je otvoren) i biljeĹľi akciju u audit trail.
         /// </summary>
         /// <param name="workOrderId">ID radnog naloga koji se zatvara.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
-        /// <param name="resultNote">Završna napomena/rezultat.</param>
+        /// <param name="resultNote">Zavrˇna napomena/rezultat.</param>
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="InvalidOperationException">Ako nalog ne postoji ili je već zatvoren.</exception>
         public async Task CloseWorkOrderAsync(int workOrderId, int userId, string resultNote)
         {
             var order = await _db.GetWorkOrderByIdAsync(workOrderId).ConfigureAwait(false);
             if (order == null) throw new InvalidOperationException("Radni nalog ne postoji.");
-            if (IsClosed(order)) throw new InvalidOperationException("Radni nalog je već zatvoren.");
+            if (IsClosed(order)) throw new InvalidOperationException("Radni nalog je veÄ‡ zatvoren.");
 
             order.Status = "CLOSED";
             order.Result = resultNote ?? string.Empty;
             order.DigitalSignature = GenerateDigitalSignature(order);
 
-            await _db.InsertOrUpdateWorkOrderAsync(order, update: true, actorUserId: userId, ip: "system", device: Environment.MachineName).ConfigureAwait(false);
+            await _db.InsertOrUpdateWorkOrderAsync(order, update: true, actorUserId: userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null).ConfigureAwait(false);
             await LogAudit(order.Id, userId, WorkOrderActionType.Closed, $"Zatvoren nalog ID={order.Id} | Rezultat: {resultNote}").ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Briše radni nalog i bilježi GMP audit zapis o brisanju.
+        /// BriĹˇe radni nalog i biljeĹľi GMP audit zapis o brisanju.
         /// </summary>
         /// <param name="workOrderId">ID radnog naloga za brisanje.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
         /// <returns>Asinhroni zadatak.</returns>
         public async Task DeleteAsync(int workOrderId, int userId)
         {
-            await _db.DeleteWorkOrderAsync(workOrderId, userId, ip: "system", device: Environment.MachineName).ConfigureAwait(false);
+            await _db.DeleteWorkOrderAsync(workOrderId, userId, ip: "system", device: Environment.MachineName, sessionId: null).ConfigureAwait(false);
             await LogAudit(workOrderId, userId, WorkOrderActionType.Delete, $"Obrisan radni nalog ID={workOrderId}").ConfigureAwait(false);
         }
 
@@ -198,7 +198,7 @@ namespace YasGMP.Services
         #region === AUDIT INTEGRATION ===
 
         /// <summary>
-        /// Centralizirano bilježi promjene nad radnim nalozima u GMP audit log.
+        /// Centralizirano biljeĹľi promjene nad radnim nalozima u GMP audit log.
         /// </summary>
         /// <param name="workOrderId">ID radnog naloga.</param>
         /// <param name="userId">ID korisnika.</param>
@@ -225,12 +225,12 @@ namespace YasGMP.Services
         #region === FUTURE HOOKS ===
 
         /// <summary>
-        /// 🔥 Hook za AI predikciju kvarova ili IoT integraciju sa senzorima strojeva.
+        /// đź”Ą Hook za AI predikciju kvarova ili IoT integraciju sa senzorima strojeva.
         /// </summary>
         /// <param name="workOrderId">ID radnog naloga.</param>
         /// <returns>Simuliran prikaz IoT statusa za zadani nalog.</returns>
         public Task<string> GetIoTSensorStatusAsync(int workOrderId) =>
-            Task.FromResult($"IoT Data: WorkOrder {workOrderId} – All sensors nominal.");
+            Task.FromResult($"IoT Data: WorkOrder {workOrderId} â€“ All sensors nominal.");
 
         #endregion
     }

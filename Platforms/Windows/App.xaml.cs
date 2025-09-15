@@ -26,7 +26,11 @@ namespace YasGMP.WinUI
                     try
                     {
                         var page = ControlsApp.Current?.MainPage;
-                        if (page != null) await page.DisplayAlert("Windows error", e.Exception.Message, "OK");
+                        if (page != null)
+                        {
+                            var msg = e.Exception?.ToString() ?? "Unknown Windows exception";
+                            await page.DisplayAlert("Windows error", msg, "OK");
+                        }
                     }
                     catch { /* swallow */ }
                 });

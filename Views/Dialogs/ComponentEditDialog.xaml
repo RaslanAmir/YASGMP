@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.ComponentEditDialog"
+             Title="Uredi komponentu">
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="10">
+      <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+            ColumnDefinitions="120,*" ColumnSpacing="8" RowSpacing="8">
+        <Label Grid.Row="0" Grid.Column="0" Text="Šifra" VerticalTextAlignment="Center" />
+        <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Code}" Placeholder="Unesite šifru"/>
+
+        <Label Grid.Row="1" Grid.Column="0" Text="Naziv" VerticalTextAlignment="Center" />
+        <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Name}" Placeholder="Unesite naziv"/>
+
+        <Label Grid.Row="2" Grid.Column="0" Text="Tip" VerticalTextAlignment="Center" />
+        <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Type}" Placeholder="npr. pumpa, motor"/>
+
+        <Label Grid.Row="3" Grid.Column="0" Text="Model" VerticalTextAlignment="Center" />
+        <Entry Grid.Row="3" Grid.Column="1" Text="{Binding Model}" Placeholder="Model/varijanta"/>
+
+        <Label Grid.Row="4" Grid.Column="0" Text="Status" VerticalTextAlignment="Center" />
+        <Entry Grid.Row="4" Grid.Column="1" Text="{Binding Status}" Placeholder="active/maintenance"/>
+
+        <Label Grid.Row="5" Grid.Column="0" Text="Napomena" VerticalTextAlignment="Center" />
+        <Entry Grid.Row="5" Grid.Column="1" Text="{Binding Note}" Placeholder="Dodatna napomena"/>
+      </Grid>
+
+      <HorizontalStackLayout Spacing="10" HorizontalOptions="End">
+        <Button Text="Odustani" Clicked="OnCancelClicked" />
+        <Button Text="Spremi" Clicked="OnSaveClicked" />
+      </HorizontalStackLayout>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>
+

@@ -88,5 +88,40 @@ FROM machine_components WHERE id=@id LIMIT 1";
 
             return m;
         }
+
+        /// <summary>Returns components linked to a specific machine.</summary>
+        public static async Task<List<MachineComponent>> GetComponentsByMachineIdAsync(
+            this DatabaseService db,
+            int machineId,
+            CancellationToken token = default)
+        {
+            const string sql = @"SELECT 
+    id, machine_id, code, name, type, model, install_date, purchase_date,
+    warranty_until, warranty_expiry, status, serial_number, supplier, rfid_tag,
+    io_tdevice_id AS iot_device_id, sop_doc, last_modified, last_modified_by_id,
+    source_ip, is_critical, note, digital_signature, notes, lifecycle_phase
+FROM machine_components WHERE machine_id=@mid ORDER BY name, id";
+            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@mid", machineId) }, token).ConfigureAwait(false);
+            var list = new List<MachineComponent>(dt.Rows.Count);
+            foreach (DataRow r in dt.Rows) list.Add(Parse(r));
+            return list;
+        }
+
+        /// <summary>Returns components that are not linked to any machine (machine_id is NULL or 0).</summary>
+        public static async Task<List<MachineComponent>> GetUnassignedComponentsAsync(
+            this DatabaseService db,
+            CancellationToken token = default)
+        {
+            const string sql = @"SELECT 
+    id, machine_id, code, name, type, model, install_date, purchase_date,
+    warranty_until, warranty_expiry, status, serial_number, supplier, rfid_tag,
+    io_tdevice_id AS iot_device_id, sop_doc, last_modified, last_modified_by_id,
+    source_ip, is_critical, note, digital_signature, notes, lifecycle_phase
+FROM machine_components WHERE machine_id IS NULL OR machine_id=0 ORDER BY name, id";
+            var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
+            var list = new List<MachineComponent>(dt.Rows.Count);
+            foreach (DataRow r in dt.Rows) list.Add(Parse(r));
+            return list;
+        }
     }
 }

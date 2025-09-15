@@ -11,95 +11,93 @@
 
   <!-- Top toolbar -->
   <Shell.ToolbarItems>
-    <ToolbarItem Text="Dashboard" Clicked="OnToolbarGoDashboard" />
-    <ToolbarItem Text="Work Orders" Clicked="OnToolbarGoWorkOrders" />
-    <ToolbarItem Text="Machines" Clicked="OnToolbarGoMachines" />
-    <ToolbarItem Text="Parts" Clicked="OnToolbarGoParts" />
-    <ToolbarItem Text="Suppliers" Clicked="OnToolbarGoSuppliers" />
-    <ToolbarItem Text="Components" Clicked="OnToolbarGoComponents" />
-    <ToolbarItem Text="External" Clicked="OnToolbarGoExternal" />
-    <ToolbarItem Text="PPM" Clicked="OnToolbarGoPpm" />
+    <ToolbarItem Text="Dashboard"    Clicked="OnToolbarGoDashboard" />
+    <ToolbarItem Text="Work Orders"  Clicked="OnToolbarGoWorkOrders" />
+    <ToolbarItem Text="Machines"     Clicked="OnToolbarGoMachines" />
+    <ToolbarItem Text="Parts"        Clicked="OnToolbarGoParts" />
+    <ToolbarItem Text="Suppliers"    Clicked="OnToolbarGoSuppliers" />
+    <ToolbarItem Text="Components"   Clicked="OnToolbarGoComponents" />
+    <ToolbarItem Text="External"     Clicked="OnToolbarGoExternal" />
+    <ToolbarItem Text="PPM"          Clicked="OnToolbarGoPpm" />
     <ToolbarItem Text="Calibrations" Clicked="OnToolbarGoCalibrations" />
-    <ToolbarItem Text="CAPA" Clicked="OnToolbarGoCapa" />
-    <ToolbarItem Text="Validation" Clicked="OnToolbarGoValidation" />
-    <ToolbarItem Text="Audit Dash" Clicked="OnToolbarGoAuditDash" />
-    <ToolbarItem Text="Audit Log" Clicked="OnToolbarGoAuditLog" />
-    <ToolbarItem Text="Users" Clicked="OnToolbarGoUsers" />
-    <ToolbarItem Text="RBAC" Clicked="OnToolbarGoRbac" />
-    <ToolbarItem Text="Admin" Clicked="OnToolbarGoAdmin" />
-    <ToolbarItem Text="Rollback" Clicked="OnToolbarGoRollback" />
-    <ToolbarItem Text="Diagnostics" Clicked="OnToolbarGoDebug" />
+    <ToolbarItem Text="CAPA"         Clicked="OnToolbarGoCapa" />
+    <ToolbarItem Text="Validation"   Clicked="OnToolbarGoValidation" />
+    <ToolbarItem Text="Audit Dash"   Clicked="OnToolbarGoAuditDash" />
+    <ToolbarItem Text="Audit Log"    Clicked="OnToolbarGoAuditLog" />
+    <ToolbarItem Text="Users"        Clicked="OnToolbarGoUsers" />
+    <ToolbarItem Text="RBAC"         Clicked="OnToolbarGoRbac" />
+    <ToolbarItem Text="Admin"        Clicked="OnToolbarGoAdmin" />
+    <ToolbarItem Text="Rollback"     Clicked="OnToolbarGoRollback" />
+    <ToolbarItem Text="Diagnostics"  Clicked="OnToolbarGoDebug" />
   </Shell.ToolbarItems>
 
-  <!-- Tabbed navigation -->
-  <TabBar
-      Shell.BackgroundColor="{StaticResource YtSurfaceCard}"
-      Shell.ForegroundColor="{StaticResource YtOnSurface}"
-      Shell.TitleColor="{StaticResource YtOnSurface}">
+  <!-- Give the TabBar and each Tab an explicit Route -->
+  <TabBar Route="root"
+          Shell.BackgroundColor="{StaticResource YtSurfaceCard}"
+          Shell.ForegroundColor="{StaticResource YtOnSurface}"
+          Shell.TitleColor="{StaticResource YtOnSurface}">
 
     <!-- HOME -->
-    <Tab Title="Home">
-      <!-- FIX: DashboardPage lives in namespace YasGMP (not YasGMP.Views) -->
-      <ShellContent Title="Dashboard" Route="routes/dashboard"
+    <Tab Title="Home" Route="home">
+      <ShellContent Title="Dashboard" Route="dashboard"
                     ContentTemplate="{DataTemplate local:DashboardPage}" />
     </Tab>
 
     <!-- OPERATIONS -->
-    <Tab Title="Operations">
-      <ShellContent Title="Work Orders" Route="routes/workorders"
+    <Tab Title="Operations" Route="ops">
+      <ShellContent Title="Work Orders"   Route="workorders"
                     ContentTemplate="{DataTemplate views:WorkOrdersPage}" />
-      <ShellContent Title="Machines" Route="routes/machines"
+      <ShellContent Title="Machines"      Route="machines"
                     ContentTemplate="{DataTemplate views:MachinesPage}" />
-      <ShellContent Title="Calibrations" Route="routes/calibrations"
+      <ShellContent Title="Calibrations"  Route="calibrations"
                     ContentTemplate="{DataTemplate views:CalibrationsPage}" />
-      <ShellContent Title="Parts" Route="routes/parts"
+      <ShellContent Title="Parts"         Route="parts"
                     ContentTemplate="{DataTemplate views:PartsPage}" />
-      <ShellContent Title="Suppliers" Route="routes/suppliers"
+      <ShellContent Title="Suppliers"     Route="suppliers"
                     ContentTemplate="{DataTemplate views:SuppliersPage}" />
-      <ShellContent Title="Components" Route="routes/components"
+      <ShellContent Title="Components"    Route="components"
                     ContentTemplate="{DataTemplate views:ComponentsPage}" />
-      <ShellContent Title="External Servicers" Route="routes/externalservicers"
+      <ShellContent Title="External Serv." Route="externalservicers"
                     ContentTemplate="{DataTemplate local:ExternalServicersPage}" />
-      <ShellContent Title="PPM" Route="routes/ppm"
+      <ShellContent Title="PPM"           Route="ppm"
                     ContentTemplate="{DataTemplate pages:PpmPage}" />
     </Tab>
 
     <!-- QUALITY / COMPLIANCE -->
-    <Tab Title="Quality">
-      <ShellContent Title="CAPA" Route="routes/capa"
+    <Tab Title="Quality" Route="quality">
+      <ShellContent Title="CAPA"            Route="capa"
                     ContentTemplate="{DataTemplate views:CapaPage}" />
-      <ShellContent Title="Validation" Route="routes/validation"
+      <ShellContent Title="Validation"      Route="validation"
                     ContentTemplate="{DataTemplate views:ValidationPage}" />
-      <ShellContent Title="Audit Dashboard" Route="routes/auditdashboard"
+      <ShellContent Title="Audit Dashboard" Route="auditdashboard"
                     ContentTemplate="{DataTemplate views:AuditDashboardPage}" />
-      <ShellContent Title="Audit Log" Route="routes/auditlog"
+      <ShellContent Title="Audit Log"       Route="auditlog"
                     ContentTemplate="{DataTemplate views:AuditLogPage}" />
     </Tab>
 
     <!-- ADMIN -->
-    <Tab Title="Admin">
-      <ShellContent Title="Users" Route="routes/users"
+    <Tab Title="Admin" Route="admin">
+      <ShellContent Title="Users"            Route="users"
                     ContentTemplate="{DataTemplate views:UsersPage}" />
-      <ShellContent Title="RBAC" Route="routes/rbac"
+      <ShellContent Title="RBAC"             Route="rbac"
                     ContentTemplate="{DataTemplate views:UserRolePermissionPage}" />
-      <ShellContent Title="Admin Panel" Route="routes/adminpanel"
+      <ShellContent Title="Admin Panel"      Route="adminpanel"
                     ContentTemplate="{DataTemplate views:AdminPanelPage}" />
-      <ShellContent Title="Rollback Preview" Route="routes/rollbackpreview"
+      <ShellContent Title="Rollback Preview" Route="rollbackpreview"
                     ContentTemplate="{DataTemplate views:RollbackPreviewPage}" />
     </Tab>
 
-    <!-- DEBUG: always visible while app is in development -->
-    <Tab Title="Debug">
-      <ShellContent Title="Diagnostics" Route="routes/debug"
+    <!-- DEBUG -->
+    <Tab Title="Debug" Route="debug">
+      <ShellContent Title="Diagnostics" Route="debug_dashboard"
                     ContentTemplate="{DataTemplate debug:DebugDashboardPage}" />
-      <ShellContent Title="Logs" Route="routes/logviewer"
+      <ShellContent Title="Logs"        Route="logviewer"
                     ContentTemplate="{DataTemplate debug:LogViewerPage}" />
-      <ShellContent Title="Health" Route="routes/health"
+      <ShellContent Title="Health"      Route="health"
                     ContentTemplate="{DataTemplate debug:HealthPage}" />
     </Tab>
   </TabBar>
 
-  <!-- Global Shell visuals -->
   <Shell.Resources>
     <Style TargetType="Shell">
       <Setter Property="Shell.BackgroundColor" Value="{StaticResource YtSurface}" />

@@ -62,6 +62,12 @@
                            maui:ToolTipProperties.Text="Status (active/maintenance/removed)" />
                     <Label Text="{Binding SopDoc}" FontSize="12" TextColor="{StaticResource YtOnSurfaceDim}"
                            maui:ToolTipProperties.Text="SOP/URS dokument (putanja)" />
+                    <HorizontalStackLayout Spacing="8">
+                      <Frame Padding="6,2" CornerRadius="6" BackgroundColor="{StaticResource YtPrimary50}">
+                        <Label Text="{Binding DocumentsCount, StringFormat='Dokumenti: {0}'}" FontSize="11" TextColor="{StaticResource YtPrimary700}"/>
+                      </Frame>
+                      <Button Text="Dokumenti" Clicked="OnOpenDocsClicked" />
+                    </HorizontalStackLayout>
                   </VerticalStackLayout>
                 </Frame>
               </DataTemplate>

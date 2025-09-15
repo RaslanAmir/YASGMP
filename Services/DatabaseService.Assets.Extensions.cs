@@ -36,7 +36,8 @@ ORDER BY name, id";
             try
             {
                 const string sql = @"INSERT INTO machines (code, name, description, model, manufacturer, location, install_date, procurement_date, purchase_date, status, urs_doc, digital_signature)
-                                    VALUES (@code,@name,@desc,@model,@mf,@loc,@inst,@proc,@purch,@status,@urs,@sig)";
+                                    VALUES (COALESCE(NULLIF(@code,''), CONCAT('MCH-AUTO-', DATE_FORMAT(UTC_TIMESTAMP(), '%Y%m%d%H%i%s'))),
+                                            @name,@desc,@model,@mf,@loc,@inst,@proc,@purch,@status,@urs,@sig)";
                 var pars = new List<MySqlParameter>
                 {
                     new("@code", asset.Code ?? string.Empty),

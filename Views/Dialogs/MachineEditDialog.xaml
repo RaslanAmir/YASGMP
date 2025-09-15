@@ -3,22 +3,116 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YasGMP.Views.Dialogs.MachineEditDialog"
              Title="Stroj">
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12">
-            <Entry Text="{Binding Name}" Placeholder="Naziv stroja" />
-            <Entry Text="{Binding SerialNumber}" Placeholder="Serijski broj" />
-            <Picker x:Name="TypePicker" Title="Tip" SelectedIndexChanged="OnTypeChanged" ItemDisplayBinding="{Binding Name}" />
-            <Picker x:Name="ManufacturerPicker" Title="Proizvođač" SelectedIndexChanged="OnManufacturerChanged" ItemDisplayBinding="{Binding Name}" />
-            <Picker x:Name="LocationPicker" Title="Lokacija" SelectedIndexChanged="OnLocationChanged" ItemDisplayBinding="{Binding Name}" />
-            <Picker x:Name="ResponsiblePicker" Title="Odgovorna osoba" SelectedIndexChanged="OnResponsibleChanged" ItemDisplayBinding="{Binding Name}" />
-            <Picker x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" ItemDisplayBinding="{Binding Name}" />
-            <DatePicker Date="{Binding InstallDate}" />
-            <Button Text="Dodaj dokument" Clicked="OnPickDocumentClicked" />
-            <Button Text="Preuzmi QR" Clicked="OnOpenQrClicked" />
-            <HorizontalStackLayout Spacing="16" Margin="0,20,0,0">
-                <Button Text="Spremi" Clicked="OnSaveClicked" />
-                <Button Text="Odustani" Clicked="OnCancelClicked" />
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Grid Grid.Row="0" Padding="20,16" ColumnDefinitions="*,Auto" BackgroundColor="{StaticResource YtSurfaceCard}">
+            <Label Text="Podaci o stroju" Style="{StaticResource YtH2}" />
+            <HorizontalStackLayout Grid.Column="1" Spacing="12">
+                <Button Text="Spremi" Style="{StaticResource YtButton.Primary}" Clicked="OnSaveClicked" />
+                <Button Text="Odustani" Style="{StaticResource YtButton.Secondary}" Clicked="OnCancelClicked" />
             </HorizontalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+        </Grid>
+
+        <!-- Form -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="16">
+                <!-- Code row -->
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                    <Entry Grid.Column="0" Text="{Binding Code}" Placeholder="Šifra (ručno/auto)" />
+                    <Button Grid.Column="1" Text="Auto kod" Style="{StaticResource YtButton.Flat}" Clicked="OnAutoCodeClicked" />
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="10">
+                    <Label Grid.Row="0" Grid.Column="0" Text="Interna oznaka" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="0" Grid.Column="1" Text="{Binding InternalCode}" Placeholder="prazno = auto iz DB" />
+
+                    <Label Grid.Row="1" Grid.Column="0" Text="Naziv" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Name}" Placeholder="Naziv stroja" />
+
+                    <Label Grid.Row="2" Grid.Column="0" Text="Opis" VerticalTextAlignment="Start" />
+                    <Editor Grid.Row="2" Grid.Column="1" Text="{Binding Description}" Placeholder="Opis" AutoSize="TextChanges" />
+
+                    <Label Grid.Row="3" Grid.Column="0" Text="Model" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="3" Grid.Column="1" Text="{Binding Model}" Placeholder="Model" />
+
+                    <Label Grid.Row="4" Grid.Column="0" Text="Serijski broj" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="4" Grid.Column="1" Text="{Binding SerialNumber}" Placeholder="Serijski broj" />
+
+                    <Label Grid.Row="5" Grid.Column="0" Text="Tip" VerticalTextAlignment="Center" />
+                    <Picker Grid.Row="5" Grid.Column="1" x:Name="TypePicker" Title="Tip stroja" SelectedIndexChanged="OnTypeChanged" ItemDisplayBinding="{Binding Name}" />
+
+                    <Label Grid.Row="6" Grid.Column="0" Text="Proizvođač" VerticalTextAlignment="Center" />
+                    <Picker Grid.Row="6" Grid.Column="1" x:Name="ManufacturerPicker" Title="Proizvođač" SelectedIndexChanged="OnManufacturerChanged" ItemDisplayBinding="{Binding Name}" />
+
+                    <Label Grid.Row="7" Grid.Column="0" Text="Lokacija" VerticalTextAlignment="Center" />
+                    <Picker Grid.Row="7" Grid.Column="1" x:Name="LocationPicker" Title="Lokacija" SelectedIndexChanged="OnLocationChanged" ItemDisplayBinding="{Binding Name}" />
+
+                    <Label Grid.Row="8" Grid.Column="0" Text="Odgovorna osoba" VerticalTextAlignment="Center" />
+                    <Picker Grid.Row="8" Grid.Column="1" x:Name="ResponsiblePicker" Title="Odgovorna osoba" SelectedIndexChanged="OnResponsibleChanged" ItemDisplayBinding="{Binding Name}" />
+
+                    <Label Grid.Row="9" Grid.Column="0" Text="Status" VerticalTextAlignment="Center" />
+                    <Picker Grid.Row="9" Grid.Column="1" x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" ItemDisplayBinding="{Binding Name}" />
+
+                    <Label Grid.Row="10" Grid.Column="0" Text="Instalacija" VerticalTextAlignment="Center" />
+                    <DatePicker Grid.Row="10" Grid.Column="1" Date="{Binding InstallDate}" />
+
+                    <Label Grid.Row="11" Grid.Column="0" Text="Nabava" VerticalTextAlignment="Center" />
+                    <DatePicker Grid.Row="11" Grid.Column="1" Date="{Binding ProcurementDate}" />
+
+                    <Label Grid.Row="12" Grid.Column="0" Text="Garancija do" VerticalTextAlignment="Center" />
+                    <DatePicker Grid.Row="12" Grid.Column="1" Date="{Binding WarrantyUntil}" />
+
+                    <Label Grid.Row="13" Grid.Column="0" Text="Povlačenje" VerticalTextAlignment="Center" />
+                    <DatePicker Grid.Row="13" Grid.Column="1" Date="{Binding DecommissionDate}" />
+
+                    <Label Grid.Row="14" Grid.Column="0" Text="Razlog povlačenja" VerticalTextAlignment="Start" />
+                    <Editor Grid.Row="14" Grid.Column="1" Text="{Binding DecommissionReason}" Placeholder="Razlog povlačenja" AutoSize="TextChanges" />
+
+                    <Label Grid.Row="15" Grid.Column="0" Text="Nabavna vrijednost" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="15" Grid.Column="1" Text="{Binding AcquisitionCost}" Placeholder="0,00" Keyboard="Numeric" />
+
+                    <Label Grid.Row="16" Grid.Column="0" Text="RFID/NFC" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="16" Grid.Column="1" Text="{Binding RfidTag}" Placeholder="RFID/NFC" />
+
+                    <Label Grid.Row="17" Grid.Column="0" Text="IoT uređaj" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="17" Grid.Column="1" Text="{Binding IoTDeviceId}" Placeholder="ID uređaja" />
+
+                    <Label Grid.Row="18" Grid.Column="0" Text="Cloud GUID" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="18" Grid.Column="1" Text="{Binding CloudDeviceGuid}" Placeholder="GUID" />
+
+                    <Label Grid.Row="19" Grid.Column="0" Text="Kritično" VerticalTextAlignment="Center" />
+                    <Switch Grid.Row="19" Grid.Column="1" IsToggled="{Binding IsCritical}" />
+
+                    <Label Grid.Row="20" Grid.Column="0" Text="Faza životnog ciklusa" VerticalTextAlignment="Center" />
+                    <Entry Grid.Row="20" Grid.Column="1" Text="{Binding LifecyclePhase}" Placeholder="Faza" />
+
+                    <Label Grid.Row="21" Grid.Column="0" Text="Napomena" VerticalTextAlignment="Start" />
+                    <Editor Grid.Row="21" Grid.Column="1" Text="{Binding Note}" Placeholder="Napomena" AutoSize="TextChanges" />
+                </Grid>
+
+                <!-- Documents -->
+                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                    <Label Grid.Row="0" Grid.Column="0" Text="Dokumenti" Style="{StaticResource YtH2}" />
+                    <Button Grid.Row="0" Grid.Column="2" Text="Dodaj" Style="{StaticResource YtButton.Flat}" Clicked="OnPickDocumentsClicked" />
+                    <CollectionView Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding LinkedDocuments}" HeightRequest="120">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Text="{Binding .}" FontSize="12" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+
+                <Button Text="Otvori QR" Style="{StaticResource YtButton.Flat}" Clicked="OnOpenQrClicked" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Footer actions (sticky) -->
+        <Grid Grid.Row="2" Padding="20,10" ColumnDefinitions="*,Auto,Auto" BackgroundColor="{StaticResource YtSurfaceCard}">
+            <Label Grid.Column="0" Text="Polja označena su obavezna: Naziv" Style="{StaticResource YtCaption}" />
+            <Button Grid.Column="1" Text="Spremi" Style="{StaticResource YtButton.Primary}" Clicked="OnSaveClicked" />
+            <Button Grid.Column="2" Text="Odustani" Style="{StaticResource YtButton.Secondary}" Clicked="OnCancelClicked" />
+        </Grid>
+    </Grid>
 </ContentPage>
+

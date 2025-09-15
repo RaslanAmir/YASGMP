@@ -299,5 +299,12 @@ namespace YasGMP.Models
                 AuditTrail = new List<WorkOrderAudit>(this.AuditTrail)
             };
         }
+        [NotMapped]
+        [Display(Name = "Broj slika")]
+        public int PhotosCount { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Broj dijelova")]
+        public int PartsCount { get; set; }
     }
 }

@@ -3,10 +3,6 @@
 //  Project: YasGMP
 //  Summary:
 //      Ekran za pregled/unos/uređivanje/brisanje strojeva/opreme (MySQL).
-//      • UI-thread safe (MainThread) – izbjegnute WinUI 0x8001010E greške
-//      • Robusno čitanje konekcijskog stringa iz App.AppConfig
-//      • Sigurne konverzije NULL vrijednosti i tipizirani parametri (MySqlConnector)
-//      • Potpuna XML dokumentacija za IntelliSense
 // ==============================================================================
 using System;
 using System.Collections.Generic;
@@ -24,78 +20,76 @@ using YasGMP.Views.Dialogs;
 
 namespace YasGMP.Views
 {
-    /// <summary>
-    /// <b>MachinesPage</b> – ekran za pregled, unos, uređivanje i brisanje strojeva/opreme.
-    /// </summary>
     public partial class MachinesPage : ContentPage
     {
-        /// <summary>Observable kolekcija strojeva za prikaz/binding.</summary>
         public ObservableCollection<Machine> Machines { get; } = new();
-
-        /// <summary>Servis baze podataka (MySqlConnector).</summary>
+        public Machine? SelectedMachine { get; set; }
+        private List<Machine> _allMachines = new();
         private readonly DatabaseService _dbService;
-
-        /// <summary>Generatori kôda i QR-a (lokalno za ovu stranicu).</summary>
         private readonly CodeGeneratorService _codeService = new();
         private readonly QRCodeService _qrService = new();
+        private readonly DocumentService _docService;
 
-        /// <summary>
-        /// Konstruktor – priprema servis i učitava podatke.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Ako aplikacija nema connection string.</exception>
         public MachinesPage()
         {
             InitializeComponent();
 
-            if (Application.Current is not App app)
-                throw new InvalidOperationException("Application.Current nije tipa App.");
+            // Resolve connection string from App configuration or DI; avoid throwing to prevent navigation crashes.
+            string? connStr = null;
+            try
+            {
+                if (Application.Current is App app && app.AppConfig is not null)
+                    connStr = app.AppConfig["ConnectionStrings:MySqlDb"] ?? app.AppConfig["MySqlDb"];
 
-            var connStr = app.AppConfig?["ConnectionStrings:MySqlDb"] ?? app.AppConfig?["MySqlDb"];
+                if (string.IsNullOrWhiteSpace(connStr))
+                {
+                    var sp = Application.Current?.Handler?.MauiContext?.Services;
+                    var cfg = sp?.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
+                    connStr = cfg?["ConnectionStrings:MySqlDb"] ?? cfg?["MySqlDb"];
+                }
+            }
+            catch { /* fall through to alert */ }
+
             if (string.IsNullOrWhiteSpace(connStr))
-                throw new InvalidOperationException("MySqlDb connection string nije pronađen u konfiguraciji.");
+            {
+                _ = SafeNavigator.ShowAlertAsync("Konfiguracija", "MySqlDb connection string nije pronađen.", "OK");
+                // Minimal placeholder so the page can open; operations will surface friendly DB errors.
+                connStr = "Server=127.0.0.1;Port=3306;Database=YASGMP;User ID=app;Password=;Connection Timeout=3;Default Command Timeout=10;";
+            }
 
             _dbService = new DatabaseService(connStr);
+            _docService = new DocumentService(_dbService);
             BindingContext = this;
 
+            // One-time DB safety net: ensure triggers cannot null-out machines.code
+            // Run safely and ignore permission issues for non-DBA users
+            _ = EnsureTriggersSafeAsync();
             _ = LoadMachinesAsync();
         }
 
-        /// <summary>Učitava sve strojeve iz baze i puni kolekciju.</summary>
+        private async Task EnsureTriggersSafeAsync()
+        {
+            try
+            {
+                await _dbService.EnsureMachineTriggersForMachinesAsync().ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // Intentionally ignore: lower-privileged accounts cannot manage TRIGGERs.
+                // The app can function without trigger reconciliation.
+            }
+        }
+
         private async Task LoadMachinesAsync()
         {
             try
             {
-                const string sql = @"SELECT id, code, name, machine_type, manufacturer, location, responsible_party, serial_number, install_date, urs_doc, status, qr_code
-                                     FROM machines";
-                DataTable dt = await _dbService.ExecuteSelectAsync(sql).ConfigureAwait(false);
-
-                var list = new List<Machine>(capacity: dt.Rows.Count);
-                foreach (DataRow row in dt.Rows)
-                {
-                    static string S(object v) => v == DBNull.Value ? string.Empty : v?.ToString() ?? string.Empty;
-
-                    list.Add(new Machine
-                    {
-                        Id           = row["id"] == DBNull.Value ? 0 : Convert.ToInt32(row["id"]),
-                        Code         = S(row["code"]),
-                        Name         = S(row["name"]),
-                        MachineType  = S(row["machine_type"]),
-                        Manufacturer = S(row["manufacturer"]),
-                        Location     = S(row["location"]),
-                        ResponsibleParty = S(row["responsible_party"]),
-                        SerialNumber = S(row["serial_number"]),
-                        InstallDate  = row["install_date"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["install_date"]),
-                        UrsDoc       = S(row["urs_doc"]),
-                        Status       = S(row["status"]),
-                        QrCode       = S(row["qr_code"])
-                    });
-                }
-
+                var list = await _dbService.GetAllMachinesAsync().ConfigureAwait(false) ?? new List<Machine>();
+                _allMachines = new List<Machine>(list);
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Machines.Clear();
-                    foreach (var m in list)
-                        Machines.Add(m);
+                    foreach (var m in list) Machines.Add(m);
                 });
             }
             catch (Exception ex)
@@ -104,52 +98,65 @@ namespace YasGMP.Views
             }
         }
 
-        /// <summary>Dodavanje novog stroja – vodi korisnika kroz promptove i sprema u bazu.</summary>
         private async void OnAddMachineClicked(object? sender, EventArgs e)
         {
             try
             {
                 var newMachine = new Machine();
-
                 var ok = await ShowMachineFormAsync(newMachine, "Unesi novi stroj");
                 if (!ok) return;
 
+                if (string.IsNullOrWhiteSpace(newMachine.Name))
+                {
+                    await SafeNavigator.ShowAlertAsync("Napomena", "Naziv stroja je obavezan.", "OK");
+                    return;
+                }
+
                 if (string.IsNullOrWhiteSpace(newMachine.Code))
                     newMachine.Code = _codeService.GenerateMachineCode(newMachine.Name, newMachine.Manufacturer);
-
-                if (string.IsNullOrWhiteSpace(newMachine.QrCode))
-                {
-                    using var stream = _qrService.GeneratePng(newMachine.Code);
-                    var dir = FileSystem.AppDataDirectory;
-                    Directory.CreateDirectory(dir);
-                    var path = Path.Combine(dir, $"{newMachine.Code}.png");
-                    using var fs = File.Create(path);
-                    stream.CopyTo(fs);
-                    newMachine.QrCode = path;
-                }
+                if (string.IsNullOrWhiteSpace(newMachine.Code))
+                    newMachine.Code = $"MCH-AUTO-{DateTime.UtcNow:yyyyMMddHHmmss}";
 
                 newMachine.Status = NormalizeStatus(newMachine.Status);
 
-                const string sql = @"
-INSERT INTO machines (code, name, machine_type, manufacturer, location, responsible_party, serial_number, install_date, urs_doc, status, qr_code)
-VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @serial, @install_date, @urs_doc, @status, @qr_code)";
+                // Temporary debug assist: show the code we are about to persist
+                try { await SafeNavigator.ShowAlertAsync("Debug", $"Code to save: '{newMachine.Code}'", "OK"); } catch { }
 
-                var pars = new MySqlParameter[]
+                int newId = await _dbService.InsertOrUpdateMachineAsync(newMachine, false, 0, "ui", "MachinesPage", null).ConfigureAwait(false);
+
+                // Save any picked documents
+                if (newMachine.LinkedDocuments?.Count > 0)
                 {
-                    new("@code",         newMachine.Code ?? string.Empty),
-                    new("@name",         newMachine.Name ?? string.Empty),
-                    new("@machine_type", newMachine.MachineType ?? string.Empty),
-                    new("@manufacturer", newMachine.Manufacturer ?? string.Empty),
-                    new("@location",     newMachine.Location ?? string.Empty),
-                    new("@responsible",  newMachine.ResponsibleParty ?? string.Empty),
-                    new("@serial",       newMachine.SerialNumber ?? string.Empty),
-                    new("@install_date", newMachine.InstallDate ?? (object)DBNull.Value) { MySqlDbType = MySqlDbType.DateTime },
-                    new("@urs_doc",      newMachine.UrsDoc ?? string.Empty),
-                    new("@status",       newMachine.Status ?? "active"),
-                    new("@qr_code",      newMachine.QrCode ?? string.Empty),
-                };
+                    foreach (var path in newMachine.LinkedDocuments)
+                    {
+                        try
+                        {
+                            using var fs = File.OpenRead(path);
+                            string name = Path.GetFileName(path);
+                            await _docService.SaveAsync(fs, name, null, "Machine", newId).ConfigureAwait(false);
+                        }
+                        catch { }
+                    }
+                }
 
-                await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+                // Generate QR image from payload if available
+                var dt = await _dbService.ExecuteSelectAsync("SELECT COALESCE(qr_payload,'') AS p FROM machines WHERE id=@id", new[] { new MySqlParameter("@id", newId) }).ConfigureAwait(false);
+                if (dt.Rows.Count == 1)
+                {
+                    string payload = dt.Rows[0]["p"]?.ToString() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(payload))
+                    {
+                        using var stream = _qrService.GeneratePng(payload);
+                        var dir = FileSystem.AppDataDirectory;
+                        Directory.CreateDirectory(dir);
+                        var pathPng = Path.Combine(dir, $"M_{newId}.png");
+                        using var fsOut = File.Create(pathPng);
+                        stream.CopyTo(fsOut);
+
+                        await _dbService.ExecuteNonQueryAsync("UPDATE machines SET qr_code=@p WHERE id=@id", new[] { new MySqlParameter("@p", pathPng), new MySqlParameter("@id", newId) }).ConfigureAwait(false);
+                    }
+                }
+
                 await LoadMachinesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -158,76 +165,68 @@ VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @se
             }
         }
 
-        /// <summary>Uređivanje odabranog stroja.</summary>
         private async void OnEditMachineClicked(object? sender, EventArgs e)
         {
             try
             {
-                if (MachineListView?.SelectedItem is not Machine selected)
+                if (SelectedMachine is not Machine selected)
                 {
                     await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite stroj iz liste za uređivanje.", "OK");
                     return;
-@@ -180,62 +180,62 @@ VALUES (@code, @name, @machine_type, @manufacturer, @location, @responsible, @se
-                    QrCode       = selected.QrCode
-                };
+                }
 
+                var m = selected.DeepCopy();
                 var ok = await ShowMachineFormAsync(m, "Uredi stroj");
                 if (!ok) return;
 
                 if (string.IsNullOrWhiteSpace(m.Code))
                     m.Code = _codeService.GenerateMachineCode(m.Name, m.Manufacturer);
 
-                if (string.IsNullOrWhiteSpace(m.QrCode))
-                {
-                    using var stream = _qrService.GeneratePng(m.Code);
-                    var dir = FileSystem.AppDataDirectory;
-                    Directory.CreateDirectory(dir);
-                    var path = Path.Combine(dir, $"{m.Code}.png");
-                    using var fs = File.Create(path);
-                    stream.CopyTo(fs);
-                    m.QrCode = path;
-                }
-
                 m.Status = NormalizeStatus(m.Status);
 
-                const string sql = @"
-UPDATE machines SET
-    code=@code, name=@name, machine_type=@machine_type, manufacturer=@manufacturer,
-    location=@location, responsible_party=@responsible, serial_number=@serial, install_date=@install_date,
-    urs_doc=@urs_doc, status=@status, qr_code=@qr_code
-WHERE id=@id";
+                await _dbService.InsertOrUpdateMachineAsync(m, true, 0, "ui", "MachinesPage", null).ConfigureAwait(false);
 
-                var pars = new MySqlParameter[]
+                // Persist newly picked documents (if any)
+                if (m.LinkedDocuments?.Count > 0)
                 {
-                    new("@code",         m.Code ?? string.Empty),
-                    new("@name",         m.Name ?? string.Empty),
-                    new("@machine_type", m.MachineType ?? string.Empty),
-                    new("@manufacturer", m.Manufacturer ?? string.Empty),
-                    new("@location",     m.Location ?? string.Empty),
-                    new("@responsible",  m.ResponsibleParty ?? string.Empty),
-                    new("@serial",       m.SerialNumber ?? string.Empty),
-                    new("@install_date", m.InstallDate ?? (object)DBNull.Value) { MySqlDbType = MySqlDbType.DateTime },
-                    new("@urs_doc",      m.UrsDoc ?? string.Empty),
-                    new("@status",       m.Status ?? "active"),
-                    new("@qr_code",      m.QrCode ?? string.Empty),
-                    new("@id",           m.Id),
-                };
+                    foreach (var path in m.LinkedDocuments)
+                    {
+                        try
+                        {
+                            using var fs = File.OpenRead(path);
+                            string name = Path.GetFileName(path);
+                            await _docService.SaveAsync(fs, name, null, "Machine", m.Id).ConfigureAwait(false);
+                        }
+                        catch { }
+                    }
+                }
 
-                await _dbService.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);
+                // Generate QR image if payload provided/updated
+                if (!string.IsNullOrWhiteSpace(m.QrPayload))
+                {
+                    using var stream = _qrService.GeneratePng(m.QrPayload);
+                    var dir = FileSystem.AppDataDirectory;
+                    Directory.CreateDirectory(dir);
+                    var pathPng = Path.Combine(dir, $"M_{m.Id}.png");
+                    using var fsOut = File.Create(pathPng);
+                    stream.CopyTo(fsOut);
+
+                    await _dbService.ExecuteNonQueryAsync("UPDATE machines SET qr_code=@p WHERE id=@id", new[] { new MySqlParameter("@p", pathPng), new MySqlParameter("@id", m.Id) }).ConfigureAwait(false);
+                }
+
                 await LoadMachinesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("Greška", $"Ažuriranje stroja nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"AĹľuriranje stroja nije uspjelo: {ex.Message}", "OK");
             }
         }
 
-        /// <summary>Brisanje odabranog stroja nakon potvrde.</summary>
         private async void OnDeleteMachineClicked(object? sender, EventArgs e)
         {
             try
             {
-                if (MachineListView?.SelectedItem is not Machine selected)
+                if (SelectedMachine is not Machine selected)
                 {
                     await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite stroj iz liste za brisanje.", "OK");
                     return;
@@ -248,9 +247,6 @@ WHERE id=@id";
             }
         }
 
-        /// <summary>
-        /// Popup forma za unos/uređivanje stroja (UI-thread safe).
-        /// </summary>
         private async Task<bool> ShowMachineFormAsync(Machine machine, string title)
         {
             var dialog = new MachineEditDialog(machine, _dbService) { Title = title };
@@ -258,7 +254,6 @@ WHERE id=@id";
             return await dialog.Result;
         }
 
-        /// <summary>Kanonska normalizacija statusa (isti mapping kao u servisnom sloju).</summary>
         private static string NormalizeStatus(string? raw)
         {
             string s = (raw ?? string.Empty).Trim().ToLowerInvariant();
@@ -278,49 +273,143 @@ WHERE id=@id";
             };
         }
 
-        /// <summary>
-        /// Otvaranje/vezanje dokumenata za odabrani stroj (placeholder).
-        /// </summary>
         private async void OnDocumentsClicked(object? sender, EventArgs e)
         {
-            if (MachineListView?.SelectedItem is not Machine selected)
+            if (SelectedMachine is not Machine selected)
             {
-                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste vidjeli/pridružili dokumente.", "OK");
+                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste vidjeli/pridruĹľili dokumente.", "OK");
                 return;
             }
-            await SafeNavigator.ShowAlertAsync("Info",
-                $"Priloženi dokumenti za: {selected.Name}\n(Funkcionalnost će biti dodana u sljedećoj fazi.)",
-                "OK");
+
+            var dlg = new YasGMP.Views.Dialogs.MachineDocumentsDialog(_dbService, selected.Id);
+            await Navigation.PushModalAsync(dlg);
+            _ = await dlg.Result;
+            
         }
 
-        /// <summary>
-        /// Pregled ili generiranje QR koda za odabrani stroj (placeholder).
-        /// </summary>
         private async void OnQrClicked(object? sender, EventArgs e)
         {
-            if (MachineListView?.SelectedItem is not Machine selected)
+            if (SelectedMachine is not Machine selected)
             {
                 await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste otvorili QR.", "OK");
                 return;
             }
-            await SafeNavigator.ShowAlertAsync("Info",
-                $"QR za: {selected.Name}\nVrijednost: {(string.IsNullOrWhiteSpace(selected.QrCode) ? "(nije postavljeno)" : selected.QrCode)}",
-                "OK");
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(selected.QrCode) && File.Exists(selected.QrCode))
+                {
+                    await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(selected.QrCode) });
+                    return;
+                }
+                var dt = await _dbService.ExecuteSelectAsync("SELECT COALESCE(qr_payload,'') AS p FROM machines WHERE id=@id", new[] { new MySqlParameter("@id", selected.Id) }).ConfigureAwait(false);
+                string payload = dt.Rows.Count == 1 ? (dt.Rows[0]["p"]?.ToString() ?? string.Empty) : string.Empty;
+                if (!string.IsNullOrWhiteSpace(payload))
+                {
+                    using var stream = _qrService.GeneratePng(payload);
+                    var dir = FileSystem.AppDataDirectory;
+                    Directory.CreateDirectory(dir);
+                    var pathPng = Path.Combine(dir, $"M_{selected.Id}.png");
+                    using var fsOut = File.Create(pathPng);
+                    stream.CopyTo(fsOut);
+                    await _dbService.ExecuteNonQueryAsync("UPDATE machines SET qr_code=@p WHERE id=@id", new[] { new MySqlParameter("@p", pathPng), new MySqlParameter("@id", selected.Id) }).ConfigureAwait(false);
+                    await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(pathPng) });
+                    return;
+                }
+                await SafeNavigator.ShowAlertAsync("Info", "QR payload nije postavljen za ovaj stroj.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await SafeNavigator.ShowAlertAsync("Greška", ex.Message, "OK");
+            }
         }
 
-        /// <summary>
-        /// Pregled povezanih komponenti za odabrani stroj (placeholder).
-        /// </summary>
         private async void OnComponentsClicked(object? sender, EventArgs e)
         {
-            if (MachineListView?.SelectedItem is not Machine selected)
+            if (SelectedMachine is not Machine selected)
             {
-                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj kako biste vidjeli komponente.", "OK");
+                await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite stroj za pregled komponenti.", "OK");
                 return;
             }
-            await SafeNavigator.ShowAlertAsync("Info",
-                $"Komponente za: {selected.Name}\n(Pregled komponenti će biti dodan.)",
-                "OK");
+            var dlg = new YasGMP.Views.Dialogs.MachineComponentsDialog(_dbService, selected.Id);
+            await Navigation.PushModalAsync(dlg);
+            _ = await dlg.Result;
+        }
+
+        private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            SelectedMachine = e?.CurrentSelection != null && e.CurrentSelection.Count > 0
+                ? e.CurrentSelection[0] as Machine
+                : null;
+            try
+            {
+                SelectedInfo.IsVisible = SelectedMachine != null;
+            }
+            catch { }
+        }
+
+        // Syncfusion DataGrid selection changed handler
+        private void OnGridSelectionChanged(object? sender, Syncfusion.Maui.DataGrid.DataGridSelectionChangedEventArgs e)
+        {
+            try
+            {
+                var selected = (e != null && e.AddedRows != null && e.AddedRows.Count > 0)
+                    ? e.AddedRows[0] as Machine
+                    : null;
+                SelectedMachine = selected;
+                SelectedInfo.IsVisible = SelectedMachine != null;
+            }
+            catch { }
+        }
+
+        private void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                ApplySearchFilter(e?.NewTextValue);
+            }
+            catch { }
+        }
+
+        // Applies only the global SearchBar filter; column filters are now provided by the grid itself.
+        private void ApplySearchFilter(string? query)
+        {
+            string q = (query ?? string.Empty).Trim().ToLowerInvariant();
+            IEnumerable<Machine> src = _allMachines;
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                src = src.Where(m =>
+                    (m.Name ?? string.Empty).ToLowerInvariant().Contains(q) ||
+                    (m.Code ?? string.Empty).ToLowerInvariant().Contains(q) ||
+                    (m.Manufacturer ?? string.Empty).ToLowerInvariant().Contains(q) ||
+                    (m.Location ?? string.Empty).ToLowerInvariant().Contains(q));
+            }
+
+            try
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Machines.Clear();
+                    foreach (var m in src) Machines.Add(m);
+                });
+            }
+            catch { }
+        }
+
+        private async void OnTestConnectionClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                var v = await _dbService.ExecuteScalarAsync("SELECT 1").ConfigureAwait(false);
+                await SafeNavigator.ShowAlertAsync("Baza", $"Veza uspješna (SELECT 1 = {v}).", "OK");
+            }
+            catch (Exception ex)
+            {
+                await SafeNavigator.ShowAlertAsync("Greška baze", ex.Message, "OK");
+            }
         }
     }
 }
+
+
+

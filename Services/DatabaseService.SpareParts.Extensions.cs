@@ -35,7 +35,20 @@ namespace YasGMP.Services
             => db.DeleteSparePartAsync(id, actorUserId: 0, ip: string.Empty, token);
         public static async Task<List<Part>> GetAllSparePartsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync("SELECT id, code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, last_modified, last_modified_by_id, source_ip FROM parts ORDER BY name, id", null, token).ConfigureAwait(false);
+            const string sql = @"SELECT p.id, p.code, p.name, p.description, p.category, p.barcode, p.rfid, p.serial_or_lot,
+       p.default_supplier_id, p.price, p.stock, p.min_stock_alert, p.location, p.image, p.status, p.blocked,
+       p.regulatory_certificates, p.digital_signature, p.last_modified, p.last_modified_by_id, p.source_ip,
+       (
+         SELECT SUM(CASE WHEN sl.quantity < COALESCE(sl.min_threshold, 2147483647) THEN 1 ELSE 0 END)
+         FROM stock_levels sl WHERE sl.part_id = p.id
+       ) AS low_wh_count,
+       (
+         SELECT GROUP_CONCAT(CONCAT(COALESCE(w.name, CONCAT('WH-', sl.warehouse_id)), ':', sl.quantity) ORDER BY w.name SEPARATOR ', ')
+         FROM stock_levels sl LEFT JOIN warehouses w ON w.id = sl.warehouse_id WHERE sl.part_id = p.id
+       ) AS wh_summary
+FROM parts p
+ORDER BY p.name, p.id";
+            var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
             var list = new List<Part>(dt.Rows.Count);
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
@@ -64,6 +77,9 @@ namespace YasGMP.Services
             await db.ExecuteNonQueryAsync(update, pars, token).ConfigureAwait(false);
             await db.LogSparePartAuditAsync(part.Id, "UPDATE", actorUserId, part.DigitalSignature, ip, deviceInfo, null, token).ConfigureAwait(false);
         }
+
+        public static Task UpdatePartMinStockAlertAsync(this DatabaseService db, int partId, int? minStock, CancellationToken token = default)
+            => db.ExecuteNonQueryAsync("UPDATE parts SET min_stock_alert=@m WHERE id=@id", new[] { new MySqlParameter("@m", (object?)minStock ?? DBNull.Value), new MySqlParameter("@id", partId) }, token);
 
         public static async Task DeleteSparePartAsync(this DatabaseService db, int id, int actorUserId, string ip, CancellationToken token = default)
         {
@@ -172,7 +188,7 @@ namespace YasGMP.Services
             decimal? DEC(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDecimal(r[c]) : (decimal?)null;
             bool B(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value && Convert.ToBoolean(r[c]);
 
-            return new Part
+            var part = new Part
             {
                 Id = I("id"),
                 Code = S("code"),
@@ -196,6 +212,16 @@ namespace YasGMP.Services
                 LastModifiedById = IN("last_modified_by_id") ?? 0,
                 SourceIp = S("source_ip")
             };
+            if (r.Table.Columns.Contains("low_wh_count") && r["low_wh_count"] != DBNull.Value)
+            {
+                part.LowWarehouseCount = Convert.ToInt32(r["low_wh_count"]);
+                part.IsWarehouseStockCritical = part.LowWarehouseCount > 0;
+            }
+            if (r.Table.Columns.Contains("wh_summary"))
+            {
+                part.WarehouseSummary = r["wh_summary"]?.ToString() ?? string.Empty;
+            }
+            return part;
         }
     }
 }

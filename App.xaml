@@ -13,6 +13,8 @@
       <ResourceDictionary.MergedDictionaries>
         <!-- YASTECH theme (ensure the file is copied to project under Resources/Styles or similar) -->
         <ResourceDictionary Source="Resources/Theme.YASTECH.xaml" />
+        <!-- Syncfusion control styles -->
+        <ResourceDictionary Source="Resources/Styles.Syncfusion.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <!-- Optional: cross-cutting app styles or converters can live here -->

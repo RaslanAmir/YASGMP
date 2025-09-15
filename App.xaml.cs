@@ -63,6 +63,9 @@ namespace YasGMP
                     ctx.SessionId = SessionId;
                     YasGMP.Diagnostics.ReplayHarness.SaveReplayToken(SessionId);
                 }
+
+                // Ensure BackgroundScheduler is created so periodic jobs start (PPM/alerts)
+                try { _ = sp?.GetService(typeof(YasGMP.Services.BackgroundScheduler)); } catch { }
             }
             catch { }
 

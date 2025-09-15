@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.MachineDocumentsDialog"
+             Title="Dokumenti stroja">
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="10">
+      <HorizontalStackLayout Spacing="10">
+        <Button Text="Dodaj" Clicked="OnAddClicked" />
+        <Button Text="Zatvori" Clicked="OnCloseClicked" />
+      </HorizontalStackLayout>
+      <CollectionView x:Name="DocsList" HeightRequest="420">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="* , Auto, Auto" Padding="6">
+              <Label Grid.Column="0" Text="{Binding FileName}" />
+              <Button Grid.Column="1" Text="Otvori" Command="{Binding OpenCommand}" />
+              <Button Grid.Column="2" Text="Ukloni" Command="{Binding RemoveCommand}" />
+            </Grid>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>
+

@@ -21,6 +21,7 @@ namespace YasGMP.Data
         }
 
         // === DbSet-ovi za sve entitete ===
+
         public DbSet<User> Users { get; set; }
         public DbSet<WorkOrderAudit> WorkOrderAudits { get; set; }
         public DbSet<WorkOrder> WorkOrders { get; set; }
@@ -28,7 +29,6 @@ namespace YasGMP.Data
         public DbSet<WorkOrderSignature> WorkOrderSignatures { get; set; }
         public DbSet<WorkOrderStatusLog> WorkOrderStatusLogs { get; set; }
         public DbSet<WorkOrderAttachment> WorkOrderAttachments { get; set; }
-
         public DbSet<Machine> Machines { get; set; }
         public DbSet<MachineComponent> MachineComponents { get; set; }
         public DbSet<MachineType> MachineTypes { get; set; }
@@ -36,13 +36,12 @@ namespace YasGMP.Data
         public DbSet<Models.Location> Locations { get; set; }
         public DbSet<ResponsibleParty> ResponsibleParties { get; set; }
         public DbSet<Models.MachineStatus> MachineStatuses { get; set; }
-
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<CapaCase> CapaCases { get; set; }
         public DbSet<Incident> Incidents { get; set; }
         public DbSet<TrainingLog> TrainingLogs { get; set; }
         public DbSet<SystemEventLog> SystemEventLogs { get; set; }
-        // Dodaj ostale DbSet-ove po potrebi...
+        // Dodaj sve ostale DbSet-ove za entitete koje imaš u projektu...
 
         /// <summary>
         /// Konfiguracija modela i relacija u bazi podataka.
@@ -52,60 +51,73 @@ namespace YasGMP.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // WorkOrderAudit.Action -> string (enum to string)
+            // Konfiguracija enum polja u WorkOrderAudit (Action) kao string u bazi
             modelBuilder.Entity<WorkOrderAudit>()
                 .Property(a => a.Action)
                 .HasConversion(new EnumToStringConverter<WorkOrderActionType>())
                 .IsRequired();
 
-            // WorkOrderAudit -> WorkOrder (1:N)
+            // Primjer konfiguracije odnosa između WorkOrder i WorkOrderAudit
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasOne(a => a.WorkOrder)
                 .WithMany(w => w.AuditTrail)
                 .HasForeignKey(a => a.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // WorkOrderAudit -> User (N:1, optional, SET NULL)
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasOne(a => a.User)
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Index za performanse
+            // Konfiguracija indeksa za performanse na WorkOrderAudit ChangedAt
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasIndex(a => a.ChangedAt);
 
-            // User konfiguracija
+            // Konfiguracija User role enum kao string
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>()
+                .IsRequired();
+
+            // Ostale konfiguracije (npr. dužine stringova, odnosi, indeksi)
+
+            // Primjer: jedinstveni indeks na korisničko ime
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
 
-            // Ako je Role string u modelu, držimo jednostavno ograničenje; ako je enum, može se zamijeniti .HasConversion<string>()
-            modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasMaxLength(64)
+            // Primjeri dodatnih konfiguracija (po potrebi)
+            modelBuilder.Entity<Manufacturer>()
+                .Property(x => x.Name)
+                .HasMaxLength(256)
                 .IsRequired();
 
-            // --- WorkOrder relacije ---
+            modelBuilder.Entity<Models.Location>()
+                .Property(x => x.Name)
+                .HasMaxLength(256)
+                .IsRequired();
 
-            // WorkOrder -> Comments (1:N, cascade)
+            modelBuilder.Entity<Supplier>()
+                .Property(x => x.Name)
+                .HasMaxLength(256)
+                .IsRequired();
+
+            // Postavi cascade delete gdje je smisleno (npr. WorkOrder -> Comments)
             modelBuilder.Entity<WorkOrderComment>()
                 .HasOne(c => c.WorkOrder)
                 .WithMany(w => w.Comments)
                 .HasForeignKey(c => c.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // WorkOrder -> Attachments (1:N, cascade)
-            // (Ako WorkOrder nema navigaciju za Attachments, koristimo .WithMany() bez izraza)
+            // Work order attachments cascade on delete
             modelBuilder.Entity<WorkOrderAttachment>()
                 .HasOne(a => a.WorkOrder)
                 .WithMany()
                 .HasForeignKey(a => a.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // WorkOrder -> StatusLogs (1:N, cascade)
-            // (Ako WorkOrder navigacija za logove glasi StatusTimeline)
+            // Work order status logs cascade on delete
             modelBuilder.Entity<WorkOrderStatusLog>()
                 .HasOne(l => l.WorkOrder)
                 .WithMany(w => w.StatusTimeline)
@@ -163,4 +175,5 @@ namespace YasGMP.Data
         }
     }
 }
+
 

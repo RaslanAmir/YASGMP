@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.MachineComponentsDialog"
+             Title="Komponente stroja">
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="10">
+      <Label x:Name="TitleLabel" Text="Komponente" FontAttributes="Bold" FontSize="20" />
+
+      <!-- Inline add -->
+      <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="6">
+        <Entry x:Name="CodeEntry" Placeholder="Šifra" />
+        <Entry Grid.Column="1" x:Name="NameEntry" Placeholder="Naziv" />
+        <Entry Grid.Column="2" x:Name="TypeEntry" Placeholder="Tip" />
+        <Button Grid.Column="3" Text="Dodaj" Clicked="OnAddClicked" />
+      </Grid>
+
+      <!-- Link existing component to this machine -->
+      <HorizontalStackLayout Spacing="6">
+        <Button Text="Poveži postojeću komponentu" Clicked="OnLinkExistingClicked" />
+      </HorizontalStackLayout>
+
+      <CollectionView x:Name="CompList" HeightRequest="420">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" Padding="6">
+              <Label Grid.Column="0" Text="{Binding Name}" />
+              <Button Grid.Column="1" Text="Kal." Command="{Binding CalibrateCommand2}" />
+              <Button Grid.Column="2" Text="Uredi" Command="{Binding EditCommand}" />
+              <Button Grid.Column="3" Text="Ukloni" Command="{Binding RemoveOrDetachCommand}" />
+              <Frame Grid.Column="4" Padding="6,2" CornerRadius="6" BackgroundColor="{StaticResource YtPrimary50}">
+                <Label Text="{Binding DocsCount, StringFormat='Dok: {0}'}" FontSize="11" TextColor="{StaticResource YtPrimary700}"/>
+              </Frame>
+              <Button Grid.Column="5" Text="Dokumenti" Command="{Binding DocsCommand}" />
+            </Grid>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+
+      <HorizontalStackLayout Spacing="10">
+        <Button Text="Zatvori" Clicked="OnCloseClicked" />
+      </HorizontalStackLayout>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>

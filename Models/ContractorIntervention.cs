@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>ContractorIntervention</b> â€” GMP/CSV/21 CFR Part 11 compliant record for external contractor interventions.
+    /// <b>ContractorIntervention</b> — GMP/CSV/21 CFR Part 11 compliant record for external contractor interventions.
     /// <para>
     /// Links contractor (<see cref="User"/>), component, asset, reason, outcome, full audit, GMP status,
     /// digital signatures, forensics, versioning, document linkage, and future extensibility.
@@ -21,7 +21,7 @@ namespace YasGMP.Models
 
         /// <summary>Foreign Key to contractor user (User with "Contractor" role).</summary>
         [Required]
-        [Display(Name = "Vanjski izvoÄ‘aÄŤ")]
+        [Display(Name = "Vanjski izvođač")]
         [Column("contractor_id")]
         public int ContractorId { get; set; }
 
@@ -79,12 +79,12 @@ namespace YasGMP.Models
         public string DigitalSignature { get; set; } = string.Empty;
 
         /// <summary>Start date/time of the intervention (for scheduling &amp; duration tracking).</summary>
-        [Display(Name = "PoÄŤetak intervencije")]
+        [Display(Name = "Početak intervencije")]
         [Column("start_date")]
         public DateTime? StartDate { get; set; }
 
         /// <summary>End date/time of the intervention (for scheduling &amp; duration tracking).</summary>
-        [Display(Name = "ZavrĹˇetak intervencije")]
+        [Display(Name = "Završetak intervencije")]
         [Column("end_date")]
         public DateTime? EndDate { get; set; }
 
@@ -116,7 +116,7 @@ namespace YasGMP.Models
 
         /// <summary>Comments or notes (bonus: for inspection, CAPA, incident context).</summary>
         [StringLength(500)]
-        [Display(Name = "BiljeĹˇke")]
+        [Display(Name = "Bilješke")]
         [Column("comments")]
         public string Comments { get; set; } = string.Empty;
 

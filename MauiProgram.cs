@@ -19,6 +19,8 @@ using Microsoft.Maui.Storage;
 using YasGMP.Diagnostics;
 using YasGMP.Diagnostics.LogSinks;
 using Microsoft.Extensions.Configuration;
+using Syncfusion.Maui.Core.Hosting;                 // ConfigureSyncfusionCore()
+using Syncfusion.Licensing;                         // SyncfusionLicenseProvider
 
 namespace YasGMP
 {
@@ -40,6 +42,8 @@ namespace YasGMP
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                // Syncfusion core init (required by Toolkit and controls)
+                .ConfigureSyncfusionCore()
                 // NOTE: No ZXing.Net.Maui init needed; QR generation uses ZXing core + System.Drawing
                 .ConfigureFonts(fonts =>
                 {
@@ -74,6 +78,34 @@ namespace YasGMP
             builder.Services.AddSingleton<IProfiler>(profiler);
             builder.Services.AddSingleton<IEnumerable<YasGMP.Diagnostics.ILogSink>>(sinksList);
             builder.Services.AddSingleton(new DiagnosticsHub(diagCtx, sinksList));
+
+            // Optional: register Syncfusion license if provided (prevents trial watermark)
+            try
+            {
+                // Priority: env var → appsettings.json (AppData/bin) → none
+                var sfKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")
+                           ?? Environment.GetEnvironmentVariable("YASGMP_SYNCFUSION_LICENSE")
+                           ?? diagConfig["Syncfusion:LicenseKey"];
+                if (!string.IsNullOrWhiteSpace(sfKey))
+                {
+                    SyncfusionLicenseProvider.RegisterLicense(sfKey);
+#if DEBUG
+                    AppDataFileLoggerProvider.WriteFrameworkLine("SYNCFUSION", "info", "License key registered from configuration.");
+#endif
+                }
+                else
+                {
+#if DEBUG
+                    AppDataFileLoggerProvider.WriteFrameworkLine("SYNCFUSION", "warn", "No Syncfusion license key found; controls may show trial watermark.");
+#endif
+                }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                AppDataFileLoggerProvider.WriteFrameworkLine("SYNCFUSION", "error", ex.ToString());
+#endif
+            }
 
             // Resolve connection string (env → bin\AppSettings.json → AppData\AppSettings.json → fallback)
             string mysqlConnStr = ResolveMySqlConnString();
@@ -122,6 +154,7 @@ namespace YasGMP
             builder.Services.AddSingleton<WorkOrderAuditService>();
             builder.Services.AddSingleton<DocumentService>();   // documents/attachments
             builder.Services.AddSingleton<QRCodeService>();     // QR generation
+            builder.Services.AddSingleton<BackgroundScheduler>(); // in-app scheduler (PPM/alerts)
             builder.Services.AddSingleton<CodeGeneratorService>(); // NEW
 
             // RBAC + Users

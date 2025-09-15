@@ -17,6 +17,7 @@ using Microsoft.Maui.Controls;
 using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.Services;
+using MySqlConnector;
 
 namespace YasGMP.Views
 {
@@ -93,6 +94,36 @@ ORDER BY name;";
                         InstallDate = row["install_date"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["install_date"])
                     });
                 }
+
+                // Load documents count for all listed components in a single query
+                try
+                {
+                    var ids = list.ConvertAll(c => c.Id);
+                    if (ids.Count > 0)
+                    {
+                        var pars = new List<MySqlParameter> { new MySqlParameter("@et", "Component") };
+                        var inClauses = new List<string>(ids.Count);
+                        for (int i = 0; i < ids.Count; i++)
+                        {
+                            string name = "@id" + i.ToString();
+                            inClauses.Add(name);
+                            pars.Add(new MySqlParameter(name, ids[i]));
+                        }
+
+                        string sqlCnt = $"SELECT entity_id, COUNT(*) AS cnt FROM document_links WHERE entity_type=@et AND entity_id IN ({string.Join(",", inClauses)}) GROUP BY entity_id";
+                        var dtCnt = await _dbService.ExecuteSelectAsync(sqlCnt, pars).ConfigureAwait(false);
+                        var map = new Dictionary<int, int>(dtCnt.Rows.Count);
+                        foreach (DataRow r in dtCnt.Rows)
+                        {
+                            int eid = r["entity_id"] == DBNull.Value ? 0 : Convert.ToInt32(r["entity_id"]);
+                            int cnt = r["cnt"] == DBNull.Value ? 0 : Convert.ToInt32(r["cnt"]);
+                            map[eid] = cnt;
+                        }
+                        foreach (var c in list)
+                            if (map.TryGetValue(c.Id, out var cnt)) c.DocumentsCount = cnt;
+                    }
+                }
+                catch { }
 
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
@@ -227,6 +258,23 @@ WHERE id=@id;";
             catch (Exception ex)
             {
                 await SafeNavigator.ShowAlertAsync("Komponente", $"Brisanje nije uspjelo: {ex.Message}", "OK");
+            }
+        }
+
+        private async void OnOpenDocsClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is not Button btn) return;
+                if (btn.BindingContext is not MachineComponent mc) return;
+                var dlg = new YasGMP.Views.Dialogs.ComponentDocumentsDialog(_dbService, mc.Id);
+                await Navigation.PushModalAsync(dlg);
+                _ = await dlg.Result;
+                await LoadComponentsAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await SafeNavigator.ShowAlertAsync("Dokumenti", ex.Message, "OK");
             }
         }
 

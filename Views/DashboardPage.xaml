@@ -7,7 +7,7 @@
     Title="Dashboard – YasGMP">
 
   <ContentPage.Content>
-    <ScrollView>
+    <ScrollView xmlns:sf="http://schemas.syncfusion.com/maui">
       <VerticalStackLayout Spacing="28" Padding="32" BackgroundColor="{StaticResource YtSurface}">
 
         <Frame CornerRadius="16"
@@ -49,7 +49,16 @@
 
             <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*" ColumnSpacing="14" RowSpacing="12">
 
-              <Button x:Name="MachinesButton"   Text="Strojevi / Oprema"     Clicked="OnMachinesClicked"   />
+              <sf:SfEffectsView x:Name="MachinesButton">
+                <Frame Padding="14" CornerRadius="12" HasShadow="True" BackgroundColor="{StaticResource YtSurface}"
+                       BorderColor="{StaticResource YtRowBorder}">
+                  <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMachinesClicked" NumberOfTapsRequired="1" />
+                  </Frame.GestureRecognizers>
+                  <Label Text="Strojevi / Oprema" HorizontalOptions="Center" VerticalOptions="Center"
+                         TextColor="{StaticResource YtOnSurface}" />
+                </Frame>
+              </sf:SfEffectsView>
               <Button x:Name="PartsButton"      Grid.Column="1" Text="Dijelovi / Skladište" Clicked="OnPartsClicked" />
               <Button x:Name="WorkOrdersButton" Grid.Row="1"   Text="Radni nalozi"         Clicked="OnWorkOrdersClicked" />
               <Button x:Name="CapaButton"       Grid.Row="1" Grid.Column="1" Text="CAPA (Korektivne akcije)" Clicked="OnCapaClicked" />

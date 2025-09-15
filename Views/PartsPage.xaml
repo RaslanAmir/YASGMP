@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
   File: Views/PartsPage.xaml
   Purpose: YASTECH-themed UI for Parts inventory (MySQL-backed).
@@ -29,27 +29,62 @@
                  TextColor="{StaticResource YtPrimary700}"
                  HorizontalOptions="Center"/>
 
+          <!-- Filters and actions -->
+          <Frame Padding="12" CornerRadius="10" BackgroundColor="{StaticResource YtSurface}" BorderColor="{StaticResource YtRowBorder}">
+            <VerticalStackLayout Spacing="10">
+              <HorizontalStackLayout Spacing="10">
+                <SearchBar x:Name="SearchBar"
+                           Placeholder="Pretraži (šifra/naziv/dobavljač)"
+                           TextChanged="OnSearchTextChanged"
+                           WidthRequest="420" />
+                <CheckBox x:Name="LowStockOnly" CheckedChanged="OnLowStockOnlyChanged"/>
+                <Label Text="Samo 'Low stock'" VerticalOptions="Center"/>
+                <Button Text="Export XLSX" Clicked="OnExportClicked"
+                        BackgroundColor="{StaticResource YtPrimary50}" TextColor="{StaticResource YtPrimary700}" />
+              </HorizontalStackLayout>
+              <HorizontalStackLayout Spacing="10">
+                <Label Text="Dobavljač:" VerticalOptions="Center"/>
+                <Picker x:Name="SupplierFilterPicker" WidthRequest="220" SelectedIndexChanged="OnSupplierFilterChanged" />
+                <Label Text="Lokacija:" VerticalOptions="Center"/>
+                <Picker x:Name="LocationFilterPicker" WidthRequest="220" SelectedIndexChanged="OnLocationFilterChanged" />
+              </HorizontalStackLayout>
+              <HorizontalStackLayout Spacing="10">
+                <Label Text="Kategorija:" VerticalOptions="Center"/>
+                <Picker x:Name="CategoryFilterPicker" WidthRequest="180" SelectedIndexChanged="OnCategoryFilterChanged" />
+                <Label Text="Status:" VerticalOptions="Center"/>
+                <Picker x:Name="StatusFilterPicker" WidthRequest="160" SelectedIndexChanged="OnStatusFilterChanged" />
+              </HorizontalStackLayout>
+              <HorizontalStackLayout Spacing="10">
+                <Button Text="+ Povećaj zalihu" Clicked="OnIncreaseStockClicked"
+                        BackgroundColor="{StaticResource YtSuccess700}" TextColor="White" />
+                <Button Text="- Smanji zalihu" Clicked="OnDecreaseStockClicked"
+                        BackgroundColor="{StaticResource YtDanger700}" TextColor="White" />
+              </HorizontalStackLayout>
+            </VerticalStackLayout>
+          </Frame>
+
           <HorizontalStackLayout Spacing="14">
-            <Button Text="➕ Dodaj novi dio"
+            <Button Text="Dodaj novi dio"
                     Clicked="OnAddPartClicked"
                     BackgroundColor="{StaticResource YtPrimary600}"
                     TextColor="White"
                     FontAttributes="Bold"
                     maui:ToolTipProperties.Text="Unos novog rezervnog dijela." />
 
-            <Button Text="✏️ Uredi"
+            <Button Text="Uredi"
                     Clicked="OnEditPartClicked"
                     BackgroundColor="{StaticResource YtAccent50}"
                     TextColor="{StaticResource YtAccent700}"
                     FontAttributes="Bold"
                     maui:ToolTipProperties.Text="Uređivanje odabranog dijela." />
 
-            <Button Text="🗑️ Briši"
+            <Button Text="Briši"
                     Clicked="OnDeletePartClicked"
                     BackgroundColor="{StaticResource YtDanger700}"
                     TextColor="White"
                     FontAttributes="Bold"
                     maui:ToolTipProperties.Text="Brisanje odabranog dijela iz baze." />
+                      <Button Text="Detalji" Clicked="OnPartDetailClicked" BackgroundColor="{StaticResource YtPrimary50}" TextColor="{StaticResource YtPrimary700}" FontAttributes="Bold" maui:ToolTipProperties.Text="Detalji zaliha i transakcija za odabrani dio" />
           </HorizontalStackLayout>
 
           <CollectionView x:Name="PartListView"
@@ -88,6 +123,21 @@
                     <Label Text="{Binding Stock, StringFormat='Stanje: {0} kom'}"
                            FontSize="12"
                            TextColor="{StaticResource YtPrimary700}" />
+                    <Label Text="{Binding MinStockAlert, StringFormat='Min: {0} kom'}"
+                           FontSize="12"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Label Text="{Binding WarehouseSummary}"
+                           FontSize="11"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Frame Padding="6,2" CornerRadius="6" BackgroundColor="{StaticResource YtDanger50}" IsVisible="{Binding IsWarehouseStockCritical}">
+                      <Label Text="WH Low" FontSize="11" TextColor="{StaticResource YtDanger700}"/>
+                    </Frame>
+                    <Frame Padding="6,2" CornerRadius="6" BackgroundColor="{StaticResource YtDanger50}" IsVisible="{Binding IsStockCritical}">
+                      <Label Text="⚠ Low stock" FontSize="11" TextColor="{StaticResource YtDanger700}"/>
+                    </Frame>
+                    <Label Text="{Binding LinkedWorkOrdersCount, StringFormat='WO povezanih: {0}'}"
+                           FontSize="11"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
                     <Label Text="{Binding Image}"
                            FontSize="12"
                            TextColor="{StaticResource YtOnSurfaceDim}"
@@ -108,3 +158,5 @@
     </VerticalStackLayout>
   </ContentPage.Content>
 </ContentPage>
+
+

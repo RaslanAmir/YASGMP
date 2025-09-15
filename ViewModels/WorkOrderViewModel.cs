@@ -16,11 +16,11 @@ using YasGMP.Services;
 namespace YasGMP.ViewModels
 {
     /// <summary>
-    /// <b>WorkOrderViewModel</b> – Ultra-robust MVVM for GMP/Annex 11/21 CFR Part 11 compliant Work Order Management.
+    /// <b>WorkOrderViewModel</b> � Ultra-robust MVVM for GMP/Annex 11/21 CFR Part 11 compliant Work Order Management.
     /// <para>
-    /// ✅ Async CRUD, full workflow, audit trail, digital signature, rollback/versioning<br/>
-    /// ✅ Attachments, comments, asset/part/supplier linkage, timeline, escalation, dashboard stats<br/>
-    /// ✅ Advanced filtering, KPI, extensibility, sign-off, mass actions, future AI/ML hooks
+    /// ? Async CRUD, full workflow, audit trail, digital signature, rollback/versioning<br/>
+    /// ? Attachments, comments, asset/part/supplier linkage, timeline, escalation, dashboard stats<br/>
+    /// ? Advanced filtering, KPI, extensibility, sign-off, mass actions, future AI/ML hooks
     /// </para>
     /// </summary>
     public sealed class WorkOrderViewModel : INotifyPropertyChanged
@@ -39,6 +39,14 @@ namespace YasGMP.ViewModels
         private string? _statusFilter = null;
         private string? _assetFilter = null;
         private string? _priorityFilter = null;
+        private int? _photosMin;
+        private int? _partsMin;
+        // New: additional filters
+        private int? _idFilter = null;
+        private DateTime? _openFrom = null;
+        private DateTime? _openTo = null;
+        private DateTime? _closeFrom = null;
+        private DateTime? _closeTo = null;
         private bool _isBusy;
         private string? _statusMessage = null;
 
@@ -140,6 +148,49 @@ namespace YasGMP.ViewModels
             set { _priorityFilter = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
 
+        public int? PhotosMin
+        {
+            get => _photosMin;
+            set { _photosMin = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
+        public int? PartsMin
+        {
+            get => _partsMin;
+            set { _partsMin = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
+        // New filters: ID and date ranges
+        public int? IdFilter
+        {
+            get => _idFilter;
+            set { _idFilter = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
+        public DateTime? OpenFrom
+        {
+            get => _openFrom;
+            set { _openFrom = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
+        public DateTime? OpenTo
+        {
+            get => _openTo;
+            set { _openTo = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
+        public DateTime? CloseFrom
+        {
+            get => _closeFrom;
+            set { _closeFrom = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
+        public DateTime? CloseTo
+        {
+            get => _closeTo;
+            set { _closeTo = value; OnPropertyChanged(); FilterWorkOrders(); }
+        }
+
         /// <summary>Busy flag for async UI operations.</summary>
         public bool IsBusy
         {
@@ -147,7 +198,7 @@ namespace YasGMP.ViewModels
             set { _isBusy = value; OnPropertyChanged(); }
         }
 
-        /// <summary>Status message for UI (nullable to allow “no error/info”).</summary>
+        /// <summary>Status message for UI (nullable to allow �no error/info�).</summary>
         public string? StatusMessage
         {
             get => _statusMessage;
@@ -251,7 +302,7 @@ namespace YasGMP.ViewModels
                 var actorId = _authService.CurrentUser?.Id ?? 0;
                 SelectedWorkOrder.DigitalSignature = ComputeSignature(SelectedWorkOrder, _currentSessionId, _currentDeviceInfo);
 
-                await _dbService.InsertOrUpdateWorkOrderAsync(SelectedWorkOrder, update: true, actorUserId: actorId, ip: _currentIpAddress, device: _currentDeviceInfo).ConfigureAwait(false);
+                await _dbService.InsertOrUpdateWorkOrderAsync(SelectedWorkOrder, update: true, actorUserId: actorId, ip: _currentIpAddress, deviceInfo: _currentDeviceInfo, sessionId: _currentSessionId).ConfigureAwait(false);
                 await _dbService.LogWorkOrderAuditAsync(SelectedWorkOrder.Id, actorId, "UPDATE", null, _currentIpAddress, _currentDeviceInfo).ConfigureAwait(false);
 
                 StatusMessage = $"Work order '{(SelectedWorkOrder.Title ?? $"#{SelectedWorkOrder.Id}")}' updated.";
@@ -418,20 +469,36 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>Real-time filter for work orders (by machine name, title, priority, status).</summary>
-        public void FilterWorkOrders()
+                public void FilterWorkOrders()
         {
-            var filtered = WorkOrders.Where(w =>
-                (string.IsNullOrWhiteSpace(SearchTerm) ||
+            var filtered = WorkOrders.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                filtered = filtered.Where(w =>
                     (w.Machine?.Name?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
                     (w.Title?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (w.Description?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ?? false)) &&
-                (string.IsNullOrWhiteSpace(StatusFilter) || string.Equals(w.Status, StatusFilter, StringComparison.Ordinal)) &&
-                (string.IsNullOrWhiteSpace(AssetFilter) || string.Equals(w.Machine?.Name, AssetFilter, StringComparison.Ordinal)) &&
-                (string.IsNullOrWhiteSpace(PriorityFilter) || string.Equals(w.Priority, PriorityFilter, StringComparison.Ordinal))
-            );
+                    (w.Description?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+            if (!string.IsNullOrWhiteSpace(StatusFilter))
+                filtered = filtered.Where(w => string.Equals(w.Status, StatusFilter, StringComparison.Ordinal));
+            if (!string.IsNullOrWhiteSpace(AssetFilter))
+                filtered = filtered.Where(w => string.Equals(w.Machine?.Name, AssetFilter, StringComparison.Ordinal));
+            if (!string.IsNullOrWhiteSpace(PriorityFilter))
+                filtered = filtered.Where(w => string.Equals(w.Priority, PriorityFilter, StringComparison.Ordinal));
+
+            if (IdFilter.HasValue) filtered = filtered.Where(w => w.Id == IdFilter.Value);
+            if (OpenFrom.HasValue) filtered = filtered.Where(w => w.DateOpen >= OpenFrom.Value);
+            if (OpenTo.HasValue)   filtered = filtered.Where(w => w.DateOpen <= OpenTo.Value);
+            if (CloseFrom.HasValue) filtered = filtered.Where(w => w.DateClose.HasValue && w.DateClose.Value >= CloseFrom.Value);
+            if (CloseTo.HasValue)   filtered = filtered.Where(w => w.DateClose.HasValue && w.DateClose.Value <= CloseTo.Value);
+
+            if (PhotosMin.HasValue) filtered = filtered.Where(w => w.PhotosCount >= PhotosMin.Value);
+            if (PartsMin.HasValue)  filtered = filtered.Where(w => w.PartsCount >= PartsMin.Value);
+
             FilteredWorkOrders = new ObservableCollection<WorkOrder>(filtered);
         }
-
         #endregion
 
         #region === Audit/Auxiliary ===
@@ -549,3 +616,8 @@ namespace YasGMP.ViewModels
         #endregion
     }
 }
+
+
+
+
+

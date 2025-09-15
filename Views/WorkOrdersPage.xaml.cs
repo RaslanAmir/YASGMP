@@ -1,3 +1,4 @@
+using YasGMP.Services;
 // ==============================================================================
 //  File: Views/WorkOrdersPage.xaml.cs
 //  Project: YasGMP
@@ -113,6 +114,74 @@ namespace YasGMP.Views
         {
             var p = vm.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
             return p?.GetValue(vm) as ICommand;
+        }
+
+        private async void OnAddWorkOrderClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                var services = Application.Current?.Handler?.MauiContext?.Services;
+                var connStr = (Application.Current as App)?.AppConfig?["ConnectionStrings:MySqlDb"] ?? (Application.Current as App)?.AppConfig?["MySqlDb"];
+                if (string.IsNullOrWhiteSpace(connStr)) { await DisplayAlert("Greška", "Nema konekcijskog stringa.", "OK"); return; }
+                var db = new YasGMP.Services.DatabaseService(connStr!);
+                var wo = new YasGMP.Models.WorkOrder { Title = "", Type = "korektivni", Priority = "srednji", Status = "otvoren", DateOpen = DateTime.UtcNow };
+                var dlg = new YasGMP.Views.Dialogs.WorkOrderEditDialog(wo, db, 0);
+                await Navigation.PushModalAsync(dlg);
+                if (await dlg.Result)
+                {
+                    await db.InsertOrUpdateWorkOrderAsync(wo, false, 0, "ui", "WorkOrdersPage", null);
+                    // attempt to refresh via VM if present
+                    var vm = BindingContext;
+                    var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
+                    if (cmd?.CanExecute(null) == true) cmd.Execute(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Greška", ex.Message, "OK");
+            }
+        }
+
+        private async void OnEditWorkOrderClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                var listProp = BindingContext?.GetType().GetProperty("SelectedWorkOrder");
+                var selected = listProp?.GetValue(BindingContext) as YasGMP.Models.WorkOrder;
+                if (selected == null) { await DisplayAlert("Obavijest", "Odaberite radni nalog.", "OK"); return; }
+                var wo = selected; // editing direct reference should be fine for now
+                var connStr = (Application.Current as App)?.AppConfig?["ConnectionStrings:MySqlDb"] ?? (Application.Current as App)?.AppConfig?["MySqlDb"];
+                var db = new YasGMP.Services.DatabaseService(connStr!);
+                var dlg = new YasGMP.Views.Dialogs.WorkOrderEditDialog(wo, db, 0);
+                await Navigation.PushModalAsync(dlg);
+                if (await dlg.Result)
+                {
+                    await db.InsertOrUpdateWorkOrderAsync(wo, true, 0, "ui", "WorkOrdersPage", null);
+                    var vm = BindingContext;
+                    var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
+                    if (cmd?.CanExecute(null) == true) cmd.Execute(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Greška", ex.Message, "OK");
+            }
+        }
+
+        // Syncfusion DataGrid selection changed: propagate to ViewModel.SelectedWorkOrder if present
+        private void OnGridSelectionChanged(object? sender, Syncfusion.Maui.DataGrid.DataGridSelectionChangedEventArgs e)
+        {
+            try
+            {
+                var vm = BindingContext;
+                if (vm == null) return;
+                var prop = vm.GetType().GetProperty("SelectedWorkOrder", BindingFlags.Public | BindingFlags.Instance);
+                if (prop == null || !prop.CanWrite) return;
+                object? selected = (e != null && e.AddedRows != null && e.AddedRows.Count > 0) ? e.AddedRows[0] : null;
+                // Set the selection on the VM
+                prop.SetValue(vm, selected);
+            }
+            catch { }
         }
     }
 }

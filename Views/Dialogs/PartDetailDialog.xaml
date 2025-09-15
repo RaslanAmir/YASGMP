@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.PartDetailDialog"
+             Title="Detalji dijela">
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="16">
+      <VerticalStackLayout Spacing="8">
+        <Label Text="Pregled" FontAttributes="Bold" FontSize="18" />
+        <Label x:Name="PartNameLabel" Text="-" FontAttributes="Bold" FontSize="20" />
+        <Label x:Name="PartCodeLabel" Text="-" FontSize="14" />
+        <HorizontalStackLayout Spacing="8">
+          <Entry x:Name="MinStockEntry" Placeholder="Min stock alert (global)" Keyboard="Numeric" WidthRequest="200" />
+          <Button Text="Spremi" Clicked="OnSaveMinClicked" />
+        </HorizontalStackLayout>
+      </VerticalStackLayout>
+
+      <VerticalStackLayout Spacing="8">
+        <Label Text="Zalihe po skladištu" FontAttributes="Bold" FontSize="18" />
+        <CollectionView x:Name="StockList" HeightRequest="320">
+          <CollectionView.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="*,90,Auto,Auto" Padding="6">
+                <Label Grid.Column="0" Text="{Binding WarehouseName}" />
+                <Label Grid.Column="1" Text="{Binding Quantity}" />
+                <HorizontalStackLayout Grid.Column="2" Spacing="6">
+                  <Entry Text="{Binding Min}" Placeholder="Min" Keyboard="Numeric" WidthRequest="60" />
+                  <Entry Text="{Binding Max}" Placeholder="Max" Keyboard="Numeric" WidthRequest="60" />
+                </HorizontalStackLayout>
+                <Button Grid.Column="3" Text="Spremi" Command="{Binding SaveThresholdCommand}" />
+              </Grid>
+            </DataTemplate>
+          </CollectionView.ItemTemplate>
+        </CollectionView>
+      </VerticalStackLayout>
+
+      <VerticalStackLayout Spacing="8">
+        <Label Text="Zadnje transakcije" FontAttributes="Bold" FontSize="18" />
+        <CollectionView x:Name="TxList" HeightRequest="360">
+          <CollectionView.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="160,90,*,120" Padding="6">
+                <Label Grid.Column="0" Text="{Binding Date}"/>
+                <Label Grid.Column="1" Text="{Binding Type}"/>
+                <Label Grid.Column="2" Text="{Binding Note}"/>
+                <Label Grid.Column="3" Text="{Binding Qty}"/>
+              </Grid>
+            </DataTemplate>
+          </CollectionView.ItemTemplate>
+        </CollectionView>
+      </VerticalStackLayout>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>

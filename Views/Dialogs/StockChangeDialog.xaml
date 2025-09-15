@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.StockChangeDialog"
+             Title="Promjena zalihe">
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="12">
+      <Label x:Name="TitleLabel" Text="Promjena zalihe" FontSize="20" FontAttributes="Bold" />
+      <Label x:Name="PartLabel" Text="Dio: -" FontSize="14" />
+      <Picker x:Name="WarehousePicker" Title="Skladište" ItemDisplayBinding="{Binding Name}" />
+      <Entry x:Name="QuantityEntry" Placeholder="Količina" Keyboard="Numeric" />
+      <Entry x:Name="DocumentEntry" Placeholder="Dokument (opcionalno)" />
+      <Editor x:Name="NoteEditor" Placeholder="Napomena (razlog)" AutoSize="TextChanges" />
+      <HorizontalStackLayout Spacing="16" Margin="0,10,0,0">
+        <Button Text="Potvrdi" Clicked="OnConfirmClicked" />
+        <Button Text="Odustani" Clicked="OnCancelClicked" />
+      </HorizontalStackLayout>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>
+

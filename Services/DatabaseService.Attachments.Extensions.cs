@@ -95,5 +95,39 @@ namespace YasGMP.Services
                 UploadedAt = D("uploaded_at") ?? DateTime.UtcNow
             };
         }
+
+        // -------------------- documents/document_links helpers (DocumentService compatible) --------------------
+        public static async Task<DataTable> GetDocumentsForEntityAsync(
+            this DatabaseService db,
+            string entityType,
+            int entityId,
+            CancellationToken token = default)
+        {
+            const string sql = @"SELECT d.id, d.file_name, d.storage_provider, d.storage_path, d.content_type, d.sha256, d.uploaded_by,
+       dl.entity_type, dl.entity_id
+FROM document_links dl
+JOIN documents d ON d.id = dl.document_id
+WHERE dl.entity_type=@et AND dl.entity_id=@eid
+ORDER BY d.id DESC";
+            var pars = new[] { new MySqlParameter("@et", entityType), new MySqlParameter("@eid", entityId) };
+            return await db.ExecuteSelectAsync(sql, pars, token).ConfigureAwait(false);
+        }
+
+        public static async Task DeleteDocumentLinkAsync(
+            this DatabaseService db,
+            string entityType,
+            int entityId,
+            int documentId,
+            int? actorUserId = null,
+            string? ip = null,
+            string? device = null,
+            string? sessionId = null,
+            CancellationToken token = default)
+        {
+            const string sql = "DELETE FROM document_links WHERE entity_type=@et AND entity_id=@eid AND document_id=@doc";
+            var pars = new[] { new MySqlParameter("@et", entityType), new MySqlParameter("@eid", entityId), new MySqlParameter("@doc", documentId) };
+            await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
+            await db.LogSystemEventAsync(actorUserId, "ATTACHMENT_DELETE", "document_links", entityType, documentId, $"unlink entity={entityType}/{entityId}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
+        }
     }
 }

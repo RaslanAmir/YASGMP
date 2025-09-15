@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MySqlConnector; // MySQL ADO.NET provider
 using YasGMP.Models;
 using YasGMP.Helpers;
+using Microsoft.Maui.Controls; // Application, DependencyService
 
 namespace YasGMP.Services
 {
@@ -41,6 +42,10 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (component is null) throw new ArgumentNullException(nameof(component));
+
+            // Wire real user/IP when caller passed defaults
+            try { actorUserId = actorUserId != 0 ? actorUserId : ((Application.Current as App)?.LoggedUser?.Id ?? 0); } catch { }
+            try { ip = !string.IsNullOrWhiteSpace(ip) && ip != "ui" ? ip : (DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? ip); } catch { }
 
             // Map to low-level DTO to stay consistent with DB column names.
             var c = ComponentMapper.ToMachineComponent(component);
@@ -101,6 +106,9 @@ namespace YasGMP.Services
             string deviceInfo,
             CancellationToken token = default)
         {
+            // Wire real user/IP when caller passed defaults
+            try { actorUserId = actorUserId != 0 ? actorUserId : ((Application.Current as App)?.LoggedUser?.Id ?? 0); } catch { }
+            try { ip = !string.IsNullOrWhiteSpace(ip) && ip != "ui" ? ip : (DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? ip); } catch { }
             int id = await InsertOrUpdateComponentAsync(component, update, actorUserId, ip, token).ConfigureAwait(false);
 
             await LogSystemEventAsync(
@@ -195,6 +203,9 @@ namespace YasGMP.Services
             string deviceInfo,
             CancellationToken token = default)
         {
+            // Wire real user/IP when caller passed defaults
+            try { actorUserId = actorUserId != 0 ? actorUserId : ((Application.Current as App)?.LoggedUser?.Id ?? 0); } catch { }
+            try { ip = !string.IsNullOrWhiteSpace(ip) && ip != "ui" ? ip : (DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? ip); } catch { }
             await ExecuteNonQueryAsync(
                 "DELETE FROM machine_components WHERE id=@id",
                 new[] { new MySqlParameter("@id", id) },
@@ -227,6 +238,9 @@ namespace YasGMP.Services
             string? sessionId,
             CancellationToken token = default)
         {
+            // Wire real user/IP when caller passed defaults
+            try { actorUserId = actorUserId != 0 ? actorUserId : ((Application.Current as App)?.LoggedUser?.Id ?? 0); } catch { }
+            try { ip = !string.IsNullOrWhiteSpace(ip) && ip != "ui" ? ip : (DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? ip); } catch { }
             await ExecuteNonQueryAsync(
                 "DELETE FROM machine_components WHERE id=@id",
                 new[] { new MySqlParameter("@id", id) },

@@ -238,6 +238,13 @@ namespace YasGMP.Models
         public bool RequiresCalibration =>
             Calibrations != null && Calibrations.Any(c => c.NextDue.Date < DateTime.UtcNow.Date);
 
+        /// <summary>
+        /// Number of documents linked via document_links (entity_type='Component').
+        /// Not mapped to DB; populated by UI queries.
+        /// </summary>
+        [NotMapped]
+        public int DocumentsCount { get; set; }
+
         // ================= HELPERS / NORMALIZATION =================
 
         /// <summary>

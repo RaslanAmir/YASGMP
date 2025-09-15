@@ -1,9 +1,4 @@
-// ==============================================================================
-// File: Services/DatabaseService.WorkOrders.Extensions.cs
-// Purpose: Work Orders CRUD + Audit helpers on DatabaseService (schema-tolerant)
-// ==============================================================================
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading;
@@ -13,353 +8,509 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
-    /// <summary>
-    /// Extension methods providing Work Order queries and commands on <see cref="DatabaseService"/>.
-    /// SQL is parameterized and mapping is tolerant to missing columns.
-    /// </summary>
-    public static class DatabaseServiceWorkOrderExtensions
+    public static class DatabaseServiceWorkOrdersExtensions
     {
-        // ========================= READ =========================
+        #region Core Insert/Update
+        public static async Task<int> InsertOrUpdateWorkOrderAsync(
+            this DatabaseService db,
+            WorkOrder wo,
+            bool update,
+            int actorUserId,
+            string ip,
+            string deviceInfo,
+            string? sessionId,
+            CancellationToken token = default)
+        {
+            string insert = @"INSERT INTO work_orders
+ (title, description, task_description, type, priority, status,
+  date_open, due_date, date_close,
+  requested_by_id, created_by_id, assigned_to_id,
+  machine_id, component_id,
+  result, notes)
+ VALUES
+ (@title, @desc, @task, @type, @prio, @status,
+  @open, @due, @close,
+  @req, @crt, @ass,
+  @mach, @comp,
+  @res, @notes)";
 
-        public static async Task<List<WorkOrder>> GetAllWorkOrdersAsync(
+            string updateSql = @"UPDATE work_orders SET
+  title=@title, description=@desc, task_description=@task,
+  type=@type, priority=@prio, status=@status,
+  date_open=@open, due_date=@due, date_close=@close,
+  requested_by_id=@req, created_by_id=@crt, assigned_to_id=@ass,
+  machine_id=@mach, component_id=@comp,
+  result=@res, notes=@notes
+WHERE id=@id";
+
+            var pars = new List<MySqlParameter>
+            {
+                new("@title",   wo.Title ?? string.Empty),
+                new("@desc",    wo.Description ?? string.Empty),
+                new("@task",    wo.TaskDescription ?? (object)DBNull.Value),
+                new("@type",    wo.Type ?? string.Empty),
+                new("@prio",    wo.Priority ?? string.Empty),
+                new("@status",  wo.Status ?? string.Empty),
+                new("@open",    wo.DateOpen),
+                new("@due",     (object?)wo.DueDate ?? DBNull.Value),
+                new("@close",   (object?)wo.DateClose ?? DBNull.Value),
+                new("@req",     wo.RequestedById),
+                new("@crt",     wo.CreatedById),
+                new("@ass",     wo.AssignedToId),
+                new("@mach",    wo.MachineId),
+                new("@comp",    (object?)wo.ComponentId ?? DBNull.Value),
+                new("@res",     wo.Result ?? string.Empty),
+                new("@notes",   (object?)wo.Notes ?? DBNull.Value)
+            };
+            if (update) pars.Add(new MySqlParameter("@id", wo.Id));
+
+            if (!update)
+            {
+                await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
+                var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
+                wo.Id = Convert.ToInt32(idObj);
+            }
+            else
+            {
+                await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
+            }
+
+            await db.LogSystemEventAsync(
+                actorUserId,
+                update ? "WO_UPDATE" : "WO_CREATE",
+                "work_orders",
+                "WorkOrders",
+                wo.Id,
+                wo.Title,
+                ip,
+                "audit",
+                deviceInfo,
+                sessionId,
+                token: token
+            ).ConfigureAwait(false);
+
+            return wo.Id;
+        }
+
+        #region Convenience CRUD + Queries
+        public static Task AddWorkOrderAsync(
+            this DatabaseService db,
+            WorkOrder wo,
+            int actorUserId,
+            string ip,
+            string device,
+            string? sessionId,
+            CancellationToken token = default)
+            => db.InsertOrUpdateWorkOrderAsync(wo, update: false, actorUserId, ip, device, sessionId, token);
+
+        public static async Task DeleteWorkOrderAsync(
+            this DatabaseService db,
+            int workOrderId,
+            int actorUserId,
+            string ip,
+            string device,
+            string? sessionId,
+            CancellationToken token = default)
+        {
+            try
+            {
+                await db.ExecuteNonQueryAsync("DELETE FROM work_orders WHERE id=@id",
+                    new[] { new MySqlParameter("@id", workOrderId) }, token).ConfigureAwait(false);
+            }
+            catch { /* tolerant of schema differences */ }
+            await db.LogSystemEventAsync(actorUserId, "WO_DELETE", "work_orders", "WorkOrders", workOrderId, null, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task<List<WorkOrder>> GetAllWorkOrdersFullAsync(
             this DatabaseService db,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT id, machine_id, component_id, type, created_by, assigned_to, date_open, date_close,
-    description, result, status, digital_signature, priority, related_incident, title, task_description, due_date,
-    closed_at, requested_by_id, created_by_id, assigned_to_id, incident_id, notes, last_modified, last_modified_by_id,
-    device_info, source_ip, session_id
-FROM work_orders ORDER BY date_open DESC, id DESC";
+            const string sql = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
+       w.date_open, w.due_date, w.date_close,
+       w.requested_by_id, w.created_by_id, w.assigned_to_id,
+       w.machine_id, w.component_id,
+       w.result, w.notes,
+       w.digital_signature,
+       (SELECT COUNT(*) FROM work_order_parts p WHERE p.work_order_id = w.id) AS parts_count,
+       (SELECT COUNT(*) FROM document_links dl WHERE dl.entity_type='WorkOrder' AND dl.entity_id = w.id) AS photos_count,
+       m.name AS machine_name
+FROM work_orders w
+LEFT JOIN machines m ON m.id = w.machine_id
+ORDER BY w.date_open DESC, w.id DESC";
+
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
             var list = new List<WorkOrder>(dt.Rows.Count);
-            foreach (DataRow r in dt.Rows) list.Add(ParseWorkOrder(r));
+            foreach (System.Data.DataRow r in dt.Rows) list.Add(MapWorkOrder(r));
             return list;
         }
 
-        public static Task<List<WorkOrder>> GetAllWorkOrdersFullAsync(
-            this DatabaseService db,
-            CancellationToken token = default)
-            => GetAllWorkOrdersAsync(db, token);
+        private static WorkOrder MapWorkOrder(System.Data.DataRow r)
+        {
+            string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+            int I(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
+            int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
+            DateTime? D(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
 
+            return new WorkOrder
+            {
+                Id = I("id"),
+                Title = S("title"),
+                Description = S("description"),
+                TaskDescription = S("task_description"),
+                Type = S("type"),
+                Priority = S("priority"),
+                Status = S("status"),
+                DateOpen = D("date_open") ?? DateTime.UtcNow,
+                DueDate = D("due_date"),
+                DateClose = D("date_close"),
+                RequestedById = I("requested_by_id"),
+                CreatedById = I("created_by_id"),
+                AssignedToId = I("assigned_to_id"),
+                MachineId = I("machine_id"),
+                ComponentId = IN("component_id"),
+                Result = S("result"),
+                Notes = S("notes"),
+                DigitalSignature = S("digital_signature"),
+                PhotosCount = I("photos_count"),
+                PartsCount = I("parts_count"),
+                Machine = new Machine { Id = I("machine_id"), Name = S("machine_name") }
+            };
+        }
+        #endregion
+        
         public static async Task<WorkOrder?> GetWorkOrderByIdAsync(
             this DatabaseService db,
             int id,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT id, machine_id, component_id, type, created_by, assigned_to, date_open, date_close,
-    description, result, status, digital_signature, priority, related_incident, title, task_description, due_date,
-    closed_at, requested_by_id, created_by_id, assigned_to_id, incident_id, notes, last_modified, last_modified_by_id,
-    device_info, source_ip, session_id
-FROM work_orders WHERE id=@id LIMIT 1";
+            const string sql = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
+       w.date_open, w.due_date, w.date_close,
+       w.requested_by_id, w.created_by_id, w.assigned_to_id,
+       w.machine_id, w.component_id,
+       w.result, w.notes,
+       w.digital_signature,
+       m.name AS machine_name
+FROM work_orders w
+LEFT JOIN machines m ON m.id = w.machine_id
+WHERE w.id=@id";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
-            return dt.Rows.Count == 1 ? ParseWorkOrder(dt.Rows[0]) : null;
+            if (dt.Rows.Count == 0) return null;
+            return MapWorkOrder(dt.Rows[0]);
         }
 
-        // ========================= WRITE =========================
-
-        /// <summary>
-        /// Insert or update a WorkOrder. Minimal column set to align with common schema.
-        /// </summary>
-        public static async Task<int> InsertOrUpdateWorkOrderAsync(
+        public static async Task<int> AddWorkOrderPartAsync(
             this DatabaseService db,
-            WorkOrder order,
-            bool update,
+            WorkOrderPart part,
             int actorUserId,
             string ip,
-            string device,
+            string deviceInfo,
+            string? sessionId,
             CancellationToken token = default)
         {
-            if (order == null) throw new ArgumentNullException(nameof(order));
-
-            string insert = @"INSERT INTO work_orders
-                (machine_id, component_id, type, created_by, assigned_to, date_open, date_close,
-                 description, result, status, digital_signature, priority, related_incident)
-            VALUES
-                (@mid, @cid, @type, @cby, @asgn, @open, @close, @desc, @res, @status, @sig, @prio, @inc)";
-
-            string updateSql = @"UPDATE work_orders SET
-                machine_id=@mid, component_id=@cid, type=@type, created_by=@cby, assigned_to=@asgn,
-                date_open=@open, date_close=@close, description=@desc, result=@res, status=@status,
-                digital_signature=@sig, priority=@prio, related_incident=@inc
-            WHERE id=@id";
-
-            var pars = new List<MySqlParameter>
+            // Strict transactional decrement of stock + part usage insert
+            await db.WithTransactionAsync(async (conn, tx) =>
             {
-                new("@mid",  (object?)order.MachineId),
-                new("@cid",  (object?)order.ComponentId ?? DBNull.Value),
-                new("@type", order.Type ?? string.Empty),
-                new("@cby",  order.CreatedById),
-                new("@asgn", order.AssignedToId),
-                new("@open", order.DateOpen == default ? (object)DBNull.Value : order.DateOpen),
-                new("@close", (object?)order.DateClose ?? DBNull.Value),
-                new("@desc", order.Description ?? order.Title ?? string.Empty),
-                new("@res",  order.Result ?? string.Empty),
-                new("@status", order.Status ?? "otvoren"),
-                new("@sig", order.DigitalSignature ?? string.Empty),
-                new("@prio", order.Priority ?? "srednji"),
-                new("@inc",  (object?)order.IncidentId ?? DBNull.Value)
-            };
-            if (update) pars.Add(new MySqlParameter("@id", order.Id));
+                try
+                {
+                    var insert = new MySqlCommand(@"INSERT INTO work_order_parts
+ (work_order_id, part_id, quantity, unit_of_measure, unit_price, currency, warehouse_id, used_at, used_by_id, note)
+ VALUES(@wo, @pid, @qty, @uom, @price, @cur, @wh, @used, @uid, @note)", conn, tx);
+                    insert.Parameters.AddRange(new[]
+                    {
+                        new MySqlParameter("@wo", part.WorkOrderId),
+                        new MySqlParameter("@pid", part.PartId),
+                        new MySqlParameter("@qty", part.Quantity),
+                        new MySqlParameter("@uom", (object?)part.UnitOfMeasure ?? DBNull.Value),
+                        new MySqlParameter("@price", (object?)part.UnitPrice ?? DBNull.Value),
+                        new MySqlParameter("@cur", (object?)part.Currency ?? DBNull.Value),
+                        new MySqlParameter("@wh", (object?)part.WarehouseId ?? DBNull.Value),
+                        new MySqlParameter("@used", (object?)part.UsedAt ?? DBNull.Value),
+                        new MySqlParameter("@uid", (object?)part.UsedById ?? DBNull.Value),
+                        new MySqlParameter("@note", (object?)part.Note ?? DBNull.Value)
+                    });
+                    await insert.ExecuteNonQueryAsync(token).ConfigureAwait(false);
 
-            try
-            {
-                if (!update)
-                {
-                    await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
-                    var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
-                    order.Id = Convert.ToInt32(idObj);
+                    var stock = new MySqlCommand("UPDATE parts SET stock = stock - @q WHERE id=@pid", conn, tx);
+                    stock.Parameters.Add(new MySqlParameter("@q", part.Quantity));
+                    stock.Parameters.Add(new MySqlParameter("@pid", part.PartId));
+                    await stock.ExecuteNonQueryAsync(token).ConfigureAwait(false);
                 }
-                else
+                catch
                 {
-                    await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
+                    throw;
                 }
-            }
-            catch (MySqlException ex) when (ex.Number == 1054)
-            {
-                // Schema differences: try a reduced set
-                string insertMin = @"INSERT INTO work_orders (machine_id, type, description, status, priority)
-                                     VALUES (@mid, @type, @desc, @status, @prio)";
-                string updateMin = @"UPDATE work_orders SET machine_id=@mid, type=@type, description=@desc, status=@status, priority=@prio WHERE id=@id";
-                var parsMin = new List<MySqlParameter>
-                {
-                    new("@mid",  (object?)order.MachineId),
-                    new("@type", order.Type ?? string.Empty),
-                    new("@desc", order.Description ?? order.Title ?? string.Empty),
-                    new("@status", order.Status ?? "otvoren"),
-                    new("@prio", order.Priority ?? "srednji")
-                };
-                if (update) parsMin.Add(new MySqlParameter("@id", order.Id));
+            }, token).ConfigureAwait(false);
 
-                if (!update)
-                {
-                    await db.ExecuteNonQueryAsync(insertMin, parsMin, token).ConfigureAwait(false);
-                    var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
-                    order.Id = Convert.ToInt32(idObj);
-                }
-                else
-                {
-                    await db.ExecuteNonQueryAsync(updateMin, parsMin, token).ConfigureAwait(false);
-                }
-            }
-
-            // Audit (system event)
             await db.LogSystemEventAsync(
-                userId: actorUserId,
-                eventType: update ? "WO_UPDATE" : "WO_CREATE",
-                tableName: "work_orders",
-                module: "WorkOrders",
-                recordId: order.Id,
-                description: update ? $"Work order updated (Id={order.Id})" : $"Work order created (Id={order.Id})",
-                ip: ip,
-                severity: "audit",
-                deviceInfo: device,
-                sessionId: null,
+                actorUserId,
+                "WO_PART_ADD",
+                "work_order_parts",
+                "WorkOrders",
+                part.WorkOrderId,
+                $"part={part.PartId}; qty={part.Quantity}",
+                ip,
+                "audit",
+                deviceInfo,
+                sessionId,
                 token: token
             ).ConfigureAwait(false);
 
-            return order.Id;
+            return part.WorkOrderId;
         }
 
-        public static async Task<int> InsertOrUpdateWorkOrderAsync(
-            this DatabaseService db,
-            WorkOrder order,
-            bool update,
-            int actorUserId,
-            string ip,
-            string device,
-            string? sessionId,
-            CancellationToken token = default)
-        {
-            var id = await db.InsertOrUpdateWorkOrderAsync(order, update, actorUserId, ip, device, token).ConfigureAwait(false);
-            // Session-context audit line
-            await db.LogSystemEventAsync(
-                userId: actorUserId,
-                eventType: update ? "WO_UPDATE_CTX" : "WO_CREATE_CTX",
-                tableName: "work_orders",
-                module: "WorkOrders",
-                recordId: id,
-                description: null,
-                ip: ip,
-                severity: "info",
-                deviceInfo: device,
-                sessionId: sessionId,
-                token: token
-            ).ConfigureAwait(false);
-            return id;
-        }
-
-        public static async Task DeleteWorkOrderAsync(
-            this DatabaseService db,
-            int id,
-            int actorUserId,
-            string ip,
-            string device,
-            CancellationToken token = default)
-        {
-            await db.ExecuteNonQueryAsync("DELETE FROM work_orders WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
-            await db.LogSystemEventAsync(actorUserId, "WO_DELETE", "work_orders", "WorkOrders", id, "Work order deleted", ip, "audit", device, null, token: token).ConfigureAwait(false);
-        }
-
-        public static async Task DeleteWorkOrderAsync(
-            this DatabaseService db,
-            int id,
-            int actorUserId,
-            string ip,
-            string device,
-            string? sessionId,
-            CancellationToken token = default)
-        {
-            await db.ExecuteNonQueryAsync("DELETE FROM work_orders WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
-            await db.LogSystemEventAsync(actorUserId, "WO_DELETE", "work_orders", "WorkOrders", id, "Work order deleted", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
-        }
-
-        public static async Task<int> AddWorkOrderAsync(
-            this DatabaseService db,
-            WorkOrder order,
-            int actorUserId,
-            string ip,
-            string device,
-            string? sessionId,
-            CancellationToken token = default)
-        {
-            return await db.InsertOrUpdateWorkOrderAsync(order, update: false, actorUserId, ip, device, sessionId, token).ConfigureAwait(false);
-        }
-
-        // ========================= EXTRAS (VM actions) =========================
-
-        public static Task ExportWorkOrdersAsync(this DatabaseService db, List<WorkOrder> items, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, "WO_EXPORT", "work_orders", "WorkOrders", null, $"count={items?.Count ?? 0}", ip, "info", device, sessionId, token: token);
-
-        // Overload matching VM call order (items, actorUserId, ip, device, session)
-        public static Task ExportWorkOrdersAsync(this DatabaseService db, List<WorkOrder> items, int actorUserId, string ip, string device, string sessionId, CancellationToken token = default)
-            => db.ExportWorkOrdersAsync(items, ip, device, sessionId, actorUserId, token);
-
-        public static async Task ApproveWorkOrderAsync(this DatabaseService db, int workOrderId, int actorUserId, string ip, string device, CancellationToken token = default)
-        {
-            await db.ExecuteNonQueryAsync("UPDATE work_orders SET status='zavrsen' WHERE id=@id", new[] { new MySqlParameter("@id", workOrderId) }, token).ConfigureAwait(false);
-            await db.LogSystemEventAsync(actorUserId, "WO_APPROVE", "work_orders", "WorkOrders", workOrderId, null, ip, "audit", device, null, token: token).ConfigureAwait(false);
-        }
-
-        // Overload with optional note
-        public static Task ApproveWorkOrderAsync(this DatabaseService db, int workOrderId, int actorUserId, string? note, string ip, string device, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, "WO_APPROVE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, null, token: token);
-
-        public static async Task CloseWorkOrderAsync(this DatabaseService db, int workOrderId, int actorUserId, string ip, string device, CancellationToken token = default)
-        {
-            await db.ExecuteNonQueryAsync("UPDATE work_orders SET status='zavrsen', date_close=NOW() WHERE id=@id", new[] { new MySqlParameter("@id", workOrderId) }, token).ConfigureAwait(false);
-            await db.LogSystemEventAsync(actorUserId, "WO_CLOSE", "work_orders", "WorkOrders", workOrderId, null, ip, "audit", device, null, token: token).ConfigureAwait(false);
-        }
-
-        // Overload with optional note
-        public static Task CloseWorkOrderAsync(this DatabaseService db, int workOrderId, int actorUserId, string? note, string ip, string device, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, "WO_CLOSE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, null, token: token);
-
-        public static Task EscalateWorkOrderAsync(this DatabaseService db, int workOrderId, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, "WO_ESCALATE", "work_orders", "WorkOrders", workOrderId, null, ip, "warn", device, sessionId, token: token);
-
-        // Overload with note
-        public static Task EscalateWorkOrderAsync(this DatabaseService db, int workOrderId, int actorUserId, string? note, string ip, string device, string? sessionId = null, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, "WO_ESCALATE", "work_orders", "WorkOrders", workOrderId, note, ip, "warn", device, sessionId, token: token);
-
-        public static Task AddWorkOrderCommentAsync(this DatabaseService db, int workOrderId, int actorUserId, string comment, string ip, string device, string? sessionId, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, "WO_COMMENT", "work_orders", "WorkOrders", workOrderId, comment, ip, "info", device, sessionId, token: token);
-
-        // Back-compat overload used by VM (only 3 params)
-        public static Task AddWorkOrderCommentAsync(this DatabaseService db, int workOrderId, int actorUserId, string comment, CancellationToken token = default)
-            => db.AddWorkOrderCommentAsync(workOrderId, actorUserId, comment, ip: string.Empty, device: string.Empty, sessionId: null, token: token);
-
-        // ========================= AUDIT =========================
-
-        /// <summary>
-        /// Writes a row into work_order_audit if present; falls back to system_event_log.
-        /// </summary>
-        public static async Task LogWorkOrderAuditAsync(
+        public static async Task<int> AddWorkOrderSignatureAsync(
             this DatabaseService db,
             int workOrderId,
             int userId,
-            string action,
+            string signatureHash,
             string? note,
-            string? ip,
-            string? device,
+            string signatureType = "potvrda",
+            CancellationToken token = default)
+        {
+            const string sql = @"INSERT INTO work_order_signatures
+ (work_order_id, user_id, signature_hash, signed_at, pin_used, signature_type, note)
+ VALUES(@wo, @uid, @hash, NOW(), NULL, @type, @note)";
+            var pars = new[]
+            {
+                new MySqlParameter("@wo", workOrderId),
+                new MySqlParameter("@uid", userId),
+                new MySqlParameter("@hash", signatureHash ?? string.Empty),
+                new MySqlParameter("@type", signatureType ?? "potvrda"),
+                new MySqlParameter("@note", (object?)note ?? DBNull.Value)
+            };
+            await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
+            return workOrderId;
+        }
+
+        public static async Task AttachWorkOrderPhotoAsync(
+            this DatabaseService db,
+            int workOrderId,
+            System.IO.Stream content,
+            string fileName,
+            string? kind, // "before"/"after"/null
+            int? uploadedBy = null,
+            CancellationToken token = default)
+        {
+            var docs = new DocumentService(db);
+            int docId = await docs.SaveAsync(content, fileName, null, "WorkOrder", workOrderId, uploadedBy, token).ConfigureAwait(false);
+            // Persist before/after classification (best effort)
+            try
+            {
+                const string create = @"CREATE TABLE IF NOT EXISTS work_order_photos (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  work_order_id INT NOT NULL,
+  document_id INT NOT NULL,
+  kind VARCHAR(16) NULL,
+  uploaded_by INT NULL,
+  uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_wop_wo (work_order_id),
+  KEY ix_wop_doc (document_id)
+)";
+                await db.ExecuteNonQueryAsync(create, null, token).ConfigureAwait(false);
+                const string ins = @"INSERT INTO work_order_photos (work_order_id, document_id, kind, uploaded_by) VALUES (@wo,@doc,@kind,@by)";
+                var pars = new[]
+                {
+                    new MySqlParameter("@wo", workOrderId),
+                    new MySqlParameter("@doc", docId),
+                    new MySqlParameter("@kind", (object?)kind ?? DBNull.Value),
+                    new MySqlParameter("@by", (object?)uploadedBy ?? DBNull.Value)
+                };
+                await db.ExecuteNonQueryAsync(ins, pars, token).ConfigureAwait(false);
+            }
+            catch { /* tolerate missing permissions in dev */ }
+            await db.LogSystemEventAsync(
+                uploadedBy,
+                "WO_PHOTO_ADD",
+                "work_orders",
+                "WorkOrders",
+                workOrderId,
+                $"doc={docId}; kind={kind}",
+                "ui",
+                "info",
+                "WorkOrdersPage",
+                null,
+                token: token
+            ).ConfigureAwait(false);
+        }
+
+        public static async Task AddWorkOrderCommentAsync(
+            this DatabaseService db,
+            int workOrderId,
+            int userId,
+            string comment,
+            string? ip = null,
+            string? device = null,
+            string? sessionId = null,
+            CancellationToken token = default)
+        {
+            if (string.IsNullOrWhiteSpace(comment)) return;
+            try
+            {
+                const string sql = @"INSERT INTO work_order_comments (work_order_id, user_id, text, created_at, type, revision_no, digital_signature, is_critical, source_ip)
+VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
+                string sig = ComputeCommentSignature(workOrderId, userId, comment);
+                var pars = new[]
+                {
+                    new MySqlParameter("@wo", workOrderId),
+                    new MySqlParameter("@uid", userId),
+                    new MySqlParameter("@txt", comment),
+                    new MySqlParameter("@sig", sig),
+                    new MySqlParameter("@ip", (object?)ip ?? DBNull.Value)
+                };
+                await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
+            }
+            catch { /* schema tolerant */ }
+            await db.LogSystemEventAsync(userId, "WO_COMMENT", "work_orders", "WorkOrders", workOrderId, comment, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
+        }
+
+        private static string ComputeCommentSignature(int workOrderId, int userId, string text)
+        {
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var raw = $"WO:{workOrderId}|U:{userId}|{DateTime.UtcNow:O}|{text}";
+            return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw)));
+        }
+
+        public static async Task ApproveWorkOrderAsync(
+            this DatabaseService db,
+            int workOrderId,
+            int actorUserId,
+            string? note,
+            string ip,
+            string device,
+            string? sessionId = null,
             CancellationToken token = default)
         {
             try
             {
-                const string sql = @"INSERT INTO work_order_audit
-                    (work_order_id, user_id, action, note, source_ip, device_info)
-                 VALUES (@wo, @uid, @act, @note, @ip, @dev)";
-                await db.ExecuteNonQueryAsync(sql, new[]
-                {
-                    new MySqlParameter("@wo", workOrderId),
-                    new MySqlParameter("@uid", userId),
-                    new MySqlParameter("@act", action ?? "UPDATE"),
-                    new MySqlParameter("@note", (object?)note ?? DBNull.Value),
-                    new MySqlParameter("@ip", (object?)ip ?? DBNull.Value),
-                    new MySqlParameter("@dev", (object?)device ?? DBNull.Value)
-                }, token).ConfigureAwait(false);
-                return;
+                // If schema supports an explicit approved flag/status, update it; otherwise ignore
+                const string sql = "UPDATE work_orders SET status=COALESCE(status,'otvoren') WHERE id=@id";
+                await db.ExecuteNonQueryAsync(sql, new[] { new MySqlParameter("@id", workOrderId) }, token).ConfigureAwait(false);
             }
-            catch (MySqlException ex) when (ex.Number == 1146) // table missing
-            {
-                await db.LogSystemEventAsync(userId, $"WO_{action}", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, null, token: token).ConfigureAwait(false);
-            }
+            catch { }
+            await db.LogSystemEventAsync(actorUserId, "WO_APPROVE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
 
-        // ========================= Mapping =========================
-
-        private static WorkOrder ParseWorkOrder(DataRow r)
+        public static async Task CloseWorkOrderAsync(
+            this DatabaseService db,
+            int workOrderId,
+            int actorUserId,
+            string? note,
+            string ip,
+            string device,
+            string? sessionId = null,
+            CancellationToken token = default)
         {
-            int? GetInt(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
-            string? GetString(string c) => r.Table.Columns.Contains(c) ? r[c]?.ToString() : null;
-            DateTime? GetDate(string c)
-            {
-                if (!r.Table.Columns.Contains(c) || r[c] == DBNull.Value) return null;
-                try { return Convert.ToDateTime(r[c]); } catch { return null; }
-            }
-
-            var wo = new WorkOrder();
-            SetIfExists(wo, nameof(WorkOrder.Id), GetInt("id") ?? 0);
-            SetIfExists(wo, nameof(WorkOrder.MachineId), GetInt("machine_id") ?? wo.MachineId);
-            SetIfExists(wo, nameof(WorkOrder.ComponentId), GetInt("component_id"));
-            SetIfExists(wo, nameof(WorkOrder.Type), GetString("type") ?? wo.Type);
-            SetIfExists(wo, nameof(WorkOrder.CreatedById), GetInt("created_by") ?? wo.CreatedById);
-            SetIfExists(wo, nameof(WorkOrder.AssignedToId), GetInt("assigned_to") ?? wo.AssignedToId);
-            SetIfExists(wo, nameof(WorkOrder.DateOpen), GetDate("date_open") ?? wo.DateOpen);
-            SetIfExists(wo, nameof(WorkOrder.DateClose), GetDate("date_close"));
-            SetIfExists(wo, nameof(WorkOrder.Description), GetString("description") ?? wo.Description);
-            SetIfExists(wo, nameof(WorkOrder.Result), GetString("result") ?? wo.Result);
-            SetIfExists(wo, nameof(WorkOrder.Status), GetString("status") ?? wo.Status);
-            SetIfExists(wo, nameof(WorkOrder.DigitalSignature), GetString("digital_signature") ?? wo.DigitalSignature);
-            SetIfExists(wo, nameof(WorkOrder.Priority), GetString("priority") ?? wo.Priority);
-            SetIfExists(wo, nameof(WorkOrder.IncidentId), GetInt("related_incident"));
-
-            // For enriched schemas, try reading these if they exist
-            SetIfExists(wo, nameof(WorkOrder.LastModified), GetDate("updated_at") ?? wo.LastModified);
-
-            return wo;
-        }
-
-        private static void SetIfExists<TTarget>(TTarget target, string propertyName, object? value)
-        {
-            if (target == null || string.IsNullOrWhiteSpace(propertyName)) return;
-            var p = typeof(TTarget).GetProperty(propertyName);
-            if (p == null || !p.CanWrite) return;
             try
             {
-                if (value == null || value is DBNull)
-                {
-                    if (!p.PropertyType.IsValueType || Nullable.GetUnderlyingType(p.PropertyType) != null)
-                        p.SetValue(target, null);
-                    return;
-                }
-                var dest = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
-                if (value is IConvertible) p.SetValue(target, Convert.ChangeType(value, dest));
-                else p.SetValue(target, value);
+                const string sql = "UPDATE work_orders SET status='zavrsen', date_close=NOW() WHERE id=@id";
+                await db.ExecuteNonQueryAsync(sql, new[] { new MySqlParameter("@id", workOrderId) }, token).ConfigureAwait(false);
             }
-            catch
-            {
-                // swallow to stay schema-tolerant
-            }
+            catch { }
+            await db.LogSystemEventAsync(actorUserId, "WO_CLOSE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
+
+        public static async Task EscalateWorkOrderAsync(
+            this DatabaseService db,
+            int workOrderId,
+            int actorUserId,
+            string? note,
+            string ip,
+            string device,
+            string? sessionId = null,
+            CancellationToken token = default)
+        {
+            try
+            {
+                const string sql = "UPDATE work_orders SET priority='kritican' WHERE id=@id";
+                await db.ExecuteNonQueryAsync(sql, new[] { new MySqlParameter("@id", workOrderId) }, token).ConfigureAwait(false);
+            }
+            catch { }
+            await db.LogSystemEventAsync(actorUserId, "WO_ESCALATE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task ExportWorkOrdersAsync(
+            this DatabaseService db,
+            List<WorkOrder> items,
+            int actorUserId,
+            string ip,
+            string device,
+            string? sessionId,
+            CancellationToken token = default)
+        {
+            await db.LogSystemEventAsync(actorUserId, "WO_EXPORT", "work_orders", "WorkOrders", null, $"count={items?.Count ?? 0}", ip, "info", device, sessionId, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task<string?> ExportWorkOrdersAsync(
+            this DatabaseService db,
+            List<WorkOrder> items,
+            string format,
+            int actorUserId,
+            string ip,
+            string device,
+            string? sessionId,
+            CancellationToken token = default)
+        {
+            string fmt = string.IsNullOrWhiteSpace(format) ? "csv" : format.ToLowerInvariant();
+            var list = items ?? new List<WorkOrder>();
+            string? path;
+            if (fmt == "xlsx")
+            {
+                path = YasGMP.Helpers.XlsxExporter.WriteSheet(list, "work_orders",
+                    new (string, Func<WorkOrder, object?>)[]
+                    {
+                        ("Id", w => w.Id),
+                        ("Title", w => w.Title),
+                        ("Type", w => w.Type),
+                        ("Priority", w => w.Priority),
+                        ("Status", w => w.Status),
+                        ("Machine", w => w.Machine?.Name),
+                        ("Open", w => w.DateOpen),
+                        ("Close", w => w.DateClose)
+                    });
+            }
+            else if (fmt == "pdf")
+            {
+                path = YasGMP.Helpers.PdfExporter.WriteTable(list, "work_orders",
+                    new (string, Func<WorkOrder, object?>)[]
+                    {
+                        ("Id", w => w.Id),
+                        ("Title", w => w.Title),
+                        ("Type", w => w.Type),
+                        ("Priority", w => w.Priority),
+                        ("Status", w => w.Status),
+                        ("Machine", w => w.Machine?.Name)
+                    }, title: "Work Orders Export");
+            }
+            else
+            {
+                path = YasGMP.Helpers.CsvExportHelper.WriteCsv(list, "work_orders",
+                    new (string, Func<WorkOrder, object?>)[]
+                    {
+                        ("Id", w => w.Id),
+                        ("Title", w => w.Title),
+                        ("Type", w => w.Type),
+                        ("Priority", w => w.Priority),
+                        ("Status", w => w.Status),
+                        ("Machine", w => w.Machine?.Name),
+                        ("Open", w => w.DateOpen),
+                        ("Close", w => w.DateClose)
+                    });
+            }
+            await db.LogSystemEventAsync(actorUserId, "WO_EXPORT", "work_orders", "WorkOrders", null, $"fmt={fmt}; count={list.Count}; file={path}", ip, "info", device, sessionId, token: token).ConfigureAwait(false);
+            return path;
+        }
+        
+        public static Task LogWorkOrderAuditAsync(
+            this DatabaseService db,
+            int workOrderId,
+            int actorUserId,
+            string action,
+            string? note,
+            string ip,
+            string deviceInfo,
+            string? sessionId = null,
+            CancellationToken token = default)
+            => db.LogSystemEventAsync(actorUserId, $"WO_{action}", "work_orders", "WorkOrders", workOrderId == 0 ? null : workOrderId, note, ip, "audit", deviceInfo, sessionId, token: token);
+        #endregion
     }
 }

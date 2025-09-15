@@ -30,8 +30,9 @@ namespace YasGMP.Services
             string comment,
             CancellationToken cancellationToken = default)
         {
-            // TODO: call your real DB upsert and return new/updated ID.
-            return Task.FromResult(component?.Id ?? 0);
+            // Forward to the robust instance implementation (maps domain -> low-level inside).
+            // Actor/comment are recorded via LogSystemEventAsync in the instance method.
+            return db.InsertOrUpdateComponentAsync(component, isUpdate, userId, actor, cancellationToken);
         }
 
         /// <summary>Upsert using IP/Device context.</summary>
@@ -64,8 +65,9 @@ namespace YasGMP.Services
             string comment,
             CancellationToken cancellationToken = default)
         {
-            // TODO: call your real DB upsert for MachineComponent and return ID.
-            return Task.FromResult(component?.Id ?? 0);
+            // Convert to domain model and forward to instance method that accepts actor context.
+            var domain = Helpers.ComponentMapper.ToComponent(component);
+            return db.InsertOrUpdateComponentAsync(domain, isUpdate, userId, actor, cancellationToken);
         }
 
         /// <summary>Upsert MachineComponent using IP/Device context.</summary>
@@ -80,8 +82,9 @@ namespace YasGMP.Services
             CancellationToken cancellationToken = default)
         {
             var actor = $"IP:{ipAddress}|Device:{deviceInfo}";
+            var domain = Helpers.ComponentMapper.ToComponent(component);
             return db.InsertOrUpdateComponentAsync(
-                component, isUpdate, userId, actor, comment ?? "Component upsert", cancellationToken);
+                domain, isUpdate, userId, actor, comment ?? "Component upsert", cancellationToken);
         }
 
         // =========================================================================
@@ -97,8 +100,8 @@ namespace YasGMP.Services
             string comment,
             CancellationToken cancellationToken = default)
         {
-            // TODO: call your real DB delete.
-            return Task.CompletedTask;
+            // Forward to concrete instance delete (records audit via LogSystemEventAsync).
+            return db.DeleteComponentAsync(componentId, userId, actor, deviceInfo: "UI", cancellationToken);
         }
 
         /// <summary>Delete using IP/Device context.</summary>

@@ -117,6 +117,18 @@ namespace YasGMP.Models
         [Display(Name = "QR kod")]
         public string? QrCode { get; set; }
 
+        /// <summary>Database-generated internal code (auto-increment style, e.g., TYPE-MFR-00001). Maps to <c>internal_code</c>.</summary>
+        [StringLength(40)]
+        [Column("internal_code")]
+        [Display(Name = "Interna oznaka")]
+        public string? InternalCode { get; set; }
+
+        /// <summary>Canonical QR payload stored in DB (e.g., yasgmp://machine/123). Maps to <c>qr_payload</c>.</summary>
+        [StringLength(120)]
+        [Column("qr_payload")]
+        [Display(Name = "QR payload")]
+        public string? QrPayload { get; set; }
+
         [StringLength(64)]
         [Column("iot_device_id")]
         [Display(Name = "IoT uređaj ID")]
@@ -215,6 +227,8 @@ namespace YasGMP.Models
                 AcquisitionCost    = this.AcquisitionCost,
                 RfidTag            = this.RfidTag,
                 QrCode             = this.QrCode,
+                InternalCode       = this.InternalCode,
+                QrPayload          = this.QrPayload,
                 IoTDeviceId        = this.IoTDeviceId,
                 CloudDeviceGuid    = this.CloudDeviceGuid,
                 IsCritical         = this.IsCritical,
