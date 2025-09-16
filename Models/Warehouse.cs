@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace YasGMP.Models
@@ -8,6 +9,7 @@ namespace YasGMP.Models
     /// <b>Warehouse</b> — Ultra-robust model for all warehouse/storage locations, with full GMP/CSV/audit traceability.
     /// Tracks responsibility, access, audit, compliance, digital signatures, IoT readiness, legal requirements, forensics, and ML/AI support.
     /// </summary>
+        [Table("warehouses")]
     public class Warehouse
     {
         /// <summary>Unique warehouse ID (Primary Key).</summary>
