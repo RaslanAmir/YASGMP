@@ -74,6 +74,67 @@ namespace YasGMP.Services
 
             return list;
         }
+
+        /// <summary>
+        /// Reads audit entries for a given entity from the compatibility view <c>audit_log</c>.
+        /// This mirrors the behavior of <see cref="GetAuditLogForEntityAsync"/> but
+        /// selects from the view instead of the base table for older schemas.
+        /// </summary>
+        public static async Task<List<AuditEntryDto>> GetAuditLogViewForEntityAsync(
+            this DatabaseService db,
+            string entity,
+            int entityId,
+            CancellationToken token = default)
+        {
+            entity ??= "system";
+
+            var list = new List<AuditEntryDto>();
+
+            try
+            {
+                const string sql = @"SELECT id, ts_utc, user_id, event_type, table_name, related_module, record_id,
+                                            field_name, old_value, new_value, description, source_ip, device_info, session_id, severity
+                                     FROM audit_log
+                                     WHERE table_name=@t AND record_id=@id
+                                     ORDER BY ts_utc DESC, id DESC";
+
+                var pars = new[]
+                {
+                    new MySqlParameter("@t", entity),
+                    new MySqlParameter("@id", entityId)
+                };
+
+                var dt = await db.ExecuteSelectAsync(sql, pars, token).ConfigureAwait(false);
+                foreach (DataRow r in dt.Rows)
+                {
+                    var dto = new AuditEntryDto
+                    {
+                        Id = r["id"] != DBNull.Value ? Convert.ToInt32(r["id"]) : (int?)null,
+                        Entity = r["table_name"]?.ToString(),
+                        EntityId = r["record_id"]?.ToString(),
+                        Action = r["event_type"]?.ToString(),
+                        Timestamp = r.Table.Columns.Contains("ts_utc") && r["ts_utc"] != DBNull.Value ? Convert.ToDateTime(r["ts_utc"]) : DateTime.UtcNow,
+                        UserId = r["user_id"] != DBNull.Value ? Convert.ToInt32(r["user_id"]) : (int?)null,
+                        IpAddress = r["source_ip"]?.ToString(),
+                        DeviceInfo = r["device_info"]?.ToString(),
+                        SessionId = r["session_id"]?.ToString(),
+                        FieldName = r["field_name"]?.ToString(),
+                        OldValue = r["old_value"]?.ToString(),
+                        NewValue = r["new_value"]?.ToString(),
+                        Status = r["severity"]?.ToString(),
+                        Note = r["description"]?.ToString()
+                    };
+                    list.Add(dto);
+                }
+                return list;
+            }
+            catch (MySqlException)
+            {
+                // Fallback: if view missing, return empty list.
+            }
+
+            return list;
+        }
     }
 }
 

@@ -3,10 +3,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
 using YasGMP.Views;
+using YasGMP.Services;
 
 namespace YasGMP.ViewModels
 {
@@ -72,17 +74,22 @@ namespace YasGMP.ViewModels
         /// <summary>Dialog service for modal interactions.</summary>
         private readonly IDialogService _dialogService;
 
+        /// <summary>Database service used for CAPA data access.</summary>
+        private readonly DatabaseService _dbService;
+
         /// <summary>Default (parameterless) constructor for XAML instantiation.</summary>
-        public CapaViewModel() : this(new DefaultDialogService()) { }
+        public CapaViewModel() : this(ResolveDatabaseServiceFromMaui(), new DefaultDialogService()) { }
 
         /// <summary>
-        /// DI-friendly constructor that accepts a dialog service.
+        /// DI-friendly constructor that accepts required services.
         /// </summary>
+        /// <param name="dbService">Database service for CAPA data.</param>
         /// <param name="dialogService">Dialog service used to show modal pages and alerts.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="dialogService"/> is <c>null</c>.</exception>
-        public CapaViewModel(IDialogService dialogService)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="dbService"/> is <c>null</c>.</exception>
+        public CapaViewModel(DatabaseService dbService, IDialogService? dialogService = null)
         {
-            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _dbService     = dbService  ?? throw new ArgumentNullException(nameof(dbService));
+            _dialogService = dialogService ?? new DefaultDialogService();
 
             AddNewCommand = new Command(async () => await OpenCapaDialogAsync());
             EditCommand   = new Command(async () =>
@@ -158,32 +165,23 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>
-        /// Loads all CAPA cases from the data source.
-        /// Currently uses demo data; replace with real repository/database calls.
+        /// Loads all CAPA cases from the database/API layer.
         /// </summary>
         public async Task LoadCapaCasesAsync()
         {
             IsRefreshing = true;
             try
             {
-                // Simulate fetch
-                await Task.Delay(300).ConfigureAwait(false);
+                var items = await _dbService.GetAllCapaCasesAsync().ConfigureAwait(false);
 
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     CapaCases.Clear();
-
-                    // TODO: Replace with real database/API fetch
-                    CapaCases.Add(new CapaCase
+                    if (items != null)
                     {
-                        Id       = 1,
-                        Title    = "Neispravna serija proizvoda",
-                        Reason   = "Uočen odstupajući uzorak tijekom inspekcije.",
-                        Actions  = "Povlačenje serije, ispitivanje procesa, dodatna edukacija osoblja.",
-                        DateOpen = DateTime.Today.AddDays(-7),
-                        Status   = "otvoren"
-                    });
-
+                        foreach (var c in items)
+                            CapaCases.Add(c);
+                    }
                     OnPropertyChanged(nameof(IsEmpty));
                 });
             }
@@ -195,6 +193,21 @@ namespace YasGMP.ViewModels
 
         /// <summary>Generates the next ID for a new CAPA entry (max + 1).</summary>
         private int GenerateNextId() => CapaCases.Count == 0 ? 1 : CapaCases.Max(c => c.Id) + 1;
+
+        /// <summary>Resolves <see cref="DatabaseService"/> from the MAUI service provider.</summary>
+        /// <exception cref="InvalidOperationException">Thrown if service provider or database service is not available.</exception>
+        private static DatabaseService ResolveDatabaseServiceFromMaui()
+        {
+            var services = Application.Current?.Handler?.MauiContext?.Services;
+            if (services == null)
+                throw new InvalidOperationException("MAUI service provider is not available. Ensure the application is initialized and services are configured.");
+
+            var svc = services.GetService<DatabaseService>();
+            if (svc == null)
+                throw new InvalidOperationException("DatabaseService is not registered in the DI container. Please register it in MauiProgram.cs (builder.Services.AddSingleton<DatabaseService>()).");
+
+            return svc;
+        }
     }
 
     /// <summary>
