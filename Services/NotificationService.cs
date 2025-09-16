@@ -1,7 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Mail;
+using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Services.Interfaces;
+using YasGMP;
 
 namespace YasGMP.Services
 {
@@ -25,7 +30,7 @@ namespace YasGMP.Services
             if (destination.Contains("@"))
                 await SendEmailAsync(destination, "🚨 GMP Alert", message);
             else
-                await SendSmsAsync(destination, message); // placeholder for SMS API
+                await SendSmsAsync(destination, message);
         }
 
         private async Task SendEmailAsync(string to, string subject, string body)
@@ -42,8 +47,89 @@ namespace YasGMP.Services
 
         private async Task SendSmsAsync(string number, string message)
         {
-            // ✅ TODO: Integrate with Twilio, Nexmo or other SMS API
-            await Task.Run(() => Console.WriteLine($"[SMS] To: {number}, Msg: {message}"));
+            if (string.IsNullOrWhiteSpace(number))
+            {
+                throw new ArgumentException("SMS destination number must not be empty.", nameof(number));
+            }
+
+            var configuration = AppConfigurationHelper.LoadMerged();
+
+            static string? Resolve(params string?[] candidates)
+            {
+                foreach (var candidate in candidates)
+                {
+                    if (!string.IsNullOrWhiteSpace(candidate))
+                    {
+                        return candidate.Trim();
+                    }
+                }
+
+                return null;
+            }
+
+            var accountSid = Resolve(
+                configuration["Notifications:Sms:Twilio:AccountSid"],
+                configuration["Sms:Twilio:AccountSid"],
+                configuration["Twilio:AccountSid"],
+                Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID"));
+
+            var authToken = Resolve(
+                configuration["Notifications:Sms:Twilio:AuthToken"],
+                configuration["Sms:Twilio:AuthToken"],
+                configuration["Twilio:AuthToken"],
+                Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN"));
+
+            var fromNumber = Resolve(
+                configuration["Notifications:Sms:Twilio:From"],
+                configuration["Sms:Twilio:From"],
+                configuration["Twilio:From"],
+                Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER"));
+
+            if (string.IsNullOrWhiteSpace(accountSid) || string.IsNullOrWhiteSpace(authToken) || string.IsNullOrWhiteSpace(fromNumber))
+            {
+                throw new InvalidOperationException("Twilio SMS configuration is missing. Please provide AccountSid, AuthToken, and From number in configuration or environment.");
+            }
+
+            var requestUri = new Uri($"https://api.twilio.com/2010-04-01/Accounts/{accountSid}/Messages.json");
+
+            using var client = new HttpClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["To"] = number,
+                    ["From"] = fromNumber,
+                    ["Body"] = message ?? string.Empty,
+                }),
+            };
+
+            var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{accountSid}:{authToken}"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await client.SendAsync(request).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException)
+            {
+                throw new InvalidOperationException("Failed to reach Twilio SMS service.", ex);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string? errorDetails = null;
+                try
+                {
+                    errorDetails = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Ignore parsing issues; we'll throw a generic error below.
+                }
+
+                throw new InvalidOperationException($"Twilio SMS send failed with status {(int)response.StatusCode} ({response.StatusCode}). {errorDetails}");
+            }
         }
     }
 }
