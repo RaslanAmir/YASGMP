@@ -310,7 +310,7 @@ namespace YasGMP.Services
         }
 
         private static CapaActionType ParseActionType(string? actionValue, string statusValue)
-        {
+       {
             if (!string.IsNullOrWhiteSpace(actionValue))
             {
                 var normalized = NormalizeActionKey(actionValue);
@@ -335,10 +335,8 @@ namespace YasGMP.Services
             var canonical = Enum.GetName(typeof(CapaActionType), action) ?? action.ToString();
             var raw = action switch
             {
-                CapaActionType.CorrectiveAction => "korektivna",
-                CapaActionType.ACTION_EXECUTED => "korektivna",
-                CapaActionType.PreventiveAction => "preventivna",
-                CapaActionType.PreventiveActionPlanning => "preventivna",
+                CapaActionType.CorrectiveAction or CapaActionType.ACTION_EXECUTED => "korektivna",
+                CapaActionType.PreventiveAction or CapaActionType.PreventiveActionPlanning => "preventivna",
                 _ => canonical,
             };
 
