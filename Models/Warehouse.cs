@@ -1,96 +1,112 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>Warehouse</b> — Ultra-robust model for all warehouse/storage locations, with full GMP/CSV/audit traceability.
-    /// Tracks responsibility, access, audit, compliance, digital signatures, IoT readiness, legal requirements, forensics, and ML/AI support.
+    /// Warehouse storage location mapped to the <c>warehouses</c> table.
     /// </summary>
-        [Table("warehouses")]
+    [Table("warehouses")]
     public class Warehouse
     {
-        /// <summary>Unique warehouse ID (Primary Key).</summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>Warehouse name (e.g., "Main Warehouse", "Spare Parts").</summary>
-        [Required, MaxLength(100)]
-        public string Name { get; set; } = string.Empty;
+        [Column("name")]
+        [StringLength(100)]
+        public string? Name { get; set; }
 
-        /// <summary>Warehouse location (hall, floor, zone, address, room...).</summary>
-        [Required, MaxLength(255)]
-        public string Location { get; set; } = string.Empty;
+        [Column("location")]
+        [StringLength(255)]
+        public string? Location { get; set; }
 
-        /// <summary>FK to User.Id (responsible person for the warehouse).</summary>
-        public int ResponsibleId { get; set; }
-        public User? Responsible { get; set; }
+        [Column("responsible_id")]
+        public int? ResponsibleId { get; set; }
 
-        /// <summary>(Optional) QR code or link to QR code of the warehouse.</summary>
-        [MaxLength(255)]
-        public string QrCode { get; set; } = string.Empty;
+        [Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
 
-        /// <summary>(Optional) Note (e.g., storage conditions, special requirements, audits).</summary>
-        [MaxLength(500)]
-        public string Note { get; set; } = string.Empty;
+        [Column("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>Creation timestamp (audit, UTC).</summary>
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Column("location_id")]
+        public int? LocationId { get; set; }
 
-        /// <summary>ID of the user who created the record.</summary>
+        [Column("responsible")]
+        [StringLength(255)]
+        public string? Responsible { get; set; }
+
+        [Column("qr_code")]
+        [StringLength(255)]
+        public string? QrCode { get; set; }
+
+        [Column("note")]
+        [StringLength(500)]
+        public string? Note { get; set; }
+
+        [Column("created_by_id")]
         public int? CreatedById { get; set; }
-        public User? CreatedBy { get; set; }
 
-        /// <summary>Last modification timestamp (audit, UTC).</summary>
+        [Column("created_by")]
+        [StringLength(255)]
+        public string? CreatedBy { get; set; }
+
+        [Column("last_modified")]
         public DateTime? LastModified { get; set; }
 
-        /// <summary>ID of the user who last modified the data.</summary>
+        [Column("last_modified_by_id")]
         public int? LastModifiedById { get; set; }
-        public User? LastModifiedBy { get; set; }
 
-        /// <summary>Digital signature (hash, name, or pin) — for GMP/CSV compliance.</summary>
-        [MaxLength(128)]
-        public string DigitalSignature { get; set; } = string.Empty;
+        [Column("last_modified_by")]
+        [StringLength(255)]
+        public string? LastModifiedBy { get; set; }
 
-        /// <summary>(Bonus) Warehouse status (active, archived, closed, in review…).</summary>
-        [MaxLength(30)]
-        public string Status { get; set; } = string.Empty;
+        [Column("digital_signature")]
+        [StringLength(128)]
+        public string? DigitalSignature { get; set; }
 
-        /// <summary>(Bonus) IoT/Automation ID (for warehouse sensors, monitoring).</summary>
-        [MaxLength(64)]
-        public string IoTDeviceId { get; set; } = string.Empty;
+        [Column("status")]
+        [StringLength(30)]
+        public string? Status { get; set; }
 
-        /// <summary>(Bonus) Climate regime (ambient, cold, cleanroom, etc.).</summary>
-        [MaxLength(60)]
-        public string ClimateMode { get; set; } = string.Empty;
+        [Column("io_tdevice_id")]
+        [StringLength(64)]
+        public string? IoTDeviceId { get; set; }
 
-        /// <summary>(Bonus) Linked compliance certificates or documents (GMP cert, photos, docs).</summary>
-        public List<string> ComplianceDocs { get; set; } = new();
+        [Column("climate_mode")]
+        [StringLength(60)]
+        public string? ClimateMode { get; set; }
 
-        /// <summary>(Bonus) Hash of entire record (for forensic chain-of-custody, blockchain, 21 CFR).</summary>
-        [MaxLength(128)]
-        public string EntryHash { get; set; } = string.Empty;
+        [Column("compliance_docs")]
+        [StringLength(255)]
+        public string? ComplianceDocs { get; set; }
 
-        /// <summary>(Bonus) IP address/device of last modification (forensics).</summary>
-        [MaxLength(45)]
-        public string SourceIp { get; set; } = string.Empty;
+        [Column("entry_hash")]
+        [StringLength(128)]
+        public string? EntryHash { get; set; }
 
-        /// <summary>(Bonus) Is this warehouse currently qualified (compliance, audit state)?</summary>
-        public bool IsQualified { get; set; } = false;
+        [Column("source_ip")]
+        [StringLength(45)]
+        public string? SourceIp { get; set; }
 
-        /// <summary>(Bonus) Date of last qualification/audit.</summary>
+        [Column("is_qualified")]
+        public bool? IsQualified { get; set; }
+
+        [Column("last_qualified")]
         public DateTime? LastQualified { get; set; }
 
-        /// <summary>(Bonus) Session ID (for full audit chain, e.g., for mobile edits).</summary>
-        [MaxLength(80)]
-        public string SessionId { get; set; } = string.Empty;
+        [Column("session_id")]
+        [StringLength(80)]
+        public string? SessionId { get; set; }
 
-        /// <summary>(Bonus) ML/AI anomaly score (future risk/compliance/AI audits).</summary>
-        public double? AnomalyScore { get; set; }
+        [Column("anomaly_score")]
+        [Precision(10, 2)]
+        public decimal? AnomalyScore { get; set; }
 
-        /// <summary>(Bonus) GDPR/soft delete/archive flag (never physically deleted).</summary>
-        public bool IsDeleted { get; set; } = false;
+        [Column("is_deleted")]
+        public bool? IsDeleted { get; set; }
     }
 }
