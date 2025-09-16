@@ -115,7 +115,7 @@ namespace YasGMP.Services
                 else if (r.StartsWith("days:", StringComparison.Ordinal) &&
                          int.TryParse(r["days:".Length..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var d) &&
                          d > 0)
-@@ -114,65 +119,657 @@ namespace YasGMP.Services
+                {
                     from = to.AddDays(-d);
                 }
             }
