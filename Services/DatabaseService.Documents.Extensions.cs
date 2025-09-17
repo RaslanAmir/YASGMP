@@ -17,9 +17,18 @@ namespace YasGMP.Services
     {
         public static async Task<List<SopDocument>> GetAllDocumentsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
-            const string sql = @"SELECT 
-    id, code, title, description, document_type, file_path, revision, status,
-    revision_history, related_case_type, related_case_id, source_ip
+            const string sql = @"SELECT
+    id,
+    code,
+    title,
+    description,
+    file_path,
+    revision,
+    status,
+    linked_change_controls,
+    device_info,
+    created_at,
+    updated_at
 FROM documentcontrol ORDER BY id DESC";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
             var list = new List<SopDocument>(dt.Rows.Count);
@@ -217,20 +226,40 @@ ON DUPLICATE KEY UPDATE linked_at = CURRENT_TIMESTAMP, linked_by = @actor";
             int I(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
             int ParseRev(string s) => int.TryParse(s, out var v) ? v : 0;
 
+            DateTime D(string c)
+            {
+                if (!r.Table.Columns.Contains(c) || r[c] == DBNull.Value) return DateTime.UtcNow;
+                if (r[c] is DateTime dt) return DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+                return DateTime.TryParse(r[c]?.ToString(), out var parsed) ? DateTime.SpecifyKind(parsed, DateTimeKind.Utc) : DateTime.UtcNow;
+            }
+
+            string description = S("description");
+            string linkedChangeControls = S("linked_change_controls");
+            string status = S("status");
+            string deviceInfo = S("device_info");
+
+            DateTime createdAt = D("created_at");
+            DateTime updatedAt = createdAt;
+            if (r.Table.Columns.Contains("updated_at") && r["updated_at"] != DBNull.Value)
+                updatedAt = D("updated_at");
+
             return new SopDocument
             {
                 Id = I("id"),
                 Code = S("code"),
                 Name = S("title"),
-                Description = S("description"),
-                Process = S("document_type"),
+                Description = description,
                 FilePath = S("file_path"),
                 VersionNo = ParseRev(S("revision")),
-                Status = S("status"),
-                ReviewNotes = S("revision_history"),
-                RelatedType = S("related_case_type"),
-                RelatedId = I("related_case_id"),
-                SourceIp = S("source_ip")
+                Status = string.IsNullOrWhiteSpace(status) ? "draft" : status,
+                ReviewNotes = string.IsNullOrWhiteSpace(description) ? linkedChangeControls : description,
+                Comment = linkedChangeControls,
+                DateIssued = createdAt,
+                LastModified = updatedAt,
+                SourceIp = deviceInfo,
+                Process = string.Empty,
+                RelatedType = string.Empty,
+                RelatedId = null
             };
         }
     }
