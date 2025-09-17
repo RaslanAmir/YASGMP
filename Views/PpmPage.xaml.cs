@@ -350,6 +350,179 @@ namespace YasGMP.Pages
 
         #region === Helpers (reflection + service resolution + UI prompts) ===
 
+        /// <summary>
+        /// Gets the ViewModel's <c>PpmPlans</c> collection (if exposed) and the element type.
+        /// </summary>
+        private (IList? List, Type? ElementType) GetPlansListAndElementType()
+        {
+            if (_vm is null)
+                return (null, null);
+
+            var prop = _vm.GetType().GetRuntimeProperty("PpmPlans");
+            if (prop is null)
+                return (null, null);
+
+            var value = prop.GetValue(_vm);
+            if (value is not IList list)
+                return (null, null);
+
+            Type? elementType = null;
+            var propertyType = prop.PropertyType;
+            if (propertyType.IsArray)
+            {
+                elementType = propertyType.GetElementType();
+            }
+            else if (propertyType.IsGenericType)
+            {
+                elementType = propertyType.GetGenericArguments().FirstOrDefault();
+            }
+
+            return (list, elementType);
+        }
+
+        /// <summary>
+        /// Reads a property value from the ViewModel via reflection.
+        /// </summary>
+        private object? GetVmPropertyValue(string propertyName)
+        {
+            if (_vm is null || string.IsNullOrWhiteSpace(propertyName))
+                return null;
+
+            var prop = _vm.GetType().GetRuntimeProperty(propertyName);
+            return prop?.GetValue(_vm);
+        }
+
+        /// <summary>
+        /// Sets a property on the ViewModel if it exists.
+        /// </summary>
+        private void SetVmPropertyValue(string propertyName, object? value)
+        {
+            if (_vm is null || string.IsNullOrWhiteSpace(propertyName))
+                return;
+
+            var prop = _vm.GetType().GetRuntimeProperty(propertyName);
+            if (prop is null || !prop.CanWrite)
+                return;
+
+            try
+            {
+                prop.SetValue(_vm, ConvertToPropertyType(value, prop.PropertyType));
+            }
+            catch
+            {
+                // silent failure keeps the helper defensive as in the previous implementation
+            }
+        }
+
+        /// <summary>
+        /// Sets a property on a target object when such property exists.
+        /// </summary>
+        private static void SetIfExists(object target, string propertyName, object? value)
+        {
+            if (target is null || string.IsNullOrWhiteSpace(propertyName))
+                return;
+
+            var prop = target.GetType().GetRuntimeProperty(propertyName);
+            if (prop is null || !prop.CanWrite)
+                return;
+
+            try
+            {
+                prop.SetValue(target, ConvertToPropertyType(value, prop.PropertyType));
+            }
+            catch
+            {
+                // ignore conversion issues – helper is best-effort
+            }
+        }
+
+        /// <summary>
+        /// Invokes an asynchronous method on the ViewModel if present.
+        /// Returns <c>true</c> when a matching method existed and completed successfully.
+        /// </summary>
+        private async Task<bool> InvokeIfExistsAsync(string methodName, params object?[] args)
+        {
+            if (_vm is null || string.IsNullOrWhiteSpace(methodName))
+                return false;
+
+            var method = _vm.GetType().GetRuntimeMethods()
+                .FirstOrDefault(m => string.Equals(m.Name, methodName, StringComparison.Ordinal) &&
+                                     m.GetParameters().Length == args.Length);
+            if (method is null)
+                return false;
+
+            var result = method.Invoke(_vm, args);
+            if (result is null)
+                return true;
+
+            if (result is Task task)
+            {
+                await task.ConfigureAwait(false);
+
+                if (task.GetType().IsGenericType)
+                {
+                    var resultProperty = task.GetType().GetRuntimeProperty("Result");
+                    if (resultProperty?.GetValue(task) is bool boolResult)
+                        return boolResult;
+                }
+
+                return true;
+            }
+
+            if (result is bool boolValue)
+                return boolValue;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Shows an informational stub alert for features that are not yet implemented.
+        /// </summary>
+        private static async Task DisplayInfoStubAsync(string featureName)
+        {
+            var title = string.IsNullOrWhiteSpace(featureName) ? "Info" : featureName;
+            var message = string.IsNullOrWhiteSpace(featureName)
+                ? "Funkcionalnost je trenutno u pripremi."
+                : $"\u201E{featureName}\u201C funkcionalnost je trenutno u pripremi.";
+
+            await Services.SafeNavigator.ShowAlertAsync(title, message, "OK").ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// UI-thread safe prompt helper used for CRUD dialogs.
+        /// </summary>
+        private Task<string?> PromptAsync(string title, string message)
+            => MainThread.InvokeOnMainThreadAsync(() => DisplayPromptAsync(title, message));
+
+        private static object? ConvertToPropertyType(object? value, Type propertyType)
+        {
+            if (value is null)
+                return Nullable.GetUnderlyingType(propertyType) is not null || !propertyType.IsValueType
+                    ? null
+                    : Activator.CreateInstance(propertyType);
+
+            var valueType = value.GetType();
+            if (propertyType.IsAssignableFrom(valueType))
+                return value;
+
+            try
+            {
+                if (propertyType.IsEnum)
+                {
+                    if (value is string enumName)
+                        return Enum.Parse(propertyType, enumName, ignoreCase: true);
+
+                    return Enum.ToObject(propertyType, value);
+                }
+
+                var targetType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+                return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return value;
+            }
+        }
 
         #endregion
     }
