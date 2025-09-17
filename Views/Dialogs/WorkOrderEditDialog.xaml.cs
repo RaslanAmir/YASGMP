@@ -17,6 +17,11 @@ namespace YasGMP.Views.Dialogs
         private readonly DocumentService _docs;
         private readonly int _currentUserId;
 
+        private static readonly DateTime NoDateSentinel = DateTime.MinValue.Date;
+
+        private bool _suppressDueDateSync;
+        private bool _suppressCloseDateSync;
+
         public WorkOrder WorkOrder { get; }
         public TaskCompletionSource<bool> _tcs = new();
         public Task<bool> Result => _tcs.Task;
@@ -24,6 +29,26 @@ namespace YasGMP.Views.Dialogs
         private List<(string name, int id)> _machines = new();
         private List<(string name, int id)> _components = new();
         private List<(string name, int id)> _users = new();
+
+        public static readonly BindableProperty DueDatePickerValueProperty =
+            BindableProperty.Create(nameof(DueDatePickerValue), typeof(DateTime), typeof(WorkOrderEditDialog), DateTime.Today,
+                BindingMode.TwoWay, propertyChanged: OnDueDatePickerValueChanged);
+
+        public static readonly BindableProperty DateClosePickerValueProperty =
+            BindableProperty.Create(nameof(DateClosePickerValue), typeof(DateTime), typeof(WorkOrderEditDialog), DateTime.Today,
+                BindingMode.TwoWay, propertyChanged: OnDateClosePickerValueChanged);
+
+        public DateTime DueDatePickerValue
+        {
+            get => (DateTime)GetValue(DueDatePickerValueProperty);
+            set => SetValue(DueDatePickerValueProperty, value);
+        }
+
+        public DateTime DateClosePickerValue
+        {
+            get => (DateTime)GetValue(DateClosePickerValueProperty);
+            set => SetValue(DateClosePickerValueProperty, value);
+        }
 
         public WorkOrderEditDialog(WorkOrder wo, DatabaseService db, int currentUserId)
         {
@@ -33,7 +58,92 @@ namespace YasGMP.Views.Dialogs
             _docs = new DocumentService(db);
             _currentUserId = currentUserId;
             BindingContext = WorkOrder;
+            SyncDatePickersFromModel();
             _ = LoadLookupsAsync();
+        }
+
+        private static void OnDueDatePickerValueChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is WorkOrderEditDialog dialog && newValue is DateTime dt)
+            {
+                dialog.HandleDueDatePickerValueChanged(dt);
+            }
+        }
+
+        private static void OnDateClosePickerValueChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is WorkOrderEditDialog dialog && newValue is DateTime dt)
+            {
+                dialog.HandleDateClosePickerValueChanged(dt);
+            }
+        }
+
+        private void HandleDueDatePickerValueChanged(DateTime newValue)
+        {
+            if (_suppressDueDateSync || WorkOrder is null)
+            {
+                return;
+            }
+
+            if (IsSentinel(newValue))
+            {
+                WorkOrder.DueDate = null;
+                ResetDueDatePickerValue();
+            }
+            else
+            {
+                WorkOrder.DueDate = newValue.Date;
+            }
+        }
+
+        private void HandleDateClosePickerValueChanged(DateTime newValue)
+        {
+            if (_suppressCloseDateSync || WorkOrder is null)
+            {
+                return;
+            }
+
+            if (IsSentinel(newValue))
+            {
+                WorkOrder.DateClose = null;
+                ResetDateClosePickerValue();
+            }
+            else
+            {
+                WorkOrder.DateClose = newValue.Date;
+            }
+        }
+
+        private static bool IsSentinel(DateTime value) => value.Date <= NoDateSentinel;
+
+        private void SyncDatePickersFromModel()
+        {
+            if (WorkOrder is null)
+            {
+                return;
+            }
+
+            _suppressDueDateSync = true;
+            DueDatePickerValue = WorkOrder.DueDate ?? DateTime.Today;
+            _suppressDueDateSync = false;
+
+            _suppressCloseDateSync = true;
+            DateClosePickerValue = WorkOrder.DateClose ?? DateTime.Today;
+            _suppressCloseDateSync = false;
+        }
+
+        private void ResetDueDatePickerValue()
+        {
+            _suppressDueDateSync = true;
+            DueDatePickerValue = DateTime.Today;
+            _suppressDueDateSync = false;
+        }
+
+        private void ResetDateClosePickerValue()
+        {
+            _suppressCloseDateSync = true;
+            DateClosePickerValue = DateTime.Today;
+            _suppressCloseDateSync = false;
         }
 
         private async Task LoadLookupsAsync()
