@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using iText.IO.Font.Constants;
 using iText.Layout.Element;
 using ITextDocument = iText.Layout.Document; // disambiguate from YasGMP.Models.Document
 
+using YasGMP.Helpers;
 using YasGMP.Models;
 using YasGMP.Models.DTO;
 using MySqlConnector;
@@ -308,6 +310,73 @@ namespace YasGMP.Services
             }
 
             return filePath;
+        }
+
+        /// <summary>
+        /// Exports machine components to the requested format (CSV, XLSX, PDF) and returns the file path.
+        /// </summary>
+        /// <param name="components">Component rows to export.</param>
+        /// <param name="format">Desired export format (csv, xlsx, pdf). Defaults to csv.</param>
+        public Task<string> ExportComponentsAsync(IEnumerable<MachineComponent>? components, string? format)
+        {
+            var list = (components ?? Array.Empty<MachineComponent>()).ToList();
+            string normalizedFormat = string.IsNullOrWhiteSpace(format)
+                ? "csv"
+                : format.Trim().ToLowerInvariant();
+
+            static string FormatDate(DateTime? value)
+                => value.HasValue ? value.Value.ToString("yyyy-MM-dd") : string.Empty;
+
+            static string FormatDateTime(DateTime value)
+                => value == default ? string.Empty : value.ToString("yyyy-MM-dd HH:mm");
+
+            static string FormatMachine(MachineComponent component)
+                => !string.IsNullOrWhiteSpace(component.Machine?.Name)
+                    ? component.Machine!.Name
+                    : component.MachineId?.ToString() ?? string.Empty;
+
+            static string FormatNotes(MachineComponent component)
+                => string.Join(
+                    " | ",
+                    new[] { component.Note, component.Notes }
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Select(s => s!.Trim()));
+
+            var columns = new (string Header, Func<MachineComponent, object?>)[]
+            {
+                ("ID", c => c.Id),
+                ("Machine", c => FormatMachine(c)),
+                ("Code", c => c.Code ?? string.Empty),
+                ("Name", c => c.Name ?? string.Empty),
+                ("Type", c => c.Type ?? string.Empty),
+                ("Model", c => c.Model ?? string.Empty),
+                ("Status", c => c.Status ?? string.Empty),
+                ("Install Date", c => FormatDate(c.InstallDate)),
+                ("Purchase Date", c => FormatDate(c.PurchaseDate)),
+                ("Warranty Until", c => FormatDate(c.WarrantyUntil)),
+                ("Warranty Expiry", c => FormatDate(c.WarrantyExpiry)),
+                ("Serial Number", c => c.SerialNumber ?? string.Empty),
+                ("Supplier", c => c.Supplier ?? string.Empty),
+                ("Lifecycle Phase", c => c.LifecyclePhase ?? string.Empty),
+                ("Critical", c => c.IsCritical ? "Yes" : "No"),
+                ("RFID/NFC", c => c.RfidTag ?? string.Empty),
+                ("IoT Device", c => c.IoTDeviceId ?? string.Empty),
+                ("SOP Doc", c => c.SopDoc ?? string.Empty),
+                ("Notes", c => FormatNotes(c)),
+                ("Digital Signature", c => c.DigitalSignature ?? string.Empty),
+                ("Last Modified", c => FormatDateTime(c.LastModified)),
+                ("Modified By", c => c.LastModifiedBy?.FullName ?? (c.LastModifiedById == 0 ? string.Empty : c.LastModifiedById.ToString())),
+                ("Source IP", c => c.SourceIp ?? string.Empty)
+            };
+
+            string path = normalizedFormat switch
+            {
+                "xlsx" => XlsxExporter.WriteSheet(list, "components", columns),
+                "pdf"  => PdfExporter.WriteTable(list, "components", columns, "Machine Components Export"),
+                _       => CsvExportHelper.WriteCsv(list, "components", columns)
+            };
+
+            return Task.FromResult(path);
         }
 
         /// <summary>
