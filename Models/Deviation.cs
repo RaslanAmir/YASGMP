@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using YasGMP.Models.Enums;
 
 namespace YasGMP.Models
@@ -194,6 +195,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Custom extension fields (for customer-specific attributes).
         /// </summary>
+        [NotMapped]
         public Dictionary<string, string> CustomFields { get; set; } = new();
 
         /// <summary>

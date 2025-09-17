@@ -187,14 +187,27 @@ namespace YasGMP.Models
 
         public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
         public virtual ICollection<Permission> Permissions { get; set; } = new List<Permission>();
+        [InverseProperty(nameof(DelegatedPermission.ToUser))]
         public virtual ICollection<DelegatedPermission> DelegatedPermissions { get; set; } = new List<DelegatedPermission>();
+        [InverseProperty(nameof(DelegatedPermission.FromUser))]
+        public virtual ICollection<DelegatedPermission> DelegationsGranted { get; set; } = new List<DelegatedPermission>();
+        [InverseProperty(nameof(DelegatedPermission.ApprovedBy))]
+        public virtual ICollection<DelegatedPermission> DelegationsApproved { get; set; } = new List<DelegatedPermission>();
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
         public virtual ICollection<DigitalSignature> DigitalSignatures { get; set; } = new List<DigitalSignature>();
         public virtual ICollection<SessionLog> SessionLogs { get; set; } = new List<SessionLog>();
         public virtual ICollection<WorkOrder> CreatedWorkOrders { get; set; } = new List<WorkOrder>();
         public virtual ICollection<WorkOrder> AssignedWorkOrders { get; set; } = new List<WorkOrder>();
+        [InverseProperty(nameof(Photo.UploadedBy))]
         public virtual ICollection<Photo> UploadedPhotos { get; set; } = new List<Photo>();
+        [InverseProperty(nameof(Photo.ApprovedBy))]
+        public virtual ICollection<Photo> ApprovedPhotos { get; set; } = new List<Photo>();
+        [InverseProperty(nameof(Photo.LastModifiedBy))]
+        public virtual ICollection<Photo> ModifiedPhotos { get; set; } = new List<Photo>();
+        [InverseProperty(nameof(Attachment.UploadedBy))]
         public virtual ICollection<Attachment> UploadedAttachments { get; set; } = new List<Attachment>();
+        [InverseProperty(nameof(Attachment.ApprovedBy))]
+        public virtual ICollection<Attachment> ApprovedAttachments { get; set; } = new List<Attachment>();
         public virtual ICollection<AdminActivityLog> AdminActivityLogs { get; set; } = new List<AdminActivityLog>();
 
         // === UTILITY / COMPATIBILITY ===

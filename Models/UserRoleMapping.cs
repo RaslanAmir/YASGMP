@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
@@ -9,12 +10,13 @@ namespace YasGMP.Models
     /// Ultra-robust: supports full GMP, CSV, 21 CFR Part 11, Annex 11, forensics, digital signature, audit, expiry, and rollback/versioning.
     /// </summary>
     [Table("user_roles")]
+    [PrimaryKey(nameof(UserId), nameof(RoleId))]
     public class UserRoleMapping
     {
         /// <summary>
         /// User ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("user_id", Order = 0)]
+        [Column("user_id", Order = 0)]
         [Display(Name = "Korisnik")]
         public int UserId { get; set; }
 
@@ -22,14 +24,12 @@ namespace YasGMP.Models
         /// Navigation property for the assigned user.
         /// </summary>
         [ForeignKey("UserId")]
-        public virtual User User { get; set; } = null!
-
-        ;
+        public virtual User User { get; set; } = null!;
 
         /// <summary>
         /// Role ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("role_id", Order = 1)]
+        [Column("role_id", Order = 1)]
         [Display(Name = "Uloga")]
         public int RoleId { get; set; }
 

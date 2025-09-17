@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
@@ -17,12 +18,13 @@ namespace YasGMP.Models
     /// </remarks>
     /// </summary>
     [Table("role_permissions")]
+    [PrimaryKey(nameof(RoleId), nameof(PermissionId))]
     public class RolePermission
     {
         /// <summary>
         /// Role ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("role_id", Order = 0)]
+        [Column("role_id", Order = 0)]
         [Display(Name = "Uloga")]
         public int RoleId { get; set; }
 
@@ -35,7 +37,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Permission ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("permission_id", Order = 1)]
+        [Column("permission_id", Order = 1)]
         [Display(Name = "Dozvola")]
         public int PermissionId { get; set; }
 

@@ -80,6 +80,9 @@ namespace YasGMP.Models
         /// <summary>Per-warehouse stock snapshot.</summary>
         public List<WarehouseStock> WarehouseStocks { get; set; } = new();
 
+        /// <summary>Normalized stock level entities per warehouse (enables EF relationships).</summary>
+        public List<StockLevel> StockLevels { get; set; } = new();
+
         /// <summary>Stock movement/change history.</summary>
         public List<StockChangeLog> StockHistory { get; set; } = new();
 

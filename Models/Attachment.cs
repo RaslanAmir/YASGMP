@@ -117,6 +117,7 @@ namespace YasGMP.Models
         /// Navigation property for the user who uploaded the file.
         /// </summary>
         [ForeignKey(nameof(UploadedById))]
+        [InverseProperty(nameof(User.UploadedAttachments))]
         public virtual User? UploadedBy { get; set; }
 
         /// <summary>
@@ -136,6 +137,7 @@ namespace YasGMP.Models
         /// Navigation property for the user who approved the file.
         /// </summary>
         [ForeignKey(nameof(ApprovedById))]
+        [InverseProperty(nameof(User.ApprovedAttachments))]
         public virtual User? ApprovedBy { get; set; }
 
         /// <summary>

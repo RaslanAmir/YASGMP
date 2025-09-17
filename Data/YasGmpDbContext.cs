@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YasGMP.Models;
@@ -197,6 +200,8 @@ namespace YasGMP.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Ignore<Asset>();
+
             // Konfiguracija enum polja u WorkOrderAudit (Action) kao string u bazi
             modelBuilder.Entity<WorkOrderAudit>()
                 .Property(a => a.Action)
@@ -235,11 +240,16 @@ namespace YasGMP.Data
 
             ConfigureAdminActivityLog(modelBuilder);
             ConfigureApiKey(modelBuilder);
+            ConfigureAttachment(modelBuilder);
             ConfigureContractorInterventionAudit(modelBuilder);
+            ConfigureDelegatedPermission(modelBuilder);
             ConfigureInventoryTransaction(modelBuilder);
+            ConfigurePermission(modelBuilder);
+            ConfigureRole(modelBuilder);
             ConfigureQualityEvent(modelBuilder);
             ConfigureStockLevel(modelBuilder);
             ConfigureWarehouse(modelBuilder);
+            ConfigureUserRelationships(modelBuilder);
 
             // Postavi cascade delete gdje je smisleno (npr. WorkOrder -> Comments)
             modelBuilder.Entity<WorkOrderComment>()
@@ -380,6 +390,22 @@ namespace YasGMP.Data
             });
         }
 
+        private static void ConfigureAttachment(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Attachment>(entity =>
+            {
+                entity.HasOne(a => a.UploadedBy)
+                    .WithMany(u => u.UploadedAttachments)
+                    .HasForeignKey(a => a.UploadedById)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(a => a.ApprovedBy)
+                    .WithMany(u => u.ApprovedAttachments)
+                    .HasForeignKey(a => a.ApprovedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
+
         private static void ConfigureContractorInterventionAudit(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ContractorInterventionAudit>(entity =>
@@ -434,6 +460,27 @@ namespace YasGMP.Data
             });
         }
 
+        private static void ConfigureDelegatedPermission(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<DelegatedPermission>(entity =>
+            {
+                entity.HasOne(d => d.FromUser)
+                    .WithMany(u => u.DelegationsGranted)
+                    .HasForeignKey(d => d.FromUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.ToUser)
+                    .WithMany(u => u.DelegatedPermissions)
+                    .HasForeignKey(d => d.ToUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.ApprovedBy)
+                    .WithMany(u => u.DelegationsApproved)
+                    .HasForeignKey(d => d.ApprovedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
+
         private static void ConfigureInventoryTransaction(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<InventoryTransaction>(entity =>
@@ -482,6 +529,92 @@ namespace YasGMP.Data
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_it_user");
             });
+        }
+
+        private static void ConfigurePermission(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Permission>(entity =>
+            {
+                entity.HasOne(p => p.CreatedBy)
+                    .WithMany()
+                    .HasForeignKey(p => p.CreatedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(p => p.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(p => p.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
+
+        private static void ConfigureRole(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.HasOne(r => r.CreatedBy)
+                    .WithMany()
+                    .HasForeignKey(r => r.CreatedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(r => r.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(r => r.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
+
+        private static void ConfigureUserRelationships(ModelBuilder modelBuilder)
+        {
+            var userType = typeof(User);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+                         .Where(e => e.ClrType != null && e.ClrType != userType))
+            {
+                var clrType = entityType.ClrType!;
+                if (clrType.IsGenericType &&
+                    (clrType.GetGenericTypeDefinition() == typeof(Dictionary<,>) ||
+                     clrType.GetInterfaces().Any(i => i.IsGenericType &&
+                                                        i.GetGenericTypeDefinition() == typeof(IDictionary<,>))))
+                {
+                    continue;
+                }
+
+                var entityBuilder = modelBuilder.Entity(clrType);
+
+                foreach (var navigation in clrType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    if (navigation.PropertyType != typeof(User))
+                    {
+                        continue;
+                    }
+
+                    if (navigation.GetCustomAttribute<InversePropertyAttribute>() != null)
+                    {
+                        continue;
+                    }
+
+                    var foreignKeyAttr = navigation.GetCustomAttribute<ForeignKeyAttribute>();
+                    var fkName = foreignKeyAttr?.Name ?? navigation.Name + "Id";
+                    var fkProperty = clrType.GetProperty(fkName, BindingFlags.Public | BindingFlags.Instance);
+                    if (fkProperty == null)
+                    {
+                        continue;
+                    }
+
+                    var reference = entityBuilder.HasOne(userType, navigation.Name).WithMany();
+                    reference.HasForeignKey(fkName);
+
+                    var fkType = Nullable.GetUnderlyingType(fkProperty.PropertyType) ?? fkProperty.PropertyType;
+                    if (fkType.IsValueType && Nullable.GetUnderlyingType(fkProperty.PropertyType) == null && fkType != typeof(string))
+                    {
+                        reference.OnDelete(DeleteBehavior.Restrict);
+                    }
+                    else
+                    {
+                        reference.OnDelete(DeleteBehavior.SetNull);
+                    }
+                }
+            }
         }
 
         private static void ConfigureQualityEvent(ModelBuilder modelBuilder)

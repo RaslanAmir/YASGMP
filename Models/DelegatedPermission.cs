@@ -58,6 +58,7 @@ namespace YasGMP.Models
         /// Nullable to keep constructors lightweight and support projection-only queries.
         /// </summary>
         [ForeignKey(nameof(FromUserId))]
+        [InverseProperty(nameof(User.DelegationsGranted))]
         public virtual User? FromUser { get; set; }
 
         /// <summary>
@@ -73,6 +74,7 @@ namespace YasGMP.Models
         /// Nullable to support detached contexts and minimal selects.
         /// </summary>
         [ForeignKey(nameof(ToUserId))]
+        [InverseProperty(nameof(User.DelegatedPermissions))]
         public virtual User? ToUser { get; set; }
 
         /// <summary>
@@ -123,6 +125,7 @@ namespace YasGMP.Models
         /// Navigation to the approver/revoker user.
         /// </summary>
         [ForeignKey(nameof(ApprovedById))]
+        [InverseProperty(nameof(User.DelegationsApproved))]
         public virtual User? ApprovedBy { get; set; }
 
         /// <summary>

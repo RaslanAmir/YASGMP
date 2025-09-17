@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
@@ -18,12 +19,13 @@ namespace YasGMP.Models
     /// </remarks>
     /// </summary>
     [Table("user_permissions")]
+    [PrimaryKey(nameof(UserId), nameof(PermissionId))]
     public class UserPermission
     {
         /// <summary>
         /// User ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("user_id", Order = 0)]
+        [Column("user_id", Order = 0)]
         [Display(Name = "Korisnik")]
         public int UserId { get; set; }
 
@@ -36,7 +38,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Permission ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("permission_id", Order = 1)]
+        [Column("permission_id", Order = 1)]
         [Display(Name = "Dozvola")]
         public int PermissionId { get; set; }
 

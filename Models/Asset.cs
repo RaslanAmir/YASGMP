@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
@@ -9,12 +10,12 @@ namespace YasGMP.Models
     /// Asset / equipment model.
     /// </summary>
     [Table("machines")]
+    [Keyless]
     public class Asset
     {
         /// <summary>
         /// Primary key (machine/asset identifier).
         /// </summary>
-        [Key]
         [Column("id")]
         public int Id { get; set; }
 

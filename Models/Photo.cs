@@ -50,6 +50,7 @@ namespace YasGMP.Models
         public int? UploadedById { get; set; }
 
         [ForeignKey(nameof(UploadedById))]
+        [InverseProperty(nameof(User.UploadedPhotos))]
         public virtual User? UploadedBy { get; set; }
 
         [Column("uploaded_at")]
@@ -74,6 +75,7 @@ namespace YasGMP.Models
         public int? ApprovedById { get; set; }
 
         [ForeignKey(nameof(ApprovedById))]
+        [InverseProperty(nameof(User.ApprovedPhotos))]
         public virtual User? ApprovedBy { get; set; }
 
         [Column("approved_at")]
@@ -149,6 +151,7 @@ namespace YasGMP.Models
         public int? LastModifiedById { get; set; }
 
         [ForeignKey(nameof(LastModifiedById))]
+        [InverseProperty(nameof(User.ModifiedPhotos))]
         public virtual User? LastModifiedBy { get; set; }
 
         // ==================== METHODS ====================
