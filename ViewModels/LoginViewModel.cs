@@ -220,18 +220,18 @@ namespace YasGMP.ViewModels
 
         #region Dependencies
 
-        private readonly UserService _userService;
+        private readonly AuthService _authService;
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// DI constructor: <see cref="UserService"/> je obavezan (DI isporučuje vlastite ovisnosti).
+        /// DI constructor: <see cref="AuthService"/> je obavezan (DI isporučuje vlastite ovisnosti).
         /// </summary>
-        public LoginViewModel(UserService userService)
+        public LoginViewModel(AuthService authService)
         {
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _authService = authService ?? throw new ArgumentNullException(nameof(authService));
 
             LoginCommand                    = new Command(async () => await ExecuteLoginAsync(), () => IsLoginEnabled);
             TogglePasswordVisibilityCommand = new Command(() => IsPasswordHidden = !IsPasswordHidden);
@@ -252,25 +252,25 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>
-        /// Zadani (parameterless) konstruktor za XAML/alatne potrebe – dohvaća <see cref="UserService"/> iz MAUI DI kontejnera.
+        /// Zadani (parameterless) konstruktor za XAML/alatne potrebe – dohvaća <see cref="AuthService"/> iz MAUI DI kontejnera.
         /// </summary>
-        public LoginViewModel() : this(ResolveUserServiceFromMaui())
+        public LoginViewModel() : this(ResolveAuthServiceFromMaui())
         {
         }
 
         /// <summary>
-        /// Pomoćna metoda: dohvaća <see cref="UserService"/> iz DI kontejnera.
+        /// Pomoćna metoda: dohvaća <see cref="AuthService"/> iz DI kontejnera.
         /// Baca jasnu grešku ako nije registriran (sprječava tihi pad).
         /// </summary>
-        private static UserService ResolveUserServiceFromMaui()
+        private static AuthService ResolveAuthServiceFromMaui()
         {
             var services = Application.Current?.Handler?.MauiContext?.Services;
             if (services == null)
                 throw new InvalidOperationException("MAUI service provider is not available. Ensure the application is initialized and services are configured.");
 
-            var svc = services.GetService<UserService>();
+            var svc = services.GetService<AuthService>();
             if (svc == null)
-                throw new InvalidOperationException("UserService is not registered in the DI container. Please register it in MauiProgram.cs (builder.Services.AddSingleton<UserService>()).");
+                throw new InvalidOperationException("AuthService is not registered in the DI container. Please register it in MauiProgram.cs (builder.Services.AddSingleton<AuthService>()).");
 
             return svc;
         }
@@ -313,7 +313,7 @@ namespace YasGMP.ViewModels
                 await Task.Delay(500);
 
                 // Wrap the actual authentication in a timeout guard to avoid infinite spinners on dead DB connections.
-                var authTask = _userService.AuthenticateAsync(Username, Password);
+                var authTask = _authService.AuthenticateAsync(Username, Password);
                 var completed = await Task.WhenAny(authTask, Task.Delay(LoginTimeout));
 
                 if (completed != authTask)
@@ -335,9 +335,6 @@ namespace YasGMP.ViewModels
                     IsAuthenticated = true;
                     LoggedInUser = user;
                     StatusMessage = $"Dobrodošli, {user.FullName}!";
-
-                    if (Application.Current is App app)
-                        app.LoggedUser = user;
 
                     LastLogins.Insert(0, $"{DateTime.Now:G} - Prijava uspješna ({DeviceInfo})");
 
@@ -388,11 +385,13 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                var valid = await _userService.VerifyTwoFactorCodeAsync(Username, TwoFactorCode);
+                var valid = await _authService.VerifyTwoFactorCodeAsync(Username, TwoFactorCode);
                 if (valid)
                 {
                     IsTwoFactorRequired = false;
                     StatusMessage = "2FA uspješan! Pristup dozvoljen.";
+
+                    UpdateAppLoggedUser();
 
                     // ⛳️ Same Shell switch as above.
                     await SwitchToShellDashboardAsync();
@@ -420,16 +419,32 @@ namespace YasGMP.ViewModels
         /// to the dashboard tab. Uses the absolute Shell route (<c>//root/home/dashboard</c>) so the
         /// stack is clean and <see cref="Shell.Current"/> is guaranteed non-null afterwards.
         /// </summary>
-        private static async Task SwitchToShellDashboardAsync()
+        private async Task SwitchToShellDashboardAsync()
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
+                UpdateAppLoggedUser();
                 Application.Current!.MainPage = new AppShell();
                 if (Shell.Current is not null)
                 {
                     await Shell.Current.GoToAsync("//root/home/dashboard");
                 }
             });
+        }
+
+        /// <summary>Osvježava <see cref="LoggedInUser"/> i <see cref="App.LoggedUser"/> prema <see cref="AuthService.CurrentUser"/>.</summary>
+        private void UpdateAppLoggedUser()
+        {
+            var current = _authService.CurrentUser ?? LoggedInUser;
+            if (current != null)
+            {
+                LoggedInUser = current;
+            }
+
+            if (Application.Current is App app)
+            {
+                app.LoggedUser = current;
+            }
         }
 
         /// <summary>Promjena jezika sučelja.</summary>
