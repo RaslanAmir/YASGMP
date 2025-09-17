@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -353,29 +354,19 @@ namespace YasGMP.Pages
         /// <summary>
         /// Gets the ViewModel's <c>PpmPlans</c> collection (if exposed) and the element type.
         /// </summary>
-        private (IList? List, Type? ElementType) GetPlansListAndElementType()
+        private (IList? Plans, Type? ElementType) GetPlansListAndElementType()
         {
             if (_vm is null)
                 return (null, null);
 
-            var prop = _vm.GetType().GetRuntimeProperty("PpmPlans");
-            if (prop is null)
+            var property = GetPropertyInfo(_vm, "PpmPlans");
+            if (property is null)
                 return (null, null);
 
-            var value = prop.GetValue(_vm);
-            if (value is not IList list)
+            if (property.GetValue(_vm) is not IList list)
                 return (null, null);
 
-            Type? elementType = null;
-            var propertyType = prop.PropertyType;
-            if (propertyType.IsArray)
-            {
-                elementType = propertyType.GetElementType();
-            }
-            else if (propertyType.IsGenericType)
-            {
-                elementType = propertyType.GetGenericArguments().FirstOrDefault();
-            }
+            var elementType = ExtractElementType(property.PropertyType);
 
             return (list, elementType);
         }
@@ -388,8 +379,8 @@ namespace YasGMP.Pages
             if (_vm is null || string.IsNullOrWhiteSpace(propertyName))
                 return null;
 
-            var prop = _vm.GetType().GetRuntimeProperty(propertyName);
-            return prop?.GetValue(_vm);
+            var property = GetPropertyInfo(_vm, propertyName);
+            return property?.GetValue(_vm);
         }
 
         /// <summary>
@@ -400,13 +391,13 @@ namespace YasGMP.Pages
             if (_vm is null || string.IsNullOrWhiteSpace(propertyName))
                 return;
 
-            var prop = _vm.GetType().GetRuntimeProperty(propertyName);
-            if (prop is null || !prop.CanWrite)
+            var property = GetPropertyInfo(_vm, propertyName);
+            if (property is null || !property.CanWrite)
                 return;
 
             try
             {
-                prop.SetValue(_vm, ConvertToPropertyType(value, prop.PropertyType));
+                property.SetValue(_vm, ConvertToPropertyType(value, property.PropertyType));
             }
             catch
             {
@@ -422,13 +413,13 @@ namespace YasGMP.Pages
             if (target is null || string.IsNullOrWhiteSpace(propertyName))
                 return;
 
-            var prop = target.GetType().GetRuntimeProperty(propertyName);
-            if (prop is null || !prop.CanWrite)
+            var property = GetPropertyInfo(target, propertyName);
+            if (property is null || !property.CanWrite)
                 return;
 
             try
             {
-                prop.SetValue(target, ConvertToPropertyType(value, prop.PropertyType));
+                property.SetValue(target, ConvertToPropertyType(value, property.PropertyType));
             }
             catch
             {
@@ -445,13 +436,18 @@ namespace YasGMP.Pages
             if (_vm is null || string.IsNullOrWhiteSpace(methodName))
                 return false;
 
-            var method = _vm.GetType().GetRuntimeMethods()
-                .FirstOrDefault(m => string.Equals(m.Name, methodName, StringComparison.Ordinal) &&
-                                     m.GetParameters().Length == args.Length);
+            var method = GetMethodInfo(_vm, methodName, args.Length);
             if (method is null)
                 return false;
 
-            var result = method.Invoke(_vm, args);
+            var parameters = method.GetParameters();
+            var invocationArgs = new object?[args.Length];
+            for (int i = 0; i < args.Length; i++)
+            {
+                invocationArgs[i] = ConvertToPropertyType(args[i], parameters[i].ParameterType);
+            }
+
+            var result = method.Invoke(_vm, invocationArgs);
             if (result is null)
                 return true;
 
@@ -493,6 +489,53 @@ namespace YasGMP.Pages
         /// </summary>
         private Task<string?> PromptAsync(string title, string message)
             => MainThread.InvokeOnMainThreadAsync(() => DisplayPromptAsync(title, message));
+
+        private static PropertyInfo? GetPropertyInfo(object target, string propertyName)
+        {
+            if (target is null || string.IsNullOrWhiteSpace(propertyName))
+                return null;
+
+            return target.GetType().GetProperty(
+                propertyName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        }
+
+        private static MethodInfo? GetMethodInfo(object target, string methodName, int argumentCount)
+        {
+            if (target is null || string.IsNullOrWhiteSpace(methodName))
+                return null;
+
+            return target.GetType()
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .FirstOrDefault(m => string.Equals(m.Name, methodName, StringComparison.Ordinal) &&
+                                     m.GetParameters().Length == argumentCount);
+        }
+
+        private static Type? ExtractElementType(Type propertyType)
+        {
+            if (propertyType is null)
+                return null;
+
+            if (propertyType.IsArray)
+                return propertyType.GetElementType();
+
+            if (propertyType.IsGenericType)
+            {
+                var args = propertyType.GetGenericArguments();
+                if (args.Length == 1)
+                    return args[0];
+            }
+
+            if (typeof(IEnumerable).IsAssignableFrom(propertyType) && propertyType != typeof(string))
+            {
+                var enumerableInterface = propertyType.GetInterfaces()
+                    .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+                return enumerableInterface?.GetGenericArguments().FirstOrDefault();
+            }
+
+            return null;
+        }
 
         private static object? ConvertToPropertyType(object? value, Type propertyType)
         {
