@@ -15,6 +15,7 @@
     <ToolbarItem Text="Work Orders"  Clicked="OnToolbarGoWorkOrders" />
     <ToolbarItem Text="Machines"     Clicked="OnToolbarGoMachines" />
     <ToolbarItem Text="Parts"        Clicked="OnToolbarGoParts" />
+    <ToolbarItem Text="Warehouses"   Clicked="OnToolbarGoWarehouses" />
     <ToolbarItem Text="Suppliers"    Clicked="OnToolbarGoSuppliers" />
     <ToolbarItem Text="Components"   Clicked="OnToolbarGoComponents" />
     <ToolbarItem Text="External"     Clicked="OnToolbarGoExternal" />
@@ -53,6 +54,8 @@
                     ContentTemplate="{DataTemplate views:CalibrationsPage}" />
       <ShellContent Title="Parts"         Route="parts"
                     ContentTemplate="{DataTemplate views:PartsPage}" />
+      <ShellContent Title="Warehouses"    Route="warehouses"
+                    ContentTemplate="{DataTemplate views:WarehousePage}" />
       <ShellContent Title="Suppliers"     Route="suppliers"
                     ContentTemplate="{DataTemplate views:SuppliersPage}" />
       <ShellContent Title="Components"    Route="components"

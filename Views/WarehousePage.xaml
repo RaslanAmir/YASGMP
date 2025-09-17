@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="YasGMP.Views.WarehousePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Skladišta – YasGMP">
+  <ScrollView>
+    <Grid Padding="24"
+          ColumnSpacing="18"
+          RowSpacing="18"
+          RowDefinitions="Auto,Auto,*"
+          ColumnDefinitions="320,*">
+
+      <Frame Grid.ColumnSpan="2"
+             BackgroundColor="{StaticResource YtSurfaceCard}"
+             BorderColor="{StaticResource YtRowBorder}"
+             Padding="12">
+        <VerticalStackLayout Spacing="4">
+          <Label Text="{Binding StatusMessage}"
+                 FontSize="14"
+                 TextColor="{StaticResource YtOnSurface}" />
+          <Label Text="{Binding GlobalLowStockSummary}"
+                 FontSize="12"
+                 TextColor="{StaticResource YtOnSurfaceDim}" />
+        </VerticalStackLayout>
+      </Frame>
+
+      <Frame Grid.Row="1"
+             Grid.Column="0"
+             BackgroundColor="{StaticResource YtSurfaceCard}"
+             BorderColor="{StaticResource YtRowBorder}"
+             Padding="14"
+             HasShadow="True"
+             CornerRadius="14">
+        <VerticalStackLayout Spacing="10">
+          <Label Text="Skladišta"
+                 FontSize="18"
+                 FontAttributes="Bold"
+                 TextColor="{StaticResource YtPrimary700}" />
+          <CollectionView ItemsSource="{Binding Warehouses}"
+                          SelectionMode="Single"
+                          SelectedItem="{Binding SelectedWarehouse}"
+                          HeightRequest="360"
+                          BackgroundColor="{StaticResource YtSurface}">
+            <CollectionView.ItemTemplate>
+              <DataTemplate>
+                <Frame Margin="0,4"
+                       Padding="10"
+                       CornerRadius="10"
+                       BorderColor="{StaticResource YtRowBorder}"
+                       BackgroundColor="{StaticResource YtSurface}">
+                  <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Name}"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource YtOnSurface}" />
+                    <Label Text="{Binding Location}"
+                           FontSize="12"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Label Text="{Binding Status, StringFormat='Status: {0}'}"
+                           FontSize="12"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Label Text="{Binding Note}"
+                           FontSize="11"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                  </VerticalStackLayout>
+                </Frame>
+              </DataTemplate>
+            </CollectionView.ItemTemplate>
+          </CollectionView>
+        </VerticalStackLayout>
+      </Frame>
+
+      <Grid Grid.Row="1"
+            Grid.Column="1"
+            RowDefinitions="Auto,*"
+            RowSpacing="18">
+        <Frame BackgroundColor="{StaticResource YtSurfaceCard}"
+               BorderColor="{StaticResource YtRowBorder}"
+               Padding="14"
+               HasShadow="True"
+               CornerRadius="14">
+          <VerticalStackLayout Spacing="10">
+            <Label Text="Artikli i zalihe"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource YtPrimary700}" />
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="10">
+              <SearchBar Grid.Column="0"
+                         Placeholder="Pretraži artikle (šifra ili naziv)"
+                         Text="{Binding PartSearchTerm}" />
+              <StackLayout Grid.Column="1"
+                           Orientation="Horizontal"
+                           Spacing="6"
+                           VerticalOptions="Center">
+                <CheckBox IsChecked="{Binding ShowOnlyLowStock}" />
+                <Label Text="Samo niski stock"
+                       VerticalOptions="Center"
+                       FontSize="13" />
+              </StackLayout>
+            </Grid>
+            <Label Text="{Binding SelectedWarehouseLowStockSummary}"
+                   FontSize="12"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+            <CollectionView ItemsSource="{Binding FilteredParts}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedPart}"
+                            HeightRequest="260"
+                            BackgroundColor="{StaticResource YtSurface}">
+              <CollectionView.ItemTemplate>
+                <DataTemplate>
+                  <Frame Margin="0,4"
+                         Padding="10"
+                         CornerRadius="10"
+                         BorderColor="{StaticResource YtRowBorder}"
+                         BackgroundColor="{StaticResource YtSurface}">
+                    <VerticalStackLayout Spacing="4">
+                      <Label Text="{Binding PartName}"
+                             FontAttributes="Bold"
+                             TextColor="{StaticResource YtOnSurface}" />
+                      <Label Text="{Binding PartCode, StringFormat='Šifra: {0}'}"
+                             FontSize="12"
+                             TextColor="{StaticResource YtOnSurfaceDim}" />
+                      <Label Text="{Binding WarehouseName, StringFormat='Skladište: {0}'}"
+                             FontSize="12"
+                             TextColor="{StaticResource YtOnSurfaceDim}" />
+                      <HorizontalStackLayout Spacing="10">
+                        <Label Text="{Binding Quantity, StringFormat='Količina: {0}'}"
+                               FontSize="12"
+                               TextColor="{StaticResource YtPrimary700}" />
+                        <Label Text="{Binding WarehouseMin, StringFormat='Min: {0}'}"
+                               FontSize="12"
+                               TextColor="{StaticResource YtOnSurfaceDim}" />
+                      </HorizontalStackLayout>
+                      <Frame BackgroundColor="{StaticResource YtDanger50}"
+                             Padding="4,2"
+                             CornerRadius="6"
+                             IsVisible="{Binding IsLowStock}">
+                        <Label Text="⚠ Potrebna nadopuna"
+                               FontSize="11"
+                               TextColor="{StaticResource YtDanger700}" />
+                      </Frame>
+                    </VerticalStackLayout>
+                  </Frame>
+                </DataTemplate>
+              </CollectionView.ItemTemplate>
+            </CollectionView>
+          </VerticalStackLayout>
+        </Frame>
+
+        <Frame Grid.Row="1"
+               BackgroundColor="{StaticResource YtSurfaceCard}"
+               BorderColor="{StaticResource YtRowBorder}"
+               Padding="14"
+               HasShadow="True"
+               CornerRadius="14">
+          <VerticalStackLayout Spacing="10">
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="10"
+                  VerticalOptions="Center">
+              <Label Text="Povijest kretanja zaliha"
+                     FontSize="18"
+                     FontAttributes="Bold"
+                     TextColor="{StaticResource YtPrimary700}" />
+              <Button Text="Osvježi"
+                      Command="{Binding RefreshMovementHistoryCommand}" />
+            </Grid>
+            <ActivityIndicator IsRunning="{Binding IsMovementHistoryLoading}"
+                               IsVisible="{Binding IsMovementHistoryLoading}" />
+            <Label Text="{Binding MovementHistoryStatus}"
+                   FontSize="12"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+            <CollectionView ItemsSource="{Binding MovementHistory}"
+                            BackgroundColor="{StaticResource YtSurface}">
+              <CollectionView.EmptyView>
+                <VerticalStackLayout Spacing="8" Padding="12">
+                  <Label Text="Nema evidentiranih transakcija za prikaz." />
+                </VerticalStackLayout>
+              </CollectionView.EmptyView>
+              <CollectionView.ItemTemplate>
+                <DataTemplate>
+                  <Frame Margin="0,4"
+                         Padding="10"
+                         CornerRadius="10"
+                         BorderColor="{StaticResource YtRowBorder}"
+                         BackgroundColor="{StaticResource YtSurface}">
+                    <VerticalStackLayout Spacing="6">
+                      <Grid ColumnDefinitions="160,*,80"
+                            ColumnSpacing="10">
+                        <Label Grid.Column="0"
+                               Text="{Binding Timestamp, StringFormat='{0:yyyy-MM-dd HH:mm}'}"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource YtOnSurface}" />
+                        <Label Grid.Column="1"
+                               Text="{Binding TransactionType}"
+                               FontSize="12"
+                               TextColor="{StaticResource YtOnSurfaceDim}" />
+                        <Label Grid.Column="2"
+                               Text="{Binding Quantity, StringFormat='Qty: {0}'}"
+                               FontSize="12"
+                               HorizontalTextAlignment="End"
+                               TextColor="{StaticResource YtPrimary700}" />
+                      </Grid>
+                      <Label Text="{Binding RelatedDocument, StringFormat='Dokument: {0}'}"
+                             FontSize="12"
+                             TextColor="{StaticResource YtOnSurfaceDim}">
+                        <Label.Triggers>
+                          <DataTrigger TargetType="Label" Binding="{Binding RelatedDocument}" Value="">
+                            <Setter Property="IsVisible" Value="False" />
+                          </DataTrigger>
+                          <DataTrigger TargetType="Label" Binding="{Binding RelatedDocument}" Value="{x:Null}">
+                            <Setter Property="IsVisible" Value="False" />
+                          </DataTrigger>
+                        </Label.Triggers>
+                      </Label>
+                      <Label Text="{Binding Note, StringFormat='Napomena: {0}'}"
+                             FontSize="12"
+                             TextColor="{StaticResource YtOnSurface}">
+                        <Label.Triggers>
+                          <DataTrigger TargetType="Label" Binding="{Binding Note}" Value="">
+                            <Setter Property="IsVisible" Value="False" />
+                          </DataTrigger>
+                          <DataTrigger TargetType="Label" Binding="{Binding Note}" Value="{x:Null}">
+                            <Setter Property="IsVisible" Value="False" />
+                          </DataTrigger>
+                        </Label.Triggers>
+                      </Label>
+                      <Label Text="{Binding PerformedById, StringFormat='Izvršio korisnik ID: {0}'}"
+                             FontSize="11"
+                             TextColor="{StaticResource YtOnSurfaceDim}">
+                        <Label.Triggers>
+                          <DataTrigger TargetType="Label" Binding="{Binding PerformedById}" Value="{x:Null}">
+                            <Setter Property="IsVisible" Value="False" />
+                          </DataTrigger>
+                        </Label.Triggers>
+                      </Label>
+                    </VerticalStackLayout>
+                  </Frame>
+                </DataTemplate>
+              </CollectionView.ItemTemplate>
+            </CollectionView>
+          </VerticalStackLayout>
+        </Frame>
+      </Grid>
+    </Grid>
+  </ScrollView>
+</ContentPage>

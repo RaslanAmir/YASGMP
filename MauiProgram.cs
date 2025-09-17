@@ -174,6 +174,7 @@ namespace YasGMP
             builder.Services.AddTransient<MachineViewModel>(); // NEW
             builder.Services.AddTransient<CalibrationsViewModel>();
             builder.Services.AddTransient<PpmViewModel>();
+            builder.Services.AddTransient<WarehouseViewModel>();
 
             // Pages
             builder.Services.AddTransient<YasGMP.Views.LoginPage>();
@@ -185,6 +186,7 @@ namespace YasGMP
             builder.Services.AddTransient<YasGMP.Views.CalibrationsPage>();
             builder.Services.AddTransient<YasGMP.Views.MachinesPage>();
             builder.Services.AddTransient<YasGMP.Views.PartsPage>();
+            builder.Services.AddTransient<YasGMP.Views.WarehousePage>();
             builder.Services.AddTransient<YasGMP.Views.WorkOrdersPage>();
             builder.Services.AddTransient<YasGMP.Views.ComponentsPage>();
             builder.Services.AddTransient<YasGMP.Views.SuppliersPage>();

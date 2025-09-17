@@ -18,6 +18,7 @@ namespace YasGMP
             public const string WorkOrders     = "//root/ops/workorders";
             public const string Machines       = "//root/ops/machines";
             public const string Parts          = "//root/ops/parts";
+            public const string Warehouses     = "//root/ops/warehouses";
             public const string Suppliers      = "//root/ops/suppliers";
             public const string Components     = "//root/ops/components";
             public const string External       = "//root/ops/externalservicers";
@@ -95,6 +96,7 @@ namespace YasGMP
         private async void OnToolbarGoWorkOrders(object s, EventArgs e) => await GoAsync(Paths.WorkOrders);
         private async void OnToolbarGoMachines  (object s, EventArgs e) => await GoAsync(Paths.Machines);
         private async void OnToolbarGoParts     (object s, EventArgs e) => await GoAsync(Paths.Parts);
+        private async void OnToolbarGoWarehouses(object s, EventArgs e) => await GoAsync(Paths.Warehouses);
         private async void OnToolbarGoSuppliers (object s, EventArgs e) => await GoAsync(Paths.Suppliers);
         private async void OnToolbarGoComponents(object s, EventArgs e) => await GoAsync(Paths.Components);
         private async void OnToolbarGoExternal  (object s, EventArgs e) => await GoAsync(Paths.External);
