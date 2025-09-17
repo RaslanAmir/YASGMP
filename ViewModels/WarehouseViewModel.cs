@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.ApplicationModel;
 using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -28,6 +29,7 @@ namespace YasGMP.ViewModels
         private ObservableCollection<WarehousePartRow> _filteredParts = new();
         private ObservableCollection<WarehousePartRow> _lowStockHighlights = new();
         private ObservableCollection<User> _responsibleUsers = new();
+        private ObservableCollection<MovementPreview> _movementHistory = new();
 
         private readonly List<WarehousePartRow> _allPartRows = new();
 
@@ -51,6 +53,9 @@ namespace YasGMP.ViewModels
         private readonly string _currentIpAddress;
 
         private bool _schemaEnsured;
+        private bool _isMovementHistoryLoading;
+        private string _movementHistoryStatus = "Odaberite skladište ili artikl za prikaz povijesti.";
+        private CancellationTokenSource? _movementHistoryRefreshCts;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WarehouseViewModel"/> class.
@@ -74,6 +79,7 @@ namespace YasGMP.ViewModels
             ClearFiltersCommand = new RelayCommand(ClearFilters);
             BeginNewWarehouseCommand = new RelayCommand(BeginNewWarehouse);
             ToggleLowStockCommand = new RelayCommand(() => ShowOnlyLowStock = !ShowOnlyLowStock);
+            RefreshMovementHistoryCommand = new AsyncRelayCommand(RefreshMovementHistoryPreviewAsync, () => !IsMovementHistoryLoading);
 
             _ = LoadAsync();
         }
@@ -119,6 +125,42 @@ namespace YasGMP.ViewModels
             private set => SetProperty(ref _lowStockHighlights, value ?? new ObservableCollection<WarehousePartRow>());
         }
 
+        /// <summary>Sažetak povijesti kretanja zaliha.</summary>
+        public ObservableCollection<MovementPreview> MovementHistory
+        {
+            get => _movementHistory;
+            private set
+            {
+                if (SetProperty(ref _movementHistory, value ?? new ObservableCollection<MovementPreview>()))
+                {
+                    OnPropertyChanged(nameof(HasMovementHistory));
+                }
+            }
+        }
+
+        /// <summary>True ako postoji barem jedan zapis u povijesti.</summary>
+        public bool HasMovementHistory => MovementHistory.Count > 0;
+
+        /// <summary>Indikator dohvaća li se trenutno povijest kretanja.</summary>
+        public bool IsMovementHistoryLoading
+        {
+            get => _isMovementHistoryLoading;
+            private set
+            {
+                if (SetProperty(ref _isMovementHistoryLoading, value))
+                {
+                    (RefreshMovementHistoryCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        /// <summary>Statusna poruka za povijest kretanja.</summary>
+        public string MovementHistoryStatus
+        {
+            get => _movementHistoryStatus;
+            private set => SetProperty(ref _movementHistoryStatus, value ?? string.Empty);
+        }
+
         /// <summary>Lista korisnika koji mogu biti odgovorne osobe.</summary>
         public ObservableCollection<User> ResponsibleUsers
         {
@@ -146,7 +188,13 @@ namespace YasGMP.ViewModels
         public WarehousePartRow? SelectedPart
         {
             get => _selectedPart;
-            set => SetProperty(ref _selectedPart, value);
+            set
+            {
+                if (SetProperty(ref _selectedPart, value))
+                {
+                    QueueMovementHistoryRefresh();
+                }
+            }
         }
 
         /// <summary>Tražilica po šifri/nazivu dijela.</summary>
@@ -302,6 +350,9 @@ namespace YasGMP.ViewModels
 
         /// <summary>Komanda za brzi toggle "prikaži samo low stock".</summary>
         public ICommand ToggleLowStockCommand { get; }
+
+        /// <summary>Komanda za ručno osvježenje povijesti kretanja.</summary>
+        public IAsyncRelayCommand RefreshMovementHistoryCommand { get; }
 
         /// <summary>
         /// Učitava skladišta, odgovorne osobe i zalihe.
@@ -514,17 +565,84 @@ namespace YasGMP.ViewModels
         /// <param name="partId">Optional part filter.</param>
         /// <param name="take">Number of latest transactions to fetch when implemented.</param>
         /// <param name="token">Cancellation token.</param>
-        /// <returns>Currently empty list; ready for future implementation.</returns>
-        public Task<IReadOnlyList<MovementPreview>> LoadMovementHistoryPreviewAsync(Warehouse? warehouse, int? partId = null, int take = 20, CancellationToken token = default)
+        /// <returns>Lista transakcija sortirana po datumu (DESC).</returns>
+        public async Task<IReadOnlyList<MovementPreview>> LoadMovementHistoryPreviewAsync(Warehouse? warehouse, int? partId = null, int take = 20, CancellationToken token = default)
         {
-            // Namjera: SELECT transaction_date, transaction_type, quantity, related_document, note, performed_by_id
-            //          FROM inventory_transactions
-            //          WHERE (@warehouseId IS NULL OR warehouse_id = @warehouseId)
-            //            AND (@partId IS NULL OR part_id = @partId)
-            //          ORDER BY transaction_date DESC
-            //          LIMIT @take;
-            // TODO: Implementirati zajedno s modulom za povijest kretanja.
-            return Task.FromResult<IReadOnlyList<MovementPreview>>(Array.Empty<MovementPreview>());
+            token.ThrowIfCancellationRequested();
+
+            int? warehouseId = warehouse?.Id;
+            if (warehouseId.HasValue && warehouseId.Value <= 0)
+            {
+                warehouseId = null;
+            }
+
+            int? normalizedPartId = partId.HasValue && partId.Value > 0 ? partId : null;
+
+            var table = await _dbService.GetInventoryMovementPreviewAsync(warehouseId, normalizedPartId, take, token).ConfigureAwait(false);
+            var list = new List<MovementPreview>(table.Rows.Count);
+
+            static string? NullableString(DataRow row, string column)
+                => row.Table.Columns.Contains(column) && row[column] != DBNull.Value
+                    ? row[column]?.ToString()
+                    : null;
+
+            foreach (DataRow row in table.Rows)
+            {
+                token.ThrowIfCancellationRequested();
+
+                var timestamp = SafeDateTime(row, "transaction_date") ?? DateTime.UtcNow;
+                var transactionType = SafeString(row, "transaction_type", "unknown");
+                if (string.IsNullOrWhiteSpace(transactionType))
+                {
+                    transactionType = "unknown";
+                }
+
+                int quantity = SafeInt(row, "quantity") ?? 0;
+                string? relatedDocument = NullableString(row, "related_document");
+                if (string.IsNullOrWhiteSpace(relatedDocument))
+                {
+                    relatedDocument = null;
+                }
+
+                string? note = NullableString(row, "note");
+                if (string.IsNullOrWhiteSpace(note))
+                {
+                    note = null;
+                }
+
+                int? performedById = SafeInt(row, "performed_by_id");
+
+                list.Add(new MovementPreview(timestamp, transactionType, quantity, relatedDocument, note, performedById));
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            try
+            {
+                var details = $"warehouse={(warehouseId?.ToString() ?? "*")}; part={(normalizedPartId?.ToString() ?? "*")}; take={take}; count={list.Count}";
+                await _dbService.LogSystemEventAsync(
+                    _authService.CurrentUser?.Id,
+                    "WAREHOUSE_HISTORY_PREVIEW",
+                    "inventory_transactions",
+                    "Warehouse",
+                    warehouseId,
+                    details,
+                    _currentIpAddress,
+                    "info",
+                    _currentDeviceInfo,
+                    _currentSessionId,
+                    token: token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // Telemetry nije kritičan – ignoriraj greške prilikom logiranja.
+            }
+
+            return list;
         }
 
         private async Task LoadResponsibleUsersAsync()
@@ -811,6 +929,89 @@ WHERE id = @id";
 
             FilteredParts = new ObservableCollection<WarehousePartRow>(result);
             LowStockHighlights = new ObservableCollection<WarehousePartRow>(result.Where(r => r.IsLowStock));
+
+            var currentSelection = SelectedPart;
+            var desiredSelection = currentSelection is not null && result.Contains(currentSelection)
+                ? currentSelection
+                : result.FirstOrDefault();
+
+            if (!EqualityComparer<WarehousePartRow>.Default.Equals(currentSelection, desiredSelection))
+            {
+                SelectedPart = desiredSelection;
+            }
+            else
+            {
+                QueueMovementHistoryRefresh();
+            }
+        }
+
+        private void QueueMovementHistoryRefresh()
+        {
+            var cts = new CancellationTokenSource();
+            var previous = Interlocked.Exchange(ref _movementHistoryRefreshCts, cts);
+            if (previous is not null)
+            {
+                try
+                {
+                    previous.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Već zbrisan.
+                }
+            }
+
+            IsMovementHistoryLoading = true;
+            MovementHistoryStatus = "Učitavanje povijesti...";
+            _ = RefreshMovementHistoryPreviewInternalAsync(cts);
+        }
+
+        private Task RefreshMovementHistoryPreviewAsync()
+        {
+            QueueMovementHistoryRefresh();
+            return Task.CompletedTask;
+        }
+
+        private async Task RefreshMovementHistoryPreviewInternalAsync(CancellationTokenSource cts)
+        {
+            try
+            {
+                var previews = await LoadMovementHistoryPreviewAsync(SelectedWarehouse, SelectedPart?.Part?.Id, 25, cts.Token).ConfigureAwait(false);
+                if (cts.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    MovementHistory = new ObservableCollection<MovementPreview>(previews);
+                    MovementHistoryStatus = MovementHistory.Count == 0
+                        ? "Nema nedavnih transakcija za odabrani filter."
+                        : $"Prikazano {MovementHistory.Count} zadnjih transakcija.";
+                }).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignored – novi zahtjev je pokrenut.
+            }
+            catch (Exception ex)
+            {
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    MovementHistory = new ObservableCollection<MovementPreview>();
+                    MovementHistoryStatus = $"Povijest nije dostupna: {ex.Message}";
+                }).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (ReferenceEquals(_movementHistoryRefreshCts, cts))
+                {
+                    _movementHistoryRefreshCts = null;
+                    IsMovementHistoryLoading = false;
+                }
+
+                cts.Dispose();
+            }
         }
 
         private async Task EnsureWarehouseSchemaAsync(CancellationToken token = default)
@@ -880,6 +1081,7 @@ WHERE id = @id";
             (RefreshStockCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
             (AddWarehouseCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
             (UpdateWarehouseCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+            (RefreshMovementHistoryCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
         }
 
         /// <summary>Helper za PropertyChanged.</summary>

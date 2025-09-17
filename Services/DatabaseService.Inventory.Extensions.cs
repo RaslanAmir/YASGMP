@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 using MySqlConnector;
 
 namespace YasGMP.Services
@@ -243,6 +244,63 @@ ORDER BY wname, sl.warehouse_id";
                 list.Add((wid, name, qty, min, max));
             }
             return list;
+        }
+
+        public static async Task<System.Data.DataTable> GetInventoryMovementPreviewAsync(
+            this DatabaseService db,
+            int? warehouseId,
+            int? partId,
+            int take = 20,
+            CancellationToken token = default)
+        {
+            await db.EnsureInventorySchemaAsync(token).ConfigureAwait(false);
+
+            if (take <= 0)
+            {
+                take = 20;
+            }
+            else if (take > 500)
+            {
+                take = 500;
+            }
+
+            var sql = new StringBuilder();
+            sql.AppendLine("SELECT");
+            sql.AppendLine("    it.transaction_date,");
+            sql.AppendLine("    it.transaction_type,");
+            sql.AppendLine("    it.quantity,");
+            sql.AppendLine("    it.related_document,");
+            sql.AppendLine("    it.note,");
+            sql.AppendLine("    it.performed_by_id");
+            sql.AppendLine("FROM inventory_transactions it");
+
+            var filters = new List<string>();
+            var parameters = new List<MySqlParameter>
+            {
+                new("@take", take)
+            };
+
+            if (warehouseId.HasValue && warehouseId.Value > 0)
+            {
+                filters.Add("it.warehouse_id = @warehouseId");
+                parameters.Add(new MySqlParameter("@warehouseId", warehouseId.Value));
+            }
+
+            if (partId.HasValue && partId.Value > 0)
+            {
+                filters.Add("it.part_id = @partId");
+                parameters.Add(new MySqlParameter("@partId", partId.Value));
+            }
+
+            if (filters.Count > 0)
+            {
+                sql.AppendLine("WHERE " + string.Join(" AND ", filters));
+            }
+
+            sql.AppendLine("ORDER BY it.transaction_date DESC, it.id DESC");
+            sql.AppendLine("LIMIT @take");
+
+            return await db.ExecuteSelectAsync(sql.ToString(), parameters, token).ConfigureAwait(false);
         }
 
         public static Task UpdateStockThresholdsAsync(
