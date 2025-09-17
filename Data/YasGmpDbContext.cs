@@ -233,21 +233,13 @@ namespace YasGMP.Data
                 .HasIndex(u => u.Username)
                 .IsUnique();
 
-            // Primjeri dodatnih konfiguracija (po potrebi)
-            modelBuilder.Entity<Manufacturer>()
-                .Property(x => x.Name)
-                .HasMaxLength(256)
-                .IsRequired();
-
-            modelBuilder.Entity<Models.Location>()
-                .Property(x => x.Name)
-                .HasMaxLength(256)
-                .IsRequired();
-
-            modelBuilder.Entity<Supplier>()
-                .Property(x => x.Name)
-                .HasMaxLength(256)
-                .IsRequired();
+            ConfigureAdminActivityLog(modelBuilder);
+            ConfigureApiKey(modelBuilder);
+            ConfigureContractorInterventionAudit(modelBuilder);
+            ConfigureInventoryTransaction(modelBuilder);
+            ConfigureQualityEvent(modelBuilder);
+            ConfigureStockLevel(modelBuilder);
+            ConfigureWarehouse(modelBuilder);
 
             // Postavi cascade delete gdje je smisleno (npr. WorkOrder -> Comments)
             modelBuilder.Entity<WorkOrderComment>()
@@ -302,22 +294,400 @@ namespace YasGMP.Data
             modelBuilder.Entity<Machine>()
                 .HasIndex(m => m.Code)
                 .IsUnique(false);
+        }
 
-            // Primjeri dodatnih konfiguracija (po potrebi)
-            modelBuilder.Entity<Manufacturer>()
-                .Property(x => x.Name)
-                .HasMaxLength(256)
-                .IsRequired();
+        private static void ConfigureAdminActivityLog(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AdminActivityLog>(entity =>
+            {
+                entity.ToTable("admin_activity_log");
 
-            modelBuilder.Entity<Models.Location>()
-                .Property(x => x.Name)
-                .HasMaxLength(256)
-                .IsRequired();
+                entity.HasKey(e => e.Id);
 
-            modelBuilder.Entity<Supplier>()
-                .Property(x => x.Name)
-                .HasMaxLength(256)
-                .IsRequired();
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.AdminId).HasColumnName("admin_id");
+                entity.Property(e => e.ActivityTime).HasColumnName("activity_time");
+                entity.Property(e => e.Activity)
+                    .HasColumnName("activity")
+                    .HasMaxLength(255)
+                    .IsRequired();
+                entity.Property(e => e.AffectedTable)
+                    .HasColumnName("affected_table")
+                    .HasMaxLength(100)
+                    .IsRequired();
+                entity.Property(e => e.AffectedRecordId).HasColumnName("affected_record_id");
+                entity.Property(e => e.Details).HasColumnName("details");
+                entity.Property(e => e.SourceIp)
+                    .HasColumnName("source_ip")
+                    .HasMaxLength(45);
+                entity.Property(e => e.DeviceName)
+                    .HasColumnName("device_name")
+                    .HasMaxLength(128);
+                entity.Property(e => e.SessionId)
+                    .HasColumnName("session_id")
+                    .HasMaxLength(64);
+                entity.Property(e => e.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(256);
+                entity.Property(e => e.ChangeVersion).HasColumnName("change_version");
+                entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+                entity.Property(e => e.Note).HasColumnName("note");
+
+                entity.HasIndex(e => e.AdminId)
+                    .HasDatabaseName("fk_adminact_user");
+
+                entity.HasOne(e => e.Admin)
+                    .WithMany()
+                    .HasForeignKey(e => e.AdminId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_adminact_user");
+            });
+        }
+
+        private static void ConfigureApiKey(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ApiKey>(entity =>
+            {
+                entity.ToTable("api_keys");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Key)
+                    .HasColumnName("key_value")
+                    .HasMaxLength(255)
+                    .IsRequired();
+                entity.Property(e => e.Description)
+                    .HasColumnName("description")
+                    .HasMaxLength(255);
+                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+                entity.Property(e => e.IsActive).HasColumnName("is_active");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.LastUsedAt).HasColumnName("last_used_at");
+
+                entity.HasIndex(e => e.Key)
+                    .HasDatabaseName("key_value")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.OwnerId)
+                    .HasDatabaseName("fk_apikey_owner");
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(e => e.OwnerId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_apikey_owner");
+            });
+        }
+
+        private static void ConfigureContractorInterventionAudit(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ContractorInterventionAudit>(entity =>
+            {
+                entity.ToTable("contractor_intervention_audit");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.InterventionId)
+                    .HasColumnName("intervention_id")
+                    .IsRequired();
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasMaxLength(30)
+                    .IsRequired();
+                entity.Property(e => e.Details).HasColumnName("details");
+                entity.Property(e => e.ChangedAt).HasColumnName("changed_at");
+                entity.Property(e => e.SourceIp)
+                    .HasColumnName("source_ip")
+                    .HasMaxLength(45);
+                entity.Property(e => e.DeviceInfo)
+                    .HasColumnName("device_info")
+                    .HasMaxLength(255);
+                entity.Property(e => e.SessionId)
+                    .HasColumnName("session_id")
+                    .HasMaxLength(100);
+                entity.Property(e => e.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(255);
+                entity.Property(e => e.OldValue).HasColumnName("old_value");
+                entity.Property(e => e.NewValue).HasColumnName("new_value");
+                entity.Property(e => e.Note).HasColumnName("note");
+
+                entity.HasIndex(e => e.InterventionId)
+                    .HasDatabaseName("fk_cia_intervention");
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("fk_cia_user");
+
+                entity.HasOne<ContractorIntervention>()
+                    .WithMany()
+                    .HasForeignKey(e => e.InterventionId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_cia_intervention");
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_cia_user");
+            });
+        }
+
+        private static void ConfigureInventoryTransaction(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<InventoryTransaction>(entity =>
+            {
+                entity.ToTable("inventory_transactions");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.PartId).HasColumnName("part_id");
+                entity.Property(e => e.WarehouseId).HasColumnName("warehouse_id");
+                entity.Property(e => e.TransactionType)
+                    .HasColumnName("transaction_type")
+                    .HasMaxLength(8)
+                    .IsRequired();
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+                entity.Property(e => e.TransactionDate).HasColumnName("transaction_date");
+                entity.Property(e => e.PerformedById).HasColumnName("performed_by");
+                entity.Property(e => e.RelatedDocument)
+                    .HasColumnName("related_document")
+                    .HasMaxLength(255);
+                entity.Property(e => e.Note).HasColumnName("note");
+
+                entity.HasIndex(e => e.PartId)
+                    .HasDatabaseName("fk_it_part");
+                entity.HasIndex(e => e.PerformedById)
+                    .HasDatabaseName("fk_it_user");
+                entity.HasIndex(e => e.WarehouseId)
+                    .HasDatabaseName("fk_it_warehouse");
+
+                entity.HasOne(e => e.Part)
+                    .WithMany(p => p.InventoryTransactions)
+                    .HasForeignKey(e => e.PartId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_it_part");
+
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_it_warehouse");
+
+                entity.HasOne(e => e.PerformedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.PerformedById)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_it_user");
+            });
+        }
+
+        private static void ConfigureQualityEvent(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<QualityEvent>(entity =>
+            {
+                entity.ToTable("quality_events");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.EventType)
+                    .HasColumnName("event_type")
+                    .HasConversion<string>()
+                    .HasMaxLength(14);
+                entity.Property(e => e.DateOpen)
+                    .HasColumnName("date_open")
+                    .HasColumnType("date");
+                entity.Property(e => e.DateClose)
+                    .HasColumnName("date_close")
+                    .HasColumnType("date");
+                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.RelatedMachineId).HasColumnName("related_machine");
+                entity.Property(e => e.RelatedComponentId).HasColumnName("related_component");
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .HasConversion<string>()
+                    .HasMaxLength(12);
+                entity.Property(e => e.Actions).HasColumnName("actions");
+                entity.Property(e => e.DocFile)
+                    .HasColumnName("doc_file")
+                    .HasMaxLength(255);
+                entity.Property(e => e.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(128);
+                entity.Property(e => e.CreatedById).HasColumnName("created_by_id");
+                entity.Property(e => e.LastModifiedById).HasColumnName("last_modified_by_id");
+                entity.Property(e => e.LastModified).HasColumnName("last_modified");
+
+                entity.Property<int?>("TypeId").HasColumnName("type_id");
+                entity.Property<int?>("StatusId").HasColumnName("status_id");
+
+                entity.HasIndex(e => e.RelatedComponentId)
+                    .HasDatabaseName("fk_qe_component");
+                entity.HasIndex(e => e.RelatedMachineId)
+                    .HasDatabaseName("fk_qe_machine");
+                entity.HasIndex("StatusId")
+                    .HasDatabaseName("idx_qe_status_id");
+                entity.HasIndex("TypeId")
+                    .HasDatabaseName("idx_qe_type_id");
+
+                entity.HasOne(e => e.RelatedComponent)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedComponentId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_qe_component");
+
+                entity.HasOne(e => e.RelatedMachine)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedMachineId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_qe_machine");
+            });
+        }
+
+        private static void ConfigureStockLevel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StockLevel>(entity =>
+            {
+                entity.ToTable("stock_levels");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.PartId).HasColumnName("part_id");
+                entity.Property(e => e.WarehouseId).HasColumnName("warehouse_id");
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+                entity.Property(e => e.MinThreshold).HasColumnName("min_threshold");
+                entity.Property(e => e.MaxThreshold).HasColumnName("max_threshold");
+                entity.Property(e => e.AutoReorderTriggered).HasColumnName("auto_reorder_triggered");
+                entity.Property(e => e.DaysBelowMin).HasColumnName("days_below_min");
+                entity.Property(e => e.AlarmStatus)
+                    .HasColumnName("alarm_status")
+                    .HasMaxLength(30);
+                entity.Property(e => e.AnomalyScore).HasColumnName("anomaly_score");
+                entity.Property(e => e.LastModified).HasColumnName("last_modified");
+                entity.Property(e => e.LastModifiedById).HasColumnName("last_modified_by_id");
+                entity.Property(e => e.SourceIp)
+                    .HasColumnName("source_ip")
+                    .HasMaxLength(45);
+                entity.Property(e => e.GeoLocation)
+                    .HasColumnName("geo_location")
+                    .HasMaxLength(100);
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasMaxLength(255);
+                entity.Property(e => e.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(128);
+                entity.Property(e => e.EntryHash)
+                    .HasColumnName("entry_hash")
+                    .HasMaxLength(128);
+                entity.Property(e => e.OldStateSnapshot)
+                    .HasColumnName("old_state_snapshot")
+                    .HasMaxLength(255);
+                entity.Property(e => e.NewStateSnapshot)
+                    .HasColumnName("new_state_snapshot")
+                    .HasMaxLength(255);
+                entity.Property(e => e.IsAutomated).HasColumnName("is_automated");
+                entity.Property(e => e.SessionId)
+                    .HasColumnName("session_id")
+                    .HasMaxLength(80);
+                entity.Property(e => e.RelatedCaseId).HasColumnName("related_case_id");
+                entity.Property(e => e.RelatedCaseType)
+                    .HasColumnName("related_case_type")
+                    .HasMaxLength(30);
+
+                entity.HasIndex(e => e.PartId)
+                    .HasDatabaseName("fk_sl_part");
+                entity.HasIndex(e => e.WarehouseId)
+                    .HasDatabaseName("fk_sl_warehouse");
+
+                entity.HasOne(e => e.Part)
+                    .WithMany(p => p.StockLevels)
+                    .HasForeignKey(e => e.PartId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_sl_part");
+
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_sl_warehouse");
+
+            });
+        }
+
+        private static void ConfigureWarehouse(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Warehouse>(entity =>
+            {
+                entity.ToTable("warehouses");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasMaxLength(100)
+                    .IsRequired();
+                entity.Property(e => e.Location)
+                    .HasColumnName("location")
+                    .HasMaxLength(255)
+                    .IsRequired();
+                entity.Property(e => e.ResponsibleId).HasColumnName("responsible_id");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.LastModified).HasColumnName("last_modified");
+                entity.Property(e => e.CreatedById).HasColumnName("created_by_id");
+                entity.Property(e => e.LastModifiedById).HasColumnName("last_modified_by_id");
+                entity.Property(e => e.QrCode)
+                    .HasColumnName("qr_code")
+                    .HasMaxLength(255);
+                entity.Property(e => e.Note)
+                    .HasColumnName("note")
+                    .HasMaxLength(500);
+                entity.Property(e => e.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(128);
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .HasMaxLength(30);
+                entity.Property(e => e.IoTDeviceId)
+                    .HasColumnName("io_tdevice_id")
+                    .HasMaxLength(64);
+                entity.Property(e => e.ClimateMode)
+                    .HasColumnName("climate_mode")
+                    .HasMaxLength(60);
+                entity.Property(e => e.EntryHash)
+                    .HasColumnName("entry_hash")
+                    .HasMaxLength(128);
+                entity.Property(e => e.SourceIp)
+                    .HasColumnName("source_ip")
+                    .HasMaxLength(45);
+                entity.Property(e => e.IsQualified).HasColumnName("is_qualified");
+                entity.Property(e => e.LastQualified).HasColumnName("last_qualified");
+                entity.Property(e => e.SessionId)
+                    .HasColumnName("session_id")
+                    .HasMaxLength(80);
+                entity.Property(e => e.AnomalyScore).HasColumnName("anomaly_score");
+                entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+
+                entity.Property<int?>("LocationId").HasColumnName("location_id");
+
+                entity.HasIndex(e => e.ResponsibleId)
+                    .HasDatabaseName("fk_wh_user");
+                entity.HasIndex("LocationId")
+                    .HasDatabaseName("fk_wh_location");
+
+                entity.HasOne(e => e.Responsible)
+                    .WithMany()
+                    .HasForeignKey(e => e.ResponsibleId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_wh_user");
+
+                entity.Ignore(e => e.ComplianceDocs);
+            });
         }
     }
 }
