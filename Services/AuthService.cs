@@ -115,6 +115,49 @@ namespace YasGMP.Services
             }
         }
 
+        /// <summary>
+        /// Verifies a two-factor authentication code for the given username.
+        /// Logs success/failure and ensures <see cref="CurrentUser"/> is hydrated for downstream consumers.
+        /// </summary>
+        public async Task<bool> VerifyTwoFactorCodeAsync(string username, string code)
+        {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(code))
+            {
+                await _auditService.LogSystemEventAsync("2FA_FAILED", $"Missing 2FA input for user: {username}");
+                return false;
+            }
+
+            try
+            {
+                var valid = await _userService.VerifyTwoFactorCodeAsync(username, code).ConfigureAwait(false);
+
+                if (valid)
+                {
+                    if (CurrentUser == null)
+                    {
+                        CurrentUser = await _userService.GetUserByUsernameAsync(username).ConfigureAwait(false);
+                    }
+
+                    await _auditService.LogSystemEventAsync(
+                        "2FA_SUCCESS",
+                        $"User {username} passed 2FA. Device: {CurrentDeviceInfo}, IP: {CurrentIpAddress}, Session: {CurrentSessionId}");
+                }
+                else
+                {
+                    await _auditService.LogSystemEventAsync(
+                        "2FA_FAILED",
+                        $"User {username} provided invalid 2FA code. Session: {CurrentSessionId}");
+                }
+
+                return valid;
+            }
+            catch (Exception ex)
+            {
+                await _auditService.LogSystemEventAsync("2FA_ERROR", $"2FA error for user {username}: {ex.Message}");
+                throw;
+            }
+        }
+
         #endregion
 
         #region === PASSWORD MANAGEMENT / HELPERS ===
