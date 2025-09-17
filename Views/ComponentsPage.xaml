@@ -6,6 +6,13 @@
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
     Title="Komponente strojeva – YasGMP">
 
+  <ContentPage.ToolbarItems>
+    <ToolbarItem Text="📤 Export"
+                 Order="Primary"
+                 Priority="0"
+                 Clicked="OnExportComponentsClicked" />
+  </ContentPage.ToolbarItems>
+
   <ContentPage.Content>
     <VerticalStackLayout Padding="28,20,28,20" Spacing="18"
                          BackgroundColor="{StaticResource YtSurface}">
@@ -40,7 +47,8 @@
           </HorizontalStackLayout>
 
           <CollectionView x:Name="ComponentListView"
-                          ItemsSource="{Binding Components}"
+                          ItemsSource="{Binding FilteredComponents}"
+                          SelectedItem="{Binding SelectedComponent, Mode=TwoWay}"
                           SelectionMode="Single"
                           HeightRequest="440"
                           BackgroundColor="{StaticResource YtSurface}">

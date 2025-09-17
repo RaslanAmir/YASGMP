@@ -49,7 +49,7 @@ namespace YasGMP.ViewModels
         /// <param name="authService">Authentication/session service (DI).</param>
         /// <param name="exportService">Export orchestrator service.</param>
         /// <exception cref="ArgumentNullException">Thrown if any dependency is null.</exception>
-        public ComponentViewModel(DatabaseService dbService, AuthService authService, ExportService exportService)
+        public ComponentViewModel(DatabaseService dbService, AuthService authService, ExportService exportService, bool autoLoad = true)
         {
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
@@ -63,10 +63,13 @@ namespace YasGMP.ViewModels
             AddComponentCommand = new AsyncRelayCommand(AddComponentAsync, () => !IsBusy && SelectedComponent != null);
             UpdateComponentCommand = new AsyncRelayCommand(UpdateComponentAsync, () => !IsBusy && SelectedComponent != null);
             DeleteComponentCommand = new AsyncRelayCommand(DeleteComponentAsync, () => !IsBusy && SelectedComponent != null);
-            ExportComponentsCommand = new AsyncRelayCommand(ExportComponentsAsync, () => !IsBusy);
+            ExportComponentsCommand = new AsyncRelayCommand(ExecuteExportComponentsCommandAsync, () => !IsBusy);
             FilterChangedCommand = new RelayCommand(FilterComponents);
 
-            _ = LoadComponentsAsync();
+            if (autoLoad)
+            {
+                _ = LoadComponentsAsync();
+            }
         }
 
         #endregion
@@ -97,7 +100,21 @@ namespace YasGMP.ViewModels
         public MachineComponent? SelectedComponent
         {
             get => _selectedComponent;
-            set { _selectedComponent = value; OnPropertyChanged(); }
+            set
+            {
+                if (_selectedComponent == value)
+                    return;
+
+                _selectedComponent = value;
+                OnPropertyChanged();
+
+                if (AddComponentCommand is IRelayCommand addCmd)
+                    addCmd.NotifyCanExecuteChanged();
+                if (UpdateComponentCommand is IRelayCommand updateCmd)
+                    updateCmd.NotifyCanExecuteChanged();
+                if (DeleteComponentCommand is IRelayCommand deleteCmd)
+                    deleteCmd.NotifyCanExecuteChanged();
+            }
         }
 
         /// <summary>
@@ -124,7 +141,23 @@ namespace YasGMP.ViewModels
         public bool IsBusy
         {
             get => _isBusy;
-            set { _isBusy = value; OnPropertyChanged(); }
+            set
+            {
+                if (_isBusy == value)
+                    return;
+
+                _isBusy = value;
+                OnPropertyChanged();
+
+                if (AddComponentCommand is IRelayCommand addCmd)
+                    addCmd.NotifyCanExecuteChanged();
+                if (UpdateComponentCommand is IRelayCommand updateCmd)
+                    updateCmd.NotifyCanExecuteChanged();
+                if (DeleteComponentCommand is IRelayCommand deleteCmd)
+                    deleteCmd.NotifyCanExecuteChanged();
+
+                ExportComponentsCommand.NotifyCanExecuteChanged();
+            }
         }
 
         /// <summary>
@@ -158,7 +191,7 @@ namespace YasGMP.ViewModels
         public ICommand DeleteComponentCommand { get; }
 
         /// <summary>Exports filtered components (placeholder).</summary>
-        public ICommand ExportComponentsCommand { get; }
+        public IAsyncRelayCommand ExportComponentsCommand { get; }
 
         /// <summary>Signals filter changes from the UI.</summary>
         public ICommand FilterChangedCommand { get; }
@@ -283,10 +316,16 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
+        private async Task ExecuteExportComponentsCommandAsync()
+        {
+            await ExportComponentsAsync().ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Exports the current filtered component list to a user-chosen format with audit logging.
+        /// Returns the exported file path or <c>null</c> if the operation failed or was cancelled.
         /// </summary>
-        public async Task ExportComponentsAsync()
+        public async Task<string?> ExportComponentsAsync()
         {
             IsBusy = true;
             try
@@ -316,10 +355,12 @@ namespace YasGMP.ViewModels
                 ).ConfigureAwait(false);
 
                 StatusMessage = $"Exported {items.Count} component(s) to {filePath}.";
+                return filePath;
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Export failed: {ex.Message}";
+                return null;
             }
             finally { IsBusy = false; }
         }

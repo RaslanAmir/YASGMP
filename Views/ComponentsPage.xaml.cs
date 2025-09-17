@@ -11,14 +11,17 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.IO;
 using System.Threading.Tasks;
 using System.Text;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Storage;
 using Microsoft.Maui.Controls;
 using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.ViewModels;
 
 namespace YasGMP.Views
 {
@@ -28,10 +31,8 @@ namespace YasGMP.Views
     /// </summary>
     public partial class ComponentsPage : ContentPage
     {
-        /// <summary>Kolekcija komponenti za UI binding.</summary>
-        public ObservableCollection<MachineComponent> Components { get; } = new();
-
         private readonly DatabaseService _dbService;
+        private readonly ComponentViewModel _viewModel;
         private readonly Dictionary<int, string> _machineLookup = new();
         private Task? _machinesPreloadTask;
 
@@ -45,7 +46,11 @@ namespace YasGMP.Views
 
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
 
-            BindingContext = this;
+            var authService = ServiceLocator.GetRequiredService<AuthService>();
+            var exportService = ServiceLocator.GetRequiredService<ExportService>();
+            _viewModel = new ComponentViewModel(_dbService, authService, exportService, autoLoad: false);
+
+            BindingContext = _viewModel;
 
             _machinesPreloadTask = LoadMachinesAsync();
             _ = LoadComponentsAsync();
@@ -131,9 +136,11 @@ ORDER BY name;";
 
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    Components.Clear();
-                    foreach (var c in list)
-                        Components.Add(c);
+                    _viewModel.Components = new ObservableCollection<MachineComponent>(list);
+                    _viewModel.FilterComponents();
+                    if (ComponentListView is not null)
+                        ComponentListView.SelectedItem = null;
+                    _viewModel.SelectedComponent = null;
                 });
             }
             catch (Exception ex)
@@ -279,6 +286,47 @@ WHERE id=@id;";
             catch (Exception ex)
             {
                 await SafeNavigator.ShowAlertAsync("Dokumenti", ex.Message, "OK");
+            }
+        }
+
+        private async void OnExportComponentsClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                string? path = await _viewModel.ExportComponentsAsync().ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    await SafeNavigator.ShowAlertAsync("Komponente", "Export je otkazan ili nije generirao datoteku.", "OK");
+                    return;
+                }
+
+                if (!File.Exists(path))
+                {
+                    await SafeNavigator.ShowAlertAsync("Komponente", $"Exportirana datoteka nije pronađena: {path}", "OK");
+                    return;
+                }
+
+                var request = new OpenFileRequest
+                {
+                    File = new ReadOnlyFile(path)
+                };
+
+                try
+                {
+                    await MainThread.InvokeOnMainThreadAsync(async () => await Launcher.OpenAsync(request));
+                }
+                catch (Exception launchEx)
+                {
+                    await SafeNavigator.ShowAlertAsync("Komponente", $"Datoteka je spremljena na: {path}\nOtvaranje nije uspjelo: {launchEx.Message}", "OK");
+                    return;
+                }
+
+                await SafeNavigator.ShowAlertAsync("Komponente", $"Datoteka je spremljena na: {path}", "OK");
+            }
+            catch (Exception ex)
+            {
+                await SafeNavigator.ShowAlertAsync("Komponente", $"Export nije uspio: {ex.Message}", "OK");
             }
         }
 
