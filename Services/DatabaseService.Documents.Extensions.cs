@@ -97,6 +97,22 @@ FROM documentcontrol ORDER BY id DESC";
             if (documentId <= 0) throw new ArgumentOutOfRangeException(nameof(documentId));
             if (changeControlId <= 0) throw new ArgumentOutOfRangeException(nameof(changeControlId));
 
+            var docExists = await db.ExecuteScalarAsync(
+                "SELECT 1 FROM documentcontrol WHERE id=@docId LIMIT 1",
+                new[] { new MySqlParameter("@docId", documentId) },
+                token).ConfigureAwait(false);
+
+            if (docExists == null || docExists == DBNull.Value)
+                throw new DocumentControlLinkException("Document not found. Please refresh and try again.");
+
+            var changeControlExists = await db.ExecuteScalarAsync(
+                "SELECT 1 FROM change_controls WHERE id=@ccId LIMIT 1",
+                new[] { new MySqlParameter("@ccId", changeControlId) },
+                token).ConfigureAwait(false);
+
+            if (changeControlExists == null || changeControlExists == DBNull.Value)
+                throw new DocumentControlLinkException("Change control not found. It may have been removed.");
+
             bool persisted = false;
             Exception? primaryFailure = null;
 
