@@ -44,7 +44,6 @@ namespace YasGMP.Views
 
             BindingContext = this;
 
-            _ = LoadMachinesAsync();
             _ = LoadComponentsAsync();
         }
 
