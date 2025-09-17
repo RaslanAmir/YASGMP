@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -31,9 +32,11 @@ namespace YasGMP.ViewModels
 
         private ObservableCollection<SopDocument> _documents = new();
         private ObservableCollection<SopDocument> _filteredDocuments = new();
+        private ObservableCollection<ChangeControlSummaryDto> _availableChangeControls = new();
 
         // nullable to avoid CS8618; UI guards all usages
         private SopDocument? _selectedDocument;
+        private ChangeControlSummaryDto? _selectedChangeControlForLink;
 
         private string? _searchTerm;
         private string? _statusFilter;
@@ -41,6 +44,7 @@ namespace YasGMP.ViewModels
 
         private bool _isBusy;
         private string? _statusMessage;
+        private bool _isChangeControlPickerOpen;
 
         private readonly string _currentSessionId;
         private readonly string _currentDeviceInfo;
@@ -74,7 +78,9 @@ namespace YasGMP.ViewModels
             ApproveDocumentCommand    = new AsyncRelayCommand(ApproveDocumentAsync,    () => !IsBusy && SelectedDocument != null && SelectedDocument.Status?.Equals("pending_approval", StringComparison.OrdinalIgnoreCase) == true);
             PublishDocumentCommand    = new AsyncRelayCommand(PublishDocumentAsync,    () => !IsBusy && SelectedDocument != null && SelectedDocument.Status?.Equals("approved", StringComparison.OrdinalIgnoreCase) == true);
             ExpireDocumentCommand     = new AsyncRelayCommand(ExpireDocumentAsync,     () => !IsBusy && SelectedDocument != null && SelectedDocument.Status?.Equals("published", StringComparison.OrdinalIgnoreCase) == true);
-            LinkChangeControlCommand  = new AsyncRelayCommand(LinkChangeControlAsync,  () => !IsBusy && SelectedDocument != null);
+            OpenChangeControlPickerCommand = new AsyncRelayCommand(OpenChangeControlPickerAsync, () => !IsBusy && SelectedDocument != null);
+            LinkChangeControlCommand       = new AsyncRelayCommand(LinkChangeControlAsync,  () => !IsBusy && SelectedDocument != null);
+            CancelChangeControlPickerCommand = new RelayCommand(CancelChangeControlPicker);
             ExportDocumentsCommand    = new AsyncRelayCommand(ExportDocumentsAsync,    () => !IsBusy);
             FilterChangedCommand      = new RelayCommand(FilterDocuments);
 
@@ -104,7 +110,49 @@ namespace YasGMP.ViewModels
         public SopDocument? SelectedDocument
         {
             get => _selectedDocument;
-            set { _selectedDocument = value; OnPropertyChanged(); }
+            set
+            {
+                _selectedDocument = value;
+                OnPropertyChanged();
+                CancelChangeControlPicker();
+            }
+        }
+
+        #endregion
+
+        #region Properties : Change Control Linking
+
+        /// <summary>Change controls available for linking in the picker dialog.</summary>
+        public ObservableCollection<ChangeControlSummaryDto> AvailableChangeControls
+        {
+            get => _availableChangeControls;
+            private set
+            {
+                _availableChangeControls = value ?? new ObservableCollection<ChangeControlSummaryDto>();
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>Currently selected change control in the picker dialog.</summary>
+        public ChangeControlSummaryDto? SelectedChangeControlForLink
+        {
+            get => _selectedChangeControlForLink;
+            set
+            {
+                _selectedChangeControlForLink = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>Whether the change control picker dialog should be visible.</summary>
+        public bool IsChangeControlPickerOpen
+        {
+            get => _isChangeControlPickerOpen;
+            private set
+            {
+                _isChangeControlPickerOpen = value;
+                OnPropertyChanged();
+            }
         }
 
         #endregion
@@ -169,7 +217,9 @@ namespace YasGMP.ViewModels
         public ICommand ApproveDocumentCommand { get; }
         public ICommand PublishDocumentCommand { get; }
         public ICommand ExpireDocumentCommand { get; }
+        public ICommand OpenChangeControlPickerCommand { get; }
         public ICommand LinkChangeControlCommand { get; }
+        public ICommand CancelChangeControlPickerCommand { get; }
         public ICommand ExportDocumentsCommand { get; }
         public ICommand FilterChangedCommand { get; }
 
@@ -468,8 +518,8 @@ namespace YasGMP.ViewModels
             }
         }
 
-        /// <summary>Links the selected document to a change control (demo uses a placeholder CC id = 0).</summary>
-        public async Task LinkChangeControlAsync()
+        /// <summary>Loads available change controls and opens the picker dialog.</summary>
+        public async Task OpenChangeControlPickerAsync()
         {
             if (SelectedDocument == null)
             {
@@ -480,11 +530,50 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                var changeControlId = 0; // Replace with a real selection from your UI
+                var changeControls = await _dbService.GetChangeControlsAsync().ConfigureAwait(false)
+                                   ?? new List<ChangeControlSummaryDto>();
+                AvailableChangeControls = new ObservableCollection<ChangeControlSummaryDto>(changeControls);
+                SelectedChangeControlForLink = null;
+                IsChangeControlPickerOpen = true;
+                StatusMessage = $"Loaded {AvailableChangeControls.Count} change control(s).";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error loading change controls: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
 
+        private void CancelChangeControlPicker()
+        {
+            IsChangeControlPickerOpen = false;
+            SelectedChangeControlForLink = null;
+        }
+
+        /// <summary>Links the selected document to a change control.</summary>
+        public async Task LinkChangeControlAsync()
+        {
+            if (SelectedDocument == null)
+            {
+                StatusMessage = "No document selected.";
+                return;
+            }
+
+            if (SelectedChangeControlForLink == null)
+            {
+                StatusMessage = "Select a change control to link.";
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
                 await _dbService.LinkChangeControlToDocumentAsync(
                     documentId: SelectedDocument.Id,
-                    changeControlId: changeControlId,
+                    changeControlId: SelectedChangeControlForLink.Id,
                     actorUserId: _authService.CurrentUser?.Id ?? 0,
                     ip: _currentIpAddress,
                     device: _currentDeviceInfo
@@ -494,13 +583,14 @@ namespace YasGMP.ViewModels
                     documentId: SelectedDocument.Id,
                     action: "LINK_CHANGE",
                     actorUserId: _authService.CurrentUser?.Id ?? 0,
-                    description: $"Linked CC #{changeControlId}",
+                    description: $"Linked CC #{SelectedChangeControlForLink.Id} ({SelectedChangeControlForLink.Code})",
                     ip: _currentIpAddress,
                     deviceInfo: _currentDeviceInfo,
                     sessionId: _currentSessionId
                 ).ConfigureAwait(false);
 
-                StatusMessage = $"Change control linked for '{SelectedDocument.Name}'.";
+                StatusMessage = $"Change control '{SelectedChangeControlForLink.Code}' linked to '{SelectedDocument.Name}'.";
+                CancelChangeControlPicker();
                 await LoadDocumentsAsync().ConfigureAwait(false);
             }
             catch (Exception ex)

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="YasGMP.Views.DocumentControlPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:conv="clr-namespace:YasGMP.Converters"
+    mc:Ignorable="d">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <conv:NullToBoolConverter x:Key="NullToBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,*,Auto" ColumnDefinitions="*">
+        <Label Grid.Row="0"
+               Text="Document Control"
+               FontAttributes="Bold"
+               FontSize="22"
+               TextColor="{DynamicResource YtPrimary700}" />
+
+        <SearchBar Grid.Row="1"
+                   Placeholder="Search by name, code, status or notes"
+                   Text="{Binding SearchTerm}" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,8">
+            <Picker Grid.Column="0"
+                    Title="Status"
+                    ItemsSource="{Binding AvailableStatuses}"
+                    SelectedItem="{Binding StatusFilter}" />
+            <Picker Grid.Column="1"
+                    Title="Type"
+                    ItemsSource="{Binding AvailableTypes}"
+                    SelectedItem="{Binding TypeFilter}" />
+        </Grid>
+
+        <CollectionView Grid.Row="3"
+                        ItemsSource="{Binding FilteredDocuments}"
+                        SelectedItem="{Binding SelectedDocument}"
+                        SelectionMode="Single">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Stroke="{DynamicResource YtPrimary200}" StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{DynamicResource YtSurfaceCard}"
+                            Margin="0,0,0,8"
+                            Padding="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                            <Label Text="{Binding Code}" FontSize="12" TextColor="{DynamicResource YtPrimary500}" />
+                            <HorizontalStackLayout Spacing="12">
+                                <Label Text="{Binding Status, StringFormat='Status: {0}'}" FontSize="12" />
+                                <Label Text="{Binding VersionNo, StringFormat='Version: {0}'}" FontSize="12" />
+                            </HorizontalStackLayout>
+                            <Label Text="{Binding ReviewNotes}" FontSize="12" TextColor="{DynamicResource YtOnSurfaceVariant}" MaxLines="2" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="4" Spacing="8">
+            <HorizontalStackLayout Spacing="12">
+                <Button Text="Link Change Control"
+                        Command="{Binding OpenChangeControlPickerCommand}"
+                        IsEnabled="{Binding SelectedDocument, Converter={StaticResource NullToBoolConverter}}"
+                        Style="{StaticResource YtButton.Primary}" />
+                <Button Text="Refresh"
+                        Command="{Binding LoadDocumentsCommand}"
+                        Style="{StaticResource YtButton.Flat}" />
+            </HorizontalStackLayout>
+            <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource YtOnSurfaceVariant}" FontSize="12" />
+        </VerticalStackLayout>
+
+        <Border Grid.RowSpan="5"
+                BackgroundColor="#66000000"
+                IsVisible="{Binding IsChangeControlPickerOpen}"
+                ZIndex="10">
+            <Border Stroke="{DynamicResource YtPrimary200}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{DynamicResource YtSurface}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Padding="20"
+                    WidthRequest="420">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="Select Change Control"
+                           FontAttributes="Bold"
+                           FontSize="18"
+                           HorizontalOptions="Center" />
+                    <CollectionView ItemsSource="{Binding AvailableChangeControls}"
+                                    SelectedItem="{Binding SelectedChangeControlForLink}"
+                                    SelectionMode="Single"
+                                    HeightRequest="240">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Stroke="{DynamicResource YtPrimary100}" StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="{DynamicResource YtSurfaceCard}"
+                                        Margin="0,0,0,8"
+                                        Padding="10">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Code}" FontSize="12" TextColor="{DynamicResource YtPrimary500}" />
+                                        <Label Text="{Binding Status, StringFormat='Status: {0}'}" FontSize="12" />
+                                        <Label Text="{Binding DateRequested, StringFormat='Requested: {0:yyyy-MM-dd}'}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                        <Button Text="Cancel"
+                                Command="{Binding CancelChangeControlPickerCommand}"
+                                Style="{StaticResource YtButton.Flat}" />
+                        <Button Text="Link"
+                                Command="{Binding LinkChangeControlCommand}"
+                                IsEnabled="{Binding SelectedChangeControlForLink, Converter={StaticResource NullToBoolConverter}}"
+                                Style="{StaticResource YtButton.Primary}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+    </Grid>
+</ContentPage>

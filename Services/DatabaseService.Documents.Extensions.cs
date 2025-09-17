@@ -85,13 +85,75 @@ FROM documentcontrol ORDER BY id DESC";
 
         public static async Task LinkChangeControlToDocumentAsync(this DatabaseService db, int documentId, int changeControlId, int actorUserId, string ip, string device, CancellationToken token = default)
         {
-            // Best-effort append to a CSV/JSON column
+            if (documentId <= 0) throw new ArgumentOutOfRangeException(nameof(documentId));
+            if (changeControlId <= 0) throw new ArgumentOutOfRangeException(nameof(changeControlId));
+
+            bool persisted = false;
+            Exception? primaryFailure = null;
+
             try
             {
-                await db.ExecuteNonQueryAsync("UPDATE documentcontrol SET linked_change_controls = CONCAT(IFNULL(linked_change_controls,''), CASE WHEN linked_change_controls IS NULL OR linked_change_controls='' THEN '' ELSE ',' END, @cc) WHERE id=@id",
-                    new[] { new MySqlParameter("@cc", changeControlId.ToString()), new MySqlParameter("@id", documentId) }, token).ConfigureAwait(false);
+                const string ensureSql = @"CREATE TABLE IF NOT EXISTS document_change_controls (
+    document_id INT NOT NULL,
+    change_control_id INT NOT NULL,
+    linked_by INT NULL,
+    linked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (document_id, change_control_id),
+    INDEX idx_dcc_document (document_id),
+    INDEX idx_dcc_change (change_control_id),
+    CONSTRAINT fk_dcc_document FOREIGN KEY (document_id) REFERENCES documentcontrol(id) ON DELETE CASCADE,
+    CONSTRAINT fk_dcc_change FOREIGN KEY (change_control_id) REFERENCES change_controls(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
+
+                await db.ExecuteNonQueryAsync(ensureSql, null, token).ConfigureAwait(false);
+
+                const string insertSql = @"INSERT INTO document_change_controls (document_id, change_control_id, linked_by)
+VALUES (@docId, @ccId, @actor)
+ON DUPLICATE KEY UPDATE linked_at = CURRENT_TIMESTAMP, linked_by = @actor";
+
+                var insertPars = new[]
+                {
+                    new MySqlParameter("@docId", documentId),
+                    new MySqlParameter("@ccId", changeControlId),
+                    new MySqlParameter("@actor", actorUserId == 0 ? (object)DBNull.Value : actorUserId)
+                };
+
+                await db.ExecuteNonQueryAsync(insertSql, insertPars, token).ConfigureAwait(false);
+                persisted = true;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                primaryFailure = ex;
+            }
+
+            if (!persisted)
+            {
+                try
+                {
+                    await db.ExecuteNonQueryAsync(
+                        "UPDATE documentcontrol SET linked_change_controls = CONCAT(IFNULL(linked_change_controls,''), CASE WHEN linked_change_controls IS NULL OR linked_change_controls='' THEN '' ELSE ',' END, @cc) WHERE id=@id",
+                        new[]
+                        {
+                            new MySqlParameter("@cc", changeControlId.ToString()),
+                            new MySqlParameter("@id", documentId)
+                        },
+                        token).ConfigureAwait(false);
+                    persisted = true;
+                }
+                catch (Exception fallbackEx)
+                {
+                    if (primaryFailure != null)
+                        throw new AggregateException("Failed to link change control to document.", primaryFailure, fallbackEx);
+
+                    throw;
+                }
+            }
+
+            if (!persisted && primaryFailure != null)
+            {
+                throw new InvalidOperationException("Unable to persist change control link.", primaryFailure);
+            }
+
             await db.LogSystemEventAsync(actorUserId, "DOC_LINK_CHANGE", "documentcontrol", "DocControl", documentId, $"cc={changeControlId}", ip, "audit", device, null, token: token).ConfigureAwait(false);
         }
 
