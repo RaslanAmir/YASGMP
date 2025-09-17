@@ -42,6 +42,7 @@ SELECT
     m.id, m.code, m.name,
     COALESCE(mt.name, m.machine_type)       AS machine_type,
     m.description, m.model,
+    m.serial_number,
     COALESCE(mf.name, m.manufacturer)       AS manufacturer,
     COALESCE(l.name,  m.location)           AS location,
     COALESCE(rp.name, m.responsible_party)  AS responsible_party,
@@ -62,6 +63,7 @@ SELECT
     m.id, m.code, m.name,
     mt.name AS machine_type,
     m.description, m.model,
+    m.serial_number,
     mf.name AS manufacturer,
     l.name  AS location,
     rp.name AS responsible_party,
@@ -101,6 +103,7 @@ ORDER BY m.name, m.id";
                     MachineType = S("machine_type"),
                     Description = S("description"),
                     Model = S("model"),
+                    SerialNumber = S("serial_number"),
                     Manufacturer = S("manufacturer"),
                     Location = S("location"),
                     ResponsibleParty = S("responsible_party"),
@@ -127,6 +130,7 @@ SELECT
     m.id, m.code, m.name,
     COALESCE(mt.name, m.machine_type)      AS machine_type,
     m.description, m.model,
+    m.serial_number,
     COALESCE(mf.name, m.manufacturer)      AS manufacturer,
     COALESCE(l.name,  m.location)          AS location,
     COALESCE(rp.name, m.responsible_party) AS responsible_party
@@ -143,6 +147,7 @@ SELECT
     m.id, m.code, m.name,
     mt.name AS machine_type,
     m.description, m.model,
+    m.serial_number,
     mf.name AS manufacturer,
     l.name  AS location,
     rp.name AS responsible_party
@@ -174,6 +179,7 @@ LIMIT 1";
                 MachineType = r.Table.Columns.Contains("machine_type") ? r["machine_type"]?.ToString() ?? string.Empty : string.Empty,
                 Description = r.Table.Columns.Contains("description") ? r["description"]?.ToString() ?? string.Empty : string.Empty,
                 Model = r.Table.Columns.Contains("model") ? r["model"]?.ToString() ?? string.Empty : string.Empty,
+                SerialNumber = r.Table.Columns.Contains("serial_number") ? r["serial_number"]?.ToString() ?? string.Empty : string.Empty,
                 Manufacturer = r.Table.Columns.Contains("manufacturer") ? r["manufacturer"]?.ToString() ?? string.Empty : string.Empty,
                 Location = r.Table.Columns.Contains("location") ? r["location"]?.ToString() ?? string.Empty : string.Empty,
                 ResponsibleParty = r.Table.Columns.Contains("responsible_party") ? r["responsible_party"]?.ToString() ?? string.Empty : string.Empty
