@@ -1,5 +1,0 @@
-﻿# Table `validations`
-Schema columns: additional_signers, anomaly_score, capa_case?, code, comment, component_id, created_at, created_by_id, date_end, date_start, digital_signature, doc_file, documentation, entry_hash, id, last_modified, last_modified_by_id, linked_capa_id, machine?, machine_component?, machine_id, next_due, regulator, session_id, signature_timestamp, signed_by, signed_by_id, signed_by_name, source_ip, status, type, updated_at, user?, validation_date, workflow_status
-Code-used columns: code, comment, component_id, date_end, date_start, digital_signature, documentation, machine_id, next_due, status, type
-Missing in schema: 
-Extra in schema (unused by code): additional_signers, anomaly_score, capa_case?, created_at, created_by_id, doc_file, entry_hash, id, last_modified, last_modified_by_id, linked_capa_id, machine?, machine_component?, regulator, session_id, signature_timestamp, signed_by, signed_by_id, signed_by_name, source_ip, updated_at, user?, validation_date, workflow_status

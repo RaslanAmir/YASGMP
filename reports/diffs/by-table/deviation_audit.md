@@ -1,5 +1,0 @@
-﻿# Table `deviation_audit`
-Schema columns: action, ai_anomaly_score, approval_status, approval_time, approved_by, audit_trail_id, changed_at, comment, created_at, deleted, deleted_at, deleted_by, details, deviation_id, device_info, digital_signature, export_status, export_time, exported_by, id, iot_event_id, new_value, old_value, regulatory_status, related_file, related_photo, restoration_reference, restored_from_snapshot, session_id, signature_method, signature_type, signature_valid, source_ip, updated_at, user_id, validated
-Code-used columns: action, ai_anomaly_score, approval_status, approval_time, approved_by, changed_at, comment, created_at, deleted, deleted_at, deleted_by, details, deviation_id, device_info, digital_signature, export_status, export_time, exported_by, iot_event_id, new_value, old_value, regulatory_status, related_file, related_photo, restoration_reference, restored_from_snapshot, session_id, signature_type, signature_valid, source_ip, updated_at, user_id, validated
-Missing in schema: 
-Extra in schema (unused by code): audit_trail_id, id, signature_method

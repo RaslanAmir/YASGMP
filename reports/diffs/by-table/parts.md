@@ -1,5 +1,0 @@
-﻿# Table `parts`
-Schema columns: anomaly_score, barcode, blocked, category, change_logs, code, created_at, default_supplier, default_supplier_id, description, digital_signature, documents, expiry_date, id, image, images, last_modified, last_modified_by, last_modified_by_id, location, min_stock_alert, name, note, price, regulatory_certificates, rfid, serial_or_lot, source_ip, status, stock, stock_history, supplier, supplier_prices, updated_at, warehouse_stocks, warehouses, warranty_until, work_order_parts
-Code-used columns: barcode, blocked, category, code, default_supplier_id, description, digital_signature, id, image, last_modified, last_modified_by_id, location, min_stock_alert, name, price, regulatory_certificates, rfid, serial_or_lot, source_ip, status, stock, supplier
-Missing in schema: 
-Extra in schema (unused by code): anomaly_score, change_logs, created_at, default_supplier, documents, expiry_date, images, last_modified_by, note, stock_history, supplier_prices, updated_at, warehouse_stocks, warehouses, warranty_until, work_order_parts

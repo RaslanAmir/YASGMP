@@ -1,5 +1,0 @@
-﻿# Table `deviations`
-Schema columns: anomaly_score, assigned_investigator_id, assigned_investigator_name, attachment_ids, attachments, audit_note, audit_trail, capa_case?, closed_at, closure_comment, code, corrective_actions, created_at, description, digital_signature, id, investigation_started_at, is_critical, last_modified, last_modified_by_id, linked_capa_id, reported_at, reported_by_id, risk_score, root_cause, severity, source_ip, status, string>, title, updated_at, user, user?
-Code-used columns: anomaly_score, assigned_investigator_id, assigned_investigator_name, audit_note, closed_at, closure_comment, code, description, digital_signature, investigation_started_at, is_critical, last_modified, last_modified_by_id, linked_capa_id, reported_at, reported_by_id, risk_score, root_cause, severity, source_ip, status, title
-Missing in schema: 
-Extra in schema (unused by code): attachment_ids, attachments, audit_trail, capa_case?, corrective_actions, created_at, id, string>, updated_at, user, user?
