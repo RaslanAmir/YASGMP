@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
+using YasGMP.Services;
 
 namespace YasGMP.Helpers
 {
@@ -15,9 +14,13 @@ namespace YasGMP.Helpers
         {
             try
             {
-                var choice = await MainThread.InvokeOnMainThreadAsync(async () =>
-                    await (Application.Current?.MainPage)?.DisplayActionSheet(
-                        "Export format", "Cancel", null, "CSV", "XLSX", "PDF")!);
+                var choice = await SafeNavigator.ActionSheetAsync(
+                    "Export format",
+                    "Cancel",
+                    null,
+                    "CSV",
+                    "XLSX",
+                    "PDF").ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(choice) || choice.Equals("Cancel", StringComparison.OrdinalIgnoreCase))
                     return "csv";

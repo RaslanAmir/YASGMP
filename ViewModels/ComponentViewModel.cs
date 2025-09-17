@@ -7,7 +7,6 @@ using System.Windows.Input;
 using System.Linq;
 using YasGMP.Models;
 using YasGMP.Services;
-using YasGMP.Helpers;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 
@@ -63,7 +62,7 @@ namespace YasGMP.ViewModels
             AddComponentCommand = new AsyncRelayCommand(AddComponentAsync, () => !IsBusy && SelectedComponent != null);
             UpdateComponentCommand = new AsyncRelayCommand(UpdateComponentAsync, () => !IsBusy && SelectedComponent != null);
             DeleteComponentCommand = new AsyncRelayCommand(DeleteComponentAsync, () => !IsBusy && SelectedComponent != null);
-            ExportComponentsCommand = new AsyncRelayCommand(ExecuteExportComponentsCommandAsync, () => !IsBusy);
+            ExportComponentsCommand = new AsyncRelayCommand<string?>(ExecuteExportComponentsCommandAsync, _ => !IsBusy);
             FilterChangedCommand = new RelayCommand(FilterComponents);
 
             if (autoLoad)
@@ -316,21 +315,20 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
-        private async Task ExecuteExportComponentsCommandAsync()
+        private async Task ExecuteExportComponentsCommandAsync(string? format)
         {
-            await ExportComponentsAsync().ConfigureAwait(false);
+            await ExportComponentsAsync(format).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Exports the current filtered component list to a user-chosen format with audit logging.
         /// Returns the exported file path or <c>null</c> if the operation failed or was cancelled.
         /// </summary>
-        public async Task<string?> ExportComponentsAsync()
+        public async Task<string?> ExportComponentsAsync(string? format = null)
         {
             IsBusy = true;
             try
             {
-                var format = await ExportFormatPrompt.PromptAsync().ConfigureAwait(false);
                 var normalizedFormat = string.IsNullOrWhiteSpace(format)
                     ? "csv"
                     : format.Trim().ToLowerInvariant();
