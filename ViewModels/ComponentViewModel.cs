@@ -23,6 +23,7 @@ namespace YasGMP.ViewModels
 
         private readonly DatabaseService _dbService;
         private readonly AuthService _authService;
+        private readonly ExportService _exportService;
 
         private ObservableCollection<MachineComponent> _components = new();
         private ObservableCollection<MachineComponent> _filteredComponents = new();
@@ -46,11 +47,13 @@ namespace YasGMP.ViewModels
         /// </summary>
         /// <param name="dbService">Database access service (DI).</param>
         /// <param name="authService">Authentication/session service (DI).</param>
+        /// <param name="exportService">Export orchestrator service.</param>
         /// <exception cref="ArgumentNullException">Thrown if any dependency is null.</exception>
-        public ComponentViewModel(DatabaseService dbService, AuthService authService)
+        public ComponentViewModel(DatabaseService dbService, AuthService authService, ExportService exportService)
         {
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 
             _currentSessionId = _authService.CurrentSessionId;
             _currentDeviceInfo = _authService.CurrentDeviceInfo;
@@ -281,15 +284,38 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>
-        /// Exports all filtered components (placeholder hook; wire to real export service when available).
+        /// Exports the current filtered component list to a user-chosen format with audit logging.
         /// </summary>
         public async Task ExportComponentsAsync()
         {
             IsBusy = true;
             try
             {
-                await Task.Yield();
-                StatusMessage = "Components exported successfully (placeholder).";
+                var format = await ExportFormatPrompt.PromptAsync().ConfigureAwait(false);
+                var normalizedFormat = string.IsNullOrWhiteSpace(format)
+                    ? "csv"
+                    : format.Trim().ToLowerInvariant();
+
+                var items = FilteredComponents?.ToList() ?? new List<MachineComponent>();
+                string filePath = await _exportService.ExportComponentsAsync(items, normalizedFormat).ConfigureAwait(false);
+
+                int? actorUserId = _authService.CurrentUser?.Id;
+                string description = $"format={normalizedFormat}; count={items.Count}; file={filePath}";
+
+                await _dbService.LogSystemEventAsync(
+                    userId: actorUserId,
+                    eventType: "COMP_EXPORT",
+                    tableName: "machine_components",
+                    module: "MachineModule",
+                    recordId: null,
+                    description: description,
+                    ip: _currentIpAddress,
+                    severity: "info",
+                    deviceInfo: _currentDeviceInfo,
+                    sessionId: _currentSessionId
+                ).ConfigureAwait(false);
+
+                StatusMessage = $"Exported {items.Count} component(s) to {filePath}.";
             }
             catch (Exception ex)
             {
