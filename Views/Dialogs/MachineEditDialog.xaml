@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:YasGMP.Converters"
              x:Class="YasGMP.Views.Dialogs.MachineEditDialog"
              Title="Stroj">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:NullableDateTimeConverter x:Key="NullableDateTimeConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <Grid RowDefinitions="Auto,*,Auto">
         <!-- Header -->
         <Grid Grid.Row="0" Padding="20,16" ColumnDefinitions="*,Auto" BackgroundColor="{StaticResource YtSurfaceCard}">
@@ -54,16 +60,16 @@
                     <Picker Grid.Row="9" Grid.Column="1" x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" ItemDisplayBinding="{Binding Name}" />
 
                     <Label Grid.Row="10" Grid.Column="0" Text="Instalacija" VerticalTextAlignment="Center" />
-                    <DatePicker Grid.Row="10" Grid.Column="1" Date="{Binding InstallDate}" />
+                    <DatePicker Grid.Row="10" Grid.Column="1" Date="{Binding InstallDate, Converter={StaticResource NullableDateTimeConverter}}" />
 
                     <Label Grid.Row="11" Grid.Column="0" Text="Nabava" VerticalTextAlignment="Center" />
-                    <DatePicker Grid.Row="11" Grid.Column="1" Date="{Binding ProcurementDate}" />
+                    <DatePicker Grid.Row="11" Grid.Column="1" Date="{Binding ProcurementDate, Converter={StaticResource NullableDateTimeConverter}}" />
 
                     <Label Grid.Row="12" Grid.Column="0" Text="Garancija do" VerticalTextAlignment="Center" />
-                    <DatePicker Grid.Row="12" Grid.Column="1" Date="{Binding WarrantyUntil}" />
+                    <DatePicker Grid.Row="12" Grid.Column="1" Date="{Binding WarrantyUntil, Converter={StaticResource NullableDateTimeConverter}}" />
 
                     <Label Grid.Row="13" Grid.Column="0" Text="Povlačenje" VerticalTextAlignment="Center" />
-                    <DatePicker Grid.Row="13" Grid.Column="1" Date="{Binding DecommissionDate}" />
+                    <DatePicker Grid.Row="13" Grid.Column="1" Date="{Binding DecommissionDate, Converter={StaticResource NullableDateTimeConverter}}" />
 
                     <Label Grid.Row="14" Grid.Column="0" Text="Razlog povlačenja" VerticalTextAlignment="Start" />
                     <Editor Grid.Row="14" Grid.Column="1" Text="{Binding DecommissionReason}" Placeholder="Razlog povlačenja" AutoSize="TextChanges" />
