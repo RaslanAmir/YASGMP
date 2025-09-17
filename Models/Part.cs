@@ -82,6 +82,9 @@ namespace YasGMP.Models
 
         /// <summary>Stock movement/change history.</summary>
         public List<StockChangeLog> StockHistory { get; set; } = new();
+ 
+		/// <summary>Aggregated stock levels over time.</summary>
+        public List<StockLevel> StockLevels { get; set; } = new();
 
         /// <summary>Primary storage location (quick view).</summary>
         [StringLength(100)]
