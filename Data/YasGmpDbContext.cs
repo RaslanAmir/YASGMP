@@ -20,7 +20,7 @@ namespace YasGMP.Data
         {
         }
 
-        // === DbSet-ovi za sve entitete ===
+		// === DbSet-ovi za sve entitete ===
         public DbSet<AdminActivityLog> AdminActivityLogs { get; set; }
         public DbSet<ApiAuditLog> ApiAuditLogs { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
