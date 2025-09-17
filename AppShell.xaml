@@ -72,6 +72,8 @@
                     ContentTemplate="{DataTemplate views:CapaPage}" />
       <ShellContent Title="Validation"      Route="validation"
                     ContentTemplate="{DataTemplate views:ValidationPage}" />
+      <ShellContent Title="Documents"       Route="documents"
+                    ContentTemplate="{DataTemplate views:DocumentControlPage}" />
       <ShellContent Title="Audit Dashboard" Route="auditdashboard"
                     ContentTemplate="{DataTemplate views:AuditDashboardPage}" />
       <ShellContent Title="Audit Log"       Route="auditlog"
