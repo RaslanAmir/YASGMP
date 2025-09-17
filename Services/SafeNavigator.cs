@@ -142,6 +142,32 @@ namespace YasGMP.Services
             }
         }
 
+        /// <summary>
+        /// Displays an action sheet in a UI-thread-safe manner.
+        /// Returns the selected option or <c>null</c> if cancelled/failed.
+        /// </summary>
+        public static async Task<string?> ActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
+        {
+            try
+            {
+                return await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    var page = Application.Current?.MainPage;
+                    if (page is null)
+                        return null;
+
+                    return await page.DisplayActionSheet(title, cancel, destruction, buttons).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Debug.WriteLine($"[NAV WARN] ActionSheetAsync('{title}') → {ex.Message}");
+#endif
+                return null;
+            }
+        }
+
         private static async Task TryShowAlertAsync(string title, string message, string cancel)
         {
             try

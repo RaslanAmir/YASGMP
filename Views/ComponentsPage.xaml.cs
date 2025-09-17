@@ -293,7 +293,25 @@ WHERE id=@id;";
         {
             try
             {
-                string? path = await _viewModel.ExportComponentsAsync().ConfigureAwait(false);
+                string? choice = await SafeNavigator.ActionSheetAsync(
+                    "Odaberite format",
+                    "Cancel",
+                    null,
+                    "CSV",
+                    "XLSX",
+                    "PDF").ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(choice) || choice.Equals("Cancel", StringComparison.OrdinalIgnoreCase))
+                {
+                    await SafeNavigator.ShowAlertAsync("Komponente", "Export je otkazan.", "OK");
+                    return;
+                }
+
+                string normalizedFormat = choice.Equals("XLSX", StringComparison.OrdinalIgnoreCase) ? "xlsx"
+                    : choice.Equals("PDF", StringComparison.OrdinalIgnoreCase) ? "pdf"
+                    : "csv";
+
+                string? path = await _viewModel.ExportComponentsAsync(normalizedFormat).ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(path))
                 {
