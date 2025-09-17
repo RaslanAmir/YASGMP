@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="YasGMP.Views.ChangeControlPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Upravljanje promjenama – YasGMP">
+  <ScrollView>
+    <Grid Padding="24"
+          RowSpacing="18"
+          ColumnSpacing="18"
+          RowDefinitions="Auto,*"
+          ColumnDefinitions="320,*">
+
+      <Frame Grid.ColumnSpan="2"
+             BackgroundColor="{StaticResource YtSurfaceCard}"
+             BorderColor="{StaticResource YtRowBorder}"
+             Padding="12">
+        <VerticalStackLayout Spacing="4">
+          <Label Text="{Binding StatusMessage}"
+                 FontSize="14"
+                 TextColor="{StaticResource YtOnSurface}"
+                 IsVisible="True">
+            <Label.Triggers>
+              <DataTrigger TargetType="Label"
+                           Binding="{Binding StatusMessage}"
+                           Value="{x:Null}">
+                <Setter Property="IsVisible" Value="False" />
+              </DataTrigger>
+              <DataTrigger TargetType="Label"
+                           Binding="{Binding StatusMessage}"
+                           Value="">
+                <Setter Property="IsVisible" Value="False" />
+              </DataTrigger>
+            </Label.Triggers>
+          </Label>
+        </VerticalStackLayout>
+      </Frame>
+
+      <Frame Grid.Row="1"
+             Grid.Column="0"
+             BackgroundColor="{StaticResource YtSurfaceCard}"
+             BorderColor="{StaticResource YtRowBorder}"
+             Padding="14"
+             CornerRadius="14"
+             HasShadow="True">
+        <VerticalStackLayout Spacing="10">
+          <Label Text="Promjene"
+                 FontSize="18"
+                 FontAttributes="Bold"
+                 TextColor="{StaticResource YtPrimary700}" />
+          <SearchBar Placeholder="Pretraži promjene"
+                     Text="{Binding SearchTerm}" />
+          <Grid ColumnDefinitions="*,Auto"
+                ColumnSpacing="10">
+            <Picker Grid.Column="0"
+                    Title="Status"
+                    ItemsSource="{Binding AvailableStatuses}"
+                    SelectedItem="{Binding StatusFilter}" />
+            <Entry Grid.Column="1"
+                   WidthRequest="120"
+                   Placeholder="Vrsta"
+                   Text="{Binding TypeFilter}" />
+          </Grid>
+          <CollectionView ItemsSource="{Binding FilteredChangeControls}"
+                          SelectionMode="Single"
+                          SelectedItem="{Binding SelectedChangeControl}"
+                          HeightRequest="420"
+                          BackgroundColor="{StaticResource YtSurface}">
+            <CollectionView.EmptyView>
+              <VerticalStackLayout Padding="12" Spacing="6">
+                <Label Text="Nema promjena za prikaz." />
+              </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+              <DataTemplate>
+                <Frame Margin="0,4"
+                       Padding="10"
+                       CornerRadius="10"
+                       BackgroundColor="{StaticResource YtSurface}"
+                       BorderColor="{StaticResource YtRowBorder}">
+                  <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Title}"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource YtOnSurface}" />
+                    <Label Text="{Binding Code, StringFormat='Šifra: {0}'}"
+                           FontSize="12"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                    <Label Text="{Binding Status}"
+                           FontSize="12"
+                           TextColor="{StaticResource YtPrimary700}" />
+                    <Label Text="{Binding Description}"
+                           FontSize="11"
+                           LineBreakMode="WordWrap"
+                           MaxLines="2"
+                           TextColor="{StaticResource YtOnSurfaceDim}" />
+                  </VerticalStackLayout>
+                </Frame>
+              </DataTemplate>
+            </CollectionView.ItemTemplate>
+          </CollectionView>
+        </VerticalStackLayout>
+      </Frame>
+
+      <Frame Grid.Row="1"
+             Grid.Column="1"
+             BackgroundColor="{StaticResource YtSurfaceCard}"
+             BorderColor="{StaticResource YtRowBorder}"
+             Padding="14"
+             CornerRadius="14"
+             HasShadow="True">
+        <VerticalStackLayout Spacing="16">
+          <VerticalStackLayout x:Name="PlaceholderPanel"
+                                Spacing="8"
+                                IsVisible="False">
+            <VerticalStackLayout.Triggers>
+              <DataTrigger TargetType="VerticalStackLayout"
+                           Binding="{Binding SelectedChangeControl}"
+                           Value="{x:Null}">
+                <Setter Property="IsVisible" Value="True" />
+              </DataTrigger>
+            </VerticalStackLayout.Triggers>
+            <Label Text="Odaberite promjenu s popisa kako biste vidjeli detalje."
+                   FontSize="14"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+          </VerticalStackLayout>
+
+          <VerticalStackLayout x:Name="DetailsPanel"
+                                Spacing="10"
+                                IsVisible="True">
+            <VerticalStackLayout.Triggers>
+              <DataTrigger TargetType="VerticalStackLayout"
+                           Binding="{Binding SelectedChangeControl}"
+                           Value="{x:Null}">
+                <Setter Property="IsVisible" Value="False" />
+              </DataTrigger>
+            </VerticalStackLayout.Triggers>
+
+            <Label Text="{Binding SelectedChangeControl.Title}"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource YtPrimary700}" />
+            <Label Text="{Binding SelectedChangeControl.Code, StringFormat='Šifra: {0}'}"
+                   FontSize="12"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+            <Label Text="{Binding SelectedChangeControl.Status, StringFormat='Status: {0}'}"
+                   FontSize="12"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+            <Label Text="{Binding SelectedChangeControl.Description}"
+                   FontSize="13"
+                   LineBreakMode="WordWrap"
+                   TextColor="{StaticResource YtOnSurface}" />
+            <Label Text="{Binding SelectedChangeControl.DateRequested, StringFormat='Datum zahtjeva: {0:yyyy-MM-dd HH:mm}'}"
+                   FontSize="12"
+                   TextColor="{StaticResource YtOnSurfaceDim}" />
+          </VerticalStackLayout>
+
+          <VerticalStackLayout x:Name="AssignmentPanel"
+                                Spacing="12"
+                                IsVisible="True">
+            <VerticalStackLayout.Triggers>
+              <DataTrigger TargetType="VerticalStackLayout"
+                           Binding="{Binding SelectedChangeControl}"
+                           Value="{x:Null}">
+                <Setter Property="IsVisible" Value="False" />
+              </DataTrigger>
+            </VerticalStackLayout.Triggers>
+
+            <Label Text="Dodjela odgovorne osobe"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource YtPrimary700}" />
+            <Picker Title="Odaberite osobu"
+                    ItemsSource="{Binding AvailableAssignees}"
+                    SelectedItem="{Binding SelectedAssignee}"
+                    ItemDisplayBinding="{Binding FullName}" />
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="{StaticResource YtDanger700}"
+                   FontSize="12"
+                   IsVisible="False">
+              <Label.Triggers>
+                <DataTrigger TargetType="Label"
+                             Binding="{Binding IsAssigneeSelectionValid}"
+                             Value="False">
+                  <Setter Property="IsVisible" Value="True" />
+                </DataTrigger>
+              </Label.Triggers>
+            </Label>
+            <Button Text="Dodijeli promjenu"
+                    Command="{Binding AssignChangeControlCommand}" />
+          </VerticalStackLayout>
+        </VerticalStackLayout>
+      </Frame>
+
+    </Grid>
+  </ScrollView>
+</ContentPage>

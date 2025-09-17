@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Linq;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -25,12 +26,15 @@ namespace YasGMP.ViewModels
 
         private ObservableCollection<ChangeControl> _changeControls = new();
         private ObservableCollection<ChangeControl> _filteredChangeControls = new();
+        private ObservableCollection<User> _availableAssignees = new();
         private ChangeControl? _selectedChangeControl;
+        private User? _selectedAssignee;
         private string? _searchTerm;
         private ChangeControlStatus? _statusFilter;
         private string? _typeFilter;
         private bool _isBusy;
         private string? _statusMessage;
+        private bool _isAssigneeSelectionValid = true;
 
         /// <summary>
         /// Initialize ChangeControlViewModel and all commands.
@@ -43,12 +47,13 @@ namespace YasGMP.ViewModels
             LoadChangeControlsCommand = new Command(async () => await LoadChangeControlsAsync(), () => !IsBusy);
             InitiateChangeControlCommand = new Command(async () => await InitiateChangeControlAsync(), () => !IsBusy);
             ApproveChangeControlCommand = new Command(async () => await ApproveChangeControlAsync(), () => !IsBusy && SelectedChangeControl != null && SelectedChangeControl.Status == ChangeControlStatus.UnderReview);
-            AssignChangeControlCommand = new Command(async () => await AssignChangeControlAsync(), () => !IsBusy && SelectedChangeControl != null);
+            AssignChangeControlCommand = new Command(async () => await AssignChangeControlAsync(), () => !IsBusy && SelectedChangeControl != null && SelectedAssignee != null);
             ImplementChangeControlCommand = new Command(async () => await ImplementChangeControlAsync(), () => !IsBusy && SelectedChangeControl != null && SelectedChangeControl.Status == ChangeControlStatus.Approved);
             CloseChangeControlCommand = new Command(async () => await CloseChangeControlAsync(), () => !IsBusy && SelectedChangeControl != null && SelectedChangeControl.Status == ChangeControlStatus.Implemented);
             FilterChangedCommand = new Command(FilterChangeControls);
 
             Task.Run(LoadChangeControlsAsync);
+            Task.Run(LoadAssignableUsersAsync);
         }
 
         #endregion
@@ -73,7 +78,59 @@ namespace YasGMP.ViewModels
         public ChangeControl? SelectedChangeControl
         {
             get => _selectedChangeControl;
-            set { _selectedChangeControl = value; OnPropertyChanged(); }
+            set
+            {
+                if (_selectedChangeControl == value) return;
+                _selectedChangeControl = value;
+                OnPropertyChanged();
+
+                if (value == null)
+                {
+                    SelectedAssignee = null;
+                    IsAssigneeSelectionValid = true;
+                }
+                else
+                {
+                    TrySelectAssigneeForSelectedChangeControl();
+                }
+
+                RefreshAssignCommandCanExecute();
+            }
+        }
+
+        public ObservableCollection<User> AvailableAssignees
+        {
+            get => _availableAssignees;
+            set
+            {
+                _availableAssignees = value ?? new ObservableCollection<User>();
+                OnPropertyChanged();
+                TrySelectAssigneeForSelectedChangeControl();
+            }
+        }
+
+        public User? SelectedAssignee
+        {
+            get => _selectedAssignee;
+            set
+            {
+                if (_selectedAssignee == value) return;
+                _selectedAssignee = value;
+                OnPropertyChanged();
+                IsAssigneeSelectionValid = true;
+                RefreshAssignCommandCanExecute();
+            }
+        }
+
+        public bool IsAssigneeSelectionValid
+        {
+            get => _isAssigneeSelectionValid;
+            set
+            {
+                if (_isAssigneeSelectionValid == value) return;
+                _isAssigneeSelectionValid = value;
+                OnPropertyChanged();
+            }
         }
 
         /// <summary>Search term for title, code, etc.</summary>
@@ -101,7 +158,13 @@ namespace YasGMP.ViewModels
         public bool IsBusy
         {
             get => _isBusy;
-            set { _isBusy = value; OnPropertyChanged(); }
+            set
+            {
+                if (_isBusy == value) return;
+                _isBusy = value;
+                OnPropertyChanged();
+                RefreshAssignCommandCanExecute();
+            }
         }
 
         /// <summary>Status message for UI notification.</summary>
@@ -246,10 +309,27 @@ namespace YasGMP.ViewModels
         public async Task AssignChangeControlAsync()
         {
             if (SelectedChangeControl == null) { StatusMessage = "No change control selected."; return; }
+            if (SelectedAssignee == null)
+            {
+                IsAssigneeSelectionValid = false;
+                StatusMessage = "Odaberite osobu za dodjelu.";
+                return;
+            }
             IsBusy = true;
             try
             {
-                StatusMessage = $"Change control '{SelectedChangeControl.Title}' assigned.";
+                SelectedChangeControl.AssignedToId = SelectedAssignee.Id;
+                await _dbService.ExecuteNonQueryAsync(
+                    "UPDATE change_controls SET assigned_to_id=@assignee WHERE id=@id",
+                    new MySqlConnector.MySqlParameter[]
+                    {
+                        new("@assignee", SelectedAssignee.Id),
+                        new("@id", SelectedChangeControl.Id)
+                    }
+                ).ConfigureAwait(false);
+
+                StatusMessage = $"Change control '{SelectedChangeControl.Title}' assigned to {SelectedAssignee.FullName}.";
+                IsAssigneeSelectionValid = true;
                 await LoadChangeControlsAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -257,6 +337,28 @@ namespace YasGMP.ViewModels
                 StatusMessage = $"Assignment failed: {ex.Message}";
             }
             finally { IsBusy = false; }
+        }
+
+        /// <summary>
+        /// Loads the list of assignable users from the database and applies it to the picker.
+        /// </summary>
+        public async Task LoadAssignableUsersAsync()
+        {
+            try
+            {
+                var users = await _dbService.GetAllUsersBasicAsync().ConfigureAwait(false);
+                var ordered = users
+                    .OrderBy(u => u.FullName, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList();
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    AvailableAssignees = new ObservableCollection<User>(ordered);
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Failed to load assignees: {ex.Message}";
+            }
         }
 
         /// <summary>Marks the selected change control as implemented.</summary>
@@ -348,6 +450,24 @@ namespace YasGMP.ViewModels
         /// <summary>Raises a property changed notification.</summary>
         private void OnPropertyChanged([CallerMemberName] string? propName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName ?? string.Empty));
+
+        private void RefreshAssignCommandCanExecute() =>
+            (AssignChangeControlCommand as Command)?.ChangeCanExecute();
+
+        private void TrySelectAssigneeForSelectedChangeControl()
+        {
+            if (SelectedChangeControl?.AssignedToId is int assignedId && AvailableAssignees.Count > 0)
+            {
+                var match = AvailableAssignees.FirstOrDefault(u => u.Id == assignedId);
+                if (match != null)
+                {
+                    SelectedAssignee = match;
+                    return;
+                }
+            }
+
+            SelectedAssignee = null;
+        }
 
         #endregion
     }

@@ -23,6 +23,7 @@
     <ToolbarItem Text="Calibrations" Clicked="OnToolbarGoCalibrations" />
     <ToolbarItem Text="CAPA"         Clicked="OnToolbarGoCapa" />
     <ToolbarItem Text="Validation"   Clicked="OnToolbarGoValidation" />
+    <ToolbarItem Text="Change Control" Clicked="OnToolbarGoChangeControl" />
     <ToolbarItem Text="Audit Dash"   Clicked="OnToolbarGoAuditDash" />
     <ToolbarItem Text="Audit Log"    Clicked="OnToolbarGoAuditLog" />
     <ToolbarItem Text="Users"        Clicked="OnToolbarGoUsers" />
@@ -72,6 +73,8 @@
                     ContentTemplate="{DataTemplate views:CapaPage}" />
       <ShellContent Title="Validation"      Route="validation"
                     ContentTemplate="{DataTemplate views:ValidationPage}" />
+      <ShellContent Title="Change Control"  Route="changecontrol"
+                    ContentTemplate="{DataTemplate views:ChangeControlPage}" />
       <ShellContent Title="Documents"       Route="documents"
                     ContentTemplate="{DataTemplate views:DocumentControlPage}" />
       <ShellContent Title="Audit Dashboard" Route="auditdashboard"

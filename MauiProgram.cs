@@ -176,6 +176,7 @@ namespace YasGMP
             builder.Services.AddTransient<PpmViewModel>();
             builder.Services.AddTransient<WarehouseViewModel>();
             builder.Services.AddTransient<DocumentControlViewModel>();
+            builder.Services.AddTransient<ChangeControlViewModel>();
 
             // Pages
             builder.Services.AddTransient<YasGMP.Views.LoginPage>();
@@ -192,6 +193,7 @@ namespace YasGMP
             builder.Services.AddTransient<YasGMP.Views.ComponentsPage>();
             builder.Services.AddTransient<YasGMP.Views.SuppliersPage>();
             builder.Services.AddTransient<YasGMP.Views.DocumentControlPage>();
+            builder.Services.AddTransient<YasGMP.Views.ChangeControlPage>();
             builder.Services.AddTransient<YasGMP.ExternalServicersPage>();
             builder.Services.AddTransient<YasGMP.Pages.PpmPage>();
             builder.Services.AddTransient<YasGMP.Views.ValidationPage>();
