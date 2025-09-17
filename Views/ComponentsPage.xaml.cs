@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading.Tasks;
+using System.Text;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using MySqlConnector;
@@ -31,6 +32,8 @@ namespace YasGMP.Views
         public ObservableCollection<MachineComponent> Components { get; } = new();
 
         private readonly DatabaseService _dbService;
+        private readonly Dictionary<int, string> _machineLookup = new();
+        private Task? _machinesPreloadTask;
 
         /// <summary>
         /// Inicijalizira stranicu, rješava konekcijski string i učitava podatke.
@@ -44,6 +47,7 @@ namespace YasGMP.Views
 
             BindingContext = this;
 
+            _machinesPreloadTask = LoadMachinesAsync();
             _ = LoadComponentsAsync();
         }
 
@@ -58,6 +62,8 @@ namespace YasGMP.Views
         /// </summary>
         private async Task LoadComponentsAsync()
         {
+            await WaitForMachineLookupAsync().ConfigureAwait(false);
+
             const string sql = @"
 SELECT id, machine_id, code, name, type, sop_doc, status, install_date
 FROM machine_components
@@ -71,10 +77,11 @@ ORDER BY name;";
                 var list = new List<MachineComponent>(capacity: dt.Rows.Count);
                 foreach (DataRow row in dt.Rows)
                 {
+                    var machineId = row["machine_id"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["machine_id"]);
                     list.Add(new MachineComponent
                     {
                         Id          = row["id"]           == DBNull.Value ? 0 : Convert.ToInt32(row["id"]),
-                        MachineId   = row["machine_id"]   == DBNull.Value ? (int?)null : Convert.ToInt32(row["machine_id"]),
+                        MachineId   = machineId,
                         Code        = row["code"]         == DBNull.Value ? string.Empty : row["code"]?.ToString() ?? string.Empty,
                         Name        = row["name"]         == DBNull.Value ? string.Empty : row["name"]?.ToString() ?? string.Empty,
                         Type        = row["type"]         == DBNull.Value ? string.Empty : row["type"]?.ToString() ?? string.Empty,
@@ -82,6 +89,14 @@ ORDER BY name;";
                         Status      = row["status"]       == DBNull.Value ? "active" : row["status"]?.ToString() ?? "active",
                         InstallDate = row["install_date"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["install_date"])
                     });
+                    if (machineId.HasValue && _machineLookup.TryGetValue(machineId.Value, out var machineName))
+                    {
+                        list[^1].Machine = new Machine
+                        {
+                            Id   = machineId.Value,
+                            Name = machineName
+                        };
+                    }
                 }
 
                 // Load documents count for all listed components in a single query
@@ -272,6 +287,8 @@ WHERE id=@id;";
         /// </summary>
         private async Task<bool> ShowComponentFormAsync(MachineComponent c, string title)
         {
+            await WaitForMachineLookupAsync();
+
             string? code = await DisplayPromptAsync(title, "Interna oznaka (Code):", initialValue: c.Code);
             if (code is null) return false;
             c.Code = code;
@@ -280,7 +297,8 @@ WHERE id=@id;";
             if (name is null) return false;
             c.Name = name;
 
-            string? mid = await DisplayPromptAsync(title, "ID stroja (machine_id):", initialValue: c.MachineId?.ToString());
+            string machinePrompt = BuildMachinePrompt(c.MachineId);
+            string? mid = await DisplayPromptAsync(title, machinePrompt, initialValue: c.MachineId?.ToString());
             if (!string.IsNullOrWhiteSpace(mid) && int.TryParse(mid, out var m)) c.MachineId = m; else c.MachineId = null;
 
             c.Type   = (await DisplayPromptAsync(title, "Tip (npr. pumpa, ventil...):", initialValue: c.Type)) ?? c.Type ?? string.Empty;
@@ -293,6 +311,88 @@ WHERE id=@id;";
             if (!string.IsNullOrWhiteSpace(dateStr) && DateTime.TryParse(dateStr, out var dt)) c.InstallDate = dt; else c.InstallDate = null;
 
             return true;
+        }
+
+        private async Task LoadMachinesAsync()
+        {
+            const string sql = @"
+SELECT id, name, code
+FROM machines
+WHERE is_deleted = 0 OR is_deleted IS NULL
+ORDER BY name;";
+
+            try
+            {
+                DataTable dt = await _dbService.ExecuteSelectAsync(sql).ConfigureAwait(false);
+
+                var lookup = new Dictionary<int, string>(dt.Rows.Count);
+                foreach (DataRow row in dt.Rows)
+                {
+                    int id = row["id"] == DBNull.Value ? 0 : Convert.ToInt32(row["id"]);
+                    if (id == 0) continue;
+
+                    string name = row.Table.Columns.Contains("name") && row["name"] is not DBNull
+                        ? row["name"]?.ToString() ?? string.Empty
+                        : string.Empty;
+                    string code = row.Table.Columns.Contains("code") && row["code"] is not DBNull
+                        ? row["code"]?.ToString() ?? string.Empty
+                        : string.Empty;
+
+                    string display = string.IsNullOrWhiteSpace(code)
+                        ? name
+                        : string.IsNullOrWhiteSpace(name)
+                            ? code
+                            : $"{code} – {name}";
+
+                    lookup[id] = display;
+                }
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    _machineLookup.Clear();
+                    foreach (var kvp in lookup)
+                        _machineLookup[kvp.Key] = kvp.Value;
+                });
+            }
+            catch (Exception ex)
+            {
+                await SafeNavigator.ShowAlertAsync("Strojevi", $"Učitavanje popisa strojeva nije uspjelo: {ex.Message}", "OK");
+            }
+        }
+
+        private Task WaitForMachineLookupAsync()
+        {
+            _machinesPreloadTask ??= LoadMachinesAsync();
+            return _machinesPreloadTask;
+        }
+
+        private string BuildMachinePrompt(int? currentMachineId)
+        {
+            const int previewLimit = 5;
+            var prompt = new StringBuilder("ID stroja (machine_id):");
+
+            if (_machineLookup.Count == 0)
+                return prompt.ToString();
+
+            if (currentMachineId.HasValue && _machineLookup.TryGetValue(currentMachineId.Value, out var currentName))
+                prompt.Append($"\nTrenutno: {currentName} ({currentMachineId.Value})");
+
+            prompt.Append("\nDostupni strojevi (ID – naziv):");
+
+            int shown = 0;
+            foreach (var kvp in _machineLookup)
+            {
+                if (shown >= previewLimit)
+                    break;
+
+                prompt.Append($"\n • {kvp.Key} – {kvp.Value}");
+                shown++;
+            }
+
+            if (_machineLookup.Count > previewLimit)
+                prompt.Append("\n • …");
+
+            return prompt.ToString();
         }
     }
 }
