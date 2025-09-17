@@ -39,6 +39,11 @@ namespace YasGMP.ViewModels
         private bool _isAuthenticated;
         private bool _hasError;
         private bool _isCapsLockOn;
+        private bool _isPinSupported;
+        private bool _isBiometricSupported;
+        private bool _isSmartcardSupported;
+        private bool _isSsoSupported;
+        private bool _isQrSupported;
         private int _failedAttempts;
         private User? _loggedInUser;
 
@@ -162,6 +167,76 @@ namespace YasGMP.ViewModels
             set { if (_loggedInUser != value) { _loggedInUser = value; OnPropertyChanged(nameof(LoggedInUser)); } }
         }
 
+        /// <summary>Prikaži PIN opciju samo ako je platforma podržava.</summary>
+        public bool IsPinSupported
+        {
+            get => _isPinSupported;
+            private set
+            {
+                if (_isPinSupported != value)
+                {
+                    _isPinSupported = value;
+                    OnPropertyChanged(nameof(IsPinSupported));
+                }
+            }
+        }
+
+        /// <summary>Prikaži biometrijsku prijavu kada je dostupna.</summary>
+        public bool IsBiometricSupported
+        {
+            get => _isBiometricSupported;
+            private set
+            {
+                if (_isBiometricSupported != value)
+                {
+                    _isBiometricSupported = value;
+                    OnPropertyChanged(nameof(IsBiometricSupported));
+                }
+            }
+        }
+
+        /// <summary>Prikaži Smartcard tipku samo ako je podržana.</summary>
+        public bool IsSmartcardSupported
+        {
+            get => _isSmartcardSupported;
+            private set
+            {
+                if (_isSmartcardSupported != value)
+                {
+                    _isSmartcardSupported = value;
+                    OnPropertyChanged(nameof(IsSmartcardSupported));
+                }
+            }
+        }
+
+        /// <summary>Prikaži SSO tipku ako je konfiguracija omogućena.</summary>
+        public bool IsSsoSupported
+        {
+            get => _isSsoSupported;
+            private set
+            {
+                if (_isSsoSupported != value)
+                {
+                    _isSsoSupported = value;
+                    OnPropertyChanged(nameof(IsSsoSupported));
+                }
+            }
+        }
+
+        /// <summary>Prikaži QR opciju samo kada je funkcionalnost dostupna.</summary>
+        public bool IsQrSupported
+        {
+            get => _isQrSupported;
+            private set
+            {
+                if (_isQrSupported != value)
+                {
+                    _isQrSupported = value;
+                    OnPropertyChanged(nameof(IsQrSupported));
+                }
+            }
+        }
+
         /// <summary>Može li se pokrenuti login akcija?</summary>
         public bool IsLoginEnabled => !IsBusy &&
                                       !string.IsNullOrWhiteSpace(Username) &&
@@ -248,6 +323,7 @@ namespace YasGMP.ViewModels
             PrivacyCommand                  = new Command(ShowPrivacyDialog);
             ShowAuditModalCommand           = new Command(ShowAuditModal);
 
+            InitializeAuthCapabilityFlags();
             _ = InitializeAsync();
         }
 
@@ -285,6 +361,17 @@ namespace YasGMP.ViewModels
             DeviceInfo = CollectDeviceInfo();
             IpAddress  = await GetPublicIpAddressAsync();
             await LoadLoginHistoryAsync();
+        }
+
+        /// <summary>Procjenjuje koji opcionalni auth kanali su dostupni na trenutnoj platformi.</summary>
+        private void InitializeAuthCapabilityFlags()
+        {
+            // TODO: zamijeniti stvarnom detekcijom (platforma/config).
+            IsPinSupported        = false;
+            IsBiometricSupported  = false;
+            IsSmartcardSupported  = false;
+            IsSsoSupported        = false;
+            IsQrSupported         = false;
         }
 
         /// <summary>Osvježava CanExecute stanja vezanih komandi.</summary>
@@ -456,11 +543,40 @@ namespace YasGMP.ViewModels
 
         // Placeholderi/poruke (svjesno bez implementacije, ali ostavljaju trag za UI)
         private void ShowForgotPasswordDialog()  => StatusMessage = "Reset lozinke nije još implementiran.";
-        private void ExecutePinLogin()           => StatusMessage = "PIN prijava nije još implementirana.";
-        private void ExecuteBiometricLogin()     => StatusMessage = "Biometrijska prijava nije još implementirana.";
-        private void ExecuteSmartcardLogin()     => StatusMessage = "Smartcard prijava nije još implementirana.";
-        private void ExecuteSsoLogin()           => StatusMessage = "SSO prijava nije još implementirana.";
-        private void ExecuteQrLogin()            => StatusMessage = "QR prijava nije još implementirana.";
+        private void ExecutePinLogin()
+        {
+            StatusMessage = IsPinSupported
+                ? "PIN prijava nije još implementirana."
+                : "PIN prijava nije podržana na ovoj platformi.";
+        }
+
+        private void ExecuteBiometricLogin()
+        {
+            StatusMessage = IsBiometricSupported
+                ? "Biometrijska prijava nije još implementirana."
+                : "Biometrijska prijava nije podržana na ovoj platformi.";
+        }
+
+        private void ExecuteSmartcardLogin()
+        {
+            StatusMessage = IsSmartcardSupported
+                ? "Smartcard prijava nije još implementirana."
+                : "Smartcard prijava nije podržana na ovoj platformi.";
+        }
+
+        private void ExecuteSsoLogin()
+        {
+            StatusMessage = IsSsoSupported
+                ? "SSO prijava nije još implementirana."
+                : "SSO prijava nije podržana u trenutnoj konfiguraciji.";
+        }
+
+        private void ExecuteQrLogin()
+        {
+            StatusMessage = IsQrSupported
+                ? "QR prijava nije još implementirana."
+                : "QR prijava nije podržana na ovoj platformi.";
+        }
         private void ShowSupportDialog()         => StatusMessage = "Za podršku kontaktirajte IT odjel: support@yasenka.hr";
         private void ShowPrivacyDialog()         => StatusMessage = "Vaša privatnost je zaštićena prema GMP standardima.";
         private void ShowAuditModal()            => StatusMessage = "Audit log nije još implementiran.";
