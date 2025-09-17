@@ -593,6 +593,10 @@ namespace YasGMP.ViewModels
                 CancelChangeControlPicker();
                 await LoadDocumentsAsync().ConfigureAwait(false);
             }
+            catch (DocumentControlLinkException ex)
+            {
+                StatusMessage = ex.Message;
+            }
             catch (Exception ex)
             {
                 StatusMessage = $"Linking failed: {ex.Message}";
