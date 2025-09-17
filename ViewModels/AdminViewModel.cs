@@ -730,7 +730,7 @@ namespace YasGMP.ViewModels
         [RelayCommand]
         public async Task OpenAuditAsync()
         {
-            await Services.SafeNavigator.GoToAsync("routes/auditlog").ConfigureAwait(false);
+            await Services.SafeNavigator.GoToAsync("//root/quality/auditlog").ConfigureAwait(false);
         }
 
         #endregion

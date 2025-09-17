@@ -53,12 +53,12 @@ namespace YasGMP.Views.Debug
 
         private async void OnViewLogs(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("routes/logviewer");
+            await Shell.Current.GoToAsync("//root/debug/logviewer");
         }
 
         private async void OnHealth(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("routes/health");
+            await Shell.Current.GoToAsync("//root/debug/health");
         }
 
         private void OnFlushElastic(object sender, EventArgs e)

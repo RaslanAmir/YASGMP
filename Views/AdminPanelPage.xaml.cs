@@ -46,7 +46,7 @@ namespace YasGMP.Views
         {
             if (Shell.Current is not null)
             {
-                await Shell.Current.GoToAsync("routes/users").ConfigureAwait(false);
+                await Shell.Current.GoToAsync("//root/admin/users").ConfigureAwait(false);
             }
         }
     }
