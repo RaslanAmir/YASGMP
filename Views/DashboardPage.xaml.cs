@@ -22,12 +22,12 @@ namespace YasGMP
     {
         private static class AppRoutes
         {
-            public const string Machines   = "routes/machines";
-            public const string Parts      = "routes/parts";
-            public const string WorkOrders = "routes/workorders";
-            public const string Capa       = "routes/capa";
-            public const string Validation = "routes/validation";
-            public const string AdminPanel = "routes/adminpanel";
+            public const string Machines   = "//root/ops/machines";
+            public const string Parts      = "//root/ops/parts";
+            public const string WorkOrders = "//root/ops/workorders";
+            public const string Capa       = "//root/quality/capa";
+            public const string Validation = "//root/quality/validation";
+            public const string AdminPanel = "//root/admin/adminpanel";
         }
 
         public User? CurrentUser { get; private set; }

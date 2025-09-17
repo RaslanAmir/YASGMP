@@ -27,10 +27,11 @@
           <Button Text="Kalibracije"              Command="{Binding OpenCalibrationsCommand}"/>
           <Button Text="Korisnici"                 Command="{Binding OpenUsersCommand}"      />
           <Button Text="Audit log"                 Command="{Binding OpenAuditLogCommand}"   />
-          <Button Text="SOP / Dokumentacija"      Command="{Binding OpenSopCommand}"        />
-          <Button Text="Inspekcije"               Command="{Binding OpenInspectionsCommand}"/>
+          <Button Text="Strojevi"                  Command="{Binding OpenMachinesCommand}"   />
+          <Button Text="Komponente"                Command="{Binding OpenComponentsCommand}" />
           <Button Text="Dijelovi (Parts)"         Command="{Binding OpenPartsCommand}"      />
           <Button Text="CAPA"                      Command="{Binding OpenCapaCommand}"       />
+          <Button Text="Validacija / URS"         Command="{Binding OpenValidationCommand}" />
           <Button Text="Dobavljači i Serviseri"   Command="{Binding OpenSuppliersCommand}"  />
           <Button Text="Izvještaji / Dashboard"   Command="{Binding OpenReportsCommand}"    />
         </VerticalStackLayout>

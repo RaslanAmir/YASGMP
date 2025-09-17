@@ -417,7 +417,7 @@ namespace YasGMP.ViewModels
 
         /// <summary>
         /// Centralized, UI-thread-safe switch to <see cref="AppShell"/> as the root and navigation
-        /// to the dashboard tab. Uses an absolute Shell route (<c>///routes/dashboard</c>) so the
+        /// to the dashboard tab. Uses the absolute Shell route (<c>//root/home/dashboard</c>) so the
         /// stack is clean and <see cref="Shell.Current"/> is guaranteed non-null afterwards.
         /// </summary>
         private static async Task SwitchToShellDashboardAsync()
@@ -427,7 +427,7 @@ namespace YasGMP.ViewModels
                 Application.Current!.MainPage = new AppShell();
                 if (Shell.Current is not null)
                 {
-                    await Shell.Current.GoToAsync("///routes/dashboard");
+                    await Shell.Current.GoToAsync("//root/home/dashboard");
                 }
             });
         }

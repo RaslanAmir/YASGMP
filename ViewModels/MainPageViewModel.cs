@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace YasGMP.ViewModels
@@ -33,10 +34,6 @@ namespace YasGMP.ViewModels
         public ICommand OpenValidationCommand { get; }
         /// <summary>Komanda za CAPA slučajeve.</summary>
         public ICommand OpenCapaCommand { get; }
-        /// <summary>Komanda za SOP/dokumentaciju.</summary>
-        public ICommand OpenSopCommand { get; }
-        /// <summary>Komanda za inspekcije.</summary>
-        public ICommand OpenInspectionsCommand { get; }
         /// <summary>Komanda za izvještaje (reports/dashboard).</summary>
         public ICommand OpenReportsCommand { get; }
         /// <summary>Komanda za GMP/Audit log.</summary>
@@ -56,75 +53,81 @@ namespace YasGMP.ViewModels
             OpenCalibrationsCommand = new Command(OpenCalibrations);
             OpenValidationCommand = new Command(OpenValidation);
             OpenCapaCommand = new Command(OpenCapa);
-            OpenSopCommand = new Command(OpenSop);
-            OpenInspectionsCommand = new Command(OpenInspections);
             OpenReportsCommand = new Command(OpenReports);
             OpenAuditLogCommand = new Command(OpenAuditLog);
         }
 
+        private static class Routes
+        {
+            public const string Dashboard    = "//root/home/dashboard";
+            public const string Users        = "//root/admin/users";
+            public const string Machines     = "//root/ops/machines";
+            public const string Components   = "//root/ops/components";
+            public const string Parts        = "//root/ops/parts";
+            public const string Suppliers    = "//root/ops/suppliers";
+            public const string WorkOrders   = "//root/ops/workorders";
+            public const string Calibrations = "//root/ops/calibrations";
+            public const string Validation   = "//root/quality/validation";
+            public const string Capa         = "//root/quality/capa";
+            public const string AuditLog     = "//root/quality/auditlog";
+        }
+
+        private static Task NavigateAsync(string route)
+            => Shell.Current is null ? Task.CompletedTask : Shell.Current.GoToAsync(route);
+
         /// <summary>
         /// Otvara ekran za korisnike.
         /// </summary>
-        private async void OpenUsers() => await Shell.Current.GoToAsync("//UsersPage");
+        private async void OpenUsers() => await NavigateAsync(Routes.Users);
 
         /// <summary>
         /// Otvara ekran za strojeve.
         /// </summary>
-        private async void OpenMachines() => await Shell.Current.GoToAsync("//MachinesPage");
+        private async void OpenMachines() => await NavigateAsync(Routes.Machines);
 
         /// <summary>
         /// Otvara ekran za komponente.
         /// </summary>
-        private async void OpenComponents() => await Shell.Current.GoToAsync("//ComponentsPage");
+        private async void OpenComponents() => await NavigateAsync(Routes.Components);
 
         /// <summary>
         /// Otvara ekran za dijelove (Parts).
         /// </summary>
-        private async void OpenParts() => await Shell.Current.GoToAsync("//PartsPage");
+        private async void OpenParts() => await NavigateAsync(Routes.Parts);
 
         /// <summary>
         /// Otvara ekran za dobavljače.
         /// </summary>
-        private async void OpenSuppliers() => await Shell.Current.GoToAsync("//SuppliersPage");
+        private async void OpenSuppliers() => await NavigateAsync(Routes.Suppliers);
 
         /// <summary>
         /// Otvara ekran za radne naloge.
         /// </summary>
-        private async void OpenWorkOrders() => await Shell.Current.GoToAsync("//WorkOrdersPage");
+        private async void OpenWorkOrders() => await NavigateAsync(Routes.WorkOrders);
 
         /// <summary>
         /// Otvara ekran za kalibracije.
         /// </summary>
-        private async void OpenCalibrations() => await Shell.Current.GoToAsync("//CalibrationsPage");
+        private async void OpenCalibrations() => await NavigateAsync(Routes.Calibrations);
 
         /// <summary>
         /// Otvara ekran za validacije/kvalifikacije (IQ/OQ/PQ/URS).
         /// </summary>
-        private async void OpenValidation() => await Shell.Current.GoToAsync("//ValidationPage");
+        private async void OpenValidation() => await NavigateAsync(Routes.Validation);
 
         /// <summary>
         /// Otvara ekran za CAPA slučajeve.
         /// </summary>
-        private async void OpenCapa() => await Shell.Current.GoToAsync("//CapaPage");
+        private async void OpenCapa() => await NavigateAsync(Routes.Capa);
 
         /// <summary>
-        /// Otvara ekran za SOP dokumente.
+        /// Otvara glavni dashboard s izvještajima.
         /// </summary>
-        private async void OpenSop() => await Shell.Current.GoToAsync("//SopPage");
-
-        /// <summary>
-        /// Otvara ekran za inspekcije.
-        /// </summary>
-        private async void OpenInspections() => await Shell.Current.GoToAsync("//InspectionsPage");
-
-        /// <summary>
-        /// Otvara ekran za izvještaje/dashboard.
-        /// </summary>
-        private async void OpenReports() => await Shell.Current.GoToAsync("//ReportsPage");
+        private async void OpenReports() => await NavigateAsync(Routes.Dashboard);
 
         /// <summary>
         /// Otvara ekran za audit/GMP log.
         /// </summary>
-        private async void OpenAuditLog() => await Shell.Current.GoToAsync("//AuditLogPage");
+        private async void OpenAuditLog() => await NavigateAsync(Routes.AuditLog);
     }
 }
