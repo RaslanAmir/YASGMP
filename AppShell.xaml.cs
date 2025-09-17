@@ -28,6 +28,7 @@ namespace YasGMP
             // Quality
             public const string Capa           = "//root/quality/capa";
             public const string Validation     = "//root/quality/validation";
+            public const string ChangeControl  = "//root/quality/changecontrol";
             public const string AuditDashboard = "//root/quality/auditdashboard";
             public const string AuditLog       = "//root/quality/auditlog";
 
@@ -105,6 +106,7 @@ namespace YasGMP
 
         private async void OnToolbarGoCapa      (object s, EventArgs e) => await GoAsync(Paths.Capa);
         private async void OnToolbarGoValidation(object s, EventArgs e) => await GoAsync(Paths.Validation);
+        private async void OnToolbarGoChangeControl(object s, EventArgs e) => await GoAsync(Paths.ChangeControl);
         private async void OnToolbarGoAuditDash (object s, EventArgs e) => await GoAsync(Paths.AuditDashboard);
         private async void OnToolbarGoAuditLog  (object s, EventArgs e) => await GoAsync(Paths.AuditLog);
 
