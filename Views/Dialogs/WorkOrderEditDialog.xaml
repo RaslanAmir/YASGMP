@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YasGMP.Views.Dialogs.WorkOrderEditDialog"
+             x:Name="DialogPage"
              Title="Radni nalog">
   <ScrollView>
     <VerticalStackLayout Padding="20" Spacing="10">
@@ -15,8 +16,8 @@
       <Editor Text="{Binding Description}" Placeholder="Opis" AutoSize="TextChanges" />
       <Entry Text="{Binding TaskDescription}" Placeholder="Opis zadatka (legacy)" />
       <DatePicker Date="{Binding DateOpen}" />
-      <DatePicker Date="{Binding DueDate}" />
-      <DatePicker Date="{Binding DateClose}" />
+      <DatePicker Date="{Binding Source={x:Reference DialogPage}, Path=DueDatePickerValue, Mode=TwoWay}" />
+      <DatePicker Date="{Binding Source={x:Reference DialogPage}, Path=DateClosePickerValue, Mode=TwoWay}" />
       <Entry Text="{Binding Result}" Placeholder="Rezultat/nalaz" />
       <Editor Text="{Binding Notes}" Placeholder="Napomena" AutoSize="TextChanges" />
 
