@@ -87,7 +87,7 @@ namespace YasGMP.Data
         public DbSet<IrregularitiesLog> IrregularitiesLogs { get; set; }
         public DbSet<JobTitle> JobTitles { get; set; }
         public DbSet<KpiWidget> KpiWidgets { get; set; }
-        public DbSet<Location> Locations { get; set; }
+        public DbSet<YasGMP.Models.Location> Locations { get; set; }
         public DbSet<LogEntry> LogEntries { get; set; }
         public DbSet<LoginAttemptLog> LoginAttemptLogs { get; set; }
         public DbSet<LookupDomain> LookupDomains { get; set; }

@@ -23,7 +23,7 @@ namespace YasGMP.Models
         public int? UserId { get; set; }
 
         [Column("comment")]
-        public string? Comment { get; set; }
+        public string? CommentText { get; set; }
 
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }

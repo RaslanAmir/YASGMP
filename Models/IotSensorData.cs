@@ -72,6 +72,6 @@ namespace YasGMP.Models
         public virtual MachineComponent? Component { get; set; }
 
         [ForeignKey(nameof(UnitId))]
-        public virtual Unit? UnitNavigation { get; set; }
+        public virtual MeasurementUnit? MeasurementUnit { get; set; }
     }
 }

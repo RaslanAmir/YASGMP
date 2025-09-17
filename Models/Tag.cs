@@ -13,10 +13,10 @@ namespace YasGMP.Models
         [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>Gets or sets the tag.</summary>
+        /// <summary>Gets or sets the tag value.</summary>
         [Column("tag")]
         [StringLength(60)]
-        public string Tag { get; set; } = string.Empty;
+        public string TagValue { get; set; } = string.Empty;
 
         /// <summary>Gets or sets the created at.</summary>
         [Column("created_at")]
