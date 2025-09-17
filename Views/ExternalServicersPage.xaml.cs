@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 using ExternalServicer = YasGMP.Models.ExternalContractor;
@@ -50,25 +51,24 @@ namespace YasGMP
         /// Inicijalizira stranicu, validira konfiguraciju i učitava podatke.
         /// </summary>
         /// <exception cref="InvalidOperationException">Ako konfiguracija ili konekcijski string nisu dostupni.</exception>
-        public ExternalServicersPage()
+        public ExternalServicersPage(DatabaseService dbService)
         {
-            InitializeComponent(); // use source-generated InitializeComponent
+            InitializeComponent();
 
-            var app = Application.Current as App ?? throw new InvalidOperationException("Application.Current nije tipa App.");
-
-            // Robusno dohvaćanje connection stringa (podrži i ravni i sekcijski ključ)
-            var connStr = app.AppConfig?["ConnectionStrings:MySqlDb"] ?? app.AppConfig?["MySqlDb"];
-            if (string.IsNullOrWhiteSpace(connStr))
-                throw new InvalidOperationException("MySqlDb connection string nije pronađen u konfiguraciji.");
-
-            _dbService = new DatabaseService(connStr);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
 
             BindingContext = this;
 
-            // Fire-and-forget inicijalno punjenje (metode same rješavaju iznimke i UI maršaliranje)
             _ = LoadLookupsAsync();
             _ = LoadExternalServicersAsync();
         }
+
+        /// <summary>Parameterless ctor za Shell/XAML (ServiceLocator fallback).</summary>
+        public ExternalServicersPage()
+            : this(ServiceLocator.GetRequiredService<DatabaseService>())
+        {
+        }
+
 
         #region === Reflection helpers (schema tolerant) ===
 

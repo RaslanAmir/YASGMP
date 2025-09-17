@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;                  // IEnumerable<>
+using YasGMP.Common;
 using YasGMP.Data;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;                  // IRBACService
@@ -171,6 +172,8 @@ namespace YasGMP
             builder.Services.AddTransient<UserViewModel>();
             builder.Services.AddTransient<UserRolePermissionViewModel>();
             builder.Services.AddTransient<MachineViewModel>(); // NEW
+            builder.Services.AddTransient<CalibrationsViewModel>();
+            builder.Services.AddTransient<PpmViewModel>();
 
             // Pages
             builder.Services.AddTransient<YasGMP.Views.LoginPage>();
@@ -179,6 +182,15 @@ namespace YasGMP
             builder.Services.AddTransient<YasGMP.Views.AdminPanelPage>();
             builder.Services.AddTransient<YasGMP.Views.UsersPage>();
             builder.Services.AddTransient<YasGMP.Views.UserRolePermissionPage>();
+            builder.Services.AddTransient<YasGMP.Views.CalibrationsPage>();
+            builder.Services.AddTransient<YasGMP.Views.MachinesPage>();
+            builder.Services.AddTransient<YasGMP.Views.PartsPage>();
+            builder.Services.AddTransient<YasGMP.Views.WorkOrdersPage>();
+            builder.Services.AddTransient<YasGMP.Views.ComponentsPage>();
+            builder.Services.AddTransient<YasGMP.Views.SuppliersPage>();
+            builder.Services.AddTransient<YasGMP.ExternalServicersPage>();
+            builder.Services.AddTransient<YasGMP.Pages.PpmPage>();
+            builder.Services.AddTransient<YasGMP.Views.ValidationPage>();
             // Debug pages (RBAC-gated in page code-behind)
             builder.Services.AddTransient<YasGMP.Views.Debug.DebugDashboardPage>();
             builder.Services.AddTransient<YasGMP.Views.Debug.LogViewerPage>();
@@ -206,7 +218,9 @@ namespace YasGMP
             AppDataFileLoggerProvider.WriteFrameworkLine("CFG", "info", $"ConnString (redacted): {Redact(mysqlConnStr)}");
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+            ServiceLocator.Initialize(app.Services);
+            return app;
         }
 
         /// <summary>

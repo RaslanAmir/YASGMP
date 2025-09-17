@@ -20,6 +20,7 @@ using Microsoft.Maui.ApplicationModel;     // MainThread
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;              // FilePicker, FileSystem
 using Microsoft.Extensions.DependencyInjection;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -108,7 +109,7 @@ namespace YasGMP.Views
         public bool CanDelete => (SelectedValidation?.Id ?? 0) > 0;
 
         /// <summary>Shell/HotReload-friendly ctor: resolves DB via DI, with AppConfig fallback.</summary>
-        public ValidationPage() : this(ResolveDb()) { }
+        public ValidationPage() : this(ServiceLocator.GetRequiredService<DatabaseService>()) { }
 
         /// <summary>DI-friendly constructor.</summary>
         public ValidationPage(DatabaseService db)
@@ -124,38 +125,6 @@ namespace YasGMP.Views
         /// <summary>
         /// Resolves a <see cref="DatabaseService"/> from DI or from App.AppConfig as a fallback.
         /// </summary>
-        private static DatabaseService ResolveDb()
-        {
-            var sp = Application.Current?.Handler?.MauiContext?.Services;
-            var byDi = sp?.GetService<DatabaseService>();
-            if (byDi != null) return byDi;
-
-            if (Application.Current is App app && app.AppConfig is not null)
-            {
-                string? cs = null;
-                try
-                {
-                    var idxer = app.AppConfig.GetType().GetProperty("Item", new[] { typeof(string) });
-                    cs = idxer?.GetValue(app.AppConfig, new object[] { "ConnectionStrings:MySqlDb" }) as string;
-                }
-                catch { /* ignore */ }
-
-                if (string.IsNullOrWhiteSpace(cs))
-                {
-                    try
-                    {
-                        var csObj = app.AppConfig.GetType().GetProperty("ConnectionStrings")?.GetValue(app.AppConfig);
-                        cs = csObj?.GetType().GetProperty("MySqlDb")?.GetValue(csObj) as string;
-                    }
-                    catch { /* ignore */ }
-                }
-
-                if (!string.IsNullOrWhiteSpace(cs))
-                    return new DatabaseService(cs!);
-            }
-
-            throw new InvalidOperationException("MySqlDb connection string nije pronađen.");
-        }
 
         /// <summary>
         /// Loads data (validations + lookup lists) and optionally attempts to reselect & scroll to an item by Id.

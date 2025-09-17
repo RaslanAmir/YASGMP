@@ -15,9 +15,9 @@ using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
-using MySqlConnector;
 
 namespace YasGMP.Views
 {
@@ -36,32 +36,22 @@ namespace YasGMP.Views
         /// Inicijalizira stranicu, rješava konekcijski string i učitava podatke.
         /// </summary>
         /// <exception cref="InvalidOperationException">Ako aplikacija nema connection string.</exception>
-        public ComponentsPage()
+        public ComponentsPage(DatabaseService dbService)
         {
             InitializeComponent();
 
-            var connStr = ResolveMySqlConnectionStringFromApp();
-            _dbService = new DatabaseService(connStr);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
 
             BindingContext = this;
+
+            _ = LoadMachinesAsync();
             _ = LoadComponentsAsync();
         }
 
-        private static string ResolveMySqlConnectionStringFromApp()
+        /// <summary>Parameterless ctor for Shell/XAML koji koristi ServiceLocator.</summary>
+        public ComponentsPage()
+            : this(ServiceLocator.GetRequiredService<DatabaseService>())
         {
-            if (Application.Current is not App app)
-                throw new InvalidOperationException("Application.Current nije tipa App.");
-
-            var viaSection = app.AppConfig?["ConnectionStrings:MySqlDb"];
-            var viaFlat    = app.AppConfig?["MySqlDb"];
-            var conn       = !string.IsNullOrWhiteSpace(viaSection) ? viaSection
-                           : !string.IsNullOrWhiteSpace(viaFlat)    ? viaFlat
-                           : null;
-
-            if (string.IsNullOrWhiteSpace(conn))
-                throw new InvalidOperationException("MySqlDb connection string nije pronađen u konfiguraciji.");
-
-            return conn!;
         }
 
         /// <summary>

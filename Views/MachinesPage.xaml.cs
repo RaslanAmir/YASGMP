@@ -14,6 +14,7 @@ using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Views.Dialogs;
@@ -26,45 +27,34 @@ namespace YasGMP.Views
         public Machine? SelectedMachine { get; set; }
         private List<Machine> _allMachines = new();
         private readonly DatabaseService _dbService;
-        private readonly CodeGeneratorService _codeService = new();
-        private readonly QRCodeService _qrService = new();
+        private readonly CodeGeneratorService _codeService;
+        private readonly QRCodeService _qrService;
         private readonly DocumentService _docService;
 
-        public MachinesPage()
+        public MachinesPage(DatabaseService dbService, CodeGeneratorService codeService, QRCodeService qrService, DocumentService documentService)
         {
             InitializeComponent();
 
-            // Resolve connection string from App configuration or DI; avoid throwing to prevent navigation crashes.
-            string? connStr = null;
-            try
-            {
-                if (Application.Current is App app && app.AppConfig is not null)
-                    connStr = app.AppConfig["ConnectionStrings:MySqlDb"] ?? app.AppConfig["MySqlDb"];
-
-                if (string.IsNullOrWhiteSpace(connStr))
-                {
-                    var sp = Application.Current?.Handler?.MauiContext?.Services;
-                    var cfg = sp?.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
-                    connStr = cfg?["ConnectionStrings:MySqlDb"] ?? cfg?["MySqlDb"];
-                }
-            }
-            catch { /* fall through to alert */ }
-
-            if (string.IsNullOrWhiteSpace(connStr))
-            {
-                _ = SafeNavigator.ShowAlertAsync("Konfiguracija", "MySqlDb connection string nije pronađen.", "OK");
-                // Minimal placeholder so the page can open; operations will surface friendly DB errors.
-                connStr = "Server=127.0.0.1;Port=3306;Database=YASGMP;User ID=app;Password=;Connection Timeout=3;Default Command Timeout=10;";
-            }
-
-            _dbService = new DatabaseService(connStr);
-            _docService = new DocumentService(_dbService);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
+            _codeService = codeService ?? throw new ArgumentNullException(nameof(codeService));
+            _qrService = qrService ?? throw new ArgumentNullException(nameof(qrService));
+            _docService = documentService ?? throw new ArgumentNullException(nameof(documentService));
             BindingContext = this;
 
             // One-time DB safety net: ensure triggers cannot null-out machines.code
             // Run safely and ignore permission issues for non-DBA users
             _ = EnsureTriggersSafeAsync();
             _ = LoadMachinesAsync();
+        }
+
+        /// <summary>Parameterless ctor for Shell/XAML. Resolves dependencies via ServiceLocator.</summary>
+        public MachinesPage()
+            : this(
+                ServiceLocator.GetRequiredService<DatabaseService>(),
+                ServiceLocator.GetRequiredService<CodeGeneratorService>(),
+                ServiceLocator.GetRequiredService<QRCodeService>(),
+                ServiceLocator.GetRequiredService<DocumentService>())
+        {
         }
 
         private async Task EnsureTriggersSafeAsync()

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Controls;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Views.Dialogs;
@@ -40,25 +41,26 @@ namespace YasGMP.Views
         private DateTime? _filterTo;
 
         /// <summary>Konstruktor s učitavanjem konfiguracije i inicijalnih podataka.</summary>
-        public CalibrationsPage()
+        public CalibrationsPage(DatabaseService dbService, ExportService exportService)
         {
             InitializeComponent();
 
-            if (Application.Current is not App app)
-                throw new InvalidOperationException("Application.Current is not an App.");
-
-            var connStr = app.AppConfig?["ConnectionStrings:MySqlDb"] ?? app.AppConfig?["MySqlDb"];
-            if (string.IsNullOrWhiteSpace(connStr))
-                throw new InvalidOperationException("MySqlDb connection string not found in configuration.");
-
-            _dbService = new DatabaseService(connStr);
-            _exportService = new ExportService(_dbService);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
+            _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 
             BindingContext = this;
 
             // Fire-and-forget inicijalno punjenje (UI ažuriranja se maršaliraju na UI thread)
             _ = LoadLookupsAsync();
             _ = LoadCalibrationsAsync();
+        }
+
+        /// <summary>Parameterless ctor for XAML/HotReload. Resolves services via ServiceLocator.</summary>
+        public CalibrationsPage()
+            : this(
+                ServiceLocator.GetRequiredService<DatabaseService>(),
+                ServiceLocator.GetRequiredService<ExportService>())
+        {
         }
 
         #region Data Loading

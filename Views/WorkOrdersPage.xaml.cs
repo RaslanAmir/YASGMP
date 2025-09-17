@@ -1,3 +1,4 @@
+using YasGMP.Common;
 using YasGMP.Services;
 // ==============================================================================
 //  File: Views/WorkOrdersPage.xaml.cs
@@ -26,14 +27,23 @@ namespace YasGMP.Views
     /// </summary>
     public partial class WorkOrdersPage : ContentPage
     {
+        private readonly DatabaseService _dbService;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkOrdersPage"/> and wires
         /// the ViewModel from MAUI DI or a default constructor without throwing.
         /// </summary>
-        public WorkOrdersPage()
+        public WorkOrdersPage(DatabaseService dbService)
         {
             InitializeComponent();
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             TryWireViewModel();
+        }
+
+        /// <summary>Parameterless ctor for Shell/XAML. Resolves services from the locator.</summary>
+        public WorkOrdersPage()
+            : this(ServiceLocator.GetRequiredService<DatabaseService>())
+        {
         }
 
         /// <summary>
@@ -121,15 +131,13 @@ namespace YasGMP.Views
             try
             {
                 var services = Application.Current?.Handler?.MauiContext?.Services;
-                var connStr = (Application.Current as App)?.AppConfig?["ConnectionStrings:MySqlDb"] ?? (Application.Current as App)?.AppConfig?["MySqlDb"];
-                if (string.IsNullOrWhiteSpace(connStr)) { await DisplayAlert("Greška", "Nema konekcijskog stringa.", "OK"); return; }
-                var db = new YasGMP.Services.DatabaseService(connStr!);
+                if (_dbService is null) { await DisplayAlert("Greška", "Nema servisa baze.", "OK"); return; }
                 var wo = new YasGMP.Models.WorkOrder { Title = "", Type = "korektivni", Priority = "srednji", Status = "otvoren", DateOpen = DateTime.UtcNow };
-                var dlg = new YasGMP.Views.Dialogs.WorkOrderEditDialog(wo, db, 0);
+                var dlg = new YasGMP.Views.Dialogs.WorkOrderEditDialog(wo, _dbService, 0);
                 await Navigation.PushModalAsync(dlg);
                 if (await dlg.Result)
                 {
-                    await db.InsertOrUpdateWorkOrderAsync(wo, false, 0, "ui", "WorkOrdersPage", null);
+                    await _dbService.InsertOrUpdateWorkOrderAsync(wo, false, 0, "ui", "WorkOrdersPage", null);
                     // attempt to refresh via VM if present
                     var vm = BindingContext;
                     var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
@@ -150,13 +158,12 @@ namespace YasGMP.Views
                 var selected = listProp?.GetValue(BindingContext) as YasGMP.Models.WorkOrder;
                 if (selected == null) { await DisplayAlert("Obavijest", "Odaberite radni nalog.", "OK"); return; }
                 var wo = selected; // editing direct reference should be fine for now
-                var connStr = (Application.Current as App)?.AppConfig?["ConnectionStrings:MySqlDb"] ?? (Application.Current as App)?.AppConfig?["MySqlDb"];
-                var db = new YasGMP.Services.DatabaseService(connStr!);
-                var dlg = new YasGMP.Views.Dialogs.WorkOrderEditDialog(wo, db, 0);
+                if (_dbService is null) { await DisplayAlert("Greška", "Nema servisa baze.", "OK"); return; }
+                var dlg = new YasGMP.Views.Dialogs.WorkOrderEditDialog(wo, _dbService, 0);
                 await Navigation.PushModalAsync(dlg);
                 if (await dlg.Result)
                 {
-                    await db.InsertOrUpdateWorkOrderAsync(wo, true, 0, "ui", "WorkOrdersPage", null);
+                    await _dbService.InsertOrUpdateWorkOrderAsync(wo, true, 0, "ui", "WorkOrdersPage", null);
                     var vm = BindingContext;
                     var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
                     if (cmd?.CanExecute(null) == true) cmd.Execute(null);

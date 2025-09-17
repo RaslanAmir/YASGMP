@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;             // MainThread
 using Microsoft.Maui.Controls;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 using ClosedXML.Excel;
@@ -48,40 +49,22 @@ namespace YasGMP.Views
         /// Inicijalizira stranicu i uÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬Ă‚¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¤itava dijelove. Sigurno dohvaÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚â€ąĂ˘â‚¬Ë‡a konekcijski string.
         /// </summary>
         /// <exception cref="InvalidOperationException">Ako aplikacija ili konekcijski string nisu dostupni.</exception>
-        public PartsPage()
+        public PartsPage(DatabaseService dbService)
         {
             InitializeComponent();
 
-            var connStr = ResolveMySqlConnectionStringFromApp();
-            _dbService = new DatabaseService(connStr);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
 
             BindingContext = this;
 
-            // Ne blokirati UI Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚„Ă˘â‚¬¦Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…ÄąĹź metoda sama marĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇalira UI aĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚„Ă„Äľuriranja
+            // Ne blokirati UI – metoda sama maršalira UI ažuriranja
             _ = LoadPartsAsync();
         }
 
-        /// <summary>
-        /// Sigurno dohvaÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚â€ąĂ˘â‚¬Ë‡a MySQL connection string iz <see cref="App.AppConfig"/> bez ovisnosti o ekstenzijama.
-        /// PokuĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇava i ravni kljuÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬Ă‚¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¤ (<c>MySqlDb</c>) i sekcijski (<c>ConnectionStrings:MySqlDb</c>).
-        /// </summary>
-        private static string ResolveMySqlConnectionStringFromApp()
+        /// <summary>Parameterless ctor for Shell/XAML; resolves dependencies via ServiceLocator.</summary>
+        public PartsPage()
+            : this(ServiceLocator.GetRequiredService<DatabaseService>())
         {
-            if (Application.Current is not App app)
-                throw new InvalidOperationException("Application.Current nije tipa App.");
-
-            var cfg = app.AppConfig;
-            var viaSection = cfg?["ConnectionStrings:MySqlDb"];
-            var viaFlat    = cfg?["MySqlDb"];
-
-            var conn = !string.IsNullOrWhiteSpace(viaSection) ? viaSection
-                     : !string.IsNullOrWhiteSpace(viaFlat)    ? viaFlat
-                     : null;
-
-            if (string.IsNullOrWhiteSpace(conn))
-                throw new InvalidOperationException("MySqlDb connection string nije pronaÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬Ä…Ä‚â€šĂ‚ÂÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇĂ„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¬Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Âen u konfiguraciji.");
-
-            return conn!;
         }
 
         /// <summary>
