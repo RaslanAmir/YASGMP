@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Maui.ApplicationModel;   // MainThread
 using Microsoft.Maui.Controls;           // Command, Keyboard
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -184,21 +185,11 @@ namespace YasGMP.ViewModels
         /// <summary>
         /// Initializes a new instance of <see cref="CalibrationsViewModel"/> and wires up services and commands.
         /// </summary>
-        public CalibrationsViewModel()
+        public CalibrationsViewModel(DatabaseService dbService, AuditService auditService, ExportService exportService)
         {
-            // Resolve connection string from IConfiguration (App.AppConfig)
-            var app = Application.Current as App;
-            var cfg = app?.AppConfig;
-
-            var cs = cfg?["ConnectionStrings:MySqlDb"]
-                  ?? cfg?["MySqlDb"];
-
-            if (string.IsNullOrWhiteSpace(cs))
-                throw new InvalidOperationException("MySqlDb connection string not found in AppConfig. Expected key 'ConnectionStrings:MySqlDb' or 'MySqlDb'.");
-
-            _dbService     = new DatabaseService(cs);
-            _auditService  = new AuditService(_dbService);
-            _exportService = new ExportService(_dbService, _auditService);
+            _dbService     = dbService    ?? throw new ArgumentNullException(nameof(dbService));
+            _auditService  = auditService ?? throw new ArgumentNullException(nameof(auditService));
+            _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 
             LoadAllCommand     = new Command(async () => await LoadAllAsync());
             AddCommand         = new Command(OnAddCalibrationRequested);
@@ -210,6 +201,17 @@ namespace YasGMP.ViewModels
             RefreshCommand     = new Command(async () => await LoadAllAsync());
 
             _ = LoadAllAsync();
+        }
+
+        /// <summary>
+        /// Parameterless constructor retained for XAML/HotReload. Resolves services from the global locator.
+        /// </summary>
+        public CalibrationsViewModel()
+            : this(
+                ServiceLocator.GetRequiredService<DatabaseService>(),
+                ServiceLocator.GetRequiredService<AuditService>(),
+                ServiceLocator.GetRequiredService<ExportService>())
+        {
         }
 
         #endregion

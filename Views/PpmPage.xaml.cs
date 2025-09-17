@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.ViewModels;
 
@@ -33,42 +34,34 @@ namespace YasGMP.Pages
         /// The ViewModel instance used as this page's <see cref="BindableObject.BindingContext"/>.
         /// Kept as <see cref="object"/> to reduce compile-time coupling (reflection is used).
         /// </summary>
-        private readonly object _vm;
+        private readonly PpmViewModel _vm;
 
         /// <summary>
         /// Creates the page from XAML/Shell without DI.
         /// Discovers the connection string from <c>App.AppConfig</c>.
         /// </summary>
         /// <exception cref="InvalidOperationException">When App or connection string is not available.</exception>
-        public PpmPage()
+        public PpmPage(PpmViewModel viewModel)
         {
+            if (viewModel is null) throw new ArgumentNullException(nameof(viewModel));
+
             InitializeComponent();
 
-            var db = CreateDatabaseServiceFromAppConfig();
-            _vm = new PpmViewModel(db);
-
+            _vm = viewModel;
             BindingContext = _vm;
 
             // Safe initial load
             Loaded += async (_, __) => await SafeLoadAsync();
         }
 
-        /// <summary>
-        /// DI-friendly constructor when you already have a <see cref="DatabaseService"/>.
-        /// </summary>
-        /// <param name="db">Instance of <see cref="DatabaseService"/> to use for the view model.</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="db"/> is <c>null</c>.</exception>
-        public PpmPage(DatabaseService db)
+        /// <summary>DI-friendly constructor when you already have a <see cref="DatabaseService"/>.</summary>
+        public PpmPage(DatabaseService db) : this(new PpmViewModel(db ?? throw new ArgumentNullException(nameof(db))))
         {
-            if (db is null) throw new ArgumentNullException(nameof(db));
+        }
 
-            InitializeComponent();
-
-            _vm = new PpmViewModel(db);
-            BindingContext = _vm;
-
-            // Safe initial load
-            Loaded += async (_, __) => await SafeLoadAsync();
+        /// <summary>Parameterless ctor for Shell/XAML; resolves ViewModel via ServiceLocator.</summary>
+        public PpmPage() : this(ServiceLocator.GetRequiredService<PpmViewModel>())
+        {
         }
 
         #region === Startup / Data Load ===
@@ -357,114 +350,6 @@ namespace YasGMP.Pages
 
         #region === Helpers (reflection + service resolution + UI prompts) ===
 
-        /// <summary>
-        /// Resolves connection string from <c>App.AppConfig</c> and constructs <see cref="DatabaseService"/>.
-        /// Accepts both <c>ConnectionStrings:MySqlDb</c> and flat <c>MySqlDb</c> keys.
-        /// </summary>
-        private static DatabaseService CreateDatabaseServiceFromAppConfig()
-        {
-            string? connStr = null;
-
-            if (Application.Current is App app)
-            {
-                if (app.AppConfig is Microsoft.Extensions.Configuration.IConfiguration cfg)
-                {
-                    connStr = cfg["ConnectionStrings:MySqlDb"];
-                    connStr ??= cfg["MySqlDb"];
-                }
-
-                if (string.IsNullOrWhiteSpace(connStr) && app.AppConfig is not null)
-                {
-                    var csObj = app.AppConfig.GetType().GetProperty("ConnectionStrings")?.GetValue(app.AppConfig);
-                    connStr = csObj?.GetType().GetProperty("MySqlDb")?.GetValue(csObj) as string;
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(connStr))
-                throw new InvalidOperationException("MySqlDb connection string nije pronađen u AppConfig.");
-
-            return new DatabaseService(connStr);
-        }
-
-        /// <summary>
-        /// Retrieves the <c>PpmPlans</c> collection and its element type from the ViewModel via reflection.
-        /// </summary>
-        private (IList? list, Type? elementType) GetPlansListAndElementType()
-        {
-            var plansObj = GetVmPropertyValue("PpmPlans");
-            if (plansObj is null) return (null, null);
-
-            var plansType = plansObj.GetType();
-            var iList = plansObj as IList;
-            var elementType = plansType.IsGenericType ? plansType.GetGenericArguments().FirstOrDefault() : null;
-            return (iList, elementType);
-        }
-
-        /// <summary>Reads a property value from the ViewModel via reflection.</summary>
-        private object? GetVmPropertyValue(string propertyName)
-        {
-            var prop = _vm.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
-            return prop?.GetValue(_vm);
-        }
-
-        /// <summary>Writes a property on the ViewModel via reflection (no-throw if missing).</summary>
-        private void SetVmPropertyValue(string propertyName, object? value)
-        {
-            var prop = _vm.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
-            prop?.SetValue(_vm, value);
-        }
-
-        /// <summary>
-        /// Sets a property on an arbitrary model instance if it exists (type-safe with conversion).
-        /// </summary>
-        private static void SetIfExists(object? instance, string propertyName, object? value)
-        {
-            if (instance is null) return;
-
-            var prop = instance.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
-            if (prop is null || !prop.CanWrite) return;
-
-            try
-            {
-                var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-                var converted = value is null ? null : Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
-                prop.SetValue(instance, converted);
-            }
-            catch
-            {
-                if (value is not null && prop.PropertyType.IsInstanceOfType(value))
-                    prop.SetValue(instance, value);
-            }
-        }
-
-        /// <summary>
-        /// Invokes an async (or sync) method on the ViewModel if it exists.
-        /// Returns <c>true</c> if found and invoked, otherwise <c>false</c>.
-        /// Awaits any returned <see cref="Task"/>.
-        /// </summary>
-        private async Task<bool> InvokeIfExistsAsync(string methodName, params object[] args)
-        {
-            var method = _vm.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public);
-            if (method is null) return false;
-
-            var result = method.Invoke(_vm, args);
-            if (result is Task t)
-                await t.ConfigureAwait(false);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Displays a simple informational stub when a ViewModel action is not implemented.
-        /// </summary>
-        private Task DisplayInfoStubAsync(string feature) =>
-            Services.SafeNavigator.ShowAlertAsync("Info", $"{feature} – funkcionalnost će se aktivirati preko ViewModela kada postane dostupna.", "OK");
-
-        /// <summary>
-        /// UI-thread safe prompt wrapper to avoid 0x8001010E when invoked from background threads.
-        /// </summary>
-        private static Task<string?> PromptAsync(string title, string message, string? initial = null) =>
-            MainThread.InvokeOnMainThreadAsync(() => Application.Current!.MainPage!.DisplayPromptAsync(title, message, initialValue: initial));
 
         #endregion
     }

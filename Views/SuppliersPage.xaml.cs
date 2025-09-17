@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Controls;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -30,37 +31,20 @@ namespace YasGMP.Views
         /// Konstruktor — inicijalizira UI, konfiguraciju i učitava podatke.
         /// </summary>
         /// <exception cref="InvalidOperationException">Ako konekcijski string nije dostupan.</exception>
-        public SuppliersPage()
+        public SuppliersPage(DatabaseService dbService)
         {
             InitializeComponent();
 
-            var connStr = ResolveMySqlConnectionStringFromApp();
-            _dbService = new DatabaseService(connStr);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
 
             BindingContext = this;
             _ = LoadSuppliersAsync();
         }
 
-        /// <summary>
-        /// Vraća MySQL connection string iz <see cref="App.AppConfig"/>.
-        /// Pokušava i sekcijski (<c>ConnectionStrings:MySqlDb</c>) i ravni ključ (<c>MySqlDb</c>).
-        /// </summary>
-        private static string ResolveMySqlConnectionStringFromApp()
+        /// <summary>Parameterless ctor for Shell/XAML; koristi ServiceLocator.</summary>
+        public SuppliersPage()
+            : this(ServiceLocator.GetRequiredService<DatabaseService>())
         {
-            if (Application.Current is not App app)
-                throw new InvalidOperationException("Application.Current nije tipa App.");
-
-            var cfg       = app.AppConfig;
-            var viaSection = cfg?["ConnectionStrings:MySqlDb"];
-            var viaFlat    = cfg?["MySqlDb"];
-            var conn       = !string.IsNullOrWhiteSpace(viaSection) ? viaSection
-                           : !string.IsNullOrWhiteSpace(viaFlat)    ? viaFlat
-                           : null;
-
-            if (string.IsNullOrWhiteSpace(conn))
-                throw new InvalidOperationException("MySqlDb connection string nije pronađen u konfiguraciji.");
-
-            return conn!;
         }
 
         /// <summary>
