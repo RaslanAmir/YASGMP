@@ -258,6 +258,18 @@ namespace YasGMP.Data
                 .HasForeignKey(p => p.LastModifiedById)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Role>()
+                .HasOne(r => r.CreatedBy)
+                .WithMany()
+                .HasForeignKey(r => r.CreatedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Role>()
+                .HasOne(r => r.LastModifiedBy)
+                .WithMany()
+                .HasForeignKey(r => r.LastModifiedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Konfiguracija enum polja u WorkOrderAudit (Action) kao string u bazi
             modelBuilder.Entity<WorkOrderAudit>()
                 .Property(a => a.Action)
