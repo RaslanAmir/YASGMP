@@ -72,6 +72,9 @@
     <!-- Exclude tooling sources from the main app build -->
     <Compile Remove="tools\**\*.cs" />
     <None Include="tools\**\*.cs" />
+    <!-- Exclude test sources from the main app build -->
+    <Compile Remove="YasGMP.Tests\**\*.cs" />
+    <None Include="YasGMP.Tests\**\*.cs" />
   </ItemGroup>
 
   <Target Name="DbSyncAnalyzer" BeforeTargets="Build" Condition="'$(RUN_DB_ANALYZER_ON_BUILD)'=='true'">
