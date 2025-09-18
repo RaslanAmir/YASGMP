@@ -24,6 +24,7 @@ namespace YasGMP.Models
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
 
+
         /// <summary>
         /// Role ID (Foreign Key, part of composite key).
         /// </summary>

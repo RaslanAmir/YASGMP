@@ -82,7 +82,10 @@ namespace YasGMP.Models
         public List<Attachment> Attachments { get; set; } = new();
 
         // audit
+        [InverseProperty(nameof(IncidentAuditLog.Incident))]
         public List<IncidentAuditLog> AuditLogs { get; set; } = new();
+
+        [InverseProperty(nameof(IncidentAuditLog.WorkflowIncident))]
         public List<IncidentAuditLog> WorkflowHistory { get; set; } = new();
     }
 
@@ -97,7 +100,14 @@ namespace YasGMP.Models
         public int IncidentReportId { get; set; }
 
         [ForeignKey(nameof(IncidentReportId))]
+        [InverseProperty(nameof(IncidentReport.AuditLogs))]
         public IncidentReport? Incident { get; set; }
+
+        public int? WorkflowIncidentReportId { get; set; }
+
+        [ForeignKey(nameof(WorkflowIncidentReportId))]
+        [InverseProperty(nameof(IncidentReport.WorkflowHistory))]
+        public IncidentReport? WorkflowIncident { get; set; }
 
         public DateTime Timestamp { get; set; } = DateTime.Now;
 

@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YasGMP.Models;
 using WorkOrderActionType = YasGMP.Models.Enums.WorkOrderActionType;
@@ -199,6 +203,88 @@ namespace YasGMP.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+            var customFieldsComparer = new ValueComparer<Dictionary<string, string>>(
+                (left, right) =>
+                    left == right ||
+                    (left != null && right != null && left.Count == right.Count && !left.Except(right).Any()),
+                dictionary =>
+                    dictionary == null
+                        ? 0
+                        : dictionary.Aggregate(0, (hash, pair) =>
+                            HashCode.Combine(
+                                hash,
+                                pair.Key != null ? StringComparer.Ordinal.GetHashCode(pair.Key) : 0,
+                                pair.Value != null ? StringComparer.Ordinal.GetHashCode(pair.Value) : 0)),
+                dictionary =>
+                    dictionary == null
+                        ? new Dictionary<string, string>()
+                        : dictionary.ToDictionary(entry => entry.Key, entry => entry.Value));
+
+            var customFieldsProperty = modelBuilder.Entity<Deviation>()
+                .Property(d => d.CustomFields);
+
+            customFieldsProperty.HasConversion(
+                v => JsonSerializer.Serialize(v ?? new Dictionary<string, string>(), jsonOptions),
+                v => string.IsNullOrWhiteSpace(v)
+                    ? new Dictionary<string, string>()
+                    : JsonSerializer.Deserialize<Dictionary<string, string>>(v, jsonOptions) ?? new Dictionary<string, string>());
+
+            customFieldsProperty.HasColumnType("TEXT");
+            customFieldsProperty.Metadata.SetValueComparer(customFieldsComparer);
+
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.UploadedBy)
+                .WithMany(u => u.UploadedAttachments)
+                .HasForeignKey(a => a.UploadedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.ApprovedBy)
+                .WithMany()
+                .HasForeignKey(a => a.ApprovedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.UploadedBy)
+                .WithMany(u => u.UploadedPhotos)
+                .HasForeignKey(p => p.UploadedById);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.ApprovedBy)
+                .WithMany()
+                .HasForeignKey(p => p.ApprovedById);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.LastModifiedBy)
+                .WithMany()
+                .HasForeignKey(p => p.LastModifiedById);
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.CreatedBy)
+                .WithMany()
+                .HasForeignKey(p => p.CreatedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.LastModifiedBy)
+                .WithMany()
+                .HasForeignKey(p => p.LastModifiedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Role>()
+                .HasOne(r => r.CreatedBy)
+                .WithMany()
+                .HasForeignKey(r => r.CreatedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Role>()
+                .HasOne(r => r.LastModifiedBy)
+                .WithMany()
+                .HasForeignKey(r => r.LastModifiedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Konfiguracija enum polja u WorkOrderAudit (Action) kao string u bazi
             modelBuilder.Entity<WorkOrderAudit>()
                 .Property(a => a.Action)
@@ -245,6 +331,7 @@ namespace YasGMP.Data
                 .HasIndex(u => u.Username)
                 .IsUnique();
 
+
             modelBuilder.Entity<SessionLog>(entity =>
             {
                 entity.HasOne(sl => sl.User)
@@ -280,11 +367,13 @@ namespace YasGMP.Data
 
                 entity.HasOne(rp => rp.Role)
                     .WithMany(r => r.RolePermissions)
+
                     .HasForeignKey(rp => rp.RoleId);
 
                 entity.HasOne(rp => rp.Permission)
                     .WithMany(p => p.RolePermissions)
                     .HasForeignKey(rp => rp.PermissionId);
+
 
                 entity.HasOne(rp => rp.AssignedBy)
                     .WithMany()
@@ -294,15 +383,20 @@ namespace YasGMP.Data
 
             modelBuilder.Entity<UserPermission>(entity =>
             {
+
+                entity.ToTable("user_permissions");
+
                 entity.HasKey(up => new { up.UserId, up.PermissionId });
 
                 entity.HasOne(up => up.User)
                     .WithMany()
+
                     .HasForeignKey(up => up.UserId);
 
                 entity.HasOne(up => up.Permission)
                     .WithMany(p => p.UserPermissions)
                     .HasForeignKey(up => up.PermissionId);
+
 
                 entity.HasOne(up => up.AssignedBy)
                     .WithMany()
@@ -312,19 +406,79 @@ namespace YasGMP.Data
 
             modelBuilder.Entity<UserRoleMapping>(entity =>
             {
+
+                entity.ToTable("user_roles");
+
+
                 entity.HasKey(urm => new { urm.UserId, urm.RoleId });
 
                 entity.HasOne(urm => urm.User)
                     .WithMany()
+
                     .HasForeignKey(urm => urm.UserId);
 
                 entity.HasOne(urm => urm.Role)
                     .WithMany()
                     .HasForeignKey(urm => urm.RoleId);
 
+
                 entity.HasOne(urm => urm.AssignedBy)
                     .WithMany()
                     .HasForeignKey(urm => urm.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+
+            modelBuilder.Entity<Role>()
+                .HasMany(r => r.Permissions)
+                .WithMany(p => p.Roles)
+                .UsingEntity<RolePermission>(
+                    j => j.HasOne(rp => rp.Permission)
+                        .WithMany(p => p.RolePermissions)
+                        .HasForeignKey(rp => rp.PermissionId),
+                    j => j.HasOne(rp => rp.Role)
+                        .WithMany(r => r.RolePermissions)
+                        .HasForeignKey(rp => rp.RoleId));
+
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Permissions)
+                .WithMany(p => p.Users)
+                .UsingEntity<UserPermission>(
+                    j => j.HasOne(up => up.Permission)
+                        .WithMany(p => p.UserPermissions)
+                        .HasForeignKey(up => up.PermissionId),
+                    j => j.HasOne(up => up.User)
+                        .WithMany()
+                        .HasForeignKey(up => up.UserId));
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Roles)
+                .WithMany(r => r.Users)
+                .UsingEntity<UserRoleMapping>(
+
+                    j => j.HasOne(urm => urm.Role)
+                        .WithMany()
+                        .HasForeignKey(urm => urm.RoleId),
+                    j => j.HasOne(urm => urm.User)
+                        .WithMany()
+                        .HasForeignKey(urm => urm.UserId));
+
+            modelBuilder.Entity<DelegatedPermission>(entity =>
+            {
+                entity.HasOne(dp => dp.FromUser)
+                    .WithMany(u => u.DelegatedPermissions)
+                    .HasForeignKey(dp => dp.FromUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(dp => dp.ToUser)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.ToUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(dp => dp.ApprovedBy)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.ApprovedById)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
