@@ -27,6 +27,8 @@ namespace YasGMP.Data
         public DbSet<ApiUsageLog> ApiUsageLogs { get; set; }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+        public DbSet<AttachmentLink> AttachmentLinks { get; set; }
+        public DbSet<RetentionPolicy> RetentionPolicies { get; set; }
         public DbSet<AttachmentAuditLog> AttachmentAuditLogs { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<AuditLogEntry> AuditLogEntries { get; set; }

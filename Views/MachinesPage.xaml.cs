@@ -17,6 +17,7 @@ using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Views.Dialogs;
 
 namespace YasGMP.Views
@@ -29,16 +30,16 @@ namespace YasGMP.Views
         private readonly DatabaseService _dbService;
         private readonly CodeGeneratorService _codeService;
         private readonly QRCodeService _qrService;
-        private readonly DocumentService _docService;
+        private readonly IAttachmentService _attachmentService;
 
-        public MachinesPage(DatabaseService dbService, CodeGeneratorService codeService, QRCodeService qrService, DocumentService documentService)
+        public MachinesPage(DatabaseService dbService, CodeGeneratorService codeService, QRCodeService qrService, IAttachmentService attachmentService)
         {
             InitializeComponent();
 
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _codeService = codeService ?? throw new ArgumentNullException(nameof(codeService));
             _qrService = qrService ?? throw new ArgumentNullException(nameof(qrService));
-            _docService = documentService ?? throw new ArgumentNullException(nameof(documentService));
+            _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
             BindingContext = this;
 
             // One-time DB safety net: ensure triggers cannot null-out machines.code
@@ -53,7 +54,7 @@ namespace YasGMP.Views
                 ServiceLocator.GetRequiredService<DatabaseService>(),
                 ServiceLocator.GetRequiredService<CodeGeneratorService>(),
                 ServiceLocator.GetRequiredService<QRCodeService>(),
-                ServiceLocator.GetRequiredService<DocumentService>())
+                ServiceLocator.GetRequiredService<IAttachmentService>())
         {
         }
 
@@ -123,7 +124,15 @@ namespace YasGMP.Views
                         {
                             using var fs = File.OpenRead(path);
                             string name = Path.GetFileName(path);
-                            await _docService.SaveAsync(fs, name, null, "Machine", newId).ConfigureAwait(false);
+                            await _attachmentService.UploadAsync(fs, new AttachmentUploadRequest
+                            {
+                                FileName = name,
+                                ContentType = null,
+                                EntityType = "Machine",
+                                EntityId = newId,
+                                UploadedById = null,
+                                Notes = "Machine document"
+                            }).ConfigureAwait(false);
                         }
                         catch { }
                     }
@@ -185,7 +194,15 @@ namespace YasGMP.Views
                         {
                             using var fs = File.OpenRead(path);
                             string name = Path.GetFileName(path);
-                            await _docService.SaveAsync(fs, name, null, "Machine", m.Id).ConfigureAwait(false);
+                            await _attachmentService.UploadAsync(fs, new AttachmentUploadRequest
+                            {
+                                FileName = name,
+                                ContentType = null,
+                                EntityType = "Machine",
+                                EntityId = m.Id,
+                                UploadedById = null,
+                                Notes = "Machine document"
+                            }).ConfigureAwait(false);
                         }
                         catch { }
                     }
@@ -271,7 +288,7 @@ namespace YasGMP.Views
                 return;
             }
 
-            var dlg = new YasGMP.Views.Dialogs.MachineDocumentsDialog(_dbService, selected.Id);
+            var dlg = new YasGMP.Views.Dialogs.MachineDocumentsDialog(_dbService, selected.Id, _attachmentService);
             await Navigation.PushModalAsync(dlg);
             _ = await dlg.Result;
             
