@@ -2,7 +2,9 @@
 
 This guide captures the manual verification steps for the change-control assignment workflow. It focuses on
 ensuring that both initial assignments and subsequent reassignments behave as expected and that every action
-is written to `system_event_log` for Annex 11 / 21 CFR Part 11 traceability.
+is written to `system_event_log` for Annex 11 / 21 CFR Part 11 traceability. Follow the three test flows
+below (initial assignment, reassignment, and direct SQL validation) and confirm that diagnostics tooling
+reports the expected audit events.
 
 > **Scope**: These checks target the `ChangeControlViewModel.AssignChangeControlAsync` workflow and related audit
 > instrumentation. They should be executed for every release that touches change control routing, audit, or
@@ -17,6 +19,17 @@ is written to `system_event_log` for Annex 11 / 21 CFR Part 11 traceability.
    is gated by these roles (`ChangeControlViewModel.CanManageChangeControl`).
 4. **Audit visibility**: Confirm that the Audit Log page (Navigation: **Admin → Audit Log**) is accessible, or that you
    have SQL access to query `system_event_log` directly.
+5. **Time window**: Perform the assignment and reassignment within the same session so the resulting audit entries
+   are adjacent when sorted by timestamp.
+
+## Audit expectations at a glance
+
+| Scenario                  | Expected `event_type` | `field_name`      | `old_value`      | `new_value`      | Notes |
+| ------------------------- | --------------------- | ----------------- | ---------------- | ---------------- | ----- |
+| First-time assignment     | `CC_ASSIGN`           | `assigned_to_id`  | `NULL` / `∅`     | `<new user id>`  | Description includes `previous=no one` and the acting user's id/IP/session info. |
+| Subsequent reassignment   | `CC_REASSIGN`         | `assigned_to_id`  | `<previous id>`  | `<new user id>`  | Description summarises the transition (`code=...; new=user ID ...; previous=user ID ...; actor=...`). |
+
+Every manual run should produce both rows (in the above order) for the specific change-control id under test.
 
 ## Test 1 – Initial assignment
 
@@ -33,10 +46,8 @@ Goal: Assign an unassigned change control to a specific owner and confirm the UI
    - `Table` = `change_controls`
    - `Event Type` = `CC_ASSIGN`
    - `Record Id` = the change-control id you acted on
-7. Confirm the audit entry shows:
-   - `old_value` (or description `previous=none`) reflecting no prior assignment.
-   - `new_value` matching the new assignee's user id.
-   - Description includes the change control code and the acting user's id.
+7. Confirm the audit entry matches the first row in the expectations table above. Pay particular attention to
+   the `old_value` (should be empty) and the `field_name` (`assigned_to_id`).
 
 ## Test 2 – Reassignment
 
@@ -49,10 +60,8 @@ Goal: Reassign the same record to a different user and verify old/new values are
    > `Change control '<title>' reassigned from user ID <old> to user ID <new>.`
 4. Refresh the change-control list to ensure the assignee reflects the new value.
 5. In the Audit Log (or via SQL), filter for `Event Type = CC_REASSIGN`.
-6. Validate the new row contains:
-   - `old_value` = previous user id
-   - `new_value` = the latest user id
-   - Description string summarising the transition (e.g., `code=CC-2025-...; new=user ID 2002; previous=user ID 2001; actor=...`).
+6. Validate the row aligns with the reassignment expectations in the table. Confirm the `old_value` matches
+   the user id selected in Test 1 and that the description captures both the new and previous assignees.
 
 ## Test 3 – Direct system_event_log verification
 
@@ -74,9 +83,11 @@ ORDER BY ts_utc DESC;
 
 Expected results:
 
-- The most recent row is `CC_REASSIGN` with `field_name = 'assigned_to_id'` and the correct `old_value`/`new_value` pair.
+- Exactly two rows (unless additional historical assignments exist) corresponding to the table above.
+- The most recent row is `CC_REASSIGN` with the correct `old_value`/`new_value` pair.
 - The preceding row is `CC_ASSIGN` with `old_value` = `NULL` (or empty) and `new_value` = the initial assignee.
-- Each entry includes the acting user's id, IP, and session metadata.
+- Each entry includes the acting user's id, IP, device, and session metadata. Capture a screenshot of the SQL
+  output for release records.
 
 If any of the fields are missing or the event type is not recorded, investigate the assignment command handler
 before releasing.
@@ -87,18 +98,20 @@ A lightweight harness backs these flows and can be executed without a live datab
 
 1. Build the solution (`dotnet build`).
 2. From the Debug dashboard inside the app (**Debug → Diagnostics Hub → Run Self Tests**), execute the self-test suite.
-   - The new harness logs a `cc_assign_harness` entry that summarises the synthetic assignment and reassignment and
-     confirms a `system_event_log` insert was emitted.
-3. Alternatively, from a development shell you can run the harness directly using C# Interactive
-   (requires the [dotnet-script](https://github.com/dotnet-script/dotnet-script) global tool — install via
-   `dotnet tool install -g dotnet-script`):
-   
+   - The harness emits either an INFO (`cc_assign_harness`) or WARN (`cc_assign_harness_missing_audit`) trace. Inspect the
+     payload — `missingAuditEvents` must be empty and the boolean flags `hasInitialAssignmentEvent` and
+     `hasReassignmentEvent` should both read `true`.
+3. Alternatively, from a development shell you can run the harness directly using C# Interactive (requires the
+   [dotnet-script](https://github.com/dotnet-script/dotnet-script) global tool — install via `dotnet tool install -g
+   dotnet-script`):
+
    ```bash
-   dotnet script -q -c "await YasGMP.Diagnostics.ChangeControlAssignmentHarness.RunAsync()"
+   dotnet script -q -c "var result = await YasGMP.Diagnostics.ChangeControlAssignmentHarness.RunAsync();\nConsole.WriteLine($\"LoggedAudit={result.LoggedAudit}; Missing=[{string.Join(", ", result.MissingAuditEvents)}]\");"
    ```
-   
-   Examine the returned payload to ensure `LoggedAudit` is `true` and that `LoggedEvents` includes both `CC_ASSIGN`
-   and `CC_REASSIGN` records.
+
+   A passing run prints `LoggedAudit=True` and `Missing=[]`. For deeper inspection you can dump
+   `result.LoggedEvents` to confirm both `CC_ASSIGN` and `CC_REASSIGN` entries along with their captured
+   `old_value`/`new_value` pairs.
 
 Document any anomalies (unexpected status messages, missing audit rows, SQL failures) in the release notes and block
 shipping until the discrepancy is resolved.
