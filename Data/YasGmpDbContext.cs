@@ -245,6 +245,60 @@ namespace YasGMP.Data
                 .HasIndex(u => u.Username)
                 .IsUnique();
 
+            modelBuilder.Entity<Role>()
+                .HasMany(r => r.Permissions)
+                .WithMany(p => p.Roles)
+                .UsingEntity<RolePermission>(
+                    j => j
+                        .HasOne(rp => rp.Permission)
+                        .WithMany(p => p.RolePermissions)
+                        .HasForeignKey(rp => rp.PermissionId),
+                    j => j
+                        .HasOne(rp => rp.Role)
+                        .WithMany(r => r.RolePermissions)
+                        .HasForeignKey(rp => rp.RoleId),
+                    j =>
+                    {
+                        j.HasKey(rp => new { rp.RoleId, rp.PermissionId });
+                        j.ToTable("role_permissions");
+                    });
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Permissions)
+                .WithMany(p => p.Users)
+                .UsingEntity<UserPermission>(
+                    j => j
+                        .HasOne(up => up.Permission)
+                        .WithMany(p => p.UserPermissions)
+                        .HasForeignKey(up => up.PermissionId),
+                    j => j
+                        .HasOne(up => up.User)
+                        .WithMany()
+                        .HasForeignKey(up => up.UserId),
+                    j =>
+                    {
+                        j.HasKey(up => new { up.UserId, up.PermissionId });
+                        j.ToTable("user_permissions");
+                    });
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Roles)
+                .WithMany(r => r.Users)
+                .UsingEntity<UserRoleMapping>(
+                    j => j
+                        .HasOne(urm => urm.Role)
+                        .WithMany()
+                        .HasForeignKey(urm => urm.RoleId),
+                    j => j
+                        .HasOne(urm => urm.User)
+                        .WithMany()
+                        .HasForeignKey(urm => urm.UserId),
+                    j =>
+                    {
+                        j.HasKey(urm => new { urm.UserId, urm.RoleId });
+                        j.ToTable("user_roles");
+                    });
+
             ConfigureAdminActivityLog(modelBuilder);
             ConfigureApiKey(modelBuilder);
             ConfigureContractorInterventionAudit(modelBuilder);
