@@ -205,6 +205,16 @@ namespace YasGMP.Data
                 .HasConversion(new EnumToStringConverter<WorkOrderActionType>())
                 .IsRequired();
 
+            modelBuilder.Entity<Calibration>()
+                .HasOne(c => c.PreviousCalibration)
+                .WithMany()
+                .HasForeignKey(c => c.PreviousCalibrationId);
+
+            modelBuilder.Entity<Calibration>()
+                .HasOne(c => c.NextCalibration)
+                .WithMany()
+                .HasForeignKey(c => c.NextCalibrationId);
+
             // Primjer konfiguracije odnosa između WorkOrder i WorkOrderAudit
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasOne(a => a.WorkOrder)
