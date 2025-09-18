@@ -199,6 +199,18 @@ namespace YasGMP.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.UploadedBy)
+                .WithMany(u => u.UploadedAttachments)
+                .HasForeignKey(a => a.UploadedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.ApprovedBy)
+                .WithMany()
+                .HasForeignKey(a => a.ApprovedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Konfiguracija enum polja u WorkOrderAudit (Action) kao string u bazi
             modelBuilder.Entity<WorkOrderAudit>()
                 .Property(a => a.Action)
