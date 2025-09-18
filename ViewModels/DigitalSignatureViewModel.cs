@@ -3,11 +3,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input; // AsyncRelayCommand / RelayCommand
+using YasGMP.Helpers;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -162,18 +161,28 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
+                string session = _currentSessionId ?? string.Empty;
+                string device  = _currentDeviceInfo ?? string.Empty;
+                var timestamp = DateTime.UtcNow;
+                var signatureContext = DigitalSignatureHelper.ComputeUserContextSignature(
+                    _authService.CurrentUser.Id,
+                    session,
+                    device,
+                    timestamp);
+
                 var sig = new DigitalSignature
                 {
                     TableName     = "generic", // adapt as needed from UI context
                     RecordId      = 0,
                     UserId        = _authService.CurrentUser.Id,
-                    SignatureHash = ComputeSignatureHash(_authService.CurrentUser.Id, _currentSessionId, _currentDeviceInfo),
+                    SignatureHash = signatureContext.Hash,
                     Method        = "pin",
                     Status        = "valid",
                     IpAddress     = _currentIpAddress,
                     DeviceInfo    = _currentDeviceInfo,
+                    SessionId     = _currentSessionId,
                     Note          = "User signed from UI",
-                    SignedAt      = DateTime.UtcNow
+                    SignedAt      = timestamp
                     // UserName not set here (your User model does not expose UserName)
                 };
 
@@ -294,22 +303,6 @@ namespace YasGMP.ViewModels
             }
 
             Signatures = new ObservableCollection<DigitalSignature>(q);
-        }
-
-        #endregion
-
-        #region Helpers
-
-        /// <summary>
-        /// Creates a SHA-256 Base64 signature hash from stable context inputs.
-        /// </summary>
-        private static string ComputeSignatureHash(int userId, string sessionId, string deviceInfo)
-        {
-            var now = DateTime.UtcNow.Ticks;
-            var payload = $"{userId}|{sessionId}|{deviceInfo}|{now}";
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(payload));
-            return Convert.ToBase64String(bytes);
         }
 
         #endregion

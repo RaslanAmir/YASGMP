@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
@@ -22,6 +23,42 @@ namespace YasGMP.Services
             var list = new List<Qualification>(dt.Rows.Count);
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
+        }
+
+        public static async Task<Qualification?> GetQualificationByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
+        {
+            const string sql = @"SELECT cq.id, cq.component_id, cq.supplier_id, cq.type, cq.qualification_type, cq.status, cq.certificate_number,
+       mc.name AS component_name,
+       s.name  AS supplier_name
+FROM component_qualifications cq
+LEFT JOIN machine_components mc ON mc.id = cq.component_id
+LEFT JOIN suppliers s          ON s.id  = cq.supplier_id
+WHERE cq.id=@id
+LIMIT 1";
+
+            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            if (dt.Rows.Count != 1) return null;
+
+            var r = dt.Rows[0];
+            string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+            int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
+
+            string componentName = S("component_name");
+            string supplierName = S("supplier_name");
+            string type = !string.IsNullOrWhiteSpace(S("type")) ? S("type") : S("qualification_type");
+            string code = !string.IsNullOrWhiteSpace(S("certificate_number")) ? S("certificate_number") : S("code");
+
+            return new Qualification
+            {
+                Id = id,
+                Code = string.IsNullOrWhiteSpace(code) ? id.ToString(CultureInfo.InvariantCulture) : code,
+                Type = string.IsNullOrWhiteSpace(type) ? "Component" : type,
+                Status = S("status"),
+                ComponentId = IN("component_id"),
+                SupplierId = IN("supplier_id"),
+                Component = string.IsNullOrWhiteSpace(componentName) ? null : new MachineComponent { Name = componentName },
+                Supplier = string.IsNullOrWhiteSpace(supplierName) ? null : new Supplier { Name = supplierName }
+            };
         }
 
         public static async Task AddQualificationAsync(this DatabaseService db, Qualification q, string signature, string ip, string device, string? sessionId, CancellationToken token = default)

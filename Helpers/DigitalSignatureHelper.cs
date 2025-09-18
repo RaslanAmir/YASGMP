@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Globalization;
 using YasGMP.Models;
 
 namespace YasGMP.Helpers
@@ -18,6 +19,22 @@ namespace YasGMP.Helpers
     /// </summary>
     public static class DigitalSignatureHelper
     {
+        /// <summary>
+        /// Represents the canonical payload and derived hash for a signature computation.
+        /// </summary>
+        public readonly record struct SignatureComputationResult(string Payload, string Hash);
+
+        private static SignatureComputationResult ComputeSignatureInternal(string payload)
+        {
+            if (payload == null)
+                throw new ArgumentNullException(nameof(payload));
+
+            using SHA256 sha = SHA256.Create();
+            byte[] bytes = Encoding.UTF8.GetBytes(payload);
+            byte[] hash = sha.ComputeHash(bytes);
+            return new SignatureComputationResult(payload, Convert.ToBase64String(hash));
+        }
+
         // ---------------------------------------------------------------------
         //  GENERIC STRING + FILE
         // ---------------------------------------------------------------------
@@ -29,15 +46,13 @@ namespace YasGMP.Helpers
         /// <returns>Base64-encoded SHA-256 hash.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="dataToSign"/> is null.</exception>
         public static string GenerateSignatureHash(string dataToSign)
-        {
-            if (dataToSign == null)
-                throw new ArgumentNullException(nameof(dataToSign));
+            => ComputeSignatureInternal(dataToSign).Hash;
 
-            using SHA256 sha = SHA256.Create();
-            byte[] bytes = Encoding.UTF8.GetBytes(dataToSign);
-            byte[] hash = sha.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
-        }
+        /// <summary>
+        /// Computes the canonical payload and SHA-256 hash for an arbitrary string.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(string dataToSign)
+            => ComputeSignatureInternal(dataToSign);
 
         /// <summary>
         /// Generates a base64-encoded SHA-256 hash for the contents of a file.
@@ -79,6 +94,12 @@ namespace YasGMP.Helpers
         /// Signature for a <see cref="Machine"/> (legacy screens often pass a Machine directly).
         /// </summary>
         public static string GenerateSignatureHash(Machine machine, string sessionId, string deviceInfo)
+            => ComputeSignature(machine, sessionId, deviceInfo).Hash;
+
+        /// <summary>
+        /// Computes the canonical payload and signature hash for a <see cref="Machine"/>.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(Machine machine, string sessionId, string deviceInfo)
         {
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             if (sessionId == null) throw new ArgumentNullException(nameof(sessionId));
@@ -86,26 +107,38 @@ namespace YasGMP.Helpers
 
             string dataToSign =
                 $"{machine.Id}|{machine.Code}|{machine.Name}|{machine.SerialNumber}|{sessionId}|{deviceInfo}";
-            return GenerateSignatureHash(dataToSign);
+            return ComputeSignatureInternal(dataToSign);
         }
 
         /// <summary>
         /// Signature for a <see cref="Part"/>.
         /// </summary>
         public static string GenerateSignatureHash(Part part, string sessionId, string deviceInfo)
+            => ComputeSignature(part, sessionId, deviceInfo).Hash;
+
+        /// <summary>
+        /// Computes the canonical payload and signature hash for a <see cref="Part"/>.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(Part part, string sessionId, string deviceInfo)
         {
             if (part == null) throw new ArgumentNullException(nameof(part));
             if (sessionId == null) throw new ArgumentNullException(nameof(sessionId));
             if (deviceInfo == null) throw new ArgumentNullException(nameof(deviceInfo));
 
             string dataToSign = $"{part.Id}|{part.Code}|{part.Name}|{sessionId}|{deviceInfo}";
-            return GenerateSignatureHash(dataToSign);
+            return ComputeSignatureInternal(dataToSign);
         }
 
         /// <summary>
         /// Signature for a <see cref="Qualification"/>.
         /// </summary>
         public static string GenerateSignatureHash(Qualification qualification, string sessionId, string deviceInfo)
+            => ComputeSignature(qualification, sessionId, deviceInfo).Hash;
+
+        /// <summary>
+        /// Computes the canonical payload and signature hash for a <see cref="Qualification"/>.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(Qualification qualification, string sessionId, string deviceInfo)
         {
             if (qualification == null) throw new ArgumentNullException(nameof(qualification));
             if (sessionId == null) throw new ArgumentNullException(nameof(sessionId));
@@ -113,26 +146,38 @@ namespace YasGMP.Helpers
 
             string equip = qualification.Machine?.Name ?? qualification.Component?.Name ?? qualification.Supplier?.Name ?? "N/A";
             string dataToSign = $"{qualification.Id}|{qualification.Code}|{qualification.Type}|{equip}|{sessionId}|{deviceInfo}";
-            return GenerateSignatureHash(dataToSign);
+            return ComputeSignatureInternal(dataToSign);
         }
 
         /// <summary>
         /// Signature for a <see cref="Supplier"/> (some older pages hash suppliers directly).
         /// </summary>
         public static string GenerateSignatureHash(Supplier supplier, string sessionId, string deviceInfo)
+            => ComputeSignature(supplier, sessionId, deviceInfo).Hash;
+
+        /// <summary>
+        /// Computes canonical payload and signature hash for a <see cref="Supplier"/>.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(Supplier supplier, string sessionId, string deviceInfo)
         {
             if (supplier == null) throw new ArgumentNullException(nameof(supplier));
             if (sessionId == null) throw new ArgumentNullException(nameof(sessionId));
             if (deviceInfo == null) throw new ArgumentNullException(nameof(deviceInfo));
 
             string dataToSign = $"{supplier.Id}|{supplier.Name}|{supplier.VatNumber}|{supplier.Status}|{sessionId}|{deviceInfo}";
-            return GenerateSignatureHash(dataToSign);
+            return ComputeSignatureInternal(dataToSign);
         }
 
         /// <summary>
         /// Signature for a <see cref="ContractorIntervention"/>.
         /// </summary>
         public static string GenerateSignatureHash(ContractorIntervention intervention, string sessionId, string deviceInfo)
+            => ComputeSignature(intervention, sessionId, deviceInfo).Hash;
+
+        /// <summary>
+        /// Computes canonical payload and signature hash for a <see cref="ContractorIntervention"/>.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(ContractorIntervention intervention, string sessionId, string deviceInfo)
         {
             if (intervention == null)
                 throw new ArgumentNullException(nameof(intervention), "ContractorIntervention cannot be null for digital signature generation.");
@@ -143,20 +188,41 @@ namespace YasGMP.Helpers
 
             string dataToSign =
                 $"{intervention.Id}|{intervention.AssetName}|{intervention.ContractorName}|{intervention.InterventionType}|{intervention.Status}|{intervention.StartDate:O}|{intervention.EndDate:O}|{intervention.Notes}|{sessionId}|{deviceInfo}";
-            return GenerateSignatureHash(dataToSign);
+            return ComputeSignatureInternal(dataToSign);
         }
 
         /// <summary>
         /// Signature for a <see cref="CapaCase"/>.
         /// </summary>
         public static string GenerateSignatureHash(CapaCase capaCase, string sessionId, string deviceInfo)
+            => ComputeSignature(capaCase, sessionId, deviceInfo).Hash;
+
+        /// <summary>
+        /// Computes canonical payload and signature hash for a <see cref="CapaCase"/>.
+        /// </summary>
+        public static SignatureComputationResult ComputeSignature(CapaCase capaCase, string sessionId, string deviceInfo)
         {
             if (capaCase == null) throw new ArgumentNullException(nameof(capaCase));
             if (sessionId == null) throw new ArgumentNullException(nameof(sessionId));
             if (deviceInfo == null) throw new ArgumentNullException(nameof(deviceInfo));
 
             string dataToSign = $"{capaCase.Id}|{capaCase.CapaCode}|{capaCase.Title}|{capaCase.Status}|{capaCase.RiskRating}|{sessionId}|{deviceInfo}";
-            return GenerateSignatureHash(dataToSign);
+            return ComputeSignatureInternal(dataToSign);
+        }
+
+        /// <summary>
+        /// Computes the canonical signature payload for a digital-signature record context (user/session/device/time).
+        /// </summary>
+        /// <param name="userId">User identifier associated with the signature.</param>
+        /// <param name="sessionId">Session identifier (optional).</param>
+        /// <param name="deviceInfo">Device metadata (optional).</param>
+        /// <param name="signedAtUtc">UTC timestamp when the signature was created.</param>
+        public static SignatureComputationResult ComputeUserContextSignature(int userId, string? sessionId, string? deviceInfo, DateTime signedAtUtc)
+        {
+            string normalizedSession = sessionId ?? string.Empty;
+            string normalizedDevice = deviceInfo ?? string.Empty;
+            string payload = $"{userId}|{normalizedSession}|{normalizedDevice}|{signedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)}";
+            return ComputeSignatureInternal(payload);
         }
 
         // ---------------------------------------------------------------------
