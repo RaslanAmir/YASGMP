@@ -63,6 +63,11 @@ namespace YasGMP.Models
         [MaxLength(512)]
         public string? Note { get; set; }
 
+        /// <summary>Optional session identifier captured during signing.</summary>
+        [Column("session_id")]
+        [MaxLength(128)]
+        public string? SessionId { get; set; }
+
         // ---------------- Convenience (not mapped) used by ViewModels/UI ----------------
 
         /// <summary>Friendly user name (resolved by joins or UI layer).</summary>
