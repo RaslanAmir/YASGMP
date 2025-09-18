@@ -322,6 +322,7 @@ namespace YasGMP.Data
                         .WithMany(r => r.RolePermissions)
                         .HasForeignKey(rp => rp.RoleId));
 
+
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Permissions)
                 .WithMany(p => p.Users)
@@ -337,6 +338,7 @@ namespace YasGMP.Data
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
                 .UsingEntity<UserRoleMapping>(
+
                     j => j.HasOne(urm => urm.Role)
                         .WithMany()
                         .HasForeignKey(urm => urm.RoleId),
