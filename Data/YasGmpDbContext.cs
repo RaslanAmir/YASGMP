@@ -246,6 +246,21 @@ namespace YasGMP.Data
                 .HasForeignKey(a => a.ApprovedById)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.UploadedBy)
+                .WithMany(u => u.UploadedPhotos)
+                .HasForeignKey(p => p.UploadedById);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.ApprovedBy)
+                .WithMany()
+                .HasForeignKey(p => p.ApprovedById);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.LastModifiedBy)
+                .WithMany()
+                .HasForeignKey(p => p.LastModifiedById);
+
             modelBuilder.Entity<Permission>()
                 .HasOne(p => p.CreatedBy)
                 .WithMany()
