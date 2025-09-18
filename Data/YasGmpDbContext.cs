@@ -313,6 +313,30 @@ namespace YasGMP.Data
                 .HasForeignKey(c => c.NextCalibrationId);
 
             // Primjer konfiguracije odnosa između WorkOrder i WorkOrderAudit
+            modelBuilder.Entity<WorkOrder>()
+                .HasOne(wo => wo.CreatedBy)
+                .WithMany(u => u.CreatedWorkOrders)
+                .HasForeignKey(wo => wo.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<WorkOrder>()
+                .HasOne(wo => wo.AssignedTo)
+                .WithMany(u => u.AssignedWorkOrders)
+                .HasForeignKey(wo => wo.AssignedToId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<WorkOrder>()
+                .HasOne(wo => wo.RequestedBy)
+                .WithMany()
+                .HasForeignKey(wo => wo.RequestedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<WorkOrder>()
+                .HasOne(wo => wo.LastModifiedBy)
+                .WithMany()
+                .HasForeignKey(wo => wo.LastModifiedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasOne(a => a.WorkOrder)
                 .WithMany(w => w.AuditTrail)
