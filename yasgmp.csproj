@@ -20,9 +20,6 @@
     <!-- ===== Unpackaged run on Windows (no MSIX, no manifest needed) ===== -->
     <WindowsPackageType>None</WindowsPackageType>
     <EnablePreviewMsixTooling>false</EnablePreviewMsixTooling>
-    <!-- Suppress StyleCop/documentation/code-style warnings captured in errors.txt -->
-    <!-- Suppress all codes listed in errors.txt (style/doc/code-style only) -->
-    <NoWarn>$(NoWarn);CS0105;CS1570;CS1574;CS1998;CS8321;CS8602;CS8625;SA1001;SA1003;SA1008;SA1009;SA1010;SA1019;SA1025;SA1028;SA1101;SA1102;SA1107;SA1108;SA1111;SA1116;SA1117;SA1118;SA1119;SA1122;SA1124;SA1127;SA1128;SA1133;SA1134;SA1137;SA1200;SA1201;SA1202;SA1203;SA1204;SA1208;SA1209;SA1210;SA1211;SA1214;SA1300;SA1308;SA1309;SA1311;SA1312;SA1316;SA1401;SA1402;SA1403;SA1413;SA1500;SA1501;SA1502;SA1503;SA1507;SA1508;SA1510;SA1512;SA1513;SA1514;SA1515;SA1516;SA1518;SA1519;SA1520;SA1600;SA1601;SA1602;SA1611;SA1615;SA1623;SA1629;SA1633;SA1642;SA1649</NoWarn>
   </PropertyGroup>
 
   <!-- ====== NuGet packages (pinned per your constraints) ====== -->
