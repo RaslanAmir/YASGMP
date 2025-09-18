@@ -52,7 +52,7 @@ namespace YasGMP.Models
         public int? ImpersonatedById { get; set; }
 
         /// <summary>Navigation property for impersonating user.</summary>
-        public User ImpersonatedBy { get; set; } = null!;
+        public User? ImpersonatedBy { get; set; }
 
         /// <summary>True if temporary escalation was granted for this session.</summary>
         [Display(Name = "Privremena eskalacija")]

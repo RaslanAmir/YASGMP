@@ -71,7 +71,7 @@ namespace YasGMP.Models
         /// Navigation to the assigning user (for audit trace).
         /// </summary>
         [ForeignKey("AssignedById")]
-        public virtual User AssignedBy { get; set; } = null!;
+        public virtual User? AssignedBy { get; set; }
 
         /// <summary>
         /// Expiry date/time for this assignment (null = permanent).

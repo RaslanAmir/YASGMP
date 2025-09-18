@@ -56,7 +56,7 @@ namespace YasGMP.Models
         /// Navigation to the user who granted/assigned the role.
         /// </summary>
         [ForeignKey("AssignedById")]
-        public virtual User AssignedBy { get; set; } = null!;
+        public virtual User? AssignedBy { get; set; }
 
         /// <summary>
         /// Optional: expiry date/time for this assignment (null = no expiry, permanent assignment).
