@@ -147,5 +147,28 @@ namespace YasGMP.Diagnostics
     {
         /// <summary>True when at least one INSERT into system_event_log was observed.</summary>
         public bool LoggedAudit => LoggedEvents.Count > 0;
+
+        /// <summary>True when the harness observed a CC_ASSIGN audit event.</summary>
+        public bool HasInitialAssignmentEvent => LoggedEvents.Any(e =>
+            string.Equals(e.EventType, "CC_ASSIGN", StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>True when the harness observed a CC_REASSIGN audit event.</summary>
+        public bool HasReassignmentEvent => LoggedEvents.Any(e =>
+            string.Equals(e.EventType, "CC_REASSIGN", StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>Returns the expected audit event types that did not appear during the harness run.</summary>
+        public IReadOnlyList<string> MissingAuditEvents => _missingAuditEvents ??= ComputeMissingAuditEvents();
+
+        private IReadOnlyList<string>? _missingAuditEvents;
+
+        private IReadOnlyList<string> ComputeMissingAuditEvents()
+        {
+            var missing = new List<string>();
+            if (!HasInitialAssignmentEvent)
+                missing.Add("CC_ASSIGN");
+            if (!HasReassignmentEvent)
+                missing.Add("CC_REASSIGN");
+            return missing;
+        }
     }
 }

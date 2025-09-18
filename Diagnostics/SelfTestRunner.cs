@@ -148,9 +148,31 @@ namespace YasGMP.Diagnostics
                     ["statusMessages"] = harnessResult.StatusMessages,
                     ["eventSummary"] = eventSummary,
                     ["executedSqlCount"] = harnessResult.ExecutedSql.Count,
-                    ["loggedAudit"] = harnessResult.LoggedAudit
+                    ["loggedAudit"] = harnessResult.LoggedAudit,
+                    ["hasInitialAssignmentEvent"] = harnessResult.HasInitialAssignmentEvent,
+                    ["hasReassignmentEvent"] = harnessResult.HasReassignmentEvent,
+                    ["missingAuditEvents"] = harnessResult.MissingAuditEvents
                 };
-                _trace.Log(DiagLevel.Info, "selftest", "cc_assign_harness", "Change control assignment harness executed.", data: data);
+
+                if (harnessResult.MissingAuditEvents.Count > 0)
+                {
+                    var missing = string.Join(", ", harnessResult.MissingAuditEvents);
+                    _trace.Log(
+                        DiagLevel.Warn,
+                        "selftest",
+                        "cc_assign_harness_missing_audit",
+                        $"Change control assignment harness executed with missing audit events: {missing}.",
+                        data: data);
+                }
+                else
+                {
+                    _trace.Log(
+                        DiagLevel.Info,
+                        "selftest",
+                        "cc_assign_harness",
+                        "Change control assignment harness executed.",
+                        data: data);
+                }
             }
             catch (Exception ex)
             {
