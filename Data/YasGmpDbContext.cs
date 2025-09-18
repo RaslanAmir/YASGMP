@@ -261,6 +261,17 @@ namespace YasGMP.Data
                 .WithMany()
                 .HasForeignKey(p => p.LastModifiedById);
 
+            modelBuilder.Entity<SessionLog>()
+                .HasOne(sl => sl.User)
+                .WithMany(u => u.SessionLogs)
+                .HasForeignKey(sl => sl.UserId);
+
+            modelBuilder.Entity<SessionLog>()
+                .HasOne(sl => sl.ImpersonatedBy)
+                .WithMany()
+                .HasForeignKey(sl => sl.ImpersonatedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Permission>()
                 .HasOne(p => p.CreatedBy)
                 .WithMany()
