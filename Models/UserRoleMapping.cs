@@ -14,7 +14,7 @@ namespace YasGMP.Models
         /// <summary>
         /// User ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("user_id", Order = 0)]
+        [Column("user_id")]
         [Display(Name = "Korisnik")]
         public int UserId { get; set; }
 
@@ -22,14 +22,12 @@ namespace YasGMP.Models
         /// Navigation property for the assigned user.
         /// </summary>
         [ForeignKey("UserId")]
-        public virtual User User { get; set; } = null!
-
-        ;
+        public virtual User User { get; set; } = null!;
 
         /// <summary>
         /// Role ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("role_id", Order = 1)]
+        [Column("role_id")]
         [Display(Name = "Uloga")]
         public int RoleId { get; set; }
 
@@ -57,7 +55,7 @@ namespace YasGMP.Models
         /// Navigation to the user who granted/assigned the role.
         /// </summary>
         [ForeignKey("AssignedById")]
-        public virtual User AssignedBy { get; set; } = null!;
+        public virtual User? AssignedBy { get; set; }
 
         /// <summary>
         /// Optional: expiry date/time for this assignment (null = no expiry, permanent assignment).

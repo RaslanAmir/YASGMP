@@ -205,6 +205,16 @@ namespace YasGMP.Data
                 .HasConversion(new EnumToStringConverter<WorkOrderActionType>())
                 .IsRequired();
 
+            modelBuilder.Entity<Calibration>()
+                .HasOne(c => c.PreviousCalibration)
+                .WithMany()
+                .HasForeignKey(c => c.PreviousCalibrationId);
+
+            modelBuilder.Entity<Calibration>()
+                .HasOne(c => c.NextCalibration)
+                .WithMany()
+                .HasForeignKey(c => c.NextCalibrationId);
+
             // Primjer konfiguracije odnosa između WorkOrder i WorkOrderAudit
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasOne(a => a.WorkOrder)
@@ -234,6 +244,89 @@ namespace YasGMP.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            modelBuilder.Entity<SessionLog>(entity =>
+            {
+                entity.HasOne(sl => sl.User)
+                    .WithMany(u => u.SessionLogs)
+                    .HasForeignKey(sl => sl.UserId);
+
+                entity.HasOne(sl => sl.ImpersonatedBy)
+                    .WithMany()
+                    .HasForeignKey(sl => sl.ImpersonatedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Photo>(entity =>
+            {
+                entity.HasOne(p => p.UploadedBy)
+                    .WithMany(u => u.UploadedPhotos)
+                    .HasForeignKey(p => p.UploadedById);
+
+                entity.HasOne(p => p.ApprovedBy)
+                    .WithMany()
+                    .HasForeignKey(p => p.ApprovedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(p => p.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(p => p.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<RolePermission>(entity =>
+            {
+                entity.HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+                entity.HasOne(rp => rp.Role)
+                    .WithMany(r => r.RolePermissions)
+                    .HasForeignKey(rp => rp.RoleId);
+
+                entity.HasOne(rp => rp.Permission)
+                    .WithMany(p => p.RolePermissions)
+                    .HasForeignKey(rp => rp.PermissionId);
+
+                entity.HasOne(rp => rp.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(rp => rp.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<UserPermission>(entity =>
+            {
+                entity.HasKey(up => new { up.UserId, up.PermissionId });
+
+                entity.HasOne(up => up.User)
+                    .WithMany()
+                    .HasForeignKey(up => up.UserId);
+
+                entity.HasOne(up => up.Permission)
+                    .WithMany(p => p.UserPermissions)
+                    .HasForeignKey(up => up.PermissionId);
+
+                entity.HasOne(up => up.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(up => up.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<UserRoleMapping>(entity =>
+            {
+                entity.HasKey(urm => new { urm.UserId, urm.RoleId });
+
+                entity.HasOne(urm => urm.User)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.UserId);
+
+                entity.HasOne(urm => urm.Role)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.RoleId);
+
+                entity.HasOne(urm => urm.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
             ConfigureAdminActivityLog(modelBuilder);
             ConfigureApiKey(modelBuilder);

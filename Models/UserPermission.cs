@@ -23,7 +23,7 @@ namespace YasGMP.Models
         /// <summary>
         /// User ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("user_id", Order = 0)]
+        [Column("user_id")]
         [Display(Name = "Korisnik")]
         public int UserId { get; set; }
 
@@ -36,7 +36,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Permission ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("permission_id", Order = 1)]
+        [Column("permission_id")]
         [Display(Name = "Dozvola")]
         public int PermissionId { get; set; }
 
@@ -71,7 +71,7 @@ namespace YasGMP.Models
         /// Navigation to the assigning user (for audit trace).
         /// </summary>
         [ForeignKey("AssignedById")]
-        public virtual User AssignedBy { get; set; } = null!;
+        public virtual User? AssignedBy { get; set; }
 
         /// <summary>
         /// Expiry date/time for this assignment (null = permanent).
