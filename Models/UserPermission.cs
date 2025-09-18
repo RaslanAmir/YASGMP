@@ -23,7 +23,7 @@ namespace YasGMP.Models
         /// <summary>
         /// User ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("user_id", Order = 0)]
+        [Column("user_id")]
         [Display(Name = "Korisnik")]
         public int UserId { get; set; }
 
@@ -36,7 +36,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Permission ID (Foreign Key, part of composite key).
         /// </summary>
-        [Key, Column("permission_id", Order = 1)]
+        [Column("permission_id")]
         [Display(Name = "Dozvola")]
         public int PermissionId { get; set; }
 
