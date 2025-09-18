@@ -8,13 +8,15 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
+using YasGMP.Common;
 
 namespace YasGMP.Views.Dialogs
 {
     public partial class WorkOrderEditDialog : ContentPage
     {
         private readonly DatabaseService _db;
-        private readonly DocumentService _docs;
+        private readonly IAttachmentService _attachments;
         private readonly int _currentUserId;
 
         private static readonly DateTime NoDateSentinel = DateTime.MinValue.Date;
@@ -50,12 +52,12 @@ namespace YasGMP.Views.Dialogs
             set => SetValue(DateClosePickerValueProperty, value);
         }
 
-        public WorkOrderEditDialog(WorkOrder wo, DatabaseService db, int currentUserId)
+        public WorkOrderEditDialog(WorkOrder wo, DatabaseService db, int currentUserId, IAttachmentService? attachmentService = null)
         {
             InitializeComponent();
             WorkOrder = wo;
             _db = db;
-            _docs = new DocumentService(db);
+            _attachments = attachmentService ?? ServiceLocator.GetRequiredService<IAttachmentService>();
             _currentUserId = currentUserId;
             BindingContext = WorkOrder;
             SyncDatePickersFromModel();
@@ -289,7 +291,7 @@ namespace YasGMP.Views.Dialogs
                 foreach (var f in files)
                 {
                     using var fs = File.OpenRead(f.FullPath);
-                    await _db.AttachWorkOrderPhotoAsync(WorkOrder.Id, fs, Path.GetFileName(f.FullPath), kind, _currentUserId);
+                    await _db.AttachWorkOrderPhotoAsync(WorkOrder.Id, fs, Path.GetFileName(f.FullPath), kind, _currentUserId, _attachments).ConfigureAwait(false);
                 }
                 await DisplayAlert("OK", "Slike dodane.", "Zatvori");
             }

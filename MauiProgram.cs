@@ -112,7 +112,7 @@ namespace YasGMP
             string mysqlConnStr = ResolveMySqlConnString();
 
             // DbContext (MySQL) + optional EF SQL log to AppData (DEBUG)
-            builder.Services.AddDbContext<YasGmpDbContext>((sp, options) =>
+            void ConfigureDbContext(IServiceProvider sp, DbContextOptionsBuilder options)
             {
                 options.UseMySql(mysqlConnStr, ServerVersion.AutoDetect(mysqlConnStr));
                 var ctx = sp.GetService<DiagnosticContext>();
@@ -134,7 +134,10 @@ namespace YasGMP
                 });
                 options.EnableSensitiveDataLogging(true);
 #endif
-            });
+            }
+
+            builder.Services.AddDbContext<YasGmpDbContext>(ConfigureDbContext);
+            builder.Services.AddDbContextFactory<YasGmpDbContext>(ConfigureDbContext);
 
             // Core Services
             builder.Services.AddSingleton(sp =>
@@ -153,7 +156,7 @@ namespace YasGMP
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<ExportService>();
             builder.Services.AddSingleton<WorkOrderAuditService>();
-            builder.Services.AddSingleton<DocumentService>();   // documents/attachments
+            builder.Services.AddSingleton<IAttachmentService, AttachmentService>();
             builder.Services.AddSingleton<QRCodeService>();     // QR generation
             builder.Services.AddSingleton<BackgroundScheduler>(); // in-app scheduler (PPM/alerts)
             builder.Services.AddSingleton<CodeGeneratorService>(); // NEW
@@ -223,6 +226,17 @@ namespace YasGMP
 #endif
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetService<YasGmpDbContext>();
+                if (db != null)
+                {
+                    db.Database.Migrate();
+                    AttachmentSeedData.EnsureSeeded(db);
+                }
+            }
+
             ServiceLocator.Initialize(app.Services);
             return app;
         }

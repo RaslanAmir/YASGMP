@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -109,9 +110,8 @@ namespace YasGMP.Models
         /// <summary>
         /// ID of the user who uploaded the file (FK).
         /// </summary>
-        [Required]
         [Column("uploaded_by_id")]
-        public int UploadedById { get; set; }
+        public int? UploadedById { get; set; }
 
         /// <summary>
         /// Navigation property for the user who uploaded the file.
@@ -293,6 +293,10 @@ namespace YasGMP.Models
         /// Returns a human-readable string for debugging or logging.
         /// </summary>
         /// <returns>A string representing the attachment details.</returns>
+        public virtual ICollection<AttachmentLink> Links { get; set; } = new List<AttachmentLink>();
+
+        public virtual ICollection<RetentionPolicy> RetentionPolicies { get; set; } = new List<RetentionPolicy>();
+
         public override string ToString()
         {
             return $"{(string.IsNullOrWhiteSpace(FileName) ? Name : FileName)} ({FileType}) - Linked to: {EntityType}#{EntityId} [{Status}]";

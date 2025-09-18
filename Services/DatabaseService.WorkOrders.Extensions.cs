@@ -4,7 +4,9 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
 {
@@ -289,29 +291,39 @@ WHERE w.id=@id";
             string fileName,
             string? kind, // "before"/"after"/null
             int? uploadedBy = null,
+            IAttachmentService? attachmentService = null,
             CancellationToken token = default)
         {
-            var docs = new DocumentService(db);
-            int docId = await docs.SaveAsync(content, fileName, null, "WorkOrder", workOrderId, uploadedBy, token).ConfigureAwait(false);
+            attachmentService ??= ServiceLocator.GetRequiredService<IAttachmentService>();
+            var result = await attachmentService.UploadAsync(content, new AttachmentUploadRequest
+            {
+                FileName = fileName,
+                ContentType = null,
+                EntityType = "WorkOrder",
+                EntityId = workOrderId,
+                UploadedById = uploadedBy,
+                Notes = kind
+            }, token).ConfigureAwait(false);
+            int attachmentId = result.Attachment.Id;
             // Persist before/after classification (best effort)
             try
             {
                 const string create = @"CREATE TABLE IF NOT EXISTS work_order_photos (
   id INT PRIMARY KEY AUTO_INCREMENT,
   work_order_id INT NOT NULL,
-  document_id INT NOT NULL,
+  attachment_id INT NOT NULL,
   kind VARCHAR(16) NULL,
   uploaded_by INT NULL,
   uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY ix_wop_wo (work_order_id),
-  KEY ix_wop_doc (document_id)
+  KEY ix_wop_attachment (attachment_id)
 )";
                 await db.ExecuteNonQueryAsync(create, null, token).ConfigureAwait(false);
-                const string ins = @"INSERT INTO work_order_photos (work_order_id, document_id, kind, uploaded_by) VALUES (@wo,@doc,@kind,@by)";
+                const string ins = @"INSERT INTO work_order_photos (work_order_id, attachment_id, kind, uploaded_by) VALUES (@wo,@att,@kind,@by)";
                 var pars = new[]
                 {
                     new MySqlParameter("@wo", workOrderId),
-                    new MySqlParameter("@doc", docId),
+                    new MySqlParameter("@att", attachmentId),
                     new MySqlParameter("@kind", (object?)kind ?? DBNull.Value),
                     new MySqlParameter("@by", (object?)uploadedBy ?? DBNull.Value)
                 };
@@ -324,7 +336,7 @@ WHERE w.id=@id";
                 "work_orders",
                 "WorkOrders",
                 workOrderId,
-                $"doc={docId}; kind={kind}",
+                $"attachment={attachmentId}; kind={kind}",
                 "ui",
                 "info",
                 "WorkOrdersPage",

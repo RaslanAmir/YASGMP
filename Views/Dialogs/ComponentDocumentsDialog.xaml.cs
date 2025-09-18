@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
+using YasGMP.Common;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Views.Dialogs
 {
@@ -16,14 +17,17 @@ namespace YasGMP.Views.Dialogs
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
+        private readonly IAttachmentService _attachments;
         private readonly int _componentId;
 
         public ObservableCollection<DocRow> Documents { get; } = new();
 
-        public ComponentDocumentsDialog(DatabaseService db, int componentId)
+        public ComponentDocumentsDialog(DatabaseService db, int componentId, IAttachmentService? attachmentService = null)
         {
             InitializeComponent();
-            _db = db; _componentId = componentId;
+            _db = db;
+            _componentId = componentId;
+            _attachments = attachmentService ?? ServiceLocator.GetRequiredService<IAttachmentService>();
             DocsList.ItemsSource = Documents;
             _ = LoadAsync();
         }
@@ -32,16 +36,13 @@ namespace YasGMP.Views.Dialogs
         {
             try
             {
-                var dt = await _db.GetDocumentsForEntityAsync("Component", _componentId).ConfigureAwait(false);
+                var rows = await _attachments.GetLinksForEntityAsync("Component", _componentId).ConfigureAwait(false);
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Documents.Clear();
-                    foreach (DataRow r in dt.Rows)
+                    foreach (var row in rows)
                     {
-                        var id = r.Table.Columns.Contains("id") && r["id"] != DBNull.Value ? Convert.ToInt32(r["id"]) : 0;
-                        var name = r["file_name"]?.ToString() ?? string.Empty;
-                        var path = r["storage_path"]?.ToString() ?? string.Empty;
-                        Documents.Add(new DocRow(_db, _componentId, id, name, path, OnChanged));
+                        Documents.Add(new DocRow(_attachments, row, OnChanged));
                     }
                 });
             }
@@ -60,11 +61,18 @@ namespace YasGMP.Views.Dialogs
                 var files = await FilePicker.PickMultipleAsync();
                 if (files != null)
                 {
-                    var docs = new DocumentService(_db);
                     foreach (var f in files)
                     {
                         using var fs = File.OpenRead(f.FullPath);
-                        await docs.SaveAsync(fs, Path.GetFileName(f.FullPath), null, "Component", _componentId).ConfigureAwait(false);
+                        await _attachments.UploadAsync(fs, new AttachmentUploadRequest
+                        {
+                            FileName = Path.GetFileName(f.FullPath),
+                            ContentType = f.ContentType,
+                            EntityType = "Component",
+                            EntityId = _componentId,
+                            UploadedById = null,
+                            Notes = "Component document"
+                        }).ConfigureAwait(false);
                     }
                     await LoadAsync().ConfigureAwait(false);
                 }
@@ -83,18 +91,23 @@ namespace YasGMP.Views.Dialogs
 
         public sealed class DocRow
         {
-            private readonly DatabaseService _db;
-            private readonly int _componentId;
-            public int DocumentId { get; }
+            private readonly IAttachmentService _attachments;
+            public int LinkId { get; }
+            public int AttachmentId { get; }
             public string FileName { get; }
             public string StoragePath { get; }
             public Command OpenCommand { get; }
             public Command RemoveCommand { get; }
             private readonly Func<Task> _onChanged;
 
-            public DocRow(DatabaseService db, int componentId, int docId, string name, string path, Func<Task> onChanged)
+            public DocRow(IAttachmentService attachments, AttachmentLinkWithAttachment row, Func<Task> onChanged)
             {
-                _db = db; _componentId = componentId; DocumentId = docId; FileName = name; StoragePath = path; _onChanged = onChanged;
+                _attachments = attachments;
+                _onChanged = onChanged;
+                LinkId = row.Link.Id;
+                AttachmentId = row.Attachment.Id;
+                FileName = row.Attachment.FileName;
+                StoragePath = row.Attachment.FilePath;
                 OpenCommand = new Command(async () => await OpenAsync());
                 RemoveCommand = new Command(async () => await RemoveAsync());
             }
@@ -118,7 +131,7 @@ namespace YasGMP.Views.Dialogs
             {
                 try
                 {
-                    await _db.DeleteDocumentLinkAsync("Component", _componentId, DocumentId).ConfigureAwait(false);
+                    await _attachments.RemoveLinkAsync(LinkId).ConfigureAwait(false);
                     await _onChanged().ConfigureAwait(false);
                 }
                 catch (Exception ex)
