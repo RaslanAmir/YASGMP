@@ -1854,6 +1854,10 @@ CREATE TABLE `change_controls` (
   `code` varchar(255) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   `requested_by_id` int DEFAULT NULL,
+  `assigned_to_id` int DEFAULT NULL,
+  `date_assigned` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `last_modified_by_id` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
