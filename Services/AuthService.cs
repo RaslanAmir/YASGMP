@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
 {
@@ -16,7 +17,7 @@ namespace YasGMP.Services
     /// <see cref="AuditService"/>, and tracks minimal session/device forensics.
     /// </para>
     /// </summary>
-    public class AuthService
+    public class AuthService : IAuthContext
     {
         private readonly UserService _userService;
         private readonly AuditService _auditService;
