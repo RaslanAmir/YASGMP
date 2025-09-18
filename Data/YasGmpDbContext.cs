@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YasGMP.Models;
 using WorkOrderActionType = YasGMP.Models.Enums.WorkOrderActionType;
@@ -198,6 +202,37 @@ namespace YasGMP.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+            var customFieldsComparer = new ValueComparer<Dictionary<string, string>>(
+                (left, right) =>
+                    left == right ||
+                    (left != null && right != null && left.Count == right.Count && !left.Except(right).Any()),
+                dictionary =>
+                    dictionary == null
+                        ? 0
+                        : dictionary.Aggregate(0, (hash, pair) =>
+                            HashCode.Combine(
+                                hash,
+                                pair.Key != null ? StringComparer.Ordinal.GetHashCode(pair.Key) : 0,
+                                pair.Value != null ? StringComparer.Ordinal.GetHashCode(pair.Value) : 0)),
+                dictionary =>
+                    dictionary == null
+                        ? new Dictionary<string, string>()
+                        : dictionary.ToDictionary(entry => entry.Key, entry => entry.Value));
+
+            var customFieldsProperty = modelBuilder.Entity<Deviation>()
+                .Property(d => d.CustomFields);
+
+            customFieldsProperty.HasConversion(
+                v => JsonSerializer.Serialize(v ?? new Dictionary<string, string>(), jsonOptions),
+                v => string.IsNullOrWhiteSpace(v)
+                    ? new Dictionary<string, string>()
+                    : JsonSerializer.Deserialize<Dictionary<string, string>>(v, jsonOptions) ?? new Dictionary<string, string>());
+
+            customFieldsProperty.HasColumnType("TEXT");
+            customFieldsProperty.Metadata.SetValueComparer(customFieldsComparer);
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(a => a.UploadedBy)
