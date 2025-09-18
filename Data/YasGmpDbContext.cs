@@ -245,59 +245,106 @@ namespace YasGMP.Data
                 .HasIndex(u => u.Username)
                 .IsUnique();
 
+            modelBuilder.Entity<RolePermission>(entity =>
+            {
+                entity.ToTable("role_permissions");
+
+                entity.HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+                entity.HasOne(rp => rp.Role)
+                    .WithMany(r => r.RolePermissions)
+                    .HasForeignKey(rp => rp.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(rp => rp.Permission)
+                    .WithMany(p => p.RolePermissions)
+                    .HasForeignKey(rp => rp.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(rp => rp.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(rp => rp.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<UserPermission>(entity =>
+            {
+                entity.ToTable("user_permissions");
+
+                entity.HasKey(up => new { up.UserId, up.PermissionId });
+
+                entity.HasOne(up => up.User)
+                    .WithMany()
+                    .HasForeignKey(up => up.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(up => up.Permission)
+                    .WithMany(p => p.UserPermissions)
+                    .HasForeignKey(up => up.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(up => up.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(up => up.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<UserRoleMapping>(entity =>
+            {
+                entity.ToTable("user_roles");
+
+                entity.HasKey(urm => new { urm.UserId, urm.RoleId });
+
+                entity.HasOne(urm => urm.User)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(urm => urm.Role)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(urm => urm.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
             modelBuilder.Entity<Role>()
                 .HasMany(r => r.Permissions)
                 .WithMany(p => p.Roles)
                 .UsingEntity<RolePermission>(
-                    j => j
-                        .HasOne(rp => rp.Permission)
+                    j => j.HasOne(rp => rp.Permission)
                         .WithMany(p => p.RolePermissions)
                         .HasForeignKey(rp => rp.PermissionId),
-                    j => j
-                        .HasOne(rp => rp.Role)
+                    j => j.HasOne(rp => rp.Role)
                         .WithMany(r => r.RolePermissions)
-                        .HasForeignKey(rp => rp.RoleId),
-                    j =>
-                    {
-                        j.HasKey(rp => new { rp.RoleId, rp.PermissionId });
-                        j.ToTable("role_permissions");
-                    });
+                        .HasForeignKey(rp => rp.RoleId));
+
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Permissions)
                 .WithMany(p => p.Users)
                 .UsingEntity<UserPermission>(
-                    j => j
-                        .HasOne(up => up.Permission)
+                    j => j.HasOne(up => up.Permission)
                         .WithMany(p => p.UserPermissions)
                         .HasForeignKey(up => up.PermissionId),
-                    j => j
-                        .HasOne(up => up.User)
+                    j => j.HasOne(up => up.User)
                         .WithMany()
-                        .HasForeignKey(up => up.UserId),
-                    j =>
-                    {
-                        j.HasKey(up => new { up.UserId, up.PermissionId });
-                        j.ToTable("user_permissions");
-                    });
+                        .HasForeignKey(up => up.UserId));
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
                 .UsingEntity<UserRoleMapping>(
-                    j => j
-                        .HasOne(urm => urm.Role)
+
+                    j => j.HasOne(urm => urm.Role)
                         .WithMany()
                         .HasForeignKey(urm => urm.RoleId),
-                    j => j
-                        .HasOne(urm => urm.User)
+                    j => j.HasOne(urm => urm.User)
                         .WithMany()
-                        .HasForeignKey(urm => urm.UserId),
-                    j =>
-                    {
-                        j.HasKey(urm => new { urm.UserId, urm.RoleId });
-                        j.ToTable("user_roles");
-                    });
+                        .HasForeignKey(urm => urm.UserId));
 
             ConfigureAdminActivityLog(modelBuilder);
             ConfigureApiKey(modelBuilder);

@@ -22,7 +22,7 @@ namespace YasGMP.Models
         /// Navigation property for the assigned user.
         /// </summary>
         [ForeignKey("UserId")]
-        public virtual User User { get; set; } = null!
+        public virtual User User { get; set; } = null!;
 
 
         /// <summary>
