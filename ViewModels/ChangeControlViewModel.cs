@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -31,6 +32,7 @@ namespace YasGMP.ViewModels
         private ObservableCollection<ChangeControl> _changeControls = new();
         private ObservableCollection<ChangeControl> _filteredChangeControls = new();
         private ChangeControl? _selectedChangeControl;
+        private User? _selectedAssignee;
         private string? _searchTerm;
         private ChangeControlStatus? _statusFilter;
         private string? _typeFilter;
@@ -56,13 +58,7 @@ namespace YasGMP.ViewModels
             Task.Run(LoadChangeControlsAsync);
         }
 
-        #endregion
-
-        #region === Properties ===
-
-        /// <summary>All change control records in the system.</summary>
-        public ObservableCollection<ChangeControl> ChangeControls
-        {
+@@ -66,50 +68,57 @@ namespace YasGMP.ViewModels
             get => _changeControls;
             set { _changeControls = value ?? new ObservableCollection<ChangeControl>(); OnPropertyChanged(); }
         }
@@ -86,6 +82,13 @@ namespace YasGMP.ViewModels
         {
             get => _searchTerm;
             set { _searchTerm = value; OnPropertyChanged(); FilterChangeControls(); }
+        }
+
+        /// <summary>Assignee selected in the UI for assignment actions.</summary>
+        public User? SelectedAssignee
+        {
+            get => _selectedAssignee;
+            set { _selectedAssignee = value; OnPropertyChanged(); }
         }
 
         /// <summary>Status filter (as enum, mapped from dropdown UI).</summary>
@@ -113,12 +116,7 @@ namespace YasGMP.ViewModels
         public string? StatusMessage
         {
             get => _statusMessage;
-            set { _statusMessage = value; OnPropertyChanged(); }
-        }
-
-        /// <summary>Enum values for UI selection.</summary>
-        public Array AvailableStatuses => Enum.GetValues(typeof(ChangeControlStatus));
-
+@@ -122,76 +131,85 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ===
@@ -144,7 +142,7 @@ namespace YasGMP.ViewModels
             try
             {
                 var controls = await _dbService.ExecuteSelectAsync(
-                    "SELECT id, code, title, description, status, requested_by_id, date_requested FROM change_controls")
+                    "SELECT * FROM change_controls")
                     .ConfigureAwait(false);
                 var list = new ObservableCollection<ChangeControl>();
                 _initialAssignees.Clear();
@@ -163,13 +161,22 @@ namespace YasGMP.ViewModels
                         Description    = row["description"]?.ToString() ?? string.Empty,
                         Status         = parsed,
                         ChangeType     = row.Table.Columns.Contains("change_type")     ? (row["change_type"]?.ToString()     ?? string.Empty) : string.Empty,
-                        RequestedById  = row.Table.Columns.Contains("requested_by_id") ? Convert.ToInt32(row["requested_by_id"]) : 0,
-                        DateRequested  = row.Table.Columns.Contains("date_requested") && row["date_requested"] != DBNull.Value
-                                         ? Convert.ToDateTime(row["date_requested"])
-                                         : (DateTime?)null,
-                        AssignedToId   = row.Table.Columns.Contains("assigned_to_id") && row["assigned_to_id"] != DBNull.Value
-                                         ? Convert.ToInt32(row["assigned_to_id"])
-                                         : (int?)null
+                        RequestedById    = row.Table.Columns.Contains("requested_by_id") ? Convert.ToInt32(row["requested_by_id"]) : 0,
+                        DateRequested    = row.Table.Columns.Contains("date_requested") && row["date_requested"] != DBNull.Value
+                                           ? Convert.ToDateTime(row["date_requested"])
+                                           : (DateTime?)null,
+                        AssignedToId     = row.Table.Columns.Contains("assigned_to_id") && row["assigned_to_id"] != DBNull.Value
+                                           ? Convert.ToInt32(row["assigned_to_id"])
+                                           : (int?)null,
+                        LastModified     = row.Table.Columns.Contains("last_modified") && row["last_modified"] != DBNull.Value
+                                           ? Convert.ToDateTime(row["last_modified"])
+                                           : (DateTime?)null,
+                        LastModifiedById = row.Table.Columns.Contains("last_modified_by_id") && row["last_modified_by_id"] != DBNull.Value
+                                           ? Convert.ToInt32(row["last_modified_by_id"])
+                                           : (int?)null,
+                        DateAssigned     = row.Table.Columns.Contains("date_assigned") && row["date_assigned"] != DBNull.Value
+                                           ? Convert.ToDateTime(row["date_assigned"])
+                                           : (DateTime?)null
                     };
                     cc.AssignedToId = NormalizeAssignee(cc.AssignedToId);
                     _initialAssignees[cc.Id] = cc.AssignedToId;
@@ -195,44 +202,7 @@ namespace YasGMP.ViewModels
             try
             {
                 var newChange = new ChangeControl
-                {
-                    Title         = "New Change Control",
-                    Code          = $"CC-{DateTime.UtcNow:yyyyMMddHHmmss}",
-                    Status        = ChangeControlStatus.Draft,
-                    RequestedById = _authContext.CurrentUser?.Id ?? 0,
-                    DateRequested = DateTime.UtcNow
-                };
-
-                await _dbService.ExecuteNonQueryAsync(
-                    "INSERT INTO change_controls (code, title, description, status, requested_by_id, date_requested) VALUES (@code, @title, @desc, @status, @rbid, @dt)",
-                    new MySqlConnector.MySqlParameter[]
-                    {
-                        new("@code",   newChange.Code        ?? string.Empty),
-                        new("@title",  newChange.Title       ?? string.Empty),
-                        new("@desc",   newChange.Description ?? string.Empty),
-                        new("@status", newChange.Status.ToString()),
-                        new("@rbid",   newChange.RequestedById),
-                        new("@dt",     newChange.DateRequested ?? DateTime.UtcNow)
-                    }
-                ).ConfigureAwait(false);
-
-                StatusMessage = "Change control initiated.";
-                await LoadChangeControlsAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Initiation failed: {ex.Message}";
-            }
-            finally { IsBusy = false; }
-        }
-
-        /// <summary>Approves the <see cref="SelectedChangeControl"/>.</summary>
-        public async Task ApproveChangeControlAsync()
-        {
-            if (SelectedChangeControl == null) { StatusMessage = "No change control selected."; return; }
-            IsBusy = true;
-            try
-            {
+@@ -236,113 +254,135 @@ namespace YasGMP.ViewModels
                 SelectedChangeControl.Status = ChangeControlStatus.Approved;
                 await _dbService.ExecuteNonQueryAsync(
                     "UPDATE change_controls SET status=@status WHERE id=@id",
@@ -258,6 +228,12 @@ namespace YasGMP.ViewModels
         {
             if (SelectedChangeControl == null) { StatusMessage = "No change control selected."; return; }
 
+            if (SelectedAssignee == null)
+            {
+                StatusMessage = "Select an assignee before assigning.";
+                return;
+            }
+
             var actor = _authContext.CurrentUser;
             if (actor == null)
             {
@@ -270,34 +246,46 @@ namespace YasGMP.ViewModels
             {
                 _initialAssignees.TryGetValue(SelectedChangeControl.Id, out var storedOriginal);
                 var previousAssignee = NormalizeAssignee(storedOriginal);
-                var newAssignee = NormalizeAssignee(SelectedChangeControl.AssignedToId);
+                var newAssignee = NormalizeAssignee(SelectedAssignee.Id);
                 SelectedChangeControl.AssignedToId = newAssignee;
+                var now = DateTime.UtcNow;
 
                 if (previousAssignee == newAssignee)
                 {
-                    StatusMessage = $"Change control '{SelectedChangeControl.Title}' already assigned to {FormatAssignee(newAssignee)}.";
+                    StatusMessage = $"Change control '{SelectedChangeControl.Title}' already assigned to {FormatAssignee(null, newAssignee)}.";
                 }
                 else
                 {
                     try
                     {
-                        var parameters = new MySqlParameter[]
+                        var parameters = new List<MySqlParameter>
                         {
                             new("@assigned", (object?)newAssignee ?? DBNull.Value),
+                            new("@lastModified", now),
+                            new("@modifiedBy", actor.Id),
+                            new("@dateAssigned", now),
                             new("@id", SelectedChangeControl.Id)
                         };
                         await _dbService.ExecuteNonQueryAsync(
-                            "UPDATE change_controls SET assigned_to_id=@assigned, updated_at=UTC_TIMESTAMP() WHERE id=@id",
+                            "UPDATE change_controls SET assigned_to_id=@assigned, last_modified=@lastModified, last_modified_by_id=@modifiedBy, date_assigned=@dateAssigned WHERE id=@id",
                             parameters
                         ).ConfigureAwait(false);
                     }
                     catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
                     {
-                        // Schema without assigned_to_id column (dev/test DB). Swallow silently and continue.
+                        var fallbackParameters = new MySqlParameter[]
+                        {
+                            new("@assigned", (object?)newAssignee ?? DBNull.Value),
+                            new("@id", SelectedChangeControl.Id)
+                        };
+                        await _dbService.ExecuteNonQueryAsync(
+                            "UPDATE change_controls SET assigned_to_id=@assigned WHERE id=@id",
+                            fallbackParameters
+                        ).ConfigureAwait(false);
                     }
 
                     var eventType = previousAssignee.HasValue ? "CC_REASSIGN" : "CC_ASSIGN";
-                    var description = $"code={SelectedChangeControl.Code ?? SelectedChangeControl.Id.ToString()}; new={FormatAssignee(newAssignee)}; previous={FormatAssignee(previousAssignee)}; actor={actor.Id}";
+                    var description = $"code={SelectedChangeControl.Code ?? SelectedChangeControl.Id.ToString()}; new={FormatAssignee(SelectedAssignee, newAssignee)}; previous={FormatAssignee(null, previousAssignee)}; actor={actor.Id}";
                     await _dbService.LogSystemEventAsync(
                         userId: actor.Id,
                         eventType: eventType,
@@ -310,17 +298,21 @@ namespace YasGMP.ViewModels
                         deviceInfo: _authContext.CurrentDeviceInfo,
                         sessionId: _authContext.CurrentSessionId,
                         fieldName: "assigned_to_id",
-                        oldValue: previousAssignee?.ToString(),
-                        newValue: newAssignee?.ToString()
+                        oldValue: previousAssignee.HasValue ? previousAssignee.Value.ToString(CultureInfo.InvariantCulture) : null,
+                        newValue: newAssignee.HasValue ? newAssignee.Value.ToString(CultureInfo.InvariantCulture) : null
                     ).ConfigureAwait(false);
 
-                    StatusMessage = previousAssignee.HasValue
-                        ? $"Change control '{SelectedChangeControl.Title}' reassigned from {FormatAssignee(previousAssignee)} to {FormatAssignee(newAssignee)}."
-                        : $"Change control '{SelectedChangeControl.Title}' assigned to {FormatAssignee(newAssignee)}.";
+                    var message = previousAssignee.HasValue
+                        ? $"Change control '{SelectedChangeControl.Title}' reassigned from {FormatAssignee(null, previousAssignee)} to {FormatAssignee(SelectedAssignee, newAssignee)}."
+                        : $"Change control '{SelectedChangeControl.Title}' assigned to {FormatAssignee(SelectedAssignee, newAssignee)}.";
+
+                    _initialAssignees[SelectedChangeControl.Id] = newAssignee;
+                    await LoadChangeControlsAsync().ConfigureAwait(false);
+                    StatusMessage = message;
+                    return;
                 }
 
                 _initialAssignees[SelectedChangeControl.Id] = newAssignee;
-                await LoadChangeControlsAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -346,25 +338,7 @@ namespace YasGMP.ViewModels
                     }
                 ).ConfigureAwait(false);
 
-                StatusMessage = $"Change control '{SelectedChangeControl.Title}' implemented.";
-                await LoadChangeControlsAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Implementation failed: {ex.Message}";
-            }
-            finally { IsBusy = false; }
-        }
-
-        /// <summary>Closes the selected change control.</summary>
-        public async Task CloseChangeControlAsync()
-        {
-            if (SelectedChangeControl == null) { StatusMessage = "No change control selected."; return; }
-            IsBusy = true;
-            try
-            {
-                SelectedChangeControl.Status = ChangeControlStatus.Closed;
-                await _dbService.ExecuteNonQueryAsync(
+@@ -368,52 +408,60 @@ namespace YasGMP.ViewModels
                     "UPDATE change_controls SET status=@status WHERE id=@id",
                     new MySqlConnector.MySqlParameter[]
                     {
@@ -390,8 +364,16 @@ namespace YasGMP.ViewModels
             return value > 0 ? value : null;
         }
 
-        private static string FormatAssignee(int? assigneeId)
+        private static string FormatAssignee(User? assignee, int? assigneeId)
         {
+            if (assignee != null)
+            {
+                if (!string.IsNullOrWhiteSpace(assignee.FullName))
+                    return assignee.FullName;
+                if (!string.IsNullOrWhiteSpace(assignee.Username))
+                    return assignee.Username;
+            }
+
             return assigneeId.HasValue
                 ? $"user ID {assigneeId.Value}"
                 : "no one";

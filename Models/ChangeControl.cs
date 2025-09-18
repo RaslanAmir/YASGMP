@@ -109,6 +109,12 @@ namespace YasGMP.Models
         public User AssignedTo { get; set; } = null!;
 
         /// <summary>
+        /// Date/time when the change control was assigned to the current owner.
+        /// </summary>
+        [Display(Name = "Datum dodjele")]
+        public DateTime? DateAssigned { get; set; }
+
+        /// <summary>
         /// Date when change was reviewed.
         /// </summary>
         [Display(Name = "Datum pregleda")]
