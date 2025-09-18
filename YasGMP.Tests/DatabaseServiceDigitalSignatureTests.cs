@@ -234,6 +234,162 @@ namespace YasGMP.Tests
             }
         }
 
+        [Fact]
+        public async Task VerifySignatureAsync_ReturnsTrue_ForValidCapaSignature()
+        {
+            var db = new DatabaseService(ConnectionString);
+            var sessionId = "sess-004";
+            var deviceInfo = "Device-D";
+            var capaId = 101;
+            var userId = 77;
+
+            var canonicalCapa = new CapaCase
+            {
+                Id = capaId,
+                Title = "Deviation 42",
+                Status = "open"
+            };
+            var signatureComputation = DigitalSignatureHelper.ComputeSignature(canonicalCapa, sessionId, deviceInfo);
+
+            var signatureTable = CreateSignatureTable();
+            signatureTable.Rows.Add(
+                4,
+                "capa_cases",
+                capaId,
+                userId,
+                signatureComputation.Hash,
+                "pin",
+                "valid",
+                DateTime.UtcNow,
+                deviceInfo,
+                "127.0.0.5",
+                "capa",
+                DBNull.Value,
+                sessionId);
+
+            var capaTable = CreateCapaCaseTable();
+            capaTable.Rows.Add(
+                capaId,
+                canonicalCapa.Title,
+                "CAPA case description",
+                5,
+                DateTime.UtcNow,
+                DBNull.Value,
+                DBNull.Value,
+                "medium",
+                canonicalCapa.Status,
+                "Root cause",
+                "Corrective",
+                "Preventive",
+                "Reason",
+                "Actions",
+                "doc.pdf",
+                signatureComputation.Hash,
+                DateTime.UtcNow,
+                DBNull.Value,
+                false,
+                DBNull.Value,
+                DBNull.Value,
+                "10.1.1.5",
+                DBNull.Value,
+                "RC-1",
+                "Finding",
+                "Notes",
+                "Comments",
+                1,
+                false);
+
+            db.ExecuteSelectOverride = (sql, parameters, _) =>
+            {
+                if (sql.Contains("digital_signatures", StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(signatureTable);
+                if (sql.Contains("FROM capa_cases", StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(capaTable);
+                throw new InvalidOperationException($"Unexpected SQL: {sql}");
+            };
+
+            try
+            {
+                var result = await db.VerifySignatureAsync(4).ConfigureAwait(false);
+                Assert.True(result);
+            }
+            finally
+            {
+                db.ResetTestOverrides();
+            }
+        }
+
+        [Fact]
+        public async Task VerifySignatureAsync_ReturnsFalse_WhenCapaMissing()
+        {
+            var db = new DatabaseService(ConnectionString);
+            var sessionId = "sess-005";
+            var deviceInfo = "Device-E";
+            var capaId = 202;
+            var userId = 84;
+
+            var canonicalCapa = new CapaCase
+            {
+                Id = capaId,
+                Title = "OOS Investigation",
+                Status = "pending"
+            };
+            var signatureComputation = DigitalSignatureHelper.ComputeSignature(canonicalCapa, sessionId, deviceInfo);
+
+            var signatureTable = CreateSignatureTable();
+            signatureTable.Rows.Add(
+                5,
+                "capa_case",
+                capaId,
+                userId,
+                signatureComputation.Hash,
+                "pin",
+                "valid",
+                DateTime.UtcNow,
+                deviceInfo,
+                "192.168.0.10",
+                "pending",
+                DBNull.Value,
+                sessionId);
+
+            var loggedEvents = new List<Dictionary<string, object?>>();
+
+            db.ExecuteSelectOverride = (sql, parameters, _) =>
+            {
+                if (sql.Contains("digital_signatures", StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(signatureTable);
+                if (sql.Contains("FROM capa_cases", StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(CreateCapaCaseTable());
+                throw new InvalidOperationException($"Unexpected SQL: {sql}");
+            };
+
+            db.ExecuteNonQueryOverride = (sql, parameters, _) =>
+            {
+                var snapshot = new Dictionary<string, object?>();
+                if (parameters != null)
+                {
+                    foreach (var p in parameters)
+                        snapshot[p.ParameterName] = p.Value;
+                }
+                loggedEvents.Add(snapshot);
+                return Task.FromResult(1);
+            };
+
+            try
+            {
+                var result = await db.VerifySignatureAsync(5).ConfigureAwait(false);
+                Assert.False(result);
+                Assert.NotEmpty(loggedEvents);
+                Assert.Contains(loggedEvents, entry =>
+                    entry.TryGetValue("@desc", out var desc) &&
+                    string.Equals(desc?.ToString(), "verify_fail:capa_case_missing", StringComparison.OrdinalIgnoreCase));
+            }
+            finally
+            {
+                db.ResetTestOverrides();
+            }
+        }
+
         private static DataTable CreateSignatureTable()
         {
             var table = new DataTable();
@@ -266,6 +422,41 @@ namespace YasGMP.Tests
             table.Columns.Add("manufacturer", typeof(string));
             table.Columns.Add("location", typeof(string));
             table.Columns.Add("responsible_party", typeof(string));
+            return table;
+        }
+
+        private static DataTable CreateCapaCaseTable()
+        {
+            var table = new DataTable();
+            table.Columns.Add("id", typeof(int));
+            table.Columns.Add("title", typeof(string));
+            table.Columns.Add("description", typeof(string));
+            table.Columns.Add("component_id", typeof(int));
+            table.Columns.Add("date_open", typeof(DateTime));
+            table.Columns.Add("date_close", typeof(DateTime));
+            table.Columns.Add("assigned_to_id", typeof(int));
+            table.Columns.Add("priority", typeof(string));
+            table.Columns.Add("status", typeof(string));
+            table.Columns.Add("root_cause", typeof(string));
+            table.Columns.Add("corrective_action", typeof(string));
+            table.Columns.Add("preventive_action", typeof(string));
+            table.Columns.Add("reason", typeof(string));
+            table.Columns.Add("actions", typeof(string));
+            table.Columns.Add("doc_file", typeof(string));
+            table.Columns.Add("digital_signature", typeof(string));
+            table.Columns.Add("last_modified", typeof(DateTime));
+            table.Columns.Add("last_modified_by_id", typeof(int));
+            table.Columns.Add("approved", typeof(bool));
+            table.Columns.Add("approved_at", typeof(DateTime));
+            table.Columns.Add("approved_by_id", typeof(int));
+            table.Columns.Add("source_ip", typeof(string));
+            table.Columns.Add("status_id", typeof(int));
+            table.Columns.Add("root_cause_reference", typeof(string));
+            table.Columns.Add("linked_findings", typeof(string));
+            table.Columns.Add("notes", typeof(string));
+            table.Columns.Add("comments", typeof(string));
+            table.Columns.Add("change_version", typeof(int));
+            table.Columns.Add("is_deleted", typeof(bool));
             return table;
         }
     }
