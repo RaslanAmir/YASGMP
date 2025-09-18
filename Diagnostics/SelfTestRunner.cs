@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -30,6 +31,7 @@ namespace YasGMP.Diagnostics
                 await InventoryTriggersAndAudit(token).ConfigureAwait(false);
                 await CheckRbacIntegrity(token).ConfigureAwait(false);
                 await ComputeSchemaHash(token).ConfigureAwait(false);
+                await ExerciseChangeControlAssignmentHarness().ConfigureAwait(false);
                 _trace.Log(DiagLevel.Info, "selftest", "completed", "Diagnostics self-tests finished.");
             }
             catch (Exception ex)
@@ -130,6 +132,29 @@ namespace YasGMP.Diagnostics
             catch (Exception ex)
             {
                 _trace.Log(DiagLevel.Warn, "selftest", "schema_hash_failed", ex.Message, ex);
+            }
+        }
+
+        private async Task ExerciseChangeControlAssignmentHarness()
+        {
+            try
+            {
+                var harnessResult = await ChangeControlAssignmentHarness.RunAsync().ConfigureAwait(false);
+                var eventSummary = harnessResult.LoggedEvents
+                    .Select(e => $"{e.EventType}:{e.OldValue ?? "∅"}->{e.NewValue ?? "∅"}")
+                    .ToArray();
+                var data = new Dictionary<string, object?>
+                {
+                    ["statusMessages"] = harnessResult.StatusMessages,
+                    ["eventSummary"] = eventSummary,
+                    ["executedSqlCount"] = harnessResult.ExecutedSql.Count,
+                    ["loggedAudit"] = harnessResult.LoggedAudit
+                };
+                _trace.Log(DiagLevel.Info, "selftest", "cc_assign_harness", "Change control assignment harness executed.", data: data);
+            }
+            catch (Exception ex)
+            {
+                _trace.Log(DiagLevel.Warn, "selftest", "cc_assign_harness_failed", ex.Message, ex);
             }
         }
     }
