@@ -119,7 +119,6 @@ namespace YasGMP.Models
 
         /// <summary>Navigation to previous calibration (optional).</summary>
         [ForeignKey(nameof(PreviousCalibrationId))]
-        [InverseProperty("NextCalibration")]
         public virtual Calibration? PreviousCalibration { get; set; }
 
         /// <summary>Bonus: Next planned calibration reference (for traceability).</summary>
@@ -128,7 +127,6 @@ namespace YasGMP.Models
 
         /// <summary>Navigation to next calibration (optional).</summary>
         [ForeignKey(nameof(NextCalibrationId))]
-        [InverseProperty("PreviousCalibration")]
         public virtual Calibration? NextCalibration { get; set; }
 
         /// <summary>Full chain/version support for audit, rollback, event sourcing.</summary>
