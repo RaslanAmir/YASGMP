@@ -358,6 +358,24 @@ namespace YasGMP.Data
                         .WithMany()
                         .HasForeignKey(urm => urm.UserId));
 
+            modelBuilder.Entity<DelegatedPermission>(entity =>
+            {
+                entity.HasOne(dp => dp.FromUser)
+                    .WithMany(u => u.DelegatedPermissions)
+                    .HasForeignKey(dp => dp.FromUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(dp => dp.ToUser)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.ToUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(dp => dp.ApprovedBy)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.ApprovedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
             ConfigureAdminActivityLog(modelBuilder);
             ConfigureApiKey(modelBuilder);
             ConfigureContractorInterventionAudit(modelBuilder);
