@@ -223,6 +223,16 @@ FROM digital_signatures WHERE id=@id LIMIT 1";
                         var result = DigitalSignatureHelper.ComputeSignature(qualification, sessionId, deviceInfo);
                         return new ExpectedSignatureResult(result.Hash, result.Payload, null);
                     }
+                case "capa_cases":
+                case "capa_case":
+                case "capa":
+                    {
+                        var capaCase = await db.GetCapaCaseByIdAsync(signature.RecordId, token).ConfigureAwait(false);
+                        if (capaCase == null)
+                            return new ExpectedSignatureResult(null, null, "capa_case_missing");
+                        var result = DigitalSignatureHelper.ComputeSignature(capaCase, sessionId, deviceInfo);
+                        return new ExpectedSignatureResult(result.Hash, result.Payload, null);
+                    }
                 default:
                     return new ExpectedSignatureResult(null, null, $"unsupported_table={signature.TableName}");
             }
