@@ -82,6 +82,8 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (ExecuteNonQueryOverride != null)
+                return await ExecuteNonQueryOverride(sql, parameters, token).ConfigureAwait(false);
             await using var conn = CreateConnection();
             await conn.OpenAsync(token).ConfigureAwait(false);
             await using var cmd = new MySqlCommand(sql, conn);
@@ -110,6 +112,8 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (ExecuteScalarOverride != null)
+                return await ExecuteScalarOverride(sql, parameters, token).ConfigureAwait(false);
             await using var conn = CreateConnection();
             await conn.OpenAsync(token).ConfigureAwait(false);
             await using var cmd = new MySqlCommand(sql, conn);
@@ -132,6 +136,8 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (ExecuteSelectOverride != null)
+                return await ExecuteSelectOverride(sql, parameters, token).ConfigureAwait(false);
             await using var conn = CreateConnection();
             await conn.OpenAsync(token).ConfigureAwait(false);
             await using var cmd = new MySqlCommand(sql, conn);
