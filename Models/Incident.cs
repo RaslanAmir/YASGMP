@@ -47,7 +47,6 @@ namespace YasGMP.Models
 
         [Column("work_order_id")]
         public int? WorkOrderId { get; set; }
-        [ForeignKey(nameof(WorkOrderId))]
         public virtual WorkOrder? WorkOrder { get; set; }
 
         [Column("capa_case_id")]

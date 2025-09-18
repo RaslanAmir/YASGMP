@@ -337,6 +337,12 @@ namespace YasGMP.Data
                 .HasForeignKey(wo => wo.LastModifiedById)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<WorkOrder>()
+                .HasOne(wo => wo.Incident)
+                .WithOne(i => i.WorkOrder)
+                .HasForeignKey<WorkOrder>(wo => wo.IncidentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<WorkOrderAudit>()
                 .HasOne(a => a.WorkOrder)
                 .WithMany(w => w.AuditTrail)

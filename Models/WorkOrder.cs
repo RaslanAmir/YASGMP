@@ -146,7 +146,6 @@ namespace YasGMP.Models
         [Display(Name = "Incident")]
         public int? IncidentId { get; set; }
 
-        [ForeignKey("IncidentId")]
         public virtual Incident? Incident { get; set; }
 
         // ========== RESULTS / FINDINGS ==========
