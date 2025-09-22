@@ -82,7 +82,7 @@ namespace YasGMP.Views.Dialogs
             });
         }
 
-        private async Task OnChanged() => await LoadAsync().ConfigureAwait(false);
+        private async Task OnChanged() => await LoadAsync();
 
         private async void OnAddClicked(object? sender, EventArgs e)
         {
@@ -102,10 +102,10 @@ namespace YasGMP.Views.Dialogs
                 int userId = app?.LoggedUser?.Id ?? 0;
                 string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                 string? sessionId = app?.SessionId;
-                await _db.InsertOrUpdateComponentAsync(mc, update: false, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId).ConfigureAwait(false);
+                await _db.InsertOrUpdateComponentAsync(mc, update: false, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
 
                 CodeEntry.Text = string.Empty; NameEntry.Text = string.Empty; TypeEntry.Text = string.Empty;
-                await LoadAsync().ConfigureAwait(false);
+                await LoadAsync();
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace YasGMP.Views.Dialogs
         {
             try
             {
-                var unassigned = await _db.GetUnassignedComponentsAsync().ConfigureAwait(false);
+                var unassigned = await _db.GetUnassignedComponentsAsync();
                 if (unassigned.Count == 0)
                 {
                     await DisplayAlert("Info", "Nema dostupnih nevezanih komponenti.", "OK");
@@ -141,7 +141,7 @@ namespace YasGMP.Views.Dialogs
                     var idStr = pick.Substring(lb + 1, rb - lb - 1);
                     if (int.TryParse(idStr, out int compId))
                     {
-                        var comp = await _db.GetComponentByIdAsync(compId).ConfigureAwait(false);
+                        var comp = await _db.GetComponentByIdAsync(compId);
                         if (comp is null) return;
                         comp.MachineId = _machineId;
 
@@ -149,8 +149,8 @@ namespace YasGMP.Views.Dialogs
                         int userId = app?.LoggedUser?.Id ?? 0;
                         string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                         string? sessionId = app?.SessionId;
-                        await _db.InsertOrUpdateComponentAsync(comp, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId).ConfigureAwait(false);
-                        await LoadAsync().ConfigureAwait(false);
+                        await _db.InsertOrUpdateComponentAsync(comp, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
+                        await LoadAsync();
                     }
                 }
             }
@@ -236,7 +236,7 @@ namespace YasGMP.Views.Dialogs
                     var dlg = new ComponentEditDialog(snapshot);
                     if (Application.Current?.MainPage?.Navigation != null)
                         await Application.Current.MainPage.Navigation.PushModalAsync(dlg);
-                    var ok = await dlg.Result.ConfigureAwait(false);
+                    var ok = await dlg.Result;
                     if (!ok) return;
 
                     _mc.Code = snapshot.Code;
@@ -250,8 +250,8 @@ namespace YasGMP.Views.Dialogs
                     int userId = app?.LoggedUser?.Id ?? 0;
                     string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                     string? sessionId = app?.SessionId;
-                    await _db.InsertOrUpdateComponentAsync(_mc, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId).ConfigureAwait(false);
-                    await _onChanged().ConfigureAwait(false);
+                    await _db.InsertOrUpdateComponentAsync(_mc, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
+                    await _onChanged();
                 }
                 catch (Exception ex)
                 {
@@ -267,8 +267,8 @@ namespace YasGMP.Views.Dialogs
                     int userId = app?.LoggedUser?.Id ?? 0;
                     string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                     string? sessionId = app?.SessionId;
-                    await _db.DeleteComponentAsync(_mc.Id, userId, ip, "MachineComponentsDialog", sessionId).ConfigureAwait(false);
-                    await _onChanged().ConfigureAwait(false);
+                    await _db.DeleteComponentAsync(_mc.Id, userId, ip, "MachineComponentsDialog", sessionId);
+                    await _onChanged();
                 }
                 catch (Exception ex)
                 {
@@ -292,15 +292,15 @@ namespace YasGMP.Views.Dialogs
                     if (choice == "Odspoji od stroja")
                     {
                         _mc.MachineId = null;
-                        await _db.InsertOrUpdateComponentAsync(_mc, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId).ConfigureAwait(false);
-                        await _onChanged().ConfigureAwait(false);
+                        await _db.InsertOrUpdateComponentAsync(_mc, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
+                        await _onChanged();
                         return;
                     }
 
                     if (choice == "Obriši komponentu")
                     {
-                        await _db.DeleteComponentAsync(_mc.Id, userId, ip, "MachineComponentsDialog", sessionId).ConfigureAwait(false);
-                        await _onChanged().ConfigureAwait(false);
+                        await _db.DeleteComponentAsync(_mc.Id, userId, ip, "MachineComponentsDialog", sessionId);
+                        await _onChanged();
                         return;
                     }
                 }
@@ -317,7 +317,7 @@ namespace YasGMP.Views.Dialogs
                     var dlg = new ComponentDocumentsDialog(_db, _mc.Id);
                     if (Application.Current?.MainPage?.Navigation != null)
                         await Application.Current.MainPage.Navigation.PushModalAsync(dlg);
-                    _ = await dlg.Result.ConfigureAwait(false);
+                    _ = await dlg.Result;
                 }
                 catch (Exception ex)
                 {
