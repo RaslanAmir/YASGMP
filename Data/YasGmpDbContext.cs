@@ -249,6 +249,28 @@ namespace YasGMP.Data
                 .HasForeignKey(a => a.ApprovedById)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.Tenant)
+                .WithMany()
+                .HasForeignKey(a => a.TenantId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Attachment>()
+                .HasIndex(a => new { a.Sha256, a.FileSize })
+                .HasDatabaseName("ux_attachments_sha256_size")
+                .IsUnique();
+
+            modelBuilder.Entity<RetentionPolicy>()
+                .Property(r => r.DeleteMode)
+                .HasMaxLength(32)
+                .HasDefaultValue("soft");
+
+            modelBuilder.Entity<RetentionPolicy>()
+                .HasOne(r => r.Attachment)
+                .WithMany(a => a.RetentionPolicies)
+                .HasForeignKey(r => r.AttachmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             var photoTypeConverter = new ValueConverter<PhotoType, string>(
                 v => v switch
                 {

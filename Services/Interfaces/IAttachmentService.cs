@@ -66,6 +66,24 @@ namespace YasGMP.Services.Interfaces
         public string? RetentionPolicyName { get; set; }
         public string? Notes { get; set; }
 
+        /// <summary>Optional tenant owning the attachment.</summary>
+        public int? TenantId { get; set; }
+
+        /// <summary>Minimum number of days the attachment must be retained.</summary>
+        public int? MinRetainDays { get; set; }
+
+        /// <summary>Maximum number of days the attachment may be retained.</summary>
+        public int? MaxRetainDays { get; set; }
+
+        /// <summary>True when a legal hold prevents automated purge.</summary>
+        public bool LegalHold { get; set; }
+
+        /// <summary>Optional disposition mode (soft/hard) for retention enforcement.</summary>
+        public string? DeleteMode { get; set; }
+
+        /// <summary>True when manual review is required before purge.</summary>
+        public bool ReviewRequired { get; set; }
+
         /// <summary>
         /// Human readable rationale for the upload (audit/a11y context).
         /// </summary>
