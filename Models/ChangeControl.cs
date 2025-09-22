@@ -1,5 +1,5 @@
-﻿using YasGMP.Models.Enums;
-ď»żusing System;
+using YasGMP.Models.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
