@@ -10,6 +10,7 @@ using System.Linq;
 using MySqlConnector;
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
+using YasGMP.Models.Enums;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 
