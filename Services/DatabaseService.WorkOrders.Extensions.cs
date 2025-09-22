@@ -1,11 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
@@ -263,28 +273,140 @@ WHERE w.id=@id";
             return part.WorkOrderId;
         }
 
-        public static async Task<int> AddWorkOrderSignatureAsync(
+        public static async Task<WorkOrderSignature> AddWorkOrderSignatureAsync(
             this DatabaseService db,
-            int workOrderId,
-            int userId,
-            string signatureHash,
-            string? note,
-            string signatureType = "potvrda",
+            WorkOrderSignaturePersistRequest request,
+            IAttachmentService? attachmentService = null,
             CancellationToken token = default)
         {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request.WorkOrderId <= 0) throw new ArgumentException("Work order id is required", nameof(request));
+            if (request.UserId <= 0) throw new ArgumentException("User id is required", nameof(request));
+            if (string.IsNullOrWhiteSpace(request.ReasonCode)) throw new ArgumentException("Reason code is required", nameof(request));
+
+            string signatureType = string.IsNullOrWhiteSpace(request.SignatureType)
+                ? "potvrda"
+                : request.SignatureType;
+
+            int recordVersion = request.RecordVersion > 0
+                ? request.RecordVersion
+                : await db.GetNextWorkOrderSignatureVersionAsync(request.WorkOrderId, token).ConfigureAwait(false);
+
+            int revisionNo = request.RevisionNo > 0
+                ? request.RevisionNo
+                : await db.GetCurrentWorkOrderRevisionAsync(request.WorkOrderId, token).ConfigureAwait(false);
+
+            DateTime signedAtUtc = request.SignedAtUtc == default
+                ? DateTime.UtcNow
+                : request.SignedAtUtc;
+
+            string serverTz = string.IsNullOrWhiteSpace(request.ServerTimeZone)
+                ? TimeZoneInfo.Local.Id
+                : request.ServerTimeZone;
+
+            string snapshotJson = !string.IsNullOrWhiteSpace(request.WorkOrderSnapshotJson)
+                ? request.WorkOrderSnapshotJson!
+                : await BuildWorkOrderSnapshotAsync(db, request.WorkOrderId, token).ConfigureAwait(false);
+
+            string recordHash = string.IsNullOrWhiteSpace(request.RecordHash)
+                ? (!string.IsNullOrWhiteSpace(snapshotJson)
+                    ? ComputeRecordHash(snapshotJson)
+                    : await ComputeWorkOrderRecordHashAsync(db, request.WorkOrderId, token).ConfigureAwait(false))
+                : request.RecordHash;
+
             const string sql = @"INSERT INTO work_order_signatures
- (work_order_id, user_id, signature_hash, signed_at, pin_used, signature_type, note)
- VALUES(@wo, @uid, @hash, NOW(), NULL, @type, @note)";
-            var pars = new[]
+(work_order_id, user_id, signature_hash, signed_at, pin_used, signature_type, note,
+ record_hash, record_version, server_timezone, ip_address, device_info, session_id,
+ reason_code, reason_description, revision_no, mfa_challenge)
+VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
+       @recordHash, @recordVersion, @tz, @ip, @device, @session,
+       @reasonCode, @reasonDescription, @revisionNo, @mfa)";
+
+            var parameters = new[]
             {
-                new MySqlParameter("@wo", workOrderId),
-                new MySqlParameter("@uid", userId),
-                new MySqlParameter("@hash", signatureHash ?? string.Empty),
-                new MySqlParameter("@type", signatureType ?? "potvrda"),
-                new MySqlParameter("@note", (object?)note ?? DBNull.Value)
+                new MySqlParameter("@wo", request.WorkOrderId),
+                new MySqlParameter("@uid", request.UserId),
+                new MySqlParameter("@hash", request.SignatureHash ?? string.Empty),
+                new MySqlParameter("@signedAt", signedAtUtc),
+                new MySqlParameter("@type", signatureType),
+                new MySqlParameter("@note", (object?)request.ReasonDescription ?? DBNull.Value),
+                new MySqlParameter("@recordHash", recordHash),
+                new MySqlParameter("@recordVersion", recordVersion),
+                new MySqlParameter("@tz", serverTz),
+                new MySqlParameter("@ip", (object?)request.IpAddress ?? DBNull.Value),
+                new MySqlParameter("@device", (object?)request.DeviceInfo ?? DBNull.Value),
+                new MySqlParameter("@session", (object?)request.SessionId ?? DBNull.Value),
+                new MySqlParameter("@reasonCode", request.ReasonCode),
+                new MySqlParameter("@reasonDescription", (object?)request.ReasonDescription ?? DBNull.Value),
+                new MySqlParameter("@revisionNo", revisionNo),
+                new MySqlParameter("@mfa", (object?)request.MfaEvidence ?? DBNull.Value)
             };
-            await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
-            return workOrderId;
+
+            await db.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+            var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
+            int signatureId = Convert.ToInt32(idObj, CultureInfo.InvariantCulture);
+
+            var signature = new WorkOrderSignature
+            {
+                Id = signatureId,
+                WorkOrderId = request.WorkOrderId,
+                UserId = request.UserId,
+                SignatureHash = request.SignatureHash,
+                SignedAt = signedAtUtc,
+                SignatureTypeRaw = signatureType,
+                Note = request.ReasonDescription,
+                ReasonCode = request.ReasonCode,
+                ReasonDescription = request.ReasonDescription,
+                RecordHash = recordHash,
+                RecordVersion = recordVersion,
+                ServerTimezone = serverTz,
+                IpAddress = request.IpAddress,
+                DeviceInfo = request.DeviceInfo,
+                SessionId = request.SessionId,
+                RevisionNo = revisionNo,
+                MfaEvidence = request.MfaEvidence
+            };
+
+            string description = $"signatureId={signatureId}; reason={request.ReasonCode}; version={recordVersion}; revision={revisionNo}";
+            await db.LogSystemEventAsync(
+                request.UserId,
+                "WO_SIGNATURE",
+                "work_order_signatures",
+                "WorkOrders",
+                request.WorkOrderId,
+                description,
+                request.IpAddress,
+                "audit",
+                request.DeviceInfo,
+                request.SessionId,
+                token: token).ConfigureAwait(false);
+
+            attachmentService ??= ServiceLocator.GetRequiredService<IAttachmentService>();
+            var workOrder = await db.GetWorkOrderByIdAsync(request.WorkOrderId, token).ConfigureAwait(false)
+                ?? new WorkOrder { Id = request.WorkOrderId };
+
+            byte[] pdf = GenerateSignatureManifestPdf(workOrder, signature, request, snapshotJson);
+            using var manifestStream = new MemoryStream(pdf);
+            manifestStream.Position = 0;
+
+            var uploadRequest = new AttachmentUploadRequest
+            {
+                FileName = $"WO-{request.WorkOrderId}-signature-v{recordVersion}.pdf",
+                ContentType = "application/pdf",
+                EntityType = "WorkOrder",
+                EntityId = request.WorkOrderId,
+                UploadedById = request.UserId,
+                DisplayName = $"WorkOrder #{request.WorkOrderId} – potpis v{recordVersion}",
+                Notes = request.ReasonDescription,
+                Reason = $"workorder-signature:{request.ReasonCode}",
+                SourceIp = request.IpAddress,
+                SourceHost = request.DeviceInfo
+            };
+
+            await attachmentService.UploadAsync(manifestStream, uploadRequest, token).ConfigureAwait(false);
+
+            return signature;
         }
 
         public static async Task AttachWorkOrderPhotoAsync(
@@ -349,6 +471,159 @@ WHERE w.id=@id";
                 null,
                 token: token
             ).ConfigureAwait(false);
+        }
+
+        public static async Task<int> GetNextWorkOrderSignatureVersionAsync(
+            this DatabaseService db,
+            int workOrderId,
+            CancellationToken token = default)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            var pars = new[] { new MySqlParameter("@wo", workOrderId) };
+            const string sql = "SELECT COALESCE(MAX(record_version),0) FROM work_order_signatures WHERE work_order_id=@wo";
+            var obj = await db.ExecuteScalarAsync(sql, pars, token).ConfigureAwait(false);
+            int current = obj is null || obj == DBNull.Value ? 0 : Convert.ToInt32(obj, CultureInfo.InvariantCulture);
+            return current + 1;
+        }
+
+        public static async Task<int> GetCurrentWorkOrderRevisionAsync(
+            this DatabaseService db,
+            int workOrderId,
+            CancellationToken token = default)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            var pars = new[] { new MySqlParameter("@wo", workOrderId) };
+            const string sql = "SELECT COALESCE(MAX(revision_no),1) FROM work_order_comments WHERE work_order_id=@wo";
+            var obj = await db.ExecuteScalarAsync(sql, pars, token).ConfigureAwait(false);
+            return obj is null || obj == DBNull.Value ? 1 : Convert.ToInt32(obj, CultureInfo.InvariantCulture);
+        }
+
+        private static async Task<string> BuildWorkOrderSnapshotAsync(DatabaseService db, int workOrderId, CancellationToken token)
+        {
+            var workOrder = await db.GetWorkOrderByIdAsync(workOrderId, token).ConfigureAwait(false);
+            if (workOrder == null) return string.Empty;
+
+            var snapshot = new
+            {
+                workOrder.Id,
+                workOrder.Title,
+                workOrder.Description,
+                workOrder.TaskDescription,
+                workOrder.Type,
+                workOrder.Priority,
+                workOrder.Status,
+                workOrder.DateOpen,
+                workOrder.DueDate,
+                workOrder.DateClose,
+                workOrder.MachineId,
+                workOrder.ComponentId,
+                workOrder.AssignedToId,
+                workOrder.RequestedById,
+                workOrder.CreatedById,
+                workOrder.Result,
+                workOrder.Notes,
+                workOrder.LastModified,
+                workOrder.LastModifiedById
+            };
+
+            return JsonSerializer.Serialize(snapshot, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
+        }
+
+        private static async Task<string> ComputeWorkOrderRecordHashAsync(DatabaseService db, int workOrderId, CancellationToken token)
+        {
+            string snapshot = await BuildWorkOrderSnapshotAsync(db, workOrderId, token).ConfigureAwait(false);
+            return string.IsNullOrWhiteSpace(snapshot) ? string.Empty : ComputeRecordHash(snapshot);
+        }
+
+        private static string ComputeRecordHash(string payload)
+        {
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(payload ?? string.Empty);
+            return Convert.ToHexString(sha.ComputeHash(bytes));
+        }
+
+        private static byte[] GenerateSignatureManifestPdf(
+            WorkOrder workOrder,
+            WorkOrderSignature signature,
+            WorkOrderSignaturePersistRequest request,
+            string snapshotJson)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+            using var stream = new MemoryStream();
+            Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(20);
+                    page.Size(PageSizes.A4);
+                    page.Header().Text($"Radni nalog #{workOrder.Id} – manifest potpisa").SemiBold().FontSize(16);
+                    page.Content().Column(col =>
+                    {
+                        col.Item().Text($"Potpisao: {request.SignerFullName ?? request.SignerUsername} (ID {signature.UserId})");
+                        col.Item().Text($"Korisničko ime: {request.SignerUsername}");
+                        col.Item().Text($"Razlog (kod): {signature.ReasonCode}");
+                        if (!string.IsNullOrWhiteSpace(request.ReasonDisplay))
+                            col.Item().Text($"Razlog (opis): {request.ReasonDisplay}");
+                        if (!string.IsNullOrWhiteSpace(signature.ReasonDescription))
+                            col.Item().Text($"Detalji: {signature.ReasonDescription}");
+                        col.Item().Text($"Revizija: {signature.RevisionNo}; Verzija zapisa: {signature.RecordVersion}");
+                        col.Item().Text($"Hash zapisa: {signature.RecordHash}");
+                        if (!string.IsNullOrWhiteSpace(signature.SignatureHash))
+                            col.Item().Text($"Hash potpisa: {signature.SignatureHash}");
+                        col.Item().Text($"Vrijeme potpisa: {signature.SignedAt:yyyy-MM-dd HH:mm:ss} {signature.ServerTimezone}");
+                        col.Item().Text($"IP: {signature.IpAddress ?? "n/a"}");
+                        col.Item().Text($"Uređaj: {signature.DeviceInfo ?? "n/a"}");
+                        if (!string.IsNullOrWhiteSpace(signature.SessionId))
+                            col.Item().Text($"Session ID: {signature.SessionId}");
+                        col.Item().Text(string.IsNullOrWhiteSpace(request.MfaEvidence)
+                            ? "MFA: nije primijenjeno"
+                            : "MFA: dokaz pohranjen (hash)");
+
+                        col.Item().Element(e => e.PaddingVertical(6)).LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
+
+                        col.Item().Text("Sažetak radnog naloga").SemiBold();
+                        col.Item().Text($"Naslov: {workOrder.Title}");
+                        col.Item().Text($"Status: {workOrder.Status}");
+                        col.Item().Text($"Tip / Prioritet: {workOrder.Type} / {workOrder.Priority}");
+                        col.Item().Text($"Dodijeljeno korisniku #{workOrder.AssignedToId}");
+                        col.Item().Text($"Otvoren: {workOrder.DateOpen:yyyy-MM-dd}");
+                        if (workOrder.DateClose.HasValue)
+                            col.Item().Text($"Zatvoren: {workOrder.DateClose:yyyy-MM-dd}");
+                        if (!string.IsNullOrWhiteSpace(workOrder.Result))
+                            col.Item().Text($"Rezultat: {workOrder.Result}");
+
+                        if (!string.IsNullOrWhiteSpace(snapshotJson))
+                        {
+                            col.Item().Element(e => e.PaddingTop(8)).Text("JSON snapshot").SemiBold();
+                            col.Item().Background(Colors.Grey.Lighten4).Padding(6).DefaultTextStyle(t => t.FontSize(8).FontFamily("Consolas"))
+                                .Text(text =>
+                                {
+                                    foreach (var line in SplitLines(snapshotJson))
+                                    {
+                                        text.Line(line);
+                                    }
+                                });
+                        }
+                    });
+                    page.Footer().AlignRight().Text($"Generirano {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+                });
+            }).GeneratePdf(stream);
+            return stream.ToArray();
+        }
+
+        private static IEnumerable<string> SplitLines(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) yield break;
+            using var reader = new StringReader(value);
+            string? line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                yield return line;
+            }
         }
 
         public static async Task AddWorkOrderCommentAsync(

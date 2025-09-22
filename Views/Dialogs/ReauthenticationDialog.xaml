@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.ReauthenticationDialog"
+             Title="Potvrda identiteta">
+  <ScrollView>
+    <VerticalStackLayout Padding="24" Spacing="12">
+      <Label Text="Za digitalni potpis potrebno je ponovno potvrditi identitet i odabrati GMP razlog." FontAttributes="Bold" LineBreakMode="WordWrap" />
+
+      <Entry x:Name="UsernameEntry"
+             Placeholder="Korisničko ime"
+             Keyboard="Text"
+             AutomationId="ReauthUsername" />
+
+      <Entry x:Name="PasswordEntry"
+             Placeholder="Lozinka"
+             IsPassword="True"
+             AutomationId="ReauthPassword" />
+
+      <Entry x:Name="MfaEntry"
+             Placeholder="MFA/TOTP kod (ako je potrebno)"
+             Keyboard="Numeric"
+             AutomationId="ReauthMfa" />
+
+      <Picker x:Name="ReasonPicker"
+              Title="Razlog potpisa"
+              ItemDisplayBinding="{Binding DisplayLabel}"
+              AutomationId="ReauthReason"
+              SelectedIndexChanged="OnReasonChanged" />
+
+      <Entry x:Name="CustomReasonEntry"
+             Placeholder="Unesite vlastiti reason code"
+             IsVisible="False"
+             AutomationId="ReauthCustomReason" />
+
+      <Editor x:Name="ReasonDetailEditor"
+              Placeholder="Detaljno obrazloženje (audit note)"
+              AutoSize="TextChanges"
+              AutomationId="ReauthReasonDetail" />
+
+      <HorizontalStackLayout Spacing="16" Margin="0,20,0,0">
+        <Button Text="Potvrdi" Clicked="OnConfirmClicked" AutomationId="ReauthConfirm" />
+        <Button Text="Odustani" Clicked="OnCancelClicked" AutomationId="ReauthCancel" />
+      </HorizontalStackLayout>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>
