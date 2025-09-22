@@ -187,6 +187,7 @@ namespace YasGMP.Models
 
         public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
         public virtual ICollection<Permission> Permissions { get; set; } = new List<Permission>();
+        public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
         public virtual ICollection<DelegatedPermission> DelegatedPermissions { get; set; } = new List<DelegatedPermission>();
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
         public virtual ICollection<DigitalSignature> DigitalSignatures { get; set; } = new List<DigitalSignature>();

@@ -397,28 +397,6 @@ namespace YasGMP.Data
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
-            modelBuilder.Entity<UserPermission>(entity =>
-            {
-                entity.ToTable("user_permissions");
-
-                entity.HasKey(up => new { up.UserId, up.PermissionId });
-
-                entity.HasOne(up => up.User)
-                    .WithMany()
-                    .HasForeignKey(up => up.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(up => up.Permission)
-                    .WithMany()
-                    .HasForeignKey(up => up.PermissionId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(up => up.AssignedBy)
-                    .WithMany()
-                    .HasForeignKey(up => up.AssignedById)
-                    .OnDelete(DeleteBehavior.SetNull);
-            });
-
             modelBuilder.Entity<UserRoleMapping>(entity =>
             {
                 entity.ToTable("user_roles");
@@ -458,10 +436,10 @@ namespace YasGMP.Data
                 .WithMany(p => p.Users)
                 .UsingEntity<UserPermission>(
                     j => j.HasOne(up => up.Permission)
-                        .WithMany()
+                        .WithMany(p => p.UserPermissions)
                         .HasForeignKey(up => up.PermissionId),
                     j => j.HasOne(up => up.User)
-                        .WithMany()
+                        .WithMany(u => u.UserPermissions)
                         .HasForeignKey(up => up.UserId));
 
             modelBuilder.Entity<User>()
@@ -983,7 +961,7 @@ namespace YasGMP.Data
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_up_by");
 
-                entity.HasOne<User>()
+                entity.HasOne(up => up.AssignedBy)
                     .WithMany()
                     .HasForeignKey(up => up.AssignedById)
                     .OnDelete(DeleteBehavior.SetNull);
