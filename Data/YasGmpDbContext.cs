@@ -1269,8 +1269,8 @@ namespace YasGMP.Data
                     .HasColumnName("date_close")
                     .HasColumnType("date");
                 entity.Property(e => e.Description).HasColumnName("description");
-                entity.Property(e => e.RelatedMachineId).HasColumnName("related_machine");
-                entity.Property(e => e.RelatedComponentId).HasColumnName("related_component");
+                entity.Property(e => e.RelatedMachineId).HasColumnName("related_machine_id");
+                entity.Property(e => e.RelatedComponentId).HasColumnName("related_component_id");
                 entity.Property(e => e.StatusRaw)
                     .HasColumnName("status")
                     .HasMaxLength(12);
