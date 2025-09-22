@@ -50,6 +50,12 @@ namespace YasGMP.Models
         [NotMapped]
         public bool IsWarehouseStockCritical { get; set; }
 
+        [NotMapped]
+        public int LowWarehouseCount { get; set; } = 0;
+
+        [NotMapped]
+        public int LinkedWorkOrdersCount { get; set; } = 0;
+
         private List<string> Split(string? raw) => string.IsNullOrWhiteSpace(raw)
             ? new List<string>()
             : raw!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
