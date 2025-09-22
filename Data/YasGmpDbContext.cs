@@ -1259,9 +1259,8 @@ namespace YasGMP.Data
                 entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.EventType)
+                entity.Property(e => e.EventTypeRaw)
                     .HasColumnName("event_type")
-                    .HasConversion<string>()
                     .HasMaxLength(14);
                 entity.Property(e => e.DateOpen)
                     .HasColumnName("date_open")
@@ -1272,9 +1271,8 @@ namespace YasGMP.Data
                 entity.Property(e => e.Description).HasColumnName("description");
                 entity.Property(e => e.RelatedMachineId).HasColumnName("related_machine");
                 entity.Property(e => e.RelatedComponentId).HasColumnName("related_component");
-                entity.Property(e => e.Status)
+                entity.Property(e => e.StatusRaw)
                     .HasColumnName("status")
-                    .HasConversion<string>()
                     .HasMaxLength(12);
                 entity.Property(e => e.Actions).HasColumnName("actions");
                 entity.Property(e => e.DocFile)
