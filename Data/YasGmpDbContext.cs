@@ -142,7 +142,6 @@ namespace YasGMP.Data
         public DbSet<ResponsibleParty> ResponsibleParties { get; set; }
         public DbSet<RiskAssessment> RiskAssessments { get; set; }
         public DbSet<RiskAssessmentAuditLog> RiskAssessmentAuditLogs { get; set; }
-        public DbSet<RiskWorkflowEntry> RiskWorkflowEntries { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<RoleAudit> RoleAudits { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }

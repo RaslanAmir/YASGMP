@@ -157,6 +157,7 @@ namespace YasGMP.Models
     /// <b>RiskWorkflowEntry</b> – Lightweight workflow history line for a risk assessment (for UI/export).
     /// Use DB audit tables for authoritative history; this is a convenience projection.
     /// </summary>
+    [NotMapped]
     public class RiskWorkflowEntry
     {
         /// <summary>UTC timestamp of the workflow event.</summary>
