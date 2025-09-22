@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YasGMP.Models;
+using YasGMP.Models.Enums;
 using WorkOrderActionType = YasGMP.Models.Enums.WorkOrderActionType;
 
 namespace YasGMP.Data
@@ -248,20 +249,45 @@ namespace YasGMP.Data
                 .HasForeignKey(a => a.ApprovedById)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            var photoTypeConverter = new ValueConverter<PhotoType, string>(
+                v => v switch
+                {
+                    PhotoType.Prije => "prije",
+                    PhotoType.Poslije => "poslije",
+                    PhotoType.Dokumentacija => "dokumentacija",
+                    _ => "drugo"
+                },
+                v => v?.ToLowerInvariant() switch
+                {
+                    "prije" => PhotoType.Prije,
+                    "poslije" => PhotoType.Poslije,
+                    "dokumentacija" => PhotoType.Dokumentacija,
+                    "drugo" => PhotoType.Drugo,
+                    _ => PhotoType.Drugo
+                });
+
             modelBuilder.Entity<Photo>()
-                .HasOne(p => p.UploadedBy)
+                .Property(p => p.Type)
+                .HasConversion(photoTypeConverter)
+                .HasMaxLength(32);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.WorkOrder)
+                .WithMany(wo => wo.Photos)
+                .HasForeignKey(p => p.WorkOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.Component)
+                .WithMany(c => c.Photos)
+                .HasForeignKey(p => p.ComponentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.Uploader)
                 .WithMany(u => u.UploadedPhotos)
-                .HasForeignKey(p => p.UploadedById);
-
-            modelBuilder.Entity<Photo>()
-                .HasOne(p => p.ApprovedBy)
-                .WithMany()
-                .HasForeignKey(p => p.ApprovedById);
-
-            modelBuilder.Entity<Photo>()
-                .HasOne(p => p.LastModifiedBy)
-                .WithMany()
-                .HasForeignKey(p => p.LastModifiedById);
+                .HasForeignKey(p => p.UploadedBy)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<SessionLog>()
                 .HasOne(sl => sl.User)

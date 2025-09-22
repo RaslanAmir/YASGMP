@@ -194,7 +194,7 @@ namespace YasGMP.Models
         public virtual ICollection<SessionLog> SessionLogs { get; set; } = new List<SessionLog>();
         public virtual ICollection<WorkOrder> CreatedWorkOrders { get; set; } = new List<WorkOrder>();
         public virtual ICollection<WorkOrder> AssignedWorkOrders { get; set; } = new List<WorkOrder>();
-        [InverseProperty(nameof(Photo.UploadedBy))]
+        [InverseProperty(nameof(Photo.Uploader))]
         public virtual ICollection<Photo> UploadedPhotos { get; set; } = new List<Photo>();
         public virtual ICollection<Attachment> UploadedAttachments { get; set; } = new List<Attachment>();
         public virtual ICollection<AdminActivityLog> AdminActivityLogs { get; set; } = new List<AdminActivityLog>();
