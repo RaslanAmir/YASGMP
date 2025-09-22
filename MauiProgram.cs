@@ -167,10 +167,13 @@ namespace YasGMP
                 // Attach diagnostics to the central DB service
                 var ctx = sp.GetService<DiagnosticContext>();
                 var tr  = sp.GetService<ITrace>();
+                var cfgRoot = sp.GetService<IConfiguration>();
                 if (ctx != null && tr != null) db.SetDiagnostics(ctx, tr);
                 // Set global fallbacks for ad-hoc DatabaseService instantiation
                 DatabaseService.GlobalDiagnosticContext = ctx;
                 DatabaseService.GlobalTrace = tr;
+                if (cfgRoot != null)
+                    DatabaseService.GlobalConfiguration = cfgRoot;
                 return db;
             });
             builder.Services.AddSingleton<AuditService>();

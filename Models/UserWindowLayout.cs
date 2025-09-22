@@ -38,6 +38,10 @@ namespace YasGMP.Models
         [Column("height")]
         public int Height { get; set; }
 
+        /// <summary>Gets or sets the serialized layout snapshot.</summary>
+        [Column("layout_xml")]
+        public string? LayoutXml { get; set; }
+
         /// <summary>Gets or sets the saved at.</summary>
         [Column("saved_at")]
         public DateTime SavedAt { get; set; } = DateTime.UtcNow;

@@ -69,6 +69,7 @@ namespace YasGMP.Services
             public int  Width { get; set; }
             public int  Height { get; set; }
             public DateTime SavedAtUtc { get; set; }
+            public string? LayoutXml { get; set; }
         }
 
         private async Task RestoreGeometryAsync(string key, Window window)
@@ -106,7 +107,8 @@ namespace YasGMP.Services
                 Width  = (int)Math.Round(window.Width),
                 Height = (int)Math.Round(window.Height),
 #endif
-                SavedAtUtc = DateTime.UtcNow
+                SavedAtUtc = DateTime.UtcNow,
+                LayoutXml = null
             };
 
             if (!await SaveToDbAsync(key, g).ConfigureAwait(false))
@@ -201,13 +203,14 @@ LIMIT 1;";
                 var db = new DatabaseService(connStr);
 
                 const string sql = @"
-INSERT INTO user_window_layouts (user_id, page_type, pos_x, pos_y, width, height, saved_at)
-VALUES (@u,@p,@x,@y,@w,@h,UTC_TIMESTAMP())
+INSERT INTO user_window_layouts (user_id, page_type, pos_x, pos_y, width, height, layout_xml, saved_at)
+VALUES (@u,@p,@x,@y,@w,@h,@layout,UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
 pos_x=VALUES(pos_x),
 pos_y=VALUES(pos_y),
 width=VALUES(width),
 height=VALUES(height),
+layout_xml=VALUES(layout_xml),
 saved_at=UTC_TIMESTAMP();";
 
                 var pars = new[]
@@ -217,7 +220,8 @@ saved_at=UTC_TIMESTAMP();";
                     new MySqlParameter("@x", (object?)g.X ?? DBNull.Value),
                     new MySqlParameter("@y", (object?)g.Y ?? DBNull.Value),
                     new MySqlParameter("@w", g.Width),
-                    new MySqlParameter("@h", g.Height)
+                    new MySqlParameter("@h", g.Height),
+                    new MySqlParameter("@layout", (object?)g.LayoutXml ?? DBNull.Value)
                 };
 
                 await db.ExecuteNonQueryAsync(sql, pars).ConfigureAwait(false);

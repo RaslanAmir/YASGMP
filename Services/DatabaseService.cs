@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Diagnostics;
 using YasGMP.Services.Database;
+using Microsoft.Extensions.Configuration;
 
 namespace YasGMP.Services
 {
@@ -19,7 +20,7 @@ namespace YasGMP.Services
         private DiagnosticContext? _diagCtx;
         private ITrace? _trace;
         private ShadowReplicator? _shadow;
-        
+
         /// <summary>Default command timeout (seconds) applied to all SQL commands.</summary>
         public int CommandTimeoutSeconds { get; set; } = 15;
 
@@ -44,13 +45,13 @@ namespace YasGMP.Services
         /// <summary>Global fallbacks for components created outside DI.</summary>
         public static DiagnosticContext? GlobalDiagnosticContext { get; set; }
         public static ITrace? GlobalTrace { get; set; }
+        public static IConfiguration? GlobalConfiguration { get; set; }
 
         private string? TryGetShadowConnFromConfig()
         {
             try
             {
-                var sp = Microsoft.Maui.Controls.Application.Current?.Handler?.MauiContext?.Services;
-                var cfg = sp?.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
+                var cfg = GlobalConfiguration ?? TryResolveMauiConfiguration();
                 var en = cfg? ["Diagnostics:DbShadow:Enabled"]; bool enabled = false;
                 if (!string.IsNullOrWhiteSpace(en)) bool.TryParse(en, out enabled);
                 if (!enabled) return null;
@@ -69,6 +70,25 @@ namespace YasGMP.Services
                 return string.Join(';', parts);
             }
             catch { return null; }
+        }
+
+        private static IConfiguration? TryResolveMauiConfiguration()
+        {
+            try
+            {
+                var appType = Type.GetType("Microsoft.Maui.Controls.Application, Microsoft.Maui.Controls");
+                if (appType == null) return null;
+                var current = appType.GetProperty("Current")?.GetValue(null);
+                if (current == null) return null;
+                var handler = current.GetType().GetProperty("Handler")?.GetValue(current);
+                var mauiContext = handler?.GetType().GetProperty("MauiContext")?.GetValue(handler);
+                var services = mauiContext?.GetType().GetProperty("Services")?.GetValue(mauiContext) as IServiceProvider;
+                return services?.GetService(typeof(IConfiguration)) as IConfiguration;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         // ==============================================================
