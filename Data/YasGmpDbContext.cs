@@ -864,7 +864,7 @@ namespace YasGMP.Data
                     .HasConstraintName("fk_users_last_modified_by");
 
                 entity.HasOne<Role>()
-                    .WithMany(r => r.Users)
+                    .WithMany()
                     .HasForeignKey(u => u.RoleId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_users_role");
