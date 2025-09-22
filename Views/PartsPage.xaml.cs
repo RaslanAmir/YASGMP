@@ -2,12 +2,11 @@
 //  File: Views/PartsPage.xaml.cs
 //  Project: YasGMP
 //  Summary:
-//      Pregled/unos/ureÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ivanje/brisanje rezervnih dijelova (Parts) uz MySQL backend.
-//      Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ UI-thread safe (MainThread + SafeNavigator) Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚„Ă˘â‚¬¦Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…ÄąĹź izbjegnute WinUI 0x8001010E greĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇke
-//      Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ Robusno dohvaÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚â€ąĂ˘â‚¬Ë‡anje konekcijskog stringa iz App.AppConfig
-//      Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ Sigurne konverzije NULL vrijednosti i parametri preko MySqlConnector
-//      Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ Potpuna XML dokumentacija za IntelliSense
-// ==============================================================================
+//      Pregled, unos, uređivanje i brisanje rezervnih dijelova (Parts) uz MySQL backend.
+//      UI-thread safe (MainThread + SafeNavigator) ažuriranja kolekcije kako bi se izbjegle WinUI 0x8001010E greške.
+//      Robusno dohvaćanje konekcijskog stringa iz App.AppConfig.
+//      Sigurne konverzije NULL vrijednosti i parametri preko MySqlConnector.
+//      Potpuna XML dokumentacija za IntelliSense.
 
 using System;
 using System.Collections.Generic;
@@ -25,9 +24,9 @@ using ClosedXML.Excel;
 namespace YasGMP.Views
 {
     /// <summary>
-    /// <b>PartsPage</b> Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚â€ąĂ˘â‚¬Ë‡Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ă„‚Ă˘â‚¬ĹľÄ‚„Ă˘â‚¬¦Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…ÄąĹź pregled, unos, ureÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ivanje i brisanje rezervnih dijelova (Parts).
-    /// Povezano s MySQL bazom preko <see cref="DatabaseService"/>. Svi UI dijalozi i aĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚„Ă„Äľuriranja
-    /// izvrĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇavaju se na glavnoj niti putem <see cref="MainThread"/> kako bi se izbjegle WinUI
+    /// <b>PartsPage</b> omogućuje pregled, unos, uređivanje i brisanje rezervnih dijelova (Parts).
+    /// Povezana je s MySQL bazom preko <see cref="DatabaseService"/>. Sva UI ažuriranja i dijalozi
+    /// izvršavaju se na glavnoj niti putem <see cref="MainThread"/> kako bi se izbjegle WinUI
     /// <c>COMException 0x8001010E</c> situacije.
     /// </summary>
     public partial class PartsPage : ContentPage
@@ -46,7 +45,7 @@ namespace YasGMP.Views
         private readonly DatabaseService _dbService;
 
         /// <summary>
-        /// Inicijalizira stranicu i uÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬Ă‚¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¤itava dijelove. Sigurno dohvaÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚â€ąĂ˘â‚¬Ë‡a konekcijski string.
+        /// Inicijalizira stranicu, učitava dijelove i sigurno dohvaća konekcijski string.
         /// </summary>
         /// <exception cref="InvalidOperationException">Ako aplikacija ili konekcijski string nisu dostupni.</exception>
         public PartsPage(DatabaseService dbService)
@@ -68,7 +67,7 @@ namespace YasGMP.Views
         }
 
         /// <summary>
-        /// UÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬Ă‚¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¤itava sve dijelove iz baze i aĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚„Ă„Äľurira kolekciju <see cref="Parts"/> na glavnoj niti.
+        /// Učitava sve dijelove iz baze i ažurira kolekciju <see cref="Parts"/> na glavnoj niti.
         /// </summary>
         private async Task LoadPartsAsync()
         {
@@ -112,7 +111,7 @@ namespace YasGMP.Views
                 }
                 catch { }
 
-                // AĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚„Ă„Äľuriraj UI kolekciju na glavnoj niti
+                // Ažuriraj UI kolekciju na glavnoj niti
                 _all.Clear();
                 _all.AddRange(list);
                 await MainThread.InvokeOnMainThreadAsync(() => { 
@@ -144,7 +143,7 @@ namespace YasGMP.Views
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("GreĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇka", $"UÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤itavanje dijelova nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Učitavanje dijelova nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -178,12 +177,12 @@ namespace YasGMP.Views
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("GreĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇka", $"Spremanje dijela nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Spremanje dijela nije uspjelo: {ex.Message}", "OK");
             }
         }
 
         /// <summary>
-        /// Otvara formu za ureÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ivanje postojeÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚â€ąĂ˘â‚¬Ë‡eg dijela, validira i aĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚„Ă„Äľurira zapis u bazi.
+        /// Otvara formu za uređivanje postojećeg dijela, validira unos i ažurira zapis u bazi.
         /// </summary>
         private async void OnEditPartClicked(object? sender, EventArgs e)
         {
@@ -191,7 +190,7 @@ namespace YasGMP.Views
             {
                 if (PartListView.SelectedItem is not Part selected)
                 {
-                    await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite rezervni dio iz liste za ureÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬Ä…Ä‚â€šĂ‚ÂÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇĂ„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¬Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Âivanje.", "OK");
+                    await SafeNavigator.ShowAlertAsync("Obavijest", "Molimo odaberite rezervni dio iz liste za uređivanje.", "OK");
                     return;
                 }
 
@@ -232,12 +231,12 @@ namespace YasGMP.Views
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("GreĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇka", $"AĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ„Äľuriranje dijela nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Ažuriranje dijela nije uspjelo: {ex.Message}", "OK");
             }
         }
 
         /// <summary>
-        /// BriĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇe odabrani dio iz baze nakon potvrde korisnika.
+        /// Briše odabrani dio iz baze nakon potvrde korisnika.
         /// </summary>
         private async void OnDeletePartClicked(object? sender, EventArgs e)
         {
@@ -249,7 +248,7 @@ namespace YasGMP.Views
                     return;
                 }
 
-                bool confirm = await SafeNavigator.ConfirmAsync("Potvrda brisanja", $"Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąÄľelite li izbrisati dio: {selected.Name}?", "Da", "Ne");
+                bool confirm = await SafeNavigator.ConfirmAsync("Potvrda brisanja", $"Želite li izbrisati dio: {selected.Name}?", "Da", "Ne");
                 if (!confirm) return;
 
                 const string sql = "DELETE FROM parts WHERE id=@id";
@@ -260,7 +259,7 @@ namespace YasGMP.Views
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("GreĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇka", $"Brisanje dijela nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Brisanje dijela nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -350,8 +349,8 @@ namespace YasGMP.Views
                 }
 
                 var qtyStr = await MainThread.InvokeOnMainThreadAsync(() => DisplayPromptAsync(
-                    increase ? "+ PoveÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬Ä…Ä‚â€šĂ‚ÂÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇĂ„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¬Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬Ă„â€¦Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€ąĂ˘â‚¬Ë‡aj zalihu" : "- Smanji zalihu",
-                    "Unesi koliÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤inu:",
+                    increase ? "+ Povećaj zalihu" : "- Smanji zalihu",
+                    "Unesi količinu:",
                     keyboard: Keyboard.Numeric));
                 if (string.IsNullOrWhiteSpace(qtyStr) || !int.TryParse(qtyStr, out int qty) || qty <= 0)
                     return;
@@ -378,7 +377,7 @@ namespace YasGMP.Views
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("GreĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇka", $"Promjena zalihe nije uspjela: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Promjena zalihe nije uspjela: {ex.Message}", "OK");
             }
         }
 
@@ -441,20 +440,20 @@ namespace YasGMP.Views
             }
             catch (Exception ex)
             {
-                await SafeNavigator.ShowAlertAsync("GreĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇka", $"Export nije uspio: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Export nije uspio: {ex.Message}", "OK");
             }
         }
 
         /// <summary>
-        /// Jednostavna forma preko DisplayPromptAsync za unos/ureÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚ivanje.
-        /// Svi promptovi se izvrĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇavaju na glavnoj niti kako bi se izbjegle COM/WinUI greĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚‚Ă‚¦Ă„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚„Ă˘â‚¬¦Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ă„‚Ă˘â‚¬Ä…Ä‚ËĂ˘‚¬Ă‹â€ˇke.
+        /// Jednostavna forma preko DisplayPromptAsync za unos ili uređivanje dijela.
+        /// Svi promptovi se izvršavaju na glavnoj niti kako bi se izbjegle COM/WinUI greške.
         /// </summary>
-        /// <param name="part">Model koji se puni/ureÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚uje.</param>
+        /// <param name="part">Model koji se puni ili uređuje.</param>
         /// <param name="title">Naslov forme.</param>
-        /// <returns><c>true</c> ako je unos valjan i potvrÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚en; inaÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬Ă‚¦Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¤e <c>false</c>.</returns>
+        /// <returns><c>true</c> ako je unos valjan i potvrđen; inače <c>false</c>.</returns>
         private async Task<bool> ShowPartFormAsync(Part part, string title)
         {
-            // Lokalni pomoÄ‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬ÄąÄľĂ„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇÄ‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘‚¬ÄąË‡Ä‚‚Ă‚¬Ä‚„Ă„…Ä‚„Ă„ÄľĂ„‚Ă˘â‚¬ĹľÄ‚ËĂ˘‚¬ÄąË‡Ă„‚Ă˘â‚¬Ä…Ä‚‚Ă‚Ä‚„Ă˘â‚¬ĹˇÄ‚â€ąĂ‚Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ă„Ä…Ă‹â€ˇĂ„‚Ă˘â‚¬ĹˇÄ‚‚Ă‚¬Ä‚„Ă˘â‚¬ĹˇÄ‚ËĂ˘‚¬Ă„…Ă„‚Ă‹Ä‚ËĂ˘â‚¬ĹˇĂ‚¬Ä‚â€ąĂ˘â‚¬Ë‡nik: UI-safe prompt
+            // Lokalni pomoćnik: UI-safe prompt
             Task<string?> PromptAsync(string caption, string msg, string? initial = null) =>
                 MainThread.InvokeOnMainThreadAsync(() => DisplayPromptAsync(caption, msg, initialValue: initial));
 
@@ -466,7 +465,7 @@ namespace YasGMP.Views
             if (name is null) return false;
             part.Name = name;
 
-            var supplier = await PromptAsync(title, "DobavljaÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤:", part.Supplier);
+            var supplier = await PromptAsync(title, "Dobavljač:", part.Supplier);
             if (supplier is null) return false;
             part.Supplier = supplier;
 
@@ -476,14 +475,14 @@ namespace YasGMP.Views
             else
                 part.Price = null; // prefer null nad 0 kad nije unio vrijednost
 
-            var stockStr = await PromptAsync(title, "KoliÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă‹â€ˇÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ä‚â€žĂ„â€¦Ä‚â€žĂ„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤ina na skladiĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇtu:", part.Stock.HasValue && part.Stock.Value > 0 ? part.Stock.Value.ToString(CultureInfo.InvariantCulture) : string.Empty);
+            var stockStr = await PromptAsync(title, "Količina na skladištu:", part.Stock.HasValue && part.Stock.Value > 0 ? part.Stock.Value.ToString(CultureInfo.InvariantCulture) : string.Empty);
             if (!string.IsNullOrWhiteSpace(stockStr) && int.TryParse(stockStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var stock))
                 part.Stock = stock;
             else
                 part.Stock = 0;
 
-            part.Location = await PromptAsync(title, "Lokacija skladiĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€šĂ‚Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬Ä…Ä‚ËĂ˘â€šÂ¬Ă‹â€ˇta:", part.Location) ?? part.Location;
-            var minStr = await PromptAsync(title, "Minimalna koliĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬Ä…Ă„Ä…Ă„â€žĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąÄľina (alarm):", part.MinStockAlert.HasValue ? part.MinStockAlert.Value.ToString(CultureInfo.InvariantCulture) : string.Empty);
+            part.Location = await PromptAsync(title, "Lokacija skladišta:", part.Location) ?? part.Location;
+            var minStr = await PromptAsync(title, "Minimalna količina (alarm):", part.MinStockAlert.HasValue ? part.MinStockAlert.Value.ToString(CultureInfo.InvariantCulture) : string.Empty);
 
             if (!string.IsNullOrWhiteSpace(minStr) && int.TryParse(minStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var minq))
 
@@ -494,7 +493,7 @@ namespace YasGMP.Views
                 part.MinStockAlert = null;
 
 
-            part.Location = await PromptAsync(title, "Lokacija skladiĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬Ä…Ă„Ä…Ă„â€žĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ä‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąÄľta:", part.Location) ?? part.Location;
+            part.Location = await PromptAsync(title, "Lokacija skladišta:", part.Location) ?? part.Location;
 
             part.Image    = await PromptAsync(title, "Putanja ili ime slike:", part.Image) ?? part.Image;
 
