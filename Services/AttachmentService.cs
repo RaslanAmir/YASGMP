@@ -124,17 +124,22 @@ namespace YasGMP.Services
                 FileSize = 0,
                 EntityType = request.EntityType,
                 EntityId = request.EntityId,
-                FileHash = string.Empty,
+                Sha256 = string.Empty,
                 UploadedAt = DateTime.UtcNow,
                 UploadedById = request.UploadedById,
+                TenantId = request.TenantId,
                 Status = _cryptoProvider.IsEncryptionEnabled ? $"encrypted:{_encryptionOptions.KeyId}" : "uploaded",
                 Notes = AppendNote(request.Notes, request.Reason),
                 IpAddress = request.SourceIp,
-                DeviceInfo = request.SourceHost
+                DeviceInfo = request.SourceHost,
+                Encrypted = _cryptoProvider.IsEncryptionEnabled
             };
 
             long totalBytes = 0;
             string hashHex = string.Empty;
+            MalwareScanner.MalwareScanResult malware = default;
+            AttachmentLink? link = null;
+            RetentionPolicy? retention = null;
 
             try
             {
@@ -181,55 +186,59 @@ namespace YasGMP.Services
                 sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
                 hashHex = Convert.ToHexString(sha.Hash ?? Array.Empty<byte>());
 
-                var malware = await _malwareScanner.CompleteAsync(malwareContext, sanitizedName, hashHex, totalBytes, token).ConfigureAwait(false);
+                malware = await _malwareScanner.CompleteAsync(malwareContext, sanitizedName, hashHex, totalBytes, token).ConfigureAwait(false);
 
-                attachment.FileHash = hashHex;
+                attachment.Sha256 = hashHex;
                 attachment.FileSize = totalBytes;
                 attachment.Status = malware.IsClean
                     ? (_cryptoProvider.IsEncryptionEnabled ? $"encrypted:{_encryptionOptions.KeyId}" : "uploaded")
                     : "quarantined";
+                attachment.Encrypted = _cryptoProvider.IsEncryptionEnabled;
 
-                await context.SaveChangesAsync(token).ConfigureAwait(false);
+                var duplicate = await FindDuplicateInternalAsync(context, hashHex, totalBytes, attachment.Id, token).ConfigureAwait(false);
+                var targetAttachment = attachment;
+                bool dedupHit = duplicate is not null;
+                int newAttachmentId = attachment.Id;
 
-                var link = new AttachmentLink
+                if (dedupHit)
                 {
-                    AttachmentId = attachment.Id,
-                    EntityType = request.EntityType,
-                    EntityId = request.EntityId,
-                    LinkedAt = DateTime.UtcNow,
-                    LinkedById = request.UploadedById
-                };
-                await context.AttachmentLinks.AddAsync(link, token).ConfigureAwait(false);
+                    targetAttachment = duplicate!;
+                    context.Attachments.Remove(attachment);
+                }
 
-                var retention = new RetentionPolicy
-                {
-                    AttachmentId = attachment.Id,
-                    PolicyName = request.RetentionPolicyName ?? "default",
-                    RetainUntil = request.RetainUntil,
-                    CreatedAt = DateTime.UtcNow,
-                    CreatedById = request.UploadedById,
-                    Notes = request.Notes
-                };
+                link = await UpsertLinkAsync(context, targetAttachment.Id, request, token).ConfigureAwait(false);
+                retention = CreateRetentionPolicy(targetAttachment.Id, request);
                 await context.RetentionPolicies.AddAsync(retention, token).ConfigureAwait(false);
 
                 var encryptionNote = _cryptoProvider.CompleteEncryption(encryptionSession);
-                await LogAuditAsync(context, attachment.Id, request.UploadedById, "UPLOAD", request.SourceIp, request.SourceHost, request.Reason, token).ConfigureAwait(false);
-                await LogAuditAsync(context, attachment.Id, request.UploadedById, "MALWARE_SCAN", request.SourceIp, request.SourceHost, $"engine={malware.Engine}; result={(malware.IsClean ? "clean" : "blocked")}", token).ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(encryptionNote))
+                if (!dedupHit)
                 {
-                    await LogAuditAsync(context, attachment.Id, request.UploadedById, "ENCRYPTION", request.SourceIp, request.SourceHost, encryptionNote, token).ConfigureAwait(false);
+                    attachment.EncryptionMetadata = encryptionNote;
                 }
 
-                var duplicate = await FindDuplicateInternalAsync(context, hashHex, totalBytes, attachment.Id, token).ConfigureAwait(false);
-                if (duplicate is not null)
+                string? malwareNote = $"engine={malware.Engine ?? "stub"}; result={(malware.IsClean ? "clean" : "blocked")}";
+
+                if (!dedupHit)
                 {
-                    await LogAuditAsync(context, attachment.Id, request.UploadedById, "DEDUP_MATCH", request.SourceIp, request.SourceHost, $"existing={duplicate.Id}", token).ConfigureAwait(false);
+                    await LogAuditAsync(context, targetAttachment.Id, request.UploadedById, "UPLOAD", request.SourceIp, request.SourceHost, request.Reason, token).ConfigureAwait(false);
+                }
+
+                await LogAuditAsync(context, targetAttachment.Id, request.UploadedById, "MALWARE_SCAN", request.SourceIp, request.SourceHost, malwareNote, token).ConfigureAwait(false);
+
+                if (!dedupHit && !string.IsNullOrWhiteSpace(encryptionNote))
+                {
+                    await LogAuditAsync(context, targetAttachment.Id, request.UploadedById, "ENCRYPTION", request.SourceIp, request.SourceHost, encryptionNote, token).ConfigureAwait(false);
+                }
+
+                if (dedupHit)
+                {
+                    await LogAuditAsync(context, targetAttachment.Id, request.UploadedById, "DEDUP_LINK", request.SourceIp, request.SourceHost, $"existing={targetAttachment.Id}; replaced={newAttachmentId}", token).ConfigureAwait(false);
                 }
 
                 await context.SaveChangesAsync(token).ConfigureAwait(false);
                 await transaction.CommitAsync(token).ConfigureAwait(false);
 
-                return new AttachmentUploadResult(attachment, link, retention);
+                return new AttachmentUploadResult(targetAttachment, link, retention);
             }
             finally
             {
@@ -251,7 +260,7 @@ namespace YasGMP.Services
                 await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
                 return await context.Attachments
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(a => a.FileHash == sha256, token)
+                    .FirstOrDefaultAsync(a => a.Sha256 == sha256, token)
                     .ConfigureAwait(false);
             }
             catch (Exception ex) when (TryGetMySqlException(ex, out var mysql) && mysql is not null && IsSchemaMissing(mysql))
@@ -276,7 +285,7 @@ namespace YasGMP.Services
                 await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
                 return await context.Attachments
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(a => a.FileHash == sha256 && a.FileSize == fileSize, token)
+                    .FirstOrDefaultAsync(a => a.Sha256 == sha256 && a.FileSize == fileSize, token)
                     .ConfigureAwait(false);
             }
             catch (Exception ex) when (TryGetMySqlException(ex, out var mysql) && mysql is not null && IsSchemaMissing(mysql))
@@ -479,11 +488,59 @@ namespace YasGMP.Services
             return $"{existing} | {addition}";
         }
 
+        private static async Task<AttachmentLink> UpsertLinkAsync(YasGmpDbContext context, int attachmentId, AttachmentUploadRequest request, CancellationToken token)
+        {
+            var existing = await context.AttachmentLinks
+                .FirstOrDefaultAsync(l => l.AttachmentId == attachmentId && l.EntityType == request.EntityType && l.EntityId == request.EntityId, token)
+                .ConfigureAwait(false);
+
+            if (existing is not null)
+            {
+                existing.LinkedAt = DateTime.UtcNow;
+                existing.LinkedById = request.UploadedById;
+                return existing;
+            }
+
+            var link = new AttachmentLink
+            {
+                AttachmentId = attachmentId,
+                EntityType = request.EntityType,
+                EntityId = request.EntityId,
+                LinkedAt = DateTime.UtcNow,
+                LinkedById = request.UploadedById
+            };
+
+            await context.AttachmentLinks.AddAsync(link, token).ConfigureAwait(false);
+            return link;
+        }
+
+        private static RetentionPolicy CreateRetentionPolicy(int attachmentId, AttachmentUploadRequest request)
+        {
+            string deleteMode = string.IsNullOrWhiteSpace(request.DeleteMode)
+                ? "soft"
+                : request.DeleteMode!.Trim().ToLowerInvariant();
+
+            return new RetentionPolicy
+            {
+                AttachmentId = attachmentId,
+                PolicyName = string.IsNullOrWhiteSpace(request.RetentionPolicyName) ? "default" : request.RetentionPolicyName!,
+                RetainUntil = request.RetainUntil,
+                MinRetainDays = request.MinRetainDays,
+                MaxRetainDays = request.MaxRetainDays,
+                LegalHold = request.LegalHold,
+                DeleteMode = deleteMode,
+                ReviewRequired = request.ReviewRequired,
+                CreatedAt = DateTime.UtcNow,
+                CreatedById = request.UploadedById,
+                Notes = request.Notes
+            };
+        }
+
         private static async Task<Attachment?> FindDuplicateInternalAsync(YasGmpDbContext context, string hashHex, long expectedSize, int currentAttachmentId, CancellationToken token)
         {
             return await context.Attachments
                 .AsNoTracking()
-                .Where(a => a.FileHash == hashHex && a.FileSize == expectedSize && a.Id != currentAttachmentId)
+                .Where(a => a.Sha256 == hashHex && a.FileSize == expectedSize && a.Id != currentAttachmentId)
                 .OrderBy(a => a.Id)
                 .FirstOrDefaultAsync(token)
                 .ConfigureAwait(false);
@@ -611,7 +668,7 @@ namespace YasGMP.Services
                 FileName = fileName,
                 FilePath = filePath,
                 FileType = GetString(row, "content_type"),
-                FileHash = GetString(row, "sha256"),
+                Sha256 = GetString(row, "sha256"),
                 UploadedById = GetNullableInt(row, "uploaded_by"),
                 UploadedAt = GetNullableDateTime(row, "uploaded_at") ?? DateTime.UtcNow,
                 EntityType = entityType ?? GetString(row, "entity_type"),

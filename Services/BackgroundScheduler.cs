@@ -23,10 +23,12 @@ namespace YasGMP.Services
         private readonly DatabaseService _db;
         private readonly Timer _timer;
         private bool _running;
+        private readonly AttachmentRetentionEnforcer _retention;
 
         public BackgroundScheduler(DatabaseService db)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
+            _retention = new AttachmentRetentionEnforcer(_db);
             // fire once after short delay, then every 30 minutes
             _timer = new Timer(async _ => await SafeRunAsync().ConfigureAwait(false), null,
                                dueTime: TimeSpan.FromSeconds(15),
@@ -46,6 +48,7 @@ namespace YasGMP.Services
                 await RunCalibrationAlertsAsync(cts.Token).ConfigureAwait(false);
                 await RunPqRenewalAlertsAsync(cts.Token).ConfigureAwait(false);
                 await RunLowStockAlertsAsync(cts.Token).ConfigureAwait(false);
+                await _retention.RunOnceAsync(cts.Token).ConfigureAwait(false);
             }
             catch
             {

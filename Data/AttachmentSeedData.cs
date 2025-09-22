@@ -40,7 +40,10 @@ namespace YasGMP.Data
                 {
                     AttachmentId = id,
                     PolicyName = "legacy-default",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    DeleteMode = "soft",
+                    LegalHold = false,
+                    ReviewRequired = false
                 });
             }
 

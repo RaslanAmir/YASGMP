@@ -26,6 +26,22 @@ namespace YasGMP.Models
         [Column("retain_until")]
         public DateTime? RetainUntil { get; set; }
 
+        [Column("min_retain_days")]
+        public int? MinRetainDays { get; set; }
+
+        [Column("max_retain_days")]
+        public int? MaxRetainDays { get; set; }
+
+        [Column("legal_hold")]
+        public bool LegalHold { get; set; }
+
+        [Column("delete_mode")]
+        [StringLength(32)]
+        public string DeleteMode { get; set; } = "soft";
+
+        [Column("review_required")]
+        public bool ReviewRequired { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

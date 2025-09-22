@@ -95,10 +95,10 @@ namespace YasGMP.Models
         /// <summary>
         /// SHA256/SHA512 or other cryptographic hash of file (compliance, e-sign).
         /// </summary>
-        [StringLength(128)]
-        [Column("file_hash")]
-        [Display(Name = "File Hash")]
-        public string? FileHash { get; set; }
+        [StringLength(64)]
+        [Column("sha256")]
+        [Display(Name = "SHA-256 Hash")]
+        public string? Sha256 { get; set; }
 
         /// <summary>
         /// Timestamp when the file was uploaded (audit/forensics).
@@ -118,6 +118,18 @@ namespace YasGMP.Models
         /// </summary>
         [ForeignKey(nameof(UploadedById))]
         public virtual User? UploadedBy { get; set; }
+
+        /// <summary>
+        /// Optional tenant that owns the attachment when multi-tenancy is enabled.
+        /// </summary>
+        [Column("tenant_id")]
+        public int? TenantId { get; set; }
+
+        /// <summary>
+        /// Navigation property to the owning tenant.
+        /// </summary>
+        [ForeignKey(nameof(TenantId))]
+        public virtual Tenant? Tenant { get; set; }
 
         /// <summary>
         /// Approval status (GMP-controlled documents).
@@ -193,6 +205,19 @@ namespace YasGMP.Models
         public string? Status { get; set; }
 
         /// <summary>
+        /// Indicates whether the attachment payload is encrypted at rest.
+        /// </summary>
+        [Column("encrypted")]
+        [Display(Name = "Encrypted")]
+        public bool Encrypted { get; set; }
+
+        /// <summary>
+        /// Optional serialized encryption metadata (algorithm, key id, chunks, etc.).
+        /// </summary>
+        [Column("encryption_metadata")]
+        public string? EncryptionMetadata { get; set; }
+
+        /// <summary>
         /// Optional comments or notes about the attachment (legacy compatibility).
         /// </summary>
         [StringLength(255)]
@@ -219,6 +244,12 @@ namespace YasGMP.Models
         /// </summary>
         [Column("is_deleted")]
         public bool IsDeleted { get; set; } = false;
+
+        /// <summary>
+        /// Timestamp when the record was soft deleted by retention policies.
+        /// </summary>
+        [Column("soft_deleted_at")]
+        public DateTime? SoftDeletedAt { get; set; }
 
         // ==================== BONUS/ADVANCED EXTENSIBILITY FIELDS ====================
 
@@ -259,10 +290,12 @@ namespace YasGMP.Models
                 EntityId = this.EntityId,
                 FileContent = this.FileContent != null ? (byte[])this.FileContent.Clone() : null,
                 OCRText = this.OCRText,
-                FileHash = this.FileHash,
+                Sha256 = this.Sha256,
                 UploadedAt = this.UploadedAt,
                 UploadedById = this.UploadedById,
                 UploadedBy = this.UploadedBy,
+                TenantId = this.TenantId,
+                Tenant = this.Tenant,
                 IsApproved = this.IsApproved,
                 ApprovedById = this.ApprovedById,
                 ApprovedBy = this.ApprovedBy,
@@ -273,10 +306,13 @@ namespace YasGMP.Models
                 DeviceInfo = this.DeviceInfo,
                 SessionId = this.SessionId,
                 Status = this.Status,
+                Encrypted = this.Encrypted,
+                EncryptionMetadata = this.EncryptionMetadata,
                 Note = this.Note,
                 Notes = this.Notes,
                 ChangeVersion = this.ChangeVersion,
                 IsDeleted = this.IsDeleted,
+                SoftDeletedAt = this.SoftDeletedAt,
                 AiScore = this.AiScore,
                 ChainId = this.ChainId,
                 VersionUid = this.VersionUid
