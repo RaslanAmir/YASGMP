@@ -1,0 +1,18 @@
+<UserControl x:Class="YasGMP.Wpf.Views.ModuleTreeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="400"
+             d:DesignWidth="260">
+    <Grid>
+        <TreeView ItemsSource="{Binding Modules}" Margin="8">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type vm:ModuleNodeViewModel}" ItemsSource="{Binding Children}" xmlns:vm="clr-namespace:YasGMP.Wpf.ViewModels">
+                    <TextBlock Text="{Binding Name}" />
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+    </Grid>
+</UserControl>

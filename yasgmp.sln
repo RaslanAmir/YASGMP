@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "yasgmp", "yasgmp.csproj", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasGMP.Tests", "YasGMP.Tests\YasGMP.Tests.csproj", "{C1CF9561-4A6F-4E37-AD38-D57E7196C56D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasGMP.Wpf", "YasGMP.Wpf\YasGMP.Wpf.csproj", "{8FF09402-DFC2-4029-9A9A-1F88C4358FAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,9 +21,13 @@ Global
 		{786C8D2B-F38C-8FEA-E459-576BAF66F464}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C1CF9561-4A6F-4E37-AD38-D57E7196C56D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C1CF9561-4A6F-4E37-AD38-D57E7196C56D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C1CF9561-4A6F-4E37-AD38-D57E7196C56D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C1CF9561-4A6F-4E37-AD38-D57E7196C56D}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+                {C1CF9561-4A6F-4E37-AD38-D57E7196C56D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {C1CF9561-4A6F-4E37-AD38-D57E7196C56D}.Release|Any CPU.Build.0 = Release|Any CPU
+                {8FF09402-DFC2-4029-9A9A-1F88C4358FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {8FF09402-DFC2-4029-9A9A-1F88C4358FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {8FF09402-DFC2-4029-9A9A-1F88C4358FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {8FF09402-DFC2-4029-9A9A-1F88C4358FAE}.Release|Any CPU.Build.0 = Release|Any CPU
+        EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
