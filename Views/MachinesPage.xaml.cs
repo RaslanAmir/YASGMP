@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading.Tasks;
 using System.IO;
+using System.Linq;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
@@ -31,8 +32,9 @@ namespace YasGMP.Views
         private readonly CodeGeneratorService _codeService;
         private readonly QRCodeService _qrService;
         private readonly IAttachmentService _attachmentService;
+        private readonly AuthService _authService;
 
-        public MachinesPage(DatabaseService dbService, CodeGeneratorService codeService, QRCodeService qrService, IAttachmentService attachmentService)
+        public MachinesPage(DatabaseService dbService, CodeGeneratorService codeService, QRCodeService qrService, IAttachmentService attachmentService, AuthService authService)
         {
             InitializeComponent();
 
@@ -40,6 +42,7 @@ namespace YasGMP.Views
             _codeService = codeService ?? throw new ArgumentNullException(nameof(codeService));
             _qrService = qrService ?? throw new ArgumentNullException(nameof(qrService));
             _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+            _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             BindingContext = this;
 
             // One-time DB safety net: ensure triggers cannot null-out machines.code
@@ -54,7 +57,8 @@ namespace YasGMP.Views
                 ServiceLocator.GetRequiredService<DatabaseService>(),
                 ServiceLocator.GetRequiredService<CodeGeneratorService>(),
                 ServiceLocator.GetRequiredService<QRCodeService>(),
-                ServiceLocator.GetRequiredService<IAttachmentService>())
+                ServiceLocator.GetRequiredService<IAttachmentService>(),
+                ServiceLocator.GetRequiredService<AuthService>())
         {
         }
 
@@ -118,26 +122,49 @@ namespace YasGMP.Views
                 // Save any picked documents
                 if (newMachine.LinkedDocuments?.Count > 0)
                 {
-                    foreach (var path in newMachine.LinkedDocuments)
+                    var audit = new List<string>();
+                    foreach (var path in newMachine.LinkedDocuments.ToList())
                     {
                         try
                         {
-                            using var fs = File.OpenRead(path);
+                            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                                continue;
+
+                            await using var fs = File.OpenRead(path);
                             string name = Path.GetFileName(path);
-                            await _attachmentService.UploadAsync(fs, new AttachmentUploadRequest
+                            var upload = await _attachmentService.UploadAsync(fs, new AttachmentUploadRequest
                             {
                                 FileName = name,
                                 ContentType = null,
                                 EntityType = "Machine",
                                 EntityId = newId,
-                                UploadedById = null,
+                                UploadedById = _authService.CurrentUser?.Id,
                                 Notes = "Machine document",
                                 Reason = "machine-doc-upload",
-                                SourceIp = "ui",
-                                SourceHost = Environment.MachineName
+                                SourceIp = _authService.CurrentIpAddress,
+                                SourceHost = _authService.CurrentDeviceInfo
                             }).ConfigureAwait(false);
+
+                            audit.Add($"{upload.Attachment.FileName} → {upload.Attachment.Status ?? "uploaded"}");
+
+                            if (IsIntegrityAlarm(upload.Attachment))
+                            {
+                                await SafeNavigator.ShowAlertAsync(
+                                    "Integrity warning",
+                                    $"Attachment '{upload.Attachment.FileName}' reported a hash or integrity alarm after upload.").ConfigureAwait(false);
+                            }
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            await SafeNavigator.ShowAlertAsync("Greška", ex.Message).ConfigureAwait(false);
+                        }
+                    }
+
+                    newMachine.LinkedDocuments.Clear();
+
+                    if (audit.Count > 0)
+                    {
+                        await SafeNavigator.ShowAlertAsync("Upload audit", string.Join("\n", audit)).ConfigureAwait(false);
                     }
                 }
 
@@ -191,26 +218,49 @@ namespace YasGMP.Views
                 // Persist newly picked documents (if any)
                 if (m.LinkedDocuments?.Count > 0)
                 {
-                    foreach (var path in m.LinkedDocuments)
+                    var audit = new List<string>();
+                    foreach (var path in m.LinkedDocuments.ToList())
                     {
                         try
                         {
-                            using var fs = File.OpenRead(path);
+                            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                                continue;
+
+                            await using var fs = File.OpenRead(path);
                             string name = Path.GetFileName(path);
-                            await _attachmentService.UploadAsync(fs, new AttachmentUploadRequest
+                            var upload = await _attachmentService.UploadAsync(fs, new AttachmentUploadRequest
                             {
                                 FileName = name,
                                 ContentType = null,
                                 EntityType = "Machine",
                                 EntityId = m.Id,
-                                UploadedById = null,
+                                UploadedById = _authService.CurrentUser?.Id,
                                 Notes = "Machine document",
                                 Reason = "machine-doc-upload",
-                                SourceIp = "ui",
-                                SourceHost = Environment.MachineName
+                                SourceIp = _authService.CurrentIpAddress,
+                                SourceHost = _authService.CurrentDeviceInfo
                             }).ConfigureAwait(false);
+
+                            audit.Add($"{upload.Attachment.FileName} → {upload.Attachment.Status ?? "uploaded"}");
+
+                            if (IsIntegrityAlarm(upload.Attachment))
+                            {
+                                await SafeNavigator.ShowAlertAsync(
+                                    "Integrity warning",
+                                    $"Attachment '{upload.Attachment.FileName}' reported a hash or integrity alarm after upload.").ConfigureAwait(false);
+                            }
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            await SafeNavigator.ShowAlertAsync("Greška", ex.Message).ConfigureAwait(false);
+                        }
+                    }
+
+                    m.LinkedDocuments.Clear();
+
+                    if (audit.Count > 0)
+                    {
+                        await SafeNavigator.ShowAlertAsync("Upload audit", string.Join("\n", audit)).ConfigureAwait(false);
                     }
                 }
 
@@ -294,7 +344,7 @@ namespace YasGMP.Views
                 return;
             }
 
-            var dlg = new YasGMP.Views.Dialogs.MachineDocumentsDialog(_dbService, selected.Id, _attachmentService);
+            var dlg = new YasGMP.Views.Dialogs.MachineDocumentsDialog(_dbService, selected.Id, _attachmentService, _authService);
             await Navigation.PushModalAsync(dlg);
             _ = await dlg.Result;
             
@@ -346,6 +396,16 @@ namespace YasGMP.Views
             var dlg = new YasGMP.Views.Dialogs.MachineComponentsDialog(_dbService, selected.Id);
             await Navigation.PushModalAsync(dlg);
             _ = await dlg.Result;
+        }
+
+        private static bool IsIntegrityAlarm(Attachment attachment)
+        {
+            if (attachment == null)
+                return false;
+
+            var status = attachment.Status ?? string.Empty;
+            return status.Contains("integrity", StringComparison.OrdinalIgnoreCase)
+                || status.Contains("hash", StringComparison.OrdinalIgnoreCase);
         }
 
         private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e)

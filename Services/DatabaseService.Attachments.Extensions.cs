@@ -23,13 +23,41 @@ namespace YasGMP.Services
     {
         public static async Task<List<Attachment>> GetAttachmentsFilteredAsync(this DatabaseService db, string? entityFilter, string? typeFilter, string? searchTerm, CancellationToken token = default)
         {
-            string sql = @"SELECT id, file_name, file_path, entity_type, entity_id, file_type, notes, uploaded_by_id, uploaded_at
-                           FROM attachments WHERE 1=1";
+            string sql = @"SELECT a.id,
+                                   a.file_name,
+                                   a.file_path,
+                                   a.entity_type,
+                                   a.entity_id,
+                                   a.file_type,
+                                   a.notes,
+                                   a.uploaded_by_id,
+                                   a.uploaded_at,
+                                   a.file_size,
+                                   a.sha256,
+                                   a.status,
+                                   rp.policy_name       AS retention_policy_name,
+                                   rp.retain_until      AS retention_retain_until,
+                                   rp.legal_hold        AS retention_legal_hold,
+                                   rp.review_required   AS retention_review_required,
+                                   rp.notes             AS retention_notes
+                            FROM attachments a
+                            LEFT JOIN (
+                                SELECT rp1.*
+                                FROM retention_policies rp1
+                                WHERE rp1.id = (
+                                    SELECT rp2.id
+                                    FROM retention_policies rp2
+                                    WHERE rp2.attachment_id = rp1.attachment_id
+                                    ORDER BY rp2.created_at DESC, rp2.id DESC
+                                    LIMIT 1
+                                )
+                            ) rp ON rp.attachment_id = a.id
+                            WHERE 1=1";
             var pars = new List<MySqlParameter>();
             if (!string.IsNullOrWhiteSpace(entityFilter)) { sql += " AND entity_type LIKE @e"; pars.Add(new MySqlParameter("@e", "%" + entityFilter + "%")); }
             if (!string.IsNullOrWhiteSpace(typeFilter))   { sql += " AND file_type LIKE @t"; pars.Add(new MySqlParameter("@t", "%" + typeFilter + "%")); }
             if (!string.IsNullOrWhiteSpace(searchTerm))   { sql += " AND (file_name LIKE @s OR notes LIKE @s)"; pars.Add(new MySqlParameter("@s", "%" + searchTerm + "%")); }
-            sql += " ORDER BY created_at DESC, id DESC";
+            sql += " ORDER BY a.created_at DESC, a.id DESC";
 
             var dt = await db.ExecuteSelectAsync(sql, pars, token).ConfigureAwait(false);
             var list = new List<Attachment>(dt.Rows.Count);
@@ -103,6 +131,8 @@ namespace YasGMP.Services
         {
             string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
             int I(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
+            long? L(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt64(r[c]) : (long?)null;
+            bool B(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value && Convert.ToBoolean(r[c]);
             DateTime? D(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
 
             return new Attachment
@@ -115,7 +145,15 @@ namespace YasGMP.Services
                 FileType = S("file_type"),
                 Notes = S("notes"),
                 UploadedById = I("uploaded_by_id"),
-                UploadedAt = D("uploaded_at") ?? DateTime.UtcNow
+                UploadedAt = D("uploaded_at") ?? DateTime.UtcNow,
+                FileSize = L("file_size"),
+                Sha256 = S("sha256"),
+                Status = S("status"),
+                RetentionPolicyName = S("retention_policy_name"),
+                RetainUntil = D("retention_retain_until"),
+                RetentionLegalHold = B("retention_legal_hold"),
+                RetentionReviewRequired = B("retention_review_required"),
+                RetentionNotes = S("retention_notes")
             };
         }
 
