@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Helpers;
 
 namespace YasGMP.ViewModels
@@ -230,7 +232,26 @@ namespace YasGMP.ViewModels
             try
             {
                 // Placeholder: hook up to the actual binary/document storage implementation.
-                await Task.Delay(50).ConfigureAwait(false);
+                var attachmentService = ServiceLocator.GetRequiredService<IAttachmentService>();
+                var currentUser = _authService.CurrentUser;
+
+                var directory = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrWhiteSpace(directory))
+                    Directory.CreateDirectory(directory);
+
+                var request = new AttachmentReadRequest
+                {
+                    RequestedById = currentUser?.Id,
+                    Reason = $"attachment-download:{SelectedAttachment.EntityType}",
+                    SourceIp = "ui",
+                    SourceHost = Environment.MachineName
+                };
+
+                await using (var fs = File.Create(destinationPath))
+                {
+                    await attachmentService.StreamContentAsync(SelectedAttachment.Id, fs, request).ConfigureAwait(false);
+                }
+
                 StatusMessage = $"Downloaded to {destinationPath}.";
             }
             catch (Exception ex)

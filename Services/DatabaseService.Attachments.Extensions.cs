@@ -6,10 +6,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
 {
@@ -34,23 +37,40 @@ namespace YasGMP.Services
             return list;
         }
 
-        public static async Task<int> AddAttachmentAsync(this DatabaseService db, string filePath, string entity, int entityId, int actorUserId, string ip, string device, string sessionId, CancellationToken token = default)
+        public static async Task<int> AddAttachmentAsync(this DatabaseService db, string filePath, string entity, int entityId, int actorUserId, string ip, string device, string sessionId, string? reason = null, IAttachmentService? attachmentService = null, CancellationToken token = default)
         {
-            const string sql = @"INSERT INTO attachments (file_name, file_path, entity_type, entity_id, uploaded_by, created_at)
-                                VALUES (@name,@path,@ent,@eid,@uid,NOW())";
-            var pars = new List<MySqlParameter>
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("File path must be provided", nameof(filePath));
+
+            attachmentService ??= ServiceLocator.GetRequiredService<IAttachmentService>();
+            await using var stream = File.OpenRead(filePath);
+            var upload = await attachmentService.UploadAsync(stream, new AttachmentUploadRequest
             {
-                new("@name", System.IO.Path.GetFileName(filePath) ?? string.Empty),
-                new("@path", filePath ?? string.Empty),
-                new("@ent", entity ?? string.Empty),
-                new("@eid", entityId),
-                new("@uid", actorUserId)
-            };
-            await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
-            var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
-            int id = Convert.ToInt32(idObj);
-            await db.LogSystemEventAsync(actorUserId, "ATTACHMENT_CREATE", "attachments", entity, id, filePath, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
-            return id;
+                FileName = Path.GetFileName(filePath) ?? string.Empty,
+                ContentType = null,
+                EntityType = entity ?? string.Empty,
+                EntityId = entityId,
+                UploadedById = actorUserId == 0 ? (int?)null : actorUserId,
+                Notes = sessionId,
+                Reason = reason ?? $"db:{entity}",
+                SourceIp = ip,
+                SourceHost = device
+            }, token).ConfigureAwait(false);
+
+            await db.LogSystemEventAsync(
+                actorUserId,
+                "ATTACHMENT_CREATE",
+                "attachments",
+                entity,
+                upload.Attachment.Id,
+                upload.Attachment.FileName,
+                ip,
+                "audit",
+                device,
+                sessionId,
+                token: token).ConfigureAwait(false);
+
+            return upload.Attachment.Id;
         }
 
         public static async Task DeleteAttachmentAsync(this DatabaseService db, int id, int actorUserId, string ip, string device, string sessionId, CancellationToken token = default)
@@ -77,7 +97,7 @@ namespace YasGMP.Services
             => db.GetAttachmentsFilteredAsync(entityFilter: relatedTable, typeFilter: fileType, searchTerm: search, token);
 
         public static Task<int> AddAttachmentAsync(this DatabaseService db, string relatedTable, int relatedId, string fileName, string filePath, CancellationToken token = default)
-            => db.AddAttachmentAsync(filePath: filePath, entity: relatedTable, entityId: relatedId, actorUserId: 0, ip: string.Empty, device: string.Empty, sessionId: null!, token: token);
+            => db.AddAttachmentAsync(filePath: filePath, entity: relatedTable, entityId: relatedId, actorUserId: 0, ip: string.Empty, device: string.Empty, sessionId: string.Empty, reason: $"ui:{relatedTable}", token: token);
 
         private static Attachment Map(DataRow r)
         {

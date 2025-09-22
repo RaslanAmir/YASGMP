@@ -43,10 +43,10 @@ namespace YasGMP.Models
         /// <summary>
         /// File storage path, URL, or blob identifier (location on disk/cloud/DB).
         /// </summary>
-        [Required, StringLength(512)]
+        [StringLength(512)]
         [Column("file_path")]
         [Display(Name = "Putanja/URL")]
-        public string FilePath { get; set; } = string.Empty;
+        public string? FilePath { get; set; }
 
         /// <summary>
         /// File extension/type (pdf, jpg, docx, etc.).

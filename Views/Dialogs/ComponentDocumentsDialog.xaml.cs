@@ -74,7 +74,10 @@ namespace YasGMP.Views.Dialogs
                             EntityType = "Component",
                             EntityId = _componentId,
                             UploadedById = null,
-                            Notes = "Component document"
+                            Notes = "Component document",
+                            Reason = "component-doc-upload",
+                            SourceIp = "ui",
+                            SourceHost = Environment.MachineName
                         }).ConfigureAwait(false);
                     }
                     await LoadAsync().ConfigureAwait(false);
@@ -98,7 +101,6 @@ namespace YasGMP.Views.Dialogs
             public int LinkId { get; }
             public int AttachmentId { get; }
             public string FileName { get; }
-            public string StoragePath { get; }
             public Command OpenCommand { get; }
             public Command RemoveCommand { get; }
             private readonly Func<Task> _onChanged;
@@ -110,7 +112,6 @@ namespace YasGMP.Views.Dialogs
                 LinkId = row.Link.Id;
                 AttachmentId = row.Attachment.Id;
                 FileName = row.Attachment.FileName;
-                StoragePath = row.Attachment.FilePath;
                 OpenCommand = new Command(async () => await OpenAsync());
                 RemoveCommand = new Command(async () => await RemoveAsync());
             }
@@ -119,13 +120,26 @@ namespace YasGMP.Views.Dialogs
             {
                 try
                 {
-                    if (!string.IsNullOrWhiteSpace(StoragePath) && File.Exists(StoragePath))
+                    var cacheDir = FileSystem.CacheDirectory;
+                    Directory.CreateDirectory(cacheDir);
+                    var tempPath = Path.Combine(cacheDir, $"attachment_{AttachmentId}_{Guid.NewGuid():N}_{FileName}");
+
+                    await using (var fs = File.Create(tempPath))
                     {
-                        await Launcher.OpenAsync(new OpenFileRequest
+                        var request = new AttachmentReadRequest
                         {
-                            File = new ReadOnlyFile(StoragePath)
-                        });
+                            Reason = "component-doc-open",
+                            SourceHost = Environment.MachineName,
+                            SourceIp = null,
+                            RequestedById = null
+                        };
+                        await _attachments.StreamContentAsync(AttachmentId, fs, request).ConfigureAwait(false);
                     }
+
+                    await Launcher.OpenAsync(new OpenFileRequest
+                    {
+                        File = new ReadOnlyFile(tempPath)
+                    });
                 }
                 catch { }
             }
