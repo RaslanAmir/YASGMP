@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Common;
@@ -21,6 +26,9 @@ namespace YasGMP.Views.Dialogs
         private readonly DatabaseService _db;
         private readonly IAttachmentService _attachments;
         private readonly int _currentUserId;
+        private readonly AuthService _authService;
+        private readonly AuditService _auditService;
+        private readonly IRBACService _rbacService;
 
         private static readonly DateTime NoDateSentinel = DateTime.MinValue.Date;
 
@@ -55,13 +63,23 @@ namespace YasGMP.Views.Dialogs
             set => SetValue(DateClosePickerValueProperty, value);
         }
 
-        public WorkOrderEditDialog(WorkOrder wo, DatabaseService db, int currentUserId, IAttachmentService? attachmentService = null)
+        public WorkOrderEditDialog(
+            WorkOrder wo,
+            DatabaseService db,
+            int currentUserId,
+            IAttachmentService? attachmentService = null,
+            AuthService? authService = null,
+            AuditService? auditService = null,
+            IRBACService? rbacService = null)
         {
             InitializeComponent();
             WorkOrder = wo;
             _db = db;
             _attachments = attachmentService ?? ServiceLocator.GetRequiredService<IAttachmentService>();
             _currentUserId = currentUserId;
+            _authService = authService ?? ServiceLocator.GetService<AuthService>() ?? throw new InvalidOperationException("AuthService nije konfiguriran.");
+            _auditService = auditService ?? ServiceLocator.GetService<AuditService>() ?? throw new InvalidOperationException("AuditService nije konfiguriran.");
+            _rbacService = rbacService ?? ServiceLocator.GetService<IRBACService>() ?? throw new InvalidOperationException("RBACService nije konfiguriran.");
             BindingContext = WorkOrder;
             SyncDatePickersFromModel();
             _ = LoadLookupsAsync();
@@ -277,12 +295,179 @@ namespace YasGMP.Views.Dialogs
 
         private async void OnSignClicked(object? sender, EventArgs e)
         {
-            string? reason = await DisplayPromptAsync("Potpis", "Razlog/napomena potpisa:");
-            string payload = $"WO:{WorkOrder.Id}|{WorkOrder.Title}|{DateTime.UtcNow:O}|{reason}";
-            using var sha = System.Security.Cryptography.SHA256.Create();
-            var hash = Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(payload)));
-            await _db.AddWorkOrderSignatureAsync(WorkOrder.Id, _currentUserId, hash, reason);
-            await DisplayAlert("OK", "Potpis spremljen.", "Zatvori");
+            if (WorkOrder == null || WorkOrder.Id <= 0)
+            {
+                await DisplayAlert("Potpis", "Radni nalog mora biti spremljen prije potpisa.", "OK");
+                return;
+            }
+
+            try
+            {
+                var defaultUser = _authService.CurrentUser?.Username
+                    ?? (Application.Current as App)?.LoggedUser?.Username;
+                var dialog = new ReauthenticationDialog(defaultUser);
+                await Navigation.PushModalAsync(dialog);
+                var reauth = await dialog.Result;
+                if (reauth == null)
+                {
+                    await LogSignatureAttemptAsync(null, "cancelled").ConfigureAwait(false);
+                    return;
+                }
+
+                var authenticatedUser = await _authService.AuthenticateAsync(reauth.Username, reauth.Password).ConfigureAwait(false);
+                if (authenticatedUser == null)
+                {
+                    await LogSignatureAttemptAsync(null, $"auth_failed:{reauth.Username}").ConfigureAwait(false);
+                    await DisplayAlert("Potpis", "Provjera vjerodajnica nije uspjela.", "OK");
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(reauth.MfaCode))
+                {
+                    bool mfaOk = await _authService.VerifyTwoFactorCodeAsync(reauth.Username, reauth.MfaCode).ConfigureAwait(false);
+                    if (!mfaOk)
+                    {
+                        await LogSignatureAttemptAsync(authenticatedUser, "mfa_failed").ConfigureAwait(false);
+                        await DisplayAlert("Potpis", "Nevažeći MFA kod.", "OK");
+                        return;
+                    }
+                }
+
+                if (!await EnsureSignerPermissionAsync(authenticatedUser.Id).ConfigureAwait(false))
+                {
+                    await LogSignatureAttemptAsync(authenticatedUser, "rbac_denied").ConfigureAwait(false);
+                    await DisplayAlert("Potpis", "Nemate dozvolu potpisati ovaj nalog.", "OK");
+                    return;
+                }
+
+                int recordVersion = await _db.GetNextWorkOrderSignatureVersionAsync(WorkOrder.Id).ConfigureAwait(false);
+                int revisionNo = await _db.GetCurrentWorkOrderRevisionAsync(WorkOrder.Id).ConfigureAwait(false);
+                DateTime signedAtUtc = DateTime.UtcNow;
+
+                string snapshotJson = BuildWorkOrderSnapshotJson();
+                string recordHash = ComputeRecordHash(snapshotJson);
+                string signatureHash = ComputeSignatureHash(authenticatedUser, reauth, recordHash, recordVersion, revisionNo, signedAtUtc);
+
+                var request = new WorkOrderSignaturePersistRequest
+                {
+                    WorkOrderId = WorkOrder.Id,
+                    UserId = authenticatedUser.Id,
+                    SignatureHash = signatureHash,
+                    ReasonCode = reauth.ReasonCode,
+                    ReasonDescription = reauth.ReasonDetail,
+                    SignatureType = "potvrda",
+                    RecordHash = recordHash,
+                    RecordVersion = recordVersion,
+                    SignedAtUtc = signedAtUtc,
+                    ServerTimeZone = TimeZoneInfo.Local.Id,
+                    IpAddress = _authService.CurrentIpAddress,
+                    DeviceInfo = _authService.CurrentDeviceInfo,
+                    SessionId = _authService.CurrentSessionId,
+                    RevisionNo = revisionNo,
+                    MfaEvidence = string.IsNullOrWhiteSpace(reauth.MfaCode) ? null : AuthService.HashPassword(reauth.MfaCode),
+                    WorkOrderSnapshotJson = snapshotJson,
+                    SignerUsername = authenticatedUser.Username ?? reauth.Username,
+                    SignerFullName = authenticatedUser.FullName,
+                    ReasonDisplay = reauth.ReasonDisplay
+                };
+
+                var signature = await _db.AddWorkOrderSignatureAsync(request, _attachments).ConfigureAwait(false);
+                WorkOrder.Signatures ??= new List<WorkOrderSignature>();
+                WorkOrder.Signatures.Add(signature);
+
+                await LogSignatureAttemptAsync(authenticatedUser, $"success:{signature.Id}").ConfigureAwait(false);
+                await DisplayAlert("Potpis", "Potpis je uspješno spremljen.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await LogSignatureAttemptAsync(null, $"error:{ex.Message}").ConfigureAwait(false);
+                await DisplayAlert("Potpis", $"Neuspješan potpis: {ex.Message}", "OK");
+            }
+        }
+
+        private async Task<bool> EnsureSignerPermissionAsync(int userId)
+        {
+            try
+            {
+                if (await _rbacService.HasPermissionAsync(userId, PermissionCodes.WorkOrders.Sign).ConfigureAwait(false))
+                    return true;
+                return await _rbacService.HasPermissionAsync(userId, PermissionCodes.SystemAdmin).ConfigureAwait(false);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string ComputeRecordHash(string snapshotJson)
+        {
+            using var sha = SHA256.Create();
+            return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(snapshotJson ?? string.Empty)));
+        }
+
+        private string BuildWorkOrderSnapshotJson()
+        {
+            var snapshot = new
+            {
+                WorkOrder.Id,
+                WorkOrder.Title,
+                WorkOrder.Description,
+                WorkOrder.TaskDescription,
+                WorkOrder.Type,
+                WorkOrder.Priority,
+                WorkOrder.Status,
+                WorkOrder.DateOpen,
+                WorkOrder.DueDate,
+                WorkOrder.DateClose,
+                WorkOrder.MachineId,
+                WorkOrder.ComponentId,
+                WorkOrder.AssignedToId,
+                WorkOrder.RequestedById,
+                WorkOrder.CreatedById,
+                WorkOrder.Result,
+                WorkOrder.Notes,
+                WorkOrder.LastModified,
+                WorkOrder.LastModifiedById
+            };
+
+            return JsonSerializer.Serialize(snapshot, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
+        }
+
+        private static string ComputeSignatureHash(User signer, ReauthenticationResult reauth, string recordHash, int recordVersion, int revisionNo, DateTime signedAtUtc)
+        {
+            string payload = string.Join('|', new[]
+            {
+                signer.Id.ToString(CultureInfo.InvariantCulture),
+                signer.Username ?? string.Empty,
+                recordHash,
+                $"v{recordVersion}",
+                $"rev{revisionNo}",
+                reauth.ReasonCode,
+                reauth.ReasonDetail ?? string.Empty,
+                signedAtUtc.ToString("O", CultureInfo.InvariantCulture)
+            });
+
+            using var sha = SHA256.Create();
+            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(payload)));
+        }
+
+        private async Task LogSignatureAttemptAsync(User? user, string outcome)
+        {
+            if (_auditService == null) return;
+            try
+            {
+                string username = user?.Username ?? string.Empty;
+                string descriptor = $"wo={WorkOrder?.Id}; outcome={outcome}; user={username}";
+                await _auditService.LogSystemEventAsync("WO_SIGNATURE_ATTEMPT", descriptor, "work_order_signatures", WorkOrder?.Id).ConfigureAwait(false);
+            }
+            catch
+            {
+                // audit logging is best effort for UI events
+            }
         }
 
         private async Task AddPhotosAsync(string kind)

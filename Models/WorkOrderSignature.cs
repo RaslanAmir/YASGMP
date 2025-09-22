@@ -39,6 +39,44 @@ namespace YasGMP.Models
         [Column("note", TypeName = "text")]
         public string? Note { get; set; }
 
+        [Column("reason_code")]
+        [StringLength(64)]
+        public string ReasonCode { get; set; } = string.Empty;
+
+        [Column("reason_description")]
+        [StringLength(255)]
+        public string? ReasonDescription { get; set; }
+
+        [Column("record_hash")]
+        [StringLength(128)]
+        public string RecordHash { get; set; } = string.Empty;
+
+        [Column("record_version")]
+        public int RecordVersion { get; set; } = 1;
+
+        [Column("server_timezone")]
+        [StringLength(64)]
+        public string? ServerTimezone { get; set; }
+
+        [Column("ip_address")]
+        [StringLength(45)]
+        public string? IpAddress { get; set; }
+
+        [Column("device_info")]
+        [StringLength(255)]
+        public string? DeviceInfo { get; set; }
+
+        [Column("session_id")]
+        [StringLength(64)]
+        public string? SessionId { get; set; }
+
+        [Column("revision_no")]
+        public int RevisionNo { get; set; } = 1;
+
+        [Column("mfa_challenge")]
+        [StringLength(128)]
+        public string? MfaEvidence { get; set; }
+
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 
