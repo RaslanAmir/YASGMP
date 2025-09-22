@@ -1,109 +1,134 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>StockLevel</b> — Ultimate robust stock-tracking for every part in every warehouse.
-    /// GMP/CSV/21 CFR Part 11 ready: alarms, audit, IoT/automation, digital signature, hash chain, ML-anomaly and full inspection trace!
+    /// <b>StockLevel</b> - Robust stock tracking for every part in every warehouse.
+    /// Ready for GMP/CSV/21 CFR Part 11 with alarms, audit, IoT automation, signatures,
+    /// hash chain, ML anomaly detection, and full inspection trace.
     /// </summary>
-    public class StockLevel
+    [Table("stock_levels")]
+    public partial class StockLevel
     {
-        /// <summary>Jedinstveni ID zapisa (PK).</summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>FK na dio/part (Part).</summary>
+        /// <summary>Foreign key to the tracked part.</summary>
         [Required]
+        [Column("part_id")]
         public int PartId { get; set; }
 
-        /// <summary>Navigacija na Part.</summary>
-        public Part Part { get; set; } = null!;
+        [ForeignKey(nameof(PartId))]
+        public virtual Part Part { get; set; } = null!;
 
-        /// <summary>FK na skladište (Warehouse).</summary>
+        /// <summary>Foreign key to the warehouse.</summary>
         [Required]
+        [Column("warehouse_id")]
         public int WarehouseId { get; set; }
 
-        /// <summary>Navigacija na Warehouse.</summary>
-        public Warehouse Warehouse { get; set; } = null!
+        [ForeignKey(nameof(WarehouseId))]
+        public virtual Warehouse Warehouse { get; set; } = null!;
 
-            ;
-
-        /// <summary>Aktualna količina (stock quantity).</summary>
+        /// <summary>Current stock quantity.</summary>
+        [Column("quantity")]
         public int Quantity { get; set; }
 
-        /// <summary>Minimalni prag (alarm ako padne ispod, auto-notify, auto-order trigger!).</summary>
+        /// <summary>Minimum stock threshold.</summary>
+        [Column("min_threshold")]
         public int MinThreshold { get; set; }
 
-        /// <summary>Maksimalni prag (alarm ako premaši, signaliziraj skladištu ili nabavi!).</summary>
+        /// <summary>Maximum stock threshold.</summary>
+        [Column("max_threshold")]
         public int MaxThreshold { get; set; }
 
-        /// <summary>Automatski reorder aktiviran kad padne ispod praga (za IoT, AI replenishment).</summary>
+        /// <summary>Automatic reorder flag.</summary>
+        [Column("auto_reorder_triggered")]
         public bool AutoReorderTriggered { get; set; }
 
-        /// <summary>Broj uzastopnih dana ispod minimuma (za prediktivno održavanje i AI alerting).</summary>
+        /// <summary>Consecutive days the quantity stayed below the minimum.</summary>
+        [Column("days_below_min")]
         public int DaysBelowMin { get; set; }
 
-        /// <summary>Alarm status (none, below_min, above_max, pending_approval, locked, reserved, anomaly_detected).</summary>
+        /// <summary>Alarm state (none, below_min, above_max, pending_approval, locked, reserved, anomaly_detected).</summary>
         [MaxLength(30)]
+        [Column("alarm_status")]
         public string AlarmStatus { get; set; } = "none";
 
-        /// <summary>ML/AI anomaly score (detekcija sumnjivih kretanja ili krađe, 0.0 = normalno, >0.8 = anomalija).</summary>
+        /// <summary>ML/AI anomaly score (0.0 = normal, >0.8 = anomaly).</summary>
+        [Column("anomaly_score")]
         public double? AnomalyScore { get; set; }
 
-        /// <summary>Timestamp zadnje izmjene (audit, forensics, digital trace).</summary>
+        /// <summary>Timestamp of the last modification.</summary>
+        [Column("last_modified")]
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
-        /// <summary>ID korisnika koji je zadnji mijenjao zalihe (audit trail, forensics).</summary>
+        /// <summary>User who last modified the record.</summary>
+        [Column("last_modified_by_id")]
         public int LastModifiedById { get; set; }
 
-        /// <summary>Navigacija na zadnjeg korisnika koji je mijenjao.</summary>
-        public User LastModifiedBy { get; set; } = null!;
+        [ForeignKey(nameof(LastModifiedById))]
+        public virtual User LastModifiedBy { get; set; } = null!;
 
-        /// <summary>IP adresa uređaja (za puni forenzički trag).</summary>
+        /// <summary>Forensic IP of the editing device.</summary>
         [MaxLength(45)]
+        [Column("source_ip")]
         public string SourceIp { get; set; } = string.Empty;
 
-        /// <summary>Geo-lokacija izmjene (opcionalno, bonus za inspekciju/krađu/remote work).</summary>
+        /// <summary>Geolocation of the change (optional).</summary>
         [MaxLength(100)]
+        [Column("geo_location")]
         public string GeoLocation { get; set; } = string.Empty;
 
-        /// <summary>Komentar/promjena uz izmjenu (incident, audit, inspekcija, razlog izmjene).</summary>
+        /// <summary>Comment describing the change.</summary>
         [MaxLength(255)]
+        [Column("comment")]
         public string Comment { get; set; } = string.Empty;
 
-        /// <summary>Digitalni potpis izmjene (hash, user, device, time).</summary>
+        /// <summary>Digital signature of the change.</summary>
         [MaxLength(128)]
+        [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>Hash integriteta zapisa (za Part 11, blockchain/chain-of-custody spremno).</summary>
+        /// <summary>Hash for integrity checks.</summary>
         [MaxLength(128)]
+        [Column("entry_hash")]
         public string EntryHash { get; set; } = string.Empty;
 
-        /// <summary>Snapshot stanja prije izmjene (JSON, rollback-ready, null ako nije primijenjeno).</summary>
+        /// <summary>Snapshot before the change.</summary>
+        [Column("old_state_snapshot")]
         public string OldStateSnapshot { get; set; } = string.Empty;
 
-        /// <summary>Snapshot stanja nakon izmjene (JSON, rollback-ready, null ako nije primijenjeno).</summary>
+        /// <summary>Snapshot after the change.</summary>
+        [Column("new_state_snapshot")]
         public string NewStateSnapshot { get; set; } = string.Empty;
 
-        /// <summary>Je li izmjena nastala automatski (IoT, RPA, API, ERP integration) ili korisnički?</summary>
+        /// <summary>Indicates whether the change was automated (IoT, API, RPA).</summary>
+        [Column("is_automated")]
         public bool IsAutomated { get; set; }
 
-        /// <summary>Session/token ID za auditiranje batch promjena, mobilne aplikacije itd.</summary>
+        /// <summary>Session or batch identifier for the change.</summary>
         [MaxLength(80)]
+        [Column("session_id")]
         public string SessionId { get; set; } = string.Empty;
 
-        /// <summary>Povezan incident, CAPA ili audit zapis za ovu promjenu (bonus za regulatory compliance).</summary>
+        /// <summary>Linked incident, CAPA, or audit record.</summary>
+        [Column("related_case_id")]
         public int? RelatedCaseId { get; set; }
 
-        /// <summary>Tip povezanog slučaja.</summary>
+        /// <summary>Type of the linked case.</summary>
         [MaxLength(30)]
+        [Column("related_case_type")]
         public string RelatedCaseType { get; set; } = string.Empty;
 
         /// <summary>Human-readable summary for dashboards/logging.</summary>
         public override string ToString()
         {
-            return $"Stock: {Quantity} [{Part?.Code ?? PartId.ToString()}] in {Warehouse?.Id ?? WarehouseId} (Min:{MinThreshold}, Max:{MaxThreshold}, Alarm:{AlarmStatus})";
+            var partLabel = Part?.Code ?? PartId.ToString();
+            var warehouseLabel = Warehouse?.Id.ToString() ?? WarehouseId.ToString();
+            return $"Stock: {Quantity} [{partLabel}] in {warehouseLabel} (Min:{MinThreshold}, Max:{MaxThreshold}, Alarm:{AlarmStatus})";
         }
     }
 }

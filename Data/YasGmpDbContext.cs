@@ -12,7 +12,7 @@ namespace YasGMP.Data
 {
     /// <summary>
     /// Glavni DbContext klase za pristup bazi podataka YasGMP aplikacije.
-    /// Sadrži DbSet-ove za sve entitete i konfiguracije modela.
+    /// SadrÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ„Äľi DbSet-ove za sve entitete i konfiguracije modela.
     /// </summary>
     public class YasGmpDbContext : DbContext
     {
@@ -34,6 +34,9 @@ namespace YasGMP.Data
         public DbSet<AttachmentLink> AttachmentLinks { get; set; }
         public DbSet<RetentionPolicy> RetentionPolicies { get; set; }
         public DbSet<AttachmentAuditLog> AttachmentAuditLogs { get; set; }
+        public DbSet<LkpStatus> LkpStatuses { get; set; }
+        public DbSet<LkpWorkOrderType> LkpWorkOrderTypes { get; set; }
+        public DbSet<LkpMachineType> LkpMachineTypes { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<AuditLogEntry> AuditLogEntries { get; set; }
         public DbSet<BackupHistory> BackupHistories { get; set; }
@@ -85,6 +88,7 @@ namespace YasGMP.Data
         public DbSet<Inspection> Inspections { get; set; }
         public DbSet<IntegrationLog> IntegrationLogs { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        public DbSet<InventoryLocation> InventoryLocations { get; set; }
         public DbSet<IotAnomalyLog> IotAnomalyLogs { get; set; }
         public DbSet<IotDevice> IotDevices { get; set; }
         public DbSet<IotEventAudit> IotEventAudits { get; set; }
@@ -119,6 +123,7 @@ namespace YasGMP.Data
         public DbSet<PartSupplierPrice> PartSupplierPrices { get; set; }
         public DbSet<PartUsage> PartUsages { get; set; }
         public DbSet<PartUsageAuditLog> PartUsageAuditLogs { get; set; }
+        public DbSet<PartStock> PartStocks { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<PermissionChangeLog> PermissionChangeLogs { get; set; }
         public DbSet<PermissionRequest> PermissionRequests { get; set; }
@@ -162,7 +167,6 @@ namespace YasGMP.Data
         public DbSet<StockLevel> StockLevels { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<SupplierAudit> SupplierAudits { get; set; }
-        public DbSet<SupplierEntity> SupplierEntities { get; set; }
         public DbSet<SupplierRiskAudit> SupplierRiskAudits { get; set; }
         public DbSet<SystemEventLog> SystemEventLogs { get; set; }
         public DbSet<SystemParameter> SystemParameters { get; set; }
@@ -312,7 +316,7 @@ namespace YasGMP.Data
                 .WithMany()
                 .HasForeignKey(c => c.NextCalibrationId);
 
-            // Primjer konfiguracije odnosa između WorkOrder i WorkOrderAudit
+            // Primjer konfiguracije odnosa izmeĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľÄ‚â€žĂ˘â‚¬ĹˇÄ‚â€ąĂ‚ÂĂ„â€šĂ‹ÂÄ‚ËĂ˘â€šÂ¬ÄąË‡Ä‚â€šĂ‚Â¬Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Âu WorkOrder i WorkOrderAudit
             modelBuilder.Entity<WorkOrder>()
                 .HasOne(wo => wo.CreatedBy)
                 .WithMany(u => u.CreatedWorkOrders)
@@ -365,9 +369,9 @@ namespace YasGMP.Data
                 .HasConversion<string>()
                 .IsRequired();
 
-            // Ostale konfiguracije (npr. dužine stringova, odnosi, indeksi)
+            // Ostale konfiguracije (npr. duÄ‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬Ă‚Â¦Ä‚â€žĂ˘â‚¬ĹˇÄ‚ËĂ˘â€šÂ¬ÄąÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ„Äľine stringova, odnosi, indeksi)
 
-            // Primjer: jedinstveni indeks na korisničko ime
+            // Primjer: jedinstveni indeks na korisniĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤ko ime
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
@@ -406,7 +410,7 @@ namespace YasGMP.Data
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(up => up.Permission)
-                    .WithMany(p => p.UserPermissions)
+                    .WithMany()
                     .HasForeignKey(up => up.PermissionId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -455,7 +459,7 @@ namespace YasGMP.Data
                 .WithMany(p => p.Users)
                 .UsingEntity<UserPermission>(
                     j => j.HasOne(up => up.Permission)
-                        .WithMany(p => p.UserPermissions)
+                        .WithMany()
                         .HasForeignKey(up => up.PermissionId),
                     j => j.HasOne(up => up.User)
                         .WithMany()
@@ -527,7 +531,8 @@ namespace YasGMP.Data
                 .HasForeignKey(s => s.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // --- Machine relacije i ograničenja ---
+            // --- Machine relacije i ograniĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤enja ---
+            ConfigureMachine(modelBuilder);
 
             // Machine -> MachineComponents (1:N, cascade)
             modelBuilder.Entity<MachineComponent>()
@@ -536,24 +541,517 @@ namespace YasGMP.Data
                 .HasForeignKey(mc => mc.MachineId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Jednostavni indeksi/dužine stringova
-            modelBuilder.Entity<Machine>()
-                .Property(m => m.Code)
-                .HasMaxLength(128);
-
-            modelBuilder.Entity<Machine>()
-                .Property(m => m.Name)
-                .HasMaxLength(256);
-
-            modelBuilder.Entity<Machine>()
-                .Property(m => m.Status)
-                .HasMaxLength(64);
-
-            modelBuilder.Entity<Machine>()
-                .HasIndex(m => m.Code)
-                .IsUnique(false);
+            ConfigureMachineComponent(modelBuilder);
+            ConfigureMachineLifecycleEvent(modelBuilder);
+            ConfigureSupplier(modelBuilder);
+            ConfigureExternalContractor(modelBuilder);
+            ConfigureUser(modelBuilder);
         }
 
+        private static void ConfigureMachine(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Machine>(entity =>
+            {
+                entity.ToTable("machines");
+
+                entity.HasOne(m => m.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(m => m.LastModifiedById)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_m_last_modified_by");
+
+                entity.HasOne<MachineStatus>()
+                    .WithMany()
+                    .HasForeignKey(m => m.StatusId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_m_status");
+
+                entity.HasOne<MachineType>()
+                    .WithMany()
+                    .HasForeignKey(m => m.MachineTypeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_mach_machine_type");
+
+                entity.HasOne<ResponsibleParty>()
+                    .WithMany()
+                    .HasForeignKey(m => m.ResponsiblePartyId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_machines_party");
+
+                entity.HasIndex(m => m.Code)
+                    .IsUnique();
+
+                entity.Property(m => m.Code).HasMaxLength(64);
+                entity.Property(m => m.Name).HasMaxLength(100);
+                entity.Property(m => m.Status).HasMaxLength(30);
+            });
+        }
+
+        private static void ConfigureMachineComponent(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MachineComponent>(entity =>
+            {
+                entity.ToTable("machine_components");
+
+                entity.HasKey(mc => mc.Id);
+
+                entity.Property(mc => mc.Id).HasColumnName("id");
+                entity.Property(mc => mc.MachineId).HasColumnName("machine_id");
+                entity.Property(mc => mc.Code)
+                    .HasColumnName("code")
+                    .HasMaxLength(50);
+                entity.Property(mc => mc.Name)
+                    .HasColumnName("name")
+                    .HasMaxLength(100);
+                entity.Property(mc => mc.Description)
+                    .HasColumnName("description")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.Type)
+                    .HasColumnName("type")
+                    .HasMaxLength(50);
+                entity.Property(mc => mc.Model)
+                    .HasColumnName("model")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.InstallDate).HasColumnName("install_date");
+                entity.Property(mc => mc.PurchaseDate).HasColumnName("purchase_date");
+                entity.Property(mc => mc.WarrantyUntil).HasColumnName("warranty_until");
+                entity.Property(mc => mc.WarrantyExpiry).HasColumnName("warranty_expiry");
+                entity.Property(mc => mc.Status)
+                    .HasColumnName("status")
+                    .HasMaxLength(30);
+                entity.Property(mc => mc.SerialNumber)
+                    .HasColumnName("serial_number")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.Supplier)
+                    .HasColumnName("supplier")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.RfidTag)
+                    .HasColumnName("rfid_tag")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.IoTDeviceId)
+                    .HasColumnName("io_tdevice_id")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.LifecyclePhase)
+                    .HasColumnName("lifecycle_phase")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.IsCritical).HasColumnName("is_critical");
+                entity.Property(mc => mc.Note)
+                    .HasColumnName("note")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.Notes)
+                    .HasColumnName("notes")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.SopDoc)
+                    .HasColumnName("sop_doc")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.LastModified).HasColumnName("last_modified");
+                entity.Property(mc => mc.LastModifiedById).HasColumnName("last_modified_by_id");
+                entity.Property(mc => mc.SourceIp)
+                    .HasColumnName("source_ip")
+                    .HasMaxLength(255);
+                entity.Property(mc => mc.IsDeleted).HasColumnName("is_deleted");
+                entity.Property(mc => mc.ChangeVersion).HasColumnName("change_version");
+
+                entity.Property(mc => mc.ComponentTypeId).HasColumnName("component_type_id");
+                entity.Property(mc => mc.StatusId).HasColumnName("status_id");
+                entity.Property(mc => mc.CreatedAt).HasColumnName("created_at");
+                entity.Property(mc => mc.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(mc => mc.DeletedAt).HasColumnName("deleted_at");
+                entity.Property(mc => mc.DeletedById).HasColumnName("deleted_by");
+
+                entity.HasIndex(mc => mc.Code)
+                    .IsUnique()
+                    .HasDatabaseName("code");
+
+                entity.HasIndex(mc => mc.MachineId)
+                    .HasDatabaseName("ix_machine_components_machine_id");
+
+                entity.HasOne(mc => mc.Machine)
+                    .WithMany(m => m.Components)
+                    .HasForeignKey(mc => mc.MachineId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_mc_machine");
+
+                entity.HasOne(mc => mc.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(mc => mc.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne<ComponentType>()
+                    .WithMany()
+                    .HasForeignKey(mc => mc.ComponentTypeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_mc_type");
+
+                entity.HasOne<RefValue>()
+                    .WithMany()
+                    .HasForeignKey(mc => mc.StatusId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_mc_status");
+            });
+        }
+        private static void ConfigureMachineLifecycleEvent(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MachineLifecycleEvent>(entity =>
+            {
+                entity.ToTable("machine_lifecycle_event");
+
+                entity.Property(e => e.EventType)
+                    .HasConversion<string>()
+                    .HasMaxLength(50);
+
+                entity.HasOne(e => e.Machine)
+                    .WithMany()
+                    .HasForeignKey(e => e.MachineId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.PerformedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.PerformedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne<RefValue>()
+                    .WithMany()
+                    .HasForeignKey(e => e.EventTypeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_mle_event_type");
+            });
+        }
+        private static void ConfigureSupplier(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Supplier>(entity =>
+            {
+                entity.ToTable("suppliers");
+
+                entity.HasOne(s => s.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(s => s.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne<RefValue>()
+                    .WithMany()
+                    .HasForeignKey(s => s.StatusId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_sup_status");
+
+                entity.HasOne<RefValue>()
+                    .WithMany()
+                    .HasForeignKey(s => s.TypeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_sup_type");
+            });
+
+            modelBuilder.Entity<SupplierAudit>(entity =>
+            {
+                entity.ToTable("supplier_audit");
+
+                entity.HasKey(sa => sa.Id);
+
+                entity.Property(sa => sa.Id).HasColumnName("id");
+                entity.Property(sa => sa.SupplierId).HasColumnName("supplier_id");
+                entity.Property(sa => sa.UserId).HasColumnName("user_id");
+                entity.Property(sa => sa.ActionType)
+                    .HasColumnName("action")
+                    .HasMaxLength(255);
+                entity.Property(sa => sa.ActionTimestamp).HasColumnName("changed_at");
+                entity.Property(sa => sa.Details)
+                    .HasColumnName("details")
+                    .HasMaxLength(255);
+                entity.Property(sa => sa.DeviceInfo)
+                    .HasColumnName("device_info")
+                    .HasMaxLength(255);
+                entity.Property(sa => sa.SourceIp)
+                    .HasColumnName("source_ip")
+                    .HasMaxLength(255);
+                entity.Property(sa => sa.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<SupplierRiskAudit>(entity =>
+            {
+                entity.ToTable("supplier_risk_audit");
+
+                entity.HasKey(sra => sra.Id);
+
+                entity.Property(sra => sra.Id).HasColumnName("id");
+                entity.Property(sra => sra.SupplierId).HasColumnName("supplier_id");
+                entity.Property(sra => sra.AuditDate).HasColumnName("audit_date");
+                entity.Property(sra => sra.Score).HasColumnName("score");
+                entity.Property(sra => sra.PerformedBy).HasColumnName("performed_by");
+                entity.Property(sra => sra.Findings).HasColumnName("findings");
+                entity.Property(sra => sra.CorrectiveActions).HasColumnName("corrective_actions");
+                entity.Property(sra => sra.CreatedAt).HasColumnName("created_at");
+                entity.Property(sra => sra.UpdatedAt).HasColumnName("updated_at");
+            });
+        }
+        private static void ConfigureExternalContractor(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ExternalContractor>(entity =>
+            {
+                entity.ToTable("external_contractors");
+
+                entity.HasKey(ec => ec.Id);
+
+                entity.Property(ec => ec.Id).HasColumnName("id");
+                entity.Property(ec => ec.Name)
+                    .HasColumnName("name")
+                    .HasMaxLength(100);
+                entity.Property(ec => ec.CompanyName)
+                    .HasColumnName("company_name")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.RegistrationNumber)
+                    .HasColumnName("registration_number")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.Type)
+                    .HasColumnName("type")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.ContactPerson)
+                    .HasColumnName("contact_person")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.Email)
+                    .HasColumnName("email")
+                    .HasMaxLength(100);
+                entity.Property(ec => ec.Phone)
+                    .HasColumnName("phone")
+                    .HasMaxLength(50);
+                entity.Property(ec => ec.Address)
+                    .HasColumnName("address")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.Certificates)
+                    .HasColumnName("certificates")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.IsBlacklisted).HasColumnName("is_blacklisted");
+                entity.Property(ec => ec.BlacklistReason)
+                    .HasColumnName("blacklist_reason")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.RiskScore).HasColumnName("risk_score");
+                entity.Property(ec => ec.SupplierId).HasColumnName("supplier_id");
+                entity.Property(ec => ec.DigitalSignature)
+                    .HasColumnName("digital_signature")
+                    .HasMaxLength(255);
+                entity.Property(ec => ec.Note)
+                    .HasColumnName("note")
+                    .HasMaxLength(255);
+
+                entity.Property(ec => ec.CreatedAt).HasColumnName("created_at");
+                entity.Property(ec => ec.UpdatedAt).HasColumnName("updated_at");
+
+                entity.HasOne(ec => ec.Supplier)
+                    .WithMany()
+                    .HasForeignKey(ec => ec.SupplierId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
+        private static void ConfigureUser(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("users");
+
+                entity.HasOne(u => u.LastModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(u => u.LastModifiedById)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_users_last_modified_by");
+
+                entity.HasOne<Role>()
+                    .WithMany(r => r.Users)
+                    .HasForeignKey(u => u.RoleId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_users_role");
+
+                entity.HasOne<Department>()
+                    .WithMany()
+                    .HasForeignKey(u => u.DepartmentId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_users_department");
+
+                entity.HasOne<Tenant>()
+                    .WithMany()
+                    .HasForeignKey(u => u.TenantId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_users_tenant_id");
+
+                entity.HasOne<JobTitle>()
+                    .WithMany()
+                    .HasForeignKey(u => u.JobTitleId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_users_job_title");
+            });
+
+            modelBuilder.Entity<UserRoleMapping>(entity =>
+            {
+                entity.ToTable("user_roles");
+
+                entity.HasKey(urm => new { urm.UserId, urm.RoleId });
+
+                entity.Property(urm => urm.UserId).HasColumnName("user_id");
+                entity.Property(urm => urm.RoleId).HasColumnName("role_id");
+                entity.Property(urm => urm.AssignedAt).HasColumnName("assigned_at");
+                entity.Property(urm => urm.AssignedById).HasColumnName("assigned_by_id");
+                entity.Property(urm => urm.ExpiresAt).HasColumnName("expires_at");
+                entity.Property(urm => urm.IsActive).HasColumnName("is_active");
+                entity.Property(urm => urm.ChangeVersion).HasColumnName("change_version");
+                entity.Property(urm => urm.DigitalSignature).HasColumnName("digital_signature");
+                entity.Property(urm => urm.SessionId).HasColumnName("session_id");
+                entity.Property(urm => urm.SourceIp).HasColumnName("source_ip");
+                entity.Property(urm => urm.Note).HasColumnName("note");
+                entity.Property(urm => urm.Reason).HasColumnName("reason");
+                entity.Property(urm => urm.CreatedAt).HasColumnName("created_at");
+                entity.Property(urm => urm.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(urm => urm.GrantedById).HasColumnName("granted_by");
+                entity.Property(urm => urm.GrantedAt).HasColumnName("granted_at");
+                entity.Property(urm => urm.UserLabel).HasColumnName("user");
+                entity.Property(urm => urm.RoleLabel).HasColumnName("role");
+                entity.Property(urm => urm.AssignedByLegacyId).HasColumnName("assigned_by");
+
+                entity.HasOne(urm => urm.User)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_ur_user");
+
+                entity.HasOne(urm => urm.Role)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_ur_role");
+
+                entity.HasOne(urm => urm.AssignedBy)
+                    .WithMany()
+                    .HasForeignKey(urm => urm.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_ur_assigned_by_id");
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(urm => urm.GrantedById)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_user_roles_granted_by");
+            });
+
+            modelBuilder.Entity<UserPermission>(entity =>
+            {
+                entity.ToTable("user_permissions");
+
+                entity.HasKey(up => new { up.UserId, up.PermissionId });
+
+                entity.Property(up => up.UserId).HasColumnName("user_id");
+                entity.Property(up => up.PermissionId).HasColumnName("permission_id");
+                entity.Property(up => up.Allowed).HasColumnName("allowed");
+                entity.Property(up => up.Reason).HasColumnName("reason");
+                entity.Property(up => up.GrantedById).HasColumnName("granted_by");
+                entity.Property(up => up.GrantedAt).HasColumnName("granted_at");
+                entity.Property(up => up.AssignedAt).HasColumnName("assigned_at");
+                entity.Property(up => up.AssignedById).HasColumnName("assigned_by");
+                entity.Property(up => up.ExpiresAt).HasColumnName("expires_at");
+                entity.Property(up => up.IsActive).HasColumnName("is_active");
+                entity.Property(up => up.ChangeVersion).HasColumnName("change_version");
+                entity.Property(up => up.DigitalSignature).HasColumnName("digital_signature");
+                entity.Property(up => up.SessionId).HasColumnName("session_id");
+                entity.Property(up => up.SourceIp).HasColumnName("source_ip");
+                entity.Property(up => up.Note).HasColumnName("note");
+                entity.Property(up => up.CreatedAt).HasColumnName("created_at");
+                entity.Property(up => up.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(up => up.UserLabel).HasColumnName("user");
+                entity.Property(up => up.PermissionLabel).HasColumnName("permission");
+                entity.Property(up => up.PermissionCode).HasColumnName("code");
+
+                entity.HasOne(up => up.User)
+                    .WithMany()
+                    .HasForeignKey(up => up.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_up_user");
+
+                entity.HasOne(up => up.Permission)
+                    .WithMany()
+                    .HasForeignKey(up => up.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_up_perm");
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(up => up.GrantedById)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_up_by");
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(up => up.AssignedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<DelegatedPermission>(entity =>
+            {
+                entity.ToTable("delegated_permissions");
+
+                entity.HasKey(dp => dp.Id);
+
+                entity.Property(dp => dp.Id).HasColumnName("id");
+                entity.Property(dp => dp.FromUserId).HasColumnName("from_user_id");
+                entity.Property(dp => dp.ToUserId).HasColumnName("to_user_id");
+                entity.Property(dp => dp.PermissionId).HasColumnName("permission_id");
+                entity.Property(dp => dp.StartAt).HasColumnName("start_at");
+                entity.Property(dp => dp.EndAt).HasColumnName("end_at");
+                entity.Property(dp => dp.Reason).HasColumnName("reason");
+                entity.Property(dp => dp.IsActive).HasColumnName("is_active");
+                entity.Property(dp => dp.IsRevoked).HasColumnName("is_revoked");
+                entity.Property(dp => dp.ApprovedById).HasColumnName("approved_by");
+                entity.Property(dp => dp.Note).HasColumnName("note");
+                entity.Property(dp => dp.ChangeVersion).HasColumnName("change_version");
+                entity.Property(dp => dp.DigitalSignature).HasColumnName("digital_signature");
+                entity.Property(dp => dp.SessionId).HasColumnName("session_id");
+                entity.Property(dp => dp.SourceIp).HasColumnName("source_ip");
+                entity.Property(dp => dp.GrantedById).HasColumnName("granted_by");
+                entity.Property(dp => dp.StartTimeRaw).HasColumnName("start_time");
+                entity.Property(dp => dp.ExpiresAtRaw).HasColumnName("expires_at");
+                entity.Property(dp => dp.RevokedLegacy).HasColumnName("revoked");
+                entity.Property(dp => dp.RevokedAt).HasColumnName("revoked_at");
+                entity.Property(dp => dp.CreatedAt).HasColumnName("created_at");
+                entity.Property(dp => dp.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(dp => dp.PermissionLabel).HasColumnName("permission?");
+                entity.Property(dp => dp.UserLabel).HasColumnName("user?");
+                entity.Property(dp => dp.DelegationCode).HasColumnName("code");
+
+                entity.HasOne(dp => dp.Permission)
+                    .WithMany(p => p.DelegatedPermissions)
+                    .HasForeignKey(dp => dp.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_dp_perm");
+
+                entity.HasOne(dp => dp.FromUser)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.FromUserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_dp_from");
+
+                entity.HasOne(dp => dp.ToUser)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.ToUserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_dp_to");
+
+                entity.HasOne(dp => dp.ApprovedBy)
+                    .WithMany()
+                    .HasForeignKey(dp => dp.ApprovedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(dp => dp.GrantedById)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("fk_dp_by");
+            });
+        }
         private static void ConfigureAdminActivityLog(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AdminActivityLog>(entity =>
@@ -564,7 +1062,9 @@ namespace YasGMP.Data
 
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.AdminId).HasColumnName("admin_id");
-                entity.Property(e => e.ActivityTime).HasColumnName("activity_time");
+                entity.Property(e => e.ActivityTime)
+                    .HasColumnName("activity_time")
+                    .IsRequired();
                 entity.Property(e => e.Activity)
                     .HasColumnName("activity")
                     .HasMaxLength(255)
@@ -574,7 +1074,9 @@ namespace YasGMP.Data
                     .HasMaxLength(100)
                     .IsRequired();
                 entity.Property(e => e.AffectedRecordId).HasColumnName("affected_record_id");
-                entity.Property(e => e.Details).HasColumnName("details");
+                entity.Property(e => e.Details)
+                    .HasColumnName("details")
+                    .HasColumnType("text");
                 entity.Property(e => e.SourceIp)
                     .HasColumnName("source_ip")
                     .HasMaxLength(45);
@@ -589,7 +1091,15 @@ namespace YasGMP.Data
                     .HasMaxLength(256);
                 entity.Property(e => e.ChangeVersion).HasColumnName("change_version");
                 entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
-                entity.Property(e => e.Note).HasColumnName("note");
+                entity.Property(e => e.Note)
+                    .HasColumnName("note")
+                    .HasColumnType("text");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(e => e.Timestamp).HasColumnName("timestamp");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasMaxLength(255);
 
                 entity.HasIndex(e => e.AdminId)
                     .HasDatabaseName("fk_adminact_user");
@@ -622,6 +1132,10 @@ namespace YasGMP.Data
                 entity.Property(e => e.IsActive).HasColumnName("is_active");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
                 entity.Property(e => e.LastUsedAt).HasColumnName("last_used_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(e => e.UsageLogsSnapshot)
+                    .HasColumnName("usage_logs")
+                    .HasMaxLength(255);
 
                 entity.HasIndex(e => e.Key)
                     .HasDatabaseName("key_value")
@@ -630,11 +1144,16 @@ namespace YasGMP.Data
                 entity.HasIndex(e => e.OwnerId)
                     .HasDatabaseName("fk_apikey_owner");
 
-                entity.HasOne<User>()
+                entity.HasOne(e => e.Owner)
                     .WithMany()
                     .HasForeignKey(e => e.OwnerId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_apikey_owner");
+
+                entity.HasMany(e => e.UsageLogEntries)
+                    .WithOne(l => l.ApiKey)
+                    .HasForeignKey(l => l.ApiKeyId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
 
@@ -701,19 +1220,9 @@ namespace YasGMP.Data
                 entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.PartId).HasColumnName("part_id");
-                entity.Property(e => e.WarehouseId).HasColumnName("warehouse_id");
                 entity.Property(e => e.TransactionType)
                     .HasColumnName("transaction_type")
-                    .HasMaxLength(8)
-                    .IsRequired();
-                entity.Property(e => e.Quantity).HasColumnName("quantity");
-                entity.Property(e => e.TransactionDate).HasColumnName("transaction_date");
-                entity.Property(e => e.PerformedById).HasColumnName("performed_by");
-                entity.Property(e => e.RelatedDocument)
-                    .HasColumnName("related_document")
-                    .HasMaxLength(255);
-                entity.Property(e => e.Note).HasColumnName("note");
+                    .HasMaxLength(16);
 
                 entity.HasIndex(e => e.PartId)
                     .HasDatabaseName("fk_it_part");
@@ -723,7 +1232,7 @@ namespace YasGMP.Data
                     .HasDatabaseName("fk_it_warehouse");
 
                 entity.HasOne(e => e.Part)
-                    .WithMany(p => p.InventoryTransactions)
+                    .WithMany()
                     .HasForeignKey(e => e.PartId)
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_it_part");
@@ -949,5 +1458,31 @@ namespace YasGMP.Data
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

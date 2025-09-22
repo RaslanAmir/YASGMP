@@ -6,74 +6,70 @@ using YasGMP.Models.Enums;
 namespace YasGMP.Models
 {
     [Table("incident_audit")]
-    public class IncidentAudit
+    public partial class IncidentAudit
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
-        [Column("incident_id")]
+        [NotMapped]
         public int IncidentId { get; set; }
 
-        [ForeignKey(nameof(IncidentId))]
+        [NotMapped]
         public Incident? Incident { get; set; }
 
-        [Required]
-        [Column("user_id")]
+        [NotMapped]
         public int UserId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
+        [NotMapped]
         public User? User { get; set; }
 
         /// <summary>Use IncidentActionType (not WorkOrderActionType)</summary>
-        [Required]
-        [Column("action")]
+        [NotMapped]
         public IncidentActionType Action { get; set; }
 
-        [Column("old_value")]
+        [NotMapped]
         public string? OldValue { get; set; }
 
-        [Column("new_value")]
+        [NotMapped]
         public string? NewValue { get; set; }
 
-        [Required]
-        [Column("action_at")]
+        [NotMapped]
         public DateTime ActionAt { get; set; } = DateTime.UtcNow;
 
-        [Column("note")]
+        [NotMapped]
         [StringLength(500)]
         public string? Note { get; set; }
 
-        [Column("source_ip")]
+        [NotMapped]
         [StringLength(128)]
         public string? SourceIp { get; set; }
 
-        [Column("digital_signature")]
+        [NotMapped]
         [StringLength(128)]
         public string? DigitalSignature { get; set; }
 
-        [Column("capa_id")]
+        [NotMapped]
         public int? CapaId { get; set; }
 
-        [ForeignKey(nameof(CapaId))]
+        [NotMapped]
         public CapaCase? CapaCase { get; set; }
 
-        [Column("work_order_id")]
+        [NotMapped]
         public int? WorkOrderId { get; set; }
 
-        [ForeignKey(nameof(WorkOrderId))]
+        [NotMapped]
         public WorkOrder? WorkOrder { get; set; }
 
-        [Column("device_info")]
+        [NotMapped]
         [StringLength(256)]
         public string? DeviceInfo { get; set; }
 
-        [Column("integrity_hash")]
+        [NotMapped]
         [StringLength(128)]
         public string? IntegrityHash { get; set; }
 
-        [Column("inspector_note")]
+        [NotMapped]
         [StringLength(500)]
         public string? InspectorNote { get; set; }
     }

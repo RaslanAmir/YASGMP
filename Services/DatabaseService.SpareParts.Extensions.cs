@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for spare part catalog, pricing, and stock.
+    /// </summary>
     public static class DatabaseServiceSparePartsExtensions
     {
         public static async Task<List<Part>> GetAllPartsAsync(this DatabaseService db, CancellationToken token = default)

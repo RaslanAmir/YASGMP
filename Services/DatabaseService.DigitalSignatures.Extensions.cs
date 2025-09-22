@@ -16,6 +16,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions covering digital signature persistence and retrieval.
+    /// </summary>
     public static class DatabaseServiceDigitalSignaturesExtensions
     {
         public static async Task<List<DigitalSignature>> GetAllSignaturesFullAsync(this DatabaseService db, CancellationToken token = default)

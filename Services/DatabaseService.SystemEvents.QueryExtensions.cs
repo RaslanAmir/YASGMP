@@ -12,6 +12,9 @@ using MySqlConnector;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions surfacing system event log queries for diagnostics.
+    /// </summary>
     public static class DatabaseServiceSystemEventsQueryExtensions
     {
         public static async Task<List<SystemEvent>> GetSystemEventsAsync(

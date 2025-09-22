@@ -7,6 +7,9 @@ using YasGMP.Diagnostics;
 
 namespace YasGMP.Services.Database
 {
+    /// <summary>
+    /// Helper telemetry functions for database calls including sampling decisions and N+1 detection.
+    /// </summary>
     internal static class DbTelemetry
     {
         private static readonly ConcurrentDictionary<string, int> NPlusOneCounter = new();

@@ -10,6 +10,9 @@ using YasGMP.Diagnostics;
 
 namespace YasGMP.Services.Database
 {
+    /// <summary>
+    /// Executes MySQL commands with telemetry hooks, parameter preparation, and slow-query tracking.
+    /// </summary>
     internal static class DbCommandWrapper
     {
         public static async Task<int> ExecuteNonQueryAsync(

@@ -1,79 +1,103 @@
-using System;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
-    /// <summary>
-    /// <b>IncidentLog</b> – Forenzička evidencija svih incidenata, nepravilnosti i GMP prijava.
-    /// Prati sve što inspektor može tražiti: detekciju, izvješćivanje, CAPA, status, korisnik, audit, rollback, signature!
-    /// <para>
-    /// ✅ Complete regulatory, forensic, and audit logging<br/>
-    /// ✅ Every field needed for inspection, rollback, legal defense<br/>
-    /// ✅ Digital signatures, user linkage, CAPA actions, and device/IP forensics
-    /// </para>
-    /// </summary>
-    public class IncidentLog
+    [Table("incident_log")]
+    public partial class IncidentLog
     {
-        /// <summary>Jedinstveni identifikator incidenta (Primary Key).</summary>
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>Datum/vrijeme detekcije incidenta.</summary>
-        public DateTime DetectedAt { get; set; }
+        [Column("detected_at")]
+        public DateTime? DetectedAt { get; set; }
 
-        /// <summary>ID korisnika koji je prijavio incident (FK).</summary>
+        [Column("reported_by_id")]
         public int? ReportedById { get; set; }
+
+        [ForeignKey(nameof(ReportedById))]
         public User? ReportedBy { get; set; }
 
-        /// <summary>Kategorizacija/snaznost incidenta ("low", "medium", "high", "critical", "gmp", "compliance").</summary>
+        [Column("severity")]
+        [MaxLength(16)]
         public string? Severity { get; set; }
 
-        /// <summary>Kratak naslov incidenta (za dashboard).</summary>
+        [Column("title")]
+        [MaxLength(255)]
         public string? Title { get; set; }
 
-        /// <summary>Detaljni opis incidenta ili GMP nepravilnosti.</summary>
+        [Column("description")]
         public string? Description { get; set; }
 
-        /// <summary>Da li je incident riješen.</summary>
-        public bool Resolved { get; set; } = false;
+        [Column("resolved")]
+        public bool? Resolved { get; set; }
 
-        /// <summary>Datum/vrijeme rješavanja (može biti null).</summary>
+        [Column("resolved_at")]
         public DateTime? ResolvedAt { get; set; }
 
-        /// <summary>ID korisnika koji je riješio incident (FK).</summary>
+        [Column("resolved_by_id")]
         public int? ResolvedById { get; set; }
+
+        [ForeignKey(nameof(ResolvedById))]
         public User? ResolvedBy { get; set; }
 
-        /// <summary>Akcije koje su poduzete radi rješavanja (CAPA, ispravci, rollback…).</summary>
+        [Column("actions_taken")]
         public string? ActionsTaken { get; set; }
 
-        /// <summary>Follow-up plan, dodatne radnje, CAPA mjere.</summary>
+        [Column("follow_up")]
         public string? FollowUp { get; set; }
 
-        /// <summary>Slobodan komentar (forenzika, rollback, notifikacija…).</summary>
+        [Column("note")]
         public string? Note { get; set; }
 
-        /// <summary>IP adresa/uređaj (forenzička evidencija).</summary>
+        [Column("source_ip")]
+        [MaxLength(45)]
         public string? SourceIp { get; set; }
 
-        /// <summary>Digitalni potpis prijave/rješenja incidenta.</summary>
+        [Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
+
+        [Column("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
+
+        [Column("severity_id")]
+        public int? SeverityId { get; set; }
+
+        [Column("digital_signature")]
+        [MaxLength(255)]
         public string? DigitalSignature { get; set; }
 
-        // ==================== ✅ BONUS FIELDS/EXTENSIONS ====================
-
-        /// <summary>Root cause/failure classification (for deep investigation and traceability).</summary>
+        [Column("root_cause")]
+        [MaxLength(255)]
         public string? RootCause { get; set; }
 
-        /// <summary>Linked CAPA case or reference (traceability to corrective/preventive action).</summary>
+        [Column("capa_case_id")]
         public int? CapaCaseId { get; set; }
+
+        [ForeignKey(nameof(CapaCaseId))]
         public CapaCase? CapaCase { get; set; }
 
-        /// <summary>Attachments or evidence (JSON/CSV/Blob/IDs for photos, PDFs, reports).</summary>
-        public string? Attachments { get; set; }
+        [Column("capa_case")]
+        [MaxLength(255)]
+        public string? CapaCaseLabel { get; set; }
 
-        /// <summary>Last modification timestamp (for forensic timeline).</summary>
-        public DateTime LastModified { get; set; } = DateTime.UtcNow;
+        [Column("attachments")]
+        [MaxLength(255)]
+        public string? AttachmentsRaw { get; set; }
 
-        /// <summary>User ID who last modified (for audit trail).</summary>
+        [Column("last_modified")]
+        public DateTime? LastModified { get; set; }
+
+        [Column("last_modified_by_id")]
         public int? LastModifiedById { get; set; }
+
+        [ForeignKey(nameof(LastModifiedById))]
         public User? LastModifiedBy { get; set; }
+
+        [Column("last_modified_by")]
+        [MaxLength(255)]
+        public string? LastModifiedByName { get; set; }
     }
 }

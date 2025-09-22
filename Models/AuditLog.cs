@@ -16,8 +16,8 @@ namespace YasGMP.Models
     /// • Use for all CRUD, user, integration, and critical system actions!
     /// </remarks>
     /// </summary>
-    [Table("audit_logs")]
-    public class AuditLog
+    [Table("audit_log")]
+    public partial class AuditLog
     {
         /// <summary>
         /// Unique log entry ID (primary key, auto-increment).
@@ -33,13 +33,13 @@ namespace YasGMP.Models
         [Required]
         [Column("user_id")]
         [Display(Name = "Korisnik")]
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
         /// <summary>
         /// Navigation property to the user who performed the action (required, EF-populated).
         /// </summary>
         [ForeignKey("UserId")]
-        public virtual User User { get; set; } = null!;
+        public virtual User? User { get; set; }
 
         /// <summary>
         /// Action performed (e.g., CREATE, UPDATE, DELETE, LOGIN, PRINT, SIGN, EXPORT, ...).
@@ -54,7 +54,7 @@ namespace YasGMP.Models
         /// UTC timestamp when the action was performed.
         /// </summary>
         [Required]
-        [Column("date_time")]
+        [Column("event_time")]
         [Display(Name = "Datum i vrijeme")]
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
@@ -154,9 +154,12 @@ namespace YasGMP.Models
         /// <summary>
         /// Optional freeform note (incident reference, CAPA, root cause, etc.).
         /// </summary>
-        [MaxLength(512)]
-        [Column("note")]
+        [NotMapped]
         [Display(Name = "Napomena")]
-        public string Note { get; set; } = string.Empty;
+        public string Note
+        {
+            get => Details;
+            set => Details = value;
+        }
     }
 }

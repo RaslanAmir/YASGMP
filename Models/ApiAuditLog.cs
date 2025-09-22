@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Database entity that records each API call for audit, linking to the key/user, action, and request context.
+    /// </summary>
     [Table("api_audit_log")]
     public class ApiAuditLog
     {

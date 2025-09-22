@@ -6,6 +6,9 @@ using YasGMP.Diagnostics;
 
 namespace YasGMP.Services.Database
 {
+    /// <summary>
+    /// Maintains a rolling buffer of slow query signatures for diagnostics dashboards.
+    /// </summary>
     public static class DbSlowQueryRegistry
     {
         private static readonly ConcurrentQueue<(int dur, string sig, DateTime ts)> Q = new();

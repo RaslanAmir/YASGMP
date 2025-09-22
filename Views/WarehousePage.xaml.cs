@@ -5,6 +5,9 @@ using YasGMP.ViewModels;
 
 namespace YasGMP.Views
 {
+    /// <summary>
+    /// Content page that exposes warehouse inventory dashboards and actions.
+    /// </summary>
     public partial class WarehousePage : ContentPage
     {
         public WarehouseViewModel ViewModel { get; }

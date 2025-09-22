@@ -12,6 +12,9 @@ using MySqlConnector;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions supporting inventory locations, stock, and movements.
+    /// </summary>
     public static class DatabaseServiceInventoryExtensions
     {
         private static Task EnsureWarehouseSchemaAsync(this DatabaseService db, CancellationToken token)

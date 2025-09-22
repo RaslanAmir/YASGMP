@@ -208,7 +208,7 @@ namespace YasGMP.Services
                   .Append(Esc(d.Severity)).Append(',')
                   .Append(Esc(d.Status)).Append(',')
                   .Append(d.ReportedById).Append(',')
-                  .Append(d.ReportedAt.ToString("yyyy-MM-dd HH:mm:ss")).Append(',')
+                  .Append(d.ReportedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "").Append(',')
                   .Append(d.AssignedInvestigatorId?.ToString() ?? "").Append(',')
                   .Append(d.LinkedCapaId?.ToString() ?? "").Append(',')
                   .Append(d.ClosedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "")

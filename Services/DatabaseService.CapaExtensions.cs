@@ -15,6 +15,9 @@ using YasGMP.Models.Enums;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions providing general CAPA queries and updates.
+    /// </summary>
     public static class DatabaseServiceCapaExtensions
     {
         private const string BaseAuditSelect = @"

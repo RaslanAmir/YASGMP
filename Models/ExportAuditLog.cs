@@ -6,7 +6,7 @@ namespace YasGMP.Models
 {
     /// <summary>Entity model for the `export_audit_log` table.</summary>
     [Table("export_audit_log")]
-    public class ExportAuditLog
+    public partial class ExportAuditLog
     {
         /// <summary>Gets or sets the id.</summary>
         [Key]

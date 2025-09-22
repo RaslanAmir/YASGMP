@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for core incident records and relations.
+    /// </summary>
     public static class DatabaseServiceIncidentsExtensions
     {
         public static async Task<List<Incident>> GetAllIncidentsAsync(this DatabaseService db, CancellationToken token = default)

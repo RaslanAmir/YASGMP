@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions interacting with supplier master data and audits.
+    /// </summary>
     public static class DatabaseServiceSuppliersExtensions
     {
         public static async Task<List<Supplier>> GetAllSuppliersAsync(this DatabaseService db, CancellationToken token = default)

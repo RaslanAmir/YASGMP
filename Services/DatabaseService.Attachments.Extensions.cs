@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for attachment CRUD, linking, and metadata lookups.
+    /// </summary>
     public static class DatabaseServiceAttachmentsExtensions
     {
         public static async Task<List<Attachment>> GetAttachmentsFilteredAsync(this DatabaseService db, string? entityFilter, string? typeFilter, string? searchTerm, CancellationToken token = default)

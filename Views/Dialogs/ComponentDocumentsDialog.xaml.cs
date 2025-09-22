@@ -11,6 +11,9 @@ using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Modal dialog that lists and manages documents linked to a component.
+    /// </summary>
     public partial class ComponentDocumentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

@@ -11,6 +11,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions that read and update system settings.
+    /// </summary>
     public static class DatabaseServiceSettingsExtensions
     {
         public static async Task<List<Setting>> GetAllSettingsFullAsync(this DatabaseService db, CancellationToken token = default)

@@ -3,6 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Data;
+using MySqlConnector;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,13 +24,58 @@ namespace YasGMP.Services
     public class AttachmentService : IAttachmentService
     {
         private readonly IDbContextFactory<YasGmpDbContext> _contextFactory;
+        private readonly DatabaseService _legacyDb;
         private readonly string _rootPath;
 
-        public AttachmentService(IDbContextFactory<YasGmpDbContext> contextFactory)
+        private bool? _supportsEfSchema;
+        private readonly SemaphoreSlim _schemaGate = new(1, 1);
+
+        public AttachmentService(IDbContextFactory<YasGmpDbContext> contextFactory, DatabaseService legacyDatabase)
         {
             _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
+            _legacyDb = legacyDatabase ?? throw new ArgumentNullException(nameof(legacyDatabase));
             _rootPath = Path.Combine(FileSystem.AppDataDirectory, "attachments");
             Directory.CreateDirectory(_rootPath);
+        }
+
+        private async Task<bool> SupportsEfAttachmentsAsync(CancellationToken token)
+        {
+            if (_supportsEfSchema.HasValue)
+                return _supportsEfSchema.Value;
+
+            await _schemaGate.WaitAsync(token).ConfigureAwait(false);
+            try
+            {
+                if (_supportsEfSchema.HasValue)
+                    return _supportsEfSchema.Value;
+
+                try
+                {
+                    await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
+                    var connection = context.Database.GetDbConnection();
+                    if (connection.State != ConnectionState.Open)
+                        await connection.OpenAsync(token).ConfigureAwait(false);
+
+                    await using var command = connection.CreateCommand();
+                    command.CommandText = "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'attachment_links' LIMIT 1";
+                    var result = await command.ExecuteScalarAsync(token).ConfigureAwait(false);
+                    _supportsEfSchema = result != null && result != DBNull.Value;
+                }
+                catch (Exception ex) when (TryGetMySqlException(ex, out var mysql))
+                {
+                    _supportsEfSchema = false;
+                }
+                catch
+                {
+                    _supportsEfSchema = false;
+                }
+
+                return _supportsEfSchema.GetValueOrDefault();
+            }
+            finally
+            {
+                _schemaGate.Release();
+            }
         }
 
         public async Task<AttachmentUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
@@ -39,6 +86,9 @@ namespace YasGMP.Services
                 throw new ArgumentException("File name must be provided", nameof(request));
             if (string.IsNullOrWhiteSpace(request.EntityType))
                 throw new ArgumentException("Entity type must be provided", nameof(request));
+
+            if (!await SupportsEfAttachmentsAsync(token).ConfigureAwait(false))
+                throw new InvalidOperationException("Attachment upload requires the new attachment_links schema. Please migrate the database or disable uploads.");
 
             if (content.CanSeek)
             {
@@ -135,11 +185,22 @@ namespace YasGMP.Services
             if (string.IsNullOrWhiteSpace(sha256))
                 throw new ArgumentException("Hash must be provided", nameof(sha256));
 
-            await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
-            return await context.Attachments
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.FileHash == sha256, token)
-                .ConfigureAwait(false);
+            if (!await SupportsEfAttachmentsAsync(token).ConfigureAwait(false))
+                return await FindByHashLegacyAsync(sha256, token).ConfigureAwait(false);
+
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
+                return await context.Attachments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.FileHash == sha256, token)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (TryGetMySqlException(ex, out var mysql) && mysql is not null && IsSchemaMissing(mysql))
+            {
+                _supportsEfSchema = false;
+                return await FindByHashLegacyAsync(sha256, token).ConfigureAwait(false);
+            }
         }
 
         public async Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
@@ -147,39 +208,64 @@ namespace YasGMP.Services
             if (string.IsNullOrWhiteSpace(entityType))
                 throw new ArgumentException("Entity type must be provided", nameof(entityType));
 
-            await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
-            var rows = await context.AttachmentLinks
-                .Include(l => l.Attachment)
-                .Where(l => l.EntityType == entityType && l.EntityId == entityId)
-                .OrderByDescending(l => l.LinkedAt)
-                .ToListAsync(token)
-                .ConfigureAwait(false);
+            if (!await SupportsEfAttachmentsAsync(token).ConfigureAwait(false))
+                return await GetLegacyLinksAsync(entityType, entityId, token).ConfigureAwait(false);
 
-            var results = new List<AttachmentLinkWithAttachment>(rows.Count);
-            foreach (var link in rows)
+            try
             {
-                if (link.Attachment is null)
+                await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
+                var rows = await context.AttachmentLinks
+                    .Include(l => l.Attachment)
+                    .Where(l => l.EntityType == entityType && l.EntityId == entityId)
+                    .OrderByDescending(l => l.LinkedAt)
+                    .ToListAsync(token)
+                    .ConfigureAwait(false);
+
+                var results = new List<AttachmentLinkWithAttachment>(rows.Count);
+                foreach (var link in rows)
                 {
-                    continue;
+                    if (link.Attachment is null)
+                    {
+                        continue;
+                    }
+
+                    results.Add(new AttachmentLinkWithAttachment(link, link.Attachment));
                 }
 
-                results.Add(new AttachmentLinkWithAttachment(link, link.Attachment));
+                return results;
             }
-
-            return results;
+            catch (Exception ex) when (TryGetMySqlException(ex, out var mysql) && mysql is not null && IsSchemaMissing(mysql))
+            {
+                _supportsEfSchema = false;
+                return await GetLegacyLinksAsync(entityType, entityId, token).ConfigureAwait(false);
+            }
         }
 
         public async Task RemoveLinkAsync(int linkId, CancellationToken token = default)
         {
-            await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
-            var link = await context.AttachmentLinks.FirstOrDefaultAsync(l => l.Id == linkId, token).ConfigureAwait(false);
-            if (link == null)
+            if (!await SupportsEfAttachmentsAsync(token).ConfigureAwait(false))
             {
+                await RemoveLegacyLinkByIdAsync(linkId, token).ConfigureAwait(false);
                 return;
             }
 
-            context.AttachmentLinks.Remove(link);
-            await context.SaveChangesAsync(token).ConfigureAwait(false);
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
+                var link = await context.AttachmentLinks.FirstOrDefaultAsync(l => l.Id == linkId, token).ConfigureAwait(false);
+                if (link == null)
+                {
+                    return;
+                }
+
+                context.AttachmentLinks.Remove(link);
+                await context.SaveChangesAsync(token).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (TryGetMySqlException(ex, out var mysql) && mysql is not null && IsSchemaMissing(mysql))
+            {
+                _supportsEfSchema = false;
+                await RemoveLegacyLinkByIdAsync(linkId, token).ConfigureAwait(false);
+            }
         }
 
         public async Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
@@ -187,17 +273,202 @@ namespace YasGMP.Services
             if (string.IsNullOrWhiteSpace(entityType))
                 throw new ArgumentException("Entity type must be provided", nameof(entityType));
 
-            await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
-            var link = await context.AttachmentLinks
-                .FirstOrDefaultAsync(l => l.EntityType == entityType && l.EntityId == entityId && l.AttachmentId == attachmentId, token)
-                .ConfigureAwait(false);
-            if (link == null)
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync(token).ConfigureAwait(false);
+                var link = await context.AttachmentLinks
+                    .FirstOrDefaultAsync(l => l.EntityType == entityType && l.EntityId == entityId && l.AttachmentId == attachmentId, token)
+                    .ConfigureAwait(false);
+                if (link == null)
+                {
+                    return;
+                }
+
+                context.AttachmentLinks.Remove(link);
+                await context.SaveChangesAsync(token).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (TryGetMySqlException(ex, out var mysql) && mysql is not null && IsSchemaMissing(mysql))
+            {
+                await RemoveLegacyLinkAsync(entityType, entityId, attachmentId, token).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLegacyLinksAsync(string entityType, int entityId, CancellationToken token)
+        {
+            if (_legacyDb is null)
+            {
+                return Array.Empty<AttachmentLinkWithAttachment>();
+            }
+
+            const string sql = @"SELECT dl.id,
+                                         dl.document_id,
+                                         dl.entity_type,
+                                         dl.entity_id,
+                                         dl.created_at,
+                                         dl.updated_at,
+                                         d.id AS doc_id,
+                                         d.file_name,
+                                         d.storage_path,
+                                         d.content_type,
+                                         d.sha256,
+                                         d.uploaded_by,
+                                         d.uploaded_at
+                                  FROM document_links dl
+                                  JOIN documents d ON d.id = dl.document_id
+                                  WHERE dl.entity_type = @et AND dl.entity_id = @eid
+                                  ORDER BY dl.created_at DESC, dl.id DESC";
+
+            var parameters = new[]
+            {
+                new MySqlParameter("@et", entityType),
+                new MySqlParameter("@eid", entityId)
+            };
+
+            var table = await _legacyDb.ExecuteSelectAsync(sql, parameters, token).ConfigureAwait(false);
+            var list = new List<AttachmentLinkWithAttachment>(table.Rows.Count);
+            foreach (DataRow row in table.Rows)
+            {
+                var attachment = CreateLegacyAttachment(row, entityType, entityId);
+                var link = CreateLegacyLink(row, entityType, entityId, attachment.Id);
+                list.Add(new AttachmentLinkWithAttachment(link, attachment));
+            }
+
+            return list;
+        }
+
+        private async Task<Attachment?> FindByHashLegacyAsync(string sha256, CancellationToken token)
+        {
+            if (_legacyDb is null)
+            {
+                return null;
+            }
+
+            const string sql = @"SELECT d.id AS document_id,
+                                         d.file_name,
+                                         d.storage_path,
+                                         d.content_type,
+                                         d.sha256,
+                                         d.uploaded_by,
+                                         d.uploaded_at
+                                  FROM documents d
+                                  WHERE d.sha256 = @hash
+                                  LIMIT 1";
+
+            var table = await _legacyDb.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@hash", sha256) }, token).ConfigureAwait(false);
+            if (table.Rows.Count == 0)
+            {
+                return null;
+            }
+
+            return CreateLegacyAttachment(table.Rows[0]);
+        }
+
+        private async Task RemoveLegacyLinkByIdAsync(int linkId, CancellationToken token)
+        {
+            if (_legacyDb is null || linkId <= 0)
             {
                 return;
             }
 
-            context.AttachmentLinks.Remove(link);
-            await context.SaveChangesAsync(token).ConfigureAwait(false);
+            const string sql = "DELETE FROM document_links WHERE id=@id";
+            await _legacyDb.ExecuteNonQueryAsync(sql, new[] { new MySqlParameter("@id", linkId) }, token).ConfigureAwait(false);
         }
+
+        private async Task RemoveLegacyLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token)
+        {
+            if (_legacyDb is null)
+            {
+                return;
+            }
+
+            const string sql = "DELETE FROM document_links WHERE entity_type=@et AND entity_id=@eid AND document_id=@doc";
+            var parameters = new[]
+            {
+                new MySqlParameter("@et", entityType),
+                new MySqlParameter("@eid", entityId),
+                new MySqlParameter("@doc", attachmentId)
+            };
+
+            await _legacyDb.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+        }
+
+        private static Attachment CreateLegacyAttachment(DataRow row, string? entityType = null, int? entityId = null)
+        {
+            var fileName = GetString(row, "file_name");
+            var filePath = GetString(row, "storage_path");
+
+            if (string.IsNullOrEmpty(fileName) && !string.IsNullOrEmpty(filePath))
+            {
+                fileName = Path.GetFileName(filePath);
+            }
+
+            var attachmentId = GetInt(row, "document_id");
+            if (attachmentId == 0)
+            {
+                attachmentId = GetInt(row, "doc_id");
+            }
+
+            return new Attachment
+            {
+                Id = attachmentId,
+                Name = fileName,
+                FileName = fileName,
+                FilePath = filePath,
+                FileType = GetString(row, "content_type"),
+                FileHash = GetString(row, "sha256"),
+                UploadedById = GetNullableInt(row, "uploaded_by"),
+                UploadedAt = GetNullableDateTime(row, "uploaded_at") ?? DateTime.UtcNow,
+                EntityType = entityType ?? GetString(row, "entity_type"),
+                EntityId = entityId ?? GetNullableInt(row, "entity_id"),
+                Status = "legacy",
+                Notes = GetString(row, "note")
+            };
+        }
+
+        private static AttachmentLink CreateLegacyLink(DataRow row, string entityType, int entityId, int attachmentId)
+        {
+            return new AttachmentLink
+            {
+                Id = GetInt(row, "id"),
+                AttachmentId = attachmentId,
+                EntityType = entityType,
+                EntityId = entityId,
+                LinkedAt = GetNullableDateTime(row, "created_at") ?? DateTime.UtcNow,
+                LinkedById = GetNullableInt(row, "uploaded_by")
+            };
+        }
+
+        private static string GetString(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToString(row[column]) ?? string.Empty : string.Empty;
+
+        private static int GetInt(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToInt32(row[column]) : 0;
+
+        private static int? GetNullableInt(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToInt32(row[column]) : (int?)null;
+
+        private static DateTime? GetNullableDateTime(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToDateTime(row[column]) : (DateTime?)null;
+
+        private static bool TryGetMySqlException(Exception ex, out MySqlException? mysql)
+        {
+            if (ex is MySqlException direct)
+            {
+                mysql = direct;
+                return true;
+            }
+
+            if (ex.InnerException is not null)
+            {
+                return TryGetMySqlException(ex.InnerException, out mysql);
+            }
+
+            mysql = null;
+            return false;
+        }
+
+        private static bool IsSchemaMissing(MySqlException ex)
+            => ex.Number == (int)MySqlErrorCode.UnknownTable || ex.Number == (int)MySqlErrorCode.BadFieldError;
+
     }
 }

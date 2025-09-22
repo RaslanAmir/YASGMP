@@ -16,6 +16,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions that read and write deviation audit trails.
+    /// </summary>
     public static class DatabaseServiceDeviationAuditExtensions
     {
         // Create

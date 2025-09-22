@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for document control records and versions.
+    /// </summary>
     public static class DatabaseServiceDocumentsExtensions
     {
         public static async Task<List<SopDocument>> GetAllDocumentsFullAsync(this DatabaseService db, CancellationToken token = default)

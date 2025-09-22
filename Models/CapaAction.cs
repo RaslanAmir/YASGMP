@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Represents an individual CAPA action, covering description, timing, ownership, and completion state.
+    /// </summary>
     [Table("capa_actions")]
     public class CapaAction
     {

@@ -8,6 +8,9 @@ using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Views.Debug
 {
+    /// <summary>
+    /// Developer-facing diagnostics dashboard with links to self-tests and inspection tools.
+    /// </summary>
     public partial class DebugDashboardPage : ContentPage
     {
         private readonly ITrace _trace;

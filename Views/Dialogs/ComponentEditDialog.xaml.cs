@@ -5,6 +5,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Modal editor for maintaining component metadata inline.
+    /// </summary>
     public partial class ComponentEditDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

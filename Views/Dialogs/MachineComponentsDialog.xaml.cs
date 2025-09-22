@@ -8,6 +8,9 @@ using YasGMP.Services;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Dialog that displays components associated with a machine for quick navigation.
+    /// </summary>
     public partial class MachineComponentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

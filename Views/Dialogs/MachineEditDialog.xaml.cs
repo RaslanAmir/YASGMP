@@ -17,6 +17,9 @@ using MachineStatus = YasGMP.Models.MachineStatus;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Modal editor for machine/base asset properties.
+    /// </summary>
     public partial class MachineEditDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

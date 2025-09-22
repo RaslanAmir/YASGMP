@@ -18,7 +18,7 @@ namespace YasGMP.Models
     /// </remarks>
     /// </summary>
     [Table("user_permissions")]
-    public class UserPermission
+    public partial class UserPermission
     {
         /// <summary>
         /// User ID (Foreign Key, part of composite key).

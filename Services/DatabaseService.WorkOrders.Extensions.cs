@@ -10,6 +10,9 @@ using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for retrieving and persisting work order aggregates.
+    /// </summary>
     public static class DatabaseServiceWorkOrdersExtensions
     {
         #region Core Insert/Update

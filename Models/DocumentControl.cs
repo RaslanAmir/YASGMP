@@ -288,7 +288,7 @@ namespace YasGMP.Models
     /// <b>DocumentVersion</b> – Linked version record for full document traceability and compliance.
     /// </summary>
     [Table("document_versions")]
-    public class DocumentVersion
+    public partial class DocumentVersion
     {
         /// <summary>Primary key.</summary>
         [Key]

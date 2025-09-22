@@ -5,96 +5,59 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>InventoryTransaction</b> – Ultra robust record of every inventory movement for a part.
-    /// <para>
-    /// ✅ Fully audit-ready: links part, warehouse, user, transaction type, docs, notes.<br/>
-    /// ✅ Supports GMP/CSV traceability, regulatory audit, attachments, and forensic analysis.
-    /// </para>
+    /// <b>InventoryTransaction</b> � Ultra robust record of every inventory movement for a part.
     /// </summary>
-    public class InventoryTransaction
+    [Table("inventory_transactions")]
+    public partial class InventoryTransaction
     {
-        /// <summary>
-        /// Unique transaction identifier (Primary Key).
-        /// </summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>
-        /// Related part ID (FK).
-        /// </summary>
         [Required]
-        [Display(Name = "Dio")]
+        [Display(Name = "Part")]
+        [Column("part_id")]
         public int PartId { get; set; }
 
-        /// <summary>
-        /// Related warehouse ID (FK).
-        /// </summary>
         [Required]
-        [Display(Name = "Skladište")]
+        [Display(Name = "Warehouse")]
+        [Column("warehouse_id")]
         public int WarehouseId { get; set; }
 
-        /// <summary>
-        /// Transaction type (in, out, transfer, adjust, damage, obsolete).
-        /// </summary>
         [Required]
-        [Display(Name = "Tip transakcije")]
+        [Display(Name = "Transaction Type")]
+        [Column("transaction_type")]
         public string TransactionType { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Quantity involved in the transaction.
-        /// </summary>
-        [Display(Name = "Količina")]
+        [Display(Name = "Quantity")]
+        [Column("quantity")]
         public int Quantity { get; set; }
 
-        /// <summary>
-        /// Transaction timestamp.
-        /// </summary>
-        [Display(Name = "Datum transakcije")]
-        public DateTime TransactionDate { get; set; } = DateTime.Now;
+        [Display(Name = "Transaction Date")]
+        [Column("transaction_date")]
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// ID of the user who performed the transaction (FK).
-        /// </summary>
-        [Display(Name = "Izvršio korisnik")]
+        [Display(Name = "Performed By")]
+        [Column("performed_by_id")]
         public int? PerformedById { get; set; }
 
-        /// <summary>
-        /// Related document number or file (invoice, WO, etc).
-        /// </summary>
         [StringLength(255)]
-        [Display(Name = "Dokument")]
+        [Display(Name = "Document")]
+        [Column("related_document")]
         public string? RelatedDocument { get; set; }
 
-        /// <summary>
-        /// Optional transaction note or description.
-        /// </summary>
-        [Display(Name = "Napomena")]
+        [Display(Name = "Note")]
+        [Column("note")]
         public string? Note { get; set; }
 
-        // === Navigation Properties ===
+        [ForeignKey(nameof(PartId))]
+        public virtual Part? Part { get; set; }
 
-        /// <summary>
-        /// Related part entity.
-        /// </summary>
-        public virtual SparePart? Part { get; set; }
-
-        /// <summary>
-        /// Related warehouse entity.
-        /// </summary>
+        [ForeignKey(nameof(WarehouseId))]
         public virtual Warehouse? Warehouse { get; set; }
 
-        /// <summary>
-        /// User who performed the transaction.
-        /// </summary>
+        [ForeignKey(nameof(PerformedById))]
         public virtual User? PerformedBy { get; set; }
-
-        // === BONUS: Attachments, audit trail, advanced links can be added here
-
-        /// <summary>
-        /// Creates a new InventoryTransaction instance.
-        /// </summary>
-        public InventoryTransaction()
-        {
-        }
     }
 }
+

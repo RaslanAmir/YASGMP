@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for deviation entities and workflows.
+    /// </summary>
     public static class DatabaseServiceDeviationsExtensions
     {
         public static async Task<List<Deviation>> GetAllDeviationsAsync(this DatabaseService db, CancellationToken token = default)

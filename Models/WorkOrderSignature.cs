@@ -1,110 +1,81 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using YasGMP.Models.Enums;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>WorkOrderSignature</b> – Digital or manual signature for any work order step.
-    /// Tracks user, signature type, digital hash, PIN, device, IP address, incident flag, notes, and more.
-    /// Every signature is forensically traceable for GMP, CSV, and 21 CFR Part 11 inspection!
+    /// Captures digital signature events for work orders, including hash, signer and type metadata.
     /// </summary>
-    [Table("work_order_signature")]
-    public class WorkOrderSignature
+    [Table("work_order_signatures")]
+    public partial class WorkOrderSignature
     {
-        /// <summary>Unique signature ID (Primary Key).</summary>
         [Key]
         [Column("id")]
-        [Display(Name = "ID potpisa")]
         public int Id { get; set; }
 
-        /// <summary>Work order ID this signature relates to (FK).</summary>
-        [Required]
         [Column("work_order_id")]
-        [Display(Name = "Radni nalog")]
         public int WorkOrderId { get; set; }
 
-        /// <summary>Navigation to work order.</summary>
-        [ForeignKey(nameof(WorkOrderId))]
-        public WorkOrder? WorkOrder { get; set; }
-
-        /// <summary>User who signed (FK to User).</summary>
-        [Required]
         [Column("user_id")]
-        [Display(Name = "Korisnik")]
         public int UserId { get; set; }
 
-        /// <summary>Navigation to user.</summary>
-        [ForeignKey(nameof(UserId))]
-        public User? User { get; set; }
+        [Column("signature_hash")]
+        [StringLength(255)]
+        public string? SignatureHash { get; set; }
 
-        /// <summary>Timestamp of signature (forensic timestamp).</summary>
-        [Required]
         [Column("signed_at")]
-        [Display(Name = "Vrijeme potpisa")]
-        public DateTime SignedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? SignedAt { get; set; }
 
-        /// <summary>Signature type: digital, manual, PIN, cert, API, approval, review, etc.</summary>
-        [Required]
-        [Column("type")]
-        [MaxLength(30)]
-        [Display(Name = "Tip potpisa")]
-        public string Type { get; set; } = string.Empty;
-
-        /// <summary>Digital hash of signature (SHA-256, GMP inspection, CSV, rollback).</summary>
-        [Column("hash")]
-        [MaxLength(128)]
-        [Display(Name = "Hash potpisa")]
-        public string Hash { get; set; } = string.Empty;
-
-        /// <summary>PIN used (if any; hashed or masked).</summary>
         [Column("pin_used")]
-        [MaxLength(32)]
-        [Display(Name = "Korišteni PIN")]
-        public string PinUsed { get; set; } = string.Empty;
+        [StringLength(20)]
+        public string? PinUsed { get; set; }
 
-        /// <summary>Device/computer info from which the signature was made (forensics).</summary>
-        [Column("device_info")]
-        [MaxLength(255)]
-        [Display(Name = "Uređaj/OS")]
-        public string DeviceInfo { get; set; } = string.Empty;
+        [Column("signature_type")]
+        [StringLength(32)]
+        public string SignatureTypeRaw { get; set; } = "zakljucavanje";
 
-        /// <summary>IP address of signer (inspection, compliance).</summary>
-        [Column("ip_address")]
-        [MaxLength(45)]
-        [Display(Name = "IP adresa")]
-        public string IpAddress { get; set; } = string.Empty;
+        [Column("note", TypeName = "text")]
+        public string? Note { get; set; }
 
-        /// <summary>Incident/CAPA flag (bonus for alerting inspection).</summary>
-        [Column("is_incident")]
-        [Display(Name = "Incident/CAPA zastavica")]
-        public bool IsIncident { get; set; }
+        [Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
 
-        /// <summary>Additional note (audit, rollback, reason for signature).</summary>
-        [Column("note")]
-        [MaxLength(500)]
-        [Display(Name = "Napomena")]
-        public string Note { get; set; } = string.Empty;
+        [Column("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>DeepCopy – for rollback, audit, signature history, forensic checks.</summary>
-        public WorkOrderSignature DeepCopy()
+        [ForeignKey(nameof(WorkOrderId))]
+        public virtual WorkOrder? WorkOrder { get; set; }
+
+        [ForeignKey(nameof(UserId))]
+        public virtual User? User { get; set; }
+
+        [NotMapped]
+        public WorkOrderSignatureType SignatureType
         {
-            return new WorkOrderSignature
+            get
             {
-                Id = this.Id,
-                WorkOrderId = this.WorkOrderId,
-                WorkOrder = this.WorkOrder,
-                UserId = this.UserId,
-                User = this.User,
-                SignedAt = this.SignedAt,
-                Type = this.Type,
-                Hash = this.Hash,
-                PinUsed = this.PinUsed,
-                DeviceInfo = this.DeviceInfo,
-                IpAddress = this.IpAddress,
-                IsIncident = this.IsIncident,
-                Note = this.Note
-            };
+                return SignatureTypeRaw switch
+                {
+                    "odobrenje" => WorkOrderSignatureType.Approval,
+                    "potvrda" => WorkOrderSignatureType.ExecutionConfirmation,
+                    "zakljucavanje" => WorkOrderSignatureType.Lock,
+                    _ => Enum.TryParse(SignatureTypeRaw, true, out WorkOrderSignatureType parsed)
+                        ? parsed
+                        : WorkOrderSignatureType.Custom
+                };
+            }
+            set
+            {
+                SignatureTypeRaw = value switch
+                {
+                    WorkOrderSignatureType.Approval => "odobrenje",
+                    WorkOrderSignatureType.ExecutionConfirmation => "potvrda",
+                    WorkOrderSignatureType.Lock => "zakljucavanje",
+                    _ => value.ToString().ToLowerInvariant()
+                };
+            }
         }
     }
 }

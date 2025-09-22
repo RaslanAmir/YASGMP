@@ -5,6 +5,9 @@ using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Views.Debug
 {
+    /// <summary>
+    /// Debug page that surfaces live health probes and environment metadata.
+    /// </summary>
     public partial class HealthPage : ContentPage
     {
         public HealthPage()

@@ -1,118 +1,122 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>PartSupplierPrice</b> – Super ultra mega robust price and contract record for a supplier-part relationship.
-    /// <para>
-    /// ✅ Full price history, audit, digital signature, multi-currency, region, and contract validity  
-    /// ✅ Tracks VAT, discounts, surcharges, min order, lead time, recall/block, ML price scoring  
-    /// ✅ Inspector/ERP/analytics-ready, fully GMP/CSV/21 CFR Part 11/ISO compliant
-    /// </para>
+    /// Record describing negotiated pricing and contract metadata between a part and a supplier.
+    /// Includes commercial, compliance, and audit details for full GMP/CSV traceability.
     /// </summary>
-    public class PartSupplierPrice
+    [Table("part_supplier_prices")]
+    public partial class PartSupplierPrice
     {
-        /// <summary>Unique record ID (Primary Key).</summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>FK to the part (Part).</summary>
-        [Required]
-        public int PartId { get; set; }
-        public Part? Part { get; set; }
+        [Column("part_id")]
+        public int? PartId { get; set; }
 
-        /// <summary>FK to the supplier (Supplier).</summary>
-        [Required]
-        public int SupplierId { get; set; }
-        public Supplier? Supplier { get; set; }
+        [Column("supplier_id")]
+        public int? SupplierId { get; set; }
 
-        /// <summary>Supplier name (snapshot for history/report even if deleted/renamed).</summary>
-        [StringLength(200)]
-        public string? SupplierName { get; set; }
+        [Column("unit_price", TypeName = "decimal(10,2)")]
+        public decimal? UnitPrice { get; set; }
 
-        /// <summary>Unit price of the part (excluding VAT).</summary>
-        [Required]
-        [Display(Name = "Jedinična cijena")]
-        public decimal UnitPrice { get; set; }
+        [Column("currency")]
+        [StringLength(10)]
+        public string? Currency { get; set; }
 
-        /// <summary>VAT percent for this price (for regulatory/tax calculations).</summary>
-        public double VatPercent { get; set; }
-
-        /// <summary>Total price including VAT (auto or manual for analytics/report).</summary>
-        public decimal? PriceWithVat { get; set; }
-
-        /// <summary>Currency (ISO 4217, e.g. HRK, EUR, USD, GBP, JPY).</summary>
-        [Required, StringLength(10)]
-        [Display(Name = "Valuta")]
-        public string Currency { get; set; } = string.Empty;
-
-        /// <summary>Region/country for this supplier price (for localization, export control).</summary>
-        [StringLength(40)]
-        public string? Region { get; set; }
-
-        /// <summary>Discount percent (if contractually agreed, for analytics/negotiation).</summary>
-        public double? DiscountPercent { get; set; }
-
-        /// <summary>Additional surcharge (e.g. shipping, customs, regulatory, per unit).</summary>
-        public decimal? Surcharge { get; set; }
-
-        /// <summary>Minimum order quantity (if contractually required).</summary>
-        public int? MinOrderQuantity { get; set; }
-
-        /// <summary>Average lead time in days (procurement analytics, supply chain risk).</summary>
-        public int? LeadTimeDays { get; set; }
-
-        /// <summary>Start date of validity (for multi-contract/period support).</summary>
-        public DateTime? ValidFrom { get; set; }
-
-        /// <summary>End date of validity (for price history, audit, and future-proofing).</summary>
-        [Display(Name = "Vrijedi do")]
+        [Column("valid_until")]
         public DateTime? ValidUntil { get; set; }
 
-        /// <summary>Is this price blocked due to recall, compliance, or audit?</summary>
-        public bool IsBlocked { get; set; }
+        [Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
 
-        /// <summary>Reason for block/recall/non-use (supply chain risk, compliance, recall, etc).</summary>
-        [StringLength(200)]
+        [Column("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
+
+        [Column("part")]
+        [StringLength(255)]
+        public string? PartCode { get; set; }
+
+        [Column("supplier")]
+        [StringLength(255)]
+        public string? SupplierCode { get; set; }
+
+        [Column("supplier_name")]
+        [StringLength(255)]
+        public string? SupplierName { get; set; }
+
+        [Column("vat_percent", TypeName = "decimal(10,2)")]
+        public decimal? VatPercent { get; set; }
+
+        [Column("price_with_vat", TypeName = "decimal(10,2)")]
+        public decimal? PriceWithVat { get; set; }
+
+        [Column("region")]
+        [StringLength(255)]
+        public string? Region { get; set; }
+
+        [Column("discount_percent", TypeName = "decimal(10,2)")]
+        public decimal? DiscountPercent { get; set; }
+
+        [Column("surcharge", TypeName = "decimal(10,2)")]
+        public decimal? Surcharge { get; set; }
+
+        [Column("min_order_quantity")]
+        public int? MinOrderQuantity { get; set; }
+
+        [Column("lead_time_days")]
+        public int? LeadTimeDays { get; set; }
+
+        [Column("valid_from")]
+        public DateTime? ValidFrom { get; set; }
+
+        [Column("is_blocked")]
+        public bool? IsBlocked { get; set; }
+
+        [Column("block_reason")]
+        [StringLength(255)]
         public string? BlockReason { get; set; }
 
-        /// <summary>Attachment for scanned contract/agreement, PDF, or price list.</summary>
+        [Column("contract_document")]
+        [StringLength(255)]
         public string? ContractDocument { get; set; }
 
-        /// <summary>Audit: last change timestamp.</summary>
-        public DateTime LastModified { get; set; } = DateTime.UtcNow;
+        [Column("last_modified")]
+        public DateTime? LastModified { get; set; }
 
-        /// <summary>User ID of last change (FK, for audit chain).</summary>
-        public int LastModifiedById { get; set; }
-        public User? LastModifiedBy { get; set; }
+        [Column("last_modified_by_id")]
+        public int? LastModifiedById { get; set; }
 
-        /// <summary>Digital signature/hash of the change (for forensic/audit/21 CFR compliance).</summary>
+        [Column("last_modified_by")]
+        [StringLength(255)]
+        public string? LastModifiedBy { get; set; }
+
+        [Column("digital_signature")]
+        [StringLength(255)]
         public string? DigitalSignature { get; set; }
 
-        /// <summary>IP/device info of the change (for audit/traceability).</summary>
+        [Column("source_ip")]
+        [StringLength(255)]
         public string? SourceIp { get; set; }
 
-        /// <summary>ML/AI risk or price anomaly score (future analytics, anti-fraud, supply chain health).</summary>
-        public double? AnomalyScore { get; set; }
+        [Column("anomaly_score", TypeName = "decimal(10,2)")]
+        public decimal? AnomalyScore { get; set; }
 
-        /// <summary>Inspector/ERP free note or comment (audit, negotiation, recall...).</summary>
-        [StringLength(1000)]
+        [Column("note")]
+        [StringLength(255)]
         public string? Note { get; set; }
 
-        /// <summary>Returns true if price is currently valid (now within ValidFrom/ValidUntil).</summary>
-        public bool IsCurrentlyValid =>
-            (!ValidFrom.HasValue || ValidFrom.Value <= DateTime.UtcNow)
-            && (!ValidUntil.HasValue || ValidUntil.Value >= DateTime.UtcNow)
-            && !IsBlocked;
+        [ForeignKey(nameof(PartId))]
+        public virtual Part? Part { get; set; }
 
-        /// <summary>Returns price including VAT (auto-calc if not set).</summary>
-        public decimal PriceWithVatCalc => PriceWithVat ?? UnitPrice * (1 + (decimal)(VatPercent / 100.0));
+        [ForeignKey(nameof(SupplierId))]
+        public virtual Supplier? Supplier { get; set; }
 
-        /// <summary>Returns human-readable string for logs/reports/inspectors.</summary>
-        public override string ToString()
-        {
-            return $"Supplier: {SupplierName ?? Supplier?.Name} | {UnitPrice} {Currency} (Valid: {ValidFrom?.ToShortDateString()} - {ValidUntil?.ToShortDateString()})";
-        }
+        [ForeignKey(nameof(LastModifiedById))]
+        public virtual User? LastModifiedByUser { get; set; }
     }
 }

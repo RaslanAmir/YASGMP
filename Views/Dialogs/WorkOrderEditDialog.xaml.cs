@@ -13,6 +13,9 @@ using YasGMP.Common;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Modal editor for creating and updating work orders with linked resources.
+    /// </summary>
     public partial class WorkOrderEditDialog : ContentPage
     {
         private readonly DatabaseService _db;

@@ -10,6 +10,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for scheduled job definitions and execution logs.
+    /// </summary>
     public static class DatabaseServiceSchedulerExtensions
     {
         public static async Task<List<ScheduledJob>> GetAllScheduledJobsFullAsync(this DatabaseService db, CancellationToken token = default)

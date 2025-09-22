@@ -8,6 +8,9 @@ using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Views.Debug
 {
+    /// <summary>
+    /// Debug log viewer page that lists collected app log files for download/inspection.
+    /// </summary>
     public partial class LogViewerPage : ContentPage
     {
         public LogViewerPage()

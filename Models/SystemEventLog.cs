@@ -10,12 +10,13 @@ namespace YasGMP.Models
     /// Forensic, regulatory, and analytics ready!
     /// </summary>
     [Table("system_event_log")]
-    public class SystemEventLog
+    public partial class SystemEventLog
     {
         /// <summary>
         /// Unique log entry ID (primary key).
         /// </summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
         /// <summary>
@@ -186,11 +187,13 @@ namespace YasGMP.Models
         /// <summary>
         /// Version number for event sourcing and rollback.
         /// </summary>
+        [Column("change_version")]
         public int ChangeVersion { get; set; } = 1;
 
         /// <summary>
         /// Indicates if the record is soft-deleted (for GDPR/archive).
         /// </summary>
+        [Column("is_deleted")]
         public bool IsDeleted { get; set; } = false;
 
         /// <summary>
@@ -209,3 +212,5 @@ namespace YasGMP.Models
         }
     }
 }
+
+

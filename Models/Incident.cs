@@ -5,6 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// End-to-end incident record capturing event details, severity, related entities, and closure metadata.
+    /// </summary>
     [Table("incidents")]
     public class Incident
     {

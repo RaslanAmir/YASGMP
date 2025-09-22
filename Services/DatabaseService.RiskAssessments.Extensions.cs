@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions dealing with risk assessment records and schedules.
+    /// </summary>
     public static class DatabaseServiceRiskAssessmentsExtensions
     {
         public static async Task<List<RiskAssessment>> GetAllRiskAssessmentsFullAsync(this DatabaseService db, CancellationToken token = default)

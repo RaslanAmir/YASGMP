@@ -7,6 +7,9 @@ using YasGMP.Services;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Dialog presenting detailed information about a part including suppliers and stock.
+    /// </summary>
     public partial class PartDetailDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

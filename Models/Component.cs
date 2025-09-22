@@ -12,7 +12,7 @@ namespace YasGMP.Models
     /// </para>
     /// </summary>
     [Table("components")]
-    public class Component
+    public partial class Component
     {
         /// <summary>Unique identifier (Primary Key).</summary>
         [Key]

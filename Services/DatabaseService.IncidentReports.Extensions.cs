@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions dedicated to incident report fetch/save operations.
+    /// </summary>
     public static class DatabaseServiceIncidentReportsExtensions
     {
         public static async Task<List<IncidentReport>> GetAllIncidentReportsFullAsync(this DatabaseService db, CancellationToken token = default)

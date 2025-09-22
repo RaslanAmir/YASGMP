@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for managing external service providers.
+    /// </summary>
     public static class DatabaseServiceExternalServicersExtensions
     {
         // UI prefers ExternalContractor. Keep DB mapping tolerant and expose both shapes when needed.

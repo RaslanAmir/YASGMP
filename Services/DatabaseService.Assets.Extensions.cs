@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions that load and persist asset (machine) records.
+    /// </summary>
     public static class DatabaseServiceAssetsExtensions
     {
         public static async Task<List<Asset>> GetAllAssetsFullAsync(this DatabaseService db, CancellationToken token = default)

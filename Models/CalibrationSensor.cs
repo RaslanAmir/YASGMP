@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Describes calibration metadata for a sensor tied to a component, including ranges, units, and upkeep cadence.
+    /// </summary>
     [Table("calibration_sensors")]
     public class CalibrationSensor
     {

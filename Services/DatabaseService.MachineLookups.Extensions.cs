@@ -19,6 +19,9 @@ using MachineStatusModel = YasGMP.Models.MachineStatus;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions that expose lightweight machine reference lookups.
+    /// </summary>
     public static class DatabaseServiceMachineLookupsExtensions
     {
         // Preferred order when looking for an existing display column

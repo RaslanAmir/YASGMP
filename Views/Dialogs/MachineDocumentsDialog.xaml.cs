@@ -11,6 +11,9 @@ using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Dialog listing documents linked to a machine with download actions.
+    /// </summary>
     public partial class MachineDocumentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

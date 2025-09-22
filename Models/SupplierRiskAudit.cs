@@ -46,7 +46,7 @@ namespace YasGMP.Models
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey(nameof(SupplierId))]
-        public virtual SupplierEntity? Supplier { get; set; }
+        public virtual Supplier? Supplier { get; set; }
 
         [ForeignKey(nameof(PerformedBy))]
         public virtual User? PerformedByNavigation { get; set; }

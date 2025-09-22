@@ -1,0 +1,1113 @@
+[
+  {
+    "table": "api_audit_log",
+    "file": "Models\\ApiAuditLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "api_usage_log",
+    "file": "Models\\ApiUsageLog.cs",
+    "missing_in_model": [
+      "action",
+      "api_key",
+      "details",
+      "id",
+      "timestamp",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "attachments",
+    "file": "Models\\Attachment.cs",
+    "missing_in_model": [
+      "changecontrolid",
+      "created_at",
+      "deviationid",
+      "externalcontractorid",
+      "file_content",
+      "incidentactionid",
+      "incidentid",
+      "incidentreportid",
+      "maintenanceexecutionlogid",
+      "notificationid",
+      "notificationlogid",
+      "partusageid",
+      "sparepartid",
+      "trainingrecordid",
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "file_content\", typename = \"longblob"
+    ]
+  },
+  {
+    "table": "attachment_links",
+    "file": "Models\\AttachmentLink.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "audit_logs",
+    "file": "Models\\AuditLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "action",
+      "change_version",
+      "date_time",
+      "details",
+      "device_info",
+      "digital_signature",
+      "field_name",
+      "id",
+      "is_deleted",
+      "new_value",
+      "note",
+      "old_value",
+      "record_id",
+      "severity",
+      "source_ip",
+      "table_name",
+      "user_id"
+    ]
+  },
+  {
+    "table": "buildings",
+    "file": "Models\\Building.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "calibrations",
+    "file": "Models\\Calibration.cs",
+    "missing_in_model": [
+      "created_at",
+      "machine_component",
+      "result_id",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "calibration_audit",
+    "file": "Models\\CalibrationAudit.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "action",
+      "calibration_id",
+      "changed_at",
+      "details",
+      "device_info",
+      "digital_signature",
+      "id",
+      "new_value",
+      "note",
+      "old_value",
+      "source_ip",
+      "user_id"
+    ]
+  },
+  {
+    "table": "calibration_audit_log",
+    "file": "Models\\CalibrationAuditLog.cs",
+    "missing_in_model": [
+      "calibration",
+      "created_at",
+      "details",
+      "timestamp",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "calibration_export_log",
+    "file": "Models\\CalibrationExportLog.cs",
+    "missing_in_model": [
+      "created_at",
+      "details",
+      "timestamp",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "calibration_sensors",
+    "file": "Models\\CalibrationSensor.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "capa_actions",
+    "file": "Models\\CapaAction.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "capa_action_log",
+    "file": "Models\\CapaActionLog.cs",
+    "missing_in_model": [
+      "capa_case",
+      "created_at",
+      "performed_by",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "capa_cases",
+    "file": "Models\\CapaCase.cs",
+    "missing_in_model": [
+      "created_at",
+      "machine_component",
+      "source_ip",
+      "updated_at",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "capa_status_history",
+    "file": "Models\\CapaStatusHistory.cs",
+    "missing_in_model": [
+      "capa_case",
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "checklist_items",
+    "file": "Models\\ChecklistItem.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "checklist_templates",
+    "file": "Models\\ChecklistTemplate.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "comments",
+    "file": "Models\\Comment.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "components",
+    "file": "Models\\Component.cs",
+    "missing_in_model": [
+      "calibration_required",
+      "component_type",
+      "created_at",
+      "manufacturer_id",
+      "notes",
+      "status_id",
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "change_version",
+      "code",
+      "comments",
+      "digital_signature",
+      "install_date",
+      "is_deleted",
+      "last_modified",
+      "last_modified_by_id",
+      "lifecycle_state",
+      "machine_id",
+      "machine_name",
+      "sop_doc",
+      "source_ip",
+      "status",
+      "supplier",
+      "type",
+      "warranty_until"
+    ]
+  },
+  {
+    "table": "component_devices",
+    "file": "Models\\ComponentDevice.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "component_models",
+    "file": "Models\\ComponentModel.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "component_parts",
+    "file": "Models\\ComponentPart.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "component_qualifications",
+    "file": "Models\\ComponentQualification.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "component_types",
+    "file": "Models\\ComponentType.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "config_change_log",
+    "file": "Models\\ConfigChangeLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "contractor_interventions",
+    "file": "Models\\ContractorIntervention.cs",
+    "missing_in_model": [
+      "component",
+      "created_at",
+      "updated_at",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "dashboards",
+    "file": "Models\\Dashboard.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "delegated_permissions",
+    "file": "Models\\DelegatedPermission.cs",
+    "missing_in_model": [
+      "code",
+      "created_at",
+      "expires_at",
+      "granted_by",
+      "revoked",
+      "revoked_at",
+      "start_time",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "delete_log",
+    "file": "Models\\DeleteLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "departments",
+    "file": "Models\\Department.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "deviation_audit",
+    "file": "Models\\DeviationAudit.cs",
+    "missing_in_model": [
+      "ai_anomaly_score"
+    ],
+    "extra_in_model": [
+      "ai_anomaly_score\", typename = \"decimal(5,4)"
+    ]
+  },
+  {
+    "table": "digital_signatures",
+    "file": "Models\\DigitalSignature.cs",
+    "missing_in_model": [
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "session_id"
+    ]
+  },
+  {
+    "table": "documentcontrol",
+    "file": "Models\\DocumentControl.cs",
+    "missing_in_model": [
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "action",
+      "approved_at",
+      "approved_by_id",
+      "assigned_to",
+      "attachments",
+      "created_by_id",
+      "digital_signature",
+      "document_type",
+      "documentcontrol_id",
+      "expiry_date",
+      "ip_address",
+      "is_locked",
+      "note",
+      "related_module",
+      "related_record_id",
+      "revision_history",
+      "session_id",
+      "status_history",
+      "timestamp",
+      "user_id"
+    ]
+  },
+  {
+    "table": "entity_audit_log",
+    "file": "Models\\EntityAuditLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "entity_tags",
+    "file": "Models\\EntityTag.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "export_audit_log",
+    "file": "Models\\ExportAuditLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "export_print_log",
+    "file": "Models\\ExportPrintLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "failure_modes",
+    "file": "Models\\FailureMode.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "incidents",
+    "file": "Models\\Incident.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "anomaly_score",
+      "assigned_investigator",
+      "assigned_to_id",
+      "capa_case_id",
+      "classification",
+      "closed_at",
+      "closed_by_id",
+      "closure_comment",
+      "description",
+      "detected_at",
+      "digital_signature",
+      "id",
+      "is_critical",
+      "is_deleted",
+      "last_modified",
+      "last_modified_by_id",
+      "linked_capa_id",
+      "linked_deviation_id",
+      "notes",
+      "priority",
+      "reported_at",
+      "reported_by_id",
+      "risk_level",
+      "root_cause",
+      "source_ip",
+      "status",
+      "title",
+      "type",
+      "work_order_id"
+    ]
+  },
+  {
+    "table": "incident_audit",
+    "file": "Models\\IncidentAudit.cs",
+    "missing_in_model": [
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "action",
+      "action_at",
+      "capa_id",
+      "device_info",
+      "digital_signature",
+      "incident_id",
+      "inspector_note",
+      "integrity_hash",
+      "new_value",
+      "note",
+      "old_value",
+      "source_ip",
+      "user_id",
+      "work_order_id"
+    ]
+  },
+  {
+    "table": "inspection",
+    "file": "Models\\Inspection.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "ai_analysis",
+      "approval_workflow_json",
+      "attachments_json",
+      "audit_finding_ref",
+      "capa_case_id",
+      "digital_signature",
+      "doc_file",
+      "id",
+      "inspection_date",
+      "inspector_name",
+      "last_modified",
+      "last_modified_by_id",
+      "notes",
+      "related_machine_id",
+      "result",
+      "source_ip",
+      "type"
+    ]
+  },
+  {
+    "table": "iot_anomaly_log",
+    "file": "Models\\IotAnomalyLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "iot_devices",
+    "file": "Models\\IotDevice.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "iot_event_audit",
+    "file": "Models\\IotEventAudit.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "iot_gateways",
+    "file": "Models\\IotGateway.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "iot_sensor_data",
+    "file": "Models\\IotSensorData.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "irregularities_log",
+    "file": "Models\\IrregularitiesLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "job_titles",
+    "file": "Models\\JobTitle.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "locations",
+    "file": "Models\\Location.cs",
+    "missing_in_model": [
+      "address",
+      "city",
+      "code",
+      "country",
+      "created_at",
+      "gps_lat",
+      "gps_lng",
+      "parent_id",
+      "type",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "lookup_domain",
+    "file": "Models\\LookupDomain.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "lookup_value",
+    "file": "Models\\LookupValue.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "machines",
+    "file": "Models\\Machine.cs",
+    "missing_in_model": [
+      "created_at",
+      "deleted_at",
+      "deleted_by",
+      "is_deleted",
+      "lifecycle_phase_id",
+      "location_id",
+      "machine_type_id",
+      "manufacturer_id",
+      "notes",
+      "purchase_date",
+      "responsible_party_id",
+      "room_id",
+      "status_id",
+      "tenant_id",
+      "updated_at",
+      "warranty_expiry"
+    ],
+    "extra_in_model": [
+      "machine_type",
+      "responsible_party"
+    ]
+  },
+  {
+    "table": "machine_models",
+    "file": "Models\\MachineModel.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "machine_statuses",
+    "file": "Models\\MachineStatus.cs",
+    "missing_in_model": [
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "machine_types",
+    "file": "Models\\MachineType.cs",
+    "missing_in_model": [
+      "code",
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "manufacturers",
+    "file": "Models\\Manufacturer.cs",
+    "missing_in_model": [
+      "created_at",
+      "updated_at",
+      "website"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "measurement_units",
+    "file": "Models\\MeasurementUnit.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "mobile_device_log",
+    "file": "Models\\MobileDeviceLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "notification_queue",
+    "file": "Models\\NotificationQueue.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "notification_templates",
+    "file": "Models\\NotificationTemplate.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "part_bom",
+    "file": "Models\\PartBom.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "permissions",
+    "file": "Models\\Permission.cs",
+    "missing_in_model": [
+      "module",
+      "string",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "permission_change_log",
+    "file": "Models\\PermissionChangeLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "permission_requests",
+    "file": "Models\\PermissionRequest.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "photo",
+    "file": "Models\\Photo.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "approved_at",
+      "approved_by_id",
+      "comment",
+      "component_id",
+      "device_info",
+      "digital_signature",
+      "file_path",
+      "file_size_bytes",
+      "hash",
+      "id",
+      "is_approved",
+      "is_original",
+      "last_modified",
+      "last_modified_by_id",
+      "latitude",
+      "longitude",
+      "next_photo_id",
+      "note",
+      "original_file_name",
+      "previous_photo_id",
+      "recognition_data",
+      "session_id",
+      "source_ip",
+      "status",
+      "type",
+      "uploaded_at",
+      "uploaded_by_id",
+      "version",
+      "watermark",
+      "work_order_id"
+    ]
+  },
+  {
+    "table": "ppm_plans",
+    "file": "Models\\PpmPlan.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "ref_domain",
+    "file": "Models\\RefDomain.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "ref_value",
+    "file": "Models\\RefValue.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "report_schedule",
+    "file": "Models\\ReportSchedule.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "responsible_parties",
+    "file": "Models\\ResponsibleParty.cs",
+    "missing_in_model": [
+      "created_at",
+      "department_id",
+      "display_name",
+      "party_type",
+      "updated_at",
+      "user_id",
+      "vendor_id"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "retention_policies",
+    "file": "Models\\RetentionPolicy.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "roles",
+    "file": "Models\\Role.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "role_audit",
+    "file": "Models\\RoleAudit.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "role_permissions",
+    "file": "Models\\RolePermission.cs",
+    "missing_in_model": [
+      "assigned_by_id",
+      "code",
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "rooms",
+    "file": "Models\\Room.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "scheduled_job_audit_log",
+    "file": "Models\\ScheduledJobAuditLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "sensor_data_log",
+    "file": "Models\\SensorDataLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "anomaly_score",
+      "approved_at",
+      "approved_by_id",
+      "chain_hash",
+      "comment",
+      "component_id",
+      "data_file",
+      "data_hash",
+      "device_name",
+      "digital_signature",
+      "geo_coordinates",
+      "id",
+      "is_anomaly",
+      "location",
+      "note",
+      "sensor_id",
+      "sensor_type",
+      "session_id",
+      "status",
+      "tag",
+      "timestamp",
+      "unit",
+      "value"
+    ]
+  },
+  {
+    "table": "sensor_models",
+    "file": "Models\\SensorModel.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "sensor_types",
+    "file": "Models\\SensorType.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "sites",
+    "file": "Models\\Site.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "sop_document_log",
+    "file": "Models\\SopDocumentLog.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "supplier",
+    "file": "Models\\Supplier.cs",
+    "missing_in_model": [
+      "created_at",
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "address",
+      "anomaly_score",
+      "city",
+      "contract_file",
+      "cooperation_end",
+      "cooperation_start",
+      "country",
+      "digital_signature",
+      "email",
+      "entry_hash",
+      "external_certification_id",
+      "gmp_comment",
+      "is_ai_flagged",
+      "is_qualified",
+      "last_modified",
+      "last_modified_by_id",
+      "last_qualification_check",
+      "name",
+      "notes",
+      "phone",
+      "registered_authorities",
+      "risk_level",
+      "session_id",
+      "source_ip",
+      "status",
+      "supplier_type",
+      "vat_number",
+      "website"
+    ]
+  },
+  {
+    "table": "suppliers",
+    "file": "Models\\SupplierEntity.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "supplier_risk_audit",
+    "file": "Models\\SupplierRiskAudit.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "system_event_log",
+    "file": "Models\\SystemEventLog.cs",
+    "missing_in_model": [
+      "action",
+      "change_version",
+      "created_at",
+      "id",
+      "is_deleted",
+      "related_module",
+      "timestamp",
+      "ts_utc",
+      "updated_at",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "system_parameters",
+    "file": "Models\\SystemParameter.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "tags",
+    "file": "Models\\Tag.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "tenants",
+    "file": "Models\\Tenant.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "users",
+    "file": "Models\\User.cs",
+    "missing_in_model": [
+      "job_title_id",
+      "password_hash",
+      "public_key",
+      "role_id",
+      "tenant_id",
+      "updated_at"
+    ],
+    "extra_in_model": [
+      "public_key\", typename = \"longtext"
+    ]
+  },
+  {
+    "table": "user_audit",
+    "file": "Models\\UserAudit.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_esignatures",
+    "file": "Models\\UserEsignature.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_login_audit",
+    "file": "Models\\UserLoginLog.cs",
+    "missing_in_model": [
+      "action",
+      "details",
+      "id",
+      "timestamp",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_permissions",
+    "file": "Models\\UserPermission.cs",
+    "missing_in_model": [
+      "code",
+      "created_at",
+      "granted_at",
+      "granted_by",
+      "permission",
+      "updated_at",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_role_assignments",
+    "file": "Models\\UserRoleAssignment.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "change_version",
+      "device_info",
+      "digital_signature",
+      "expires_at",
+      "granted_at",
+      "granted_by",
+      "id",
+      "note",
+      "role_id",
+      "session_id",
+      "source_ip",
+      "user_id"
+    ]
+  },
+  {
+    "table": "user_roles",
+    "file": "Models\\UserRoleMapping.cs",
+    "missing_in_model": [
+      "assigned_by_id",
+      "created_at",
+      "granted_at",
+      "granted_by",
+      "role",
+      "updated_at",
+      "user"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_subscriptions",
+    "file": "Models\\UserSubscription.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_training",
+    "file": "Models\\UserTraining.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "user_window_layouts",
+    "file": "Models\\UserWindowLayout.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "validations",
+    "file": "Models\\Validation.cs",
+    "missing_in_model": [
+      "doc_file",
+      "signed_by",
+      "updated_at",
+      "validation_date"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "work_orders",
+    "file": "Models\\WorkOrder.cs",
+    "missing_in_model": [
+      "assigned_to",
+      "created_at",
+      "created_by",
+      "photo_after_ids",
+      "photo_before_ids",
+      "priority_id",
+      "related_incident",
+      "status_id",
+      "tenant_id",
+      "type_id",
+      "updated_at"
+    ],
+    "extra_in_model": []
+  },
+  {
+    "table": "work_order_audit",
+    "file": "Models\\WorkOrderAudit.cs",
+    "missing_in_model": [
+      "created_at",
+      "new_value",
+      "old_value",
+      "updated_at",
+      "user",
+      "work_order"
+    ],
+    "extra_in_model": [
+      "new_value\", typename = \"text",
+      "old_value\", typename = \"text"
+    ]
+  },
+  {
+    "table": "work_order_checklist_item",
+    "file": "Models\\WorkOrderChecklistItem.cs",
+    "missing_in_model": [],
+    "extra_in_model": []
+  },
+  {
+    "table": "work_order_comment",
+    "file": "Models\\WorkOrderComment.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "created_at",
+      "digital_signature",
+      "id",
+      "is_critical",
+      "revision_no",
+      "source_ip",
+      "text",
+      "type",
+      "user_id",
+      "work_order_id"
+    ]
+  },
+  {
+    "table": "work_order_signature",
+    "file": "Models\\WorkOrderSignature.cs",
+    "missing_in_model": [],
+    "extra_in_model": [
+      "device_info",
+      "hash",
+      "id",
+      "ip_address",
+      "is_incident",
+      "note",
+      "pin_used",
+      "signed_at",
+      "type",
+      "user_id",
+      "work_order_id"
+    ]
+  },
+  {
+    "table": "work_order_status_log",
+    "file": "Models\\WorkOrderStatusLog.cs",
+    "missing_in_model": [
+      "changed_by",
+      "created_at",
+      "updated_at",
+      "work_order"
+    ],
+    "extra_in_model": []
+  }
+]

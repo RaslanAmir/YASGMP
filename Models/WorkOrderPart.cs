@@ -1,180 +1,199 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>WorkOrderPart</b> ‚Äî Represents a part used on a specific Work Order.
+    /// <b>WorkOrderPart</b> ó Represents a part used on a specific Work Order.
     /// Tracks quantities, units, pricing, CAPA/incident linkages, and forensics for GMP compliance.
     /// Fully audit-ready and future-proof for all advanced CMMS scenarios.
     /// </summary>
-    public class WorkOrderPart
+    [Table("work_order_parts")]
+    public partial class WorkOrderPart
     {
-        /// <summary>Unique identifier for the WorkOrderPart record (for ORM use, composite key is WorkOrderId+PartId).</summary>
+        [Key]
+        [Column("id")]
         [Browsable(false)]
         [Display(Name = "ID")]
         public int Id { get; set; }
 
-        /// <summary>Foreign key to the WorkOrder.</summary>
         [Required]
+        [Column("work_order_id")]
         [Display(Name = "Radni nalog")]
         public int WorkOrderId { get; set; }
 
-        /// <summary>Foreign key to the Part.</summary>
         [Required]
+        [Column("part_id")]
         [Display(Name = "Dio/Part")]
         public int PartId { get; set; }
 
-        /// <summary>Quantity of the part used in the work order.</summary>
         [Required]
-        [Range(0.01, 1000000)]
-        [Display(Name = "Koliƒçina")]
-        public decimal Quantity { get; set; }
+        [Column("quantity")]
+        [Display(Name = "KoliËina")]
+        public int Quantity { get; set; }
 
-        /// <summary>Unit of measurement for the part (e.g., pcs, ml, kg, etc).</summary>
-        [StringLength(20)]
+        [StringLength(255)]
+        [Column("unit_of_measure")]
         [Display(Name = "Mjerna jedinica")]
         public string UnitOfMeasure { get; set; } = string.Empty;
 
-        /// <summary>Price per unit at the time of use (audit).</summary>
         [DataType(DataType.Currency)]
-        [Display(Name = "Jediniƒçna cijena")]
+        [Column("unit_price")]
+        [Display(Name = "JediniËna cijena")]
         public decimal? UnitPrice { get; set; }
 
-        /// <summary>Currency code (ISO 4217, e.g., EUR, USD, HRK).</summary>
-        [StringLength(10)]
+        [StringLength(255)]
+        [Column("currency")]
         [Display(Name = "Valuta")]
         public string Currency { get; set; } = string.Empty;
 
-        /// <summary>Warehouse from which the part was withdrawn.</summary>
-        [Display(Name = "Skladi≈°te")]
+        [Column("warehouse_id")]
+        [Display(Name = "Skladiöte")]
         public int? WarehouseId { get; set; }
 
-        /// <summary>Foreign key to related CAPA case (if part usage was triggered by CAPA).</summary>
-        [Display(Name = "CAPA sluƒçaj")]
+        [Column("capa_case_id")]
+        [Display(Name = "CAPA sluËaj")]
         public int? CapaCaseId { get; set; }
 
-        /// <summary>Foreign key to related Incident.</summary>
+        [Column("incident_id")]
         [Display(Name = "Incident")]
         public int? IncidentId { get; set; }
 
-        /// <summary>Timestamp when the part was withdrawn/applied.</summary>
-        [Display(Name = "Vrijeme kori≈°tenja")]
+        [Column("used_at")]
+        [Display(Name = "Vrijeme koriötenja")]
         public DateTime? UsedAt { get; set; }
 
-        /// <summary>ID of the user who recorded the part usage.</summary>
-        [Display(Name = "Korisnik koji je zabilje≈æio")]
+        [Column("used_by_id")]
+        [Display(Name = "Korisnik koji je zabiljeûio")]
         public int? UsedById { get; set; }
 
-        /// <summary>GMP digital signature hash (for traceability, integrity, e-sign).</summary>
-        [StringLength(128)]
+        [StringLength(255)]
+        [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>Audit: IP address from which the part was recorded.</summary>
-        [StringLength(45)]
+        [StringLength(255)]
+        [Column("source_ip")]
         [Display(Name = "IP adresa")]
         public string SourceIp { get; set; } = string.Empty;
 
-        /// <summary>Audit: Device information (browser, device name, OS).</summary>
         [StringLength(255)]
-        [Display(Name = "Ureƒëaj/OS")]
+        [Column("device_info")]
+        [Display(Name = "Ureaj/OS")]
         public string DeviceInfo { get; set; } = string.Empty;
 
-        /// <summary>Audit: Session ID (for forensic linking).</summary>
-        [StringLength(100)]
+        [StringLength(255)]
+        [Column("session_id")]
         [Display(Name = "Sesija")]
         public string SessionId { get; set; } = string.Empty;
 
-        /// <summary>Additional notes or remarks about this part usage.</summary>
-        [StringLength(512)]
+        [StringLength(255)]
+        [Column("note")]
         [Display(Name = "Napomena")]
         public string Note { get; set; } = string.Empty;
 
-        /// <summary>Timestamp for record creation (UTC).</summary>
         [ReadOnly(true)]
+        [Column("created_at")]
         [Display(Name = "Vrijeme kreiranja")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>Timestamp for last modification (UTC).</summary>
         [ReadOnly(true)]
+        [Column("updated_at")]
         [Display(Name = "Vrijeme zadnje izmjene")]
-        public DateTime LastModifiedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>ID of the user who last modified the record.</summary>
+        [Column("last_modified_at")]
+        [Display(Name = "Vrijeme zadnje izmjene (legacy)")]
+        public DateTime? LastModifiedAt { get; set; }
+
+        [Column("last_modified_by_id")]
         [Display(Name = "Zadnji mijenjao")]
         public int? LastModifiedById { get; set; }
 
-        #region Navigation Properties (for ORM/data binding)
+        [MaxLength(255)]
+        [Column("work_order?")]
+        public string? LegacyWorkOrderLabel { get; set; }
 
-        /// <summary>Reference to parent WorkOrder (not serialized in API).</summary>
+        [MaxLength(255)]
+        [Column("part?")]
+        public string? LegacyPartLabel { get; set; }
+
+        [MaxLength(255)]
+        [Column("warehouse?")]
+        public string? LegacyWarehouseLabel { get; set; }
+
+        [MaxLength(255)]
+        [Column("user?")]
+        public string? LegacyUserLabel { get; set; }
+
         [JsonIgnore]
+        [ForeignKey(nameof(WorkOrderId))]
         public virtual WorkOrder? WorkOrder { get; set; }
 
-        /// <summary>Reference to Part.</summary>
         [JsonIgnore]
+        [ForeignKey(nameof(PartId))]
         public virtual Part? Part { get; set; }
 
-        /// <summary>Reference to Warehouse.</summary>
         [JsonIgnore]
+        [ForeignKey(nameof(WarehouseId))]
         public virtual Warehouse? Warehouse { get; set; }
 
-        /// <summary>Reference to User who used/recorded the part.</summary>
         [JsonIgnore]
+        [ForeignKey(nameof(UsedById))]
         public virtual User? UsedBy { get; set; }
 
-        /// <summary>Reference to CAPA case.</summary>
         [JsonIgnore]
+        [ForeignKey(nameof(CapaCaseId))]
         public virtual CapaCase? CapaCase { get; set; }
 
-        /// <summary>Reference to Incident.</summary>
         [JsonIgnore]
+        [ForeignKey(nameof(IncidentId))]
         public virtual Incident? Incident { get; set; }
 
-        #endregion
-
-        /// <summary>Returns the total cost for this usage (if price/unit available).</summary>
         [JsonIgnore]
         public decimal? TotalCost => UnitPrice.HasValue ? UnitPrice.Value * Quantity : (decimal?)null;
 
-        /// <summary>Creates a deep copy of this <see cref="WorkOrderPart"/> (for rollback/audit).</summary>
         public WorkOrderPart DeepCopy()
         {
             return new WorkOrderPart
             {
-                Id = this.Id,
-                WorkOrderId = this.WorkOrderId,
-                PartId = this.PartId,
-                Quantity = this.Quantity,
-                UnitOfMeasure = this.UnitOfMeasure,
-                UnitPrice = this.UnitPrice,
-                Currency = this.Currency,
-                WarehouseId = this.WarehouseId,
-                CapaCaseId = this.CapaCaseId,
-                IncidentId = this.IncidentId,
-                UsedAt = this.UsedAt,
-                UsedById = this.UsedById,
-                DigitalSignature = this.DigitalSignature,
-                SourceIp = this.SourceIp,
-                DeviceInfo = this.DeviceInfo,
-                SessionId = this.SessionId,
-                Note = this.Note,
-                CreatedAt = this.CreatedAt,
-                LastModifiedAt = this.LastModifiedAt,
-                LastModifiedById = this.LastModifiedById,
-                // Navigation props (not deep copied to avoid circular ref issues)
-                WorkOrder = this.WorkOrder,
-                Part = this.Part,
-                Warehouse = this.Warehouse,
-                UsedBy = this.UsedBy,
-                CapaCase = this.CapaCase,
-                Incident = this.Incident
+                Id = Id,
+                WorkOrderId = WorkOrderId,
+                PartId = PartId,
+                Quantity = Quantity,
+                UnitOfMeasure = UnitOfMeasure,
+                UnitPrice = UnitPrice,
+                Currency = Currency,
+                WarehouseId = WarehouseId,
+                CapaCaseId = CapaCaseId,
+                IncidentId = IncidentId,
+                UsedAt = UsedAt,
+                UsedById = UsedById,
+                DigitalSignature = DigitalSignature,
+                SourceIp = SourceIp,
+                DeviceInfo = DeviceInfo,
+                SessionId = SessionId,
+                Note = Note,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt,
+                LastModifiedAt = LastModifiedAt,
+                LastModifiedById = LastModifiedById,
+                LegacyWorkOrderLabel = LegacyWorkOrderLabel,
+                LegacyPartLabel = LegacyPartLabel,
+                LegacyWarehouseLabel = LegacyWarehouseLabel,
+                LegacyUserLabel = LegacyUserLabel,
+                WorkOrder = WorkOrder,
+                Part = Part,
+                Warehouse = Warehouse,
+                UsedBy = UsedBy,
+                CapaCase = CapaCase,
+                Incident = Incident
             };
         }
 
-        /// <summary>Returns a human-readable string for logs/UI/debugging.</summary>
         public override string ToString()
         {
             return $"Part: {PartId} | Qty: {Quantity} {UnitOfMeasure} | UsedAt: {UsedAt?.ToString("u") ?? "N/A"}";

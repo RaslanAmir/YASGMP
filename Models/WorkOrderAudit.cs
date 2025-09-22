@@ -14,7 +14,7 @@ namespace YasGMP.Models
     /// </para>
     /// </summary>
     [Table("work_order_audit")]
-    public class WorkOrderAudit
+    public partial class WorkOrderAudit
     {
         /// <summary>Unique audit log entry ID (Primary Key).</summary>
         [Key]
@@ -65,13 +65,13 @@ namespace YasGMP.Models
         public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>IP address of the user/device that executed the action (for forensic tracking).</summary>
-        [MaxLength(64)]
+        [MaxLength(45)]
         [Column("source_ip")]
         [Display(Name = "IP adresa")]
         public string SourceIp { get; set; } = string.Empty;
 
         /// <summary>Device/host information (browser, OS, hardware) used during the action (for forensic evidence).</summary>
-        [MaxLength(128)]
+        [MaxLength(255)]
         [Column("device_info")]
         [Display(Name = "Info o uređaju")]
         public string DeviceInfo { get; set; } = string.Empty;

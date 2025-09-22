@@ -9,24 +9,23 @@ namespace YasGMP.Models
     /// <b>Supplier</b> — GMP/CSV/21 CFR Part 11 compliant vendor/partner model with compatibility aliases.
     /// Includes rich metadata, qualification lifecycle, digital signatures and hash chain.
     /// </summary>
-    [Table("supplier")]
-    public class Supplier
+    [Table("suppliers")]
+    public partial class Supplier
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
         /// <summary>Full supplier or external service name.</summary>
-        [Required, MaxLength(200)]
+        [Required, StringLength(100)]
         [Column("name")]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>VAT/tax/OIB equivalent.</summary>
-        [MaxLength(50)]
+        [StringLength(40)]
         [Column("vat_number")]
         public string VatNumber { get; set; } = string.Empty;
 
-        [MaxLength(255)]
         [Column("address")]
         public string Address { get; set; } = string.Empty;
 
@@ -42,21 +41,20 @@ namespace YasGMP.Models
         [Column("email")]
         public string Email { get; set; } = string.Empty;
 
-        [MaxLength(40)]
+        [StringLength(50)]
         [Column("phone")]
         public string Phone { get; set; } = string.Empty;
 
-        [MaxLength(120)]
+        [StringLength(200)]
         [Column("website")]
         public string Website { get; set; } = string.Empty;
 
         /// <summary>Vendor category: parts, equipment, service, lab, validation…</summary>
-        [MaxLength(100)]
+        [StringLength(40)]
         [Column("supplier_type")]
         public string SupplierType { get; set; } = string.Empty;
 
         /// <summary>General notes/comments (legacy alias provided below).</summary>
-        [MaxLength(255)]
         [Column("notes")]
         public string Notes { get; set; } = string.Empty;
 
@@ -69,39 +67,39 @@ namespace YasGMP.Models
         public List<string> Documents { get; set; } = new();
 
         /// <summary>Collaboration/qualification status.</summary>
-        [MaxLength(30)]
+        [StringLength(40)]
         [Column("status")]
         public string Status { get; set; } = "active";
 
         /// <summary>Start date of cooperation (contract).</summary>
-        [Column("cooperation_start")]
+        [NotMapped]
         public DateTime? CooperationStart { get; set; }
 
         /// <summary>Cooperation end/expiration.</summary>
-        [Column("cooperation_end")]
+        [NotMapped]
         public DateTime? CooperationEnd { get; set; }
 
         /// <summary>GMP/audit comment (legacy alias provided below).</summary>
         [MaxLength(255)]
-        [Column("gmp_comment")]
+        [NotMapped]
         public string GmpComment { get; set; } = string.Empty;
 
         [MaxLength(128)]
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        [MaxLength(128)]
         [Column("entry_hash")]
+        [MaxLength(128)]
         public string EntryHash { get; set; } = string.Empty;
 
         [Column("last_modified")]
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
         [Column("last_modified_by_id")]
-        public int LastModifiedById { get; set; }
+        public int? LastModifiedById { get; set; }
 
         [ForeignKey(nameof(LastModifiedById))]
-        public User LastModifiedBy { get; set; } = null!;
+        public virtual User? LastModifiedBy { get; set; }
 
         [MaxLength(45)]
         [Column("source_ip")]
@@ -117,8 +115,11 @@ namespace YasGMP.Models
         [Column("external_certification_id")]
         public string ExternalCertificationId { get; set; } = string.Empty;
 
+        [NotMapped]
         public List<Inspection> AuditHistory { get; set; } = new();
+        [NotMapped]
         public List<CapaCase> CapaCases { get; set; } = new();
+        [NotMapped]
         public List<Part> PartsSupplied { get; set; } = new();
 
         [MaxLength(255)]
@@ -226,3 +227,4 @@ namespace YasGMP.Models
         }
     }
 }
+

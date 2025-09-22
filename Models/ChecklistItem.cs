@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Defines a single checklist item/question within a template with ordering and required flags.
+    /// </summary>
     [Table("checklist_items")]
     public class ChecklistItem
     {

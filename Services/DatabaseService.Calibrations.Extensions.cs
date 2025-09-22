@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for calibration records, ranges, and scheduling.
+    /// </summary>
     public static class DatabaseServiceCalibrationsExtensions
     {
         public static async Task<List<Calibration>> GetAllCalibrationsAsync(this DatabaseService db, CancellationToken token = default)

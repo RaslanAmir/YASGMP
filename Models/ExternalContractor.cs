@@ -13,7 +13,8 @@ namespace YasGMP.Models
     /// ✅ Extensible for attachments, contract docs, insurance, roles, risk audit, external/internal mapping, bonus options.
     /// </para>
     /// </summary>
-    public class ExternalContractor
+    [Table("external_contractors")]
+    public partial class ExternalContractor
     {
         /// <summary>
         /// Primary key of the contractor (database identity).
@@ -121,12 +122,14 @@ namespace YasGMP.Models
         /// List of contractor interventions.
         /// </summary>
         [Display(Name = "Intervencije")]
+        [NotMapped]
         public List<ContractorIntervention> Interventions { get; set; } = new List<ContractorIntervention>();
 
         /// <summary>
         /// Attached documents (CVs, certificates, contracts...).
         /// </summary>
         [Display(Name = "Dokumenti / Prilozi")]
+        [NotMapped]
         public List<Attachment> Attachments { get; set; } = new List<Attachment>();
 
         /// <summary>
@@ -140,6 +143,7 @@ namespace YasGMP.Models
         /// Forensic/audit log entries.
         /// </summary>
         [Display(Name = "Audit log")]
+        [NotMapped]
         public List<ContractorAuditLog> AuditLogs { get; set; } = new List<ContractorAuditLog>();
 
         /// <summary>

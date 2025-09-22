@@ -20,7 +20,7 @@ namespace YasGMP.Models
     /// </remarks>
     /// </summary>
     [Table("delegated_permissions")]
-    public class DelegatedPermission
+    public partial class DelegatedPermission
     {
         /// <summary>
         /// Unique ID for the delegation (primary key, auto-increment).

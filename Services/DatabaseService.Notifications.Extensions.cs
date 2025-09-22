@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for notification templates, queues, and dispatch logs.
+    /// </summary>
     public static class DatabaseServiceNotificationsExtensions
     {
         public static async Task<List<Notification>> GetAllNotificationsFullAsync(this DatabaseService db, CancellationToken token = default)

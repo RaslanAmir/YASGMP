@@ -14,6 +14,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions supplying primary machine CRUD and helper queries.
+    /// </summary>
     public static class DatabaseServiceMachinesCoreExtensions
     {
         private static HashSet<string>? _machineColumnsCache;

@@ -126,6 +126,7 @@ namespace YasGMP.Models
 
         /// <summary>Workflow history (status changes, notes, assignments) – light model for UI and export.</summary>
         [Display(Name = "Povijest tijeka rada")]
+        [NotMapped]
         public List<RiskWorkflowEntry> WorkflowHistory { get; set; } = new();
 
         /// <summary>Device info string captured on last change (browser/OS/host).</summary>

@@ -15,7 +15,7 @@ namespace YasGMP.Models
     /// Extra enum wrappers are provided for readability/type-safety while retaining string persistence when needed.
     /// </remarks>
     [Table("deviation_audit")]
-    public sealed class DeviationAudit
+    public sealed partial class DeviationAudit
     {
         /// <summary>Primary key.</summary>
         [Key]

@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions focused on CAPA cases and related data.
+    /// </summary>
     public static class DatabaseServiceCapaCasesExtensions
     {
         public static async Task<List<CapaCase>> GetAllCapaCasesAsync(this DatabaseService db, CancellationToken token = default)

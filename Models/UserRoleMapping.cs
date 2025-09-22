@@ -9,7 +9,7 @@ namespace YasGMP.Models
     /// Ultra-robust: supports full GMP, CSV, 21 CFR Part 11, Annex 11, forensics, digital signature, audit, expiry, and rollback/versioning.
     /// </summary>
     [Table("user_roles")]
-    public class UserRoleMapping
+    public partial class UserRoleMapping
     {
         /// <summary>
         /// User ID (Foreign Key, part of composite key).
@@ -48,7 +48,7 @@ namespace YasGMP.Models
         /// <summary>
         /// User ID of who assigned this role (for audit and incident traceability).
         /// </summary>
-        [Column("assigned_by")]
+        [Column("assigned_by_id")]
         [Display(Name = "Dodijelio")]
         public int? AssignedById { get; set; }
 
@@ -90,7 +90,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Digital signature/hash for forensic audit, legal defense, and integrity checks.
         /// </summary>
-        [MaxLength(128)]
+        [MaxLength(256)]
         [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]
         public string DigitalSignature { get; set; } = string.Empty;

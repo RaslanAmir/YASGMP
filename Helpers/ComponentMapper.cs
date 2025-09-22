@@ -58,8 +58,8 @@ namespace YasGMP.Helpers
                 SerialNumber     = mc.SerialNumber ?? string.Empty,
                 Supplier         = mc.Supplier ?? string.Empty,
                 LastModified     = mc.LastModified,
-                LastModifiedById = mc.LastModifiedById,
-                LastModifiedBy   = mc.LastModifiedBy!, // optional; UI keeps reference
+                LastModifiedById = mc.LastModifiedById ?? 0,
+                LastModifiedBy   = mc.LastModifiedBy ?? new User { Id = mc.LastModifiedById ?? 0 }, // optional; UI keeps reference
                 SourceIp         = mc.SourceIp ?? string.Empty,
                 WarrantyUntil    = mc.WarrantyUntil,
                 Comments         = mc.Note ?? string.Empty,
@@ -148,3 +148,4 @@ namespace YasGMP.Helpers
                .ToList();
     }
 }
+

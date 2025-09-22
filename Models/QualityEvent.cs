@@ -1,122 +1,97 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>QualityEvent</b> – Comprehensive GMP/CMMS record of all quality-related events (deviations, complaints, recalls, OOS, change control, audit, training, etc).
-    /// <para>
-    /// ✅ Tracks all required data for root cause analysis, compliance, audit, recall, and reporting.<br/>
-    /// ✅ Fully supports attachments, signatures, cross-linking to machines/components, and workflow.
-    /// </para>
+    /// <b>QualityEvent</b> - Comprehensive GMP/CMMS record of quality-related events
+    /// (deviations, complaints, recalls, OOS, change control, audit, training, etc.).
+    /// Tracks data needed for root cause analysis, compliance, audit, recall, and reporting.
+    /// Supports attachments, signatures, cross-linking to machines/components, and workflow.
     /// </summary>
-    public class QualityEvent
+    [Table("quality_events")]
+    public partial class QualityEvent
     {
-        /// <summary>
-        /// Unique identifier for the quality event (Primary Key).
-        /// </summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>
-        /// Type of event (deviation, complaint, recall, out_of_spec, change_control, audit, training).
-        /// </summary>
         [Required]
-        [Display(Name = "Vrsta događaja")]
-        public QualityEventType EventType { get; set; }
+        [NotMapped]
+        [Display(Name = "Vrsta doga�aja")]
+        public QualityEventType EventType
+        {
+            get => _eventType;
+            set => _eventType = value;
+        }
+        private QualityEventType _eventType;
 
-        /// <summary>
-        /// Date when the event was opened/recorded.
-        /// </summary>
+        [Column("date_open")]
         [Display(Name = "Datum otvaranja")]
         public DateTime? DateOpen { get; set; }
 
-        /// <summary>
-        /// Date when the event was closed/resolved (if applicable).
-        /// </summary>
+        [Column("date_close")]
         [Display(Name = "Datum zatvaranja")]
         public DateTime? DateClose { get; set; }
 
-        /// <summary>
-        /// Detailed description of the event, incident, or issue.
-        /// </summary>
-        [Display(Name = "Opis događaja")]
+        [Column("description")]
+        [Display(Name = "Opis doga�aja")]
         [MaxLength(2000)]
         public string? Description { get; set; }
 
-        /// <summary>
-        /// Foreign key to the related machine (if any).
-        /// </summary>
+        [Column("related_machine_id")]
         [Display(Name = "Stroj / Oprema")]
         public int? RelatedMachineId { get; set; }
 
-        /// <summary>
-        /// Navigation property to the related machine/asset.
-        /// </summary>
-        public Machine? RelatedMachine { get; set; }
+        [ForeignKey(nameof(RelatedMachineId))]
+        public virtual Machine? RelatedMachine { get; set; }
 
-        /// <summary>
-        /// Foreign key to the related component (if any).
-        /// </summary>
+        [Column("related_component_id")]
         [Display(Name = "Komponenta")]
         public int? RelatedComponentId { get; set; }
 
-        /// <summary>
-        /// Navigation property to the related component.
-        /// </summary>
-        public MachineComponent? RelatedComponent { get; set; }
+        [ForeignKey(nameof(RelatedComponentId))]
+        public virtual MachineComponent? RelatedComponent { get; set; }
 
-        /// <summary>
-        /// Current status of the quality event (open, closed, under_review).
-        /// </summary>
         [Required]
-        [Display(Name = "Status događaja")]
-        public QualityEventStatus Status { get; set; }
+        [NotMapped]
+        [Display(Name = "Status doga�aja")]
+        public QualityEventStatus Status
+        {
+            get => _status;
+            set => _status = value;
+        }
+        private QualityEventStatus _status;
 
-        /// <summary>
-        /// Actions taken or planned (for closure, CAPA, etc).
-        /// </summary>
+        [Column("actions")]
         [Display(Name = "Akcije / Korektivne mjere")]
         [MaxLength(2000)]
         public string? Actions { get; set; }
 
-        /// <summary>
-        /// File path to supporting documentation (CAPA form, complaint evidence, etc).
-        /// </summary>
+        [Column("doc_file")]
         [Display(Name = "Dokumentacija")]
         [MaxLength(255)]
         public string? DocFile { get; set; }
 
-        /// <summary>
-        /// Digital signature hash (if signed).
-        /// </summary>
+        [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]
         [MaxLength(128)]
         public string? DigitalSignature { get; set; }
 
-        /// <summary>
-        /// User who created this event (optional, for tracking/audit).
-        /// </summary>
+        [Column("created_by_id")]
         public int? CreatedById { get; set; }
 
-        /// <summary>
-        /// Navigation property for the user who created the event.
-        /// </summary>
-        public User? CreatedBy { get; set; }
+        [ForeignKey(nameof(CreatedById))]
+        public virtual User? CreatedBy { get; set; }
 
-        /// <summary>
-        /// Last user who modified this record.
-        /// </summary>
+        [Column("last_modified_by_id")]
         public int? LastModifiedById { get; set; }
 
-        /// <summary>
-        /// Navigation property for the user who last modified the event.
-        /// </summary>
-        public User? LastModifiedBy { get; set; }
+        [ForeignKey(nameof(LastModifiedById))]
+        public virtual User? LastModifiedBy { get; set; }
 
-        /// <summary>
-        /// Date/time this record was last modified (for audit trail).
-        /// </summary>
+        [Column("last_modified")]
         [Display(Name = "Zadnja izmjena")]
         public DateTime? LastModified { get; set; }
     }

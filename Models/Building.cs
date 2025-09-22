@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Represents a building within a site, storing identification codes, names, and timestamps.
+    /// </summary>
     [Table("buildings")]
     public class Building
     {

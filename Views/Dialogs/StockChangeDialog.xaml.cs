@@ -7,6 +7,9 @@ using YasGMP.Services;
 
 namespace YasGMP.Views.Dialogs
 {
+    /// <summary>
+    /// Dialog that captures manual stock adjustments with confirmation.
+    /// </summary>
     public partial class StockChangeDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();

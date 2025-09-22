@@ -1,198 +1,188 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
-    /// <summary>
-    /// <b>Part</b> – Master record for every spare part in the GMP/CMMS system.
-    /// <para>
-    /// • Full audit, digital signatures, multi-supplier, price history, attachments<br/>
-    /// • Barcode/RFID/serial/lot/expiry/warranty/certificates<br/>
-    /// • Linked to warehouses, work orders, change logs, regulatory notes
-    /// </para>
-    /// <remarks>
-    /// Includes legacy-compat properties (<see cref="Supplier"/>, <see cref="Image"/>, <see cref="Description"/>, <see cref="Category"/>)
-    /// so older pages and view models continue to compile and run.
-    /// </remarks>
-    /// </summary>
-    public class Part
+    [Table("parts")]
+    public partial class Part
     {
-        /// <summary>Unique part identifier (primary key).</summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>Internal code/part number (barcode, QR, SAP/ERP, etc.).</summary>
-        [Required, StringLength(50)]
-        [Display(Name = "Šifra dijela")]
+        [Required]
+        [MaxLength(50)]
+        [Column("code")]
         public string Code { get; set; } = string.Empty;
 
-        /// <summary>Part name (human-readable).</summary>
-        [Required, StringLength(100)]
-        [Display(Name = "Naziv dijela")]
+        [Required]
+        [MaxLength(100)]
+        [Column("name")]
         public string Name { get; set; } = string.Empty;
 
-        /// <summary>
-        /// <b>Legacy/UI compat:</b> Free-text description used by older views and filters.
-        /// </summary>
-        [StringLength(1000)]
-        public string? Description { get; set; }
-
-        /// <summary>
-        /// <b>Legacy/UI compat:</b> Free-text category (used only for filtering/search in some pages).
-        /// </summary>
-        [StringLength(100)]
-        public string? Category { get; set; }
-
-        /// <summary>Barcode value (EAN/QR/custom), if any.</summary>
-        [StringLength(64)]
-        public string? Barcode { get; set; }
-
-        /// <summary>RFID/IoT tag.</summary>
-        [StringLength(64)]
-        public string? RFID { get; set; }
-
-        /// <summary>Serial or lot number (traceability).</summary>
-        [StringLength(64)]
-        public string? SerialOrLot { get; set; }
-
-        /// <summary>Default supplier (FK).</summary>
+        [Column("default_supplier_id")]
         public int? DefaultSupplierId { get; set; }
 
-        /// <summary>Navigation to default supplier (optional).</summary>
+        [ForeignKey(nameof(DefaultSupplierId))]
         public Supplier? DefaultSupplier { get; set; }
 
-        /// <summary>Supplier price history and suppliers linked to this part.</summary>
-        public List<PartSupplierPrice> SupplierPrices { get; set; } = new();
+        [Column("description")]
+        public string? Description { get; set; }
 
-        /// <summary>Current/default price (for UI/reporting; does not replace full price history).</summary>
-        [Display(Name = "Cijena")]
-        public decimal? Price { get; set; }
-
-        /// <summary>Total quantity on hand (across warehouses).</summary>
-        [Display(Name = "Količina ukupno")]
-        public int Stock { get; set; }
-
-        /// <summary>Minimum/critical stock alert threshold.</summary>
-        public int? MinStockAlert { get; set; }
-
-        /// <summary>Per-warehouse stock snapshot.</summary>
-        public List<WarehouseStock> WarehouseStocks { get; set; } = new();
-
-        /// <summary>Stock movement/change history.</summary>
-        public List<StockChangeLog> StockHistory { get; set; } = new();
- 
-		/// <summary>Aggregated stock levels over time.</summary>
-        public List<StockLevel> StockLevels { get; set; } = new();
-
-        /// <summary>Primary storage location (quick view).</summary>
-        [StringLength(100)]
-        [Display(Name = "Lokacija")]
-        public string? Location { get; set; }
-
-        /// <summary>
-        /// <b>Legacy/UI compat:</b> Preferred single image path for pages that bind to a single string.
-        /// If you also use <see cref="Images"/>, keep this as the first/primary image path.
-        /// </summary>
-        [StringLength(512)]
-        public string? Image { get; set; }
-
-        /// <summary>All image paths (catalog/inspection).</summary>
-        public List<string> Images { get; set; } = new();
-
-        /// <summary>Paths to attached documents (datasheets, certificates, MSDS…).</summary>
-        public List<string> Documents { get; set; } = new();
-
-        /// <summary>Warranty expiry date.</summary>
-        public DateTime? WarrantyUntil { get; set; }
-
-        /// <summary>Expiry date (shelf-life/regulatory).</summary>
-        public DateTime? ExpiryDate { get; set; }
-
-        /// <summary>Status (active, archived, blocked, recall, …).</summary>
-        [StringLength(30)]
+        [Column("status")]
+        [MaxLength(30)]
         public string? Status { get; set; }
 
-        /// <summary>Is this part currently blocked for use.</summary>
-        public bool Blocked { get; set; }
+        [Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
 
-        /// <summary>Regulatory/certification info (CE/ISO/FDA…).</summary>
-        [StringLength(200)]
+        [Column("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
+
+        [Column("category")]
+        [MaxLength(255)]
+        public string? Category { get; set; }
+
+        [Column("barcode")]
+        [MaxLength(255)]
+        public string? Barcode { get; set; }
+
+        [Column("rfid")]
+        [MaxLength(255)]
+        public string? RFID { get; set; }
+
+        [Column("serial_or_lot")]
+        [MaxLength(255)]
+        public string? SerialOrLot { get; set; }
+
+        [Column("default_supplier")]
+        [MaxLength(255)]
+        public string? DefaultSupplierName { get; set; }
+
+        [Column("supplier_prices")]
+        public string? SupplierPricesRaw { get; set; }
+
+        [Column("price")]
+        public decimal? Price { get; set; }
+
+        [Column("stock")]
+        public int? Stock { get; set; }
+
+        [Column("min_stock_alert")]
+        public int? MinStockAlert { get; set; }
+
+        [Column("warehouse_stocks")]
+        public string? WarehouseStocksRaw { get; set; }
+
+        [Column("stock_history")]
+        public string? StockHistoryRaw { get; set; }
+
+        [Column("location")]
+        [MaxLength(255)]
+        public string? Location { get; set; }
+
+        [Column("image")]
+        [MaxLength(255)]
+        public string? Image { get; set; }
+
+        [Column("images")]
+        public string? ImagesRaw { get; set; }
+
+        [Column("documents")]
+        public string? DocumentsRaw { get; set; }
+
+        [Column("warranty_until")]
+        public DateTime? WarrantyUntil { get; set; }
+
+        [Column("expiry_date")]
+        public DateTime? ExpiryDate { get; set; }
+
+        [Column("blocked")]
+        public bool? Blocked { get; set; }
+
+        [Column("regulatory_certificates")]
+        [MaxLength(255)]
         public string? RegulatoryCertificates { get; set; }
 
-        /// <summary>Digital signature for the last change (hash/e-sig).</summary>
-        [Display(Name = "Digitalni potpis")]
+        [Column("digital_signature")]
+        [MaxLength(255)]
         public string? DigitalSignature { get; set; }
 
-        /// <summary>Last modification timestamp (UTC).</summary>
-        [Display(Name = "Zadnja izmjena")]
-        public DateTime LastModified { get; set; }
+        [Column("last_modified")]
+        public DateTime? LastModified { get; set; }
 
-        /// <summary>User ID of last modifier (FK).</summary>
-        [Display(Name = "Zadnji izmijenio")]
-        public int LastModifiedById { get; set; }
+        [Column("last_modified_by_id")]
+        public int? LastModifiedById { get; set; }
 
-        /// <summary>Navigation to last modifying user (optional).</summary>
+        [ForeignKey(nameof(LastModifiedById))]
         public User? LastModifiedBy { get; set; }
 
-        /// <summary>IP address for the last modification.</summary>
-        [Display(Name = "IP adresa")]
+        [Column("last_modified_by")]
+        [MaxLength(255)]
+        public string? LastModifiedByName { get; set; }
+
+        [Column("source_ip")]
+        [MaxLength(255)]
         public string? SourceIp { get; set; }
 
-        /// <summary>Structured change log (domain audit).</summary>
-        public List<PartChangeLog> ChangeLogs { get; set; } = new();
+        [Column("change_logs")]
+        public string? ChangeLogsRaw { get; set; }
 
-        /// <summary>Links to work orders where this part was used.</summary>
-        public List<WorkOrderPart> WorkOrderParts { get; set; } = new();
+        [Column("work_order_parts")]
+        public string? WorkOrderPartsRaw { get; set; }
 
-        /// <summary>List of warehouses this part is registered in.</summary>
-        public List<Warehouse> Warehouses { get; set; } = new();
+        [Column("warehouses")]
+        public string? WarehousesRaw { get; set; }
 
-        /// <summary>Inspector/ML notes, alerts, or comments.</summary>
-        [StringLength(1000)]
+        [Column("note")]
+        [MaxLength(255)]
         public string? Note { get; set; }
 
-        /// <summary>ML/AI supply risk or anomaly score (optional).</summary>
-        public double? AnomalyScore { get; set; }
+        [Column("anomaly_score")]
+        public decimal? AnomalyScore { get; set; }
 
-        /// <summary>Broj povezanih radnih naloga (UI pomoćno polje, ne mapira se u DB).</summary>
-        [NotMapped]
-        public int LinkedWorkOrdersCount { get; set; }
-
-        /// <summary>
-        /// <b>Legacy/UI compat:</b> Free-text supplier name for simple grids/forms.
-        /// When using relational suppliers, keep this as a denormalized display value (e.g., from <see cref="DefaultSupplier"/> or <see cref="SupplierPrices"/>).
-        /// </summary>
-        [StringLength(256)]
+        [Column("supplier")]
+        [MaxLength(255)]
         public string? Supplier { get; set; }
 
-        /// <summary>Returns true if the part is expired.</summary>
-        public bool IsExpired => ExpiryDate.HasValue && ExpiryDate.Value < DateTime.UtcNow;
+        [Column("sku")]
+        [MaxLength(100)]
+        public string? Sku { get; set; }
 
-        /// <summary>Returns true if stock is below the alert threshold.</summary>
-        public bool IsStockCritical => MinStockAlert.HasValue && Stock < MinStockAlert.Value;
-
-        [NotMapped]
-        public int LowWarehouseCount { get; set; }
-
-        [NotMapped]
-        public bool IsWarehouseStockCritical { get; set; }
+        [Column("sku_norm")]
+        [MaxLength(100)]
+        public string? SkuNormalized { get; set; }
 
         [NotMapped]
-        public string WarehouseSummary { get; set; } = string.Empty;
+        public List<PartSupplierPrice> SupplierPrices { get; set; } = new();
 
-        /// <summary>Returns true if the part is blocked for use.</summary>
-        public bool IsBlocked => Blocked || (!string.IsNullOrWhiteSpace(Status) && Status.ToLowerInvariant().Contains("block"));
+        [NotMapped]
+        public List<WarehouseStock> WarehouseStocks { get; set; } = new();
 
-        /// <summary>Main supplier name resolved from <see cref="DefaultSupplier"/> or first <see cref="SupplierPrices"/> row.</summary>
-        public string? MainSupplierName =>
-            !string.IsNullOrWhiteSpace(DefaultSupplier?.Name) ? DefaultSupplier.Name :
-            (SupplierPrices.Count > 0 ? (SupplierPrices[0].SupplierName ?? SupplierPrices[0].Supplier?.Name) : null) ??
-            Supplier;
+        [NotMapped]
+        public List<StockChangeLog> StockHistory { get; set; } = new();
 
-        /// <summary>Human-readable string for logs and inspectors.</summary>
-        public override string ToString()
-            => $"Part: {Name} [{Code}] (Stock: {Stock}, Price: {Price}, Blocked: {IsBlocked})";
+        [NotMapped]
+        public List<StockLevel> StockLevels { get; set; } = new();
+
+        [NotMapped]
+        public List<string> Images { get; set; } = new();
+
+        [NotMapped]
+        public List<string> Documents { get; set; } = new();
+
+        [NotMapped]
+        public List<PartChangeLog> ChangeLogs { get; set; } = new();
+
+        [NotMapped]
+        public List<WorkOrderPart> WorkOrderParts { get; set; } = new();
+
+        [NotMapped]
+        public List<Warehouse> Warehouses { get; set; } = new();
+
+        [NotMapped]
+        public List<string> SupplierList { get; set; } = new();
     }
 }

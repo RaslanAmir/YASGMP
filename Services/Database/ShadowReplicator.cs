@@ -8,6 +8,9 @@ using YasGMP.Diagnostics;
 
 namespace YasGMP.Services.Database
 {
+    /// <summary>
+    /// Optionally replays write commands against a shadow database to validate changes without impact.
+    /// </summary>
     internal sealed class ShadowReplicator
     {
         private readonly string _primaryConn;

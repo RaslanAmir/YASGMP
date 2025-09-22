@@ -12,6 +12,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions working with warehouse definitions and stock levels.
+    /// </summary>
     public static class DatabaseServiceWarehouseExtensions
     {
         public static async Task<List<Warehouse>> GetWarehousesAsync(this DatabaseService db, CancellationToken token = default)

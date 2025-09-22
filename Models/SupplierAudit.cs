@@ -7,7 +7,7 @@ namespace YasGMP.Models
     /// <summary>
     /// Immutable audit trail entry for Supplier changes (21 CFR Part 11 / Annex 11).
     /// </summary>
-    public class SupplierAudit
+    public partial class SupplierAudit
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -42,9 +42,13 @@ namespace YasGMP.Models
         [MaxLength(1024)]
         public string DigitalSignature { get; set; } = string.Empty;
 
+        [NotMapped]
         public int? SupplierVersion { get; set; }
+        [NotMapped]
         public string? JsonSnapshotBefore { get; set; }
+        [NotMapped]
         public string? JsonSnapshotAfter { get; set; }
+        [NotMapped]
         public string? ExtensionDataJson { get; set; }
 
         /// <summary>Human-readable summary.</summary>

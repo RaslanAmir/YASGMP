@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Represents a reusable checklist template definition used across inspections and workflows.
+    /// </summary>
     [Table("checklist_templates")]
     public class ChecklistTemplate
     {

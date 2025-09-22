@@ -5,73 +5,64 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>ForensicUserChangeLog</b> – Forensic, auditable log of all user-related changes: create, role/status change, password reset, delete, force logout.
-    /// <para>
-    /// ⭐ SUPER-MEGA-ULTRA ROBUST:<br/>
-    /// - Tracks who, when, what, on whom, before/after (role, status), reason, digital signature, IP/device, event chain, soft delete, and full navigation for AI/analytics/GMP/CSV/21 CFR Part 11.
-    /// </para>
+    /// <b>ForensicUserChangeLog</b> - Forensic log of user lifecycle actions (create, disable, role change, password reset, delete, force logout).
+    /// Tracks actor, target, before/after values, notes, device/IP context, signature chain, and soft-delete state.
     /// </summary>
-    public class ForensicUserChangeLog
+    [Table("forensic_user_change_log")]
+    public partial class ForensicUserChangeLog
     {
-        /// <summary>Unique ID (Primary Key).</summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>Timestamp of the change.</summary>
-        [Required]
+        [Column("changed_at")]
         public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>ID of the user (admin/supervisor) who made the change.</summary>
+        [Column("changed_by")]
         public int? ChangedBy { get; set; }
 
-        /// <summary>Navigation to user who made the change.</summary>
         [ForeignKey(nameof(ChangedBy))]
         public User? ChangedByUser { get; set; }
 
-        /// <summary>
-        /// Action: create_user, update_user, disable_user, change_role, reset_password, delete_user, force_logout.
-        /// </summary>
-        [Required]
+        [Column("action")]
         [StringLength(50)]
         public string Action { get; set; } = string.Empty;
 
-        /// <summary>ID of the user who was changed (target).</summary>
+        [Column("target_user_id")]
         public int? TargetUserId { get; set; }
 
-        /// <summary>Navigation to the user who was changed.</summary>
         [ForeignKey(nameof(TargetUserId))]
         public User? TargetUser { get; set; }
 
-        /// <summary>Old role (before change).</summary>
+        [Column("old_role")]
         [StringLength(50)]
         public string? OldRole { get; set; }
 
-        /// <summary>New role (after change).</summary>
+        [Column("new_role")]
         [StringLength(50)]
         public string? NewRole { get; set; }
 
-        /// <summary>Old status (active/inactive) before the change.</summary>
+        [Column("old_status")]
         public bool? OldStatus { get; set; }
 
-        /// <summary>New status (active/inactive) after the change.</summary>
+        [Column("new_status")]
         public bool? NewStatus { get; set; }
 
-        /// <summary>Extra note or reason for the change (optional, for audit).</summary>
-        [StringLength(1000)]
+        [Column("note", TypeName = "text")]
         public string? Note { get; set; }
 
-        /// <summary>Forensic: IP address/device of the admin who made the change.</summary>
-        [StringLength(128)]
+        [Column("source_ip")]
+        [StringLength(45)]
         public string? SourceIp { get; set; }
 
-        /// <summary>Digital signature/hash of the log (Part 11, non-repudiation).</summary>
-        [StringLength(256)]
+        [Column("digital_signature")]
+        [StringLength(255)]
         public string? DigitalSignature { get; set; }
 
-        /// <summary>Chain/version (rollback, traceability, event sourcing).</summary>
+        [Column("change_version")]
         public int ChangeVersion { get; set; } = 1;
 
-        /// <summary>Soft delete/archive (GDPR, traceability).</summary>
+        [Column("is_deleted")]
         public bool IsDeleted { get; set; } = false;
     }
 }

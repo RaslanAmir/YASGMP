@@ -21,7 +21,7 @@ namespace YasGMP.Models
     /// <b>User</b> – Ultra-robust, forensic user entity for GMP, CSV, 21 CFR Part 11, GDPR, SSO, ITIL, and banking-grade compliance.
     /// </summary>
     [Table("users")]
-    public class User
+    public partial class User
     {
         // === PRIMARY INFO ===
 
@@ -31,12 +31,12 @@ namespace YasGMP.Models
         public int Id { get; set; }
 
         /// <summary>Username for login (unique, not case-sensitive).</summary>
-        [Required, MaxLength(80)]
+        [Required, StringLength(100)]
         [Column("username")]
         public string Username { get; set; } = string.Empty;
 
         /// <summary>Password hash (PBKDF2 preferred; legacy SHA256 supported during migration).</summary>
-        [Required, MaxLength(256)]
+        [Required, StringLength(128)]
         [Column("password")]
         public string PasswordHash { get; set; } = string.Empty;
 
@@ -100,27 +100,27 @@ namespace YasGMP.Models
 
         // === EXTERNAL IDENTITY / FEDERATION ===
 
-        [MaxLength(150)]
+        [StringLength(255)]
         [Column("external_provider_id")]
         public string ExternalProviderId { get; set; } = string.Empty;
 
-        [MaxLength(60)]
+        [StringLength(40)]
         [Column("external_provider_type")]
         public string ExternalProviderType { get; set; } = string.Empty;
 
-        [MaxLength(150)]
+        [StringLength(255)]
         [Column("federated_unique_id")]
         public string FederatedUniqueId { get; set; } = string.Empty;
 
-        [MaxLength(16)]
+        [StringLength(16)]
         [Column("preferred_culture")]
         public string PreferredCulture { get; set; } = string.Empty;
 
-        [MaxLength(256)]
+        [StringLength(256)]
         [Column("last_change_signature")]
         public string LastChangeSignature { get; set; } = string.Empty;
 
-        [MaxLength(150)]
+        [StringLength(255)]
         [Column("global_federated_id")]
         public string GlobalFederatedId { get; set; } = string.Empty;
 

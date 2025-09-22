@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Generic comment entity that links user-authored text to any tracked entity with timestamps.
+    /// </summary>
     [Table("comments")]
     public class Comment
     {

@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions for preventive maintenance planning entities.
+    /// </summary>
     public static class DatabaseServicePpmExtensions
     {
         public static async Task<List<PreventiveMaintenancePlan>> GetAllPpmPlansAsync(this DatabaseService db, CancellationToken token = default)

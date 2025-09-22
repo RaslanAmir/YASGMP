@@ -14,6 +14,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions that manage qualification records and lookups.
+    /// </summary>
     public static class DatabaseServiceQualificationsExtensions
     {
         public static async Task<List<Qualification>> GetAllQualificationsAsync(this DatabaseService db, bool includeAudit = true, bool includeCertificates = true, bool includeAttachments = true, CancellationToken token = default)

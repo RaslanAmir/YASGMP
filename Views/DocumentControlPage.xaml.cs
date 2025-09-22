@@ -5,6 +5,9 @@ using YasGMP.ViewModels;
 
 namespace YasGMP.Views
 {
+    /// <summary>
+    /// Content page backing the document control workspace, binding to its ViewModel.
+    /// </summary>
     public partial class DocumentControlPage : ContentPage
     {
         public DocumentControlViewModel ViewModel { get; }

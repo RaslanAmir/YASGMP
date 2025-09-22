@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions implementing rollback helpers for audited entities.
+    /// </summary>
     public static class DatabaseServiceRollbackExtensions
     {
         // Enqueue or log a rollback request for an entity. For now this writes a system event only.

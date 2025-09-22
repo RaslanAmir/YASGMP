@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// DatabaseService extensions that expose incident audit history.
+    /// </summary>
     public static class DatabaseServiceIncidentAuditsExtensions
     {
         public static async Task<int> InsertIncidentAuditAsync(this DatabaseService db, IncidentAudit a, CancellationToken token = default)

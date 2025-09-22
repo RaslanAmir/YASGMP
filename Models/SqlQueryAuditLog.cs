@@ -1,128 +1,143 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>SqlQueryAuditLog</b> – Ultra-robust audit log for every SQL query/operation.
-    /// Tracks SELECT, INSERT, UPDATE, DELETE, DDL, EXPORT, API, IMPORT, REPORT, and more.
-    /// Full GMP, HALMED, FDA, and forensic compliance: who, what, when, where, how, result, rollback, hash chain, digital signature, and AI/ML anomaly support.
+    /// <b>SqlQueryAuditLog</b> - Audit trail for raw SQL/query execution, capturing actor, context, impact, and forensic metadata.
     /// </summary>
-    public class SqlQueryAuditLog
+    [Table("sql_query_audit_log")]
+    public partial class SqlQueryAuditLog
     {
-        /// <summary>Unique log entry ID (PK).</summary>
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>User ID who performed the query (FK, can be null for automation/batch/API).</summary>
+        [Column("user_id")]
         public int? UserId { get; set; }
 
-        /// <summary>Navigation to user.</summary>
-        public User User { get; set; } = null!;
+        [ForeignKey(nameof(UserId))]
+        public User? User { get; set; }
 
-        /// <summary>Username snapshot for robust traceability (if User later deleted).</summary>
-        [MaxLength(80)]
+        [Column("username")]
+        [StringLength(80)]
         public string Username { get; set; } = string.Empty;
 
-        /// <summary>Date/time of query execution (always UTC for regulatory compliance).</summary>
+        [Column("query_time")]
         public DateTime QueryTime { get; set; } = DateTime.UtcNow;
 
-        /// <summary>Raw or parameterized SQL query text.</summary>
+        [Column("query_text", TypeName = "text")]
         public string QueryText { get; set; } = string.Empty;
 
-        /// <summary>Query type (SELECT, INSERT, UPDATE, DELETE, DDL, EXPORT, IMPORT, API, REPORT, SCALAR, STORED_PROC, OTHER).</summary>
-        [MaxLength(20)]
+        [Column("query_type")]
+        [StringLength(20)]
         public string QueryType { get; set; } = string.Empty;
 
-        /// <summary>Target table/entity name (null if multiple or not applicable).</summary>
-        [MaxLength(100)]
+        [Column("table_name")]
+        [StringLength(100)]
         public string TableName { get; set; } = string.Empty;
 
-        /// <summary>List of affected table/entity names (for complex queries, e.g., joins, cascades).</summary>
+        [NotMapped]
         public List<string> AffectedTables { get; set; } = new();
 
-        /// <summary>Primary key or record ID(s) affected (for update/delete, rollback/audit).</summary>
+        [Column("affected_tables", TypeName = "text")]
+        public string? AffectedTablesSerialized
+        {
+            get => AffectedTables.Count == 0 ? null : string.Join(",", AffectedTables);
+            set
+            {
+                AffectedTables.Clear();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    var parts = value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    AffectedTables.AddRange(parts);
+                }
+            }
+        }
+
+        [Column("record_ids", TypeName = "text")]
         public string RecordIds { get; set; } = string.Empty;
 
-        /// <summary>Number of affected rows (null for SELECT if unknown).</summary>
+        [Column("affected_rows")]
         public int? AffectedRows { get; set; }
 
-        /// <summary>Success/failure of query execution.</summary>
+        [Column("success")]
         public bool Success { get; set; }
 
-        /// <summary>Error message/details if not successful.</summary>
+        [Column("error_message", TypeName = "text")]
         public string ErrorMessage { get; set; } = string.Empty;
 
-        /// <summary>Execution duration (ms, for performance/compliance monitoring).</summary>
+        [Column("duration_ms")]
         public int? DurationMs { get; set; }
 
-        /// <summary>IP address of user, client, or automation/batch process.</summary>
-        [MaxLength(45)]
+        [Column("source_ip")]
+        [StringLength(45)]
         public string SourceIp { get; set; } = string.Empty;
 
-        /// <summary>Client application (API, desktop, mobile, import tool, etc).</summary>
-        [MaxLength(80)]
+        [Column("client_app")]
+        [StringLength(80)]
         public string ClientApp { get; set; } = string.Empty;
 
-        /// <summary>Session or token ID for multi-step or automated processes.</summary>
-        [MaxLength(80)]
+        [Column("session_id")]
+        [StringLength(80)]
         public string SessionId { get; set; } = string.Empty;
 
-        /// <summary>Device or host information (PC, server, cloud instance, user agent, OS, MAC, geolocation if available).</summary>
-        [MaxLength(200)]
+        [Column("device_info")]
+        [StringLength(255)]
         public string DeviceInfo { get; set; } = string.Empty;
 
-        /// <summary>Automation/bot/cron/RPA (true if not direct user action).</summary>
+        [Column("is_automated")]
         public bool IsAutomated { get; set; }
 
-        /// <summary>Export type/target if query led to export (e.g., PDF, XLSX, CSV, external system).</summary>
-        [MaxLength(30)]
+        [Column("export_type")]
+        [StringLength(30)]
         public string ExportType { get; set; } = string.Empty;
 
-        /// <summary>JSON snapshot of data before change (for full rollback/audit, null for SELECT).</summary>
+        [Column("old_data_snapshot", TypeName = "text")]
         public string OldDataSnapshot { get; set; } = string.Empty;
 
-        /// <summary>JSON snapshot of data after change (for full rollback/audit, null for SELECT).</summary>
+        [Column("new_data_snapshot", TypeName = "text")]
         public string NewDataSnapshot { get; set; } = string.Empty;
 
-        /// <summary>Context: JSON or plain text – all request context, headers, API tokens, etc.</summary>
+        [Column("context_details", TypeName = "text")]
         public string ContextDetails { get; set; } = string.Empty;
 
-        /// <summary>Hash (SHA-256 or better) for full entry integrity (GMP/CSV/Part 11 compliance, blockchain ready).</summary>
-        [MaxLength(128)]
+        [Column("entry_hash")]
+        [StringLength(128)]
         public string EntryHash { get; set; } = string.Empty;
 
-        /// <summary>Digital signature of query action (for chain-of-custody, advanced compliance).</summary>
-        [MaxLength(128)]
+        [Column("digital_signature")]
+        [StringLength(128)]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>Hash chain/previous entry hash for full audit/forensic chain.</summary>
-        [MaxLength(128)]
+        [Column("chain_hash")]
+        [StringLength(128)]
         public string ChainHash { get; set; } = string.Empty;
 
-        /// <summary>Severity/criticality: info, warning, error, audit, security, export, GDPR, ML-anomaly.</summary>
-        [MaxLength(40)]
+        [Column("severity")]
+        [StringLength(40)]
         public string Severity { get; set; } = string.Empty;
 
-        /// <summary>ML/AI anomaly score for future smart audit/analytics (null = not scored).</summary>
+        [Column("anomaly_score")]
         public double? AnomalyScore { get; set; }
 
-        /// <summary>Free note/comment (user/admin, e.g. why, external incident ref, investigation link).</summary>
-        [MaxLength(1000)]
+        [Column("note", TypeName = "text")]
         public string Note { get; set; } = string.Empty;
 
-        /// <summary>Forensics: geo-location (city/country/coords if available, for compliance).</summary>
-        [MaxLength(120)]
+        [Column("geo_location")]
+        [StringLength(120)]
         public string GeoLocation { get; set; } = string.Empty;
 
-        /// <summary>Related regulatory/inspection case or investigation ID.</summary>
+        [Column("related_case_id")]
         public int? RelatedCaseId { get; set; }
 
-        /// <summary>Human-readable summary for dashboards/logging.</summary>
+        /// <summary>Human-readable summary.</summary>
         public override string ToString()
         {
-            return $"[{QueryType}] {TableName ?? "(n/a)"} by {Username ?? ("User#" + UserId)} @{QueryTime:u} | Success: {Success}";
+            var actor = !string.IsNullOrWhiteSpace(Username) ? Username : UserId?.ToString() ?? "unknown";
+            return $"[{QueryType}] {TableName ?? "(n/a)"} by {actor} @{QueryTime:u} | Success: {Success}";
         }
     }
 }

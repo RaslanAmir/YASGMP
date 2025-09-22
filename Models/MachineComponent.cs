@@ -15,7 +15,8 @@ namespace YasGMP.Models
     /// • Extended for forward compatibility with extra fields and relationships
     /// </para>
     /// </summary>
-    public class MachineComponent
+    [Table("machine_components")]
+    public partial class MachineComponent
     {
         /// <summary>
         /// Unique component identifier (Primary Key).
@@ -67,7 +68,7 @@ namespace YasGMP.Models
         /// <summary>
         /// Component model/version.
         /// </summary>
-        [StringLength(50)]
+        [StringLength(255)]
         public string? Model { get; set; }
 
         /// <summary>
@@ -104,33 +105,33 @@ namespace YasGMP.Models
         /// <summary>
         /// Serial number (manufacturer/ERP/traceability).
         /// </summary>
-        [StringLength(80)]
+        [StringLength(255)]
         public string? SerialNumber { get; set; }
 
         /// <summary>
         /// Supplier or manufacturer.
         /// </summary>
-        [StringLength(100)]
+        [StringLength(255)]
         [Display(Name = "Dobavljač/proizvođač")]
         public string? Supplier { get; set; }
 
         /// <summary>
         /// RFID/NFC tag code for physical tracking.
         /// </summary>
-        [StringLength(64)]
+        [StringLength(255)]
         [Display(Name = "RFID/NFC")]
         public string? RfidTag { get; set; }
 
         /// <summary>
         /// IoT Device ID (for smart maintenance, telemetry).
         /// </summary>
-        [StringLength(64)]
+        [StringLength(255)]
         public string? IoTDeviceId { get; set; }
 
         /// <summary>
         /// Lifecycle phase (e.g. installed, in use, replaced, scrapped).
         /// </summary>
-        [StringLength(30)]
+        [StringLength(255)]
         public string? LifecyclePhase { get; set; }
 
         /// <summary>
@@ -141,14 +142,14 @@ namespace YasGMP.Models
         /// <summary>
         /// Any free-form note (max 200 chars).
         /// </summary>
-        [StringLength(200)]
+        [StringLength(255)]
         [Display(Name = "Napomena")]
         public string? Note { get; set; }
 
         /// <summary>
         /// Full audit/traceability digital signature hash.
         /// </summary>
-        [StringLength(128)]
+        [StringLength(255)]
         public string? DigitalSignature { get; set; }
 
         /// <summary>
@@ -173,7 +174,7 @@ namespace YasGMP.Models
         /// <summary>
         /// ID of the user who last modified this record.
         /// </summary>
-        public int LastModifiedById { get; set; }
+        public int? LastModifiedById { get; set; }
 
         /// <summary>
         /// Navigation to last modifying user.
@@ -183,12 +184,13 @@ namespace YasGMP.Models
         /// <summary>
         /// IP address from which the record was last changed.
         /// </summary>
-        [StringLength(64)]
+        [StringLength(255)]
         public string? SourceIp { get; set; }
 
         /// <summary>
         /// List of linked document paths/URLs (certificates, docs, etc).
         /// </summary>
+        [NotMapped]
         public List<string> Documents { get; set; } = new();
 
         /// <summary>All photos linked to this component.</summary>

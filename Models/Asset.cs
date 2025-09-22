@@ -8,7 +8,7 @@ namespace YasGMP.Models
     /// <summary>
     /// Asset / equipment model.
     /// </summary>
-    [Table("machines")]
+    [NotMapped]
     public class Asset
     {
         /// <summary>

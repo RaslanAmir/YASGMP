@@ -13,13 +13,13 @@ namespace YasGMP.Models
     /// </para>
     /// </summary>
     [Table("machines")]
-    public class Machine
+    public partial class Machine
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
-        [Required, StringLength(50)]
+        [Required, StringLength(64)]
         [Column("code")]
         [Display(Name = "Šifra stroja")]
         public string Code { get; set; } = string.Empty;
@@ -30,11 +30,11 @@ namespace YasGMP.Models
         public string Name { get; set; } = string.Empty;
 
         [StringLength(100)]
-        [Column("machine_type")]
+        [NotMapped]
         [Display(Name = "Tip stroja")]
         public string? MachineType { get; set; }
 
-        [StringLength(512)]
+        [StringLength(1000)]
         [Column("description")]
         [Display(Name = "Opis stroja")]
         public string? Description { get; set; }
@@ -55,7 +55,7 @@ namespace YasGMP.Models
         public string? Location { get; set; }
 
         [StringLength(100)]
-        [Column("responsible_party")]
+        [NotMapped]
         [Display(Name = "Odgovorna osoba/entitet")]
         public string? ResponsibleParty { get; set; }
 
@@ -79,7 +79,7 @@ namespace YasGMP.Models
         [Display(Name = "Jamstvo isteklo")]
         public DateTime? WarrantyExpiry => WarrantyUntil;
 
-        [StringLength(20)]
+        [StringLength(30)]
         [Column("status")]
         [Display(Name = "Status")]
         public string? Status { get; set; }
@@ -112,7 +112,7 @@ namespace YasGMP.Models
         public string? RfidTag { get; set; }
 
         /// <summary>QR kod stroja (tekst ili URL). Maps to <c>qr_code</c>.</summary>
-        [StringLength(255)]
+        [StringLength(128)]
         [Column("qr_code")]
         [Display(Name = "QR kod")]
         public string? QrCode { get; set; }
@@ -163,7 +163,7 @@ namespace YasGMP.Models
 
         [Column("last_modified_by_id")]
         [Display(Name = "Zadnji izmijenio")]
-        public int LastModifiedById { get; set; }
+        public int? LastModifiedById { get; set; }
 
         [ForeignKey(nameof(LastModifiedById))]
         public virtual User? LastModifiedBy { get; set; }
