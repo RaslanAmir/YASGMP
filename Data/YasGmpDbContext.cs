@@ -160,7 +160,6 @@ namespace YasGMP.Data
         public DbSet<Site> Sites { get; set; }
         public DbSet<SopDocument> SopDocuments { get; set; }
         public DbSet<SopDocumentLog> SopDocumentLogs { get; set; }
-        public DbSet<SparePart> SpareParts { get; set; }
         public DbSet<SqlQueryAuditLog> SqlQueryAuditLogs { get; set; }
         public DbSet<StockChangeLog> StockChangeLogs { get; set; }
         public DbSet<StockLevel> StockLevels { get; set; }
