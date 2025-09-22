@@ -12,6 +12,7 @@ namespace YasGMP.Models
     /// ✅ Includes barcode/QR, status, warranty, linked stock levels, work orders, and advanced supply chain analytics.
     /// </para>
     /// </summary>
+    [NotMapped]
     public class SparePart
     {
         /// <summary>Unique part identifier (Primary Key).</summary>
@@ -64,9 +65,6 @@ namespace YasGMP.Models
 
         /// <summary>All inventory transactions for this part.</summary>
         public virtual ICollection<InventoryTransaction> InventoryTransactions { get; set; } = new List<InventoryTransaction>();
-
-        /// <summary>All work orders where this part is used.</summary>
-        public virtual ICollection<WorkOrderPart> WorkOrderParts { get; set; } = new List<WorkOrderPart>();
 
         /// <summary>Attachments and documents for this part (certificates, manuals, photos).</summary>
         public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
