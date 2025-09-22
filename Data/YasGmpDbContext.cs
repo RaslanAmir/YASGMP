@@ -508,15 +508,14 @@ namespace YasGMP.Data
                 .HasForeignKey(s => s.WorkOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<MachineComponent>()
+                .HasMany(mc => mc.WorkOrders)
+                .WithOne(wo => wo.Component)
+                .HasForeignKey(wo => wo.ComponentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // --- Machine relacije i ograniĂ„â€šĂ˘â‚¬ĹľÄ‚ËĂ˘â€šÂ¬ÄąË‡Ă„â€šĂ‹ÂÄ‚ËĂ˘â‚¬ĹˇĂ‚Â¬Ă„Ä…Ă„ÄľĂ„â€šĂ˘â‚¬ĹľÄ‚â€žĂ˘â‚¬Â¦Ă„â€šĂ˘â‚¬ĹˇÄ‚â€šĂ‚Â¤enja ---
             ConfigureMachine(modelBuilder);
-
-            // Machine -> MachineComponents (1:N, cascade)
-            modelBuilder.Entity<MachineComponent>()
-                .HasOne(mc => mc.Machine)
-                .WithMany(m => m.Components)
-                .HasForeignKey(mc => mc.MachineId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             ConfigureMachineComponent(modelBuilder);
             ConfigureMachineLifecycleEvent(modelBuilder);
