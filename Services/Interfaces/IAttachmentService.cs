@@ -27,6 +27,19 @@ namespace YasGMP.Services.Interfaces
         Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default);
 
         /// <summary>
+        /// Looks up an attachment candidate for deduplication based on the
+        /// provided SHA-256 hash and byte length.
+        /// </summary>
+        Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default);
+
+        /// <summary>
+        /// Streams an attachment's content into the supplied destination stream.
+        /// Supports optional byte range requests and emits metadata about the
+        /// transfer, including whether a partial response was produced.
+        /// </summary>
+        Task<AttachmentStreamResult> StreamContentAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default);
+
+        /// <summary>
         /// Retrieves attachments linked to the specified entity type/identifier.
         /// </summary>
         Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default);
@@ -52,6 +65,21 @@ namespace YasGMP.Services.Interfaces
         public DateTime? RetainUntil { get; set; }
         public string? RetentionPolicyName { get; set; }
         public string? Notes { get; set; }
+
+        /// <summary>
+        /// Human readable rationale for the upload (audit/a11y context).
+        /// </summary>
+        public string? Reason { get; set; }
+
+        /// <summary>
+        /// Source IP address (string representation) captured for audit trails.
+        /// </summary>
+        public string? SourceIp { get; set; }
+
+        /// <summary>
+        /// Source host/device identifier if available.
+        /// </summary>
+        public string? SourceHost { get; set; }
     }
 
     /// <summary>
@@ -68,4 +96,38 @@ namespace YasGMP.Services.Interfaces
     /// <param name="Link">The persisted link.</param>
     /// <param name="Attachment">The linked attachment metadata.</param>
     public record AttachmentLinkWithAttachment(AttachmentLink Link, Attachment Attachment);
+
+    /// <summary>
+    /// Options supplied when streaming attachment content.
+    /// </summary>
+    public class AttachmentReadRequest
+    {
+        /// <summary>Optional requesting user id for RBAC enforcement.</summary>
+        public int? RequestedById { get; set; }
+
+        /// <summary>Optional justification that will be persisted in the audit log.</summary>
+        public string? Reason { get; set; }
+
+        /// <summary>Optional caller IP address captured for the audit log.</summary>
+        public string? SourceIp { get; set; }
+
+        /// <summary>Optional host/device info captured for the audit log.</summary>
+        public string? SourceHost { get; set; }
+
+        /// <summary>Zero-based byte offset to start streaming from.</summary>
+        public long? RangeStart { get; set; }
+
+        /// <summary>Optional number of bytes to stream.</summary>
+        public long? RangeLength { get; set; }
+    }
+
+    /// <summary>
+    /// Metadata returned after streaming an attachment to a destination stream.
+    /// </summary>
+    public record AttachmentStreamResult(
+        Attachment Attachment,
+        long BytesWritten,
+        long TotalLength,
+        bool IsPartial,
+        AttachmentReadRequest? Request);
 }

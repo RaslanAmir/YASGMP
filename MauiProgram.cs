@@ -80,6 +80,27 @@ namespace YasGMP
             builder.Services.AddSingleton<IEnumerable<YasGMP.Diagnostics.ILogSink>>(sinksList);
             builder.Services.AddSingleton(new DiagnosticsHub(diagCtx, sinksList));
 
+            var encryptionOptions = new AttachmentEncryptionOptions
+            {
+                KeyMaterial = Environment.GetEnvironmentVariable("YASGMP_ATTACHMENT_KEY")
+                              ?? diagConfig["Attachments:Encryption:Key"],
+                KeyId = Environment.GetEnvironmentVariable("YASGMP_ATTACHMENT_KEY_ID")
+                         ?? diagConfig["Attachments:Encryption:KeyId"]
+                         ?? "default"
+            };
+
+            var chunkEnv = Environment.GetEnvironmentVariable("YASGMP_ATTACHMENT_CHUNK_SIZE");
+            if (!string.IsNullOrWhiteSpace(chunkEnv) && int.TryParse(chunkEnv, out var chunkSizeEnv) && chunkSizeEnv > 0)
+            {
+                encryptionOptions.ChunkSize = chunkSizeEnv;
+            }
+            else if (int.TryParse(diagConfig["Attachments:Encryption:ChunkSize"], out var chunkSizeCfg) && chunkSizeCfg > 0)
+            {
+                encryptionOptions.ChunkSize = chunkSizeCfg;
+            }
+
+            builder.Services.AddSingleton(encryptionOptions);
+
             // Optional: register Syncfusion license if provided (prevents trial watermark)
             try
             {

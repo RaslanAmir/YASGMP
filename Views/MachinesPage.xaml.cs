@@ -131,7 +131,10 @@ namespace YasGMP.Views
                                 EntityType = "Machine",
                                 EntityId = newId,
                                 UploadedById = null,
-                                Notes = "Machine document"
+                                Notes = "Machine document",
+                                Reason = "machine-doc-upload",
+                                SourceIp = "ui",
+                                SourceHost = Environment.MachineName
                             }).ConfigureAwait(false);
                         }
                         catch { }
@@ -201,7 +204,10 @@ namespace YasGMP.Views
                                 EntityType = "Machine",
                                 EntityId = m.Id,
                                 UploadedById = null,
-                                Notes = "Machine document"
+                                Notes = "Machine document",
+                                Reason = "machine-doc-upload",
+                                SourceIp = "ui",
+                                SourceHost = Environment.MachineName
                             }).ConfigureAwait(false);
                         }
                         catch { }

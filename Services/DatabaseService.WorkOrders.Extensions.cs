@@ -305,7 +305,10 @@ WHERE w.id=@id";
                 EntityType = "WorkOrder",
                 EntityId = workOrderId,
                 UploadedById = uploadedBy,
-                Notes = kind
+                Notes = kind,
+                Reason = string.IsNullOrWhiteSpace(kind) ? "workorder-photo" : $"workorder-photo:{kind}",
+                SourceIp = "ui",
+                SourceHost = Environment.MachineName
             }, token).ConfigureAwait(false);
             int attachmentId = result.Attachment.Id;
             // Persist before/after classification (best effort)
