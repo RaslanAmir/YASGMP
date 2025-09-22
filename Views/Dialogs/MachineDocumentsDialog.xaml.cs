@@ -1,13 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+using YasGMP.Models;
 
 namespace YasGMP.Views.Dialogs
 {
@@ -21,16 +26,18 @@ namespace YasGMP.Views.Dialogs
 
         private readonly DatabaseService _db;
         private readonly IAttachmentService _attachments;
+        private readonly AuthService _auth;
         private readonly int _machineId;
 
         public ObservableCollection<DocRow> Documents { get; } = new();
 
-        public MachineDocumentsDialog(DatabaseService db, int machineId, IAttachmentService? attachmentService = null)
+        public MachineDocumentsDialog(DatabaseService db, int machineId, IAttachmentService? attachmentService = null, AuthService? authService = null)
         {
             InitializeComponent();
             _db = db;
             _machineId = machineId;
             _attachments = attachmentService ?? ServiceLocator.GetRequiredService<IAttachmentService>();
+            _auth = authService ?? ServiceLocator.GetRequiredService<AuthService>();
             DocsList.ItemsSource = Documents;
             _ = LoadAsync();
         }
@@ -45,7 +52,7 @@ namespace YasGMP.Views.Dialogs
                     Documents.Clear();
                     foreach (var row in rows)
                     {
-                        Documents.Add(new DocRow(_attachments, row, OnChanged));
+                        Documents.Add(new DocRow(_attachments, _auth, row, OnChanged));
                     }
                 });
             }
@@ -69,26 +76,40 @@ namespace YasGMP.Views.Dialogs
                 {
                     foreach (var f in files)
                     {
-                        using var fs = File.OpenRead(f.FullPath);
-                        await _attachments.UploadAsync(fs, new AttachmentUploadRequest
+                        await using var stream = await f.OpenReadAsync().ConfigureAwait(false);
+                        var upload = await _attachments.UploadAsync(stream, new AttachmentUploadRequest
                         {
-                            FileName = Path.GetFileName(f.FullPath),
+                            FileName = f.FileName,
                             ContentType = f.ContentType,
                             EntityType = "Machine",
                             EntityId = _machineId,
-                            UploadedById = null,
+                            UploadedById = _auth.CurrentUser?.Id,
                             Notes = "Machine document",
                             Reason = "machine-doc-upload",
-                            SourceIp = "ui",
-                            SourceHost = Environment.MachineName
+                            SourceIp = _auth.CurrentIpAddress,
+                            SourceHost = _auth.CurrentDeviceInfo
                         }).ConfigureAwait(false);
+
+                        if (IsIntegrityAlarm(upload.Attachment))
+                        {
+                            await MainThread.InvokeOnMainThreadAsync(async () =>
+                            {
+                                await DisplayAlert(
+                                    "Integrity warning",
+                                    $"Attachment '{upload.Attachment.FileName}' reported an integrity alarm after upload.",
+                                    "OK");
+                            }).ConfigureAwait(false);
+                        }
                     }
                     await LoadAsync().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Greška", ex.Message, "OK");
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await DisplayAlert("Greška", ex.Message, "OK");
+                });
             }
         }
 
@@ -98,53 +119,120 @@ namespace YasGMP.Views.Dialogs
             await Navigation.PopModalAsync();
         }
 
+        private static bool IsIntegrityAlarm(Attachment attachment)
+        {
+            if (attachment == null)
+                return false;
+
+            var status = attachment.Status ?? string.Empty;
+            return status.Contains("integrity", StringComparison.OrdinalIgnoreCase)
+                || status.Contains("hash", StringComparison.OrdinalIgnoreCase);
+        }
+
         public sealed class DocRow
         {
             private readonly IAttachmentService _attachments;
+            private readonly AuthService _auth;
+            private readonly Func<Task> _onChanged;
+
             public int LinkId { get; }
             public int AttachmentId { get; }
             public string FileName { get; }
-            public Command OpenCommand { get; }
-            public Command RemoveCommand { get; }
-            private readonly Func<Task> _onChanged;
+            public string SizeDisplay { get; }
+            public string RetentionSummary { get; }
+            public bool HasLegalHold { get; }
+            public IAsyncRelayCommand OpenCommand { get; }
+            public IAsyncRelayCommand RemoveCommand { get; }
 
-            public DocRow(IAttachmentService attachments, AttachmentLinkWithAttachment row, Func<Task> onChanged)
+            public DocRow(IAttachmentService attachments, AuthService auth, AttachmentLinkWithAttachment row, Func<Task> onChanged)
             {
                 _attachments = attachments;
+                _auth = auth;
                 _onChanged = onChanged;
                 LinkId = row.Link.Id;
                 AttachmentId = row.Attachment.Id;
                 FileName = row.Attachment.FileName;
-                OpenCommand = new Command(async () => await OpenAsync());
-                RemoveCommand = new Command(async () => await RemoveAsync());
+                SizeDisplay = FormatBytes(row.Attachment.FileSize);
+                RetentionSummary = BuildRetentionSummary(row.Attachment);
+                HasLegalHold = row.Attachment.RetentionLegalHold;
+
+                OpenCommand = new AsyncRelayCommand(OpenAsync);
+                RemoveCommand = new AsyncRelayCommand(RemoveAsync);
             }
 
             private async Task OpenAsync()
             {
+                string? tempPath = null;
                 try
                 {
                     var cacheDir = FileSystem.CacheDirectory;
                     Directory.CreateDirectory(cacheDir);
-                    var tempPath = Path.Combine(cacheDir, $"attachment_{AttachmentId}_{Guid.NewGuid():N}_{FileName}");
 
+                    var safeName = Path.GetFileName(string.IsNullOrWhiteSpace(FileName)
+                        ? $"attachment_{AttachmentId}.dat"
+                        : FileName);
+                    tempPath = Path.Combine(cacheDir, $"attachment_{AttachmentId}_{Guid.NewGuid():N}_{safeName}");
+
+                    AttachmentStreamResult result;
                     await using (var fs = File.Create(tempPath))
                     {
                         var request = new AttachmentReadRequest
                         {
                             Reason = "machine-doc-open",
-                            SourceHost = Environment.MachineName,
-                            SourceIp = null,
-                            RequestedById = null
+                            SourceHost = _auth.CurrentDeviceInfo,
+                            SourceIp = _auth.CurrentIpAddress,
+                            RequestedById = _auth.CurrentUser?.Id
                         };
-                        await _attachments.StreamContentAsync(AttachmentId, fs, request).ConfigureAwait(false);
+                        result = await _attachments.StreamContentAsync(AttachmentId, fs, request).ConfigureAwait(false);
+                    }
+
+                    var auditMessage = $"Streamed {FormatBytes(result.BytesWritten)} of {FormatBytes(result.TotalLength)}. Status: {result.Attachment.Status ?? "OK"}.";
+                    await SafeNavigator.ShowAlertAsync("Audit", auditMessage).ConfigureAwait(false);
+
+                    if (IsIntegrityAlarm(result.Attachment))
+                    {
+                        await MainThread.InvokeOnMainThreadAsync(async () =>
+                        {
+                            var page = Application.Current?.MainPage;
+                            if (page != null)
+                                await page.DisplayAlert("Integrity warning", $"Attachment '{FileName}' reported a hash mismatch during streaming.", "OK").ConfigureAwait(false);
+                        }).ConfigureAwait(false);
                     }
 
                     await Launcher.OpenAsync(new OpenFileRequest
                     {
                         File = new ReadOnlyFile(tempPath)
+                    }).ConfigureAwait(false);
+
+                    string pathToDelete = tempPath;
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(5)).ConfigureAwait(false);
+                        try
+                        {
+                            if (File.Exists(pathToDelete))
+                                File.Delete(pathToDelete);
+                        }
+                        catch
+                        {
+                            // Best-effort cleanup; swallow exceptions.
+                        }
                     });
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        var page = Application.Current?.MainPage;
+                        if (page != null)
+                            await page.DisplayAlert("Greška", ex.Message, "OK").ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+
+                    if (!string.IsNullOrWhiteSpace(tempPath))
+                    {
+                        try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
+                    }
+                }
             }
 
             private async Task RemoveAsync()
@@ -158,6 +246,45 @@ namespace YasGMP.Views.Dialogs
                 {
                     await Application.Current?.MainPage?.DisplayAlert("Greška", ex.Message, "OK");
                 }
+            }
+
+            private static string BuildRetentionSummary(Attachment attachment)
+            {
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(attachment.RetentionPolicyName))
+                    parts.Add(attachment.RetentionPolicyName!);
+                if (attachment.RetainUntil.HasValue)
+                {
+                    parts.Add(string.Format(
+                        CultureInfo.CurrentCulture,
+                        "do {0}",
+                        attachment.RetainUntil.Value.ToLocalTime().ToString("d", CultureInfo.CurrentCulture)));
+                }
+                if (attachment.RetentionLegalHold)
+                    parts.Add("legal hold");
+                if (attachment.RetentionReviewRequired)
+                    parts.Add("review");
+                if (!string.IsNullOrWhiteSpace(attachment.RetentionNotes))
+                    parts.Add(attachment.RetentionNotes!);
+
+                return parts.Count == 0 ? "N/A" : string.Join(" • ", parts);
+            }
+
+            private static string FormatBytes(long? bytes)
+            {
+                if (!bytes.HasValue || bytes.Value <= 0)
+                    return "N/A";
+
+                string[] units = { "B", "KB", "MB", "GB", "TB" };
+                double value = bytes.Value;
+                int unit = 0;
+                while (value >= 1024 && unit < units.Length - 1)
+                {
+                    value /= 1024;
+                    unit++;
+                }
+
+                return string.Format(CultureInfo.CurrentCulture, "{0:0.##} {1}", value, units[unit]);
             }
         }
     }

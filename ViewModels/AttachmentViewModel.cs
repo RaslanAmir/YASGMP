@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -82,7 +83,18 @@ namespace YasGMP.ViewModels
         public Attachment? SelectedAttachment
         {
             get => _selectedAttachment;
-            set { _selectedAttachment = value; OnPropertyChanged(); }
+            set
+            {
+                if (_selectedAttachment == value)
+                    return;
+
+                _selectedAttachment = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedAttachmentSizeDisplay));
+                OnPropertyChanged(nameof(SelectedAttachmentRetentionSummary));
+                OnPropertyChanged(nameof(SelectedAttachmentHasLegalHold));
+                OnPropertyChanged(nameof(SelectedAttachmentRequiresReview));
+            }
         }
 
         /// <summary>Free-text search term (nullable). Triggers <see cref="FilterAttachments"/> on change.</summary>
@@ -119,6 +131,58 @@ namespace YasGMP.ViewModels
             get => _statusMessage;
             set { _statusMessage = value; OnPropertyChanged(); }
         }
+
+        /// <summary>Human readable summary of the selected attachment's size.</summary>
+        public string SelectedAttachmentSizeDisplay
+        {
+            get
+            {
+                var size = SelectedAttachment?.FileSize;
+                return size.HasValue && size.Value > 0
+                    ? FormatBytes(size.Value)
+                    : "N/A";
+            }
+        }
+
+        /// <summary>Summary of the latest retention metadata for the selected attachment.</summary>
+        public string SelectedAttachmentRetentionSummary
+        {
+            get
+            {
+                var attachment = SelectedAttachment;
+                if (attachment is null)
+                    return "N/A";
+
+                var segments = new List<string>();
+                if (!string.IsNullOrWhiteSpace(attachment.RetentionPolicyName))
+                    segments.Add(attachment.RetentionPolicyName!);
+
+                if (attachment.RetainUntil.HasValue)
+                {
+                    segments.Add(string.Format(
+                        CultureInfo.CurrentCulture,
+                        "do {0}",
+                        attachment.RetainUntil.Value.ToLocalTime().ToString("d", CultureInfo.CurrentCulture)));
+                }
+
+                if (attachment.RetentionLegalHold)
+                    segments.Add("legal hold");
+
+                if (attachment.RetentionReviewRequired)
+                    segments.Add("review");
+
+                if (!string.IsNullOrWhiteSpace(attachment.RetentionNotes))
+                    segments.Add(attachment.RetentionNotes!);
+
+                return segments.Count == 0 ? "N/A" : string.Join(" • ", segments);
+            }
+        }
+
+        /// <summary>True when a legal hold prevents purge of the selected attachment.</summary>
+        public bool SelectedAttachmentHasLegalHold => SelectedAttachment?.RetentionLegalHold ?? false;
+
+        /// <summary>True when manual review is required before retention purge.</summary>
+        public bool SelectedAttachmentRequiresReview => SelectedAttachment?.RetentionReviewRequired ?? false;
 
         /// <summary>Available attachment types for quick filtering.</summary>
         public string[] AvailableTypes => new[] { "pdf", "photo", "certificate", "doc", "report", "other" };
@@ -247,12 +311,23 @@ namespace YasGMP.ViewModels
                     SourceHost = Environment.MachineName
                 };
 
+                AttachmentStreamResult result;
                 await using (var fs = File.Create(destinationPath))
                 {
-                    await attachmentService.StreamContentAsync(SelectedAttachment.Id, fs, request).ConfigureAwait(false);
+                    result = await attachmentService.StreamContentAsync(SelectedAttachment.Id, fs, request).ConfigureAwait(false);
                 }
 
-                StatusMessage = $"Downloaded to {destinationPath}.";
+                var written = FormatBytes(result.BytesWritten);
+                var total = FormatBytes(result.TotalLength);
+                var status = string.IsNullOrWhiteSpace(result.Attachment.Status) ? "OK" : result.Attachment.Status;
+                StatusMessage = $"Downloaded {written} of {total} to {destinationPath}. Status: {status}. Audit event logged.";
+
+                if (IsIntegrityAlarm(result.Attachment))
+                {
+                    await SafeNavigator.ShowAlertAsync(
+                        "Integrity warning",
+                        "The attachment reported a hash or integrity alarm. Please verify the source before distribution.").ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -330,7 +405,25 @@ namespace YasGMP.ViewModels
             IsBusy = true;
             try
             {
-                var sigHash = DigitalSignatureHelper.GenerateFileHash(SelectedAttachment.FilePath);
+                string sigHash;
+                var sha256 = SelectedAttachment.Sha256;
+                if (!string.IsNullOrWhiteSpace(sha256))
+                {
+                    try
+                    {
+                        var bytes = Convert.FromHexString(sha256);
+                        sigHash = Convert.ToBase64String(bytes);
+                    }
+                    catch (FormatException)
+                    {
+                        sigHash = sha256;
+                    }
+                }
+                else
+                {
+                    sigHash = DigitalSignatureHelper.GenerateSignatureHash(
+                        $"attachment:{SelectedAttachment.Id}:{SelectedAttachment.FileName}:{DateTime.UtcNow:O}");
+                }
 
                 await _dbService.ApproveAttachmentAsync(
                     attachmentId: SelectedAttachment.Id,
@@ -396,6 +489,31 @@ namespace YasGMP.ViewModels
                 (string.IsNullOrWhiteSpace(TypeFilter) || string.Equals(a.FileType, TypeFilter, StringComparison.OrdinalIgnoreCase))
             );
             FilteredAttachments = new ObservableCollection<Attachment>(filtered);
+        }
+
+        private static string FormatBytes(long bytes)
+        {
+            string[] units = { "B", "KB", "MB", "GB", "TB" };
+            double value = bytes;
+            int unit = 0;
+
+            while (value >= 1024 && unit < units.Length - 1)
+            {
+                value /= 1024;
+                unit++;
+            }
+
+            return string.Format(CultureInfo.CurrentCulture, "{0:0.##} {1}", value, units[unit]);
+        }
+
+        private static bool IsIntegrityAlarm(Attachment attachment)
+        {
+            if (attachment == null)
+                return false;
+
+            var status = attachment.Status ?? string.Empty;
+            return status.Contains("integrity", StringComparison.OrdinalIgnoreCase)
+                || status.Contains("hash", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
