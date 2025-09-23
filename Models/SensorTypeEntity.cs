@@ -6,7 +6,7 @@ namespace YasGMP.Models
 {
     /// <summary>Entity model for the `sensor_types` table.</summary>
     [Table("sensor_types")]
-    public class SensorType
+    public class SensorTypeEntity
     {
         /// <summary>Gets or sets the id.</summary>
         [Key]

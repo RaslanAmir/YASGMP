@@ -153,7 +153,7 @@ namespace YasGMP.Data
         public DbSet<SensitiveDataAccessLog> SensitiveDataAccessLogs { get; set; }
         public DbSet<SensorDataLog> SensorDataLogs { get; set; }
         public DbSet<SensorModel> SensorModels { get; set; }
-        public DbSet<SensorType> SensorTypes { get; set; }
+        public DbSet<SensorTypeEntity> SensorTypes { get; set; }
         public DbSet<SessionLog> SessionLogs { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<SettingAuditLog> SettingAuditLogs { get; set; }
