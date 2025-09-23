@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ad="http://schemas.xceed.com/wpf/xaml/avalondock"
-        xmlns:adLayout="clr-namespace:Xceed.Wpf.AvalonDock.Layout;assembly=AvalonDock"
+        xmlns:adLayout="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
+        xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
         mc:Ignorable="d"
         Title="YasGMP Cockpit"
         Width="1280"
@@ -39,7 +40,7 @@
                 </ad:DockingManager.DocumentHeaderTemplate>
 
                 <ad:DockingManager.LayoutItemContainerStyle>
-                    <Style TargetType="{x:Type ad:LayoutItem}">
+                    <Style TargetType="{x:Type adControls:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.Title}" />
                         <Setter Property="ContentId" Value="{Binding Model.ContentId}" />
                     </Style>
