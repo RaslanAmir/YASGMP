@@ -1,51 +1,90 @@
 metadata:
   project_overview: YasGMP centralizes GMP-compliant manufacturing maintenance, calibration,
-    and quality workflows. The application spans the MAUI client, shared services,
-    and diagnostics tooling that keep change control, audit trail, and validation
-    data consistent across platforms.
+    and quality workflows across the MAUI client, shared services, and diagnostics
+    tooling.
   current_focus:
-    - Complete automation around schema diff regression reports.
-    - Close UI gaps between MAUI work order flows and the expanded data models.
-  blockers:
-    - QA sign-off on the change-control replay harness is still pending.
+    - 'Merge the change control assignment UI, workflow, and QA checklist pull requests
+      (PRs #26, #28, #29).'
+    - 'Verify the calibration self-referencing EF mappings provided in PR #53 before
+      release.'
+  blockers: []
   next_steps:
-    - Backfill calibration certificate seed data after the schema migration.
-    - Schedule Android smoke testing once attachment sync stabilizes.
+    - Exercise the new change control diagnostics harness once the open PRs land.
+    - Run an end-to-end build after the EF mapping fixes merge.
 tasks:
-  backlog:
-    - id: BL-003
-      title: Harden attachment virus scanning pipeline
-      owner: Security
-      due: '2024-06-18'
-      notes: Evaluate ClamAV integration for offline sites
-    - id: BL-002
-      title: Implement warehouse cycle count workflows
-      owner: Operations
-      due: '2024-06-30'
-      notes: Align with audit requirements for serialized parts
+  backlog: []
   in_progress:
-    - id: IP-003
-      title: Finalize work order mobile UX polish
-      owner: UX
-      due: '2024-05-12'
-      notes: Address feedback from pilot line supervisors
-    - id: IP-002
-      title: Integrate background scheduler alerts
-      owner: Platform
-      due: '2024-05-20'
-      notes: Tie into AuditService notifications
+    - id: PR-26
+      title: Add change control assignment picker UI
+      owner: RaslanAmir
+      notes: Introduces the change control page and assignee picker experience in
+        the MAUI client.
+      opened_on: '2025-09-17'
+      url: https://github.com/RaslanAmir/YASGMP/pull/26
+    - id: PR-28
+      title: Implement change control assignment workflow
+      owner: RaslanAmir
+      notes: Persists and audits assignment metadata while exposing it through the
+        view model.
+      opened_on: '2025-09-18'
+      url: https://github.com/RaslanAmir/YASGMP/pull/28
+    - id: PR-29
+      title: Add change control assignment QA checklist and harness
+      owner: RaslanAmir
+      notes: Documents the assignment QA process and wires a diagnostics harness into
+        the self-test runner.
+      opened_on: '2025-09-18'
+      url: https://github.com/RaslanAmir/YASGMP/pull/29
+    - id: PR-53
+      title: Fix calibration self reference mappings
+      owner: RaslanAmir
+      notes: Aligns calibration chaining navigations and related EF Core relationships.
+      opened_on: '2025-09-18'
+      url: https://github.com/RaslanAmir/YASGMP/pull/53
   completed:
-    - id: CM-002
-      title: Expand validation data models
-      owner: Data
-      completed_on: '2024-04-18'
-      notes: Added calibration and audit trail entities
-    - id: CM-003
-      title: Refresh MAUI diagnostics harness
-      owner: QA
-      completed_on: '2024-04-26'
-      notes: Includes change-control replay coverage
+    - id: PR-100
+      title: Add automated status documentation workflow
+      owner: RaslanAmir
+      completed_on: '2025-09-23'
+      notes: Adds the status doc regeneration script and CI check enforcing updated
+        artifacts.
+      url: https://github.com/RaslanAmir/YASGMP/pull/100
+    - id: PR-96
+      title: Exclude WPF assets from MAUI build
+      owner: RaslanAmir
+      completed_on: '2025-09-23'
+      notes: Keeps WPF-specific assets out of the MAUI build while retaining them
+        for the desktop client.
+      url: https://github.com/RaslanAmir/YASGMP/pull/96
+    - id: PR-97
+      title: Limit enum imports in YasGmpDbContext
+      owner: RaslanAmir
+      completed_on: '2025-09-23'
+      notes: Replaces broad enum imports with targeted aliases to avoid type conflicts.
+      url: https://github.com/RaslanAmir/YASGMP/pull/97
+    - id: PR-98
+      title: 'chore: update WPF Microsoft.Extensions packages'
+      owner: RaslanAmir
+      completed_on: '2025-09-23'
+      notes: Aligns the WPF Microsoft.Extensions package references at version 9.0.0.
+      url: https://github.com/RaslanAmir/YASGMP/pull/98
+    - id: PR-99
+      title: Add project documentation scaffolding
+      owner: RaslanAmir
+      completed_on: '2025-09-23'
+      notes: Seeds STATUS, EXECUTION_LOG, and tasks templates for future updates.
+      url: https://github.com/RaslanAmir/YASGMP/pull/99
 execution_log:
+  - date: '2025-09-23'
+    author: Status Reporter
+    summary: Seeded status docs from GitHub PR activity
+    entries:
+      - timestamp: '12:30'
+        change: Collected GitHub PR snapshots
+        notes: Reviewed open change control and calibration pull requests.
+      - timestamp: '12:45'
+        change: Updated status documentation
+        notes: Recorded open PRs and recent merges in tasks.yaml and regenerated docs.
   - date: '2024-05-02'
     author: Luka Marin
     summary: Automated status documentation
