@@ -1,0 +1,18 @@
+backlog:
+  - id: BL-001
+    title: Placeholder backlog task
+    owner: Unassigned
+    due: 2024-06-30
+    notes: Brief description of the backlog item
+in_progress:
+  - id: IP-001
+    title: Placeholder in-progress task
+    owner: Team Member
+    due: 2024-05-15
+    notes: Summary of current work being done
+completed:
+  - id: CM-001
+    title: Placeholder completed task
+    owner: Team Member
+    completed_on: 2024-04-01
+    notes: Outcome or deliverable summary
