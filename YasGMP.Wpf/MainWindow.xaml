@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ad="http://schemas.xceed.com/wpf/xaml/avalondock"
-        xmlns:adLayout="clr-namespace:Xceed.Wpf.AvalonDock.Layout;assembly=Xceed.Wpf.AvalonDock"
+        xmlns:adLayout="clr-namespace:Xceed.Wpf.AvalonDock.Layout;assembly=AvalonDock"
         mc:Ignorable="d"
         Title="YasGMP Cockpit"
         Width="1280"
