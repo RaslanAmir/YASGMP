@@ -8,12 +8,13 @@
     <RootNamespace>YasGMP.Wpf</RootNamespace>
     <!-- Keep Microsoft.Extensions packages aligned on the same patch to avoid downgrade warnings. -->
     <MicrosoftExtensionsVersion>8.0.1</MicrosoftExtensionsVersion>
+    <AvalonDockVersion>4.72.1</AvalonDockVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Pin AvalonDock to the published 4.72.1 build to avoid MC3074 design-time warnings. -->
-    <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
-    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.72.1" />
+    <PackageReference Include="Dirkster.AvalonDock" Version="$(AvalonDockVersion)" />
+    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="$(AvalonDockVersion)" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
