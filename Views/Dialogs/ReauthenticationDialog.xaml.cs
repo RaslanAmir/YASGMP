@@ -89,6 +89,16 @@ namespace YasGMP.Views.Dialogs
             }
             await Navigation.PopModalAsync();
         }
+
+        protected override void OnDisappearing()
+        {
+            if (!_tcs.Task.IsCompleted)
+            {
+                _tcs.TrySetResult(null);
+            }
+
+            base.OnDisappearing();
+        }
     }
 }
 
