@@ -1,17 +1,17 @@
 # Project Overview
 
-YasGMP centralizes GMP-compliant manufacturing maintenance, calibration, and quality workflows. The application spans the MAUI client, shared services, and diagnostics tooling that keep change control, audit trail, and validation data consistent across platforms.
+YasGMP centralizes GMP-compliant manufacturing maintenance, calibration, and quality workflows across the MAUI client, shared services, and diagnostics tooling.
 
 # Current Status
 
-- Complete automation around schema diff regression reports.
-- Close UI gaps between MAUI work order flows and the expanded data models.
+- Merge the change control assignment UI, workflow, and QA checklist pull requests (PRs #26, #28, #29).
+- Verify the calibration self-referencing EF mappings provided in PR #53 before release.
 
 # Blockers
 
-- QA sign-off on the change-control replay harness is still pending.
+No active blockers.
 
 # Next Steps
 
-- Backfill calibration certificate seed data after the schema migration.
-- Schedule Android smoke testing once attachment sync stabilizes.
+- Exercise the new change control diagnostics harness once the open PRs land.
+- Run an end-to-end build after the EF mapping fixes merge.
