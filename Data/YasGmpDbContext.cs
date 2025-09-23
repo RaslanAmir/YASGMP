@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YasGMP.Models;
-using YasGMP.Models.Enums;
+using PhotoType = YasGMP.Models.Enums.PhotoType;
 using WorkOrderActionType = YasGMP.Models.Enums.WorkOrderActionType;
 
 namespace YasGMP.Data
