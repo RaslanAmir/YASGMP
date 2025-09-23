@@ -75,6 +75,11 @@
     <!-- Exclude test sources from the main app build -->
     <Compile Remove="YasGMP.Tests\**\*.cs" />
     <None Include="YasGMP.Tests\**\*.cs" />
+    <!-- Exclude WPF desktop project sources from the main app build -->
+    <Compile Remove="YasGMP.Wpf\**\*.cs" />
+    <None Include="YasGMP.Wpf\**\*.cs" />
+    <MauiXaml Remove="YasGMP.Wpf\**\*.xaml" />
+    <None Include="YasGMP.Wpf\**\*.xaml" />
   </ItemGroup>
 
   <Target Name="DbSyncAnalyzer" BeforeTargets="Build" Condition="'$(RUN_DB_ANALYZER_ON_BUILD)'=='true'">
