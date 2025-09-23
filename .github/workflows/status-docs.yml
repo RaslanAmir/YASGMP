@@ -1,0 +1,20 @@
+name: status-docs
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  status-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pyyaml
+      - name: Validate status documentation
+        run: python scripts/update_status_docs.py --check

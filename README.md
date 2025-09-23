@@ -10,6 +10,35 @@ contains the mobile/desktop client, common domain services, and diagnostics tool
 - Diagnostics self-tests: launch **Debug → Diagnostics Hub → Run Self Tests** to execute the built-in harnesses
   (including the change-control assignment exercise) before shipping.
 
+## Status documentation workflow
+
+The status artifacts under `docs/` (`STATUS.md`, `EXECUTION_LOG.md`, and `tasks.yaml`) are generated from a single
+source of truth. To regenerate them locally install PyYAML once and run the helper script:
+
+```bash
+python -m pip install pyyaml  # first-time setup
+python scripts/update_status_docs.py
+```
+
+The script is idempotent. To verify that the checked-in files are up to date (e.g., before pushing) run:
+
+```bash
+python scripts/update_status_docs.py --check
+```
+
+To record a new execution session without hand-editing Markdown, supply `--append-log` along with the session
+metadata and table rows. Example:
+
+```bash
+python scripts/update_status_docs.py \
+  --append-log \
+  --log-date 2024-05-03 \
+  --log-author "Luka Marin" \
+  --log-summary "Closed reporting gaps" \
+  --log-entry "08:30|Rebuilt analytics snapshot|Green diff" \
+  --log-entry "10:15|Published release notes|Shared with QA"
+```
+
 ## Building the app
 
 Install the required .NET workload (see `global.json`) and run:

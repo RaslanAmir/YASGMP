@@ -1,18 +1,68 @@
-backlog:
-  - id: BL-001
-    title: Placeholder backlog task
-    owner: Unassigned
-    due: 2024-06-30
-    notes: Brief description of the backlog item
-in_progress:
-  - id: IP-001
-    title: Placeholder in-progress task
-    owner: Team Member
-    due: 2024-05-15
-    notes: Summary of current work being done
-completed:
-  - id: CM-001
-    title: Placeholder completed task
-    owner: Team Member
-    completed_on: 2024-04-01
-    notes: Outcome or deliverable summary
+metadata:
+  project_overview: YasGMP centralizes GMP-compliant manufacturing maintenance, calibration,
+    and quality workflows. The application spans the MAUI client, shared services,
+    and diagnostics tooling that keep change control, audit trail, and validation
+    data consistent across platforms.
+  current_focus:
+    - Complete automation around schema diff regression reports.
+    - Close UI gaps between MAUI work order flows and the expanded data models.
+  blockers:
+    - QA sign-off on the change-control replay harness is still pending.
+  next_steps:
+    - Backfill calibration certificate seed data after the schema migration.
+    - Schedule Android smoke testing once attachment sync stabilizes.
+tasks:
+  backlog:
+    - id: BL-003
+      title: Harden attachment virus scanning pipeline
+      owner: Security
+      due: '2024-06-18'
+      notes: Evaluate ClamAV integration for offline sites
+    - id: BL-002
+      title: Implement warehouse cycle count workflows
+      owner: Operations
+      due: '2024-06-30'
+      notes: Align with audit requirements for serialized parts
+  in_progress:
+    - id: IP-003
+      title: Finalize work order mobile UX polish
+      owner: UX
+      due: '2024-05-12'
+      notes: Address feedback from pilot line supervisors
+    - id: IP-002
+      title: Integrate background scheduler alerts
+      owner: Platform
+      due: '2024-05-20'
+      notes: Tie into AuditService notifications
+  completed:
+    - id: CM-002
+      title: Expand validation data models
+      owner: Data
+      completed_on: '2024-04-18'
+      notes: Added calibration and audit trail entities
+    - id: CM-003
+      title: Refresh MAUI diagnostics harness
+      owner: QA
+      completed_on: '2024-04-26'
+      notes: Includes change-control replay coverage
+execution_log:
+  - date: '2024-05-02'
+    author: Luka Marin
+    summary: Automated status documentation
+    entries:
+      - timestamp: '08:45'
+        change: Added status document generator
+        notes: Created scripts/update_status_docs.py
+      - timestamp: '10:05'
+        change: Wired CI validation
+        notes: Status artifacts enforced on push
+  - date: '2024-04-22'
+    author: Milica Horvat
+    summary: Stabilized schema automation
+    entries:
+      - timestamp: '09:15'
+        change: Updated schema diff tooling
+        notes: Normalized composite keys and collations
+      - timestamp: '11:40'
+        change: Validated EF Core snapshot regeneration
+        notes: Confirmed no drift across migrations
