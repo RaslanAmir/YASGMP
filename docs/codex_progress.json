@@ -4,7 +4,8 @@
     "wpfTarget": "net9.0-windows10.0.19041.0",
     "detected": false,
     "notes": [
-      "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs."
+      "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK"
     ]
   },
   "batches": [
@@ -37,6 +38,8 @@
   },
   "lastCommitSummary": "",
   "notes": [
-    "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps."
+    "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
+    "tests/fixtures/hello.txt seeded for smoke harness bootstrap"
   ]
 }
+

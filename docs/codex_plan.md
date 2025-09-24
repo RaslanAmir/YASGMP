@@ -7,17 +7,18 @@
 - [ ] WPF builds *(pending SDK availability)*
 
 ## Decisions & Pins
-- Preferred WPF target: **net9.0-windows10.0.19041.0** (existing project already targets .NET 9; retain once SDK accessible).
-- AvalonDock version: **4.72.1** (already pinned in `YasGMP.Wpf.csproj`).
-- Other NuGets: Fluent.Ribbon 11.0.1, CommunityToolkit.Mvvm 8.4.0, Microsoft.Extensions.* 9.0.3, MySqlConnector 2.4.0 (all pinned in csproj).
-- Environment gap: install/enable .NET SDK tooling inside container before any build/test can occur.
+- Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
+- Repo-level SDK pin: `global.json` set to **9.0.100** *(reinforced via bootstrap script)*.
+- AvalonDock: **4.72.1** *(pinned in `YasGMP.Wpf.csproj`)*.
+- Other NuGets: **Fluent.Ribbon 11.0.1**, **CommunityToolkit.Mvvm 8.4.0**, **Microsoft.Extensions.* 9.0.3**, **MySqlConnector 2.4.0** *(pinned in csproj)*.
+- Environment gap: install/enable **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host. The build container currently lacks `dotnet`; either run `scripts/bootstrap-dotnet9.ps1` or install via `winget install Microsoft.DotNet.SDK.9`.
 
 ## Batches
-- B0 — Environment stabilization (SDKs, NuGets, XAML namespaces) — **blocked** (no `dotnet` CLI)
-- B1 — Shell foundation (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
-- B2 — Cross-cutting (Attachments DB, E-Signature, Audit) — [ ] todo
-- B3 — Editor framework (templates, host, unsaved-guard) — [ ] todo
-- B4+ — Module rollout:
+- **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
+- **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
+- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [ ] todo
+- **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
+- **B4+ — Module rollout:**
   - Assets/Machines — [ ] todo
   - Components — [ ] todo
   - Parts & Warehouses — [ ] todo
@@ -34,9 +35,10 @@
   - Settings/Admin — [ ] todo
 
 ## Open Issues / Blockers
-- `dotnet` executable not found. Need to install or expose .NET 9 SDK in the build container before proceeding with restore/build/test steps.
-- Pending inventory of MAUI assets/services/modules; schedule once SDK issue resolved.
+- `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`.
+- Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
+- Smoke automation is blocked until SDK + Windows tooling are installed.
 
 ## Notes
-- Smoke automation not runnable until SDK/tooling installed.
-- Existing `YasGMP.Wpf` project already targets .NET 9 and references pinned packages; validate once builds are possible.
+- `scripts/bootstrap-dotnet9.ps1` added to guide host setup *(installs/verifies .NET 9, Windows SDK, runs restore/build, seeds smoke test fixture)*.
+- `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
