@@ -1,0 +1,45 @@
+{
+  "branch": "feature/wpf-shell-full-yasgmp",
+  "sdk": {
+    "wpfTarget": "net9.0-windows10.0.19041.0",
+    "detected": false,
+    "notes": [
+      "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK"
+    ]
+  },
+  "batches": [
+    { "id": "B0", "name": "Environment stabilization", "status": "blocked", "notes": ["Awaiting .NET SDK installation"] },
+    { "id": "B1", "name": "Shell foundation", "status": "pending" },
+    { "id": "B2", "name": "Cross-cutting services", "status": "pending" },
+    { "id": "B3", "name": "Editor framework", "status": "pending" }
+  ],
+  "modules": {
+    "Assets": "pending",
+    "Components": "pending",
+    "Parts": "pending",
+    "Warehouses": "pending",
+    "WorkOrders": "in-progress",
+    "Calibration": "pending",
+    "Incidents": "pending",
+    "CAPA": "pending",
+    "ChangeControl": "pending",
+    "Validations": "pending",
+    "ScheduledJobs": "pending",
+    "UsersRoles": "pending",
+    "Suppliers": "pending",
+    "ExternalServicers": "pending",
+    "Audit": "pending",
+    "ApiAudit": "pending",
+    "Attachments": "pending",
+    "Dashboard": "pending",
+    "Reports": "pending",
+    "SettingsAdmin": "pending"
+  },
+  "lastCommitSummary": "",
+  "notes": [
+    "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
+    "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
+    "Work Orders editor now surfaces a CRUD-capable form wired to WorkOrderService; attachments/signature integration pending"
+  ]
+}
