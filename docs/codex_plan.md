@@ -1,8 +1,9 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH)*
-- [ ] Solution restores *(pending SDK availability)*
+
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24 → **command not found**)*
 - [ ] MAUI builds *(pending SDK availability)*
 - [ ] WPF builds *(pending SDK availability)*
 
@@ -40,8 +41,12 @@
 - Smoke automation is blocked until SDK + Windows tooling are installed.
 - Work Orders form currently saves via shared services but lacks attachments/signature prompts; plan follow-up in Batch B2.
 
+- 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
+
+
 ## Notes
 - `scripts/bootstrap-dotnet9.ps1` added to guide host setup *(installs/verifies .NET 9, Windows SDK, runs restore/build, seeds smoke test fixture).* 
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
 - Work Orders module now exposes a mode-aware editor backed by `WorkOrderService` for CRUD operations.
+
