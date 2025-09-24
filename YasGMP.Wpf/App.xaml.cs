@@ -53,6 +53,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
+                        svc.AddSingleton<DebugSmokeTestService>();
 
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();

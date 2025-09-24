@@ -89,6 +89,10 @@
                     <fluent:Button Header="Save Layout"
                                    Command="{Binding WindowCommands.SaveLayoutCommand}" />
                 </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Diagnostics">
+                    <fluent:Button Header="Run Smoke Test"
+                                   Command="{Binding RunSmokeTestCommand}" />
+                </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
         </fluent:Ribbon>
 
