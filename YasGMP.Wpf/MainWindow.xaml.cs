@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
+using Fluent;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 
@@ -10,7 +11,7 @@ namespace YasGMP.Wpf
     /// <summary>
     /// Shell host window that bridges the view-model with AvalonDock layout services.
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : RibbonWindow
     {
         private readonly MainWindowViewModel _viewModel;
         private readonly ShellLayoutController _layoutController;
@@ -41,11 +42,13 @@ namespace YasGMP.Wpf
 
         private async void OnSaveLayoutRequested(object? sender, EventArgs e)
         {
+            ShellBackstage.IsOpen = false;
             await _layoutController.SaveLayoutAsync(this);
         }
 
         private async void OnResetLayoutRequested(object? sender, EventArgs e)
         {
+            ShellBackstage.IsOpen = false;
             await _layoutController.ResetLayoutAsync(this);
         }
     }

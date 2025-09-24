@@ -1,27 +1,65 @@
-<Window x:Class="YasGMP.Wpf.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ad="http://schemas.xceed.com/wpf/xaml/avalondock"
-        xmlns:adLayout="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
-        xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
-        mc:Ignorable="d"
-        Title="YasGMP Cockpit"
-        Width="1280"
-        Height="800"
-        Loaded="OnLoaded"
-        Closing="OnClosing">
+<fluent:RibbonWindow x:Class="YasGMP.Wpf.MainWindow"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:fluent="urn:fluent-ribbon"
+                     xmlns:ad="http://schemas.xceed.com/wpf/xaml/avalondock"
+                     xmlns:adLayout="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
+                     xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
+                     xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
+                     Title="YasGMP Cockpit"
+                     Width="1280"
+                     Height="800"
+                     Loaded="OnLoaded"
+                     Closing="OnClosing"
+                     mc:Ignorable="d">
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Window">
-                <MenuItem Header="_New Machines Tab" Command="{Binding WindowCommands.NewMachinesDocumentCommand}" />
-                <MenuItem Header="_Navigate to Machines" Command="{Binding WindowCommands.NavigateToMachinesCommand}" />
-                <Separator />
-                <MenuItem Header="_Save Layout" Command="{Binding WindowCommands.SaveLayoutCommand}" />
-                <MenuItem Header="_Reset Layout" Command="{Binding WindowCommands.ResetLayoutCommand}" />
-            </MenuItem>
-        </Menu>
+        <fluent:Ribbon x:Name="ShellRibbon"
+                       DockPanel.Dock="Top"
+                       fluent:RibbonWindow.Ribbon="{Binding RelativeSource={RelativeSource Self}}"
+                       IsQuickAccessToolBarVisible="False">
+            <fluent:Ribbon.Menu>
+                <fluent:Backstage x:Name="ShellBackstage">
+                    <fluent:BackstageTabControl>
+                        <fluent:BackstageTabItem Header="Layout">
+                            <StackPanel Margin="16">
+                                <fluent:Button Header="Save Layout"
+                                               Width="180"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.SaveLayoutCommand}" />
+                                <fluent:Button Header="Reset Layout"
+                                               Width="180"
+                                               Command="{Binding WindowCommands.ResetLayoutCommand}" />
+                            </StackPanel>
+                        </fluent:BackstageTabItem>
+                    </fluent:BackstageTabControl>
+                </fluent:Backstage>
+            </fluent:Ribbon.Menu>
+
+            <fluent:RibbonTabItem Header="Home">
+                <fluent:RibbonGroupBox Header="Workspace">
+                    <fluent:Button Header="New Machines Tab"
+                                   Command="{Binding WindowCommands.NewMachinesDocumentCommand}" />
+                    <fluent:Button Header="Navigate to Machines"
+                                   Command="{Binding WindowCommands.NavigateToMachinesCommand}" />
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+
+            <fluent:RibbonTabItem Header="View">
+                <fluent:RibbonGroupBox Header="Layout">
+                    <fluent:Button Header="Reset Layout"
+                                   Command="{Binding WindowCommands.ResetLayoutCommand}" />
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+
+            <fluent:RibbonTabItem Header="Tools">
+                <fluent:RibbonGroupBox Header="Persistence">
+                    <fluent:Button Header="Save Layout"
+                                   Command="{Binding WindowCommands.SaveLayoutCommand}" />
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+        </fluent:Ribbon>
 
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
@@ -33,6 +71,10 @@
             <ad:DockingManager x:Name="DockManager"
                                DocumentsSource="{Binding Documents}"
                                ActiveContent="{Binding ActiveDocument, Mode=TwoWay}">
+                <ad:DockingManager.Theme>
+                    <adThemes:MetroTheme />
+                </ad:DockingManager.Theme>
+
                 <ad:DockingManager.DocumentHeaderTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Title}" />
@@ -68,4 +110,4 @@
             </ad:DockingManager>
         </Grid>
     </DockPanel>
-</Window>
+</fluent:RibbonWindow>
