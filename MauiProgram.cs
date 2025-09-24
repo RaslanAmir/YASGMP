@@ -39,6 +39,7 @@ namespace YasGMP
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+            ServiceLocator.RegisterFallback(() => Microsoft.Maui.Controls.Application.Current?.Handler?.MauiContext?.Services);
 
             builder
                 .UseMauiApp<App>()

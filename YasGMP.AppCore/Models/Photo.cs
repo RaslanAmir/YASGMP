@@ -56,5 +56,27 @@ namespace YasGMP.Models
 
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public Photo DeepCopy()
+        {
+            return new Photo
+            {
+                Id = Id,
+                WorkOrderId = WorkOrderId,
+                WorkOrder = WorkOrder,
+                ComponentId = ComponentId,
+                Component = Component,
+                FileName = FileName,
+                FilePath = FilePath,
+                Type = Type,
+                UploadedBy = UploadedBy,
+                Uploader = Uploader,
+                UploadedAt = UploadedAt,
+                WatermarkApplied = WatermarkApplied,
+                Note = Note,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt
+            };
+        }
     }
 }
