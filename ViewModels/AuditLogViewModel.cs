@@ -4,7 +4,7 @@
 //  Summary:
 //      GMP / 21 CFR Part 11 compliant Audit/System Events ViewModel.
 //      Strongly-typed against DatabaseService audit query extensions and the
-//      SystemEvent POCO (namespace YasGMP.Services).
+//      SystemEvent POCO (from YasGMP.AppCore, namespace YasGMP.Services).
 //      Includes filtering + CSV/XLSX/PDF export (helpers in YasGMP.Helpers).
 //  © 2025 YasGMP. All rights reserved.
 // ==============================================================================
@@ -21,7 +21,7 @@ using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using YasGMP.Helpers;      // XlsxExporter, PdfExporter live here (separate files)
-using YasGMP.Services;     // DatabaseService + SystemEvent
+using YasGMP.Services;     // DatabaseService + SystemEvent (via YasGMP.AppCore)
 
 // Alias to ensure we bind to the correct POCO type regardless of using scope.
 using SystemEvent = YasGMP.Services.SystemEvent;
