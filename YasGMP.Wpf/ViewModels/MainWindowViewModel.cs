@@ -1,7 +1,9 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
 
@@ -14,6 +16,7 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private readonly IModuleRegistry _moduleRegistry;
     private readonly ShellInteractionService _shellInteraction;
+    private readonly DebugSmokeTestService _smokeTestService;
     private string _statusText = "Ready";
 
     [ObservableProperty]
@@ -24,15 +27,18 @@ public partial class MainWindowViewModel : ObservableObject
         ModulesPaneViewModel modulesPane,
         InspectorPaneViewModel inspectorPane,
         ShellStatusBarViewModel statusBar,
-        ShellInteractionService shellInteraction)
+        ShellInteractionService shellInteraction,
+        DebugSmokeTestService smokeTestService)
     {
         _moduleRegistry = moduleRegistry;
         _shellInteraction = shellInteraction;
+        _smokeTestService = smokeTestService;
         ModulesPane = modulesPane;
         InspectorPane = inspectorPane;
         StatusBar = statusBar;
         Documents = new ObservableCollection<DocumentViewModel>();
         WindowCommands = new WindowMenuViewModel(this);
+        RunSmokeTestCommand = new AsyncRelayCommand(RunSmokeTestAsync, () => _smokeTestService.IsEnabled);
 
         _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update);
         StatusBar.StatusText = _statusText;
@@ -52,6 +58,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     /// <summary>Command surface for Window menu/backstage.</summary>
     public WindowMenuViewModel WindowCommands { get; }
+
+    /// <summary>Runs the debug smoke test harness surfaced on the Tools ribbon tab.</summary>
+    public IAsyncRelayCommand RunSmokeTestCommand { get; }
 
     /// <summary>Gets or sets the status text exposed for legacy bindings.</summary>
     public string StatusText
@@ -154,6 +163,31 @@ public partial class MainWindowViewModel : ObservableObject
     private void UpdateStatusInternal(string message)
     {
         StatusText = message;
+    }
+
+    private async Task RunSmokeTestAsync()
+    {
+        if (!_smokeTestService.IsEnabled)
+        {
+            StatusText = $"Smoke test disabled. Set {DebugSmokeTestService.EnvironmentToggleName}=1 to enable.";
+            RunSmokeTestCommand.NotifyCanExecuteChanged();
+            return;
+        }
+
+        try
+        {
+            StatusText = "Running debug smoke test...";
+            var result = await _smokeTestService.RunAsync();
+            StatusText = result.Summary;
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Smoke test failed: {ex.Message}";
+        }
+        finally
+        {
+            RunSmokeTestCommand.NotifyCanExecuteChanged();
+        }
     }
 
     private static string? TryParseModuleKey(string contentId)
