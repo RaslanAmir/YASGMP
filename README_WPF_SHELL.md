@@ -4,8 +4,8 @@ The YasGMP WPF shell hosts the desktop docking workspace used to surface cockpit
 
 ## Prerequisites
 
-- **Supported OS:** The WPF project targets `net8.0-windows10.0.19041.0`, so the shell requires Windows 10 build 19041 or later.【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L1-L12】
-- **.NET SDK:** Install the .NET SDK pinned in `global.json` (`8.0.413`) to match the repo’s toolset.【F:global.json†L1-L6】
+- **Supported OS:** The WPF project targets `net9.0-windows10.0.19041.0`, so the shell requires Windows 10 build 19041 or later.
+- **.NET SDK:** Install the .NET SDK pinned in `global.json` (`9.0.100`) to match the repo’s toolset.【F:global.json†L1-L6】
 - **Configuration:** The shell reads configuration from `appsettings.json`. Override the defaults for per-user layouts and database access via:
   - `Shell:UserId` – numeric user identifier (defaults to `1`).【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
   - `Shell:Username` – display name used when persisting layouts (defaults to `"wpf-shell"`).【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
@@ -29,9 +29,9 @@ dotnet publish YasGMP.Wpf -c Release -r win-x64
 
 Visual Studio and MSBuild follow the same steps: open `yasgmp.sln`, set **YasGMP.Wpf** as the startup project, and use **Build → Build Solution** (or `msbuild YasGMP.Wpf/YasGMP.Wpf.csproj /t:Build`).【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L1-L28】
 
-## Key NuGet dependencies
+## Key dependencies
 
-The project file pins the following packages critical to the shell experience.【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L9-L24】
+`YasGMP.Wpf` references the shared `YasGMP.AppCore` library, which exposes the `AddYasGmpCoreServices` extension and the `YasGMP.Services` namespace consumed across the MAUI and WPF clients. The project file also pins the following packages critical to the shell experience.【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L9-L28】
 
 - **Dirkster.AvalonDock** and **Dirkster.AvalonDock.Themes.VS2013** – provide the docking layout manager and Visual Studio themed chrome for document/anchorable panes.
 - **CommunityToolkit.Mvvm** – supplies `ObservableObject`, commands, and source generators used across view-models.
