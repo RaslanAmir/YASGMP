@@ -10,7 +10,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed class CalibrationModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Calibration";
+    public new const string ModuleKey = "Calibration";
 
     public CalibrationModuleViewModel(
         DatabaseService databaseService,
@@ -47,6 +47,52 @@ public sealed class CalibrationModuleViewModel : DataDrivenModuleDocumentViewMod
                 },
                 AssetsModuleViewModel.ModuleKey, 3)
         };
+
+    protected override async Task<CflRequest?> CreateCflRequestAsync()
+    {
+        var calibrations = await Database.GetAllCalibrationsAsync().ConfigureAwait(false);
+        var items = calibrations
+            .Select(calibration =>
+            {
+                var key = calibration.Id.ToString(CultureInfo.InvariantCulture);
+                var label = $"Calibration #{calibration.Id}";
+                var descriptionParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(calibration.CertDoc))
+                {
+                    descriptionParts.Add(calibration.CertDoc!);
+                }
+
+                descriptionParts.Add(calibration.CalibrationDate.ToString("d", CultureInfo.CurrentCulture));
+                descriptionParts.Add(calibration.NextDue.ToString("d", CultureInfo.CurrentCulture));
+
+                if (!string.IsNullOrWhiteSpace(calibration.Result))
+                {
+                    descriptionParts.Add(calibration.Result!);
+                }
+
+                var description = string.Join(" • ", descriptionParts);
+
+                return new CflItem(key, label, description);
+            })
+            .ToList();
+
+        return new CflRequest("Select Calibration", items);
+    }
+
+    protected override Task OnCflSelectionAsync(CflResult result)
+    {
+        var search = result.Selected.Label;
+        var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
+        if (match is not null)
+        {
+            SelectedRecord = match;
+            search = match.Title;
+        }
+
+        SearchText = search;
+        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        return Task.CompletedTask;
+    }
 
     private static ModuleRecord ToRecord(Calibration calibration)
     {

@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>YasGMP.Wpf</RootNamespace>
     <!-- Keep Microsoft.Extensions packages aligned on the same patch to avoid downgrade warnings. -->
-    <MicrosoftExtensionsVersion>9.0.0</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion>9.0.3</MicrosoftExtensionsVersion>
     <AvalonDockVersion>4.72.1</AvalonDockVersion>
   </PropertyGroup>
 
