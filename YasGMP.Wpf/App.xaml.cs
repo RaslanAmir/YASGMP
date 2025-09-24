@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using YasGMP.AppCore.DependencyInjection;
 using YasGMP.Common;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 
@@ -44,6 +45,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IMachineDataService, MockMachineDataService>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
+                        svc.AddSingleton<IAuthContext, WpfAuthContext>();
                         svc.AddSingleton<DockLayoutPersistenceService>();
                         svc.AddSingleton<ShellLayoutController>();
 

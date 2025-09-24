@@ -6,7 +6,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Maui.Storage;
+using YasGMP.Common;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services.Logging
 {
@@ -30,7 +31,7 @@ namespace YasGMP.Services.Logging
         {
             _sessionId = sessionId ?? Guid.NewGuid().ToString("N");
             _getUserId = getUserId ?? (() => null);
-            _baseDir = baseDir ?? Path.Combine(FileSystem.AppDataDirectory, "logs");
+            _baseDir = ResolveBaseDirectory(baseDir);
             Directory.CreateDirectory(_baseDir);
             _currentFile = ComputeLogPath();
         }
@@ -128,6 +129,27 @@ namespace YasGMP.Services.Logging
         {
             _disposed = true;
             _gate.Dispose();
+        }
+
+        private static string ResolveBaseDirectory(string? baseDir)
+        {
+            if (!string.IsNullOrWhiteSpace(baseDir))
+            {
+                return baseDir!;
+            }
+
+            var platform = ServiceLocator.GetService<IPlatformService>();
+            var appData = platform?.GetAppDataDirectory();
+
+            if (string.IsNullOrWhiteSpace(appData))
+            {
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                appData = string.IsNullOrWhiteSpace(local)
+                    ? Path.Combine(AppContext.BaseDirectory, "AppData")
+                    : Path.Combine(local, "YasGMP");
+            }
+
+            return Path.Combine(appData!, "logs");
         }
     }
 }

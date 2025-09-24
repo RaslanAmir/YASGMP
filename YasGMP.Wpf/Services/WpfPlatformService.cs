@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.IO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
@@ -116,6 +117,14 @@ namespace YasGMP.Wpf.Services
 
         /// <inheritdoc />
         public string GetUserName() => Environment.UserName;
+
+        /// <inheritdoc />
+        public string GetAppDataDirectory()
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YasGMP", "Wpf");
+            Directory.CreateDirectory(path);
+            return path;
+        }
 
         private static bool IsVirtual(NetworkInterface ni)
         {

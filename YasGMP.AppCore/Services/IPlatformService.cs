@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,24 @@ namespace YasGMP.Services
         string GetModel()
         {
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Returns the application data directory suitable for storing user-specific files.
+        /// </summary>
+        string GetAppDataDirectory()
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (!string.IsNullOrWhiteSpace(localAppData))
+            {
+                var path = Path.Combine(localAppData, "YasGMP");
+                Directory.CreateDirectory(path);
+                return path;
+            }
+
+            var fallback = Path.Combine(AppContext.BaseDirectory, "AppData");
+            Directory.CreateDirectory(fallback);
+            return fallback;
         }
 
         /// <summary>
