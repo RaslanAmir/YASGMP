@@ -41,7 +41,7 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Left-hand navigation pane listing modules.</summary>
     public ModulesPaneViewModel ModulesPane { get; }
 
-    /// <summary>Inspector pane rendered along the bottom of the shell.</summary>
+    /// <summary>Inspector pane rendered along the right side of the shell.</summary>
     public InspectorPaneViewModel InspectorPane { get; }
 
     /// <summary>Status bar data context.</summary>
