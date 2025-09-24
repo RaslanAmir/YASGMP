@@ -7,7 +7,6 @@ using System.Windows.Input;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Maui.Storage;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -33,6 +32,7 @@ namespace YasGMP.ViewModels
         private readonly AuthService _authService = null!;
         private readonly CodeGeneratorService _codeService = null!;
         private readonly QRCodeService _qrService = null!;
+        private readonly IPlatformService _platformService = null!;
 
         private ObservableCollection<Machine> _machines = new();
         private ObservableCollection<Machine> _filteredMachines = new();
@@ -60,12 +60,14 @@ namespace YasGMP.ViewModels
             DatabaseService dbService,
             AuthService authService,
             CodeGeneratorService codeService,
-            QRCodeService qrService)
+            QRCodeService qrService,
+            IPlatformService platformService)
         {
             _dbService   = dbService   ?? throw new ArgumentNullException(nameof(dbService));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _codeService = codeService ?? throw new ArgumentNullException(nameof(codeService));
             _qrService   = qrService   ?? throw new ArgumentNullException(nameof(qrService));
+            _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
 
             _currentSessionId = _authService.CurrentSessionId  ?? string.Empty;
             _currentDeviceInfo = _authService.CurrentDeviceInfo ?? string.Empty;
@@ -369,7 +371,7 @@ namespace YasGMP.ViewModels
             if (string.IsNullOrWhiteSpace(machine.QrCode))
             {
                 using var stream = _qrService.GeneratePng(machine.Code);
-                var dir = FileSystem.AppDataDirectory;
+                var dir = _platformService.GetAppDataDirectory();
                 Directory.CreateDirectory(dir);
                 var path = Path.Combine(dir, $"{machine.Code}.png");
                 using var fs = File.Create(path);

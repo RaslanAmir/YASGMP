@@ -46,6 +46,9 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<IAuthContext, WpfAuthContext>();
+                        svc.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
+                        svc.AddSingleton<IDialogService, WpfDialogService>();
+                        svc.AddSingleton<IFilePicker, WpfFilePicker>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());

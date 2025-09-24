@@ -7,8 +7,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.Maui.ApplicationModel;   // MainThread
-using Microsoft.Maui.Controls;           // Command, Keyboard
 using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -27,6 +25,8 @@ namespace YasGMP.ViewModels
         private readonly DatabaseService _dbService;
         private readonly AuditService _auditService;
         private readonly ExportService _exportService;
+        private readonly IUiDispatcher _dispatcher;
+        private readonly IUserSession _userSession;
 
         /// <summary>Backing store for all calibrations (source for filtering and analytics).</summary>
         private readonly List<Calibration> _allCalibrations = new();
@@ -74,10 +74,10 @@ namespace YasGMP.ViewModels
                 {
                     _selectedCalibration = value;
                     OnPropertyChanged();
-
-                    // Re-evaluate buttons that depend on selection
-                    (EditCommand   as Command)?.ChangeCanExecute();
-                    (DeleteCommand as Command)?.ChangeCanExecute();
+                    if (EditCommand is DelegateCommand edit)
+                        edit.RaiseCanExecuteChanged();
+                    if (DeleteCommand is AsyncDelegateCommand delete)
+                        delete.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -185,20 +185,22 @@ namespace YasGMP.ViewModels
         /// <summary>
         /// Initializes a new instance of <see cref="CalibrationsViewModel"/> and wires up services and commands.
         /// </summary>
-        public CalibrationsViewModel(DatabaseService dbService, AuditService auditService, ExportService exportService)
+        public CalibrationsViewModel(DatabaseService dbService, AuditService auditService, ExportService exportService, IUiDispatcher dispatcher, IUserSession userSession)
         {
             _dbService     = dbService    ?? throw new ArgumentNullException(nameof(dbService));
             _auditService  = auditService ?? throw new ArgumentNullException(nameof(auditService));
             _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+            _dispatcher    = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+            _userSession   = userSession ?? throw new ArgumentNullException(nameof(userSession));
 
-            LoadAllCommand     = new Command(async () => await LoadAllAsync());
-            AddCommand         = new Command(OnAddCalibrationRequested);
-            EditCommand        = new Command(OnEditCalibrationRequested,   () => SelectedCalibration != null);
-            DeleteCommand      = new Command(async () => await DeleteCalibrationAsync(), () => SelectedCalibration != null);
-            ExportExcelCommand = new Command(async () => await ExportExcelAsync());
-            ExportPdfCommand   = new Command(async () => await ExportPdfAsync());
-            ResetFilterCommand = new Command(ResetFilters);
-            RefreshCommand     = new Command(async () => await LoadAllAsync());
+            LoadAllCommand     = new AsyncDelegateCommand(LoadAllAsync);
+            AddCommand         = new DelegateCommand(OnAddCalibrationRequested);
+            EditCommand        = new DelegateCommand(OnEditCalibrationRequested, () => SelectedCalibration != null);
+            DeleteCommand      = new AsyncDelegateCommand(DeleteCalibrationAsync, () => SelectedCalibration != null);
+            ExportExcelCommand = new AsyncDelegateCommand(ExportExcelAsync);
+            ExportPdfCommand   = new AsyncDelegateCommand(ExportPdfAsync);
+            ResetFilterCommand = new DelegateCommand(ResetFilters);
+            RefreshCommand     = new AsyncDelegateCommand(LoadAllAsync);
 
             _ = LoadAllAsync();
         }
@@ -210,7 +212,9 @@ namespace YasGMP.ViewModels
             : this(
                 ServiceLocator.GetRequiredService<DatabaseService>(),
                 ServiceLocator.GetRequiredService<AuditService>(),
-                ServiceLocator.GetRequiredService<ExportService>())
+                ServiceLocator.GetRequiredService<ExportService>(),
+                ServiceLocator.GetRequiredService<IUiDispatcher>(),
+                ServiceLocator.GetRequiredService<IUserSession>())
         {
         }
 
@@ -254,7 +258,7 @@ namespace YasGMP.ViewModels
             {
                 // Clear backing store and UI collection safely
                 _allCalibrations.Clear();
-                await MainThread.InvokeOnMainThreadAsync(() => Calibrations.Clear());
+                await _dispatcher.InvokeAsync(() => Calibrations.Clear()).ConfigureAwait(false);
 
                 using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
                 DataTable dt = await _dbService
@@ -318,11 +322,11 @@ namespace YasGMP.ViewModels
 
                 // Remove from collections on the UI thread
                 var toRemove = SelectedCalibration;
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                await _dispatcher.InvokeAsync(() =>
                 {
                     Calibrations.Remove(toRemove);
                     FilteredCalibrations.Remove(toRemove);
-                });
+                }).ConfigureAwait(false);
 
                 SelectedCalibration = null;
                 StatusMessage = "Calibration deleted.";
@@ -354,7 +358,7 @@ namespace YasGMP.ViewModels
             {
                 CalibrationDate  = DateTime.Now,
                 NextDue          = DateTime.Now.AddYears(1),
-                DigitalSignature = (((App?)Application.Current)?.LoggedUser?.FullName) ?? "Nepoznat korisnik"
+                DigitalSignature = _userSession.FullName ?? _userSession.Username ?? "Nepoznat korisnik"
             };
 
             EditCalibrationRequested?.Invoke(false, newCalibration, Components, Suppliers);
@@ -454,7 +458,7 @@ namespace YasGMP.ViewModels
             var list = filtered.ToList();
 
             // Update UI-bound collections + KPIs on UI thread
-            MainThread.BeginInvokeOnMainThread(() =>
+            _dispatcher.BeginInvoke(() =>
             {
                 FilteredCalibrations.Clear();
                 foreach (var cal in list)

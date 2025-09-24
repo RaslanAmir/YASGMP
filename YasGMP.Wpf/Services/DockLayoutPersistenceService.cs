@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
+using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
 {

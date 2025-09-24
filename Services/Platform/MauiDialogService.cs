@@ -1,0 +1,189 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls;
+using YasGMP.Models;
+using YasGMP.Services;
+using YasGMP.ViewModels;
+using YasGMP.Views.Dialogs;
+using YasGMP;
+
+namespace YasGMP.Services.Platform
+{
+    /// <summary>MAUI implementation of <see cref="IDialogService"/> using modal pages.</summary>
+    public sealed class MauiDialogService : IDialogService
+    {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IUiDispatcher _dispatcher;
+
+        public MauiDialogService(IServiceProvider serviceProvider, IUiDispatcher dispatcher)
+        {
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        }
+
+        public Task ShowAlertAsync(string title, string message, string cancel)
+        {
+            return _dispatcher.InvokeAsync(async () =>
+            {
+                var page = Application.Current?.MainPage;
+                if (page != null)
+                    await page.DisplayAlert(title, message, cancel);
+            });
+        }
+
+        public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
+        {
+            return await _dispatcher.InvokeAsync(async () =>
+            {
+                var page = Application.Current?.MainPage;
+                if (page == null)
+                    return false;
+
+                return await page.DisplayAlert(title, message, accept, cancel);
+            }).ConfigureAwait(false);
+        }
+
+        public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
+        {
+            return _dispatcher.InvokeAsync(async () =>
+            {
+                var page = Application.Current?.MainPage;
+                if (page == null)
+                    return null;
+
+                return await page.DisplayActionSheet(title, cancel, destruction, buttons);
+            });
+        }
+
+        public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(dialogId))
+                throw new ArgumentException("Dialog identifier must be provided.", nameof(dialogId));
+
+            return dialogId switch
+            {
+                DialogIds.CapaEdit        => ShowCapaDialogAsync<T>(parameter, cancellationToken),
+                DialogIds.CalibrationEdit => ShowCalibrationDialogAsync<T>(parameter, cancellationToken),
+                _ => throw new NotSupportedException($"Dialog '{dialogId}' is not registered.")
+            };
+        }
+
+        private async Task<T?> ShowCapaDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
+        {
+            if (!typeof(T).IsAssignableFrom(typeof(CapaCase)))
+                throw new InvalidOperationException("CAPA dialog expects result type CapaCase.");
+
+            var request = parameter as CapaDialogRequest ?? new CapaDialogRequest(parameter as CapaCase);
+            var userSession = _serviceProvider.GetRequiredService<IUserSession>();
+
+            var vm = new CapaEditDialogViewModel(request.CapaCase, userSession, this);
+            var dialogPage = new CapaEditDialog(vm);
+
+            return await PresentModalAsync(dialogPage, () =>
+            {
+                if (vm.DialogResult == true)
+                    return (T?)(object)vm.CapaCase;
+                return default;
+            }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<T?> ShowCalibrationDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
+        {
+            if (!typeof(T).IsAssignableFrom(typeof(Calibration)))
+                throw new InvalidOperationException("Calibration dialog expects result type Calibration.");
+
+            var request = parameter as CalibrationDialogRequest
+                ?? throw new ArgumentException("CalibrationDialogRequest payload is required.", nameof(parameter));
+
+            var userSession = _serviceProvider.GetRequiredService<IUserSession>();
+            var platform = _serviceProvider.GetRequiredService<IPlatformService>();
+
+            var vm = new CalibrationEditDialogViewModel(
+                request.Calibration,
+                new List<MachineComponent>(request.Components),
+                new List<Supplier>(request.Suppliers),
+                userSession,
+                this,
+                platform);
+
+            var dialogPage = new CalibrationEditDialog(vm);
+            return await PresentCalibrationAsync<T>(dialogPage, vm, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<T?> PresentCalibrationAsync<T>(Page page, CalibrationEditDialogViewModel vm, CancellationToken cancellationToken)
+        {
+            var tcs = new TaskCompletionSource<T?>();
+
+            void OnResult(bool saved, Calibration? calibration)
+            {
+                vm.DialogResult -= OnResult;
+                if (saved && calibration is not null)
+                {
+                    if (typeof(T).IsAssignableFrom(typeof(Calibration)))
+                        tcs.TrySetResult((T?)(object)calibration);
+                    else
+                        tcs.TrySetResult(default);
+                }
+                else
+                {
+                    tcs.TrySetResult(default);
+                }
+            }
+
+            vm.DialogResult += OnResult;
+
+            void OnDisappearing(object? sender, EventArgs e)
+            {
+                page.Disappearing -= OnDisappearing;
+                vm.DialogResult -= OnResult;
+                if (!tcs.Task.IsCompleted)
+                    tcs.TrySetResult(default);
+            }
+
+            page.Disappearing += OnDisappearing;
+
+            await _dispatcher.InvokeAsync(async () =>
+            {
+                await Application.Current!.MainPage!.Navigation.PushModalAsync(page);
+            }).ConfigureAwait(false);
+
+            using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
+            {
+                return await tcs.Task.ConfigureAwait(false);
+            }
+        }
+
+        private async Task<T?> PresentModalAsync<T>(Page page, Func<T?> resultAccessor, CancellationToken cancellationToken)
+        {
+            var tcs = new TaskCompletionSource<T?>();
+
+            void OnDisappearing(object? sender, EventArgs e)
+            {
+                page.Disappearing -= OnDisappearing;
+                try
+                {
+                    tcs.TrySetResult(resultAccessor());
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+            }
+
+            page.Disappearing += OnDisappearing;
+
+            await _dispatcher.InvokeAsync(async () =>
+            {
+                await Application.Current!.MainPage!.Navigation.PushModalAsync(page);
+            }).ConfigureAwait(false);
+
+            using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
+            {
+                return await tcs.Task.ConfigureAwait(false);
+            }
+        }
+    }
+}

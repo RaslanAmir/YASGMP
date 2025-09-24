@@ -1,176 +1,169 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
 namespace YasGMP.ViewModels
 {
     /// <summary>
-    /// <b>CapaEditDialogViewModel</b> — ViewModel for the CAPA Add/Edit dialog (MAUI).
-    /// Manages a <see cref="CapaCase"/>, validation rules, and save/cancel commands.
-    /// All UI alerts are routed through <see cref="SafeNavigator"/> to ensure UI-thread execution
-    /// and avoid WinUI <c>COMException 0x8001010E</c> when invoked from background threads.
+    /// View-model backing the CAPA edit dialog. Handles validation and audit metadata.
     /// </summary>
-    public class CapaEditDialogViewModel : BindableObject
+    public sealed class CapaEditDialogViewModel : INotifyPropertyChanged
     {
-        private CapaCase? _capaCase;
+        private readonly IDialogService _dialogService;
+        private readonly IUserSession _userSession;
 
-        /// <summary>
-        /// Gets or sets the CAPA object currently being edited.
-        /// Never <see langword="null"/> after construction.
-        /// </summary>
-        public CapaCase CapaCase
-        {
-            get => _capaCase!;
-            set
-            {
-                if (!ReferenceEquals(_capaCase, value))
-                {
-                    _capaCase = value;
-                    OnPropertyChanged(nameof(CapaCase));
-                }
-            }
-        }
+        private CapaCase _capaCase;
 
-        /// <summary>
-        /// Status list for the UI picker (localized).
-        /// </summary>
-        public ObservableCollection<string> StatusList { get; } = new ObservableCollection<string>
+        public ObservableCollection<string> StatusList { get; } = new()
         {
             "otvoren", "u tijeku", "zatvoren", "poništen", "odgođen"
         };
 
-        /// <summary>Command to validate and save the entry.</summary>
         public ICommand SaveCommand { get; }
-
-        /// <summary>Command to cancel the entry.</summary>
         public ICommand CancelCommand { get; }
 
-        /// <summary>
-        /// Dialog result set by the view model:
-        /// <list type="bullet">
-        /// <item><description><see langword="true"/> — saved successfully</description></item>
-        /// <item><description><see langword="false"/> — canceled</description></item>
-        /// <item><description><see langword="null"/> — pending/undecided</description></item>
-        /// </list>
-        /// The hosting view should observe this property and close the modal when set.
-        /// </summary>
         public bool? DialogResult { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="CapaEditDialogViewModel"/>.
-        /// </summary>
-        /// <param name="capaCase">Existing case or <c>null</c> for a new entry.</param>
-        public CapaEditDialogViewModel(CapaCase? capaCase)
+        public CapaCase CapaCase
         {
-            // Clone incoming entity to avoid mutating the original instance before Save.
+            get => _capaCase;
+            private set
+            {
+                if (!ReferenceEquals(_capaCase, value))
+                {
+                    _capaCase = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public CapaEditDialogViewModel()
+            : this(null,
+                  ServiceLocator.GetRequiredService<IUserSession>(),
+                  ServiceLocator.GetRequiredService<IDialogService>())
+        {
+        }
+
+        public CapaEditDialogViewModel(CapaCase? capaCase)
+            : this(capaCase,
+                  ServiceLocator.GetRequiredService<IUserSession>(),
+                  ServiceLocator.GetRequiredService<IDialogService>())
+        {
+        }
+
+        public CapaEditDialogViewModel(CapaCase? capaCase, IUserSession userSession, IDialogService dialogService)
+        {
+            _userSession = userSession ?? throw new ArgumentNullException(nameof(userSession));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+
             CapaCase = capaCase != null
                 ? new CapaCase
                 {
-                    Id               = capaCase.Id,
-                    Title            = capaCase.Title,
-                    DateOpen         = capaCase.DateOpen,
-                    DateClose        = capaCase.DateClose,
-                    Reason           = capaCase.Reason,
-                    Actions          = capaCase.Actions,
-                    Status           = capaCase.Status,
+                    Id = capaCase.Id,
+                    Title = capaCase.Title,
+                    DateOpen = capaCase.DateOpen,
+                    DateClose = capaCase.DateClose,
+                    Reason = capaCase.Reason,
+                    Actions = capaCase.Actions,
+                    Status = capaCase.Status,
                     DigitalSignature = capaCase.DigitalSignature
                 }
                 : new CapaCase
                 {
-                    DateOpen         = DateTime.Today,
-                    Status           = "otvoren",
-                    DigitalSignature = (((App?)Application.Current)?.LoggedUser?.FullName) ?? "Nepoznat korisnik"
+                    DateOpen = DateTime.Today,
+                    Status = "otvoren",
+                    DigitalSignature = ResolveSignature()
                 };
 
-            // Ensure signature is always populated for audit trails.
             if (string.IsNullOrWhiteSpace(CapaCase.DigitalSignature))
-                CapaCase.DigitalSignature = (((App?)Application.Current)?.LoggedUser?.FullName) ?? "Nepoznat korisnik";
+                CapaCase.DigitalSignature = ResolveSignature();
 
-            SaveCommand   = new Command(async () => await OnSave());
-            CancelCommand = new Command(OnCancel);
+            SaveCommand = new AsyncDelegateCommand(OnSaveAsync);
+            CancelCommand = new DelegateCommand(OnCancel);
         }
 
-        /// <summary>
-        /// Validates input and sets the dialog result on success.
-        /// Uses <see cref="SafeNavigator"/> to display messages on the UI thread.
-        /// </summary>
-        private async System.Threading.Tasks.Task OnSave()
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private async Task OnSaveAsync()
         {
-            // Trim/normalize text inputs
-            CapaCase.Title  = (CapaCase.Title  ?? string.Empty).Trim();
+            CapaCase.Title = (CapaCase.Title ?? string.Empty).Trim();
             CapaCase.Reason = (CapaCase.Reason ?? string.Empty).Trim();
-            CapaCase.Actions= (CapaCase.Actions?? string.Empty).Trim();
+            CapaCase.Actions = (CapaCase.Actions ?? string.Empty).Trim();
             CapaCase.Status = (CapaCase.Status ?? string.Empty).Trim();
 
-            // === Validation ===
             if (string.IsNullOrWhiteSpace(CapaCase.Title))
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Naslov je obavezan.", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Naslov je obavezan.", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (CapaCase.Title.Length > 200)
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Naslov je predugačak (maks. 200 znakova).", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Naslov je predugačak (maks. 200 znakova).", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(CapaCase.Status))
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Status je obavezan.", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Status je obavezan.", "OK").ConfigureAwait(false);
                 return;
             }
 
-            // If status list is used in UI, also enforce it here for consistency.
             if (!StatusList.Contains(CapaCase.Status))
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Nevažeća vrijednost statusa.", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Nevažeća vrijednost statusa.", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (CapaCase.DateOpen == default)
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Datum otvaranja je obavezan.", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Datum otvaranja je obavezan.", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (CapaCase.DateClose != default && CapaCase.DateClose < CapaCase.DateOpen)
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Datum zatvaranja ne može biti prije datuma otvaranja.", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Datum zatvaranja ne može biti prije datuma otvaranja.", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (CapaCase.Reason.Length > 2000)
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Opis uzroka je predugačak (maks. 2000 znakova).", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Opis uzroka je predugačak (maks. 2000 znakova).", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (CapaCase.Actions.Length > 4000)
             {
-                await SafeNavigator.ShowAlertAsync("Greška", "Akcije su predugačke (maks. 4000 znakova).", "OK");
+                await _dialogService.ShowAlertAsync("Greška", "Akcije su predugačke (maks. 4000 znakova).", "OK").ConfigureAwait(false);
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(CapaCase.DigitalSignature))
-                CapaCase.DigitalSignature = (((App?)Application.Current)?.LoggedUser?.FullName) ?? "Nepoznat korisnik";
+                CapaCase.DigitalSignature = ResolveSignature();
 
-            // Mark as success; view should close the dialog upon observing this change.
             DialogResult = true;
             OnPropertyChanged(nameof(DialogResult));
         }
 
-        /// <summary>
-        /// Sets the dialog result to cancelled.
-        /// The hosting view should close the modal when this property changes.
-        /// </summary>
         private void OnCancel()
         {
             DialogResult = false;
             OnPropertyChanged(nameof(DialogResult));
         }
+
+        private string ResolveSignature()
+        {
+            return _userSession.FullName ?? _userSession.Username ?? "Nepoznat korisnik";
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
     }
 }
