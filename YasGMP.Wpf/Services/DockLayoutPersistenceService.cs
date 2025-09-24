@@ -1,22 +1,21 @@
 using System;
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
-using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>Persists and restores AvalonDock layouts using the shared user_window_layouts table.</summary>
     public sealed class DockLayoutPersistenceService
     {
-        private readonly DatabaseService _database;
+        private readonly string _connectionString;
         private readonly IUserSession _session;
 
-        public DockLayoutPersistenceService(DatabaseService database, IUserSession session)
+        public DockLayoutPersistenceService(DatabaseOptions options, IUserSession session)
         {
-            _database = database;
-            _session = session;
+            if (options is null) throw new ArgumentNullException(nameof(options));
+            _connectionString = options.ConnectionString;
+            _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
         public async Task<LayoutSnapshot?> LoadAsync(string layoutKey, CancellationToken token = default)
@@ -33,19 +32,24 @@ LIMIT 1;";
                 new MySqlParameter("@p", layoutKey)
             };
 
-            var table = await _database.ExecuteSelectAsync(sql, parameters, token).ConfigureAwait(false);
-            if (table.Rows.Count == 0)
+            await using var conn = CreateConnection();
+            await conn.OpenAsync(token).ConfigureAwait(false);
+            await using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddRange(parameters);
+
+            await using var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false);
+            if (!await reader.ReadAsync(token).ConfigureAwait(false))
             {
                 return null;
             }
 
-            var row = table.Rows[0];
-            return new LayoutSnapshot(
-                row["layout_xml"] as string ?? string.Empty,
-                ReadNullableDouble(row, "pos_x"),
-                ReadNullableDouble(row, "pos_y"),
-                ReadNullableDouble(row, "width"),
-                ReadNullableDouble(row, "height"));
+            string layoutXml = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+            double? posX = reader.IsDBNull(1) ? null : reader.GetDouble(1);
+            double? posY = reader.IsDBNull(2) ? null : reader.GetDouble(2);
+            double? width = reader.IsDBNull(3) ? null : reader.GetDouble(3);
+            double? height = reader.IsDBNull(4) ? null : reader.GetDouble(4);
+
+            return new LayoutSnapshot(layoutXml, posX, posY, width, height);
         }
 
         public async Task SaveAsync(string layoutKey, string layoutXml, WindowGeometry geometry, CancellationToken token = default)
@@ -72,24 +76,14 @@ saved_at=UTC_TIMESTAMP();";
                 new MySqlParameter("@h", geometry.Height.HasValue ? geometry.Height.Value : (object)DBNull.Value)
             };
 
-            await _database.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+            await using var conn = CreateConnection();
+            await conn.OpenAsync(token).ConfigureAwait(false);
+            await using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddRange(parameters);
+            await cmd.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }
 
-        private static double? ReadNullableDouble(DataRow row, string column)
-        {
-            if (!row.Table.Columns.Contains(column))
-            {
-                return null;
-            }
-
-            var value = row[column];
-            if (value == null || value is DBNull)
-            {
-                return null;
-            }
-
-            return Convert.ToDouble(value);
-        }
+        private MySqlConnection CreateConnection() => new(_connectionString);
     }
 
     public readonly record struct WindowGeometry(double? Left, double? Top, double? Width, double? Height);

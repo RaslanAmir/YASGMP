@@ -15,6 +15,7 @@ using YasGMP.Common;
 using YasGMP.Data;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;                  // IRBACService
+using YasGMP.Services.Platform;
 using YasGMP.ViewModels;
 using Microsoft.Maui.Storage;
 using YasGMP.Diagnostics;
@@ -177,6 +178,7 @@ namespace YasGMP
                     DatabaseService.GlobalConfiguration = cfgRoot;
                 return db;
             });
+            builder.Services.AddSingleton<IPlatformService, MauiPlatformService>();
             builder.Services.AddSingleton<AuditService>();
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<ExportService>();

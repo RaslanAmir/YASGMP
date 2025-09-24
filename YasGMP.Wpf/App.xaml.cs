@@ -3,6 +3,7 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
@@ -30,33 +31,21 @@ namespace YasGMP.Wpf
                 {
                     services.AddSingleton(ctx.Configuration);
 
+                    var connectionString = ResolveConnectionString(ctx.Configuration);
+                    services.AddSingleton(new DatabaseOptions(connectionString));
+
                     services.AddSingleton<IUserSession, UserSession>();
                     services.AddSingleton<IMachineDataService, MockMachineDataService>();
+                    services.AddSingleton<IPlatformService, WpfPlatformService>();
                     services.AddSingleton<DockLayoutPersistenceService>();
                     services.AddSingleton<ShellLayoutController>();
 
                     services.AddSingleton<MainWindowViewModel>();
                     services.AddSingleton<MainWindow>();
-
-                    services.AddSingleton(sp =>
-                    {
-                        var cfg = sp.GetRequiredService<IConfiguration>();
-                        var conn = cfg.GetConnectionString("MySqlDb")
-                                   ?? cfg["ConnectionStrings:MySqlDb"]
-                                   ?? string.Empty;
-                        if (string.IsNullOrWhiteSpace(conn))
-                        {
-                            conn = "Server=127.0.0.1;Port=3306;Database=YASGMP;User ID=yasgmp_app;Password=Jasenka1;Character Set=utf8mb4;Connection Timeout=5;Default Command Timeout=30;Pooling=true;Minimum Pool Size=0;Maximum Pool Size=50;";
-                        }
-
-                        var db = new DatabaseService(conn);
-                        DatabaseService.GlobalConfiguration = cfg;
-                        return db;
-                    });
                 })
                 .Build();
 
-            DatabaseService.GlobalConfiguration = _host.Services.GetRequiredService<IConfiguration>();
+            ServiceLocator.Initialize(_host.Services);
 
             _host.Start();
 
@@ -83,6 +72,20 @@ namespace YasGMP.Wpf
             }
 
             base.OnExit(e);
+        }
+
+        private static string ResolveConnectionString(IConfiguration configuration)
+        {
+            var conn = configuration.GetConnectionString("MySqlDb")
+                       ?? configuration["ConnectionStrings:MySqlDb"]
+                       ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(conn))
+            {
+                return "Server=127.0.0.1;Port=3306;Database=YASGMP;User ID=yasgmp_app;Password=Jasenka1;Character Set=utf8mb4;Connection Timeout=5;Default Command Timeout=30;Pooling=true;Minimum Pool Size=0;Maximum Pool Size=50;";
+            }
+
+            return conn;
         }
     }
 }

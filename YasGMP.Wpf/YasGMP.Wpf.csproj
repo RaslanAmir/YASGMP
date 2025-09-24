@@ -24,6 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\yasgmp.csproj" />
+    <ProjectReference Include="..\YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
 </Project>

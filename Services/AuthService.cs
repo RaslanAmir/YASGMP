@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
 
@@ -34,7 +35,7 @@ namespace YasGMP.Services
 
         /// <summary>Current local IP address if <c>IPlatformService</c> is available; otherwise <c>unknown</c>.</summary>
         public string CurrentIpAddress =>
-            DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? "unknown";
+            ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? "unknown";
 
         /// <summary>Compatibility alias for older code paths.</summary>
         public string CurrentIp => CurrentIpAddress;

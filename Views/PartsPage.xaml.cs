@@ -431,7 +431,7 @@ namespace YasGMP.Views
                 {
                     var app = Application.Current as App;
                     int? uid = app?.LoggedUser?.Id;
-                    string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                    string ip = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                     await _dbService.LogSystemEventAsync(uid, "PARTS_EXPORT", "parts", "PartsPage", null, $"format={format}; items={Parts.Count}; lowOnly={_lowOnly}; file={path}", ip, "info", "PartsPage", app?.SessionId).ConfigureAwait(false);
                 }
                 catch { }

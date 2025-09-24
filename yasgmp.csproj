@@ -83,7 +83,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="YasGMP.AppCore\YasGMP.AppCore.csproj" />
+    <ProjectReference Include="..\YASGMP\YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
 
   <Target Name="DbSyncAnalyzer" BeforeTargets="Build" Condition="'$(RUN_DB_ANALYZER_ON_BUILD)'=='true'">
