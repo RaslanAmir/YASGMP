@@ -10,7 +10,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Assets";
+    public new const string ModuleKey = "Assets";
 
     public AssetsModuleViewModel(
         DatabaseService databaseService,
@@ -47,6 +47,56 @@ public sealed class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel
                 },
                 CalibrationModuleViewModel.ModuleKey, 502)
         };
+
+    protected override async Task<CflRequest?> CreateCflRequestAsync()
+    {
+        var assets = await Database.GetAllAssetsFullAsync().ConfigureAwait(false);
+        var items = assets
+            .Select(asset =>
+            {
+                var key = asset.Id.ToString(CultureInfo.InvariantCulture);
+                var label = string.IsNullOrWhiteSpace(asset.Name) ? key : asset.Name;
+                var descriptionParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(asset.Code))
+                {
+                    descriptionParts.Add(asset.Code);
+                }
+
+                if (!string.IsNullOrWhiteSpace(asset.Location))
+                {
+                    descriptionParts.Add(asset.Location!);
+                }
+
+                if (!string.IsNullOrWhiteSpace(asset.Status))
+                {
+                    descriptionParts.Add(asset.Status!);
+                }
+
+                var description = descriptionParts.Count > 0
+                    ? string.Join(" • ", descriptionParts)
+                    : null;
+
+                return new CflItem(key, label, description);
+            })
+            .ToList();
+
+        return new CflRequest("Select Asset", items);
+    }
+
+    protected override Task OnCflSelectionAsync(CflResult result)
+    {
+        var search = result.Selected.Label;
+        var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
+        if (match is not null)
+        {
+            SelectedRecord = match;
+            search = match.Title;
+        }
+
+        SearchText = search;
+        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        return Task.CompletedTask;
+    }
 
     private static ModuleRecord ToRecord(Asset asset)
     {
