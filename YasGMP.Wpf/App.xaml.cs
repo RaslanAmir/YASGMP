@@ -3,6 +3,7 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using YasGMP.AppCore.DependencyInjection;
 using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
@@ -34,14 +35,21 @@ namespace YasGMP.Wpf
                     var connectionString = ResolveConnectionString(ctx.Configuration);
                     services.AddSingleton(new DatabaseOptions(connectionString));
 
-                    services.AddSingleton<IUserSession, UserSession>();
-                    services.AddSingleton<IMachineDataService, MockMachineDataService>();
-                    services.AddSingleton<IPlatformService, WpfPlatformService>();
-                    services.AddSingleton<DockLayoutPersistenceService>();
-                    services.AddSingleton<ShellLayoutController>();
+                    services.AddYasGmpCoreServices(core =>
+                    {
+                        core.UseConnectionString(connectionString);
+                        core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
 
-                    services.AddSingleton<MainWindowViewModel>();
-                    services.AddSingleton<MainWindow>();
+                        var svc = core.Services;
+                        svc.AddSingleton<IUserSession, UserSession>();
+                        svc.AddSingleton<IMachineDataService, MockMachineDataService>();
+                        svc.AddSingleton<IPlatformService, WpfPlatformService>();
+                        svc.AddSingleton<DockLayoutPersistenceService>();
+                        svc.AddSingleton<ShellLayoutController>();
+
+                        svc.AddSingleton<MainWindowViewModel>();
+                        svc.AddSingleton<MainWindow>();
+                    });
                 })
                 .Build();
 
