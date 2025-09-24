@@ -215,7 +215,7 @@ namespace YasGMP.Views
             {
                 updatedCal.LastModified     = DateTime.UtcNow;
                 updatedCal.LastModifiedById = userId;
-                updatedCal.SourceIp         = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                updatedCal.SourceIp         = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
 
                 const string sql = @"INSERT INTO calibrations
                     (component_id, supplier_id, calibration_date, next_due, cert_doc, result, comment, digital_signature, last_modified, last_modified_by_id)
@@ -267,7 +267,7 @@ namespace YasGMP.Views
             {
                 updatedCal.LastModified     = DateTime.UtcNow;
                 updatedCal.LastModifiedById = userId;
-                updatedCal.SourceIp         = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                updatedCal.SourceIp         = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
 
                 const string sql = @"UPDATE calibrations SET
                     component_id=@cid, supplier_id=@supid, calibration_date=@cdate, next_due=@ndue,
@@ -342,7 +342,7 @@ namespace YasGMP.Views
                 module: "CalibrationsPage",
                 recordId: entityId == 0 ? null : entityId,
                 description: $"user={user ?? "Nepoznat"}",
-                ip: DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
+                ip: ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
                 severity: "audit",
                 deviceInfo: string.Empty,
                 sessionId: (Application.Current as App)?.SessionId

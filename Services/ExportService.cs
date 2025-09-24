@@ -20,6 +20,7 @@ using YasGMP.Models.DTO;
 using MySqlConnector;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 
 // Disambiguate iText vs MAUI types
 using ITextAlignment = iText.Layout.Properties.TextAlignment;
@@ -394,7 +395,7 @@ namespace YasGMP.Services
                 module: "ExportService",
                 recordId: null,
                 description: details ?? string.Empty,
-                ip: DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
+                ip: ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
                 severity: "audit",
                 deviceInfo: string.Empty,
                 sessionId: app?.SessionId

@@ -12,6 +12,7 @@ using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
 using MySqlConnector;
+using YasGMP.Common;
 using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
@@ -433,7 +434,7 @@ VALUES
         {
             try
             {
-                var plat = DependencyService.Get<IPlatformService>();
+                var plat = ServiceLocator.GetService<IPlatformService>();
                 var svcIp = plat?.GetLocalIpAddress();
                 if (!string.IsNullOrWhiteSpace(svcIp) && !svcIp.Equals("unknown", StringComparison.OrdinalIgnoreCase))
                     return svcIp.Trim();

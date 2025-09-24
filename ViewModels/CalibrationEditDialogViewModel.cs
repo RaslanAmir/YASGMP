@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -177,7 +178,7 @@ namespace YasGMP.ViewModels
             // --- Audit / metadata ---
             Calibration.LastModified     = DateTime.Now;
             Calibration.LastModifiedById = (((App?)Application.Current)?.LoggedUser?.Id) ?? 0;
-            Calibration.SourceIp         = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+            Calibration.SourceIp         = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
             Calibration.DigitalSignature = (((App?)Application.Current)?.LoggedUser?.FullName) ?? "Nepoznat korisnik";
 
             // Complete dialog (success).

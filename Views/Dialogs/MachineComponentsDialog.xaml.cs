@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -100,7 +101,7 @@ namespace YasGMP.Views.Dialogs
 
                 var app = Application.Current as App;
                 int userId = app?.LoggedUser?.Id ?? 0;
-                string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                string ip = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                 string? sessionId = app?.SessionId;
                 await _db.InsertOrUpdateComponentAsync(mc, update: false, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
 
@@ -147,7 +148,7 @@ namespace YasGMP.Views.Dialogs
 
                         var app = Application.Current as App;
                         int userId = app?.LoggedUser?.Id ?? 0;
-                        string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                        string ip = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                         string? sessionId = app?.SessionId;
                         await _db.InsertOrUpdateComponentAsync(comp, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
                         await LoadAsync();
@@ -248,7 +249,7 @@ namespace YasGMP.Views.Dialogs
 
                     var app = Application.Current as App;
                     int userId = app?.LoggedUser?.Id ?? 0;
-                    string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                    string ip = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                     string? sessionId = app?.SessionId;
                     await _db.InsertOrUpdateComponentAsync(_mc, update: true, actorUserId: userId, ip: ip, deviceInfo: "MachineComponentsDialog", sessionId: sessionId);
                     await _onChanged();
@@ -265,7 +266,7 @@ namespace YasGMP.Views.Dialogs
                 {
                     var app = Application.Current as App;
                     int userId = app?.LoggedUser?.Id ?? 0;
-                    string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                    string ip = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                     string? sessionId = app?.SessionId;
                     await _db.DeleteComponentAsync(_mc.Id, userId, ip, "MachineComponentsDialog", sessionId);
                     await _onChanged();
@@ -286,7 +287,7 @@ namespace YasGMP.Views.Dialogs
 
                     var app = Application.Current as App;
                     int userId = app?.LoggedUser?.Id ?? 0;
-                    string ip = DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
+                    string ip = ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty;
                     string? sessionId = app?.SessionId;
 
                     if (choice == "Odspoji od stroja")

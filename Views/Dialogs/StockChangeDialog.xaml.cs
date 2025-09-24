@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -72,7 +73,7 @@ namespace YasGMP.Views.Dialogs
                 var app = Application.Current as App;
                 int userId = _actorUserId ?? (app?.LoggedUser?.Id ?? 0);
                 string ip = string.IsNullOrWhiteSpace(_ip) || _ip == "ui"
-                    ? (DependencyService.Get<IPlatformService>()?.GetLocalIpAddress() ?? _ip)
+                    ? (ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? _ip)
                     : _ip;
                 string? sessionId = _sessionId ?? app?.SessionId;
 
