@@ -121,10 +121,10 @@ namespace YasGMP.Wpf.Services
             switch (e.Model.ContentId)
             {
                 case "YasGmp.Shell.Modules":
-                    e.Content = _viewModel.ModuleTree;
+                    e.Content = _viewModel.ModulesPane;
                     break;
-                case "YasGmp.Shell.Cockpit":
-                    e.Content = _viewModel.Cockpit;
+                case "YasGmp.Shell.Inspector":
+                    e.Content = _viewModel.InspectorPane;
                     break;
                 default:
                     if (!string.IsNullOrWhiteSpace(e.Model.ContentId))

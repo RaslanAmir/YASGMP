@@ -1,0 +1,370 @@
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using YasGMP.Wpf.Services;
+
+namespace YasGMP.Wpf.ViewModels.Modules;
+
+/// <summary>
+/// Base document view-model that reproduces SAP Business One toolbar behaviour.
+/// </summary>
+public abstract partial class B1FormDocumentViewModel : DocumentViewModel
+{
+    private readonly ICflDialogService _cflDialogService;
+    private readonly IShellInteractionService _shellInteraction;
+    private readonly IModuleNavigationService _moduleNavigation;
+
+    protected B1FormDocumentViewModel(
+        string moduleKey,
+        string title,
+        ICflDialogService cflDialogService,
+        IShellInteractionService shellInteraction,
+        IModuleNavigationService moduleNavigation)
+    {
+        ModuleKey = moduleKey ?? throw new ArgumentNullException(nameof(moduleKey));
+        Title = title ?? throw new ArgumentNullException(nameof(title));
+        ContentId = $"YasGmp.Shell.Module.{moduleKey}.{Guid.NewGuid():N}";
+        _cflDialogService = cflDialogService;
+        _shellInteraction = shellInteraction;
+        _moduleNavigation = moduleNavigation;
+
+        Records = new ObservableCollection<ModuleRecord>();
+        RecordsView = CollectionViewSource.GetDefaultView(Records);
+        RecordsView.Filter = FilterRecord;
+
+        EnterFindModeCommand = new AsyncRelayCommand(SetFindModeAsync, () => CanEnterMode(FormMode.Find));
+        EnterAddModeCommand = new AsyncRelayCommand(SetAddModeAsync, () => CanEnterMode(FormMode.Add));
+        EnterViewModeCommand = new AsyncRelayCommand(SetViewModeAsync, () => CanEnterMode(FormMode.View));
+        EnterUpdateModeCommand = new AsyncRelayCommand(SetUpdateModeAsync, () => CanEnterMode(FormMode.Update));
+        SaveCommand = new AsyncRelayCommand(SaveAsync, CanSave);
+        CancelCommand = new RelayCommand(Cancel, () => !IsBusy);
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => !IsBusy);
+        ShowCflCommand = new AsyncRelayCommand(ShowCflAsync, () => !IsBusy);
+        GoldenArrowCommand = new RelayCommand(NavigateToRelated, () => SelectedRecord?.RelatedModuleKey is not null && !IsBusy);
+
+        Toolbar = new ObservableCollection<ModuleToolbarCommand>
+        {
+            new("Find", EnterFindModeCommand),
+            new("Add", EnterAddModeCommand),
+            new("View", EnterViewModeCommand),
+            new("Update", EnterUpdateModeCommand),
+            new("Save", SaveCommand),
+            new("Cancel", CancelCommand),
+            new("Refresh", RefreshCommand)
+        };
+    }
+
+    /// <summary>Stable module key registered inside <see cref="IModuleRegistry"/>.</summary>
+    public string ModuleKey { get; }
+
+    /// <summary>Collection view used for filtering/search.</summary>
+    public ICollectionView RecordsView { get; }
+
+    /// <summary>Backing list of module records.</summary>
+    public ObservableCollection<ModuleRecord> Records { get; }
+
+    /// <summary>Toolbar buttons surfaced in the view.</summary>
+    public ObservableCollection<ModuleToolbarCommand> Toolbar { get; }
+
+    /// <summary>Whether the view-model completed its initial data load.</summary>
+    public bool IsInitialized { get; private set; }
+
+    public IAsyncRelayCommand EnterFindModeCommand { get; }
+
+    public IAsyncRelayCommand EnterAddModeCommand { get; }
+
+    public IAsyncRelayCommand EnterViewModeCommand { get; }
+
+    public IAsyncRelayCommand EnterUpdateModeCommand { get; }
+
+    public IAsyncRelayCommand SaveCommand { get; }
+
+    public IRelayCommand CancelCommand { get; }
+
+    public IAsyncRelayCommand RefreshCommand { get; }
+
+    public IAsyncRelayCommand ShowCflCommand { get; }
+
+    public IRelayCommand GoldenArrowCommand { get; }
+
+    [ObservableProperty]
+    private FormMode _mode = FormMode.View;
+
+    [ObservableProperty]
+    private bool _isBusy;
+
+    [ObservableProperty]
+    private string _statusMessage = "Ready";
+
+    [ObservableProperty]
+    private string? _searchText;
+
+    [ObservableProperty]
+    private ModuleRecord? _selectedRecord;
+
+    /// <summary>
+    /// Loads data when the document is opened or activated through golden arrow navigation.
+    /// </summary>
+    public async Task InitializeAsync(object? parameter)
+    {
+        if (IsInitialized)
+        {
+            await OnActivatedAsync(parameter).ConfigureAwait(false);
+            return;
+        }
+
+        await RefreshAsync(parameter).ConfigureAwait(false);
+        IsInitialized = true;
+    }
+
+    /// <summary>Triggers the refresh command programmatically.</summary>
+    public Task RefreshAsync() => RefreshAsync(null);
+
+    /// <summary>Overrides provide the actual data fetch implementation.</summary>
+    protected abstract Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter);
+
+    /// <summary>Derived classes can generate fallback/offline records when the live query fails.</summary>
+    protected abstract IReadOnlyList<ModuleRecord> CreateDesignTimeRecords();
+
+    /// <summary>Hook invoked when the view-model becomes active again.</summary>
+    protected virtual Task OnActivatedAsync(object? parameter) => Task.CompletedTask;
+
+    /// <summary>Hook invoked when entering a specific mode.</summary>
+    protected virtual Task OnModeChangedAsync(FormMode mode) => Task.CompletedTask;
+
+    /// <summary>Hook invoked prior to saving.</summary>
+    protected virtual Task<bool> OnSaveAsync() => Task.FromResult(false);
+
+    /// <summary>Hook invoked when cancelling edits.</summary>
+    protected virtual void OnCancel() { }
+
+    /// <summary>Allows derived classes to extend CFL behaviour.</summary>
+    protected virtual Task<CflRequest?> CreateCflRequestAsync() => Task.FromResult<CflRequest?>(null);
+
+    /// <summary>Allows derived classes to handle CFL selection.</summary>
+    protected virtual Task OnCflSelectionAsync(CflResult result) => Task.CompletedTask;
+
+    /// <summary>Override to support custom search filters.</summary>
+    protected virtual bool MatchesSearch(ModuleRecord record, string searchText)
+        => record.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+           || (!string.IsNullOrWhiteSpace(record.Code) && record.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+           || (!string.IsNullOrWhiteSpace(record.Description) && record.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+
+    partial void OnModeChanged(FormMode value)
+    {
+        foreach (var button in Toolbar)
+        {
+            button.IsChecked = string.Equals(button.Caption, value.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        _shellInteraction.UpdateStatus($"{Title}: {value} mode");
+        _ = OnModeChangedAsync(value);
+        RefreshCommandStates();
+    }
+
+    partial void OnIsBusyChanged(bool value)
+    {
+        RefreshCommandStates();
+    }
+
+    partial void OnStatusMessageChanged(string value)
+    {
+        _shellInteraction.UpdateStatus(value);
+    }
+
+    partial void OnSearchTextChanged(string? value)
+    {
+        RecordsView.Refresh();
+    }
+
+    partial void OnSelectedRecordChanged(ModuleRecord? value)
+    {
+        GoldenArrowCommand.NotifyCanExecuteChanged();
+        if (value is null)
+        {
+            _shellInteraction.UpdateInspector(new InspectorContext(Title, "No record selected", Array.Empty<InspectorField>()));
+            return;
+        }
+
+        _shellInteraction.UpdateInspector(new InspectorContext(Title, value.Title, value.InspectorFields));
+    }
+
+    private Task SetFindModeAsync()
+    {
+        Mode = FormMode.Find;
+        return Task.CompletedTask;
+    }
+
+    private Task SetAddModeAsync()
+    {
+        Mode = FormMode.Add;
+        return Task.CompletedTask;
+    }
+
+    private Task SetViewModeAsync()
+    {
+        Mode = FormMode.View;
+        return Task.CompletedTask;
+    }
+
+    private Task SetUpdateModeAsync()
+    {
+        Mode = FormMode.Update;
+        return Task.CompletedTask;
+    }
+
+    private async Task RefreshAsync(object? parameter)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            StatusMessage = $"Loading {Title} records...";
+            var records = await LoadAsync(parameter).ConfigureAwait(false);
+            ApplyRecords(records);
+            StatusMessage = $"Loaded {Records.Count} record(s).";
+        }
+        catch (Exception ex)
+        {
+            ApplyRecords(CreateDesignTimeRecords());
+            StatusMessage = $"Offline data loaded because: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void ApplyRecords(IReadOnlyList<ModuleRecord> records)
+    {
+        Records.Clear();
+        foreach (var record in records)
+        {
+            Records.Add(record);
+        }
+
+        RecordsView.Refresh();
+        if (Records.Count > 0)
+        {
+            SelectedRecord = Records[0];
+        }
+        else
+        {
+            SelectedRecord = null;
+        }
+    }
+
+    private bool FilterRecord(object obj)
+    {
+        if (obj is not ModuleRecord record)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            return true;
+        }
+
+        return MatchesSearch(record, SearchText!);
+    }
+
+    private bool CanEnterMode(FormMode mode)
+        => !IsBusy && (Mode != mode || mode == FormMode.Find);
+
+    private async Task<bool> SaveAsync()
+    {
+        if (IsBusy)
+        {
+            return false;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var saved = await OnSaveAsync().ConfigureAwait(false);
+            if (saved)
+            {
+                StatusMessage = $"{Title} saved successfully.";
+                await RefreshAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                StatusMessage = $"No changes to save for {Title}.";
+            }
+
+            return saved;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to save {Title}: {ex.Message}";
+            return false;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        OnCancel();
+        StatusMessage = $"{Title} changes cancelled.";
+    }
+
+    private async Task ShowCflAsync()
+    {
+        var request = await CreateCflRequestAsync().ConfigureAwait(false);
+        if (request is null)
+        {
+            return;
+        }
+
+        var result = await _cflDialogService.ShowAsync(request).ConfigureAwait(false);
+        if (result is null)
+        {
+            return;
+        }
+
+        await OnCflSelectionAsync(result).ConfigureAwait(false);
+    }
+
+    private void NavigateToRelated()
+    {
+        if (SelectedRecord?.RelatedModuleKey is null)
+        {
+            return;
+        }
+
+        var document = _moduleNavigation.OpenModule(SelectedRecord.RelatedModuleKey, SelectedRecord.RelatedParameter);
+        _moduleNavigation.Activate(document);
+    }
+
+    private bool CanSave() => !IsBusy;
+
+    private void RefreshCommandStates()
+    {
+        EnterFindModeCommand.NotifyCanExecuteChanged();
+        EnterAddModeCommand.NotifyCanExecuteChanged();
+        EnterViewModeCommand.NotifyCanExecuteChanged();
+        EnterUpdateModeCommand.NotifyCanExecuteChanged();
+        SaveCommand.NotifyCanExecuteChanged();
+        CancelCommand.NotifyCanExecuteChanged();
+        RefreshCommand.NotifyCanExecuteChanged();
+        ShowCflCommand.NotifyCanExecuteChanged();
+        GoldenArrowCommand.NotifyCanExecuteChanged();
+    }
+}

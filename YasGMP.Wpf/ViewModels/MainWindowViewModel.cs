@@ -3,126 +3,172 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Modules;
 
-namespace YasGMP.Wpf.ViewModels
+namespace YasGMP.Wpf.ViewModels;
+
+/// <summary>
+/// Root view-model that orchestrates the docked workspace.
+/// </summary>
+public partial class MainWindowViewModel : ObservableObject
 {
-    /// <summary>
-    /// View-model backing the root shell window. Hosts dockable content collections
-    /// and exposes menu commands for opening/navigating workspaces.
-    /// </summary>
-    public partial class MainWindowViewModel : ObservableObject
+    private readonly IModuleRegistry _moduleRegistry;
+    private readonly ShellInteractionService _shellInteraction;
+    private string _statusText = "Ready";
+
+    [ObservableProperty]
+    private DocumentViewModel? _activeDocument;
+
+    public MainWindowViewModel(
+        IModuleRegistry moduleRegistry,
+        ModulesPaneViewModel modulesPane,
+        InspectorPaneViewModel inspectorPane,
+        ShellStatusBarViewModel statusBar,
+        ShellInteractionService shellInteraction)
     {
-        private readonly IMachineDataService _machineDataService;
-        private DocumentViewModel? _activeDocument;
-        private string _statusText = "Ready";
-        private int _machinesOpened = 0;
+        _moduleRegistry = moduleRegistry;
+        _shellInteraction = shellInteraction;
+        ModulesPane = modulesPane;
+        InspectorPane = inspectorPane;
+        StatusBar = statusBar;
+        Documents = new ObservableCollection<DocumentViewModel>();
+        WindowCommands = new WindowMenuViewModel(this);
 
-        public MainWindowViewModel(IMachineDataService machineDataService)
+        _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update);
+        StatusBar.StatusText = _statusText;
+    }
+
+    /// <summary>Left-hand navigation pane listing modules.</summary>
+    public ModulesPaneViewModel ModulesPane { get; }
+
+    /// <summary>Inspector pane rendered along the bottom of the shell.</summary>
+    public InspectorPaneViewModel InspectorPane { get; }
+
+    /// <summary>Status bar data context.</summary>
+    public ShellStatusBarViewModel StatusBar { get; }
+
+    /// <summary>Collection of open docked documents.</summary>
+    public ObservableCollection<DocumentViewModel> Documents { get; }
+
+    /// <summary>Command surface for Window menu/backstage.</summary>
+    public WindowMenuViewModel WindowCommands { get; }
+
+    /// <summary>Gets or sets the status text exposed for legacy bindings.</summary>
+    public string StatusText
+    {
+        get => _statusText;
+        set
         {
-            _machineDataService = machineDataService;
-            ModuleTree = new ModuleTreeViewModel();
-            Cockpit = new CockpitViewModel();
-            Documents = new ObservableCollection<DocumentViewModel>();
-            WindowCommands = new WindowMenuViewModel(this);
-        }
-
-        /// <summary>Gets the module navigator anchorable.</summary>
-        public ModuleTreeViewModel ModuleTree { get; }
-
-        /// <summary>Gets the cockpit/status anchorable.</summary>
-        public CockpitViewModel Cockpit { get; }
-
-        /// <summary>Collection of tabbed documents (bound to AvalonDock).</summary>
-        public ObservableCollection<DocumentViewModel> Documents { get; }
-
-        /// <summary>Gets or sets the currently active document.</summary>
-        public DocumentViewModel? ActiveDocument
-        {
-            get => _activeDocument;
-            set => SetProperty(ref _activeDocument, value);
-        }
-
-        /// <summary>Command surface for the Window menu.</summary>
-        public WindowMenuViewModel WindowCommands { get; }
-
-        /// <summary>Status line content shown in the shell status bar.</summary>
-        public string StatusText
-        {
-            get => _statusText;
-            set => SetProperty(ref _statusText, value);
-        }
-
-        /// <summary>Ensures initial anchorables and a starter machines tab are present.</summary>
-        public void InitializeWorkspace()
-        {
-            if (Documents.Count == 0)
+            if (_statusText != value)
             {
-                OpenMachinesDocument();
+                _statusText = value;
+                StatusBar.StatusText = value;
+                OnPropertyChanged();
             }
         }
+    }
 
-        /// <summary>Creates a new machines workspace tab populated with mock data.</summary>
-        public MachinesDocumentViewModel OpenMachinesDocument()
+    /// <summary>Initialises the workspace with the default dashboard document.</summary>
+    public void InitializeWorkspace()
+    {
+        if (!Documents.OfType<ModuleDocumentViewModel>().Any())
         {
-            _machinesOpened++;
-            var title = _machinesOpened == 1 ? "Machines" : $"Machines {_machinesOpened}";
-            var contentId = $"YasGmp.Shell.Machines.{Guid.NewGuid():N}";
-            var machines = new ObservableCollection<MachineRowViewModel>(_machineDataService.GetMachines());
-            var vm = new MachinesDocumentViewModel(title, contentId, machines);
-            Documents.Add(vm);
-            ActiveDocument = vm;
-            StatusText = $"Opened {title} at {DateTime.Now:t}";
-            return vm;
+            OpenModule(DashboardModuleViewModel.ModuleKey);
+        }
+    }
+
+    /// <summary>Opens a module by key and activates it.</summary>
+    public ModuleDocumentViewModel OpenModule(string moduleKey, object? parameter = null)
+    {
+        var document = OpenModuleInternal(moduleKey, parameter);
+        ActivateInternal(document);
+        return document;
+    }
+
+    /// <summary>Ensures a document exists for a persisted content id.</summary>
+    public DocumentViewModel EnsureDocumentForId(string contentId)
+    {
+        var existing = Documents.FirstOrDefault(d => d.ContentId == contentId);
+        if (existing != null)
+        {
+            return existing;
         }
 
-        /// <summary>Locates or creates a machines workspace for navigation.</summary>
-        public void NavigateToMachines()
-        {
-            var target = Documents.OfType<MachinesDocumentViewModel>().FirstOrDefault();
-            if (target == null)
-            {
-                target = OpenMachinesDocument();
-            }
+        var moduleKey = TryParseModuleKey(contentId) ?? DashboardModuleViewModel.ModuleKey;
+        var document = CreateModuleInstance(moduleKey, contentId);
+        Documents.Add(document);
+        _ = document.InitializeAsync(null);
+        return document;
+    }
 
-            ActiveDocument = target;
-            StatusText = $"Navigated to {target.Title} at {DateTime.Now:t}";
+    /// <summary>Prepares state for layout deserialization.</summary>
+    public void PrepareForLayoutImport()
+    {
+        Documents.Clear();
+        ActiveDocument = null;
+        StatusBar.ActiveModule = string.Empty;
+    }
+
+    /// <summary>Resets the workspace back to a single dashboard module.</summary>
+    public void ResetWorkspace()
+    {
+        Documents.Clear();
+        ActiveDocument = null;
+        StatusBar.ActiveModule = string.Empty;
+        OpenModule(DashboardModuleViewModel.ModuleKey);
+        StatusText = "Layout reset to default";
+    }
+
+    private ModuleDocumentViewModel OpenModuleInternal(string moduleKey, object? parameter)
+    {
+        var existing = Documents.OfType<ModuleDocumentViewModel>()
+            .FirstOrDefault(m => string.Equals(m.ModuleKey, moduleKey, StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+        {
+            _ = existing.InitializeAsync(parameter);
+            return existing;
         }
 
-        /// <summary>
-        /// Used by layout deserialization to resolve persisted content by id.
-        /// Creates a new machines document if the requested id does not exist yet.
-        /// </summary>
-        public DocumentViewModel EnsureDocumentForId(string contentId)
-        {
-            var existing = Documents.FirstOrDefault(d => d.ContentId == contentId);
-            if (existing != null)
-            {
-                return existing;
-            }
+        var document = CreateModuleInstance(moduleKey, null);
+        Documents.Add(document);
+        _ = document.InitializeAsync(parameter);
+        return document;
+    }
 
-            _machinesOpened++;
-            var machines = new ObservableCollection<MachineRowViewModel>(_machineDataService.GetMachines());
-            var title = _machinesOpened == 1 ? "Machines" : $"Machines {_machinesOpened}";
-            var vm = new MachinesDocumentViewModel(title, contentId, machines);
-            Documents.Add(vm);
-            return vm;
+    private ModuleDocumentViewModel CreateModuleInstance(string moduleKey, string? contentIdOverride)
+    {
+        var vm = _moduleRegistry.CreateModule(moduleKey);
+        if (contentIdOverride is not null)
+        {
+            vm.ContentId = contentIdOverride;
+        }
+        return vm;
+    }
+
+    private void ActivateInternal(ModuleDocumentViewModel document)
+    {
+        ActiveDocument = document;
+        StatusBar.ActiveModule = document.Title;
+    }
+
+    private void UpdateStatusInternal(string message)
+    {
+        StatusText = message;
+    }
+
+    private static string? TryParseModuleKey(string contentId)
+    {
+        if (string.IsNullOrWhiteSpace(contentId))
+        {
+            return null;
         }
 
-        /// <summary>Clears document state before applying a serialized layout.</summary>
-        public void PrepareForLayoutImport()
+        var parts = contentId.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 4 && string.Equals(parts[2], "Module", StringComparison.OrdinalIgnoreCase))
         {
-            Documents.Clear();
-            _machinesOpened = 0;
-            ActiveDocument = null;
+            return parts[3];
         }
 
-        /// <summary>Removes all dynamic documents and re-adds a fresh machines workspace.</summary>
-        public void ResetWorkspace()
-        {
-            Documents.Clear();
-            _machinesOpened = 0;
-            InitializeWorkspace();
-            StatusText = "Layout reset to default";
-        }
+        return null;
     }
 }
