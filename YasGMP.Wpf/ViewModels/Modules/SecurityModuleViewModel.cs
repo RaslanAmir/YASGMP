@@ -45,7 +45,7 @@ public sealed class SecurityModuleViewModel : DataDrivenModuleDocumentViewModel
                     new InspectorField("Email", "qa@yasgmp.local"),
                     new InspectorField("Phone", "+385 91 1111")
                 },
-                QualityModuleViewModel.ModuleKey, 2)
+                CapaModuleViewModel.ModuleKey, 2)
         };
 
     private static ModuleRecord ToRecord(User user)

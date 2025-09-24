@@ -8,16 +8,16 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed class QualityModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed class CapaModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Quality";
+    public const string ModuleKey = "Capa";
 
-    public QualityModuleViewModel(
+    public CapaModuleViewModel(
         DatabaseService databaseService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Quality", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "CAPA", databaseService, cflDialogService, shellInteraction, navigation)
     {
     }
 

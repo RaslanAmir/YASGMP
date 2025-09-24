@@ -54,7 +54,7 @@ public sealed class AttachmentsModuleViewModel : DataDrivenModuleDocumentViewMod
         {
             "calibrations" => CalibrationModuleViewModel.ModuleKey,
             "work_orders" => WorkOrdersModuleViewModel.ModuleKey,
-            "capa_cases" => QualityModuleViewModel.ModuleKey,
+            "capa_cases" => CapaModuleViewModel.ModuleKey,
             "users" => SecurityModuleViewModel.ModuleKey,
             _ => null
         };
