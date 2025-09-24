@@ -8,6 +8,7 @@
                      xmlns:adLayout="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
                      xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
                      xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
+                     xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
                      Title="YasGMP Cockpit"
                      Width="1280"
                      Height="800"
@@ -38,11 +39,13 @@
             </fluent:Ribbon.Menu>
 
             <fluent:RibbonTabItem Header="Home">
-                <fluent:RibbonGroupBox Header="Workspace">
-                    <fluent:Button Header="New Machines Tab"
-                                   Command="{Binding WindowCommands.NewMachinesDocumentCommand}" />
-                    <fluent:Button Header="Navigate to Machines"
-                                   Command="{Binding WindowCommands.NavigateToMachinesCommand}" />
+                <fluent:RibbonGroupBox Header="Modules">
+                    <fluent:Button Header="Dashboard"
+                                   Command="{Binding WindowCommands.OpenDashboardCommand}" />
+                    <fluent:Button Header="Assets"
+                                   Command="{Binding WindowCommands.OpenAssetsCommand}" />
+                    <fluent:Button Header="Work Orders"
+                                   Command="{Binding WindowCommands.OpenWorkOrdersCommand}" />
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
 
@@ -61,11 +64,7 @@
             </fluent:RibbonTabItem>
         </fluent:Ribbon>
 
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <TextBlock Text="{Binding StatusText}" />
-            </StatusBarItem>
-        </StatusBar>
+        <controls:ShellStatusBar DockPanel.Dock="Bottom" DataContext="{Binding StatusBar}" />
 
         <Grid>
             <ad:DockingManager x:Name="DockManager"
@@ -94,14 +93,14 @@
                             <adLayout:LayoutAnchorablePane DockWidth="280">
                                 <adLayout:LayoutAnchorable Title="Modules"
                                                           ContentId="YasGmp.Shell.Modules"
-                                                          Content="{Binding ModuleTree}" />
+                                                          Content="{Binding ModulesPane}" />
                             </adLayout:LayoutAnchorablePane>
                             <adLayout:LayoutPanel Orientation="Vertical">
                                 <adLayout:LayoutDocumentPane />
                                 <adLayout:LayoutAnchorablePane DockHeight="220">
-                                    <adLayout:LayoutAnchorable Title="Cockpit"
-                                                              ContentId="YasGmp.Shell.Cockpit"
-                                                              Content="{Binding Cockpit}" />
+                                    <adLayout:LayoutAnchorable Title="Inspector"
+                                                              ContentId="YasGmp.Shell.Inspector"
+                                                              Content="{Binding InspectorPane}" />
                                 </adLayout:LayoutAnchorablePane>
                             </adLayout:LayoutPanel>
                         </adLayout:LayoutPanel>

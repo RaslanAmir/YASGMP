@@ -9,6 +9,7 @@ using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf
 {
@@ -43,9 +44,47 @@ namespace YasGMP.Wpf
 
                         var svc = core.Services;
                         svc.AddSingleton<IUserSession, UserSession>();
-                        svc.AddSingleton<IMachineDataService, MockMachineDataService>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<IAuthContext, WpfAuthContext>();
+                        svc.AddSingleton<ICflDialogService, CflDialogService>();
+                        svc.AddSingleton<ShellInteractionService>();
+                        svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
+                        svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());
+                        svc.AddSingleton<ModulesPaneViewModel>();
+                        svc.AddSingleton<InspectorPaneViewModel>();
+                        svc.AddSingleton<ShellStatusBarViewModel>();
+
+                        svc.AddTransient<DashboardModuleViewModel>();
+                        svc.AddTransient<AssetsModuleViewModel>();
+                        svc.AddTransient<WarehouseModuleViewModel>();
+                        svc.AddTransient<WorkOrdersModuleViewModel>();
+                        svc.AddTransient<CalibrationModuleViewModel>();
+                        svc.AddTransient<QualityModuleViewModel>();
+                        svc.AddTransient<SchedulingModuleViewModel>();
+                        svc.AddTransient<SecurityModuleViewModel>();
+                        svc.AddTransient<VendorsModuleViewModel>();
+                        svc.AddTransient<AdminModuleViewModel>();
+                        svc.AddTransient<AuditModuleViewModel>();
+                        svc.AddTransient<AttachmentsModuleViewModel>();
+
+                        svc.AddSingleton<ModuleRegistry>(sp =>
+                        {
+                            var registry = new ModuleRegistry(sp);
+                            registry.Register<DashboardModuleViewModel>(DashboardModuleViewModel.ModuleKey, "Dashboard", "Cockpit", "Operations overview and KPIs");
+                            registry.Register<AssetsModuleViewModel>(AssetsModuleViewModel.ModuleKey, "Assets", "Maintenance", "Asset register and lifecycle");
+                            registry.Register<WarehouseModuleViewModel>(WarehouseModuleViewModel.ModuleKey, "Warehouse", "Maintenance", "Warehouse master data");
+                            registry.Register<WorkOrdersModuleViewModel>(WorkOrdersModuleViewModel.ModuleKey, "Work Orders", "Maintenance", "Corrective and preventive jobs");
+                            registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey, "Calibration", "Maintenance", "Calibration records");
+                            registry.Register<QualityModuleViewModel>(QualityModuleViewModel.ModuleKey, "Quality", "Quality", "CAPA and quality events");
+                            registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
+                            registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
+                            registry.Register<VendorsModuleViewModel>(VendorsModuleViewModel.ModuleKey, "Vendors", "Supply Chain", "Approved suppliers and contractors");
+                            registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");
+                            registry.Register<AuditModuleViewModel>(AuditModuleViewModel.ModuleKey, "Audit Trail", "Compliance", "System event history");
+                            registry.Register<AttachmentsModuleViewModel>(AttachmentsModuleViewModel.ModuleKey, "Attachments", "Documents", "File attachments and certificates");
+                            return registry;
+                        });
+                        svc.AddSingleton<IModuleRegistry>(sp => sp.GetRequiredService<ModuleRegistry>());
                         svc.AddSingleton<DockLayoutPersistenceService>();
                         svc.AddSingleton<ShellLayoutController>();
 
