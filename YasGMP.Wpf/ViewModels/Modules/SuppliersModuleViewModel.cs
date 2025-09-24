@@ -8,16 +8,16 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed class VendorsModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Vendors";
+    public const string ModuleKey = "Suppliers";
 
-    public VendorsModuleViewModel(
+    public SuppliersModuleViewModel(
         DatabaseService databaseService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Vendors", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation)
     {
     }
 

@@ -39,13 +39,41 @@
             </fluent:Ribbon.Menu>
 
             <fluent:RibbonTabItem Header="Home">
-                <fluent:RibbonGroupBox Header="Modules">
+                <fluent:RibbonGroupBox Header="Operations">
                     <fluent:Button Header="Dashboard"
                                    Command="{Binding WindowCommands.OpenDashboardCommand}" />
                     <fluent:Button Header="Assets"
                                    Command="{Binding WindowCommands.OpenAssetsCommand}" />
                     <fluent:Button Header="Work Orders"
                                    Command="{Binding WindowCommands.OpenWorkOrdersCommand}" />
+                    <fluent:Button Header="Calibration"
+                                   Command="{Binding WindowCommands.OpenCalibrationCommand}" />
+                    <fluent:Button Header="Parts"
+                                   Command="{Binding WindowCommands.OpenPartsCommand}" />
+                    <fluent:Button Header="Warehouse"
+                                   Command="{Binding WindowCommands.OpenWarehouseCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Quality">
+                    <fluent:Button Header="CAPA"
+                                   Command="{Binding WindowCommands.OpenCapaCommand}" />
+                    <fluent:Button Header="Incidents"
+                                   Command="{Binding WindowCommands.OpenIncidentsCommand}" />
+                    <fluent:Button Header="Change Control"
+                                   Command="{Binding WindowCommands.OpenChangeControlCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Supply Chain">
+                    <fluent:Button Header="Suppliers"
+                                   Command="{Binding WindowCommands.OpenSuppliersCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Administration">
+                    <fluent:Button Header="Security"
+                                   Command="{Binding WindowCommands.OpenSecurityCommand}" />
+                    <fluent:Button Header="Administration"
+                                   Command="{Binding WindowCommands.OpenAdministrationCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Diagnostics">
+                    <fluent:Button Header="Diagnostics"
+                                   Command="{Binding WindowCommands.OpenDiagnosticsCommand}" />
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
 

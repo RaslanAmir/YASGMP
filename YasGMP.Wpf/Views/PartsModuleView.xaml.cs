@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace YasGMP.Wpf.Views;
 
-public partial class QualityModuleView : UserControl
+public partial class PartsModuleView : UserControl
 {
-    public QualityModuleView()
+    public PartsModuleView()
     {
         InitializeComponent();
     }

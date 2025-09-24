@@ -1,4 +1,4 @@
-<UserControl x:Class="YasGMP.Wpf.Views.VendorsModuleView"
+<UserControl x:Class="YasGMP.Wpf.Views.ChangeControlModuleView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -46,10 +46,10 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="140" />
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="3*" />
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />

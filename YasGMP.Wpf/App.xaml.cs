@@ -59,12 +59,16 @@ namespace YasGMP.Wpf
                         svc.AddTransient<WarehouseModuleViewModel>();
                         svc.AddTransient<WorkOrdersModuleViewModel>();
                         svc.AddTransient<CalibrationModuleViewModel>();
-                        svc.AddTransient<QualityModuleViewModel>();
+                        svc.AddTransient<PartsModuleViewModel>();
+                        svc.AddTransient<SuppliersModuleViewModel>();
+                        svc.AddTransient<CapaModuleViewModel>();
+                        svc.AddTransient<IncidentsModuleViewModel>();
+                        svc.AddTransient<ChangeControlModuleViewModel>();
                         svc.AddTransient<SchedulingModuleViewModel>();
                         svc.AddTransient<SecurityModuleViewModel>();
-                        svc.AddTransient<VendorsModuleViewModel>();
                         svc.AddTransient<AdminModuleViewModel>();
                         svc.AddTransient<AuditModuleViewModel>();
+                        svc.AddTransient<DiagnosticsModuleViewModel>();
                         svc.AddTransient<AttachmentsModuleViewModel>();
 
                         svc.AddSingleton<ModuleRegistry>(sp =>
@@ -75,12 +79,16 @@ namespace YasGMP.Wpf
                             registry.Register<WarehouseModuleViewModel>(WarehouseModuleViewModel.ModuleKey, "Warehouse", "Maintenance", "Warehouse master data");
                             registry.Register<WorkOrdersModuleViewModel>(WorkOrdersModuleViewModel.ModuleKey, "Work Orders", "Maintenance", "Corrective and preventive jobs");
                             registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey, "Calibration", "Maintenance", "Calibration records");
-                            registry.Register<QualityModuleViewModel>(QualityModuleViewModel.ModuleKey, "Quality", "Quality", "CAPA and quality events");
+                            registry.Register<PartsModuleViewModel>(PartsModuleViewModel.ModuleKey, "Parts", "Maintenance", "Parts and spare stock");
+                            registry.Register<SuppliersModuleViewModel>(SuppliersModuleViewModel.ModuleKey, "Suppliers", "Supply Chain", "Approved suppliers and contractors");
+                            registry.Register<CapaModuleViewModel>(CapaModuleViewModel.ModuleKey, "CAPA", "Quality", "Corrective actions and preventive plans");
+                            registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
+                            registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
-                            registry.Register<VendorsModuleViewModel>(VendorsModuleViewModel.ModuleKey, "Vendors", "Supply Chain", "Approved suppliers and contractors");
                             registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");
                             registry.Register<AuditModuleViewModel>(AuditModuleViewModel.ModuleKey, "Audit Trail", "Compliance", "System event history");
+                            registry.Register<DiagnosticsModuleViewModel>(DiagnosticsModuleViewModel.ModuleKey, "Diagnostics", "Diagnostics", "Telemetry snapshots and health checks");
                             registry.Register<AttachmentsModuleViewModel>(AttachmentsModuleViewModel.ModuleKey, "Attachments", "Documents", "File attachments and certificates");
                             return registry;
                         });

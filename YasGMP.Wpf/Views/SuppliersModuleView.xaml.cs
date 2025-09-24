@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace YasGMP.Wpf.Views;
 
-public partial class VendorsModuleView : UserControl
+public partial class SuppliersModuleView : UserControl
 {
-    public VendorsModuleView()
+    public SuppliersModuleView()
     {
         InitializeComponent();
     }
