@@ -23,6 +23,7 @@ using YasGMP.Diagnostics.LogSinks;
 using Microsoft.Extensions.Configuration;
 using Syncfusion.Maui.Core.Hosting;                 // ConfigureSyncfusionCore()
 using Syncfusion.Licensing;                         // SyncfusionLicenseProvider
+using YasGMP.AppCore.DependencyInjection;
 
 namespace YasGMP
 {
@@ -134,102 +135,106 @@ namespace YasGMP
             // Resolve connection string (env → bin\AppSettings.json → AppData\AppSettings.json → fallback)
             string mysqlConnStr = ResolveMySqlConnString();
 
-            // DbContext (MySQL) + optional EF SQL log to AppData (DEBUG)
-            void ConfigureDbContext(IServiceProvider sp, DbContextOptionsBuilder options)
+            builder.Services.AddYasGmpCoreServices(core =>
             {
-                options.UseMySql(mysqlConnStr, ServerVersion.AutoDetect(mysqlConnStr));
-                var ctx = sp.GetService<DiagnosticContext>();
-                var tr  = sp.GetService<ITrace>();
-                if (ctx != null && tr != null)
+                core.UseConnectionString(mysqlConnStr);
+                core.ConfigureDbContext((sp, options, connection) =>
                 {
-                    options.AddInterceptors(new EfSqlInterceptor(ctx, tr));
-                }
-#if DEBUG
-                var provider = sp.GetService<ILoggerFactory>();
-                options.LogTo(sql =>
-                {
-                    try
+                    var ctx = sp.GetService<DiagnosticContext>();
+                    var tr = sp.GetService<ITrace>();
+                    if (ctx != null && tr != null)
                     {
-                        var logger = provider?.CreateLogger("EFCore.SQL");
-                        logger?.LogInformation("{Sql}", sql);
+                        options.AddInterceptors(new EfSqlInterceptor(ctx, tr));
                     }
-                    catch { /* never throw from logging */ }
-                });
-                options.EnableSensitiveDataLogging(true);
+#if DEBUG
+                    var provider = sp.GetService<ILoggerFactory>();
+                    options.LogTo(sql =>
+                    {
+                        try
+                        {
+                            var logger = provider?.CreateLogger("EFCore.SQL");
+                            logger?.LogInformation("{Sql}", sql);
+                        }
+                        catch { /* never throw from logging */ }
+                    });
+                    options.EnableSensitiveDataLogging(true);
 #endif
-            }
+                });
 
-            builder.Services.AddDbContext<YasGmpDbContext>(ConfigureDbContext);
-            builder.Services.AddDbContextFactory<YasGmpDbContext>(ConfigureDbContext);
+                core.UseDatabaseService<DatabaseService>((sp, connection) => new DatabaseService(connection), (sp, db, connection) =>
+                {
+                    var ctx = sp.GetService<DiagnosticContext>();
+                    var tr = sp.GetService<ITrace>();
+                    var cfgRoot = sp.GetService<IConfiguration>();
+                    if (ctx != null && tr != null)
+                    {
+                        db.SetDiagnostics(ctx, tr);
+                    }
 
-            // Core Services
-            builder.Services.AddSingleton(sp =>
-            {
-                var db = new DatabaseService(mysqlConnStr);
-                // Attach diagnostics to the central DB service
-                var ctx = sp.GetService<DiagnosticContext>();
-                var tr  = sp.GetService<ITrace>();
-                var cfgRoot = sp.GetService<IConfiguration>();
-                if (ctx != null && tr != null) db.SetDiagnostics(ctx, tr);
-                // Set global fallbacks for ad-hoc DatabaseService instantiation
-                DatabaseService.GlobalDiagnosticContext = ctx;
-                DatabaseService.GlobalTrace = tr;
-                if (cfgRoot != null)
-                    DatabaseService.GlobalConfiguration = cfgRoot;
-                return db;
+                    DatabaseService.GlobalDiagnosticContext = ctx;
+                    DatabaseService.GlobalTrace = tr;
+                    if (cfgRoot != null)
+                    {
+                        DatabaseService.GlobalConfiguration = cfgRoot;
+                    }
+                });
+
+                var services = core.Services;
+
+                // Core Services
+                services.AddSingleton<IPlatformService, MauiPlatformService>();
+                services.AddSingleton<AuditService>();
+                services.AddSingleton<AuthService>();
+                services.AddSingleton<ExportService>();
+                services.AddSingleton<WorkOrderAuditService>();
+                services.AddSingleton<IAttachmentService, AttachmentService>();
+                services.AddSingleton<QRCodeService>();     // QR generation
+                services.AddSingleton<BackgroundScheduler>(); // in-app scheduler (PPM/alerts)
+                services.AddSingleton<CodeGeneratorService>(); // NEW
+
+                // RBAC + Users
+                services.AddSingleton<IRBACService, RBACService>();
+                services.AddSingleton<UserService>();
+
+                // ViewModels
+                services.AddTransient<LoginViewModel>();
+                services.AddTransient<CapaViewModel>();
+                services.AddTransient<WorkOrderEditDialogViewModel>();
+                services.AddTransient<WorkOrderViewModel>();
+                services.AddTransient<AuditLogViewModel>();
+                services.AddTransient<AdminViewModel>();
+                services.AddTransient<UserViewModel>();
+                services.AddTransient<UserRolePermissionViewModel>();
+                services.AddTransient<MachineViewModel>(); // NEW
+                services.AddTransient<CalibrationsViewModel>();
+                services.AddTransient<PpmViewModel>();
+                services.AddTransient<WarehouseViewModel>();
+                services.AddTransient<DocumentControlViewModel>();
+
+                // Pages
+                services.AddTransient<YasGMP.Views.LoginPage>();
+                services.AddTransient<YasGMP.Views.MainPage>();
+                services.AddTransient<YasGMP.Views.AuditLogPage>();
+                services.AddTransient<YasGMP.Views.AdminPanelPage>();
+                services.AddTransient<YasGMP.Views.UsersPage>();
+                services.AddTransient<YasGMP.Views.UserRolePermissionPage>();
+                services.AddTransient<YasGMP.Views.CalibrationsPage>();
+                services.AddTransient<YasGMP.Views.MachinesPage>();
+                services.AddTransient<YasGMP.Views.PartsPage>();
+                services.AddTransient<YasGMP.Views.WarehousePage>();
+                services.AddTransient<YasGMP.Views.WorkOrdersPage>();
+                services.AddTransient<YasGMP.Views.ComponentsPage>();
+                services.AddTransient<YasGMP.Views.SuppliersPage>();
+                services.AddTransient<YasGMP.Views.DocumentControlPage>();
+                services.AddTransient<YasGMP.ExternalServicersPage>();
+                services.AddTransient<YasGMP.Pages.PpmPage>();
+                services.AddTransient<YasGMP.Views.ValidationPage>();
+                // Debug pages (RBAC-gated in page code-behind)
+                services.AddTransient<YasGMP.Views.Debug.DebugDashboardPage>();
+                services.AddTransient<YasGMP.Views.Debug.LogViewerPage>();
+                services.AddTransient<YasGMP.Views.Debug.HealthPage>();
+                services.AddSingleton<YasGMP.Diagnostics.SelfTestRunner>();
             });
-            builder.Services.AddSingleton<IPlatformService, MauiPlatformService>();
-            builder.Services.AddSingleton<AuditService>();
-            builder.Services.AddSingleton<AuthService>();
-            builder.Services.AddSingleton<ExportService>();
-            builder.Services.AddSingleton<WorkOrderAuditService>();
-            builder.Services.AddSingleton<IAttachmentService, AttachmentService>();
-            builder.Services.AddSingleton<QRCodeService>();     // QR generation
-            builder.Services.AddSingleton<BackgroundScheduler>(); // in-app scheduler (PPM/alerts)
-            builder.Services.AddSingleton<CodeGeneratorService>(); // NEW
-
-            // RBAC + Users
-            builder.Services.AddSingleton<IRBACService, RBACService>();
-            builder.Services.AddSingleton<UserService>();
-
-            // ViewModels
-            builder.Services.AddTransient<LoginViewModel>();
-            builder.Services.AddTransient<CapaViewModel>();
-            builder.Services.AddTransient<WorkOrderEditDialogViewModel>();
-            builder.Services.AddTransient<WorkOrderViewModel>();
-            builder.Services.AddTransient<AuditLogViewModel>();
-            builder.Services.AddTransient<AdminViewModel>();
-            builder.Services.AddTransient<UserViewModel>();
-            builder.Services.AddTransient<UserRolePermissionViewModel>();
-            builder.Services.AddTransient<MachineViewModel>(); // NEW
-            builder.Services.AddTransient<CalibrationsViewModel>();
-            builder.Services.AddTransient<PpmViewModel>();
-            builder.Services.AddTransient<WarehouseViewModel>();
-            builder.Services.AddTransient<DocumentControlViewModel>();
-
-            // Pages
-            builder.Services.AddTransient<YasGMP.Views.LoginPage>();
-            builder.Services.AddTransient<YasGMP.Views.MainPage>();
-            builder.Services.AddTransient<YasGMP.Views.AuditLogPage>();
-            builder.Services.AddTransient<YasGMP.Views.AdminPanelPage>();
-            builder.Services.AddTransient<YasGMP.Views.UsersPage>();
-            builder.Services.AddTransient<YasGMP.Views.UserRolePermissionPage>();
-            builder.Services.AddTransient<YasGMP.Views.CalibrationsPage>();
-            builder.Services.AddTransient<YasGMP.Views.MachinesPage>();
-            builder.Services.AddTransient<YasGMP.Views.PartsPage>();
-            builder.Services.AddTransient<YasGMP.Views.WarehousePage>();
-            builder.Services.AddTransient<YasGMP.Views.WorkOrdersPage>();
-            builder.Services.AddTransient<YasGMP.Views.ComponentsPage>();
-            builder.Services.AddTransient<YasGMP.Views.SuppliersPage>();
-            builder.Services.AddTransient<YasGMP.Views.DocumentControlPage>();
-            builder.Services.AddTransient<YasGMP.ExternalServicersPage>();
-            builder.Services.AddTransient<YasGMP.Pages.PpmPage>();
-            builder.Services.AddTransient<YasGMP.Views.ValidationPage>();
-            // Debug pages (RBAC-gated in page code-behind)
-            builder.Services.AddTransient<YasGMP.Views.Debug.DebugDashboardPage>();
-            builder.Services.AddTransient<YasGMP.Views.Debug.LogViewerPage>();
-            builder.Services.AddTransient<YasGMP.Views.Debug.HealthPage>();
-            builder.Services.AddSingleton<YasGMP.Diagnostics.SelfTestRunner>();
 
             // Global exception hooks → JSONL framework log (DEBUG)
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
