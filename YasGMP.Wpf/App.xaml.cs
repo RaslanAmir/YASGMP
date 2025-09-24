@@ -50,6 +50,8 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IDialogService, WpfDialogService>();
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
+                        svc.AddSingleton<WorkOrderAuditService>();
+                        svc.AddTransient<WorkOrderService>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());
