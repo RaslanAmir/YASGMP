@@ -95,9 +95,9 @@
                                                           ContentId="YasGmp.Shell.Modules"
                                                           Content="{Binding ModulesPane}" />
                             </adLayout:LayoutAnchorablePane>
-                            <adLayout:LayoutPanel Orientation="Vertical">
+                            <adLayout:LayoutPanel Orientation="Horizontal">
                                 <adLayout:LayoutDocumentPane />
-                                <adLayout:LayoutAnchorablePane DockHeight="220">
+                                <adLayout:LayoutAnchorablePane DockWidth="320">
                                     <adLayout:LayoutAnchorable Title="Inspector"
                                                               ContentId="YasGmp.Shell.Inspector"
                                                               Content="{Binding InspectorPane}" />
