@@ -183,6 +183,10 @@ namespace YasGMP
 
                 // Core Services
                 services.AddSingleton<IPlatformService, MauiPlatformService>();
+                services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
+                services.AddSingleton<IDialogService, MauiDialogService>();
+                services.AddSingleton<IFilePicker, MauiFilePicker>();
+                services.AddSingleton<IUserSession, MauiUserSession>();
                 services.AddSingleton<AuditService>();
                 services.AddSingleton<AuthService>();
                 services.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<AuthService>());
