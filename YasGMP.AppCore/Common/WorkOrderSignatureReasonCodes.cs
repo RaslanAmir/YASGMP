@@ -11,7 +11,7 @@ namespace YasGMP.Common
         /// <summary>Represents a selectable reason code.</summary>
         public sealed record Reason(string Code, string DisplayName, string Description)
         {
-            /// <summary>Friendly label rendered by MAUI <see cref="Picker"/> controls.</summary>
+            /// <summary>Friendly label rendered by UI pickers and drop-downs.</summary>
             public string DisplayLabel => string.IsNullOrWhiteSpace(Description)
                 ? $"{DisplayName} ({Code})"
                 : $"{DisplayName} ({Code}) – {Description}";

@@ -272,21 +272,8 @@ namespace YasGMP.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             var photoTypeConverter = new ValueConverter<PhotoType, string>(
-                v => v switch
-                {
-                    PhotoType.Prije => "prije",
-                    PhotoType.Poslije => "poslije",
-                    PhotoType.Dokumentacija => "dokumentacija",
-                    _ => "drugo"
-                },
-                v => v?.ToLowerInvariant() switch
-                {
-                    "prije" => PhotoType.Prije,
-                    "poslije" => PhotoType.Poslije,
-                    "dokumentacija" => PhotoType.Dokumentacija,
-                    "drugo" => PhotoType.Drugo,
-                    _ => PhotoType.Drugo
-                });
+                v => ConvertPhotoTypeToString(v),
+                v => ConvertStringToPhotoType(v));
 
             modelBuilder.Entity<Photo>()
                 .Property(p => p.Type)
@@ -1477,6 +1464,25 @@ namespace YasGMP.Data
                 entity.Ignore(e => e.ComplianceDocs);
             });
         }
+
+        private static string ConvertPhotoTypeToString(PhotoType type)
+            => type switch
+            {
+                PhotoType.Prije => "prije",
+                PhotoType.Poslije => "poslije",
+                PhotoType.Dokumentacija => "dokumentacija",
+                _ => "drugo"
+            };
+
+        private static PhotoType ConvertStringToPhotoType(string? value)
+            => value?.ToLowerInvariant() switch
+            {
+                "prije" => PhotoType.Prije,
+                "poslije" => PhotoType.Poslije,
+                "dokumentacija" => PhotoType.Dokumentacija,
+                "drugo" => PhotoType.Drugo,
+                _ => PhotoType.Drugo
+            };
     }
 }
 
