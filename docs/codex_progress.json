@@ -4,13 +4,13 @@
     "wpfTarget": "net9.0-windows10.0.19041.0",
     "detected": false,
     "notes": [
-      "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs (dotnet --info failed 2025-09-24).",
       "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK"
     ]
   },
   "batches": [
-    { "id": "B0", "name": "Environment stabilization", "status": "blocked", "notes": ["Awaiting .NET SDK installation"] },
-    { "id": "B1", "name": "Shell foundation", "status": "pending" },
+    { "id": "B0", "name": "Environment stabilization", "status": "blocked", "notes": ["Awaiting .NET SDK installation", "dotnet restore/build attempted 2025-09-24 → command not found", "dotnet restore/build retried 2025-09-25 → command not found (no dotnet CLI)"] },
+    { "id": "B1", "name": "Shell foundation", "status": "in-progress", "notes": ["2025-09-25: B1FormDocumentViewModel tracks IsDirty + validation ahead of module overrides"] },
     { "id": "B2", "name": "Cross-cutting services", "status": "pending" },
     { "id": "B3", "name": "Editor framework", "status": "pending" }
   ],
@@ -36,10 +36,10 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "",
+  "lastCommitSummary": "feat(shell): add form dirty/validation scaffolding",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
-    "tests/fixtures/hello.txt seeded for smoke harness bootstrap"
+    "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
+    "B1 foundation update: Save/Cancel now gate on FormMode + validation scaffolding"
   ]
 }
-
