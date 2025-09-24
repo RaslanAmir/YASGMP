@@ -185,6 +185,7 @@ namespace YasGMP
                 services.AddSingleton<IPlatformService, MauiPlatformService>();
                 services.AddSingleton<AuditService>();
                 services.AddSingleton<AuthService>();
+                services.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<AuthService>());
                 services.AddSingleton<ExportService>();
                 services.AddSingleton<WorkOrderAuditService>();
                 services.AddSingleton<IAttachmentService, AttachmentService>();

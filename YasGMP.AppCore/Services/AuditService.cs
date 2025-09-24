@@ -8,12 +8,10 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Devices;
 using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models.DTO;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
 {
@@ -53,19 +51,47 @@ namespace YasGMP.Services
         /// <summary>
         /// Gets the ID of the currently logged-in user, or 0 if none.
         /// </summary>
-        private int CurrentUserId => (Application.Current as App)?.LoggedUser?.Id ?? 0;
+        private static IAuthContext? TryResolveAuthContext() => ServiceLocator.GetService<IAuthContext>();
+
+        private static IPlatformService? TryResolvePlatformService() => ServiceLocator.GetService<IPlatformService>();
+
+        private int CurrentUserId => TryResolveAuthContext()?.CurrentUser?.Id ?? 0;
 
         /// <summary>
         /// Best-effort local IPv4. Never returns "unknown".
         /// </summary>
-        private string CurrentIp => _cachedLocalIpv4 ??= ResolveBestIpv4();
+        private string CurrentIp
+        {
+            get
+            {
+                var auth = TryResolveAuthContext();
+                if (!string.IsNullOrWhiteSpace(auth?.CurrentIpAddress))
+                {
+                    return auth!.CurrentIpAddress;
+                }
+
+                return _cachedLocalIpv4 ??= ResolveBestIpv4();
+            }
+        }
 
         /// <summary>
         /// Builds a compact, 255-safe forensic string (key=value pairs delimited by ';').
         /// Includes OS/platform, host/user, app version, session, device model,
         /// NIC name/MAC, IPv4/IPv6, gateway, DNS, and <b>public IP</b> (cached, background-fetched).
         /// </summary>
-        private string DeviceForensics => _cachedDeviceInfo ??= BuildDeviceInfoString();
+        private string DeviceForensics
+        {
+            get
+            {
+                var auth = TryResolveAuthContext();
+                if (!string.IsNullOrWhiteSpace(auth?.CurrentDeviceInfo))
+                {
+                    return auth!.CurrentDeviceInfo;
+                }
+
+                return _cachedDeviceInfo ??= BuildDeviceInfoString();
+            }
+        }
 
         #endregion
 
@@ -97,7 +123,7 @@ namespace YasGMP.Services
                 ip: CurrentIp,
                 severity: "info",
                 deviceInfo: DeviceForensics,
-                sessionId: (Application.Current as App)?.SessionId
+                sessionId: TryResolveAuthContext()?.CurrentSessionId
             ).ConfigureAwait(false);
         }
 
@@ -120,7 +146,7 @@ namespace YasGMP.Services
                 ip: CurrentIp,
                 severity: "info",
                 deviceInfo: DeviceForensics,
-                sessionId: (Application.Current as App)?.SessionId
+                sessionId: TryResolveAuthContext()?.CurrentSessionId
             ).ConfigureAwait(false);
         }
 
@@ -151,7 +177,7 @@ VALUES
                     new MySqlParameter("@uid", CurrentUserId == 0 ? (object)DBNull.Value : CurrentUserId),
                     new MySqlParameter("@ip", CurrentIp),
                     new MySqlParameter("@device", DeviceForensics),
-                    new MySqlParameter("@sid", (Application.Current as App)?.SessionId ?? string.Empty),
+                    new MySqlParameter("@sid", TryResolveAuthContext()?.CurrentSessionId ?? string.Empty),
                     new MySqlParameter("@entity", t),
                     new MySqlParameter("@eid", entityId),
                     new MySqlParameter("@action", a),
@@ -434,7 +460,7 @@ VALUES
         {
             try
             {
-                var plat = ServiceLocator.GetService<IPlatformService>();
+                var plat = TryResolvePlatformService();
                 var svcIp = plat?.GetLocalIpAddress();
                 if (!string.IsNullOrWhiteSpace(svcIp) && !svcIp.Equals("unknown", StringComparison.OrdinalIgnoreCase))
                     return svcIp.Trim();
@@ -503,27 +529,25 @@ VALUES
             // Try to obtain a cached public IP or schedule one
             var publicIp = GetOrStartPublicIp();
 
-            // Cross-platform MAUI device data (won’t throw)
-            string platform = DeviceInfo.Current?.Platform.ToString() ?? "Unknown";
-            string manufacturer = DeviceInfo.Current?.Manufacturer ?? string.Empty;
-            string model = DeviceInfo.Current?.Model ?? string.Empty;
+            var auth = TryResolveAuthContext();
+            var platformSvc = TryResolvePlatformService();
+
+            // Platform metadata (non-throwing)
+            string platform = platformSvc?.GetOsVersion() ?? RuntimeInformation.OSDescription;
+            string manufacturer = platformSvc?.GetManufacturer() ?? string.Empty;
+            string model = platformSvc?.GetModel() ?? string.Empty;
 
             // App version + build
-            string appVer = string.Empty;
-            try
-            {
-                appVer = $"{AppInfo.Current?.VersionString}({AppInfo.Current?.BuildString})";
-            }
-            catch { /* not fatal */ }
+            string appVer = Safe(() => typeof(AuditService).Assembly.GetName().Version?.ToString());
 
             // OS / runtime / host / user / domain
             string os = Environment.OSVersion.ToString();
             string fw = RuntimeInformation.FrameworkDescription;
             string arch = $"{RuntimeInformation.OSArchitecture}/{RuntimeInformation.ProcessArchitecture}";
-            string host = Safe(() => Environment.MachineName);
-            string user = Safe(() => Environment.UserName);
+            string host = platformSvc?.GetHostName() ?? Safe(() => Environment.MachineName);
+            string user = platformSvc?.GetUserName() ?? Safe(() => Environment.UserName);
             string domain = Safe(() => Environment.UserDomainName);
-            string sessionId = (Application.Current as App)?.SessionId ?? string.Empty;
+            string sessionId = auth?.CurrentSessionId ?? string.Empty;
 
             // Network extras
             string nic = _cachedNicName ?? string.Empty;
@@ -558,7 +582,6 @@ VALUES
             var line = string.Join("; ", parts);
             return line.Length <= 255 ? line : line.Substring(0, 255);
         }
-
         /// <summary>
         /// Returns cached public IP if fresh; otherwise schedules a background fetch and returns empty for now.
         /// </summary>

@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Microsoft.Maui.Devices;
+using Microsoft.Maui.Storage;
 
 namespace YasGMP.Services.Platform
 {
@@ -157,6 +159,35 @@ namespace YasGMP.Services.Platform
             catch
             {
                 return string.Empty;
+            }
+        }
+
+        /// <inheritdoc />
+        public string GetAppDataDirectory()
+        {
+            try
+            {
+                return FileSystem.AppDataDirectory;
+            }
+            catch
+            {
+                try
+                {
+                    var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    if (!string.IsNullOrWhiteSpace(local))
+                    {
+                        var path = Path.Combine(local, "YasGMP");
+                        Directory.CreateDirectory(path);
+                        return path;
+                    }
+                }
+                catch
+                {
+                }
+
+                var fallback = Path.Combine(AppContext.BaseDirectory, "AppData");
+                Directory.CreateDirectory(fallback);
+                return fallback;
             }
         }
 

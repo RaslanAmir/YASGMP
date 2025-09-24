@@ -18,9 +18,8 @@ using YasGMP.Helpers;
 using YasGMP.Models;
 using YasGMP.Models.DTO;
 using MySqlConnector;
-using Microsoft.Maui.Storage;
-using Microsoft.Maui.Controls;
 using YasGMP.Common;
+using YasGMP.Services.Interfaces;
 
 // Disambiguate iText vs MAUI types
 using ITextAlignment = iText.Layout.Properties.TextAlignment;
@@ -32,7 +31,7 @@ namespace YasGMP.Services
     /// Exports calibrations and audit logs to Excel/PDF with audit logging.
     /// <para>
     /// ✔ EPPlus v8 compatible (deprecation warnings suppressed locally).<br/>
-    /// ✔ Null-safe for inputs and MAUI <see cref="Application.Current"/> access.<br/>
+    /// ✔ Null-safe for inputs and platform abstractions.<br/>
     /// ✔ Writes fallback audit to DB if <see cref="AuditService"/> is not injected.
     /// </para>
     /// </summary>
@@ -40,6 +39,8 @@ namespace YasGMP.Services
     {
         private readonly DatabaseService _dbService;
         private readonly AuditService? _audit;
+        private readonly IPlatformService? _platformService;
+        private readonly IAuthContext? _authContext;
         private readonly string _exportRoot;
 
         /// <summary>
@@ -50,8 +51,9 @@ namespace YasGMP.Services
         public ExportService(DatabaseService dbService)
         {
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
-            _exportRoot = Path.Combine(FileSystem.Current.AppDataDirectory, "Exports", "Calibrations");
-            Directory.CreateDirectory(_exportRoot);
+            _platformService = ServiceLocator.GetService<IPlatformService>();
+            _authContext = ServiceLocator.GetService<IAuthContext>();
+            _exportRoot = ResolveExportRoot();
         }
 
         /// <summary>
@@ -386,8 +388,12 @@ namespace YasGMP.Services
         /// </summary>
         private async Task LogFallbackAuditAsync(string action, string details)
         {
-            var app = Application.Current as App; // null-safe cast
-            int? userId = app?.LoggedUser?.Id;
+            var auth = _authContext ?? ServiceLocator.GetService<IAuthContext>();
+            var platform = _platformService ?? ServiceLocator.GetService<IPlatformService>();
+            int? userId = auth?.CurrentUser?.Id;
+            string sessionId = auth?.CurrentSessionId ?? string.Empty;
+            string ip = auth?.CurrentIpAddress ?? platform?.GetLocalIpAddress() ?? string.Empty;
+            string deviceInfo = auth?.CurrentDeviceInfo ?? string.Empty;
             await _dbService.LogSystemEventAsync(
                 userId: userId,
                 eventType: action ?? string.Empty,
@@ -395,11 +401,34 @@ namespace YasGMP.Services
                 module: "ExportService",
                 recordId: null,
                 description: details ?? string.Empty,
-                ip: ServiceLocator.GetService<IPlatformService>()?.GetLocalIpAddress() ?? string.Empty,
+                ip: ip,
                 severity: "audit",
-                deviceInfo: string.Empty,
-                sessionId: app?.SessionId
+                deviceInfo: deviceInfo,
+                sessionId: sessionId
             ).ConfigureAwait(false);
+        }
+
+        private string ResolveExportRoot()
+        {
+            var platform = _platformService ?? ServiceLocator.GetService<IPlatformService>();
+            string? appData = platform?.GetAppDataDirectory();
+
+            if (string.IsNullOrWhiteSpace(appData))
+            {
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (string.IsNullOrWhiteSpace(local))
+                {
+                    appData = Path.Combine(AppContext.BaseDirectory, "AppData");
+                }
+                else
+                {
+                    appData = Path.Combine(local, "YasGMP");
+                }
+            }
+
+            var root = Path.Combine(appData!, "Exports", "Calibrations");
+            Directory.CreateDirectory(root);
+            return root;
         }
     }
 }

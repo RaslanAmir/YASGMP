@@ -7,9 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Maui.Storage;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.Common;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
 {
@@ -230,7 +231,18 @@ WHERE id=@id;";
             string? sessionId,
             CancellationToken token = default)
         {
-            string root = Path.Combine(FileSystem.Current.AppDataDirectory, "Exports", "Validations");
+            var platform = ServiceLocator.GetService<IPlatformService>();
+            string? baseDir = platform?.GetAppDataDirectory();
+
+            if (string.IsNullOrWhiteSpace(baseDir))
+            {
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                baseDir = string.IsNullOrWhiteSpace(local)
+                    ? Path.Combine(AppContext.BaseDirectory, "AppData")
+                    : Path.Combine(local, "YasGMP");
+            }
+
+            var root = Path.Combine(baseDir!, "Exports", "Validations");
             Directory.CreateDirectory(root);
 
             string path = Path.Combine(root, $"Validations_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
