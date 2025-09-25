@@ -15,6 +15,7 @@ namespace YasGMP.Wpf.ViewModels
             _shell = shell;
             OpenDashboardCommand = new RelayCommand(() => _shell.OpenModule(DashboardModuleViewModel.ModuleKey));
             OpenAssetsCommand = new RelayCommand(() => _shell.OpenModule(AssetsModuleViewModel.ModuleKey));
+            OpenComponentsCommand = new RelayCommand(() => _shell.OpenModule(ComponentsModuleViewModel.ModuleKey));
             OpenWorkOrdersCommand = new RelayCommand(() => _shell.OpenModule(WorkOrdersModuleViewModel.ModuleKey));
             OpenWarehouseCommand = new RelayCommand(() => _shell.OpenModule(WarehouseModuleViewModel.ModuleKey));
             OpenCalibrationCommand = new RelayCommand(() => _shell.OpenModule(CalibrationModuleViewModel.ModuleKey));
@@ -33,6 +34,8 @@ namespace YasGMP.Wpf.ViewModels
         public IRelayCommand OpenDashboardCommand { get; }
 
         public IRelayCommand OpenAssetsCommand { get; }
+
+        public IRelayCommand OpenComponentsCommand { get; }
 
         public IRelayCommand OpenWorkOrdersCommand { get; }
 
