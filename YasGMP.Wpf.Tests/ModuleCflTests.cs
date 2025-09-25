@@ -44,8 +44,11 @@ public class ModuleCflTests
             InstallDate = a.InstallDate
         }));
         var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, filePicker, attachments, dialog, shell, navigation);
+
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 

@@ -1,4 +1,7 @@
+
+using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models;
@@ -25,8 +28,9 @@ public class AssetsModuleViewModelTests
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
-
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, dialog, shell, navigation);
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -49,6 +53,53 @@ public class AssetsModuleViewModelTests
         Assert.Equal("maintenance", persisted.Status);
         Assert.Equal("URS-LYO-01", persisted.UrsDoc);
     }
+
+    [Fact]
+    public async Task AttachDocumentCommand_UploadsAttachmentViaService()
+    {
+        var database = new DatabaseService();
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 5,
+            Code = "M-100",
+            Name = "Mixer",
+            Manufacturer = "Globex",
+            Location = "Suite 2",
+            UrsDoc = "URS-MIX-01"
+        });
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 12, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "127.0.0.42"
+        };
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var bytes = Encoding.UTF8.GetBytes("hello asset");
+        filePicker.Files = new[]
+        {
+            new PickedFile("hello.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
+        };
+
+        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
+        await viewModel.AttachDocumentCommand.ExecuteAsync(null);
+
+        Assert.Single(attachments.Uploads);
+        var upload = attachments.Uploads[0];
+        Assert.Equal("machines", upload.EntityType);
+        Assert.Equal(5, upload.EntityId);
+        Assert.Equal("hello.txt", upload.FileName);
+    }
+
 
     private static Task<bool> InvokeSaveAsync(AssetsModuleViewModel viewModel)
     {
