@@ -1,3 +1,4 @@
+
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -29,7 +30,6 @@ public class AssetsModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-
         var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
@@ -99,6 +99,7 @@ public class AssetsModuleViewModelTests
         Assert.Equal(5, upload.EntityId);
         Assert.Equal("hello.txt", upload.FileName);
     }
+
 
     private static Task<bool> InvokeSaveAsync(AssetsModuleViewModel viewModel)
     {
