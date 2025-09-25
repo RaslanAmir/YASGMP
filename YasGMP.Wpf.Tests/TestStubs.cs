@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace YasGMP.Models
@@ -43,6 +44,7 @@ namespace YasGMP.Models
 
     public class User
     {
+        public int Id { get; set; }
         public string? FullName { get; set; }
         public string? Username { get; set; }
     }
@@ -50,7 +52,21 @@ namespace YasGMP.Models
     public class Machine
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? Model { get; set; }
+        public string? Manufacturer { get; set; }
+        public string? Location { get; set; }
+        public string? Status { get; set; }
+        public string? UrsDoc { get; set; }
+        public DateTime? InstallDate { get; set; }
+        public DateTime? ProcurementDate { get; set; }
+        public DateTime? WarrantyUntil { get; set; }
+        public bool IsCritical { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? LifecyclePhase { get; set; }
+        public string? Note { get; set; }
     }
 
     public class Calibration
@@ -85,6 +101,28 @@ namespace YasGMP.Services
 
         public Task<List<Calibration>> GetAllCalibrationsAsync()
             => Task.FromResult(Calibrations);
+    }
+}
+
+namespace YasGMP.Services.Interfaces
+{
+    using System;
+    using YasGMP.Models;
+
+    public interface IAuthContext
+    {
+        User? CurrentUser { get; }
+        string CurrentSessionId { get; }
+        string CurrentDeviceInfo { get; }
+        string CurrentIpAddress { get; }
+    }
+
+    public sealed class TestAuthContext : IAuthContext
+    {
+        public User? CurrentUser { get; set; }
+        public string CurrentSessionId { get; set; } = Guid.NewGuid().ToString("N");
+        public string CurrentDeviceInfo { get; set; } = "TestRig";
+        public string CurrentIpAddress { get; set; } = "127.0.0.1";
     }
 }
 
@@ -150,6 +188,103 @@ namespace YasGMP.Wpf.Services
         }
 
         public CflItem Selected { get; }
+    }
+
+    public sealed class FakeMachineCrudService : IMachineCrudService
+    {
+        private readonly List<Machine> _store = new();
+
+        public List<Machine> Saved => _store;
+
+        public Task<IReadOnlyList<Machine>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
+
+        public Task<Machine?> TryGetByIdAsync(int id)
+            => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
+
+        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        {
+            if (machine.Id == 0)
+            {
+                machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
+            }
+            _store.Add(Clone(machine));
+            return Task.FromResult(machine.Id);
+        }
+
+        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(machine));
+            }
+            else
+            {
+                Copy(machine, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Machine machine)
+        {
+            if (string.IsNullOrWhiteSpace(machine.Name))
+                throw new InvalidOperationException("Name is required.");
+            if (string.IsNullOrWhiteSpace(machine.Code))
+                throw new InvalidOperationException("Code is required.");
+            if (string.IsNullOrWhiteSpace(machine.Manufacturer))
+                throw new InvalidOperationException("Manufacturer is required.");
+            if (string.IsNullOrWhiteSpace(machine.Location))
+                throw new InvalidOperationException("Location is required.");
+            if (string.IsNullOrWhiteSpace(machine.UrsDoc))
+                throw new InvalidOperationException("URS document is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private static Machine Clone(Machine source)
+        {
+            return new Machine
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Name = source.Name,
+                Description = source.Description,
+                Model = source.Model,
+                Manufacturer = source.Manufacturer,
+                Location = source.Location,
+                Status = source.Status,
+                UrsDoc = source.UrsDoc,
+                InstallDate = source.InstallDate,
+                ProcurementDate = source.ProcurementDate,
+                WarrantyUntil = source.WarrantyUntil,
+                IsCritical = source.IsCritical,
+                SerialNumber = source.SerialNumber,
+                LifecyclePhase = source.LifecyclePhase,
+                Note = source.Note
+            };
+        }
+
+        private static void Copy(Machine source, Machine destination)
+        {
+            destination.Code = source.Code;
+            destination.Name = source.Name;
+            destination.Description = source.Description;
+            destination.Model = source.Model;
+            destination.Manufacturer = source.Manufacturer;
+            destination.Location = source.Location;
+            destination.Status = source.Status;
+            destination.UrsDoc = source.UrsDoc;
+            destination.InstallDate = source.InstallDate;
+            destination.ProcurementDate = source.ProcurementDate;
+            destination.WarrantyUntil = source.WarrantyUntil;
+            destination.IsCritical = source.IsCritical;
+            destination.SerialNumber = source.SerialNumber;
+            destination.LifecyclePhase = source.LifecyclePhase;
+            destination.Note = source.Note;
+        }
     }
 }
 
@@ -229,6 +364,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public object? RelatedParameter { get; }
     }
 
+    public enum FormMode
+    {
+        View,
+        Find,
+        Add,
+        Update
+    }
+
     public abstract class ModuleDocumentViewModel
     {
         protected ModuleDocumentViewModel(
@@ -253,6 +396,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public string? SearchText { get; protected set; }
 
         public string StatusMessage { get; protected set; } = "Ready";
+
+        public List<string> ValidationMessages { get; } = new();
+
+        public bool IsDirty { get; private set; }
+
+        public FormMode Mode { get; set; } = FormMode.View;
+
+        public bool IsInEditMode => Mode is FormMode.Add or FormMode.Update;
 
         protected static IReadOnlyList<ModuleRecord> ToReadOnlyList(IEnumerable<ModuleRecord> source)
             => source as IReadOnlyList<ModuleRecord> ?? source.ToList();
@@ -296,6 +447,12 @@ namespace YasGMP.Wpf.ViewModels.Modules
             await OnCflSelectionAsync(result).ConfigureAwait(false);
             return result;
         }
+
+        protected void MarkDirty() => IsDirty = true;
+
+        protected void ResetDirty() => IsDirty = false;
+
+        protected void ClearValidationMessages() => ValidationMessages.Clear();
     }
 
     public abstract class DataDrivenModuleDocumentViewModel : ModuleDocumentViewModel
