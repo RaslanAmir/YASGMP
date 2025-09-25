@@ -22,7 +22,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentService _attachmentService;
 
-
     private WorkOrder? _loadedEntity;
     private WorkOrderEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -178,7 +177,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 _snapshot = null;
                 break;
         }
-
 
         UpdateAttachmentCommandState();
         return Task.CompletedTask;

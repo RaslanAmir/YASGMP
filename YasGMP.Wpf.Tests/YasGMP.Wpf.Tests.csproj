@@ -20,9 +20,11 @@
     <Compile Include="..\YasGMP.Wpf\Services\IMachineCrudService.cs" Link="Wpf\Services\IMachineCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IComponentCrudService.cs" Link="Wpf\Services\IComponentCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\ICalibrationCrudService.cs" Link="Wpf\Services\ICalibrationCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\IncidentsModuleViewModel.cs" Link="Wpf\Modules\IncidentsModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\PartsModuleViewModel.cs" Link="Wpf\Modules\PartsModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\WarehouseModuleViewModel.cs" Link="Wpf\Modules\WarehouseModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IPartCrudService.cs" Link="Wpf\Services\IPartCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IWarehouseCrudService.cs" Link="Wpf\Services\IWarehouseCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\IIncidentCrudService.cs" Link="Wpf\Services\IIncidentCrudService.cs" />
   </ItemGroup>
 </Project>

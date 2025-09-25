@@ -44,8 +44,6 @@ public class CalibrationModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
-
-
         var viewModel = new CalibrationModuleViewModel(
             database,
             calibrationAdapter,

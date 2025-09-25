@@ -24,7 +24,7 @@
   - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, and stock health warnings surfaced; signature prompts queued for Batch B2)*
   - Work Orders — [x] done *(CRUD adapter wired with attachments; e-signature/audit surfacing slated for Batch B2)*
   - Calibration — [x] done *(CRUD editor now supports attachment uploads via AttachmentService; e-signature/audit surfacing remains queued for Batch B2)*
-  - Incident → CAPA → Change Control — [ ] todo
+  - Incident → CAPA → Change Control — [~] in progress *(Incident editor now supports CRUD + attachments; CAPA/Change Control remains queued)*
   - Validations (IQ/OQ/PQ) — [ ] todo
   - Scheduled Jobs — [ ] todo
   - Users/Roles — [ ] todo
@@ -55,3 +55,4 @@
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
+- 2025-09-30: Incidents module now drives CRUD via `IIncidentCrudService`, exposes a full editor with toolbar modes, and supports attachment uploads; CAPA/Change Control modules remain queued.
