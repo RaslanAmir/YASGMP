@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -41,10 +43,13 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         EnterViewModeCommand = new AsyncRelayCommand(SetViewModeAsync, () => CanEnterMode(FormMode.View));
         EnterUpdateModeCommand = new AsyncRelayCommand(SetUpdateModeAsync, () => CanEnterMode(FormMode.Update));
         SaveCommand = new AsyncRelayCommand(SaveAsync, CanSave);
-        CancelCommand = new RelayCommand(Cancel, () => !IsBusy);
+        CancelCommand = new RelayCommand(Cancel, () => !IsBusy && (IsInEditMode || Mode == FormMode.Find));
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => !IsBusy);
         ShowCflCommand = new AsyncRelayCommand(ShowCflAsync, () => !IsBusy);
         GoldenArrowCommand = new RelayCommand(NavigateToRelated, () => SelectedRecord?.RelatedModuleKey is not null && !IsBusy);
+
+        ValidationMessages = new ObservableCollection<string>();
+        ValidationMessages.CollectionChanged += OnValidationMessagesChanged;
 
         Toolbar = new ObservableCollection<ModuleToolbarCommand>
         {
@@ -72,6 +77,16 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     /// <summary>Whether the view-model completed its initial data load.</summary>
     public bool IsInitialized { get; private set; }
+
+    /// <summary>Validation errors surfaced to the UI when saving fails.</summary>
+    public ObservableCollection<string> ValidationMessages { get; }
+
+    /// <summary>Indicates whether <see cref="ValidationMessages"/> contains any entries.</summary>
+    public bool HasValidationErrors => ValidationMessages.Count > 0;
+
+    /// <summary>Whether the underlying editor contains unsaved changes.</summary>
+    [ObservableProperty]
+    private bool _isDirty;
 
     public IAsyncRelayCommand EnterFindModeCommand { get; }
 
@@ -105,6 +120,9 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     [ObservableProperty]
     private ModuleRecord? _selectedRecord;
+
+    /// <summary>Returns <c>true</c> when the current form is in Add or Update mode.</summary>
+    public bool IsInEditMode => Mode is FormMode.Add or FormMode.Update;
 
     /// <summary>
     /// Loads data when the document is opened or activated through golden arrow navigation.
@@ -162,6 +180,14 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         }
 
         _shellInteraction.UpdateStatus($"{Title}: {value} mode");
+        OnPropertyChanged(nameof(IsInEditMode));
+
+        if (value is not (FormMode.Add or FormMode.Update))
+        {
+            ResetDirty();
+        }
+
+        ClearValidationMessages();
         _ = OnModeChangedAsync(value);
         RefreshCommandStates();
     }
@@ -187,10 +213,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         if (value is null)
         {
             _shellInteraction.UpdateInspector(new InspectorContext(Title, "No record selected", Array.Empty<InspectorField>()));
+            _ = OnRecordSelectedAsync(null);
             return;
         }
 
         _shellInteraction.UpdateInspector(new InspectorContext(Title, value.Title, value.InspectorFields));
+        _ = OnRecordSelectedAsync(value);
     }
 
     private Task SetFindModeAsync()
@@ -240,6 +268,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         finally
         {
             IsBusy = false;
+            RefreshCommandStates();
         }
     }
 
@@ -287,13 +316,29 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             return false;
         }
 
+        if (!IsInEditMode)
+        {
+            StatusMessage = $"{Title} is not in Add/Update mode.";
+            return false;
+        }
+
         try
         {
             IsBusy = true;
+            var validation = await ValidateAsync().ConfigureAwait(false);
+            ApplyValidation(validation);
+            if (validation.Count > 0)
+            {
+                StatusMessage = $"{Title} has {validation.Count} validation issue(s).";
+                return false;
+            }
+
             var saved = await OnSaveAsync().ConfigureAwait(false);
             if (saved)
             {
                 StatusMessage = $"{Title} saved successfully.";
+                ResetDirty();
+                Mode = FormMode.View;
                 await RefreshAsync().ConfigureAwait(false);
             }
             else
@@ -311,6 +356,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         finally
         {
             IsBusy = false;
+            RefreshCommandStates();
         }
     }
 
@@ -322,6 +368,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         }
 
         OnCancel();
+        ResetDirty();
+        ClearValidationMessages();
+        if (Mode is FormMode.Add or FormMode.Update)
+        {
+            Mode = FormMode.View;
+        }
         StatusMessage = $"{Title} changes cancelled.";
     }
 
@@ -353,7 +405,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         _moduleNavigation.Activate(document);
     }
 
-    private bool CanSave() => !IsBusy;
+    private bool CanSave() => !IsBusy && IsInEditMode;
 
     private void RefreshCommandStates()
     {
@@ -366,5 +418,64 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         RefreshCommand.NotifyCanExecuteChanged();
         ShowCflCommand.NotifyCanExecuteChanged();
         GoldenArrowCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>Allows derived classes to react when the selection changes.</summary>
+    protected virtual Task OnRecordSelectedAsync(ModuleRecord? record) => Task.CompletedTask;
+
+    /// <summary>Allows derived classes to provide validation before save.</summary>
+    protected virtual Task<IReadOnlyList<string>> ValidateAsync() => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+
+    /// <summary>Marks the current editor as dirty so command enablement updates.</summary>
+    protected void MarkDirty()
+    {
+        if (!IsDirty)
+        {
+            IsDirty = true;
+        }
+    }
+
+    /// <summary>Resets the dirty flag without triggering additional refresh operations.</summary>
+    protected void ResetDirty()
+    {
+        if (IsDirty)
+        {
+            IsDirty = false;
+        }
+    }
+
+    /// <summary>Clears any validation errors previously recorded.</summary>
+    protected void ClearValidationMessages()
+    {
+        if (ValidationMessages.Count == 0)
+        {
+            return;
+        }
+
+        ValidationMessages.Clear();
+    }
+
+    /// <summary>Pushes validation errors to the observable collection.</summary>
+    protected void ApplyValidation(IEnumerable<string> errors)
+    {
+        ValidationMessages.Clear();
+        if (errors is null)
+        {
+            return;
+        }
+
+        foreach (var error in errors)
+        {
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                ValidationMessages.Add(error);
+            }
+        }
+    }
+
+    private void OnValidationMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(HasValidationErrors));
+        RefreshCommandStates();
     }
 }
