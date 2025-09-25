@@ -1,7 +1,7 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-26, and 2025-09-27 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-26, 2025-09-27, and 2025-09-28 → **command not found**)*
 - [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-26, and 2025-09-27 → **command not found**)*
 - [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-26 and 2025-09-27 → **command not found**)*
 - [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-26 and 2025-09-27 → **command not found**)*
@@ -23,7 +23,7 @@
   - Components — [ ] in progress *(mode-aware editor wired to ComponentService; attachments/signature prompts pending)*
   - Parts & Warehouses — [ ] todo
   - Work Orders — [ ] in progress *(WPF editor scaffolding created; CRUD wiring continues)*
-  - Calibration — [ ] todo
+  - Calibration — [ ] in progress *(calibration editor now loads/saves via CalibrationService adapter; attachments/e-signature pending)*
   - Incident → CAPA → Change Control — [ ] todo
   - Validations (IQ/OQ/PQ) — [ ] todo
   - Scheduled Jobs — [ ] todo
@@ -47,6 +47,7 @@
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
 - Work Orders module now exposes a mode-aware editor backed by `WorkOrderService` for CRUD operations.
+- Calibration module now reuses `CalibrationService` through a new adapter with mode-aware editor and supplier/component lookups.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

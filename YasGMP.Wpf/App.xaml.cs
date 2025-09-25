@@ -55,8 +55,10 @@ namespace YasGMP.Wpf
                         svc.AddTransient<WorkOrderService>();
                         svc.AddTransient<MachineService>();
                         svc.AddTransient<ComponentService>();
+                        svc.AddTransient<CalibrationService>();
                         svc.AddTransient<IMachineCrudService, MachineCrudServiceAdapter>();
                         svc.AddTransient<IComponentCrudService, ComponentCrudServiceAdapter>();
+                        svc.AddTransient<ICalibrationCrudService, CalibrationCrudServiceAdapter>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());

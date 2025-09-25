@@ -67,6 +67,12 @@ namespace YasGMP.Models
         public string? Username { get; set; }
     }
 
+    public class Supplier
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
     public class Machine
     {
         public int Id { get; set; }
@@ -111,6 +117,7 @@ namespace YasGMP.Services
         public List<Component> Components { get; } = new();
         public List<WorkOrder> WorkOrders { get; } = new();
         public List<Calibration> Calibrations { get; } = new();
+        public List<Supplier> Suppliers { get; } = new();
 
         public Task<List<Asset>> GetAllAssetsFullAsync()
             => Task.FromResult(Assets);
@@ -123,6 +130,9 @@ namespace YasGMP.Services
 
         public Task<List<Calibration>> GetAllCalibrationsAsync()
             => Task.FromResult(Calibrations);
+
+        public Task<List<Supplier>> GetAllSuppliersAsync()
+            => Task.FromResult(Suppliers);
     }
 }
 
@@ -398,6 +408,89 @@ namespace YasGMP.Wpf.Services
             destination.WarrantyUntil = source.WarrantyUntil;
             destination.Comments = source.Comments;
             destination.LifecycleState = source.LifecycleState;
+        }
+    }
+
+    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    {
+        private readonly List<Calibration> _store = new();
+
+        public List<Calibration> Saved => _store;
+
+        public Task<IReadOnlyList<Calibration>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
+
+        public Task<Calibration?> TryGetByIdAsync(int id)
+            => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        {
+            if (calibration.Id == 0)
+            {
+                calibration.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(calibration));
+            return Task.FromResult(calibration.Id);
+        }
+
+        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(calibration));
+            }
+            else
+            {
+                Copy(calibration, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Calibration calibration)
+        {
+            if (calibration.ComponentId <= 0)
+                throw new InvalidOperationException("Calibration must be linked to a component.");
+            if (!calibration.SupplierId.HasValue || calibration.SupplierId.Value <= 0)
+                throw new InvalidOperationException("Supplier is required.");
+            if (calibration.CalibrationDate == default)
+                throw new InvalidOperationException("Calibration date is required.");
+            if (calibration.NextDue == default)
+                throw new InvalidOperationException("Next due date is required.");
+            if (calibration.NextDue < calibration.CalibrationDate)
+                throw new InvalidOperationException("Next due date must be after the calibration date.");
+            if (string.IsNullOrWhiteSpace(calibration.Result))
+                throw new InvalidOperationException("Calibration result is required.");
+        }
+
+        private static Calibration Clone(Calibration source)
+        {
+            return new Calibration
+            {
+                Id = source.Id,
+                ComponentId = source.ComponentId,
+                SupplierId = source.SupplierId,
+                CalibrationDate = source.CalibrationDate,
+                NextDue = source.NextDue,
+                CertDoc = source.CertDoc,
+                Result = source.Result,
+                Comment = source.Comment,
+                Status = source.Status
+            };
+        }
+
+        private static void Copy(Calibration source, Calibration destination)
+        {
+            destination.ComponentId = source.ComponentId;
+            destination.SupplierId = source.SupplierId;
+            destination.CalibrationDate = source.CalibrationDate;
+            destination.NextDue = source.NextDue;
+            destination.CertDoc = source.CertDoc;
+            destination.Result = source.Result;
+            destination.Comment = source.Comment;
+            destination.Status = source.Status;
         }
     }
 }

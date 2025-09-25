@@ -19,5 +19,6 @@
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\CalibrationModuleViewModel.cs" Link="Wpf\Modules\CalibrationModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IMachineCrudService.cs" Link="Wpf\Services\IMachineCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IComponentCrudService.cs" Link="Wpf\Services\IComponentCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\ICalibrationCrudService.cs" Link="Wpf\Services\ICalibrationCrudService.cs" />
   </ItemGroup>
 </Project>
