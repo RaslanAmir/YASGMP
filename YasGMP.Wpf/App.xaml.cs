@@ -49,7 +49,21 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
                         svc.AddSingleton<IDialogService, WpfDialogService>();
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();
+                        svc.AddSingleton<IAttachmentService, AttachmentService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
+                        svc.AddSingleton<AuditService>();
+                        svc.AddSingleton<WorkOrderAuditService>();
+                        svc.AddTransient<WorkOrderService>();
+                        svc.AddTransient<IWorkOrderCrudService, WorkOrderCrudServiceAdapter>();
+                        svc.AddTransient<MachineService>();
+                        svc.AddTransient<ComponentService>();
+                        svc.AddTransient<CalibrationService>();
+                        svc.AddTransient<PartService>();
+                        svc.AddTransient<IMachineCrudService, MachineCrudServiceAdapter>();
+                        svc.AddTransient<IComponentCrudService, ComponentCrudServiceAdapter>();
+                        svc.AddTransient<IPartCrudService, PartCrudServiceAdapter>();
+                        svc.AddTransient<IWarehouseCrudService, WarehouseCrudServiceAdapter>();
+                        svc.AddTransient<ICalibrationCrudService, CalibrationCrudServiceAdapter>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());
@@ -60,6 +74,7 @@ namespace YasGMP.Wpf
 
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();
+                        svc.AddTransient<ComponentsModuleViewModel>();
                         svc.AddTransient<WarehouseModuleViewModel>();
                         svc.AddTransient<WorkOrdersModuleViewModel>();
                         svc.AddTransient<CalibrationModuleViewModel>();
@@ -80,6 +95,7 @@ namespace YasGMP.Wpf
                             var registry = new ModuleRegistry(sp);
                             registry.Register<DashboardModuleViewModel>(DashboardModuleViewModel.ModuleKey, "Dashboard", "Cockpit", "Operations overview and KPIs");
                             registry.Register<AssetsModuleViewModel>(AssetsModuleViewModel.ModuleKey, "Assets", "Maintenance", "Asset register and lifecycle");
+                            registry.Register<ComponentsModuleViewModel>(ComponentsModuleViewModel.ModuleKey, "Components", "Maintenance", "Component hierarchy and lifecycle");
                             registry.Register<WarehouseModuleViewModel>(WarehouseModuleViewModel.ModuleKey, "Warehouse", "Maintenance", "Warehouse master data");
                             registry.Register<WorkOrdersModuleViewModel>(WorkOrdersModuleViewModel.ModuleKey, "Work Orders", "Maintenance", "Corrective and preventive jobs");
                             registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey, "Calibration", "Maintenance", "Calibration records");
