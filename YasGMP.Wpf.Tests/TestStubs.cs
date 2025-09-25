@@ -158,6 +158,28 @@ namespace YasGMP.Services.Interfaces
     }
 }
 
+namespace YasGMP.Services.Interfaces
+{
+    using System;
+    using YasGMP.Models;
+
+    public interface IAuthContext
+    {
+        User? CurrentUser { get; }
+        string CurrentSessionId { get; }
+        string CurrentDeviceInfo { get; }
+        string CurrentIpAddress { get; }
+    }
+
+    public sealed class TestAuthContext : IAuthContext
+    {
+        public User? CurrentUser { get; set; }
+        public string CurrentSessionId { get; set; } = Guid.NewGuid().ToString("N");
+        public string CurrentDeviceInfo { get; set; } = "TestRig";
+        public string CurrentIpAddress { get; set; } = "127.0.0.1";
+    }
+}
+
 namespace YasGMP.Wpf.Services
 {
     using System.Collections.Generic;
@@ -318,6 +340,7 @@ namespace YasGMP.Wpf.Services
             destination.Note = source.Note;
         }
     }
+
 
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
@@ -493,6 +516,7 @@ namespace YasGMP.Wpf.Services
             destination.Status = source.Status;
         }
     }
+
 }
 
 namespace YasGMP.Wpf.ViewModels.Modules

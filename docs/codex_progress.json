@@ -6,9 +6,11 @@
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
       "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK",
+
       "2025-09-26: Batch 0 retry confirmed `dotnet --info` still returns 'command not found'.",
       "2025-09-27: dotnet --info/dotnet restore/dotnet build all continue to fail with 'command not found'.",
       "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container."
+
     ]
   },
   "batches": [
@@ -19,11 +21,13 @@
   ],
   "modules": {
     "Assets": "in-progress",
+
     "Components": "in-progress",
     "Parts": "pending",
     "Warehouses": "pending",
     "WorkOrders": "in-progress",
     "Calibration": "in-progress",
+
     "Incidents": "pending",
     "CAPA": "pending",
     "ChangeControl": "pending",
@@ -39,15 +43,19 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
+
   "lastCommitSummary": "feat(components): add mode-aware component editor",
+
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
     "Work Orders editor now surfaces a CRUD-capable form wired to WorkOrderService; attachments/signature integration pending",
+
     "Calibration editor now saves via CalibrationService adapter with component/supplier lookups; signature + attachment work remains",
     "Assets editor now runs against MachineService via IMachineCrudService adapter; attachments, signatures, and smoke coverage queued next.",
     "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module.",
     "2025-09-27: Batch 0 still blocked in container; dotnet CLI absent so restore/build/smoke cannot execute.",
     "2025-09-27: Components module exposes B1-mode editor using ComponentService and machine lookups; attachments/e-signature follow-ups remain."
+
   ]
 }
