@@ -20,8 +20,8 @@
   "modules": {
     "Assets": "done",
     "Components": "done",
-    "Parts": "pending",
-    "Warehouses": "pending",
+    "Parts": "in-progress",
+    "Warehouses": "in-progress",
     "WorkOrders": "in-progress",
     "Calibration": "in-progress",
     "Incidents": "pending",
@@ -39,7 +39,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "docs(components): align mapping + plan/progress with adapter rollout",
+  "lastCommitSummary": "feat(parts-warehouse): add CRUD editors with adapters and attachment commands",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -50,6 +50,7 @@
     "2025-09-27: Batch 0 still blocked in container; dotnet CLI absent so restore/build/smoke cannot execute.",
     "2025-09-29: dotnet --info/restore/build retried; container still lacks CLI so Batch 0 remains blocked.",
     "2025-09-27: Components module reached CRUD parity through ComponentService with machine lookups; cross-cutting attachments/e-signature work scheduled under Batch B2.",
-    "2025-09-29: WPF mapping updated for Components; adapters documented while awaiting SDK to finish Batch B2 attachment/signature tasks."
+    "2025-09-29: WPF mapping updated for Components; adapters documented while awaiting SDK to finish Batch B2 attachment/signature tasks.",
+    "2025-09-29: Parts and Warehouse modules now have mode-aware editors wired to new CRUD adapters with attachment upload commands; e-signature/audit surfacing will follow in Batch B2 once .NET 9 SDK is accessible."
   ]
 }

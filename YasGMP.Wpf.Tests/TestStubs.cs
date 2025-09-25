@@ -74,6 +74,23 @@ namespace YasGMP.Models
         public string Name { get; set; } = string.Empty;
     }
 
+    public class Part
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? Category { get; set; }
+        public string? Status { get; set; }
+        public int? Stock { get; set; }
+        public int? MinStockAlert { get; set; }
+        public string? Location { get; set; }
+        public int? DefaultSupplierId { get; set; }
+        public string DefaultSupplierName { get; set; } = string.Empty;
+        public string? Sku { get; set; }
+        public decimal? Price { get; set; }
+    }
+
     public class Machine
     {
         public int Id { get; set; }
@@ -131,6 +148,21 @@ namespace YasGMP.Models
         public string Comment { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
     }
+
+    public class Warehouse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string LegacyResponsibleName { get; set; } = string.Empty;
+        public string Note { get; set; } = string.Empty;
+        public string QrCode { get; set; } = string.Empty;
+        public string ClimateMode { get; set; } = string.Empty;
+        public bool IsQualified { get; set; } = true;
+        public DateTime? LastQualified { get; set; }
+        public string DigitalSignature { get; set; } = string.Empty;
+    }
 }
 
 namespace YasGMP.Services
@@ -144,6 +176,8 @@ namespace YasGMP.Services
         public List<WorkOrder> WorkOrders { get; } = new();
         public List<Calibration> Calibrations { get; } = new();
         public List<Supplier> Suppliers { get; } = new();
+        public List<Part> Parts { get; } = new();
+        public List<Warehouse> Warehouses { get; } = new();
 
         public Task<List<Asset>> GetAllAssetsFullAsync()
             => Task.FromResult(Assets);
@@ -159,6 +193,9 @@ namespace YasGMP.Services
 
         public Task<List<Supplier>> GetAllSuppliersAsync()
             => Task.FromResult(Suppliers);
+
+        public Task<List<Warehouse>> GetWarehousesAsync()
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -766,3 +803,173 @@ namespace YasGMP.Wpf.ViewModels.Modules
         protected DatabaseService Database { get; }
     }
 }
+
+    public sealed class FakePartCrudService : IPartCrudService
+    {
+        private readonly List<Part> _store = new();
+
+        public List<Part> Saved => _store;
+
+        public Task<IReadOnlyList<Part>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Part>>(_store.ToList());
+
+        public Task<Part?> TryGetByIdAsync(int id)
+            => Task.FromResult<Part?>(_store.FirstOrDefault(p => p.Id == id));
+
+        public Task<int> CreateAsync(Part part, PartCrudContext context)
+        {
+            if (part.Id == 0)
+            {
+                part.Id = _store.Count == 0 ? 1 : _store.Max(p => p.Id) + 1;
+            }
+
+            _store.Add(Clone(part));
+            return Task.FromResult(part.Id);
+        }
+
+        public Task UpdateAsync(Part part, PartCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(p => p.Id == part.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(part));
+            }
+            else
+            {
+                Copy(part, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Part part)
+        {
+            if (string.IsNullOrWhiteSpace(part.Name))
+                throw new InvalidOperationException("Part name is required.");
+            if (string.IsNullOrWhiteSpace(part.Code))
+                throw new InvalidOperationException("Part code is required.");
+            if (!part.DefaultSupplierId.HasValue)
+                throw new InvalidOperationException("Supplier is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private static Part Clone(Part source)
+        {
+            return new Part
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Name = source.Name,
+                Description = source.Description,
+                Category = source.Category,
+                Status = source.Status,
+                Stock = source.Stock,
+                MinStockAlert = source.MinStockAlert,
+                Location = source.Location,
+                DefaultSupplierId = source.DefaultSupplierId,
+                DefaultSupplierName = source.DefaultSupplierName,
+                Sku = source.Sku,
+                Price = source.Price
+            };
+        }
+
+        private static void Copy(Part source, Part destination)
+        {
+            destination.Code = source.Code;
+            destination.Name = source.Name;
+            destination.Description = source.Description;
+            destination.Category = source.Category;
+            destination.Status = source.Status;
+            destination.Stock = source.Stock;
+            destination.MinStockAlert = source.MinStockAlert;
+            destination.Location = source.Location;
+            destination.DefaultSupplierId = source.DefaultSupplierId;
+            destination.DefaultSupplierName = source.DefaultSupplierName;
+            destination.Sku = source.Sku;
+            destination.Price = source.Price;
+        }
+    }
+
+    public sealed class FakeWarehouseCrudService : IWarehouseCrudService
+    {
+        private readonly List<Warehouse> _store = new();
+
+        public List<Warehouse> Saved => _store;
+
+        public Task<IReadOnlyList<Warehouse>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Warehouse>>(_store.ToList());
+
+        public Task<Warehouse?> TryGetByIdAsync(int id)
+            => Task.FromResult<Warehouse?>(_store.FirstOrDefault(w => w.Id == id));
+
+        public Task<int> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
+        {
+            if (warehouse.Id == 0)
+            {
+                warehouse.Id = _store.Count == 0 ? 1 : _store.Max(w => w.Id) + 1;
+            }
+
+            _store.Add(Clone(warehouse));
+            return Task.FromResult(warehouse.Id);
+        }
+
+        public Task UpdateAsync(Warehouse warehouse, WarehouseCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(w => w.Id == warehouse.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(warehouse));
+            }
+            else
+            {
+                Copy(warehouse, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Warehouse warehouse)
+        {
+            if (string.IsNullOrWhiteSpace(warehouse.Name))
+                throw new InvalidOperationException("Warehouse name is required.");
+            if (string.IsNullOrWhiteSpace(warehouse.Location))
+                throw new InvalidOperationException("Warehouse location is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "qualified" : status.Trim().ToLowerInvariant();
+
+        private static Warehouse Clone(Warehouse source)
+        {
+            return new Warehouse
+            {
+                Id = source.Id,
+                Name = source.Name,
+                Location = source.Location,
+                Status = source.Status,
+                LegacyResponsibleName = source.LegacyResponsibleName,
+                Note = source.Note,
+                QrCode = source.QrCode,
+                ClimateMode = source.ClimateMode,
+                IsQualified = source.IsQualified,
+                LastQualified = source.LastQualified,
+                DigitalSignature = source.DigitalSignature
+            };
+        }
+
+        private static void Copy(Warehouse source, Warehouse destination)
+        {
+            destination.Name = source.Name;
+            destination.Location = source.Location;
+            destination.Status = source.Status;
+            destination.LegacyResponsibleName = source.LegacyResponsibleName;
+            destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.ClimateMode = source.ClimateMode;
+            destination.IsQualified = source.IsQualified;
+            destination.LastQualified = source.LastQualified;
+            destination.DigitalSignature = source.DigitalSignature;
+        }
+    }
