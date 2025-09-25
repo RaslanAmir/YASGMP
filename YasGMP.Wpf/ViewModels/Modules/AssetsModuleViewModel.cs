@@ -75,6 +75,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
+
     {
         var sample = new[]
         {
@@ -136,6 +137,27 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 return new CflItem(key, label, description);
             })
             .ToList();
+
+    {
+        var sample = new[]
+        {
+            new Machine
+            {
+                Id = 1001,
+                Name = "Autoclave",
+                Code = "AUTO-001",
+                Status = "active",
+                Description = "Steam sterilizer",
+                Manufacturer = "Steris",
+                Location = "Building A",
+                InstallDate = DateTime.UtcNow.AddYears(-3)
+            },
+            new Machine
+            {
+                Id = 1002,
+                Name = "pH Meter",
+public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+
 
         return new CflRequest("Select Asset", items);
     }
@@ -232,6 +254,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     protected override async Task<bool> OnSaveAsync()
+
     {
         var context = MachineCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
@@ -259,6 +282,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
             machine.Id = _loadedMachine.Id;
             await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
+
+public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+
             _loadedMachine = machine;
             LoadEditor(machine);
             return true;

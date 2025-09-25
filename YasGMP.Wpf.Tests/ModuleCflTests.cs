@@ -48,6 +48,7 @@ public class ModuleCflTests
         var attachments = new TestAttachmentService();
 
         var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, filePicker, attachments, dialog, shell, navigation);
+
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 

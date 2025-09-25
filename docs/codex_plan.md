@@ -1,10 +1,12 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
+
 - [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-26, 2025-09-27, 2025-09-28, and 2025-09-29 → **command not found**)*
 - [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
 - [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
 - [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
+
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -20,6 +22,7 @@
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
   - Assets/Machines — [x] done *(mode-aware CRUD plus attachment upload wired through AttachmentService; e-sign prompt scheduled under Batch B2)*
+
   - Components — [x] done *(mode-aware editor wired to ComponentService; attachments/signature work tracked under Batch B2)*
   - Parts & Warehouses — [x] in progress *(mode-aware editors wired to Part/Warehouse adapters with attachment upload; signature prompts queued for Batch B2)*
   - Work Orders — [ ] in progress *(WPF editor scaffolding created; CRUD wiring continues)*
@@ -47,6 +50,7 @@
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
+
 - Components module now completes the CRUD rollout with mode-aware editor, validation, and machine lookups; attachment/signature integration remains queued for Batch B2.
 - Parts and Warehouse modules now expose CRUD-capable editors via Part/Warehouse adapters with attachment upload support; e-signatures and audit surfacing remain tied to Batch B2 once SDK access is restored.
 - 2025-09-29: WPF mapping updated to reflect the Components document and adapter usage; attachment/e-signature work still planned for Batch B2 once SDK access restored.
@@ -55,3 +59,10 @@
 - Next actionable slice once SDK access is restored: wire Assets and Components signature prompts alongside attachment persistence in Batch B2.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module reached CRUD parity through ComponentService with machine lookups; cross-cutting attachments/signature work tracked separately.
+
+- Work Orders module now exposes a mode-aware editor backed by `WorkOrderService` for CRUD operations.
+- Calibration module now reuses `CalibrationService` through a new adapter with mode-aware editor and supplier/component lookups.
+- Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
+- 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
+- 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
+
