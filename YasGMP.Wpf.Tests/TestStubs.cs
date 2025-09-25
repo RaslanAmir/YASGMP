@@ -18,6 +18,24 @@ namespace YasGMP.Models
         public DateTime? InstallDate { get; set; }
     }
 
+    public class Component
+    {
+        public int Id { get; set; }
+        public int MachineId { get; set; }
+        public string? MachineName { get; set; }
+        public string? Code { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Type { get; set; }
+        public string? SopDoc { get; set; }
+        public string? Status { get; set; }
+        public DateTime? InstallDate { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? Supplier { get; set; }
+        public DateTime? WarrantyUntil { get; set; }
+        public string? Comments { get; set; }
+        public string? LifecycleState { get; set; }
+    }
+
     public class WorkOrder
     {
         public int Id { get; set; }
@@ -47,6 +65,12 @@ namespace YasGMP.Models
         public int Id { get; set; }
         public string? FullName { get; set; }
         public string? Username { get; set; }
+    }
+
+    public class Supplier
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 
     public class Machine
@@ -90,17 +114,47 @@ namespace YasGMP.Services
     public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
+        public List<Component> Components { get; } = new();
         public List<WorkOrder> WorkOrders { get; } = new();
         public List<Calibration> Calibrations { get; } = new();
+        public List<Supplier> Suppliers { get; } = new();
 
         public Task<List<Asset>> GetAllAssetsFullAsync()
             => Task.FromResult(Assets);
+
+        public Task<List<Component>> GetAllComponentsAsync()
+            => Task.FromResult(Components);
 
         public Task<List<WorkOrder>> GetAllWorkOrdersFullAsync()
             => Task.FromResult(WorkOrders);
 
         public Task<List<Calibration>> GetAllCalibrationsAsync()
             => Task.FromResult(Calibrations);
+
+        public Task<List<Supplier>> GetAllSuppliersAsync()
+            => Task.FromResult(Suppliers);
+    }
+}
+
+namespace YasGMP.Services.Interfaces
+{
+    using System;
+    using YasGMP.Models;
+
+    public interface IAuthContext
+    {
+        User? CurrentUser { get; }
+        string CurrentSessionId { get; }
+        string CurrentDeviceInfo { get; }
+        string CurrentIpAddress { get; }
+    }
+
+    public sealed class TestAuthContext : IAuthContext
+    {
+        public User? CurrentUser { get; set; }
+        public string CurrentSessionId { get; set; } = Guid.NewGuid().ToString("N");
+        public string CurrentDeviceInfo { get; set; } = "TestRig";
+        public string CurrentIpAddress { get; set; } = "127.0.0.1";
     }
 }
 
@@ -286,6 +340,183 @@ namespace YasGMP.Wpf.Services
             destination.Note = source.Note;
         }
     }
+
+
+    public sealed class FakeComponentCrudService : IComponentCrudService
+    {
+        private readonly List<Component> _store = new();
+
+        public List<Component> Saved => _store;
+
+        public Task<IReadOnlyList<Component>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
+
+        public Task<Component?> TryGetByIdAsync(int id)
+            => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        {
+            if (component.Id == 0)
+            {
+                component.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(component));
+            return Task.FromResult(component.Id);
+        }
+
+        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == component.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(component));
+            }
+            else
+            {
+                Copy(component, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Component component)
+        {
+            if (string.IsNullOrWhiteSpace(component.Name))
+                throw new InvalidOperationException("Component name is required.");
+            if (string.IsNullOrWhiteSpace(component.Code))
+                throw new InvalidOperationException("Component code is required.");
+            if (component.MachineId <= 0)
+                throw new InvalidOperationException("Component must be linked to a machine.");
+            if (string.IsNullOrWhiteSpace(component.SopDoc))
+                throw new InvalidOperationException("SOP document is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private static Component Clone(Component source)
+        {
+            return new Component
+            {
+                Id = source.Id,
+                MachineId = source.MachineId,
+                MachineName = source.MachineName,
+                Code = source.Code,
+                Name = source.Name,
+                Type = source.Type,
+                SopDoc = source.SopDoc,
+                Status = source.Status,
+                InstallDate = source.InstallDate,
+                SerialNumber = source.SerialNumber,
+                Supplier = source.Supplier,
+                WarrantyUntil = source.WarrantyUntil,
+                Comments = source.Comments,
+                LifecycleState = source.LifecycleState
+            };
+        }
+
+        private static void Copy(Component source, Component destination)
+        {
+            destination.MachineId = source.MachineId;
+            destination.MachineName = source.MachineName;
+            destination.Code = source.Code;
+            destination.Name = source.Name;
+            destination.Type = source.Type;
+            destination.SopDoc = source.SopDoc;
+            destination.Status = source.Status;
+            destination.InstallDate = source.InstallDate;
+            destination.SerialNumber = source.SerialNumber;
+            destination.Supplier = source.Supplier;
+            destination.WarrantyUntil = source.WarrantyUntil;
+            destination.Comments = source.Comments;
+            destination.LifecycleState = source.LifecycleState;
+        }
+    }
+
+    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    {
+        private readonly List<Calibration> _store = new();
+
+        public List<Calibration> Saved => _store;
+
+        public Task<IReadOnlyList<Calibration>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
+
+        public Task<Calibration?> TryGetByIdAsync(int id)
+            => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        {
+            if (calibration.Id == 0)
+            {
+                calibration.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(calibration));
+            return Task.FromResult(calibration.Id);
+        }
+
+        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(calibration));
+            }
+            else
+            {
+                Copy(calibration, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Calibration calibration)
+        {
+            if (calibration.ComponentId <= 0)
+                throw new InvalidOperationException("Calibration must be linked to a component.");
+            if (!calibration.SupplierId.HasValue || calibration.SupplierId.Value <= 0)
+                throw new InvalidOperationException("Supplier is required.");
+            if (calibration.CalibrationDate == default)
+                throw new InvalidOperationException("Calibration date is required.");
+            if (calibration.NextDue == default)
+                throw new InvalidOperationException("Next due date is required.");
+            if (calibration.NextDue < calibration.CalibrationDate)
+                throw new InvalidOperationException("Next due date must be after the calibration date.");
+            if (string.IsNullOrWhiteSpace(calibration.Result))
+                throw new InvalidOperationException("Calibration result is required.");
+        }
+
+        private static Calibration Clone(Calibration source)
+        {
+            return new Calibration
+            {
+                Id = source.Id,
+                ComponentId = source.ComponentId,
+                SupplierId = source.SupplierId,
+                CalibrationDate = source.CalibrationDate,
+                NextDue = source.NextDue,
+                CertDoc = source.CertDoc,
+                Result = source.Result,
+                Comment = source.Comment,
+                Status = source.Status
+            };
+        }
+
+        private static void Copy(Calibration source, Calibration destination)
+        {
+            destination.ComponentId = source.ComponentId;
+            destination.SupplierId = source.SupplierId;
+            destination.CalibrationDate = source.CalibrationDate;
+            destination.NextDue = source.NextDue;
+            destination.CertDoc = source.CertDoc;
+            destination.Result = source.Result;
+            destination.Comment = source.Comment;
+            destination.Status = source.Status;
+        }
+    }
+
 }
 
 namespace YasGMP.Wpf.ViewModels.Modules
