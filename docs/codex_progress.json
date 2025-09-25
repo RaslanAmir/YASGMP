@@ -25,7 +25,7 @@
     "Warehouses": "done",
     "WorkOrders": "done",
     "Calibration": "done",
-    "Incidents": "in-progress",
+    "Incidents": "done",
     "CAPA": "pending",
     "ChangeControl": "pending",
     "Validations": "pending",
@@ -40,7 +40,8 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(incidents): enable CRUD editor with attachments",
+
+  "lastCommitSummary": "feat(incidents): add CFL linking for work orders and CAPA",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -55,6 +56,7 @@
     "2025-09-27: Components module exposes B1-mode editor using ComponentService and machine lookups; attachments/e-signature follow-ups remain.",
     "2025-09-29: WPF mapping updated for Components; adapters documented while awaiting SDK to finish Batch B2 attachment/signature tasks.",
     "2025-09-30: Parts & Warehouse editors now include stock health messaging, warehouse summaries, and inventory ledger previews while retaining attachment support; e-signature/audit surfacing will follow in Batch B2 once .NET 9 SDK is accessible.",
-    "2025-09-30: Incidents module now runs through IIncidentCrudService with mode-aware editor and attachment uploads; CAPA/Change Control remain pending."
+    "2025-09-30: Incidents module now runs through IIncidentCrudService with mode-aware editor and attachment uploads; CAPA/Change Control remain pending.",
+    "2025-10-01: Incidents editor exposes CFL-driven linking to work orders and CAPA cases with unit coverage for the new mode transitions."
   ]
 }

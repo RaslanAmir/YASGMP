@@ -105,11 +105,94 @@ public class IncidentsModuleViewModelTests
         Assert.Equal("evidence.txt", upload.FileName);
     }
 
+    [Fact]
+    public async Task CreateCflRequestAsync_ReturnsWorkOrderAndCapaChoices()
+    {
+        var database = new DatabaseService();
+        database.WorkOrders.Add(new WorkOrder
+        {
+            Id = 21,
+            Title = "Filter change",
+            Type = "Corrective",
+            Status = "Open",
+            DateOpen = DateTime.UtcNow.AddDays(-2)
+        });
+        database.CapaCases.Add(new CapaCase
+        {
+            Id = 7,
+            Title = "Investigation",
+            Priority = "High",
+            Status = "IN_PROGRESS",
+            DateOpen = DateTime.UtcNow.AddDays(-10)
+        });
+
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        viewModel.Mode = FormMode.Add;
+
+        var request = await InvokeCreateCflRequestAsync(viewModel);
+
+        Assert.NotNull(request);
+        Assert.Contains(request!.Items, item => item.Key == "WO:21");
+        Assert.Contains(request.Items, item => item.Key == "CAPA:7");
+    }
+
+    [Fact]
+    public async Task OnCflSelectionAsync_UpdatesEditorLinks()
+    {
+        var database = new DatabaseService();
+        database.WorkOrders.Add(new WorkOrder { Id = 9, Title = "Calibration follow-up" });
+        database.CapaCases.Add(new CapaCase { Id = 12, Title = "Root cause analysis" });
+
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        viewModel.Mode = FormMode.Add;
+
+        await InvokeOnCflSelectionAsync(viewModel, new CflResult(new CflItem("WO:9", "WO-00009", string.Empty)));
+        Assert.Equal(9, viewModel.Editor.WorkOrderId);
+        Assert.True(viewModel.IsDirty);
+
+        await InvokeOnCflSelectionAsync(viewModel, new CflResult(new CflItem("CAPA:12", "CAPA-00012", string.Empty)));
+        Assert.Equal(12, viewModel.Editor.CapaCaseId);
+        Assert.Equal(12, viewModel.Editor.LinkedCapaId);
+    }
+
     private static Task<bool> InvokeSaveAsync(IncidentsModuleViewModel viewModel)
     {
         var method = typeof(IncidentsModuleViewModel)
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(IncidentsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+    private static Task<CflRequest?> InvokeCreateCflRequestAsync(IncidentsModuleViewModel viewModel)
+    {
+        var method = typeof(IncidentsModuleViewModel)
+            .GetMethod("CreateCflRequestAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingMethodException(nameof(IncidentsModuleViewModel), "CreateCflRequestAsync");
+        return (Task<CflRequest?>)method.Invoke(viewModel, null)!;
+    }
+
+    private static Task InvokeOnCflSelectionAsync(IncidentsModuleViewModel viewModel, CflResult result)
+    {
+        var method = typeof(IncidentsModuleViewModel)
+            .GetMethod("OnCflSelectionAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingMethodException(nameof(IncidentsModuleViewModel), "OnCflSelectionAsync");
+        return (Task)method.Invoke(viewModel, new object[] { result })!;
     }
 }

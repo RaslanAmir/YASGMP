@@ -24,6 +24,9 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentService _attachmentService;
 
+    private const string WorkOrderCflPrefix = "WO:";
+    private const string CapaCflPrefix = "CAPA:";
+
     private Incident? _loadedIncident;
     private IncidentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -216,6 +219,121 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         }
 
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
+    }
+
+    protected override async Task<CflRequest?> CreateCflRequestAsync()
+    {
+        if (!IsInEditMode)
+        {
+            StatusMessage = "CFL lookups are only available while editing an incident.";
+            return null;
+        }
+
+        try
+        {
+            var items = new List<CflItem>();
+
+            var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
+            foreach (var wo in workOrders
+                .OrderByDescending(w => w.DateOpen)
+                .Take(25))
+            {
+                var label = string.IsNullOrWhiteSpace(wo.Title)
+                    ? $"WO-{wo.Id:D5}"
+                    : $"WO-{wo.Id:D5} • {wo.Title}";
+
+                var descriptionParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(wo.Type))
+                {
+                    descriptionParts.Add(wo.Type);
+                }
+
+                if (!string.IsNullOrWhiteSpace(wo.Status))
+                {
+                    descriptionParts.Add(wo.Status);
+                }
+
+                items.Add(new CflItem(
+                    $"{WorkOrderCflPrefix}{wo.Id}",
+                    label,
+                    descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : string.Empty));
+            }
+
+            var capaCases = await Database.GetAllCapaCasesAsync().ConfigureAwait(false);
+            foreach (var capa in capaCases
+                .OrderByDescending(c => c.DateOpen)
+                .Take(25))
+            {
+                var code = $"CAPA-{capa.Id:D5}";
+                var label = string.IsNullOrWhiteSpace(capa.Title)
+                    ? code
+                    : $"{code} • {capa.Title}";
+
+                var descriptionParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(capa.Status))
+                {
+                    descriptionParts.Add(capa.Status);
+                }
+
+                if (!string.IsNullOrWhiteSpace(capa.Priority))
+                {
+                    descriptionParts.Add($"Priority: {capa.Priority}");
+                }
+
+                items.Add(new CflItem(
+                    $"{CapaCflPrefix}{capa.Id}",
+                    label,
+                    descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : string.Empty));
+            }
+
+            if (items.Count == 0)
+            {
+                StatusMessage = "No related CAPA cases or work orders available for linking.";
+                return null;
+            }
+
+            return new CflRequest("Select related record", items);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Unable to load related records: {ex.Message}";
+            return null;
+        }
+    }
+
+    protected override Task OnCflSelectionAsync(CflResult result)
+    {
+        if (!IsInEditMode)
+        {
+            return Task.CompletedTask;
+        }
+
+        var key = result.Selected.Key ?? string.Empty;
+
+        if (key.StartsWith(WorkOrderCflPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            if (int.TryParse(key.AsSpan(WorkOrderCflPrefix.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var workOrderId))
+            {
+                Editor.WorkOrderId = workOrderId;
+                StatusMessage = $"Linked work order {result.Selected.Label}.";
+                MarkDirty();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        if (key.StartsWith(CapaCflPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            if (int.TryParse(key.AsSpan(CapaCflPrefix.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var capaId))
+            {
+                Editor.CapaCaseId = capaId;
+                Editor.LinkedCapaId = capaId;
+                StatusMessage = $"Linked CAPA case {result.Selected.Label}.";
+                MarkDirty();
+            }
+        }
+
+        return Task.CompletedTask;
     }
 
     protected override async Task<bool> OnSaveAsync()
