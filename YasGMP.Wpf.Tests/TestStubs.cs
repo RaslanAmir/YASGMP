@@ -3251,6 +3251,61 @@ namespace YasGMP.Services.Interfaces
         public DateTime DateOpen { get; set; } = DateTime.UtcNow;
     }
 
+    public class Incident
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string? Type { get; set; }
+        public string? Priority { get; set; }
+        public DateTime DetectedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ReportedAt { get; set; }
+        public int? ReportedById { get; set; }
+        public int? AssignedToId { get; set; }
+        public int? WorkOrderId { get; set; }
+        public int? CapaCaseId { get; set; }
+        public string Status { get; set; } = "REPORTED";
+        public string? RootCause { get; set; }
+        public DateTime? ClosedAt { get; set; }
+        public int? ClosedById { get; set; }
+        public string? AssignedInvestigator { get; set; }
+        public string? Classification { get; set; }
+        public int? LinkedDeviationId { get; set; }
+        public int? LinkedCapaId { get; set; }
+        public string? ClosureComment { get; set; }
+        public string? SourceIp { get; set; }
+        public string? Notes { get; set; }
+        public bool IsCritical { get; set; }
+        public int RiskLevel { get; set; }
+        public double? AnomalyScore { get; set; }
+    }
+
+    public class ChangeControl
+    {
+        public int Id { get; set; }
+        public string? Code { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? StatusRaw { get; set; }
+        public int? RequestedById { get; set; }
+        public DateTime? DateRequested { get; set; }
+        public int? AssignedToId { get; set; }
+        public DateTime? DateAssigned { get; set; }
+        public int? LastModifiedById { get; set; }
+        public DateTime? LastModified { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
+
+    public class CapaCase
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Priority { get; set; } = string.Empty;
+        public DateTime DateOpen { get; set; } = DateTime.UtcNow;
+    }
+
     public class User
     {
         public int Id { get; set; }
@@ -3282,6 +3337,7 @@ namespace YasGMP.Services.Interfaces
     }
 
     public class Machine
+
     {
         public int Id { get; set; }
         public string Code { get; set; } = string.Empty;
@@ -3326,7 +3382,7 @@ namespace YasGMP.Services.Interfaces
         public DateTime? RetainUntil { get; set; }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public class Calibration
     {
         public int Id { get; set; }
         public int ComponentId { get; set; }
@@ -3355,7 +3411,8 @@ namespace YasGMP.Services.Interfaces
     }
 }
 
-        public List<Machine> Saved => _store;
+        public Task<Incident?> TryGetByIdAsync(int id)
+            => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
     public class DatabaseService
     {
@@ -3369,8 +3426,9 @@ namespace YasGMP.Services.Interfaces
         public List<Incident> Incidents { get; } = new();
         public List<CapaCase> CapaCases { get; } = new();
 
-        public Task<Machine?> TryGetByIdAsync(int id)
-            => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
+            _store.Add(Clone(incident));
+            return Task.FromResult(incident.Id);
+        }
 
         public Task<List<Component>> GetAllComponentsAsync()
             => Task.FromResult(Components);
@@ -3478,104 +3536,6 @@ namespace YasGMP.Services.Interfaces
     }
 }
 
-            return Task.CompletedTask;
-        }
-
-        public void Validate(Machine machine)
-        {
-            if (string.IsNullOrWhiteSpace(machine.Name))
-                throw new InvalidOperationException("Name is required.");
-            if (string.IsNullOrWhiteSpace(machine.Code))
-                throw new InvalidOperationException("Code is required.");
-            if (string.IsNullOrWhiteSpace(machine.Manufacturer))
-                throw new InvalidOperationException("Manufacturer is required.");
-            if (string.IsNullOrWhiteSpace(machine.Location))
-                throw new InvalidOperationException("Location is required.");
-            if (string.IsNullOrWhiteSpace(machine.UrsDoc))
-                throw new InvalidOperationException("URS document is required.");
-        }
-
-        public string NormalizeStatus(string? status)
-            => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
-
-        private static Machine Clone(Machine source)
-        {
-            return new Machine
-            {
-                Id = source.Id,
-                Code = source.Code,
-                Name = source.Name,
-                Description = source.Description,
-                Model = source.Model,
-                Manufacturer = source.Manufacturer,
-                Location = source.Location,
-                Status = source.Status,
-                UrsDoc = source.UrsDoc,
-                InstallDate = source.InstallDate,
-                ProcurementDate = source.ProcurementDate,
-                WarrantyUntil = source.WarrantyUntil,
-                IsCritical = source.IsCritical,
-                SerialNumber = source.SerialNumber,
-                LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
-            };
-        }
-
-        private static void Copy(Machine source, Machine destination)
-        {
-            destination.Code = source.Code;
-            destination.Name = source.Name;
-            destination.Description = source.Description;
-            destination.Model = source.Model;
-            destination.Manufacturer = source.Manufacturer;
-            destination.Location = source.Location;
-            destination.Status = source.Status;
-            destination.UrsDoc = source.UrsDoc;
-            destination.InstallDate = source.InstallDate;
-            destination.ProcurementDate = source.ProcurementDate;
-            destination.WarrantyUntil = source.WarrantyUntil;
-            destination.IsCritical = source.IsCritical;
-            destination.SerialNumber = source.SerialNumber;
-            destination.LifecyclePhase = source.LifecyclePhase;
-            destination.Note = source.Note;
-        }
-    }
-
-    public sealed class FakeIncidentCrudService : IIncidentCrudService
-    {
-        private readonly List<Incident> _store = new();
-
-        public List<Incident> Saved => _store;
-
-        public Task<Incident?> TryGetByIdAsync(int id)
-            => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
-
-        public Task<int> CreateAsync(Incident incident, IncidentCrudContext context)
-        {
-            if (incident.Id == 0)
-            {
-                incident.Id = _store.Count == 0 ? 1 : _store.Max(i => i.Id) + 1;
-            }
-
-            _store.Add(Clone(incident));
-            return Task.FromResult(incident.Id);
-        }
-
-        public Task UpdateAsync(Incident incident, IncidentCrudContext context)
-        {
-            var existing = _store.FirstOrDefault(i => i.Id == incident.Id);
-            if (existing is null)
-            {
-                _store.Add(Clone(incident));
-            }
-            else
-            {
-                Copy(incident, existing);
-            }
-
-            return Task.CompletedTask;
-        }
-
         public void Validate(Incident incident)
         {
             if (string.IsNullOrWhiteSpace(incident.Title))
@@ -3643,6 +3603,115 @@ namespace YasGMP.Services.Interfaces
             destination.IsCritical = source.IsCritical;
             destination.RiskLevel = source.RiskLevel;
             destination.AnomalyScore = source.AnomalyScore;
+        }
+    }
+
+    public sealed class FakeCapaCrudService : ICapaCrudService
+    {
+        private readonly List<CapaCase> _store = new();
+
+        public List<CapaCase> Saved => _store;
+
+        public Task<IReadOnlyList<CapaCase>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<CapaCase>>(_store.ToList());
+
+        public Task<CapaCase?> TryGetByIdAsync(int id)
+            => Task.FromResult<CapaCase?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(CapaCase capa, CapaCrudContext context)
+        {
+            if (capa.Id == 0)
+            {
+                capa.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(capa));
+            return Task.FromResult(capa.Id);
+        }
+
+        public Task UpdateAsync(CapaCase capa, CapaCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == capa.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(capa));
+            }
+            else
+            {
+                Copy(capa, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(CapaCase capa)
+        {
+            if (string.IsNullOrWhiteSpace(capa.Title))
+                throw new InvalidOperationException("CAPA title is required.");
+            if (string.IsNullOrWhiteSpace(capa.Description))
+                throw new InvalidOperationException("CAPA description is required.");
+            if (capa.ComponentId <= 0)
+                throw new InvalidOperationException("CAPA must reference a component.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "OPEN" : status.Trim().ToUpperInvariant();
+
+        public string NormalizePriority(string? priority)
+            => string.IsNullOrWhiteSpace(priority) ? "Medium" : priority.Trim();
+
+        public void Seed(CapaCase capa)
+        {
+            if (capa.Id == 0)
+            {
+                capa.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(capa));
+        }
+
+        private static CapaCase Clone(CapaCase source)
+        {
+            return new CapaCase
+            {
+                Id = source.Id,
+                Title = source.Title,
+                Description = source.Description,
+                ComponentId = source.ComponentId,
+                Priority = source.Priority,
+                Status = source.Status,
+                RootCause = source.RootCause,
+                CorrectiveAction = source.CorrectiveAction,
+                PreventiveAction = source.PreventiveAction,
+                Reason = source.Reason,
+                Actions = source.Actions,
+                Notes = source.Notes,
+                Comments = source.Comments,
+                DateOpen = source.DateOpen,
+                DateClose = source.DateClose,
+                AssignedToId = source.AssignedToId,
+                DigitalSignature = source.DigitalSignature
+            };
+        }
+
+        private static void Copy(CapaCase source, CapaCase destination)
+        {
+            destination.Title = source.Title;
+            destination.Description = source.Description;
+            destination.ComponentId = source.ComponentId;
+            destination.Priority = source.Priority;
+            destination.Status = source.Status;
+            destination.RootCause = source.RootCause;
+            destination.CorrectiveAction = source.CorrectiveAction;
+            destination.PreventiveAction = source.PreventiveAction;
+            destination.Reason = source.Reason;
+            destination.Actions = source.Actions;
+            destination.Notes = source.Notes;
+            destination.Comments = source.Comments;
+            destination.DateOpen = source.DateOpen;
+            destination.DateClose = source.DateClose;
+            destination.AssignedToId = source.AssignedToId;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -3756,6 +3825,7 @@ namespace YasGMP.Services.Interfaces
             {
                 calibration.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
             }
+
             _store.Add(Clone(calibration));
             return Task.FromResult(calibration.Id);
         }
@@ -4019,6 +4089,108 @@ namespace YasGMP.Services.Interfaces
             destination.IsCritical = source.IsCritical;
             destination.RiskLevel = source.RiskLevel;
             destination.AnomalyScore = source.AnomalyScore;
+        }
+    }
+
+    public sealed class FakeChangeControlCrudService : IChangeControlCrudService
+    {
+        private readonly List<ChangeControl> _store = new();
+
+        public List<ChangeControl> Saved => _store;
+
+        public Task<IReadOnlyList<ChangeControl>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<ChangeControl>>(_store.Select(Clone).ToList());
+
+        public Task<ChangeControl?> TryGetByIdAsync(int id)
+        {
+            var match = _store.FirstOrDefault(c => c.Id == id);
+            return Task.FromResult(match is null ? null : Clone(match));
+        }
+
+        public Task<int> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        {
+            if (changeControl.Id == 0)
+            {
+                changeControl.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(changeControl));
+            return Task.FromResult(changeControl.Id);
+        }
+
+        public Task UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == changeControl.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(changeControl));
+            }
+            else
+            {
+                Copy(changeControl, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(ChangeControl changeControl)
+        {
+            if (string.IsNullOrWhiteSpace(changeControl.Title))
+            {
+                throw new InvalidOperationException("Title is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(changeControl.Code))
+            {
+                throw new InvalidOperationException("Code is required.");
+            }
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "Draft" : status.Trim();
+
+        public void Seed(ChangeControl changeControl)
+        {
+            if (changeControl.Id == 0)
+            {
+                changeControl.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(changeControl));
+        }
+
+        private static ChangeControl Clone(ChangeControl source)
+            => new ChangeControl
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Title = source.Title,
+                Description = source.Description,
+                StatusRaw = source.StatusRaw,
+                RequestedById = source.RequestedById,
+                DateRequested = source.DateRequested,
+                AssignedToId = source.AssignedToId,
+                DateAssigned = source.DateAssigned,
+                LastModifiedById = source.LastModifiedById,
+                LastModified = source.LastModified,
+                CreatedAt = source.CreatedAt,
+                UpdatedAt = source.UpdatedAt
+            };
+
+        private static void Copy(ChangeControl source, ChangeControl destination)
+        {
+            destination.Code = source.Code;
+            destination.Title = source.Title;
+            destination.Description = source.Description;
+            destination.StatusRaw = source.StatusRaw;
+            destination.RequestedById = source.RequestedById;
+            destination.DateRequested = source.DateRequested;
+            destination.AssignedToId = source.AssignedToId;
+            destination.DateAssigned = source.DateAssigned;
+            destination.LastModifiedById = source.LastModifiedById;
+            destination.LastModified = source.LastModified;
+            destination.CreatedAt = source.CreatedAt;
+            destination.UpdatedAt = source.UpdatedAt;
         }
     }
 

@@ -27,7 +27,7 @@
     "Calibration": "done",
     "Incidents": "done",
     "CAPA": "done",
-    "ChangeControl": "pending",
+    "ChangeControl": "done",
     "Validations": "pending",
     "ScheduledJobs": "pending",
     "UsersRoles": "pending",
@@ -40,7 +40,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(capa): add CRUD editor with attachments",
+  "lastCommitSummary": "feat(change-control): add CRUD editor with attachments",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -57,6 +57,7 @@
     "2025-09-30: Parts & Warehouse editors now include stock health messaging, warehouse summaries, and inventory ledger previews while retaining attachment support; e-signature/audit surfacing will follow in Batch B2 once .NET 9 SDK is accessible.",
     "2025-09-30: Incidents module now runs through IIncidentCrudService with mode-aware editor and attachment uploads; CAPA/Change Control remain pending.",
     "2025-10-01: Incidents editor exposes CFL-driven linking to work orders and CAPA cases with unit coverage for the new mode transitions.",
-    "2025-10-02: CAPA module now persists via ICapaCrudService with component lookups, attachments, and unit coverage for save/attachment flows; Change Control still pending."
+    "2025-10-02: CAPA module now persists via ICapaCrudService with component lookups, attachments, and unit coverage for save/attachment flows; Change Control still pending.",
+    "2025-10-03: Change Control module now uses IChangeControlCrudService with a mode-aware editor, CFL picker, and attachment workflow; signature/audit prompts queued for Batch B2."
   ]
 }
