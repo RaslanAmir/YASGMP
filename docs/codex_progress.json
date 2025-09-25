@@ -23,7 +23,9 @@
     "Components": "done",
     "Parts": "done",
     "Warehouses": "done",
-    "WorkOrders": "in-progress",
+
+    "WorkOrders": "done",
+
     "Calibration": "in-progress",
     "Incidents": "pending",
     "CAPA": "pending",
@@ -40,11 +42,13 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(parts-warehouse): add CRUD editors with adapters and attachment commands",
+
+  "lastCommitSummary": "feat(workorders): finish CRUD adapter + attachments",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
-    "Work Orders editor now surfaces a CRUD-capable form wired to WorkOrderService; attachments/signature integration pending",
+    "Work Orders editor now surfaces CRUD via adapter with attachments; e-signature/audit pending Batch B2",
+
     "Calibration editor now saves via CalibrationService adapter with component/supplier lookups; signature + attachment work remains",
     "Assets module now uploads attachments via AttachmentService from the WPF shell; signature prompts tracked under Batch B2.",
     "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module.",

@@ -544,7 +544,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
         public bool IsBelowMinimum => MinStockAlert.HasValue && Stock.HasValue && Stock.Value < MinStockAlert.Value;
 
-
         public static PartEditor CreateEmpty() => new();
 
         public static PartEditor CreateForNew(string normalizedStatus)

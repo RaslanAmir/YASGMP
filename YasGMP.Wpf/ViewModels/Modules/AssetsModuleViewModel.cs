@@ -281,6 +281,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             machine.Id = _loadedMachine.Id;
             await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
 
+
 public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
             _loadedMachine = machine;

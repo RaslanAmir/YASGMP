@@ -26,6 +26,7 @@
             </ItemsControl>
             <Separator />
             <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">

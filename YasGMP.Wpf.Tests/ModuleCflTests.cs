@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
 
@@ -96,8 +97,13 @@ public class ModuleCflTests
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 2 } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var workOrderCrud = new FakeWorkOrderCrudService();
+        workOrderCrud.Saved.AddRange(db.WorkOrders);
 
-        var viewModel = new WorkOrdersModuleViewModel(db, dialog, shell, navigation);
+        var viewModel = new WorkOrdersModuleViewModel(db, workOrderCrud, auth, filePicker, attachments, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 

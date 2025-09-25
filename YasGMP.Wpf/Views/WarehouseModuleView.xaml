@@ -156,7 +156,6 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-
                         <Border Background="#1FFFCCCC" Padding="8" Margin="0,12,0,0" CornerRadius="4" Visibility="{Binding HasStockAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="⚠" FontSize="16" Margin="0,0,8,0" />
