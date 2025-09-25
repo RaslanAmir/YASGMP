@@ -56,8 +56,10 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     [ObservableProperty]
     private IReadOnlyList<Supplier> _supplierOptions = Array.Empty<Supplier>();
 
+
     [ObservableProperty]
     private string _stockHealthMessage = string.Empty;
+
 
     public IReadOnlyList<string> StatusOptions { get; }
 
@@ -164,7 +166,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         {
             _loadedPart = null;
             SetEditor(PartEditor.CreateEmpty());
+
             StockHealthMessage = string.Empty;
+
             UpdateAttachmentCommandState();
             return;
         }
@@ -188,7 +192,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
         _loadedPart = part;
         LoadEditor(part);
+
         UpdateStockHealth();
+
         UpdateAttachmentCommandState();
     }
 
@@ -202,7 +208,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 _snapshot = null;
                 _loadedPart = null;
                 SetEditor(PartEditor.CreateForNew(_partService.NormalizeStatus("active")));
+
                 StockHealthMessage = "";
+
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -211,7 +219,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 if (_loadedPart is not null)
                 {
                     LoadEditor(_loadedPart);
+
                     UpdateStockHealth();
+
                 }
                 break;
         }
@@ -358,6 +368,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             MarkDirty();
         }
 
+
         if (e.PropertyName is nameof(PartEditor.Stock)
             or nameof(PartEditor.MinStockAlert)
             or nameof(PartEditor.LowWarehouseCount)
@@ -365,6 +376,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         {
             UpdateStockHealth();
         }
+
     }
 
     private void LoadEditor(Part part)
@@ -373,7 +385,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         Editor = PartEditor.FromPart(part, _partService.NormalizeStatus);
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+
         UpdateStockHealth();
+
     }
 
     private void SetEditor(PartEditor editor)
@@ -382,7 +396,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+
         UpdateStockHealth();
+
     }
 
     private bool CanAttachDocument()
@@ -432,6 +448,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
 
+
     private void UpdateStockHealth()
     {
         if (Editor.IsWarehouseStockCritical || Editor.IsBelowMinimum)
@@ -449,6 +466,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             StockHealthMessage = string.Empty;
         }
     }
+
 
     private static ModuleRecord ToRecord(Part part)
     {
@@ -514,6 +532,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         [ObservableProperty]
         private decimal? _price;
 
+
         [ObservableProperty]
         private int _lowWarehouseCount;
 
@@ -546,10 +565,12 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 DefaultSupplierId = part.DefaultSupplierId,
                 DefaultSupplierName = part.DefaultSupplierName ?? string.Empty,
                 Sku = part.Sku ?? string.Empty,
+
                 Price = part.Price,
                 LowWarehouseCount = part.LowWarehouseCount,
                 WarehouseSummary = part.WarehouseSummary ?? string.Empty,
                 IsWarehouseStockCritical = part.IsWarehouseStockCritical
+
             };
         }
 
@@ -568,10 +589,12 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 DefaultSupplierId = DefaultSupplierId,
                 DefaultSupplierName = DefaultSupplierName,
                 Sku = Sku,
+
                 Price = Price,
                 LowWarehouseCount = LowWarehouseCount,
                 WarehouseSummary = WarehouseSummary,
                 IsWarehouseStockCritical = IsWarehouseStockCritical
+
             };
 
         public Part ToPart(Part? existing)
@@ -590,9 +613,11 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             part.DefaultSupplierName = DefaultSupplierName?.Trim();
             part.Sku = Sku?.Trim();
             part.Price = Price;
+
             part.LowWarehouseCount = LowWarehouseCount;
             part.WarehouseSummary = WarehouseSummary ?? string.Empty;
             part.IsWarehouseStockCritical = IsWarehouseStockCritical;
+
             return part;
         }
     }
