@@ -14,7 +14,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\AssetsModuleViewModel.cs" Link="Wpf\Modules\AssetsModuleViewModel.cs" />
+    <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\ComponentsModuleViewModel.cs" Link="Wpf\Modules\ComponentsModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\WorkOrdersModuleViewModel.cs" Link="Wpf\Modules\WorkOrdersModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\CalibrationModuleViewModel.cs" Link="Wpf\Modules\CalibrationModuleViewModel.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\IMachineCrudService.cs" Link="Wpf\Services\IMachineCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\IComponentCrudService.cs" Link="Wpf\Services\IComponentCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\ICalibrationCrudService.cs" Link="Wpf\Services\ICalibrationCrudService.cs" />
   </ItemGroup>
 </Project>
