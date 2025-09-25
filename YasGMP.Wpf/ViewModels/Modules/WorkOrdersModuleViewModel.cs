@@ -52,7 +52,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private bool _isEditorEnabled;
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
-
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
