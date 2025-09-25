@@ -5,7 +5,8 @@
     "detected": false,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
-      "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK"
+      "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK",
+      "2025-09-26: Batch 0 retry confirmed `dotnet --info` still returns 'command not found'."
     ]
   },
   "batches": [
@@ -15,7 +16,7 @@
     { "id": "B3", "name": "Editor framework", "status": "pending" }
   ],
   "modules": {
-    "Assets": "pending",
+    "Assets": "in-progress",
     "Components": "pending",
     "Parts": "pending",
     "Warehouses": "pending",
@@ -40,7 +41,8 @@
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
-    "Work Orders editor now surfaces a CRUD-capable form wired to WorkOrderService; attachments/signature integration pending"
+    "Work Orders editor now surfaces a CRUD-capable form wired to WorkOrderService; attachments/signature integration pending",
+    "Assets editor now runs against MachineService via IMachineCrudService adapter; attachments, signatures, and smoke coverage queued next.",
+    "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module."
   ]
 }
-

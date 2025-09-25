@@ -31,8 +31,21 @@ public class ModuleCflTests
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
+        var machineCrud = new FakeMachineCrudService();
+        machineCrud.Saved.AddRange(db.Assets.Select(a => new Machine
+        {
+            Id = a.Id,
+            Name = a.Name,
+            Code = a.Code ?? string.Empty,
+            Description = a.Description,
+            Manufacturer = a.Manufacturer,
+            Location = a.Location,
+            Status = a.Status,
+            InstallDate = a.InstallDate
+        }));
+        var auth = new TestAuthContext();
 
-        var viewModel = new AssetsModuleViewModel(db, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 

@@ -1,11 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability)*
-- [ ] WPF builds *(pending SDK availability)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24 and 2025-09-26 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24 and 2025-09-26 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-26 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-26 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -20,7 +19,7 @@
 - **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [ ] todo
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
-  - Assets/Machines — [ ] todo
+  - Assets/Machines — [ ] in progress *(editor mode wiring + CRUD via MachineService implemented; attachments/signature prompts pending)*
   - Components — [ ] todo
   - Parts & Warehouses — [ ] todo
   - Work Orders — [ ] in progress *(WPF editor scaffolding created; CRUD wiring continues)*
@@ -35,18 +34,18 @@
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
 
-## Open Issues / Blockers
-- `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`.
-- Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
-- Smoke automation is blocked until SDK + Windows tooling are installed.
-- Work Orders form currently saves via shared services but lacks attachments/signature prompts; plan follow-up in Batch B2.
-
-- 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
-
+- **Open Issues / Blockers**
+  - `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`. *(2025-09-26: Batch 0 attempted again; `dotnet --info` still fails with **command not found**.)*
+  - Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
+  - Smoke automation is blocked until SDK + Windows tooling are installed.
+  - Work Orders form currently saves via shared services but lacks attachments/signature prompts; plan follow-up in Batch B2.
+  - Assets editor still requires attachment picker, signature prompt, and inspector audit feed before marking module complete.
+  - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
 - `scripts/bootstrap-dotnet9.ps1` added to guide host setup *(installs/verifies .NET 9, Windows SDK, runs restore/build, seeds smoke test fixture).* 
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
 - Work Orders module now exposes a mode-aware editor backed by `WorkOrderService` for CRUD operations.
-
+- Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
+- 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
