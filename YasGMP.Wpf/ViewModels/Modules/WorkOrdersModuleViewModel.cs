@@ -22,6 +22,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentService _attachmentService;
 
+
     private WorkOrder? _loadedEntity;
     private WorkOrderEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -52,7 +53,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private bool _isEditorEnabled;
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
-
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
@@ -178,6 +178,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 _snapshot = null;
                 break;
         }
+
 
         UpdateAttachmentCommandState();
         return Task.CompletedTask;
