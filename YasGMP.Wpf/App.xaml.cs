@@ -62,6 +62,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<CalibrationService>();
                         svc.AddTransient<PartService>();
                         svc.AddTransient<ChangeControlService>();
+
                         svc.AddTransient<IIncidentAuditService, IncidentAuditService>();
                         svc.AddTransient<IncidentService>();
                         svc.AddTransient<CAPAService>();
@@ -73,6 +74,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IIncidentCrudService, IncidentCrudServiceAdapter>();
                         svc.AddTransient<ICapaCrudService, CapaCrudServiceAdapter>();
                         svc.AddTransient<IChangeControlCrudService, ChangeControlCrudServiceAdapter>();
+
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());
@@ -80,7 +82,6 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
                         svc.AddSingleton<DebugSmokeTestService>();
-
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();
                         svc.AddTransient<ComponentsModuleViewModel>();
