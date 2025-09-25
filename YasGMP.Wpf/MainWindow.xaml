@@ -44,6 +44,8 @@
                                    Command="{Binding WindowCommands.OpenDashboardCommand}" />
                     <fluent:Button Header="Assets"
                                    Command="{Binding WindowCommands.OpenAssetsCommand}" />
+                    <fluent:Button Header="Components"
+                                   Command="{Binding WindowCommands.OpenComponentsCommand}" />
                     <fluent:Button Header="Work Orders"
                                    Command="{Binding WindowCommands.OpenWorkOrdersCommand}" />
                     <fluent:Button Header="Calibration"
