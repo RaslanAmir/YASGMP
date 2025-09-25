@@ -40,6 +40,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
+
   "lastCommitSummary": "feat(incidents): add CFL linking for work orders and CAPA",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
