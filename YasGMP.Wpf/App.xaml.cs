@@ -53,6 +53,8 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<AuditService>();
                         svc.AddSingleton<WorkOrderAuditService>();
+                        svc.AddTransient<ICapaAuditService, CapaAuditService>();
+                        svc.AddTransient<INotificationService, NotificationService>();
                         svc.AddTransient<WorkOrderService>();
                         svc.AddTransient<IWorkOrderCrudService, WorkOrderCrudServiceAdapter>();
                         svc.AddTransient<MachineService>();
@@ -61,12 +63,14 @@ namespace YasGMP.Wpf
                         svc.AddTransient<PartService>();
                         svc.AddTransient<IIncidentAuditService, IncidentAuditService>();
                         svc.AddTransient<IncidentService>();
+                        svc.AddTransient<CAPAService>();
                         svc.AddTransient<IMachineCrudService, MachineCrudServiceAdapter>();
                         svc.AddTransient<IComponentCrudService, ComponentCrudServiceAdapter>();
                         svc.AddTransient<IPartCrudService, PartCrudServiceAdapter>();
                         svc.AddTransient<IWarehouseCrudService, WarehouseCrudServiceAdapter>();
                         svc.AddTransient<ICalibrationCrudService, CalibrationCrudServiceAdapter>();
                         svc.AddTransient<IIncidentCrudService, IncidentCrudServiceAdapter>();
+                        svc.AddTransient<ICapaCrudService, CapaCrudServiceAdapter>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());

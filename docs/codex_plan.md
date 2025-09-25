@@ -24,7 +24,7 @@
   - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, and stock health warnings surfaced; signature prompts queued for Batch B2)*
   - Work Orders — [x] done *(CRUD adapter wired with attachments; e-signature/audit surfacing slated for Batch B2)*
   - Calibration — [x] done *(CRUD editor now supports attachment uploads via AttachmentService; e-signature/audit surfacing remains queued for Batch B2)*
-  - Incident → CAPA → Change Control — [~] in progress *(Incidents editor now includes CFL linking and work order/CAPA golden arrow flows; CAPA/Change Control documents remain queued)*
+  - Incident → CAPA → Change Control — [~] in progress *(Incidents and CAPA editors now CRUD-capable with attachments; Change Control document remains queued)*
   - Validations (IQ/OQ/PQ) — [ ] todo
   - Scheduled Jobs — [ ] todo
   - Users/Roles — [ ] todo
@@ -57,4 +57,4 @@
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
 - 2025-09-30: Incidents module now drives CRUD via `IIncidentCrudService`, exposes a full editor with toolbar modes, and supports attachment uploads; CAPA/Change Control modules remain queued.
 - 2025-10-01: Incidents editor adds CFL linking for work orders/CAPA cases with tests covering the new mode transitions.
-
+- 2025-10-02: CAPA module now runs through ICapaCrudService with mode-aware editor, component lookups, and attachment uploads; Change Control remains queued for the next batch.

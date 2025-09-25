@@ -180,6 +180,7 @@ public class IncidentsModuleViewModelTests
             ?? throw new MissingMethodException(nameof(IncidentsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
+
     private static Task<CflRequest?> InvokeCreateCflRequestAsync(IncidentsModuleViewModel viewModel)
     {
         var method = typeof(IncidentsModuleViewModel)
