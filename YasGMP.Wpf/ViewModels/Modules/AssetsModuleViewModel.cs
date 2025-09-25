@@ -75,7 +75,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
-
     {
         var sample = new[]
         {
@@ -254,7 +253,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     protected override async Task<bool> OnSaveAsync()
-
     {
         var context = MachineCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
@@ -284,7 +282,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
 
 public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
-
             _loadedMachine = machine;
             LoadEditor(machine);
             return true;

@@ -100,7 +100,6 @@ public class AssetsModuleViewModelTests
         Assert.Equal("hello.txt", upload.FileName);
     }
 
-
     private static Task<bool> InvokeSaveAsync(AssetsModuleViewModel viewModel)
     {
         var method = typeof(AssetsModuleViewModel)
