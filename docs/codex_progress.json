@@ -19,9 +19,10 @@
   ],
   "modules": {
     "Assets": "done",
-    "Components": "in-progress",
-    "Parts": "pending",
-    "Warehouses": "pending",
+
+    "Components": "done",
+    "Parts": "in-progress",
+    "Warehouses": "in-progress",
     "WorkOrders": "in-progress",
     "Calibration": "in-progress",
     "Incidents": "pending",
@@ -39,7 +40,8 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(components): add mode-aware component editor",
+
+  "lastCommitSummary": "feat(parts-warehouse): add CRUD editors with adapters and attachment commands",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -48,6 +50,15 @@
     "Assets module now uploads attachments via AttachmentService from the WPF shell; signature prompts tracked under Batch B2.",
     "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module.",
     "2025-09-27: Batch 0 still blocked in container; dotnet CLI absent so restore/build/smoke cannot execute.",
+
+    "2025-09-29: dotnet --info/restore/build retried; container still lacks CLI so Batch 0 remains blocked.",
+    "2025-09-27: Components module reached CRUD parity through ComponentService with machine lookups; cross-cutting attachments/e-signature work scheduled under Batch B2.",
+    "2025-09-29: WPF mapping updated for Components; adapters documented while awaiting SDK to finish Batch B2 attachment/signature tasks.",
+    "2025-09-29: Parts and Warehouse modules now have mode-aware editors wired to new CRUD adapters with attachment upload commands; e-signature/audit surfacing will follow in Batch B2 once .NET 9 SDK is accessible."
+  ]
+}
+
     "2025-09-27: Components module exposes B1-mode editor using ComponentService and machine lookups; attachments/e-signature follow-ups remain."
   ]
 }
+

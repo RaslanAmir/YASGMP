@@ -75,6 +75,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
+
     {
         var sample = new[]
         {
@@ -93,7 +94,70 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             {
                 Id = 1002,
                 Name = "pH Meter",
-@@ -127,93 +139,96 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+                Code = "LAB-PH-12",
+                Status = "maintenance",
+                Description = "Metrohm pH meter",
+                Manufacturer = "Metrohm",
+                Location = "QC Lab",
+                InstallDate = DateTime.UtcNow.AddYears(-2)
+            }
+        };
+
+        return sample.Select(ToRecord).ToList();
+    }
+
+    protected override async Task<CflRequest?> CreateCflRequestAsync()
+    {
+        var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+        var items = machines
+            .Select(machine =>
+            {
+                var key = machine.Id.ToString(CultureInfo.InvariantCulture);
+                var label = string.IsNullOrWhiteSpace(machine.Name) ? key : machine.Name;
+                var descriptionParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(machine.Code))
+                {
+                    descriptionParts.Add(machine.Code);
+                }
+
+                if (!string.IsNullOrWhiteSpace(machine.Location))
+                {
+                    descriptionParts.Add(machine.Location!);
+                }
+
+                if (!string.IsNullOrWhiteSpace(machine.Status))
+                {
+                    descriptionParts.Add(machine.Status!);
+                }
+
+                var description = descriptionParts.Count > 0
+                    ? string.Join(" • ", descriptionParts)
+                    : null;
+
+                return new CflItem(key, label, description);
+            })
+            .ToList();
+
+    {
+        var sample = new[]
+        {
+            new Machine
+            {
+                Id = 1001,
+                Name = "Autoclave",
+                Code = "AUTO-001",
+                Status = "active",
+                Description = "Steam sterilizer",
+                Manufacturer = "Steris",
+                Location = "Building A",
+                InstallDate = DateTime.UtcNow.AddYears(-3)
+            },
+            new Machine
+            {
+                Id = 1002,
+                Name = "pH Meter",
+public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+
 
         return new CflRequest("Select Asset", items);
     }
@@ -190,7 +254,37 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     protected override async Task<bool> OnSaveAsync()
-@@ -247,101 +262,183 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+
+    {
+        var context = MachineCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId);
+
+        var machine = Editor.ToMachine(_loadedMachine);
+        machine.Status = _machineService.NormalizeStatus(machine.Status);
+
+        if (Mode == FormMode.Add)
+        {
+            await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
+            _loadedMachine = machine;
+            LoadEditor(machine);
+            return true;
+        }
+
+        if (Mode == FormMode.Update)
+        {
+            if (_loadedMachine is null)
+            {
+                return false;
+            }
+
+            machine.Id = _loadedMachine.Id;
+            await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
+
+public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+
             _loadedMachine = machine;
             LoadEditor(machine);
             return true;
