@@ -156,7 +156,6 @@ public class WarehouseModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 
-
     private static Task InvokeLoadInsightsAsync(WarehouseModuleViewModel viewModel, int id)
     {
         var method = typeof(WarehouseModuleViewModel)
@@ -164,5 +163,4 @@ public class WarehouseModuleViewModelTests
             ?? throw new MissingMethodException(nameof(WarehouseModuleViewModel), "LoadInsightsAsync");
         return (Task)method.Invoke(viewModel, new object[] { id })!;
     }
-
 }

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -20,6 +21,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private readonly ICalibrationCrudService _calibrationService;
     private readonly IComponentCrudService _componentService;
     private readonly IAuthContext _authContext;
+    private readonly IFilePicker _filePicker;
+    private readonly IAttachmentService _attachmentService;
 
     private Calibration? _loadedCalibration;
     private CalibrationEditor? _snapshot;
@@ -32,6 +35,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         ICalibrationCrudService calibrationService,
         IComponentCrudService componentService,
         IAuthContext authContext,
+        IFilePicker filePicker,
+        IAttachmentService attachmentService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -40,10 +45,14 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _calibrationService = calibrationService ?? throw new ArgumentNullException(nameof(calibrationService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
 
         Editor = CalibrationEditor.CreateEmpty();
         ComponentOptions = new ObservableCollection<ComponentOption>();
         SupplierOptions = new ObservableCollection<SupplierOption>();
+
+        AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
     [ObservableProperty]
@@ -55,6 +64,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
 
     public ObservableCollection<SupplierOption> SupplierOptions { get; }
+
+    public IAsyncRelayCommand AttachDocumentCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -161,6 +172,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         {
             _loadedCalibration = null;
             SetEditor(CalibrationEditor.CreateEmpty());
+            UpdateAttachmentCommandState();
             return;
         }
 
@@ -183,6 +195,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
         _loadedCalibration = calibration;
         LoadEditor(calibration);
+        UpdateAttachmentCommandState();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -204,6 +217,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 _snapshot = null;
                 break;
         }
+
+        UpdateAttachmentCommandState();
 
         return Task.CompletedTask;
     }
@@ -239,7 +254,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
         if (Mode == FormMode.Add)
         {
-            await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
+            var id = await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
+            calibration.Id = id;
         }
         else if (Mode == FormMode.Update)
         {
@@ -251,6 +267,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         _loadedCalibration = calibration;
+        LoadEditor(calibration);
+        UpdateAttachmentCommandState();
         return true;
     }
 
@@ -261,12 +279,14 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             SetEditor(_loadedCalibration is null
                 ? CalibrationEditor.CreateEmpty()
                 : CalibrationEditor.FromCalibration(_loadedCalibration, FindComponentName, FindSupplierName));
+            UpdateAttachmentCommandState();
             return;
         }
 
         if (Mode == FormMode.Update && _snapshot is not null)
         {
             SetEditor(_snapshot.Clone());
+            UpdateAttachmentCommandState();
             return;
         }
 
@@ -274,6 +294,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         {
             LoadEditor(_loadedCalibration);
         }
+
+        UpdateAttachmentCommandState();
     }
 
     partial void OnEditorChanging(CalibrationEditor value)
@@ -337,6 +359,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         Editor = CalibrationEditor.FromCalibration(calibration, FindComponentName, FindSupplierName);
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+        UpdateAttachmentCommandState();
     }
 
     private void SetEditor(CalibrationEditor editor)
@@ -345,6 +368,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+        UpdateAttachmentCommandState();
     }
 
     private void RefreshComponentOptions(IEnumerable<Component> components)
@@ -406,6 +430,73 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
         return _suppliers.FirstOrDefault(s => s.Id == supplierId.Value)?.Name;
     }
+
+    private bool CanAttachDocument()
+        => !IsBusy
+           && !IsEditorEnabled
+           && _loadedCalibration is { Id: > 0 };
+
+    private async Task AttachDocumentAsync()
+    {
+        if (_loadedCalibration is null || _loadedCalibration.Id <= 0)
+        {
+            StatusMessage = "Save the calibration before adding attachments.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var files = await _filePicker
+                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to calibration #{_loadedCalibration.Id}"))
+                .ConfigureAwait(false);
+
+            if (files is null || files.Count == 0)
+            {
+                StatusMessage = "Attachment upload cancelled.";
+                return;
+            }
+
+            var uploads = 0;
+            var uploadedBy = _authContext.CurrentUser?.Id;
+
+            foreach (var file in files)
+            {
+                await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
+                var request = new AttachmentUploadRequest
+                {
+                    FileName = file.FileName,
+                    ContentType = file.ContentType,
+                    EntityType = "calibrations",
+                    EntityId = _loadedCalibration.Id,
+                    UploadedById = uploadedBy,
+                    Reason = $"calibration:{_loadedCalibration.Id}",
+                    SourceIp = _authContext.CurrentIpAddress,
+                    SourceHost = _authContext.CurrentDeviceInfo,
+                    Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
+                };
+
+                await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
+                uploads++;
+            }
+
+            StatusMessage = uploads == 1
+                ? "Attachment uploaded successfully."
+                : $"Uploaded {uploads} attachments successfully.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Attachment upload failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+    }
+
+    private void UpdateAttachmentCommandState()
+        => AttachDocumentCommand.NotifyCanExecuteChanged();
 
     public sealed partial class CalibrationEditor : ObservableObject
     {

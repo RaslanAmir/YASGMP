@@ -22,11 +22,9 @@ namespace YasGMP.Wpf.Services
 
         string NormalizeStatus(string? status);
 
-
         Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId);
 
         Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10);
-
     }
 
     /// <summary>
@@ -44,7 +42,6 @@ namespace YasGMP.Wpf.Services
                    string.IsNullOrWhiteSpace(deviceInfo) ? "WPF" : deviceInfo,
                    string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId);
     }
-
 
     public sealed record WarehouseStockSnapshot(
         int WarehouseId,
@@ -73,5 +70,4 @@ namespace YasGMP.Wpf.Services
         string? RelatedDocument,
         string? Note,
         int? PerformedById);
-
 }

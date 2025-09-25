@@ -1,12 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-
 - [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, and 2025-09-29 → **command not found**)*
 - [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
 - [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
 - [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
-
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -24,10 +22,8 @@
   - Assets/Machines — [x] done *(mode-aware CRUD plus attachment upload wired through AttachmentService; e-sign prompt scheduled under Batch B2)*
   - Components — [x] done *(mode-aware editor wired to ComponentService; attachments/signature work tracked under Batch B2)*
   - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, and stock health warnings surfaced; signature prompts queued for Batch B2)*
-
   - Work Orders — [x] done *(CRUD adapter wired with attachments; e-signature/audit surfacing slated for Batch B2)*
-
-  - Calibration — [ ] in progress *(calibration editor now loads/saves via CalibrationService adapter; attachments/e-signature pending)*
+  - Calibration — [x] done *(CRUD editor now supports attachment uploads via AttachmentService; e-signature/audit surfacing remains queued for Batch B2)*
   - Incident → CAPA → Change Control — [ ] todo
   - Validations (IQ/OQ/PQ) — [ ] todo
   - Scheduled Jobs — [ ] todo
@@ -42,9 +38,7 @@
   - `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`. *(2025-09-25 & 2025-09-27 retries confirmed `dotnet --info` continues to fail with **command not found**.)*
   - Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
   - Smoke automation is blocked until SDK + Windows tooling are installed.
-
   - Work Orders editor still requires e-signature prompt + inspector audit surfacing once Batch B2 unblocks the shared services.
-
   - Asset signature prompt and inspector audit surfacing will ride the Batch B2 cross-cutting work once the SDK blocker is cleared.
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
@@ -56,10 +50,8 @@
 - Components module now completes the CRUD rollout with mode-aware editor, validation, and machine lookups; attachment/signature integration remains queued for Batch B2.
 - Parts and Warehouse modules now expose CRUD-capable editors with attachment upload support, stock-health warnings, and warehouse inventory previews; e-signatures and audit surfacing remain tied to Batch B2 once SDK access is restored.
 - 2025-09-29: WPF mapping updated to reflect the Components document and adapter usage; attachment/e-signature work still planned for Batch B2 once SDK access restored.
-
   - Work Orders module now drives CRUD through `IWorkOrderCrudService` with attachment uploads; e-signature/audit pane pending B2.
-
-- Calibration module now reuses `CalibrationService` through a new adapter with mode-aware editor and supplier/component lookups.
+- Calibration module now reuses `CalibrationService` through a new adapter with mode-aware editor, supplier/component lookups, and attachment uploads via `IAttachmentService`; signature/audit follow-ups remain planned under Batch B2.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

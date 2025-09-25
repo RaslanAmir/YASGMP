@@ -79,7 +79,6 @@ namespace YasGMP.Wpf.Services
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "qualified" : status.Trim().ToLower(CultureInfo.InvariantCulture);
 
-
         public async Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId)
         {
             const string sql = @"SELECT sl.part_id,
@@ -210,7 +209,6 @@ WHERE id=@id";
                 context.SessionId).ConfigureAwait(false);
         }
 
-
         private static int SafeInt(DataRow row, string column)
             => row.Table.Columns.Contains(column) && row[column] != DBNull.Value
                 ? Convert.ToInt32(row[column], CultureInfo.InvariantCulture)
@@ -225,6 +223,5 @@ WHERE id=@id";
             => row.Table.Columns.Contains(column) && row[column] != DBNull.Value
                 ? Convert.ToDateTime(row[column], CultureInfo.InvariantCulture)
                 : null;
-
     }
 }

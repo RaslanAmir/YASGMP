@@ -5,9 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-
 using CommunityToolkit.Mvvm.Input;
-
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -20,7 +18,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     public new const string ModuleKey = "WorkOrders";
 
     private readonly IAuthContext _authContext;
-
     private readonly IWorkOrderCrudService _workOrderService;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentService _attachmentService;
@@ -32,12 +29,10 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
     public WorkOrdersModuleViewModel(
         DatabaseService databaseService,
-
         IWorkOrderCrudService workOrderService,
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentService attachmentService,
-
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -45,12 +40,10 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     {
         _workOrderService = workOrderService ?? throw new ArgumentNullException(nameof(workOrderService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
-
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
         Editor = WorkOrderEditor.CreateEmpty();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-
     }
 
     [ObservableProperty]
@@ -59,10 +52,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     [ObservableProperty]
     private bool _isEditorEnabled;
 
-
     public IAsyncRelayCommand AttachDocumentCommand { get; }
-
-
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
@@ -146,9 +136,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         {
             _loadedEntity = null;
             SetEditor(WorkOrderEditor.CreateEmpty());
-
             UpdateAttachmentCommandState();
-
             return;
         }
 
@@ -162,7 +150,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             return;
         }
 
-
         var entity = await _workOrderService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (entity is null)
         {
@@ -172,7 +159,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         _loadedEntity = entity;
         LoadEditor(entity);
-
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -195,7 +181,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
 
         UpdateAttachmentCommandState();
-
         return Task.CompletedTask;
     }
 
@@ -270,22 +255,18 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
 
         var entity = Editor.ToEntity(_loadedEntity);
-
         _workOrderService.Validate(entity);
-
         entity.LastModified = DateTime.UtcNow;
         entity.LastModifiedById = userId;
         entity.DeviceInfo = _authContext.CurrentDeviceInfo;
         entity.SourceIp = _authContext.CurrentIpAddress;
         entity.SessionId = _authContext.CurrentSessionId;
 
-
         var context = WorkOrderCrudContext.Create(
             userId.Value,
             _authContext.CurrentIpAddress,
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId);
-
 
         if (Mode == FormMode.Add)
         {
@@ -294,26 +275,22 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             entity.AssignedToId = Editor.AssignedToId > 0 ? Editor.AssignedToId : userId.Value;
             entity.DateOpen = Editor.DateOpen == default ? DateTime.UtcNow : Editor.DateOpen;
 
-
             var id = await _workOrderService.CreateAsync(entity, context).ConfigureAwait(false);
             entity.Id = id;
 
             _loadedEntity = entity;
             LoadEditor(entity);
             UpdateAttachmentCommandState();
-
             return true;
         }
 
         if (Mode == FormMode.Update)
         {
-
             await _workOrderService.UpdateAsync(entity, context).ConfigureAwait(false);
 
             _loadedEntity = entity;
             LoadEditor(entity);
             UpdateAttachmentCommandState();
-
             return true;
         }
 
@@ -338,9 +315,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             SetEditor(_snapshot.Clone());
         }
 
-
         UpdateAttachmentCommandState();
-
     }
 
     partial void OnEditorChanging(WorkOrderEditor value)
@@ -382,9 +357,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         SetEditor(WorkOrderEditor.FromEntity(entity));
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
-
         UpdateAttachmentCommandState();
-
     }
 
     private void SetEditor(WorkOrderEditor editor)
@@ -393,7 +366,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
-
         UpdateAttachmentCommandState();
     }
 
@@ -464,7 +436,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
-
 
     private static ModuleRecord ToRecord(WorkOrder workOrder)
     {

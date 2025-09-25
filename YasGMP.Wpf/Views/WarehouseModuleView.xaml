@@ -7,11 +7,9 @@
              mc:Ignorable="d"
              d:DesignHeight="480"
              d:DesignWidth="960">
-
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
-
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -203,7 +201,6 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </GroupBox>
-
                     </StackPanel>
                 </ScrollViewer>
             </Border>
