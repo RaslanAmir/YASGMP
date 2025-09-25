@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
@@ -78,6 +79,72 @@ namespace YasGMP.Wpf.Services
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "qualified" : status.Trim().ToLower(CultureInfo.InvariantCulture);
 
+
+        public async Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId)
+        {
+            const string sql = @"SELECT sl.part_id,
+       COALESCE(p.code, CONCAT('PART-', sl.part_id)) AS part_code,
+       COALESCE(p.name, CONCAT('Part #', sl.part_id)) AS part_name,
+       sl.quantity,
+       sl.min_threshold,
+       sl.max_threshold,
+       sl.reserved,
+       sl.blocked,
+       sl.batch_number,
+       sl.serial_number,
+       sl.expiry_date
+FROM stock_levels sl
+LEFT JOIN parts p ON p.id = sl.part_id
+WHERE sl.warehouse_id=@warehouse
+ORDER BY part_name, part_code";
+
+            var table = await _database.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@warehouse", warehouseId) })
+                .ConfigureAwait(false);
+
+            var results = new List<WarehouseStockSnapshot>(table.Rows.Count);
+            foreach (DataRow row in table.Rows)
+            {
+                results.Add(new WarehouseStockSnapshot(
+                    WarehouseId: warehouseId,
+                    PartId: SafeInt(row, "part_id"),
+                    PartCode: row["part_code"]?.ToString() ?? string.Empty,
+                    PartName: row["part_name"]?.ToString() ?? string.Empty,
+                    Quantity: SafeInt(row, "quantity"),
+                    MinThreshold: SafeNullableInt(row, "min_threshold"),
+                    MaxThreshold: SafeNullableInt(row, "max_threshold"),
+                    Reserved: SafeInt(row, "reserved"),
+                    Blocked: SafeInt(row, "blocked"),
+                    BatchNumber: row["batch_number"]?.ToString() ?? string.Empty,
+                    SerialNumber: row["serial_number"]?.ToString() ?? string.Empty,
+                    ExpiryDate: SafeNullableDate(row, "expiry_date")));
+            }
+
+            return results;
+        }
+
+        public async Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10)
+        {
+            var data = await _database.GetInventoryMovementPreviewAsync(warehouseId, partId: null, take: take)
+                .ConfigureAwait(false);
+
+            var items = new List<InventoryMovementEntry>(data.Rows.Count);
+            foreach (DataRow row in data.Rows)
+            {
+                items.Add(new InventoryMovementEntry(
+                    WarehouseId: warehouseId,
+                    Timestamp: SafeNullableDate(row, "transaction_date") ?? DateTime.UtcNow,
+                    Type: row["transaction_type"]?.ToString() ?? string.Empty,
+                    Quantity: SafeInt(row, "quantity"),
+                    RelatedDocument: row.Table.Columns.Contains("related_document") ? row["related_document"]?.ToString() : null,
+                    Note: row.Table.Columns.Contains("note") ? row["note"]?.ToString() : null,
+                    PerformedById: row.Table.Columns.Contains("performed_by_id") && row["performed_by_id"] != DBNull.Value
+                        ? Convert.ToInt32(row["performed_by_id"], CultureInfo.InvariantCulture)
+                        : null));
+            }
+
+            return items;
+        }
+
         private async Task UpdateWarehouseDetailsAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
             const string ensure = @"CREATE TABLE IF NOT EXISTS warehouses (
@@ -142,5 +209,22 @@ WHERE id=@id";
                 context.DeviceInfo,
                 context.SessionId).ConfigureAwait(false);
         }
+
+
+        private static int SafeInt(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value
+                ? Convert.ToInt32(row[column], CultureInfo.InvariantCulture)
+                : 0;
+
+        private static int? SafeNullableInt(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value
+                ? Convert.ToInt32(row[column], CultureInfo.InvariantCulture)
+                : null;
+
+        private static DateTime? SafeNullableDate(DataRow row, string column)
+            => row.Table.Columns.Contains(column) && row[column] != DBNull.Value
+                ? Convert.ToDateTime(row[column], CultureInfo.InvariantCulture)
+                : null;
+
     }
 }

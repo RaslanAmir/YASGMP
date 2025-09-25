@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -95,6 +96,58 @@ public class WarehouseModuleViewModelTests
         Assert.Equal(7, upload.EntityId);
     }
 
+    [Fact]
+    public async Task LoadInsights_PopulatesSnapshotAndMovements()
+    {
+        var database = new DatabaseService();
+        var warehouseAdapter = new FakeWarehouseCrudService();
+        warehouseAdapter.Saved.Add(new Warehouse
+        {
+            Id = 2,
+            Name = "Cold Storage",
+            Location = "Building C",
+            Status = "qualified"
+        });
+        warehouseAdapter.StockSnapshots.Add(new WarehouseStockSnapshot(
+            WarehouseId: 2,
+            PartId: 15,
+            PartCode: "PRT-15",
+            PartName: "Filter",
+            Quantity: 3,
+            MinThreshold: 5,
+            MaxThreshold: null,
+            Reserved: 0,
+            Blocked: 0,
+            BatchNumber: "B-1",
+            SerialNumber: string.Empty,
+            ExpiryDate: null));
+        warehouseAdapter.Movements.Add(new InventoryMovementEntry(
+            WarehouseId: 2,
+            Timestamp: DateTime.UtcNow,
+            Type: "IN",
+            Quantity: 8,
+            RelatedDocument: "PO-55",
+            Note: "Initial receipt",
+            PerformedById: 4));
+
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.First();
+        await InvokeLoadInsightsAsync(viewModel, 2);
+
+        Assert.True(viewModel.HasStockAlerts);
+        Assert.Single(viewModel.StockSnapshot);
+        Assert.Single(viewModel.RecentMovements);
+    }
+
     private static Task<bool> InvokeSaveAsync(WarehouseModuleViewModel viewModel)
     {
         var method = typeof(WarehouseModuleViewModel)
@@ -102,4 +155,14 @@ public class WarehouseModuleViewModelTests
             ?? throw new MissingMethodException(nameof(WarehouseModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
+
+
+    private static Task InvokeLoadInsightsAsync(WarehouseModuleViewModel viewModel, int id)
+    {
+        var method = typeof(WarehouseModuleViewModel)
+            .GetMethod("LoadInsightsAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingMethodException(nameof(WarehouseModuleViewModel), "LoadInsightsAsync");
+        return (Task)method.Invoke(viewModel, new object[] { id })!;
+    }
+
 }

@@ -282,6 +282,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
 
 public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
+
             _loadedMachine = machine;
             LoadEditor(machine);
             return true;

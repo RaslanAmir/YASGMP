@@ -7,6 +7,11 @@
              mc:Ignorable="d"
              d:DesignHeight="480"
              d:DesignWidth="960">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -84,6 +89,8 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+
                             </Grid.RowDefinitions>
 
                             <TextBlock Text="Code" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
@@ -152,11 +159,44 @@
                                      Grid.Column="1"
                                      Text="{Binding Editor.Sku, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
+
+
+                            <TextBlock Text="Warehouse Summary" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="10"
+                                       Grid.Column="1"
+                                       Text="{Binding Editor.WarehouseSummary}"
+                                       TextWrapping="Wrap"
+                                       Foreground="DarkSlateGray" />
+
                         </Grid>
 
                         <TextBlock Text="Price" Margin="0,0,0,4" />
                         <TextBox Text="{Binding Editor.Price, UpdateSourceTrigger=PropertyChanged, StringFormat=F2}"
                                  IsEnabled="{Binding IsEditorEnabled}" />
+
+
+                        <Border Background="#1FFFCCCC" Padding="8" Margin="0,12,0,0" CornerRadius="4" Visibility="{Binding Editor.IsWarehouseStockCritical, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚠" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding StockHealthMessage}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="{Binding StockHealthMessage}" Margin="0,8,0,0" Foreground="DarkSlateGray" TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Editor.IsWarehouseStockCritical}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding StockHealthMessage}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
                         <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>

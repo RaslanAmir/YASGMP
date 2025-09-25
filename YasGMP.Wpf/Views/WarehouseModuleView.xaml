@@ -7,6 +7,11 @@
              mc:Ignorable="d"
              d:DesignHeight="480"
              d:DesignWidth="960">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -150,6 +155,56 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+
+                        <Border Background="#1FFFCCCC" Padding="8" Margin="0,12,0,0" CornerRadius="4" Visibility="{Binding HasStockAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⚠" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="Under-minimum stock detected for one or more items." FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+
+                        <GroupBox Header="Stock Snapshot" Margin="0,16,0,0">
+                            <DataGrid ItemsSource="{Binding StockSnapshot}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" HeadersVisibility="Column" MinHeight="160">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsBelowMinimum}" Value="True">
+                                                <Setter Property="Foreground" Value="DarkRed" />
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsAboveMaximum}" Value="True">
+                                                <Setter Property="Foreground" Value="DarkGoldenrod" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Part" Binding="{Binding PartName}" Width="2*" />
+                                    <DataGridTextColumn Header="Code" Binding="{Binding PartCode}" Width="120" />
+                                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="70" />
+                                    <DataGridTextColumn Header="Reserved" Binding="{Binding Reserved}" Width="80" />
+                                    <DataGridTextColumn Header="Blocked" Binding="{Binding Blocked}" Width="80" />
+                                    <DataGridTextColumn Header="Min" Binding="{Binding MinThreshold}" Width="70" />
+                                    <DataGridTextColumn Header="Max" Binding="{Binding MaxThreshold}" Width="70" />
+                                    <DataGridTextColumn Header="Batch" Binding="{Binding BatchNumber}" Width="*" />
+                                    <DataGridTextColumn Header="Expiry" Binding="{Binding ExpiryDate, StringFormat=yyyy-MM-dd}" Width="120" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+
+                        <GroupBox Header="Recent Movements" Margin="0,16,0,0">
+                            <DataGrid ItemsSource="{Binding RecentMovements}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" MinHeight="140">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="When" Binding="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm}" Width="160" />
+                                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="120" />
+                                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="70" />
+                                    <DataGridTextColumn Header="Document" Binding="{Binding RelatedDocument}" Width="*" />
+                                    <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+
                     </StackPanel>
                 </ScrollViewer>
             </Border>

@@ -53,6 +53,17 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     [ObservableProperty]
     private bool _isEditorEnabled;
 
+
+    [ObservableProperty]
+    private ObservableCollection<WarehouseStockSnapshot> _stockSnapshot = new();
+
+    [ObservableProperty]
+    private ObservableCollection<InventoryMovementEntry> _recentMovements = new();
+
+    [ObservableProperty]
+    private bool _hasStockAlerts;
+
+
     public IReadOnlyList<string> StatusOptions { get; }
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
@@ -137,6 +148,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         {
             _loadedWarehouse = null;
             SetEditor(WarehouseEditor.CreateEmpty());
+
+            ClearInsights();
+
             UpdateAttachmentCommandState();
             return;
         }
@@ -160,6 +174,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
 
         _loadedWarehouse = warehouse;
         LoadEditor(warehouse);
+
+        await LoadInsightsAsync(id).ConfigureAwait(false);
+
         UpdateAttachmentCommandState();
     }
 
@@ -173,6 +190,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 _snapshot = null;
                 _loadedWarehouse = null;
                 SetEditor(WarehouseEditor.CreateForNew(_warehouseService.NormalizeStatus("qualified")));
+
+                ClearInsights();
+
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -181,6 +201,12 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 if (_loadedWarehouse is not null)
                 {
                     LoadEditor(_loadedWarehouse);
+
+                    if (_loadedWarehouse.Id > 0)
+                    {
+                        _ = LoadInsightsAsync(_loadedWarehouse.Id);
+                    }
+
                 }
                 break;
         }
@@ -324,6 +350,36 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
     }
+
+
+    private async Task LoadInsightsAsync(int warehouseId)
+    {
+        try
+        {
+            var stock = await _warehouseService.GetStockSnapshotAsync(warehouseId).ConfigureAwait(false);
+            StockSnapshot = new ObservableCollection<WarehouseStockSnapshot>(stock);
+            HasStockAlerts = StockSnapshot.Any(s => s.IsBelowMinimum || s.IsAboveMaximum);
+
+            var movements = await _warehouseService.GetRecentMovementsAsync(warehouseId, 15).ConfigureAwait(false);
+            RecentMovements = new ObservableCollection<InventoryMovementEntry>(movements);
+
+            StatusMessage = HasStockAlerts
+                ? $"{Title}: stock alerts detected for {StockSnapshot.Count(s => s.IsBelowMinimum)} item(s)."
+                : $"{Title}: stock overview refreshed ({StockSnapshot.Count} tracked parts).";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Unable to load warehouse insight: {ex.Message}";
+        }
+    }
+
+    private void ClearInsights()
+    {
+        StockSnapshot.Clear();
+        RecentMovements.Clear();
+        HasStockAlerts = false;
+    }
+
 
     private bool CanAttachDocument()
         => !IsBusy

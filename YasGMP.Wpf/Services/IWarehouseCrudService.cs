@@ -21,6 +21,12 @@ namespace YasGMP.Wpf.Services
         void Validate(Warehouse warehouse);
 
         string NormalizeStatus(string? status);
+
+
+        Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId);
+
+        Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10);
+
     }
 
     /// <summary>
@@ -38,4 +44,34 @@ namespace YasGMP.Wpf.Services
                    string.IsNullOrWhiteSpace(deviceInfo) ? "WPF" : deviceInfo,
                    string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId);
     }
+
+
+    public sealed record WarehouseStockSnapshot(
+        int WarehouseId,
+        int PartId,
+        string PartCode,
+        string PartName,
+        int Quantity,
+        int? MinThreshold,
+        int? MaxThreshold,
+        int Reserved,
+        int Blocked,
+        string BatchNumber,
+        string SerialNumber,
+        DateTime? ExpiryDate)
+    {
+        public bool IsBelowMinimum => MinThreshold.HasValue && Quantity - Reserved - Blocked < MinThreshold.Value;
+
+        public bool IsAboveMaximum => MaxThreshold.HasValue && Quantity > MaxThreshold.Value;
+    }
+
+    public sealed record InventoryMovementEntry(
+        int WarehouseId,
+        DateTime Timestamp,
+        string Type,
+        int Quantity,
+        string? RelatedDocument,
+        string? Note,
+        int? PerformedById);
+
 }

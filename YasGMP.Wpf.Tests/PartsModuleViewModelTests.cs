@@ -1,3 +1,5 @@
+
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -99,6 +101,40 @@ public class PartsModuleViewModelTests
         var request = attachments.Uploads[0];
         Assert.Equal("parts", request.EntityType);
         Assert.Equal(10, request.EntityId);
+    }
+
+    [Fact]
+    public async Task StockHealthMessage_WarnsWhenBelowMinimum()
+    {
+        var database = new DatabaseService();
+        database.Suppliers.Add(new Supplier { Id = 1, Name = "Contoso" });
+        var partAdapter = new FakePartCrudService();
+        partAdapter.Saved.Add(new Part
+        {
+            Id = 12,
+            Code = "PRT-12",
+            Name = "Sensor",
+            Stock = 2,
+            MinStockAlert = 5,
+            LowWarehouseCount = 1,
+            WarehouseSummary = "Main:2",
+            DefaultSupplierId = 1,
+            DefaultSupplierName = "Contoso"
+        });
+
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA" } };
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.First();
+
+        Assert.Contains("warehouse location", viewModel.StockHealthMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     private static Task<bool> InvokeSaveAsync(PartsModuleViewModel viewModel)
