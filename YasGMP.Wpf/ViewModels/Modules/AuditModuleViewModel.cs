@@ -31,8 +31,20 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var normalizedFrom = FilterFrom;
-        var normalizedTo = FilterTo < FilterFrom ? FilterFrom : FilterTo;
+        var normalizedFrom = FilterFrom.Date;
+
+        var effectiveFilterTo = FilterTo;
+        if (effectiveFilterTo == default)
+        {
+            effectiveFilterTo = FilterFrom;
+        }
+
+        if (effectiveFilterTo < FilterFrom)
+        {
+            effectiveFilterTo = FilterFrom;
+        }
+
+        var normalizedTo = effectiveFilterTo.Date.AddDays(1).AddTicks(-1);
 
         var actionFilter = string.Equals(SelectedAction, "All", StringComparison.OrdinalIgnoreCase)
             ? string.Empty

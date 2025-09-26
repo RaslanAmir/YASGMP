@@ -61,7 +61,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix(audit): format status messages via hook",
+  "lastCommitSummary": "fix(audit): normalize date filter bounds",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -87,6 +87,7 @@
     "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
     "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access.",
     "2025-10-10: Audit module now surfaces AuditService-backed filtering with richer inspector columns and WPF coverage; dotnet --info still fails with 'command not found'.",
-    "2025-10-11: B1 base now formats loaded status via a virtual hook so Audit module can emit singular/plural/no-results messaging validated by unit tests."
+    "2025-10-11: B1 base now formats loaded status via a virtual hook so Audit module can emit singular/plural/no-results messaging validated by unit tests.",
+    "2025-10-12: Audit module now normalizes filter dates to inclusive ranges and defaults missing end dates; WPF tests assert the end-of-day conversion."
   ]
 }
