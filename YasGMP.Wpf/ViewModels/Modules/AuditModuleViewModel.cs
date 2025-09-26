@@ -24,26 +24,14 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
 
-        FilterFrom = DateTime.Now.AddDays(-30);
-        FilterTo = DateTime.Now;
+        FilterFrom = DateTime.Today.AddDays(-30);
+        FilterTo = DateTime.Today;
         SelectedAction = ActionOptions[0];
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var effectiveFilterFrom = NormalizeDateInput(FilterFrom, DateTime.Today);
-        var effectiveFilterTo = NormalizeDateInput(FilterTo, effectiveFilterFrom);
-
-        var normalizedFromDate = effectiveFilterFrom.Date;
-        var normalizedToDate = effectiveFilterTo.Date;
-
-        if (normalizedToDate < normalizedFromDate)
-        {
-            (normalizedFromDate, normalizedToDate) = (normalizedToDate, normalizedFromDate);
-        }
-
-        var normalizedFrom = normalizedFromDate;
-        var normalizedTo = normalizedToDate.AddDays(1).AddTicks(-1);
+        var (normalizedFrom, normalizedTo) = NormalizeDateRange(FilterFrom, FilterTo);
 
         var actionFilter = string.Equals(SelectedAction, "All", StringComparison.OrdinalIgnoreCase)
             ? string.Empty
@@ -131,6 +119,19 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         DateTime from,
         DateTime to)
         => await _auditService.GetFilteredAudits(user, entity, action, from, to).ConfigureAwait(false);
+
+    private static (DateTime from, DateTime to) NormalizeDateRange(DateTime? from, DateTime? to)
+    {
+        var normalizedFrom = NormalizeDateInput(from, DateTime.Today).Date;
+        var normalizedToDate = NormalizeDateInput(to, normalizedFrom).Date;
+
+        if (normalizedToDate < normalizedFrom)
+        {
+            (normalizedFrom, normalizedToDate) = (normalizedToDate, normalizedFrom);
+        }
+
+        return (normalizedFrom, normalizedToDate.AddDays(1).AddTicks(-1));
+    }
 
     private static DateTime NormalizeDateInput(DateTime? value, DateTime fallback)
     {
