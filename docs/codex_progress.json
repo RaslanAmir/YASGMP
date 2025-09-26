@@ -63,7 +63,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix(b1): route refresh status through formatter",
+  "lastCommitSummary": "fix(b1): format refresh status after applying records",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -96,6 +96,7 @@
     "2025-10-15: Audit filters now clamp start/end days, auto-swap reversed ranges, and include WPF coverage for date-only end-of-day normalization.",
     "2025-10-16: B1 refresh now calls FormatLoadedStatus with the loaded count so Audit overrides can emit zero/singular/plural strings; unit tests assert the formatted audit status messages.",
     "2025-10-17: Audit module date filters now accept null DatePicker inputs, default missing end dates to the start date, and expand the end boundary to the final tick of the day; WPF unit tests verify LastToFilter receives the end-of-day timestamp.",
-    "2025-10-18: WPF host now routes AuditService registration through YasGmpCoreServiceGuards to strip transient duplicates before adding the singleton; DI tests assert duplicate descriptors are removed and the singleton instance is reused."
+    "2025-10-18: WPF host now routes AuditService registration through YasGmpCoreServiceGuards to strip transient duplicates before adding the singleton; DI tests assert duplicate descriptors are removed and the singleton instance is reused.",
+    "2025-10-19: B1 refresh status messaging now reads from the post-apply record count so overrides (Audit) emit accurate zero/singular/plural strings validated by unit coverage."
   ]
 }
