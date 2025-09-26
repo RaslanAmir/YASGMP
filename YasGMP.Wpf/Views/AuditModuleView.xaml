@@ -34,10 +34,46 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-            </DockPanel>
+            <StackPanel Grid.Row="0" Margin="0,0,0,8">
+                <WrapPanel Margin="0,0,0,8">
+                    <StackPanel Width="200" Margin="0,0,12,0">
+                        <TextBlock Text="User" FontWeight="SemiBold" />
+                        <TextBox Text="{Binding FilterUser, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="200" Margin="0,0,12,0">
+                        <TextBlock Text="Entity" FontWeight="SemiBold" />
+                        <TextBox Text="{Binding FilterEntity, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,0">
+                        <TextBlock Text="Action" FontWeight="SemiBold" />
+                        <ComboBox ItemsSource="{Binding ActionOptions}"
+                                  SelectedItem="{Binding SelectedAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,0">
+                        <TextBlock Text="From" FontWeight="SemiBold" />
+                        <DatePicker SelectedDate="{Binding FilterFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,0">
+                        <TextBlock Text="To" FontWeight="SemiBold" />
+                        <DatePicker SelectedDate="{Binding FilterTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </WrapPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="2"
+                            Content="Apply Filters"
+                            Command="{Binding RefreshCommand}"
+                            Margin="12,0,0,0"
+                            Padding="12,4" />
+                </Grid>
+            </StackPanel>
             <DataGrid Grid.Row="1"
                       ItemsSource="{Binding RecordsView}"
                       SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
@@ -46,10 +82,16 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
+                    <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[1].Value}" Width="200" />
+                    <DataGridTextColumn Header="Entity" Binding="{Binding Title}" Width="200" />
+                    <DataGridTextColumn Header="Action" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
+                    <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[4].Value}" Width="160" />
+                    <DataGridTextColumn Header="Device" Binding="{Binding InspectorFields[5].Value}" Width="2*" />
+                    <DataGridTextColumn Header="Digital Signature" Binding="{Binding InspectorFields[7].Value}" Width="200" />
+                    <DataGridTextColumn Header="Signature Hash" Binding="{Binding InspectorFields[8].Value}" Width="200" />
+                    <DataGridTextColumn Header="Note" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />

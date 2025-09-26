@@ -1,71 +1,196 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using YasGMP.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public const string ModuleKey = "Audit";
 
     public AuditModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
         : base(ModuleKey, "Audit Trail", databaseService, cflDialogService, shellInteraction, navigation)
     {
+        _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+
+        FilterFrom = DateTime.Now.AddDays(-30);
+        FilterTo = DateTime.Now;
+        SelectedAction = ActionOptions[0];
+
+        Records.CollectionChanged += OnRecordsCollectionChanged;
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var events = await Database.GetRecentDashboardEventsAsync(100).ConfigureAwait(false);
-        return events.Select(ToRecord).ToList();
+        var normalizedFrom = FilterFrom;
+        var normalizedTo = FilterTo < FilterFrom ? FilterFrom : FilterTo;
+
+        var actionFilter = string.Equals(SelectedAction, "All", StringComparison.OrdinalIgnoreCase)
+            ? string.Empty
+            : SelectedAction ?? string.Empty;
+
+        var audits = await QueryAuditsAsync(
+            FilterUser?.Trim() ?? string.Empty,
+            FilterEntity?.Trim() ?? string.Empty,
+            actionFilter.Trim(),
+            normalizedFrom,
+            normalizedTo).ConfigureAwait(false);
+
+        var records = audits?.Select(MapToRecord).ToList() ?? new List<ModuleRecord>();
+        return ToReadOnlyList(records);
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
         => new List<ModuleRecord>
         {
-            new("AUD-001", "User login", "LOGIN_SUCCESS", "info", "User admin logged in",
-                new[]
-                {
-                    new InspectorField("User", "admin"),
-                    new InspectorField("Timestamp", System.DateTime.Now.AddMinutes(-5).ToString("g", CultureInfo.CurrentCulture)),
-                    new InspectorField("Module", "Security")
-                },
-                "Security", 1),
-            new("AUD-002", "Work order closed", "WO_CLOSE", "audit", "WO-1001 closed",
-                new[]
-                {
-                    new InspectorField("User", "tech"),
-                    new InspectorField("Timestamp", System.DateTime.Now.AddMinutes(-60).ToString("g", CultureInfo.CurrentCulture)),
-                    new InspectorField("Module", "WorkOrders")
-                },
-                "WorkOrders", 1001)
+            MapToRecord(new AuditEntryDto
+            {
+                Id = 1,
+                Entity = "system_event_log",
+                EntityId = "1",
+                Action = "LOGIN_SUCCESS",
+                Timestamp = DateTime.Now.AddMinutes(-5),
+                Username = "admin",
+                UserId = 1,
+                IpAddress = "192.168.0.10",
+                DeviceInfo = "OS=Windows; Host=QA-WS",
+                DigitalSignature = "admin-sign",
+                SignatureHash = "A1B2C3",
+                Note = "User admin logged in successfully"
+            }),
+            MapToRecord(new AuditEntryDto
+            {
+                Id = 2,
+                Entity = "work_orders",
+                EntityId = "1001",
+                Action = "CLOSE",
+                Timestamp = DateTime.Now.AddMinutes(-60),
+                Username = "tech",
+                UserId = 7,
+                IpAddress = "10.0.0.5",
+                DeviceInfo = "OS=Windows; Host=MAINT-01",
+                DigitalSignature = "tech-sign",
+                SignatureHash = "FFEE0011",
+                Note = "WO-1001 closed",
+                Status = "audit"
+            })
         };
 
-    private static ModuleRecord ToRecord(DashboardEvent evt)
+    public IReadOnlyList<string> ActionOptions { get; } = new[]
     {
-        var fields = new List<InspectorField>
+        "All",
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "SIGN",
+        "ROLLBACK",
+        "EXPORT"
+    };
+
+    [ObservableProperty]
+    private string? _filterUser;
+
+    [ObservableProperty]
+    private string? _filterEntity;
+
+    [ObservableProperty]
+    private string? _selectedAction;
+
+    [ObservableProperty]
+    private DateTime _filterFrom;
+
+    [ObservableProperty]
+    private DateTime _filterTo;
+
+    private readonly AuditService _auditService;
+
+    protected virtual async Task<IReadOnlyList<AuditEntryDto>> QueryAuditsAsync(
+        string user,
+        string entity,
+        string action,
+        DateTime from,
+        DateTime to)
+        => await _auditService.GetFilteredAudits(user, entity, action, from, to).ConfigureAwait(false);
+
+    protected override bool MatchesSearch(ModuleRecord record, string searchText)
+        => base.MatchesSearch(record, searchText)
+           || record.InspectorFields.Any(field =>
+               field.Value?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
+
+    private ModuleRecord MapToRecord(AuditEntryDto entry)
+    {
+        var timestamp = entry.Timestamp == DateTime.MinValue
+            ? string.Empty
+            : entry.Timestamp.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
+
+        var userDisplay = !string.IsNullOrWhiteSpace(entry.Username)
+            ? entry.Username
+            : entry.UserId?.ToString(CultureInfo.InvariantCulture) ?? "-";
+
+        if (entry.UserId.HasValue && !string.IsNullOrWhiteSpace(entry.Username))
         {
-            new("Timestamp", evt.Timestamp.ToString("g", CultureInfo.CurrentCulture)),
-            new("Severity", evt.Severity),
-            new("Table", evt.RelatedModule ?? "system"),
-            new("Record Id", evt.RelatedRecordId?.ToString(CultureInfo.InvariantCulture) ?? "-"),
+            userDisplay = $"{entry.Username} (#{entry.UserId.Value.ToString(CultureInfo.InvariantCulture)})";
+        }
+
+        var entityDisplay = string.IsNullOrWhiteSpace(entry.Entity)
+            ? "system"
+            : entry.Entity!;
+
+        if (!string.IsNullOrWhiteSpace(entry.EntityId))
+        {
+            entityDisplay += $" #{entry.EntityId}";
+        }
+
+        var inspector = new List<InspectorField>
+        {
+            new("Timestamp", timestamp),
+            new("User", userDisplay),
+            new("Entity", entityDisplay),
+            new("Action", entry.Action ?? string.Empty),
+            new("IP Address", entry.IpAddress ?? string.Empty),
+            new("Device", entry.DeviceInfo ?? string.Empty),
+            new("Session", entry.SessionId ?? string.Empty),
+            new("Digital Signature", entry.DigitalSignature ?? string.Empty),
+            new("Signature Hash", entry.SignatureHash ?? string.Empty),
+            new("Note", entry.Note ?? string.Empty)
         };
+
+        var key = entry.Id?.ToString(CultureInfo.InvariantCulture)
+            ?? $"{entry.Timestamp:O}|{entry.Entity}|{entry.Action}";
 
         return new ModuleRecord(
-            evt.Id.ToString(CultureInfo.InvariantCulture),
-            evt.EventType,
-            evt.EventType,
-            evt.Severity,
-            evt.Description,
-            fields,
-            evt.RelatedModule,
-            evt.RelatedRecordId);
+            key,
+            entityDisplay,
+            entry.Action,
+            entry.Status,
+            entry.Note,
+            inspector,
+            relatedModuleKey: null,
+            relatedParameter: null);
+    }
+
+    private void OnRecordsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (Records.Count == 0)
+        {
+            StatusMessage = "No audit entries match the current filters.";
+        }
+        else
+        {
+            var label = Records.Count == 1 ? "audit entry" : "audit entries";
+            StatusMessage = $"Loaded {Records.Count} {label}.";
+        }
     }
 }

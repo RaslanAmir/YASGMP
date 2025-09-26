@@ -84,6 +84,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IUserService, UserService>();
                         svc.AddTransient<IUserCrudService, UserCrudServiceAdapter>();
                         svc.AddTransient<IScheduledJobCrudService, ScheduledJobCrudServiceAdapter>();
+                        svc.AddTransient<AuditService>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());

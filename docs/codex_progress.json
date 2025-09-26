@@ -34,14 +34,14 @@
     "UsersRoles": "done",
     "Suppliers": "done",
     "ExternalServicers": "done",
-    "Audit": "pending",
+    "Audit": "in-progress",
     "ApiAudit": "pending",
     "Attachments": "pending",
     "Dashboard": "pending",
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix(external-servicers): route CRUD through db extensions",
+  "lastCommitSummary": "feat(audit): load WPF audit trail via audit service",
 
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
@@ -66,7 +66,8 @@
     "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2.",
       "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task.",
       "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
-      "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access."
+      "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access.",
+      "2025-10-10: Audit module now surfaces AuditService-backed filtering with richer inspector columns and WPF coverage; dotnet --info still fails with 'command not found'."
   ]
 
 }
