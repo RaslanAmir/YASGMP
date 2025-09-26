@@ -9,7 +9,8 @@
       "2025-09-25: Batch 0 retry confirmed `dotnet --info` still returns 'command not found'.",
       "2025-09-26: Batch 0 retry confirmed `dotnet --info` still returns 'command not found'.",
       "2025-09-27: dotnet --info/dotnet restore/dotnet build all continue to fail with 'command not found'.",
-      "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container."
+      "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
+      "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked."
     ]
   },
   "batches": [
@@ -40,7 +41,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(suppliers): add CRUD editor",
+  "lastCommitSummary": "fix(external-servicers): route CRUD through db extensions",
 
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
@@ -64,7 +65,8 @@
     "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2.",
     "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2.",
       "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task.",
-      "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage."
+      "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
+      "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access."
   ]
 
 }

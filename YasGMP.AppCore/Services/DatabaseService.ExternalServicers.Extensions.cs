@@ -21,9 +21,9 @@ namespace YasGMP.Services
         // UI prefers ExternalContractor. Keep DB mapping tolerant and expose both shapes when needed.
         public static async Task<List<ExternalContractor>> GetAllExternalServicersAsync(this DatabaseService db, CancellationToken token = default)
         {
-            const string sql = @"SELECT 
+            const string sql = @"SELECT
     id, name, code, registration_number, contact_person, email, phone, address,
-    type, status, cooperation_start, cooperation_end, comment, digital_signature
+    type, status, cooperation_start, cooperation_end, comment, digital_signature, note
 FROM external_contractors ORDER BY name, id";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
             var list = new List<ExternalContractor>(dt.Rows.Count);
@@ -31,12 +31,34 @@ FROM external_contractors ORDER BY name, id";
             return list;
         }
 
+        public static async Task<ExternalServicer?> GetExternalServicerByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
+        {
+            const string sql = @"SELECT
+    id, name, code, registration_number, contact_person, email, phone, address,
+    type, status, cooperation_start, cooperation_end, comment, digital_signature, note
+FROM external_contractors WHERE id=@id LIMIT 1";
+
+            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            if (dt.Rows.Count == 0)
+            {
+                return null;
+            }
+
+            return MapToServicer(dt.Rows[0]);
+        }
+
+        public static async Task<ExternalContractor?> GetExternalContractorByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
+        {
+            var servicer = await db.GetExternalServicerByIdAsync(id, token).ConfigureAwait(false);
+            return servicer != null ? ToContractor(servicer) : null;
+        }
+
         public static async Task<int> InsertOrUpdateExternalServicerAsync(this DatabaseService db, ExternalServicer ext, bool update, CancellationToken token = default)
         {
             if (ext == null) throw new ArgumentNullException(nameof(ext));
-            string insert = @"INSERT INTO external_contractors (name, code, registration_number, contact_person, email, phone, address, type, status, cooperation_start, cooperation_end, comment, digital_signature)
-                             VALUES (@name,@code,@reg,@contact,@em,@ph,@addr,@type,@status,@start,@end,@comm,@sig)";
-            string updateSql = @"UPDATE external_contractors SET name=@name, code=@code, registration_number=@reg, contact_person=@contact, email=@em, phone=@ph, address=@addr, type=@type, status=@status, cooperation_start=@start, cooperation_end=@end, comment=@comm, digital_signature=@sig WHERE id=@id";
+            string insert = @"INSERT INTO external_contractors (name, code, registration_number, contact_person, email, phone, address, type, status, cooperation_start, cooperation_end, comment, digital_signature, note)
+                             VALUES (@name,@code,@reg,@contact,@em,@ph,@addr,@type,@status,@start,@end,@comm,@sig,@note)";
+            string updateSql = @"UPDATE external_contractors SET name=@name, code=@code, registration_number=@reg, contact_person=@contact, email=@em, phone=@ph, address=@addr, type=@type, status=@status, cooperation_start=@start, cooperation_end=@end, comment=@comm, digital_signature=@sig, note=@note WHERE id=@id";
 
             var pars = new List<MySqlParameter>
             {
@@ -52,7 +74,8 @@ FROM external_contractors ORDER BY name, id";
                 new("@start", (object?)ext.CooperationStart ?? DBNull.Value),
                 new("@end", (object?)ext.CooperationEnd ?? DBNull.Value),
                 new("@comm", (object?)ext.Comment ?? DBNull.Value),
-                new("@sig", (object?)ext.DigitalSignature ?? DBNull.Value)
+                new("@sig", (object?)ext.DigitalSignature ?? DBNull.Value),
+                new("@note", (object?)ext.ExtraNotes ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", ext.Id));
 
@@ -111,7 +134,8 @@ FROM external_contractors ORDER BY name, id";
                 CooperationStart = D("cooperation_start"),
                 CooperationEnd = D("cooperation_end"),
                 Comment = S("comment"),
-                DigitalSignature = S("digital_signature")
+                DigitalSignature = S("digital_signature"),
+                ExtraNotes = S("note")
             };
         }
 
@@ -126,6 +150,7 @@ FROM external_contractors ORDER BY name, id";
             {
                 Id = s.Id,
                 Name = s.Name,
+                ContractorCode = s.Code,
                 RegistrationNumber = s.VatOrId,
                 ContactPerson = s.ContactPerson,
                 Email = s.Email,
@@ -134,7 +159,7 @@ FROM external_contractors ORDER BY name, id";
                 Type = s.Type,
                 Status = s.Status, // UI-only on model; tolerated
                 DigitalSignature = s.DigitalSignature,
-                Note = s.Comment
+                Note = s.ExtraNotes ?? s.Comment
             };
 
         private static ExternalServicer ToServicer(ExternalContractor c)
@@ -142,6 +167,7 @@ FROM external_contractors ORDER BY name, id";
             {
                 Id = c.Id,
                 Name = c.Name,
+                Code = c.ContractorCode,
                 VatOrId = c.RegistrationNumber,
                 ContactPerson = c.ContactPerson,
                 Email = c.Email,
@@ -149,8 +175,9 @@ FROM external_contractors ORDER BY name, id";
                 Address = c.Address,
                 Type = c.Type,
                 Status = c.Status,
-                Comment = c.Note,
-                DigitalSignature = c.DigitalSignature
+                Comment = c.CommentRaw ?? c.Note,
+                DigitalSignature = c.DigitalSignature,
+                ExtraNotes = c.Note
             };
     }
 }
