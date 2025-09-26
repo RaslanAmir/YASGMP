@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, and 2025-10-14 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, and 2025-10-14 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, and 2025-10-14 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, and 2025-10-14 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, and 2025-10-17 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, and 2025-10-17 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, and 2025-10-17 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, and 2025-10-17 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -64,6 +64,7 @@
 - 2025-10-13: WPF host now keeps a single AuditService singleton registration aligned with MAUI; attempted `dotnet restore`/`dotnet build` still fail because the CLI is unavailable in the container.
 - 2025-10-15: Audit filters now clamp the start date to midnight, expand the end date to the day's final tick, and auto-swap reversed ranges; WPF coverage verifies date-only `FilterTo` inputs reach the end-of-day timestamp.
 - 2025-10-16: B1 refresh path now pushes counts through `FormatLoadedStatus`, letting Audit override emit zero/singular/plural status text; tests assert the audit-specific messaging via `RefreshAsync`.
+- 2025-10-17: Audit filters now treat null DatePicker inputs as optional bounds, default the end date to the selected start day, and extend it to the day's final tick; WPF unit coverage verifies `LastToFilter` captures the end-of-day timestamp for calendar-only inputs.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

@@ -31,12 +31,10 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var normalizedFromDate = FilterFrom.Date;
+        var effectiveFilterFrom = NormalizeDateInput(FilterFrom, DateTime.Today);
+        var effectiveFilterTo = NormalizeDateInput(FilterTo, effectiveFilterFrom);
 
-        var effectiveFilterTo = FilterTo == default
-            ? FilterFrom
-            : FilterTo;
-
+        var normalizedFromDate = effectiveFilterFrom.Date;
         var normalizedToDate = effectiveFilterTo.Date;
 
         if (normalizedToDate < normalizedFromDate)
@@ -119,10 +117,10 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     private string? _selectedAction;
 
     [ObservableProperty]
-    private DateTime _filterFrom;
+    private DateTime? _filterFrom;
 
     [ObservableProperty]
-    private DateTime _filterTo;
+    private DateTime? _filterTo;
 
     private readonly AuditService _auditService;
 
@@ -133,6 +131,16 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         DateTime from,
         DateTime to)
         => await _auditService.GetFilteredAudits(user, entity, action, from, to).ConfigureAwait(false);
+
+    private static DateTime NormalizeDateInput(DateTime? value, DateTime fallback)
+    {
+        if (!value.HasValue || value.Value == DateTime.MinValue)
+        {
+            return fallback;
+        }
+
+        return value.Value;
+    }
 
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
         => base.MatchesSearch(record, searchText)
