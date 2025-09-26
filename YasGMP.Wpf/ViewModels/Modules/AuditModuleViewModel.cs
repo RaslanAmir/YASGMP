@@ -31,7 +31,10 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var (normalizedFrom, normalizedTo) = NormalizeDateRange(FilterFrom, FilterTo);
+        var normalizedRange = NormalizeDateRange(FilterFrom, FilterTo);
+
+        FilterFrom = normalizedRange.FilterFrom;
+        FilterTo = normalizedRange.FilterTo;
 
         var actionFilter = string.Equals(SelectedAction, "All", StringComparison.OrdinalIgnoreCase)
             ? string.Empty
@@ -41,8 +44,8 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             FilterUser?.Trim() ?? string.Empty,
             FilterEntity?.Trim() ?? string.Empty,
             actionFilter.Trim(),
-            normalizedFrom,
-            normalizedTo).ConfigureAwait(false);
+            normalizedRange.QueryFrom,
+            normalizedRange.QueryTo).ConfigureAwait(false);
 
         var records = audits?.Select(MapToRecord).ToList() ?? new List<ModuleRecord>();
         return ToReadOnlyList(records);
@@ -120,27 +123,22 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         DateTime to)
         => await _auditService.GetFilteredAudits(user, entity, action, from, to).ConfigureAwait(false);
 
-    private static (DateTime from, DateTime to) NormalizeDateRange(DateTime? from, DateTime? to)
+    private static (DateTime QueryFrom, DateTime QueryTo, DateTime FilterFrom, DateTime FilterTo) NormalizeDateRange(DateTime? from, DateTime? to)
     {
-        var normalizedFrom = NormalizeDateInput(from, DateTime.Today).Date;
-        var normalizedToDate = NormalizeDateInput(to, normalizedFrom).Date;
+        var today = DateTime.Today;
 
-        if (normalizedToDate < normalizedFrom)
+        var normalizedFrom = (from?.Date ?? today.AddDays(-30));
+        var normalizedToCandidate = to?.Date
+            ?? (from.HasValue ? normalizedFrom : today);
+
+        if (normalizedToCandidate < normalizedFrom)
         {
-            (normalizedFrom, normalizedToDate) = (normalizedToDate, normalizedFrom);
+            (normalizedFrom, normalizedToCandidate) = (normalizedToCandidate, normalizedFrom);
         }
 
-        return (normalizedFrom, normalizedToDate.AddDays(1).AddTicks(-1));
-    }
+        var normalizedTo = normalizedToCandidate.Date.AddDays(1).AddTicks(-1);
 
-    private static DateTime NormalizeDateInput(DateTime? value, DateTime fallback)
-    {
-        if (!value.HasValue || value.Value == DateTime.MinValue)
-        {
-            return fallback;
-        }
-
-        return value.Value;
+        return (normalizedFrom, normalizedTo, normalizedFrom, normalizedToCandidate);
     }
 
     protected override bool MatchesSearch(ModuleRecord record, string searchText)

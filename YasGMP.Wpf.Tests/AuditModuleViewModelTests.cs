@@ -207,6 +207,27 @@ public class AuditModuleViewModelTests
         Assert.Equal(expectedFrom.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
     }
 
+    [Fact]
+    public async Task RefreshAsync_FilterToDateOnlyKindUnspecified_NormalizesAndPersistsFilter()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        viewModel.FilterFrom = new DateTime(2025, 7, 1, 15, 30, 0);
+        viewModel.FilterTo = DateTime.SpecifyKind(new DateTime(2025, 7, 5), DateTimeKind.Unspecified);
+
+        await viewModel.RefreshAsync();
+
+        Assert.Equal(new DateTime(2025, 7, 1), viewModel.LastFromFilter);
+        Assert.Equal(new DateTime(2025, 7, 5).AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.Equal(new DateTime(2025, 7, 1), viewModel.FilterFrom!.Value);
+        Assert.Equal(new DateTime(2025, 7, 5), viewModel.FilterTo!.Value);
+    }
+
     private static DatabaseService CreateDatabaseService()
         => new("Server=localhost;Database=unit_test;Uid=test;Pwd=test;");
 
