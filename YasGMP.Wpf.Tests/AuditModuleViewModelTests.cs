@@ -88,6 +88,29 @@ public class AuditModuleViewModelTests
         Assert.Equal(string.Empty, viewModel.LastActionFilter);
     }
 
+    [Fact]
+    public async Task InitializeAsync_MultipleAudits_UsesPluralizedStatusMessage()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 1, Entity = "systems", Action = "CREATE", Timestamp = DateTime.UtcNow },
+            new AuditEntryDto { Id = 2, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
+
+        await viewModel.InitializeAsync(null);
+
+        Assert.Equal(2, viewModel.Records.Count);
+        Assert.Equal("Loaded 2 audit entries.", viewModel.StatusMessage);
+    }
+
     private static DatabaseService CreateDatabaseService()
         => new("Server=localhost;Database=unit_test;Uid=test;Pwd=test;");
 

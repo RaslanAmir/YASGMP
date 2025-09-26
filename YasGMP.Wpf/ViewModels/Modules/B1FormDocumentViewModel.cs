@@ -172,6 +172,9 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
            || (!string.IsNullOrWhiteSpace(record.Code) && record.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase))
            || (!string.IsNullOrWhiteSpace(record.Description) && record.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>Formats the status message after records have been loaded.</summary>
+    protected virtual string FormatLoadedMessage(int count) => $"Loaded {count} record(s).";
+
     partial void OnModeChanged(FormMode value)
     {
         foreach (var button in Toolbar)
@@ -258,7 +261,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             StatusMessage = $"Loading {Title} records...";
             var records = await LoadAsync(parameter).ConfigureAwait(false);
             ApplyRecords(records);
-            StatusMessage = $"Loaded {Records.Count} record(s).";
+            StatusMessage = FormatLoadedMessage(Records.Count);
         }
         catch (Exception ex)
         {
