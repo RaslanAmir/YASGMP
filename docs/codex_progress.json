@@ -62,7 +62,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix(audit): normalize filter range boundaries",
+  "lastCommitSummary": "fix(b1): route refresh status through formatter",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -92,6 +92,7 @@
     "2025-10-12: Audit module now normalizes filter dates to inclusive ranges and defaults missing end dates; WPF tests assert the end-of-day conversion.",
     "2025-10-13: WPF host now keeps a single AuditService singleton aligned with MAUI; attempted dotnet restore/build still fail because the CLI is unavailable in the container.",
     "2025-10-14: dotnet restore/build retried for MAUI + WPF targets; CLI still missing so commands exit with 'command not found'.",
-    "2025-10-15: Audit filters now clamp start/end days, auto-swap reversed ranges, and include WPF coverage for date-only end-of-day normalization."
+    "2025-10-15: Audit filters now clamp start/end days, auto-swap reversed ranges, and include WPF coverage for date-only end-of-day normalization.",
+    "2025-10-16: B1 refresh now calls FormatLoadedStatus with the loaded count so Audit overrides can emit zero/singular/plural strings; unit tests assert the formatted audit status messages."
   ]
 }
