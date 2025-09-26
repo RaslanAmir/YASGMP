@@ -35,7 +35,7 @@
   - Settings/Admin — [ ] todo
 
 - **Open Issues / Blockers**
-  - `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`. *(2025-09-25 & 2025-09-27 retries confirmed `dotnet --info` continues to fail with **command not found**.)*
+- `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`. *(2025-09-25 & 2025-09-27 retries confirmed `dotnet --info` continues to fail with **command not found**; 2025-10-09 recheck still reports the command missing.)*
   - Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
   - Smoke automation is blocked until SDK + Windows tooling are installed.
   - Work Orders editor still requires e-signature prompt + inspector audit surfacing once Batch B2 unblocks the shared services.
@@ -57,6 +57,7 @@
 - 2025-10-06: Users/Roles (Security) module now reuses the shared user/RBAC services through a new adapter, exposing a mode-aware editor with CFL, role assignments, and unit coverage; signature/audit surfacing remains queued for Batch B2.
 - 2025-10-07: Suppliers module now leverages ISupplierCrudService with a mode-aware editor, attachments via AttachmentService, CFL/golden-arrow integration, and unit coverage; External Servicers remain queued for follow-up.
 - 2025-10-08: External Servicers module now mirrors MAUI CRUD with a dedicated adapter, WPF view, CFL picker, golden-arrow navigation, and unit/smoke coverage updates.
+- 2025-10-09: External Servicer service now delegates CRUD to `DatabaseServiceExternalServicersExtensions`; regression tests assert create/update/delete hit `external_contractors`. Restore/build remain blocked until the .NET CLI is available in the container.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
