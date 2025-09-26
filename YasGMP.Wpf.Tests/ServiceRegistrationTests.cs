@@ -44,7 +44,7 @@ public class ServiceRegistrationTests
             core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
 
             var svc = core.Services;
-            YasGmpCoreServiceGuards.EnsureAuditServiceSingleton(svc);
+            svc.AddSingleton<AuditService>();
             svc.AddSingleton<ICflDialogService, StubCflDialogService>();
             svc.AddSingleton<IShellInteractionService, StubShellInteractionService>();
             svc.AddSingleton<IModuleNavigationService, StubModuleNavigationService>();
