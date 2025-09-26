@@ -62,7 +62,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<CalibrationService>();
                         svc.AddTransient<PartService>();
                         svc.AddTransient<ChangeControlService>();
-
+                        svc.AddTransient<ValidationService>();
                         svc.AddTransient<IIncidentAuditService, IncidentAuditService>();
                         svc.AddTransient<IncidentService>();
                         svc.AddTransient<CAPAService>();
@@ -74,6 +74,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IIncidentCrudService, IncidentCrudServiceAdapter>();
                         svc.AddTransient<ICapaCrudService, CapaCrudServiceAdapter>();
                         svc.AddTransient<IChangeControlCrudService, ChangeControlCrudServiceAdapter>();
+                        svc.AddTransient<IValidationCrudService, ValidationCrudServiceAdapter>();
 
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
@@ -93,6 +94,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<CapaModuleViewModel>();
                         svc.AddTransient<IncidentsModuleViewModel>();
                         svc.AddTransient<ChangeControlModuleViewModel>();
+                        svc.AddTransient<ValidationsModuleViewModel>();
                         svc.AddTransient<SchedulingModuleViewModel>();
                         svc.AddTransient<SecurityModuleViewModel>();
                         svc.AddTransient<AdminModuleViewModel>();
@@ -114,6 +116,7 @@ namespace YasGMP.Wpf
                             registry.Register<CapaModuleViewModel>(CapaModuleViewModel.ModuleKey, "CAPA", "Quality", "Corrective actions and preventive plans");
                             registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
                             registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
+                            registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
                             registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");

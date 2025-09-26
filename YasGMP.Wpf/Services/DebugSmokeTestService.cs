@@ -31,7 +31,8 @@ public sealed class DebugSmokeTestService
         AssetsModuleViewModel.ModuleKey,
         ComponentsModuleViewModel.ModuleKey,
         WorkOrdersModuleViewModel.ModuleKey,
-        AuditModuleViewModel.ModuleKey
+        AuditModuleViewModel.ModuleKey,
+        ValidationsModuleViewModel.ModuleKey
     };
 
     private readonly IUserSession _userSession;

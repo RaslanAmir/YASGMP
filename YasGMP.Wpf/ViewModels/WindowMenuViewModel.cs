@@ -24,6 +24,7 @@ namespace YasGMP.Wpf.ViewModels
             OpenCapaCommand = new RelayCommand(() => _shell.OpenModule(CapaModuleViewModel.ModuleKey));
             OpenIncidentsCommand = new RelayCommand(() => _shell.OpenModule(IncidentsModuleViewModel.ModuleKey));
             OpenChangeControlCommand = new RelayCommand(() => _shell.OpenModule(ChangeControlModuleViewModel.ModuleKey));
+            OpenValidationsCommand = new RelayCommand(() => _shell.OpenModule(ValidationsModuleViewModel.ModuleKey));
             OpenSecurityCommand = new RelayCommand(() => _shell.OpenModule(SecurityModuleViewModel.ModuleKey));
             OpenAdministrationCommand = new RelayCommand(() => _shell.OpenModule(AdminModuleViewModel.ModuleKey));
             OpenDiagnosticsCommand = new RelayCommand(() => _shell.OpenModule(DiagnosticsModuleViewModel.ModuleKey));
@@ -52,6 +53,8 @@ namespace YasGMP.Wpf.ViewModels
         public IRelayCommand OpenIncidentsCommand { get; }
 
         public IRelayCommand OpenChangeControlCommand { get; }
+
+        public IRelayCommand OpenValidationsCommand { get; }
 
         public IRelayCommand OpenSecurityCommand { get; }
 

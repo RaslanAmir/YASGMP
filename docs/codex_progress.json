@@ -28,7 +28,7 @@
     "Incidents": "done",
     "CAPA": "done",
     "ChangeControl": "done",
-    "Validations": "pending",
+    "Validations": "done",
     "ScheduledJobs": "pending",
     "UsersRoles": "pending",
     "Suppliers": "pending",
@@ -40,7 +40,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(change-control): add CRUD editor with attachments",
+  "lastCommitSummary": "feat(validations): add validation editor with CRUD and attachments",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -58,6 +58,7 @@
     "2025-09-30: Incidents module now runs through IIncidentCrudService with mode-aware editor and attachment uploads; CAPA/Change Control remain pending.",
     "2025-10-01: Incidents editor exposes CFL-driven linking to work orders and CAPA cases with unit coverage for the new mode transitions.",
     "2025-10-02: CAPA module now persists via ICapaCrudService with component lookups, attachments, and unit coverage for save/attachment flows; Change Control still pending.",
-    "2025-10-03: Change Control module now uses IChangeControlCrudService with a mode-aware editor, CFL picker, and attachment workflow; signature/audit prompts queued for Batch B2."
+    "2025-10-03: Change Control module now uses IChangeControlCrudService with a mode-aware editor, CFL picker, and attachment workflow; signature/audit prompts queued for Batch B2.",
+    "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available."
   ]
 }

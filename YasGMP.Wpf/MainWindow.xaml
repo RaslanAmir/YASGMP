@@ -62,6 +62,8 @@
                                    Command="{Binding WindowCommands.OpenIncidentsCommand}" />
                     <fluent:Button Header="Change Control"
                                    Command="{Binding WindowCommands.OpenChangeControlCommand}" />
+                    <fluent:Button Header="Validations"
+                                   Command="{Binding WindowCommands.OpenValidationsCommand}" />
                 </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Supply Chain">
                     <fluent:Button Header="Suppliers"

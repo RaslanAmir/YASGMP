@@ -63,6 +63,9 @@
         <DataTemplate DataType="{x:Type vm:ChangeControlModuleViewModel}">
             <views:ChangeControlModuleView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ValidationsModuleViewModel}">
+            <views:ValidationsModuleView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:DiagnosticsModuleViewModel}">
             <views:DiagnosticsModuleView />
         </DataTemplate>
