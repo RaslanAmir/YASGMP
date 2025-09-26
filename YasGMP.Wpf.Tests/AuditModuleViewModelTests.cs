@@ -67,7 +67,8 @@ public class AuditModuleViewModelTests
         Assert.Equal("work_orders", viewModel.LastEntityFilter);
         Assert.Equal("UPDATE", viewModel.LastActionFilter);
         Assert.Equal(viewModel.FilterFrom, viewModel.LastFromFilter);
-        Assert.Equal(viewModel.FilterTo, viewModel.LastToFilter);
+        var expectedTo = viewModel.FilterTo.Date.AddDays(1).AddTicks(-1);
+        Assert.Equal(expectedTo, viewModel.LastToFilter);
     }
 
     [Fact]
@@ -109,6 +110,37 @@ public class AuditModuleViewModelTests
 
         Assert.Equal(2, viewModel.Records.Count);
         Assert.Equal("Loaded 2 audit entries.", viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_NormalizesDateFiltersBeforeQuery()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var audits = new[]
+        {
+            new AuditEntryDto
+            {
+                Id = 5,
+                Entity = "systems",
+                EntityId = "1",
+                Action = "CREATE",
+                Timestamp = new DateTime(2025, 3, 10, 15, 45, 0, DateTimeKind.Utc)
+            }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
+        viewModel.FilterFrom = new DateTime(2025, 3, 10, 14, 30, 0);
+        viewModel.FilterTo = new DateTime(2025, 3, 15);
+
+        await viewModel.InitializeAsync(null);
+
+        Assert.Equal(new DateTime(2025, 3, 10), viewModel.LastFromFilter);
+        Assert.Equal(new DateTime(2025, 3, 15).Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
     }
 
     private static DatabaseService CreateDatabaseService()
