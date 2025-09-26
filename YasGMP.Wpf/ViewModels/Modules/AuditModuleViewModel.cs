@@ -200,13 +200,10 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     }
 
     protected override string FormatLoadedStatus(int count)
-    {
-        if (count == 0)
+        => count switch
         {
-            return "No audit entries match the current filters.";
-        }
-
-        var label = count == 1 ? "audit entry" : "audit entries";
-        return $"Loaded {count} {label}.";
-    }
+            0 => "No audit entries match the current filters.",
+            1 => "Loaded 1 audit entry.",
+            _ => $"Loaded {count} audit entries."
+        };
 }
