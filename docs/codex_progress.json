@@ -11,7 +11,8 @@
       "2025-09-27: dotnet --info/dotnet restore/dotnet build all continue to fail with 'command not found'.",
       "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
       "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked.",
-      "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container."
+      "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container.",
+      "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container."
     ]
   },
   "batches": [
@@ -87,8 +88,9 @@
     "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
     "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access.",
     "2025-10-10: Audit module now surfaces AuditService-backed filtering with richer inspector columns and WPF coverage; dotnet --info still fails with 'command not found'.",
-    "2025-10-11: B1 base now formats loaded status via a virtual hook so Audit module can emit singular/plural/no-results messaging validated by unit tests.",
+    "2025-10-11: B1 base now formats loaded status via a virtual hook (FormatLoadedStatus) so Audit module can emit singular/plural/no-results messaging validated by unit tests.",
     "2025-10-12: Audit module now normalizes filter dates to inclusive ranges and defaults missing end dates; WPF tests assert the end-of-day conversion.",
-    "2025-10-13: WPF host now keeps a single AuditService singleton aligned with MAUI; attempted dotnet restore/build still fail because the CLI is unavailable in the container."
+    "2025-10-13: WPF host now keeps a single AuditService singleton aligned with MAUI; attempted dotnet restore/build still fail because the CLI is unavailable in the container.",
+    "2025-10-14: dotnet restore/build retried for MAUI + WPF targets; CLI still missing so commands exit with 'command not found'."
   ]
 }

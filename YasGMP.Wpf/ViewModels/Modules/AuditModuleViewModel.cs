@@ -190,7 +190,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             relatedParameter: null);
     }
 
-    protected override string FormatLoadedMessage(int count)
+    protected override string FormatLoadedStatus(int count)
     {
         if (count == 0)
         {

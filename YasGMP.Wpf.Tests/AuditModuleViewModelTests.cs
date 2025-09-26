@@ -49,7 +49,7 @@ public class AuditModuleViewModelTests
         viewModel.FilterFrom = new DateTime(2025, 1, 1);
         viewModel.FilterTo = new DateTime(2025, 1, 31);
 
-        await viewModel.InitializeAsync(null);
+        await viewModel.RefreshAsync();
 
         Assert.Single(viewModel.Records);
         var record = viewModel.Records.First();
@@ -82,7 +82,7 @@ public class AuditModuleViewModelTests
 
         var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
 
-        await viewModel.InitializeAsync(null);
+        await viewModel.RefreshAsync();
 
         Assert.Empty(viewModel.Records);
         Assert.Equal("No audit entries match the current filters.", viewModel.StatusMessage);
@@ -106,7 +106,7 @@ public class AuditModuleViewModelTests
 
         var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
 
-        await viewModel.InitializeAsync(null);
+        await viewModel.RefreshAsync();
 
         Assert.Equal(2, viewModel.Records.Count);
         Assert.Equal("Loaded 2 audit entries.", viewModel.StatusMessage);
@@ -137,7 +137,7 @@ public class AuditModuleViewModelTests
         viewModel.FilterFrom = new DateTime(2025, 3, 10, 14, 30, 0);
         viewModel.FilterTo = new DateTime(2025, 3, 15);
 
-        await viewModel.InitializeAsync(null);
+        await viewModel.RefreshAsync();
 
         Assert.Equal(new DateTime(2025, 3, 10), viewModel.LastFromFilter);
         Assert.Equal(new DateTime(2025, 3, 15).Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
