@@ -1,72 +1,675 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed class CapaModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public const string ModuleKey = "Capa";
 
+    private static readonly string[] DefaultStatuses =
+    {
+        "OPEN",
+        "INVESTIGATION",
+        "ACTION_DEFINED",
+        "ACTION_APPROVED",
+        "ACTION_EXECUTED",
+        "EFFECTIVENESS_CHECK",
+        "CLOSED"
+    };
+
+    private static readonly string[] DefaultPriorities =
+    {
+        "Critical",
+        "High",
+        "Medium",
+        "Low"
+    };
+
+    private readonly ICapaCrudService _capaService;
+    private readonly IComponentCrudService _componentService;
+    private readonly IAuthContext _authContext;
+    private readonly IFilePicker _filePicker;
+    private readonly IAttachmentService _attachmentService;
+
+    private IReadOnlyList<Component> _components = Array.Empty<Component>();
+    private CapaCase? _loadedCapa;
+    private CapaEditor? _snapshot;
+    private bool _suppressDirtyNotifications;
+
     public CapaModuleViewModel(
         DatabaseService databaseService,
+        ICapaCrudService capaService,
+        IComponentCrudService componentService,
+        IAuthContext authContext,
+        IFilePicker filePicker,
+        IAttachmentService attachmentService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
         : base(ModuleKey, "CAPA", databaseService, cflDialogService, shellInteraction, navigation)
     {
+        _capaService = capaService ?? throw new ArgumentNullException(nameof(capaService));
+        _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
+        _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+
+        StatusOptions = Array.AsReadOnly(DefaultStatuses);
+        PriorityOptions = Array.AsReadOnly(DefaultPriorities);
+        ComponentOptions = new ObservableCollection<ComponentOption>();
+
+        Editor = CapaEditor.CreateEmpty();
+        AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
+
+    [ObservableProperty]
+    private CapaEditor _editor;
+
+    [ObservableProperty]
+    private bool _isEditorEnabled;
+
+    public ObservableCollection<ComponentOption> ComponentOptions { get; }
+
+    public IReadOnlyList<string> StatusOptions { get; }
+
+    public IReadOnlyList<string> PriorityOptions { get; }
+
+    public IAsyncRelayCommand AttachDocumentCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var capaCases = await Database.GetAllCapaCasesAsync().ConfigureAwait(false);
+        _components = await _componentService.GetAllAsync().ConfigureAwait(false);
+        RefreshComponentOptions(_components);
+
+        var capaCases = await _capaService.GetAllAsync().ConfigureAwait(false);
+        foreach (var capa in capaCases)
+        {
+            capa.Status = _capaService.NormalizeStatus(capa.Status);
+            capa.Priority = _capaService.NormalizePriority(capa.Priority);
+        }
+
         return capaCases.Select(ToRecord).ToList();
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
-        => new List<ModuleRecord>
+    {
+        var components = new List<Component>
         {
-            new("CAPA-001", "Deviation CAPA", "CAPA-001", "Open", "CAPA for deviation 2024-01",
-                new[]
-                {
-                    new InspectorField("Priority", "High"),
-                    new InspectorField("Opened", System.DateTime.Now.AddDays(-15).ToString("d", CultureInfo.CurrentCulture)),
-                    new InspectorField("Assigned To", "QA Lead")
-                },
-                AuditModuleViewModel.ModuleKey, 10),
-            new("CAPA-002", "Audit Finding CAPA", "CAPA-002", "In Progress", "CAPA for external audit finding",
-                new[]
-                {
-                    new InspectorField("Priority", "Medium"),
-                    new InspectorField("Opened", System.DateTime.Now.AddDays(-30).ToString("d", CultureInfo.CurrentCulture)),
-                    new InspectorField("Assigned To", "Quality Manager")
-                },
-                AuditModuleViewModel.ModuleKey, 11)
+            new()
+            {
+                Id = 2001,
+                Name = "Autoclave Steam Valve",
+                Code = "CMP-AUTO-VAL"
+            },
+            new()
+            {
+                Id = 2002,
+                Name = "Lyophilizer Shelf Probe",
+                Code = "CMP-LYO-PROBE"
+            }
         };
+
+        _components = components;
+        RefreshComponentOptions(components);
+
+        var cases = new List<CapaCase>
+        {
+            new()
+            {
+                Id = 501,
+                Title = "Temperature excursion investigation",
+                Description = "Investigate freezer deviation and define corrective measures.",
+                ComponentId = 2002,
+                Priority = "High",
+                Status = "INVESTIGATION",
+                RootCause = "Door seal failure",
+                CorrectiveAction = "Replace seal",
+                PreventiveAction = "Monthly inspection",
+                Reason = "Deviation GMP-2024-044",
+                Actions = "Containment completed",
+                Notes = "Requires QA sign-off",
+                DateOpen = DateTime.UtcNow.AddDays(-7)
+            },
+            new()
+            {
+                Id = 502,
+                Title = "Audit finding CAPA",
+                Description = "Address supplier qualification gap discovered during audit.",
+                ComponentId = 2001,
+                Priority = "Medium",
+                Status = "ACTION_DEFINED",
+                RootCause = "Missing vendor re-evaluation",
+                CorrectiveAction = "Perform vendor audit",
+                PreventiveAction = "Implement annual review",
+                Reason = "External audit finding",
+                Actions = "Plan submitted",
+                Notes = "Awaiting approval",
+                DateOpen = DateTime.UtcNow.AddDays(-30)
+            }
+        };
+
+        return cases.Select(ToRecord).ToList();
+    }
+
+    protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
+    {
+        if (record is null)
+        {
+            _loadedCapa = null;
+            SetEditor(CapaEditor.CreateEmpty());
+            UpdateAttachmentCommandState();
+            return;
+        }
+
+        if (IsInEditMode)
+        {
+            return;
+        }
+
+        if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+        {
+            return;
+        }
+
+        var capa = await _capaService.TryGetByIdAsync(id).ConfigureAwait(false);
+        if (capa is null)
+        {
+            StatusMessage = $"Unable to load {record.Title}.";
+            return;
+        }
+
+        capa.Status = _capaService.NormalizeStatus(capa.Status);
+        capa.Priority = _capaService.NormalizePriority(capa.Priority);
+        _loadedCapa = capa;
+        LoadEditor(capa);
+        UpdateAttachmentCommandState();
+    }
+
+    protected override Task OnModeChangedAsync(FormMode mode)
+    {
+        IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
+
+        switch (mode)
+        {
+            case FormMode.Add:
+                _snapshot = null;
+                SetEditor(CapaEditor.CreateForNew(_authContext));
+                ApplyRelatedDefaults();
+                break;
+            case FormMode.Update:
+                _snapshot = Editor.Clone();
+                break;
+            case FormMode.View:
+                _snapshot = null;
+                break;
+        }
+
+        UpdateAttachmentCommandState();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task<bool> OnSaveAsync()
+    {
+        var context = CapaCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId);
+
+        var capa = Editor.ToCapaCase(_loadedCapa);
+        capa.Status = _capaService.NormalizeStatus(capa.Status);
+        capa.Priority = _capaService.NormalizePriority(capa.Priority);
+
+        if (Mode == FormMode.Add)
+        {
+            var id = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
+            if (capa.Id == 0 && id > 0)
+            {
+                capa.Id = id;
+            }
+
+            _loadedCapa = capa;
+            LoadEditor(capa);
+            return true;
+        }
+
+        if (Mode == FormMode.Update)
+        {
+            if (_loadedCapa is null)
+            {
+                return false;
+            }
+
+            capa.Id = _loadedCapa.Id;
+            await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
+            _loadedCapa = capa;
+            LoadEditor(capa);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected override void OnCancel()
+    {
+        if (Mode == FormMode.Add)
+        {
+            if (_loadedCapa is not null)
+            {
+                LoadEditor(_loadedCapa);
+            }
+            else
+            {
+                SetEditor(CapaEditor.CreateEmpty());
+            }
+        }
+        else if (Mode == FormMode.Update && _snapshot is not null)
+        {
+            SetEditor(_snapshot.Clone());
+        }
+    }
+
+    protected override async Task<CflRequest?> CreateCflRequestAsync()
+    {
+        var capaCases = await _capaService.GetAllAsync().ConfigureAwait(false);
+        var items = capaCases
+            .Select(capa =>
+            {
+                var key = capa.Id.ToString(CultureInfo.InvariantCulture);
+                var label = string.IsNullOrWhiteSpace(capa.Title) ? key : capa.Title;
+                var descriptionParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(capa.Priority))
+                {
+                    descriptionParts.Add(capa.Priority);
+                }
+
+                if (!string.IsNullOrWhiteSpace(capa.Status))
+                {
+                    descriptionParts.Add(capa.Status);
+                }
+
+                if (capa.DateOpen != default)
+                {
+                    descriptionParts.Add(capa.DateOpen.ToString("d", CultureInfo.CurrentCulture));
+                }
+
+                return new CflItem(key, label, descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null);
+            })
+            .ToList();
+
+        return new CflRequest("Select CAPA", items);
+    }
+
+    protected override Task OnCflSelectionAsync(CflResult result)
+    {
+        var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
+        if (match is not null)
+        {
+            SelectedRecord = match;
+            SearchText = match.Title;
+            StatusMessage = $"Loaded {match.Title}.";
+            return Task.CompletedTask;
+        }
+
+        SearchText = result.Selected.Label;
+        StatusMessage = $"Filtered CAPA cases by \"{result.Selected.Label}\".";
+        RecordsView.Refresh();
+        return Task.CompletedTask;
+    }
+
+    protected override bool MatchesSearch(ModuleRecord record, string searchText)
+    {
+        if (base.MatchesSearch(record, searchText))
+        {
+            return true;
+        }
+
+        return record.InspectorFields.Any(field =>
+            field.Value.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task AttachDocumentAsync()
+    {
+        if (_loadedCapa is null || _loadedCapa.Id <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommandState();
+
+            var files = await _filePicker
+                .PickFilesAsync(new FilePickerRequest(true, null, "Select CAPA attachment"))
+                .ConfigureAwait(false);
+
+            if (files.Count == 0)
+            {
+                StatusMessage = "No files selected.";
+                return;
+            }
+
+            var uploads = 0;
+            var uploadedBy = _authContext.CurrentUser?.Id;
+
+            foreach (var file in files)
+            {
+                await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
+                var request = new AttachmentUploadRequest
+                {
+                    FileName = file.FileName,
+                    ContentType = file.ContentType,
+                    EntityType = "capa_cases",
+                    EntityId = _loadedCapa.Id,
+                    UploadedById = uploadedBy,
+                    Reason = $"capa:{_loadedCapa.Id}",
+                    SourceIp = _authContext.CurrentIpAddress,
+                    SourceHost = _authContext.CurrentDeviceInfo,
+                    Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
+                };
+
+                await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
+                uploads++;
+            }
+
+            StatusMessage = uploads == 1
+                ? "Attachment uploaded successfully."
+                : $"Uploaded {uploads} attachments successfully.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Attachment upload failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+    }
+
+    private bool CanAttachDocument()
+        => !IsBusy && _loadedCapa is { Id: > 0 } && Mode is FormMode.View or FormMode.Update;
+
+    private void LoadEditor(CapaCase capa)
+    {
+        _suppressDirtyNotifications = true;
+        Editor = CapaEditor.FromCapa(capa, _capaService.NormalizeStatus, _capaService.NormalizePriority, ResolveComponentName);
+        _suppressDirtyNotifications = false;
+        ResetDirty();
+    }
+
+    private void SetEditor(CapaEditor editor)
+    {
+        _suppressDirtyNotifications = true;
+        Editor = editor;
+        _suppressDirtyNotifications = false;
+        ResetDirty();
+    }
+
+    private void ApplyRelatedDefaults()
+    {
+        if (SelectedRecord?.RelatedParameter is int relatedId)
+        {
+            Editor.ComponentId = relatedId;
+            Editor.ComponentName = ResolveComponentName(relatedId);
+        }
+    }
+
+    private void RefreshComponentOptions(IEnumerable<Component> components)
+    {
+        ComponentOptions.Clear();
+        foreach (var component in components
+                     .OrderBy(static c => string.IsNullOrWhiteSpace(c.Name) ? c.Code : c.Name)
+                     .Select(c => new ComponentOption(c.Id, ResolveComponentName(c.Id))))
+        {
+            ComponentOptions.Add(component);
+        }
+    }
+
+    private string ResolveComponentName(int componentId)
+    {
+        var component = _components.FirstOrDefault(c => c.Id == componentId);
+        if (component is null)
+        {
+            return string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(component.Name))
+        {
+            return component.Name;
+        }
+
+        return component.Code ?? componentId.ToString(CultureInfo.InvariantCulture);
+    }
 
     private static ModuleRecord ToRecord(CapaCase capa)
     {
         var fields = new List<InspectorField>
         {
             new("Priority", string.IsNullOrWhiteSpace(capa.Priority) ? "-" : capa.Priority),
-            new("Status", capa.Status),
-            new("Opened", capa.OpenedAt.ToString("d", CultureInfo.CurrentCulture)),
+            new("Status", string.IsNullOrWhiteSpace(capa.Status) ? "-" : capa.Status),
+            new("Opened", capa.DateOpen == default ? "-" : capa.DateOpen.ToString("d", CultureInfo.CurrentCulture)),
             new("Assigned To", capa.AssignedTo?.FullName ?? capa.AssignedTo?.Username ?? "-"),
             new("Component", capa.ComponentId.ToString(CultureInfo.InvariantCulture))
         };
 
         return new ModuleRecord(
             capa.Id.ToString(CultureInfo.InvariantCulture),
-            capa.Title,
+            string.IsNullOrWhiteSpace(capa.Title) ? $"CAPA-{capa.Id:D5}" : capa.Title,
             capa.CapaCode,
             capa.Status,
             capa.Description,
-            fields,
-            AuditModuleViewModel.ModuleKey,
-            capa.Id);
+            fields);
+    }
+
+    private void UpdateAttachmentCommandState()
+        => AttachDocumentCommand.NotifyCanExecuteChanged();
+
+    partial void OnEditorChanging(CapaEditor value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        value.PropertyChanged -= OnEditorPropertyChanged;
+    }
+
+    partial void OnEditorChanged(CapaEditor value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        value.PropertyChanged += OnEditorPropertyChanged;
+    }
+
+    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_suppressDirtyNotifications)
+        {
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(CapaEditor.ComponentId), StringComparison.Ordinal))
+        {
+            _suppressDirtyNotifications = true;
+            Editor.ComponentName = ResolveComponentName(Editor.ComponentId);
+            _suppressDirtyNotifications = false;
+        }
+
+        if (IsInEditMode)
+        {
+            MarkDirty();
+        }
+    }
+}
+
+public readonly record struct ComponentOption(int Id, string Name)
+{
+    public override string ToString() => Name;
+}
+
+public sealed partial class CapaEditor : ObservableObject
+{
+    [ObservableProperty]
+    private int _id;
+
+    [ObservableProperty]
+    private string _title = string.Empty;
+
+    [ObservableProperty]
+    private string _description = string.Empty;
+
+    [ObservableProperty]
+    private int _componentId;
+
+    [ObservableProperty]
+    private string _componentName = string.Empty;
+
+    [ObservableProperty]
+    private int? _assignedToId;
+
+    [ObservableProperty]
+    private string _priority = "Medium";
+
+    [ObservableProperty]
+    private string _status = "OPEN";
+
+    [ObservableProperty]
+    private DateTime _dateOpen = DateTime.UtcNow;
+
+    [ObservableProperty]
+    private DateTime? _dateClose;
+
+    [ObservableProperty]
+    private string _reason = string.Empty;
+
+    [ObservableProperty]
+    private string _rootCause = string.Empty;
+
+    [ObservableProperty]
+    private string _correctiveAction = string.Empty;
+
+    [ObservableProperty]
+    private string _preventiveAction = string.Empty;
+
+    [ObservableProperty]
+    private string _actions = string.Empty;
+
+    [ObservableProperty]
+    private string _notes = string.Empty;
+
+    [ObservableProperty]
+    private string _comments = string.Empty;
+
+    [ObservableProperty]
+    private string _digitalSignature = string.Empty;
+
+    public static CapaEditor CreateEmpty() => new();
+
+    public static CapaEditor CreateForNew(IAuthContext authContext)
+    {
+        return new CapaEditor
+        {
+            DateOpen = DateTime.UtcNow,
+            AssignedToId = authContext.CurrentUser?.Id,
+            Status = "OPEN",
+            Priority = "Medium"
+        };
+    }
+
+    public static CapaEditor FromCapa(
+        CapaCase capa,
+        Func<string?, string> normalizeStatus,
+        Func<string?, string> normalizePriority,
+        Func<int, string> resolveComponentName)
+    {
+        return new CapaEditor
+        {
+            Id = capa.Id,
+            Title = capa.Title,
+            Description = capa.Description,
+            ComponentId = capa.ComponentId,
+            ComponentName = resolveComponentName(capa.ComponentId),
+            AssignedToId = capa.AssignedToId,
+            Priority = normalizePriority(capa.Priority),
+            Status = normalizeStatus(capa.Status),
+            DateOpen = capa.DateOpen == default ? DateTime.UtcNow : capa.DateOpen,
+            DateClose = capa.DateClose,
+            Reason = capa.Reason,
+            RootCause = capa.RootCause,
+            CorrectiveAction = capa.CorrectiveAction,
+            PreventiveAction = capa.PreventiveAction,
+            Actions = capa.Actions,
+            Notes = capa.Notes,
+            Comments = capa.Comments,
+            DigitalSignature = capa.DigitalSignature
+        };
+    }
+
+    public CapaEditor Clone()
+        => new()
+        {
+            Id = Id,
+            Title = Title,
+            Description = Description,
+            ComponentId = ComponentId,
+            ComponentName = ComponentName,
+            AssignedToId = AssignedToId,
+            Priority = Priority,
+            Status = Status,
+            DateOpen = DateOpen,
+            DateClose = DateClose,
+            Reason = Reason,
+            RootCause = RootCause,
+            CorrectiveAction = CorrectiveAction,
+            PreventiveAction = PreventiveAction,
+            Actions = Actions,
+            Notes = Notes,
+            Comments = Comments,
+            DigitalSignature = DigitalSignature
+        };
+
+    public CapaCase ToCapaCase(CapaCase? existing)
+    {
+        var capa = existing is null ? new CapaCase() : new CapaCase { Id = existing.Id };
+
+        capa.Id = Id > 0 ? Id : capa.Id;
+        capa.Title = (Title ?? string.Empty).Trim();
+        capa.Description = (Description ?? string.Empty).Trim();
+        capa.ComponentId = ComponentId;
+        capa.AssignedToId = AssignedToId;
+        capa.Priority = string.IsNullOrWhiteSpace(Priority) ? "Medium" : Priority.Trim();
+        capa.Status = string.IsNullOrWhiteSpace(Status) ? "OPEN" : Status.Trim();
+        capa.DateOpen = DateOpen == default ? DateTime.UtcNow : DateOpen;
+        capa.DateClose = DateClose;
+        capa.Reason = (Reason ?? string.Empty).Trim();
+        capa.RootCause = (RootCause ?? string.Empty).Trim();
+        capa.CorrectiveAction = (CorrectiveAction ?? string.Empty).Trim();
+        capa.PreventiveAction = (PreventiveAction ?? string.Empty).Trim();
+        capa.Actions = (Actions ?? string.Empty).Trim();
+        capa.Notes = (Notes ?? string.Empty).Trim();
+        capa.Comments = (Comments ?? string.Empty).Trim();
+        capa.DigitalSignature = string.IsNullOrWhiteSpace(DigitalSignature)
+            ? existing?.DigitalSignature ?? string.Empty
+            : DigitalSignature.Trim();
+
+        return capa;
     }
 }
