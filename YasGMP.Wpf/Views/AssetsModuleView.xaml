@@ -26,6 +26,7 @@
             </ItemsControl>
             <Separator />
             <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
@@ -34,25 +35,167 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
                 <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
+                      Grid.Column="0"
                       ItemsSource="{Binding RecordsView}"
                       SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       CanUserAddRows="False"
-                      CanUserDeleteRows="False">
+                      CanUserDeleteRows="False"
+                      Margin="0,0,8,0">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="Location" Binding="{Binding InspectorFields[0].Value}" Width="150" />
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <Border Grid.Row="1"
+                    Grid.Column="1"
+                    Padding="12"
+                    Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                    BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Asset Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Code" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="0"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.Code, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="1"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Description" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                            <TextBox Grid.Row="2"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.Description, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     Height="60"
+                                     TextWrapping="Wrap"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Manufacturer" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="3"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.Manufacturer, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Model" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="4"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.Model, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Location" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="5"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.Location, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Status" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <ComboBox Grid.Row="6"
+                                      Grid.Column="1"
+                                      ItemsSource="{Binding StatusOptions}"
+                                      SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="URS Document" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="7"
+                                     Grid.Column="1"
+                                     Text="{Binding Editor.UrsDoc, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Install Date" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <DatePicker Grid.Row="8"
+                                        Grid.Column="1"
+                                        SelectedDate="{Binding Editor.InstallDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Procurement Date" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <DatePicker Grid.Row="9"
+                                        Grid.Column="1"
+                                        SelectedDate="{Binding Editor.ProcurementDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Text="Warranty Until" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <DatePicker Grid.Row="10"
+                                        Grid.Column="1"
+                                        SelectedDate="{Binding Editor.WarrantyUntil, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <StackPanel Grid.Row="11" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
+                                <CheckBox Content="Critical asset"
+                                          IsChecked="{Binding Editor.IsCritical, Mode=TwoWay}"
+                                          IsEnabled="{Binding IsEditorEnabled}" />
+                                <TextBlock Text="Serial No." Margin="16,0,8,0" VerticalAlignment="Center" />
+                                <TextBox Width="140"
+                                         Text="{Binding Editor.SerialNumber, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding IsEditorEnabled}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Lifecycle Phase" Margin="0,0,0,4" />
+                        <TextBox Text="{Binding Editor.LifecyclePhase, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding IsEditorEnabled}" />
+
+                        <TextBlock Text="Notes" Margin="0,12,0,4" />
+                        <TextBox Text="{Binding Editor.Notes, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="80"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 IsEnabled="{Binding IsEditorEnabled}" />
+
+                        <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                        <TextBlock Text="•" Foreground="DarkRed" Margin="0,0,4,0" />
+                                        <TextBlock Text="{Binding}" Foreground="DarkRed" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical" Margin="0,12,0,0">
+                <TextBlock Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" />
+            </StackPanel>
         </Grid>
     </DockPanel>
 </UserControl>

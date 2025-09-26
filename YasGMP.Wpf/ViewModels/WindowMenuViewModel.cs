@@ -15,6 +15,7 @@ namespace YasGMP.Wpf.ViewModels
             _shell = shell;
             OpenDashboardCommand = new RelayCommand(() => _shell.OpenModule(DashboardModuleViewModel.ModuleKey));
             OpenAssetsCommand = new RelayCommand(() => _shell.OpenModule(AssetsModuleViewModel.ModuleKey));
+            OpenComponentsCommand = new RelayCommand(() => _shell.OpenModule(ComponentsModuleViewModel.ModuleKey));
             OpenWorkOrdersCommand = new RelayCommand(() => _shell.OpenModule(WorkOrdersModuleViewModel.ModuleKey));
             OpenWarehouseCommand = new RelayCommand(() => _shell.OpenModule(WarehouseModuleViewModel.ModuleKey));
             OpenCalibrationCommand = new RelayCommand(() => _shell.OpenModule(CalibrationModuleViewModel.ModuleKey));
@@ -23,6 +24,7 @@ namespace YasGMP.Wpf.ViewModels
             OpenCapaCommand = new RelayCommand(() => _shell.OpenModule(CapaModuleViewModel.ModuleKey));
             OpenIncidentsCommand = new RelayCommand(() => _shell.OpenModule(IncidentsModuleViewModel.ModuleKey));
             OpenChangeControlCommand = new RelayCommand(() => _shell.OpenModule(ChangeControlModuleViewModel.ModuleKey));
+            OpenValidationsCommand = new RelayCommand(() => _shell.OpenModule(ValidationsModuleViewModel.ModuleKey));
             OpenSecurityCommand = new RelayCommand(() => _shell.OpenModule(SecurityModuleViewModel.ModuleKey));
             OpenAdministrationCommand = new RelayCommand(() => _shell.OpenModule(AdminModuleViewModel.ModuleKey));
             OpenDiagnosticsCommand = new RelayCommand(() => _shell.OpenModule(DiagnosticsModuleViewModel.ModuleKey));
@@ -33,6 +35,8 @@ namespace YasGMP.Wpf.ViewModels
         public IRelayCommand OpenDashboardCommand { get; }
 
         public IRelayCommand OpenAssetsCommand { get; }
+
+        public IRelayCommand OpenComponentsCommand { get; }
 
         public IRelayCommand OpenWorkOrdersCommand { get; }
 
@@ -49,6 +53,8 @@ namespace YasGMP.Wpf.ViewModels
         public IRelayCommand OpenIncidentsCommand { get; }
 
         public IRelayCommand OpenChangeControlCommand { get; }
+
+        public IRelayCommand OpenValidationsCommand { get; }
 
         public IRelayCommand OpenSecurityCommand { get; }
 
