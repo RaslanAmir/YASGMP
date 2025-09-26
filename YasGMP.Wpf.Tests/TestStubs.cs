@@ -110,6 +110,61 @@ namespace YasGMP.Models
         public DateTime DateOpen { get; set; } = DateTime.UtcNow;
     }
 
+    public class Incident
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string? Type { get; set; }
+        public string? Priority { get; set; }
+        public DateTime DetectedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ReportedAt { get; set; }
+        public int? ReportedById { get; set; }
+        public int? AssignedToId { get; set; }
+        public int? WorkOrderId { get; set; }
+        public int? CapaCaseId { get; set; }
+        public string Status { get; set; } = "REPORTED";
+        public string? RootCause { get; set; }
+        public DateTime? ClosedAt { get; set; }
+        public int? ClosedById { get; set; }
+        public string? AssignedInvestigator { get; set; }
+        public string? Classification { get; set; }
+        public int? LinkedDeviationId { get; set; }
+        public int? LinkedCapaId { get; set; }
+        public string? ClosureComment { get; set; }
+        public string? SourceIp { get; set; }
+        public string? Notes { get; set; }
+        public bool IsCritical { get; set; }
+        public int RiskLevel { get; set; }
+        public double? AnomalyScore { get; set; }
+    }
+
+    public class ChangeControl
+    {
+        public int Id { get; set; }
+        public string? Code { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? StatusRaw { get; set; }
+        public int? RequestedById { get; set; }
+        public DateTime? DateRequested { get; set; }
+        public int? AssignedToId { get; set; }
+        public DateTime? DateAssigned { get; set; }
+        public int? LastModifiedById { get; set; }
+        public DateTime? LastModified { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
+
+    public class CapaCase
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Priority { get; set; } = string.Empty;
+        public DateTime DateOpen { get; set; } = DateTime.UtcNow;
+    }
+
     public class User
     {
         public int Id { get; set; }
@@ -158,6 +213,31 @@ namespace YasGMP.Models
         public string? SerialNumber { get; set; }
         public string? LifecyclePhase { get; set; }
         public string? Note { get; set; }
+    }
+
+    public class Attachment
+    {
+        public int Id { get; set; }
+        public string FileName { get; set; } = string.Empty;
+        public string? EntityTable { get; set; }
+        public int? EntityId { get; set; }
+        public string? FileType { get; set; }
+        public string? Status { get; set; }
+        public string? Description { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class AttachmentLink
+    {
+        public int Id { get; set; }
+        public string? EntityType { get; set; }
+        public int EntityId { get; set; }
+    }
+
+    public class RetentionPolicy
+    {
+        public string? PolicyName { get; set; }
+        public DateTime? RetainUntil { get; set; }
     }
 
     public class Attachment
@@ -336,11 +416,12 @@ namespace YasGMP.Models
         public List<Component> Components { get; } = new();
         public List<WorkOrder> WorkOrders { get; } = new();
         public List<Calibration> Calibrations { get; } = new();
+        public List<ScheduledJob> ScheduledJobs { get; } = new();
         public List<Supplier> Suppliers { get; } = new();
         public List<Part> Parts { get; } = new();
         public List<Warehouse> Warehouses { get; } = new();
-
-
+        public List<Incident> Incidents { get; } = new();
+        public List<CapaCase> CapaCases { get; } = new();
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -361,11 +442,23 @@ namespace YasGMP.Models
         public Task<List<Component>> GetAllComponentsAsync()
             => Task.FromResult(Components);
 
+        public Task<List<Component>> GetAllComponentsAsync()
+            => Task.FromResult(Components);
+
         public Task<List<WorkOrder>> GetAllWorkOrdersFullAsync()
             => Task.FromResult(WorkOrders);
 
         public Task<List<Calibration>> GetAllCalibrationsAsync()
             => Task.FromResult(Calibrations);
+
+        public Task<List<ScheduledJob>> GetAllScheduledJobsFullAsync()
+            => Task.FromResult(ScheduledJobs);
+
+        public Task<List<Incident>> GetAllIncidentsAsync()
+            => Task.FromResult(Incidents);
+
+        public Task<List<CapaCase>> GetAllCapaCasesAsync()
+            => Task.FromResult(CapaCases);
 
         public Task<List<Supplier>> GetAllSuppliersAsync()
             => Task.FromResult(Suppliers);
@@ -380,83 +473,6 @@ namespace YasGMP.Models
 
         public Task<IReadOnlyList<PickedFile>> PickFilesAsync(FilePickerRequest request, CancellationToken cancellationToken = default)
             => Task.FromResult(Files);
-
-    }
-}
-
-namespace YasGMP.Services.Interfaces
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using YasGMP.Models;
-
-    public interface IAuthContext
-    {
-        User? CurrentUser { get; }
-        string CurrentSessionId { get; }
-        string CurrentDeviceInfo { get; }
-        string CurrentIpAddress { get; }
-    }
-
-    public sealed class TestAuthContext : IAuthContext
-    {
-        public User? CurrentUser { get; set; }
-        public string CurrentSessionId { get; set; } = Guid.NewGuid().ToString("N");
-        public string CurrentDeviceInfo { get; set; } = "TestRig";
-        public string CurrentIpAddress { get; set; } = "127.0.0.1";
-    }
-
-    public sealed class TestAttachmentService : IAttachmentService
-    {
-        private int _nextId = 1;
-
-        public List<AttachmentUploadRequest> Uploads { get; } = new();
-
-        public Task<AttachmentUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
-        {
-            Uploads.Add(request);
-            var attachment = new Attachment
-            {
-                Id = _nextId++,
-                FileName = request.FileName,
-                EntityTable = request.EntityType,
-                EntityId = request.EntityId
-            };
-            var link = new AttachmentLink
-            {
-                Id = attachment.Id,
-                EntityType = request.EntityType,
-                EntityId = request.EntityId
-            };
-            var retention = new RetentionPolicy
-            {
-                PolicyName = request.RetentionPolicyName,
-                RetainUntil = request.RetainUntil
-            };
-            return Task.FromResult(new AttachmentUploadResult(attachment, link, retention));
-        }
-
-        public Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default)
-            => Task.FromResult<Attachment?>(null);
-
-        public Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default)
-            => Task.FromResult<Attachment?>(null);
-
-        public Task<AttachmentStreamResult> StreamContentAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default)
-            => Task.FromResult(new AttachmentStreamResult(new Attachment { Id = attachmentId }, 0, 0, false, request));
-
-        public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
-            => Task.FromResult<IReadOnlyList<AttachmentLinkWithAttachment>>(Array.Empty<AttachmentLinkWithAttachment>());
-
-        public Task RemoveLinkAsync(int linkId, CancellationToken token = default)
-            => Task.CompletedTask;
-
-        public Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
-            => Task.CompletedTask;
-
     }
 }
 
@@ -5416,6 +5432,695 @@ namespace YasGMP.Services.Interfaces
             destination.Status = source.Status;
         }
     }
+
+    public sealed class FakeMachineCrudService : IMachineCrudService
+    {
+        private readonly List<Machine> _store = new();
+
+        public List<Machine> Saved => _store;
+
+        public Task<IReadOnlyList<Machine>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
+
+        public Task<Machine?> TryGetByIdAsync(int id)
+            => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
+
+        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        {
+            if (machine.Id == 0)
+            {
+                machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
+            }
+            _store.Add(Clone(machine));
+            return Task.FromResult(machine.Id);
+        }
+
+        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(machine));
+            }
+            else
+            {
+                Copy(machine, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Machine machine)
+        {
+            if (string.IsNullOrWhiteSpace(machine.Name))
+                throw new InvalidOperationException("Name is required.");
+            if (string.IsNullOrWhiteSpace(machine.Code))
+                throw new InvalidOperationException("Code is required.");
+            if (string.IsNullOrWhiteSpace(machine.Manufacturer))
+                throw new InvalidOperationException("Manufacturer is required.");
+            if (string.IsNullOrWhiteSpace(machine.Location))
+                throw new InvalidOperationException("Location is required.");
+            if (string.IsNullOrWhiteSpace(machine.UrsDoc))
+                throw new InvalidOperationException("URS document is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private static Machine Clone(Machine source)
+        {
+            return new Machine
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Name = source.Name,
+                Description = source.Description,
+                Model = source.Model,
+                Manufacturer = source.Manufacturer,
+                Location = source.Location,
+                Status = source.Status,
+                UrsDoc = source.UrsDoc,
+                InstallDate = source.InstallDate,
+                ProcurementDate = source.ProcurementDate,
+                WarrantyUntil = source.WarrantyUntil,
+                IsCritical = source.IsCritical,
+                SerialNumber = source.SerialNumber,
+                LifecyclePhase = source.LifecyclePhase,
+                Note = source.Note
+            };
+        }
+
+        private static void Copy(Machine source, Machine destination)
+        {
+            destination.Code = source.Code;
+            destination.Name = source.Name;
+            destination.Description = source.Description;
+            destination.Model = source.Model;
+            destination.Manufacturer = source.Manufacturer;
+            destination.Location = source.Location;
+            destination.Status = source.Status;
+            destination.UrsDoc = source.UrsDoc;
+            destination.InstallDate = source.InstallDate;
+            destination.ProcurementDate = source.ProcurementDate;
+            destination.WarrantyUntil = source.WarrantyUntil;
+            destination.IsCritical = source.IsCritical;
+            destination.SerialNumber = source.SerialNumber;
+            destination.LifecyclePhase = source.LifecyclePhase;
+            destination.Note = source.Note;
+        }
+    }
+
+    public sealed class FakeIncidentCrudService : IIncidentCrudService
+    {
+        private readonly List<Incident> _store = new();
+
+        public List<Incident> Saved => _store;
+
+        public Task<Incident?> TryGetByIdAsync(int id)
+            => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
+
+        public Task<int> CreateAsync(Incident incident, IncidentCrudContext context)
+        {
+            if (incident.Id == 0)
+            {
+                incident.Id = _store.Count == 0 ? 1 : _store.Max(i => i.Id) + 1;
+            }
+
+            _store.Add(Clone(incident));
+            return Task.FromResult(incident.Id);
+        }
+
+        public Task UpdateAsync(Incident incident, IncidentCrudContext context)
+
+        {
+            var existing = _store.FirstOrDefault(i => i.Id == incident.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(incident));
+            }
+            else
+            {
+                Copy(incident, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Incident incident)
+        {
+            if (string.IsNullOrWhiteSpace(incident.Title))
+                throw new InvalidOperationException("Incident title is required.");
+            if (string.IsNullOrWhiteSpace(incident.Description))
+                throw new InvalidOperationException("Incident description is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
+
+        private static Incident Clone(Incident source)
+            => new()
+            {
+                Id = source.Id,
+                Title = source.Title,
+                Description = source.Description,
+                Type = source.Type,
+                Priority = source.Priority,
+                DetectedAt = source.DetectedAt,
+                ReportedAt = source.ReportedAt,
+                ReportedById = source.ReportedById,
+                AssignedToId = source.AssignedToId,
+                WorkOrderId = source.WorkOrderId,
+                CapaCaseId = source.CapaCaseId,
+                Status = source.Status,
+                RootCause = source.RootCause,
+                ClosedAt = source.ClosedAt,
+                ClosedById = source.ClosedById,
+                AssignedInvestigator = source.AssignedInvestigator,
+                Classification = source.Classification,
+                LinkedDeviationId = source.LinkedDeviationId,
+                LinkedCapaId = source.LinkedCapaId,
+                ClosureComment = source.ClosureComment,
+                SourceIp = source.SourceIp,
+                Notes = source.Notes,
+                IsCritical = source.IsCritical,
+                RiskLevel = source.RiskLevel,
+                AnomalyScore = source.AnomalyScore
+            };
+
+        private static void Copy(Incident source, Incident destination)
+        {
+            destination.Title = source.Title;
+            destination.Description = source.Description;
+            destination.Type = source.Type;
+            destination.Priority = source.Priority;
+            destination.DetectedAt = source.DetectedAt;
+            destination.ReportedAt = source.ReportedAt;
+            destination.ReportedById = source.ReportedById;
+            destination.AssignedToId = source.AssignedToId;
+            destination.WorkOrderId = source.WorkOrderId;
+            destination.CapaCaseId = source.CapaCaseId;
+            destination.Status = source.Status;
+            destination.RootCause = source.RootCause;
+            destination.ClosedAt = source.ClosedAt;
+            destination.ClosedById = source.ClosedById;
+            destination.AssignedInvestigator = source.AssignedInvestigator;
+            destination.Classification = source.Classification;
+            destination.LinkedDeviationId = source.LinkedDeviationId;
+            destination.LinkedCapaId = source.LinkedCapaId;
+            destination.ClosureComment = source.ClosureComment;
+            destination.SourceIp = source.SourceIp;
+            destination.Notes = source.Notes;
+            destination.IsCritical = source.IsCritical;
+            destination.RiskLevel = source.RiskLevel;
+            destination.AnomalyScore = source.AnomalyScore;
+        }
+    }
+
+    public sealed class FakeChangeControlCrudService : IChangeControlCrudService
+    {
+        private readonly List<ChangeControl> _store = new();
+
+        public List<ChangeControl> Saved => _store;
+
+        public Task<IReadOnlyList<ChangeControl>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<ChangeControl>>(_store.Select(Clone).ToList());
+
+        public Task<ChangeControl?> TryGetByIdAsync(int id)
+        {
+            var match = _store.FirstOrDefault(c => c.Id == id);
+            return Task.FromResult(match is null ? null : Clone(match));
+        }
+
+        public Task<int> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        {
+            if (changeControl.Id == 0)
+            {
+                changeControl.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(changeControl));
+            return Task.FromResult(changeControl.Id);
+        }
+
+        public Task UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == changeControl.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(changeControl));
+            }
+            else
+            {
+                Copy(changeControl, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(ChangeControl changeControl)
+        {
+            if (string.IsNullOrWhiteSpace(changeControl.Title))
+            {
+                throw new InvalidOperationException("Title is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(changeControl.Code))
+            {
+                throw new InvalidOperationException("Code is required.");
+            }
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "Draft" : status.Trim();
+
+        public void Seed(ChangeControl changeControl)
+        {
+            if (changeControl.Id == 0)
+            {
+                changeControl.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(changeControl));
+        }
+
+        private static ChangeControl Clone(ChangeControl source)
+            => new ChangeControl
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Title = source.Title,
+                Description = source.Description,
+                StatusRaw = source.StatusRaw,
+                RequestedById = source.RequestedById,
+                DateRequested = source.DateRequested,
+                AssignedToId = source.AssignedToId,
+                DateAssigned = source.DateAssigned,
+                LastModifiedById = source.LastModifiedById,
+                LastModified = source.LastModified,
+                CreatedAt = source.CreatedAt,
+                UpdatedAt = source.UpdatedAt
+            };
+
+        private static void Copy(ChangeControl source, ChangeControl destination)
+        {
+            destination.Code = source.Code;
+            destination.Title = source.Title;
+            destination.Description = source.Description;
+            destination.StatusRaw = source.StatusRaw;
+            destination.RequestedById = source.RequestedById;
+            destination.DateRequested = source.DateRequested;
+            destination.AssignedToId = source.AssignedToId;
+            destination.DateAssigned = source.DateAssigned;
+            destination.LastModifiedById = source.LastModifiedById;
+            destination.LastModified = source.LastModified;
+            destination.CreatedAt = source.CreatedAt;
+            destination.UpdatedAt = source.UpdatedAt;
+        }
+    }
+
+    public sealed class FakeValidationCrudService : IValidationCrudService
+    {
+        private readonly List<Validation> _store = new();
+
+        public List<Validation> Saved => _store;
+
+        public Task<IReadOnlyList<Validation>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Validation>>(_store.Select(Clone).ToList());
+
+        public Task<Validation?> TryGetByIdAsync(int id)
+        {
+            var match = _store.FirstOrDefault(v => v.Id == id);
+            return Task.FromResult(match is null ? null : Clone(match));
+        }
+
+        public Task<int> CreateAsync(Validation validation, ValidationCrudContext context)
+        {
+            if (validation.Id == 0)
+            {
+                validation.Id = _store.Count == 0 ? 1 : _store.Max(v => v.Id) + 1;
+            }
+
+            _store.Add(Clone(validation));
+            return Task.FromResult(validation.Id);
+        }
+
+        public Task UpdateAsync(Validation validation, ValidationCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(v => v.Id == validation.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(validation));
+            }
+            else
+            {
+                Copy(validation, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Validation validation)
+        {
+            if (string.IsNullOrWhiteSpace(validation.Type))
+            {
+                throw new InvalidOperationException("Validation type is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(validation.Code))
+            {
+                throw new InvalidOperationException("Protocol number is required.");
+            }
+
+            if (validation.MachineId is null && validation.ComponentId is null)
+            {
+                throw new InvalidOperationException("Select a machine or component.");
+            }
+        }
+
+        public void Seed(Validation validation)
+        {
+            if (validation.Id == 0)
+            {
+                validation.Id = _store.Count == 0 ? 1 : _store.Max(v => v.Id) + 1;
+            }
+
+            _store.Add(Clone(validation));
+        }
+
+        private static Validation Clone(Validation source)
+            => new Validation
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Type = source.Type,
+                MachineId = source.MachineId,
+                ComponentId = source.ComponentId,
+                DateStart = source.DateStart,
+                DateEnd = source.DateEnd,
+                Status = source.Status,
+                Documentation = source.Documentation,
+                Comment = source.Comment,
+                NextDue = source.NextDue
+            };
+
+        private static void Copy(Validation source, Validation destination)
+        {
+            destination.Code = source.Code;
+            destination.Type = source.Type;
+            destination.MachineId = source.MachineId;
+            destination.ComponentId = source.ComponentId;
+            destination.DateStart = source.DateStart;
+            destination.DateEnd = source.DateEnd;
+            destination.Status = source.Status;
+            destination.Documentation = source.Documentation;
+            destination.Comment = source.Comment;
+            destination.NextDue = source.NextDue;
+        }
+    }
+
+    public sealed class FakeCapaCrudService : ICapaCrudService
+    {
+        private readonly List<CapaCase> _store = new();
+
+        public List<CapaCase> Saved => _store;
+
+        public Task<IReadOnlyList<CapaCase>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<CapaCase>>(_store.ToList());
+
+        public Task<CapaCase?> TryGetByIdAsync(int id)
+            => Task.FromResult<CapaCase?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(CapaCase capa, CapaCrudContext context)
+        {
+            if (capa.Id == 0)
+            {
+                capa.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(capa));
+            return Task.FromResult(capa.Id);
+        }
+
+        public Task UpdateAsync(CapaCase capa, CapaCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == capa.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(capa));
+            }
+            else
+            {
+                Copy(capa, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(CapaCase capa)
+        {
+            if (string.IsNullOrWhiteSpace(capa.Title))
+                throw new InvalidOperationException("CAPA title is required.");
+            if (string.IsNullOrWhiteSpace(capa.Description))
+                throw new InvalidOperationException("CAPA description is required.");
+            if (capa.ComponentId <= 0)
+                throw new InvalidOperationException("CAPA must reference a component.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "OPEN" : status.Trim().ToUpperInvariant();
+
+        public string NormalizePriority(string? priority)
+            => string.IsNullOrWhiteSpace(priority) ? "Medium" : priority.Trim();
+
+        public void Seed(CapaCase capa)
+        {
+            if (capa.Id == 0)
+            {
+                capa.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(capa));
+        }
+
+        private static CapaCase Clone(CapaCase source)
+        {
+            return new CapaCase
+            {
+                Id = source.Id,
+                Title = source.Title,
+                Description = source.Description,
+                ComponentId = source.ComponentId,
+                Priority = source.Priority,
+                Status = source.Status,
+                RootCause = source.RootCause,
+                CorrectiveAction = source.CorrectiveAction,
+                PreventiveAction = source.PreventiveAction,
+                Reason = source.Reason,
+                Actions = source.Actions,
+                Notes = source.Notes,
+                Comments = source.Comments,
+                DateOpen = source.DateOpen,
+                DateClose = source.DateClose,
+                AssignedToId = source.AssignedToId,
+                DigitalSignature = source.DigitalSignature
+            };
+        }
+
+        private static void Copy(CapaCase source, CapaCase destination)
+        {
+            destination.Title = source.Title;
+            destination.Description = source.Description;
+            destination.ComponentId = source.ComponentId;
+            destination.Priority = source.Priority;
+            destination.Status = source.Status;
+            destination.RootCause = source.RootCause;
+            destination.CorrectiveAction = source.CorrectiveAction;
+            destination.PreventiveAction = source.PreventiveAction;
+            destination.Reason = source.Reason;
+            destination.Actions = source.Actions;
+            destination.Notes = source.Notes;
+            destination.Comments = source.Comments;
+            destination.DateOpen = source.DateOpen;
+            destination.DateClose = source.DateClose;
+            destination.AssignedToId = source.AssignedToId;
+            destination.DigitalSignature = source.DigitalSignature;
+        }
+    }
+
+    public sealed class FakeComponentCrudService : IComponentCrudService
+    {
+        private readonly List<Component> _store = new();
+
+        public List<Component> Saved => _store;
+
+        public Task<IReadOnlyList<Component>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
+
+        public Task<Component?> TryGetByIdAsync(int id)
+            => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        {
+            if (component.Id == 0)
+            {
+                component.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(component));
+            return Task.FromResult(component.Id);
+        }
+
+        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == component.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(component));
+            }
+            else
+            {
+                Copy(component, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Component component)
+        {
+            if (string.IsNullOrWhiteSpace(component.Name))
+                throw new InvalidOperationException("Component name is required.");
+            if (string.IsNullOrWhiteSpace(component.Code))
+                throw new InvalidOperationException("Component code is required.");
+            if (component.MachineId <= 0)
+                throw new InvalidOperationException("Component must be linked to a machine.");
+            if (string.IsNullOrWhiteSpace(component.SopDoc))
+                throw new InvalidOperationException("SOP document is required.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private static Component Clone(Component source)
+        {
+            return new Component
+            {
+                Id = source.Id,
+                MachineId = source.MachineId,
+                MachineName = source.MachineName,
+                Code = source.Code,
+                Name = source.Name,
+                Type = source.Type,
+                SopDoc = source.SopDoc,
+                Status = source.Status,
+                InstallDate = source.InstallDate,
+                SerialNumber = source.SerialNumber,
+                Supplier = source.Supplier,
+                WarrantyUntil = source.WarrantyUntil,
+                Comments = source.Comments,
+                LifecycleState = source.LifecycleState
+            };
+        }
+
+        private static void Copy(Component source, Component destination)
+        {
+            destination.MachineId = source.MachineId;
+            destination.MachineName = source.MachineName;
+            destination.Code = source.Code;
+            destination.Name = source.Name;
+            destination.Type = source.Type;
+            destination.SopDoc = source.SopDoc;
+            destination.Status = source.Status;
+            destination.InstallDate = source.InstallDate;
+            destination.SerialNumber = source.SerialNumber;
+            destination.Supplier = source.Supplier;
+            destination.WarrantyUntil = source.WarrantyUntil;
+            destination.Comments = source.Comments;
+            destination.LifecycleState = source.LifecycleState;
+        }
+    }
+
+    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    {
+        private readonly List<Calibration> _store = new();
+
+        public List<Calibration> Saved => _store;
+
+        public Task<IReadOnlyList<Calibration>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
+
+        public Task<Calibration?> TryGetByIdAsync(int id)
+            => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
+
+        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        {
+            if (calibration.Id == 0)
+            {
+                calibration.Id = _store.Count == 0 ? 1 : _store.Max(c => c.Id) + 1;
+            }
+
+            _store.Add(Clone(calibration));
+            return Task.FromResult(calibration.Id);
+        }
+
+        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(calibration));
+            }
+            else
+            {
+                Copy(calibration, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Calibration calibration)
+        {
+            if (calibration.ComponentId <= 0)
+                throw new InvalidOperationException("Calibration must be linked to a component.");
+            if (!calibration.SupplierId.HasValue || calibration.SupplierId.Value <= 0)
+                throw new InvalidOperationException("Supplier is required.");
+            if (calibration.CalibrationDate == default)
+                throw new InvalidOperationException("Calibration date is required.");
+            if (calibration.NextDue == default)
+                throw new InvalidOperationException("Next due date is required.");
+            if (calibration.NextDue < calibration.CalibrationDate)
+                throw new InvalidOperationException("Next due date must be after the calibration date.");
+            if (string.IsNullOrWhiteSpace(calibration.Result))
+                throw new InvalidOperationException("Calibration result is required.");
+        }
+
+        private static Calibration Clone(Calibration source)
+        {
+            return new Calibration
+            {
+                Id = source.Id,
+                ComponentId = source.ComponentId,
+                SupplierId = source.SupplierId,
+                CalibrationDate = source.CalibrationDate,
+                NextDue = source.NextDue,
+                CertDoc = source.CertDoc,
+                Result = source.Result,
+                Comment = source.Comment,
+                Status = source.Status
+            };
+        }
+
+        private static void Copy(Calibration source, Calibration destination)
+        {
+            destination.ComponentId = source.ComponentId;
+            destination.SupplierId = source.SupplierId;
+            destination.CalibrationDate = source.CalibrationDate;
+            destination.NextDue = source.NextDue;
+            destination.CertDoc = source.CertDoc;
+            destination.Result = source.Result;
+            destination.Comment = source.Comment;
+            destination.Status = source.Status;
+        }
+    }
 }
 
 namespace YasGMP.Wpf.ViewModels.Modules
@@ -5688,6 +6393,109 @@ namespace YasGMP.Wpf.ViewModels.Modules
             destination.DefaultSupplierName = source.DefaultSupplierName;
             destination.Sku = source.Sku;
             destination.Price = source.Price;
+        }
+    }
+
+    public sealed class FakeSupplierCrudService : ISupplierCrudService
+    {
+        private readonly List<Supplier> _store = new();
+
+        public List<Supplier> Saved => _store;
+
+        public Task<IReadOnlyList<Supplier>> GetAllAsync()
+            => Task.FromResult<IReadOnlyList<Supplier>>(_store.ToList());
+
+        public Task<Supplier?> TryGetByIdAsync(int id)
+            => Task.FromResult<Supplier?>(_store.FirstOrDefault(s => s.Id == id));
+
+        public Task<int> CreateAsync(Supplier supplier, SupplierCrudContext context)
+        {
+            if (supplier.Id == 0)
+            {
+                supplier.Id = _store.Count == 0 ? 1 : _store.Max(s => s.Id) + 1;
+            }
+
+            _store.Add(Clone(supplier));
+            return Task.FromResult(supplier.Id);
+        }
+
+        public Task UpdateAsync(Supplier supplier, SupplierCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(s => s.Id == supplier.Id);
+            if (existing is null)
+            {
+                _store.Add(Clone(supplier));
+            }
+            else
+            {
+                Copy(supplier, existing);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Validate(Supplier supplier)
+        {
+            if (string.IsNullOrWhiteSpace(supplier.Name))
+                throw new InvalidOperationException("Supplier name is required.");
+            if (string.IsNullOrWhiteSpace(supplier.Email))
+                throw new InvalidOperationException("Supplier email address is required.");
+            if (string.IsNullOrWhiteSpace(supplier.VatNumber))
+                throw new InvalidOperationException("VAT number is required.");
+            if (supplier.CooperationEnd is not null && supplier.CooperationStart is not null
+                && supplier.CooperationEnd < supplier.CooperationStart)
+                throw new InvalidOperationException("Cooperation end cannot precede the start date.");
+        }
+
+        public string NormalizeStatus(string? status)
+            => SupplierCrudExtensions.NormalizeStatusDefault(status);
+
+        private static Supplier Clone(Supplier source)
+        {
+            return new Supplier
+            {
+                Id = source.Id,
+                Name = source.Name,
+                SupplierType = source.SupplierType,
+                Status = source.Status,
+                Email = source.Email,
+                Phone = source.Phone,
+                Website = source.Website,
+                VatNumber = source.VatNumber,
+                Address = source.Address,
+                City = source.City,
+                Country = source.Country,
+                Notes = source.Notes,
+                ContractFile = source.ContractFile,
+                RiskLevel = source.RiskLevel,
+                IsQualified = source.IsQualified,
+                CooperationStart = source.CooperationStart,
+                CooperationEnd = source.CooperationEnd,
+                RegisteredAuthorities = source.RegisteredAuthorities,
+                DigitalSignature = source.DigitalSignature
+            };
+        }
+
+        private static void Copy(Supplier source, Supplier destination)
+        {
+            destination.Name = source.Name;
+            destination.SupplierType = source.SupplierType;
+            destination.Status = source.Status;
+            destination.Email = source.Email;
+            destination.Phone = source.Phone;
+            destination.Website = source.Website;
+            destination.VatNumber = source.VatNumber;
+            destination.Address = source.Address;
+            destination.City = source.City;
+            destination.Country = source.Country;
+            destination.Notes = source.Notes;
+            destination.ContractFile = source.ContractFile;
+            destination.RiskLevel = source.RiskLevel;
+            destination.IsQualified = source.IsQualified;
+            destination.CooperationStart = source.CooperationStart;
+            destination.CooperationEnd = source.CooperationEnd;
+            destination.RegisteredAuthorities = source.RegisteredAuthorities;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -6101,7 +6909,6 @@ namespace YasGMP.Wpf.ViewModels.Modules
     }
 
     public sealed class FakeWorkOrderCrudService : IWorkOrderCrudService
-
     {
         private readonly List<WorkOrder> _store = new();
 

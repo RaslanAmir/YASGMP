@@ -31,7 +31,7 @@
     "Validations": "done",
     "ScheduledJobs": "done",
     "UsersRoles": "done",
-    "Suppliers": "pending",
+    "Suppliers": "done",
     "ExternalServicers": "pending",
     "Audit": "pending",
     "ApiAudit": "pending",
@@ -40,7 +40,8 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(security): add user and role editor",
+  "lastCommitSummary": "feat(suppliers): add CRUD editor",
+
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -61,6 +62,8 @@
     "2025-10-03: Change Control module now uses IChangeControlCrudService with a mode-aware editor, CFL picker, and attachment workflow; signature/audit prompts queued for Batch B2.",
     "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available.",
     "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2.",
-    "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2."
- ]
+    "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2.",
+    "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task."
+  ]
+
 }

@@ -28,7 +28,7 @@
   - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, and attachment workflow; signature/audit prompts queued for Batch B2)*
   - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling and attachment workflow; signature/audit surfacing tracked under Batch B2)*
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, and role assignment management; signature prompts queued for Batch B2)*
-  - Suppliers/External Servicers — [ ] todo
+  - Suppliers/External Servicers — [x] done *(Suppliers module now exposes a CRUD editor with attachments; External Servicers follow-up tracked separately)*
   - Audit/API Audit — [ ] todo
   - Documents/Attachments — [ ] todo
   - Dashboard/Reports — [ ] todo
@@ -55,6 +55,7 @@
 - Validations module now mirrors the MAUI experience with a CRUD-capable editor backed by `ValidationService`, machine/component lookups, CFL support, and attachment uploads; signature/audit surfacing targeted for Batch B2 once the SDK blocker clears.
 - Scheduling module now ships with a CRUD-capable editor backed by the new `IScheduledJobCrudService`, attachment uploads, and execute/acknowledge commands; e-signature/audit prompts remain planned for Batch B2.
 - 2025-10-06: Users/Roles (Security) module now reuses the shared user/RBAC services through a new adapter, exposing a mode-aware editor with CFL, role assignments, and unit coverage; signature/audit surfacing remains queued for Batch B2.
+- 2025-10-07: Suppliers module now leverages ISupplierCrudService with a mode-aware editor, attachments via AttachmentService, CFL/golden-arrow integration, and unit coverage; External Servicers remain queued for follow-up.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
