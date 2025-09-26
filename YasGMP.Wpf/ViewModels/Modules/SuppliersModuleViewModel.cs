@@ -1,72 +1,622 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public const string ModuleKey = "Suppliers";
 
+    private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
+    {
+        "Active",
+        "Validated",
+        "Qualified",
+        "Suspended",
+        "Under Review",
+        "Pending Approval",
+        "CAPA",
+        "Expired",
+        "Delisted",
+        "Blacklisted",
+        "Probation"
+    });
+
+    private static readonly IReadOnlyList<string> DefaultRiskOptions = new ReadOnlyCollection<string>(new[]
+    {
+        "Low",
+        "Moderate",
+        "Elevated",
+        "High",
+        "Critical"
+    });
+
+    private readonly ISupplierCrudService _supplierService;
+    private readonly IAttachmentService _attachmentService;
+    private readonly IFilePicker _filePicker;
+    private readonly IAuthContext _authContext;
+    private Supplier? _loadedSupplier;
+    private SupplierEditor? _snapshot;
+    private bool _suppressDirtyNotifications;
+    private int? _lastSavedSupplierId;
+
     public SuppliersModuleViewModel(
         DatabaseService databaseService,
+        ISupplierCrudService supplierService,
+        IAttachmentService attachmentService,
+        IFilePicker filePicker,
+        IAuthContext authContext,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
         : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation)
     {
+        _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+
+        Editor = SupplierEditor.CreateEmpty();
+        StatusOptions = DefaultStatusOptions;
+        RiskOptions = DefaultRiskOptions;
+        AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
+
+    [ObservableProperty]
+    private SupplierEditor _editor;
+
+    [ObservableProperty]
+    private bool _isEditorEnabled;
+
+    [ObservableProperty]
+    private IReadOnlyList<string> _statusOptions;
+
+    [ObservableProperty]
+    private IReadOnlyList<string> _riskOptions;
+
+    public IAsyncRelayCommand AttachDocumentCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var suppliers = await Database.GetAllSuppliersAsync().ConfigureAwait(false);
-        return suppliers.Select(ToRecord).ToList();
+        var suppliers = await _supplierService.GetAllAsync().ConfigureAwait(false);
+        var ordered = suppliers
+            .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(s => s.Id)
+            .Select(ToRecord)
+            .ToList();
+
+        if (_lastSavedSupplierId.HasValue)
+        {
+            var savedKey = _lastSavedSupplierId.Value.ToString(CultureInfo.InvariantCulture);
+            var index = ordered.FindIndex(r => r.Key == savedKey);
+            if (index > 0)
+            {
+                var match = ordered[index];
+                ordered.RemoveAt(index);
+                ordered.Insert(0, match);
+            }
+
+            _lastSavedSupplierId = null;
+        }
+
+        return ordered;
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
-        => new List<ModuleRecord>
+    {
+        var sample = new[]
         {
-            new("SUP-001", "Acme Calibration", "SUP-001", "Approved", "Calibration vendor",
-                new[]
-                {
-                    new InspectorField("Category", "Calibration"),
-                    new InspectorField("Phone", "+385 91 2222"),
-                    new InspectorField("Email", "support@acme-calibration.com")
-                },
-                CalibrationModuleViewModel.ModuleKey, null),
-            new("SUP-002", "Steris Service", "SUP-002", "Approved", "Maintenance vendor",
-                new[]
-                {
-                    new InspectorField("Category", "Maintenance"),
-                    new InspectorField("Phone", "+385 91 3333"),
-                    new InspectorField("Email", "service@steris.com")
-                },
-                WorkOrdersModuleViewModel.ModuleKey, null)
+            new Supplier
+            {
+                Id = 1,
+                Name = "Contoso Calibration",
+                SupplierType = "Calibration",
+                Status = "active",
+                Email = "support@contoso.example",
+                Phone = "+385 91 111 222",
+                RiskLevel = "Moderate",
+                Country = "Croatia",
+                CooperationStart = DateTime.UtcNow.AddYears(-2),
+                CooperationEnd = DateTime.UtcNow.AddYears(1)
+            },
+            new Supplier
+            {
+                Id = 2,
+                Name = "Globex Servicers",
+                SupplierType = "Maintenance",
+                Status = "suspended",
+                Email = "hq@globex.example",
+                Phone = "+385 91 333 444",
+                RiskLevel = "High",
+                Country = "Austria"
+            }
         };
+
+        return sample.Select(ToRecord).ToList();
+    }
+
+    protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
+    {
+        if (record is null)
+        {
+            _loadedSupplier = null;
+            SetEditor(SupplierEditor.CreateEmpty());
+            UpdateAttachmentCommandState();
+            return;
+        }
+
+        if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+        {
+            return;
+        }
+
+        if (IsInEditMode)
+        {
+            return;
+        }
+
+        var supplier = await _supplierService.TryGetByIdAsync(id).ConfigureAwait(false);
+        if (supplier is null)
+        {
+            StatusMessage = $"Supplier #{id} could not be located.";
+            return;
+        }
+
+        _loadedSupplier = supplier;
+        LoadEditor(supplier);
+        UpdateAttachmentCommandState();
+    }
+
+    protected override Task OnModeChangedAsync(FormMode mode)
+    {
+        IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
+
+        switch (mode)
+        {
+            case FormMode.Add:
+                _snapshot = null;
+                _loadedSupplier = null;
+                SetEditor(SupplierEditor.CreateForNew());
+                break;
+            case FormMode.Update:
+                if (_loadedSupplier is not null)
+                {
+                    _snapshot = Editor.Clone();
+                }
+                break;
+            case FormMode.Find:
+            case FormMode.View:
+                _snapshot = null;
+                break;
+        }
+
+        UpdateAttachmentCommandState();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task<IReadOnlyList<string>> ValidateAsync()
+    {
+        var supplier = Editor.ToSupplier(_loadedSupplier);
+        var errors = new List<string>();
+
+        try
+        {
+            _supplierService.Validate(supplier);
+        }
+        catch (InvalidOperationException ex)
+        {
+            errors.Add(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            errors.Add($"Unexpected validation error: {ex.Message}");
+        }
+
+        return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
+    }
+
+    protected override async Task<bool> OnSaveAsync()
+    {
+        var context = SupplierCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId);
+
+        var supplier = Editor.ToSupplier(_loadedSupplier);
+        supplier.Status = _supplierService.NormalizeStatus(supplier.Status);
+
+        if (Mode == FormMode.Add)
+        {
+            var id = await _supplierService.CreateAsync(supplier, context).ConfigureAwait(false);
+            _loadedSupplier = supplier;
+            _lastSavedSupplierId = id;
+            return true;
+        }
+
+        if (Mode == FormMode.Update)
+        {
+            if (_loadedSupplier is null)
+            {
+                return false;
+            }
+
+            supplier.Id = _loadedSupplier.Id;
+            supplier.DigitalSignature = _loadedSupplier.DigitalSignature;
+            await _supplierService.UpdateAsync(supplier, context).ConfigureAwait(false);
+            _loadedSupplier = supplier;
+            _lastSavedSupplierId = supplier.Id;
+            return true;
+        }
+
+        return false;
+    }
+
+    protected override void OnCancel()
+    {
+        if (Mode == FormMode.Add)
+        {
+            if (_loadedSupplier is not null)
+            {
+                LoadEditor(_loadedSupplier);
+            }
+            else
+            {
+                SetEditor(SupplierEditor.CreateEmpty());
+            }
+        }
+        else if (Mode == FormMode.Update && _snapshot is not null)
+        {
+            SetEditor(_snapshot.Clone());
+        }
+
+        UpdateAttachmentCommandState();
+    }
+
+    protected override async Task<CflRequest?> CreateCflRequestAsync()
+    {
+        var suppliers = await _supplierService.GetAllAsync().ConfigureAwait(false);
+        var items = suppliers.Select(supplier =>
+        {
+            var key = supplier.Id.ToString(CultureInfo.InvariantCulture);
+            var descriptionParts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(supplier.SupplierType))
+            {
+                descriptionParts.Add(supplier.SupplierType);
+            }
+
+            if (!string.IsNullOrWhiteSpace(supplier.Country))
+            {
+                descriptionParts.Add(supplier.Country);
+            }
+
+            if (!string.IsNullOrWhiteSpace(supplier.Email))
+            {
+                descriptionParts.Add(supplier.Email);
+            }
+
+            var description = descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null;
+            return new CflItem(key, supplier.Name, description);
+        }).ToList();
+
+        return new CflRequest("Select Supplier", items);
+    }
+
+    protected override Task OnCflSelectionAsync(CflResult result)
+    {
+        var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
+        if (match is not null)
+        {
+            SelectedRecord = match;
+            SearchText = match.Title;
+        }
+        else
+        {
+            SearchText = result.Selected.Label;
+        }
+
+        StatusMessage = $"Filtered suppliers by \"{SearchText}\".";
+        return Task.CompletedTask;
+    }
+
+    protected override bool MatchesSearch(ModuleRecord record, string searchText)
+    {
+        if (base.MatchesSearch(record, searchText))
+        {
+            return true;
+        }
+
+        return record.InspectorFields.Any(field => field.Value.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
+        {
+            UpdateAttachmentCommandState();
+        }
+    }
+
+    partial void OnEditorChanging(SupplierEditor value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        value.PropertyChanged -= OnEditorPropertyChanged;
+    }
+
+    partial void OnEditorChanged(SupplierEditor value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        value.PropertyChanged += OnEditorPropertyChanged;
+    }
+
+    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_suppressDirtyNotifications)
+        {
+            return;
+        }
+
+        if (IsEditorEnabled)
+        {
+            MarkDirty();
+        }
+    }
+
+    private void LoadEditor(Supplier supplier)
+    {
+        _suppressDirtyNotifications = true;
+        Editor = SupplierEditor.FromSupplier(supplier);
+        _suppressDirtyNotifications = false;
+        ResetDirty();
+    }
+
+    private void SetEditor(SupplierEditor editor)
+    {
+        _suppressDirtyNotifications = true;
+        Editor = editor;
+        _suppressDirtyNotifications = false;
+        ResetDirty();
+    }
+
+    private bool CanAttachDocument()
+        => !IsBusy && !IsEditorEnabled && _loadedSupplier is not null && _loadedSupplier.Id > 0;
+
+    private void UpdateAttachmentCommandState()
+    {
+        if (AttachDocumentCommand is AsyncRelayCommand command)
+        {
+            command.NotifyCanExecuteChanged();
+        }
+    }
+
+    private async Task AttachDocumentAsync()
+    {
+        if (_loadedSupplier is null || _loadedSupplier.Id <= 0)
+        {
+            return;
+        }
+
+        var files = await _filePicker.PickFilesAsync(new FilePickerRequest
+        {
+            Title = "Attach supplier document"
+        }).ConfigureAwait(false);
+
+        if (files.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var file in files)
+        {
+            await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
+            var request = new AttachmentUploadRequest
+            {
+                EntityType = "suppliers",
+                EntityId = _loadedSupplier.Id,
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                UploadedById = _authContext.CurrentUser?.Id,
+                SourceIp = _authContext.CurrentIpAddress,
+                SourceHost = _authContext.CurrentDeviceInfo,
+                Reason = "Supplier document upload"
+            };
+
+            await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
+        }
+
+        StatusMessage = "Attachment uploaded successfully.";
+    }
 
     private static ModuleRecord ToRecord(Supplier supplier)
     {
-        var fields = new List<InspectorField>
+        var inspector = new List<InspectorField>
         {
-            new("Category", supplier.Category ?? "-"),
-            new("Phone", supplier.Phone ?? "-"),
-            new("Email", supplier.Email ?? "-"),
-            new("Status", supplier.Status ?? "-"),
-            new("Rating", supplier.QualityRating?.ToString(CultureInfo.InvariantCulture) ?? "-"),
+            new("Type", string.IsNullOrWhiteSpace(supplier.SupplierType) ? "-" : supplier.SupplierType!),
+            new("Email", string.IsNullOrWhiteSpace(supplier.Email) ? "-" : supplier.Email!),
+            new("Phone", string.IsNullOrWhiteSpace(supplier.Phone) ? "-" : supplier.Phone!),
+            new("Risk", string.IsNullOrWhiteSpace(supplier.RiskLevel) ? "-" : supplier.RiskLevel!),
+            new("Country", string.IsNullOrWhiteSpace(supplier.Country) ? "-" : supplier.Country!)
         };
 
+        var relatedKey = supplier.PartsSupplied.Count > 0 ? PartsModuleViewModel.ModuleKey : null;
         return new ModuleRecord(
             supplier.Id.ToString(CultureInfo.InvariantCulture),
             supplier.Name,
-            supplier.Code,
+            supplier.VatNumber,
             supplier.Status,
-            supplier.Description,
-            fields,
-            CalibrationModuleViewModel.ModuleKey,
-            supplier.Id);
+            supplier.Notes,
+            inspector,
+            relatedKey,
+            supplier.PartsSupplied.Count > 0 ? supplier.PartsSupplied.First().Id : null);
+    }
+}
+
+public sealed partial class SupplierEditor : ObservableObject
+{
+    [ObservableProperty]
+    private int _id;
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string _supplierType = string.Empty;
+
+    [ObservableProperty]
+    private string _status = "Active";
+
+    [ObservableProperty]
+    private string _vatNumber = string.Empty;
+
+    [ObservableProperty]
+    private string _email = string.Empty;
+
+    [ObservableProperty]
+    private string _phone = string.Empty;
+
+    [ObservableProperty]
+    private string _website = string.Empty;
+
+    [ObservableProperty]
+    private string _address = string.Empty;
+
+    [ObservableProperty]
+    private string _city = string.Empty;
+
+    [ObservableProperty]
+    private string _country = string.Empty;
+
+    [ObservableProperty]
+    private string _notes = string.Empty;
+
+    [ObservableProperty]
+    private string _contractFile = string.Empty;
+
+    [ObservableProperty]
+    private string _riskLevel = "Low";
+
+    [ObservableProperty]
+    private bool _isQualified;
+
+    [ObservableProperty]
+    private DateTime? _cooperationStart = DateTime.UtcNow.Date;
+
+    [ObservableProperty]
+    private DateTime? _cooperationEnd;
+
+    [ObservableProperty]
+    private string _registeredAuthorities = string.Empty;
+
+    [ObservableProperty]
+    private string _digitalSignature = string.Empty;
+
+    public static SupplierEditor CreateEmpty() => new();
+
+    public static SupplierEditor CreateForNew()
+        => new()
+        {
+            Status = "Active",
+            RiskLevel = "Low",
+            CooperationStart = DateTime.UtcNow.Date
+        };
+
+    public static SupplierEditor FromSupplier(Supplier supplier)
+    {
+        return new SupplierEditor
+        {
+            Id = supplier.Id,
+            Name = supplier.Name ?? string.Empty,
+            SupplierType = supplier.SupplierType ?? string.Empty,
+            Status = string.IsNullOrWhiteSpace(supplier.Status)
+                ? "Active"
+                : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(supplier.Status),
+            VatNumber = supplier.VatNumber ?? string.Empty,
+            Email = supplier.Email ?? string.Empty,
+            Phone = supplier.Phone ?? string.Empty,
+            Website = supplier.Website ?? string.Empty,
+            Address = supplier.Address ?? string.Empty,
+            City = supplier.City ?? string.Empty,
+            Country = supplier.Country ?? string.Empty,
+            Notes = supplier.Notes ?? string.Empty,
+            ContractFile = supplier.ContractFile ?? string.Empty,
+            RiskLevel = string.IsNullOrWhiteSpace(supplier.RiskLevel) ? "Low" : supplier.RiskLevel!,
+            IsQualified = supplier.IsQualified,
+            CooperationStart = supplier.CooperationStart,
+            CooperationEnd = supplier.CooperationEnd,
+            RegisteredAuthorities = supplier.RegisteredAuthorities ?? string.Empty,
+            DigitalSignature = supplier.DigitalSignature ?? string.Empty
+        };
+    }
+
+    public SupplierEditor Clone()
+    {
+        return new SupplierEditor
+        {
+            Id = Id,
+            Name = Name,
+            SupplierType = SupplierType,
+            Status = Status,
+            VatNumber = VatNumber,
+            Email = Email,
+            Phone = Phone,
+            Website = Website,
+            Address = Address,
+            City = City,
+            Country = Country,
+            Notes = Notes,
+            ContractFile = ContractFile,
+            RiskLevel = RiskLevel,
+            IsQualified = IsQualified,
+            CooperationStart = CooperationStart,
+            CooperationEnd = CooperationEnd,
+            RegisteredAuthorities = RegisteredAuthorities,
+            DigitalSignature = DigitalSignature
+        };
+    }
+
+    public Supplier ToSupplier(Supplier? existing)
+    {
+        var supplier = existing ?? new Supplier();
+        supplier.Id = Id;
+        supplier.Name = Name?.Trim() ?? string.Empty;
+        supplier.SupplierType = SupplierType?.Trim() ?? string.Empty;
+        supplier.Status = Status?.Trim() ?? string.Empty;
+        supplier.VatNumber = VatNumber?.Trim() ?? string.Empty;
+        supplier.Email = Email?.Trim() ?? string.Empty;
+        supplier.Phone = Phone?.Trim() ?? string.Empty;
+        supplier.Website = Website?.Trim() ?? string.Empty;
+        supplier.Address = Address?.Trim() ?? string.Empty;
+        supplier.City = City?.Trim() ?? string.Empty;
+        supplier.Country = Country?.Trim() ?? string.Empty;
+        supplier.Notes = Notes?.Trim() ?? string.Empty;
+        supplier.ContractFile = ContractFile?.Trim() ?? string.Empty;
+        supplier.RiskLevel = RiskLevel?.Trim() ?? string.Empty;
+        supplier.IsQualified = IsQualified;
+        supplier.CooperationStart = CooperationStart;
+        supplier.CooperationEnd = CooperationEnd;
+        supplier.RegisteredAuthorities = RegisteredAuthorities?.Trim() ?? string.Empty;
+        supplier.DigitalSignature = DigitalSignature ?? existing?.DigitalSignature ?? string.Empty;
+        return supplier;
     }
 }
