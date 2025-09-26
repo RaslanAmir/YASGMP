@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, and 2025-09-29 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, and 2025-09-29 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, and 2025-10-14 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, and 2025-10-14 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, and 2025-10-14 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, and 2025-10-14 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -59,7 +59,7 @@
 - 2025-10-08: External Servicers module now mirrors MAUI CRUD with a dedicated adapter, WPF view, CFL picker, golden-arrow navigation, and unit/smoke coverage updates.
 - 2025-10-09: External Servicer service now delegates CRUD to `DatabaseServiceExternalServicersExtensions`; regression tests assert create/update/delete hit `external_contractors`. Restore/build remain blocked until the .NET CLI is available in the container.
 - 2025-10-10: Audit module now surfaces AuditService-backed filtering (user/entity/action/date) with richer inspector columns and WPF unit coverage; `dotnet --info` still reports `command not found` inside the container.
-- 2025-10-11: B1 form base now exposes FormatLoadedMessage, letting the Audit module emit entry-specific status text without collection hooks; tests cover singular/plural/no-result messages.
+- 2025-10-11: B1 form base now exposes FormatLoadedStatus, letting the Audit module emit entry-specific status text without collection hooks; tests cover singular/plural/no-result messages.
 - 2025-10-12: Audit module filters now normalize date ranges to inclusive day boundaries and backfill empty end dates so AuditService always receives valid bounds; unit tests cover the end-of-day behavior.
 - 2025-10-13: WPF host now keeps a single AuditService singleton registration aligned with MAUI; attempted `dotnet restore`/`dotnet build` still fail because the CLI is unavailable in the container.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
