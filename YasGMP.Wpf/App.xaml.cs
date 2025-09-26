@@ -43,6 +43,7 @@ namespace YasGMP.Wpf
                         core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
 
                         var svc = core.Services;
+                        YasGmpCoreServiceGuards.EnsureAuditServiceSingleton(svc);
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<IAuthContext, WpfAuthContext>();
@@ -51,7 +52,6 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();
                         svc.AddSingleton<IAttachmentService, AttachmentService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
-                        svc.AddSingleton<AuditService>();
                         svc.AddSingleton<IRBACService, RBACService>();
                         svc.AddSingleton<WorkOrderAuditService>();
                         svc.AddTransient<ICapaAuditService, CapaAuditService>();
