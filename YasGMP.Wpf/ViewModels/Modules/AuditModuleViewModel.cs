@@ -31,20 +31,21 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var normalizedFrom = FilterFrom.Date;
+        var normalizedFromDate = FilterFrom.Date;
 
-        var effectiveFilterTo = FilterTo;
-        if (effectiveFilterTo == default)
+        var effectiveFilterTo = FilterTo == default
+            ? FilterFrom
+            : FilterTo;
+
+        var normalizedToDate = effectiveFilterTo.Date;
+
+        if (normalizedToDate < normalizedFromDate)
         {
-            effectiveFilterTo = FilterFrom;
+            (normalizedFromDate, normalizedToDate) = (normalizedToDate, normalizedFromDate);
         }
 
-        if (effectiveFilterTo < FilterFrom)
-        {
-            effectiveFilterTo = FilterFrom;
-        }
-
-        var normalizedTo = effectiveFilterTo.Date.AddDays(1).AddTicks(-1);
+        var normalizedFrom = normalizedFromDate;
+        var normalizedTo = normalizedToDate.AddDays(1).AddTicks(-1);
 
         var actionFilter = string.Equals(SelectedAction, "All", StringComparison.OrdinalIgnoreCase)
             ? string.Empty

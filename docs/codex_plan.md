@@ -62,6 +62,7 @@
 - 2025-10-11: B1 form base now exposes FormatLoadedStatus, letting the Audit module emit entry-specific status text without collection hooks; tests cover singular/plural/no-result messages.
 - 2025-10-12: Audit module filters now normalize date ranges to inclusive day boundaries and backfill empty end dates so AuditService always receives valid bounds; unit tests cover the end-of-day behavior.
 - 2025-10-13: WPF host now keeps a single AuditService singleton registration aligned with MAUI; attempted `dotnet restore`/`dotnet build` still fail because the CLI is unavailable in the container.
+- 2025-10-15: Audit filters now clamp the start date to midnight, expand the end date to the day's final tick, and auto-swap reversed ranges; WPF coverage verifies date-only `FilterTo` inputs reach the end-of-day timestamp.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

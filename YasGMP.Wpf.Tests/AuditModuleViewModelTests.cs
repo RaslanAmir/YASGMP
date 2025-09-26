@@ -143,6 +143,25 @@ public class AuditModuleViewModelTests
         Assert.Equal(new DateTime(2025, 3, 15).Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
     }
 
+    [Fact]
+    public async Task RefreshAsync_FilterToDateOnly_NormalizesToEndOfDay()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        viewModel.FilterFrom = new DateTime(2025, 4, 5, 13, 45, 0);
+        viewModel.FilterTo = new DateTime(2025, 4, 7);
+
+        await viewModel.RefreshAsync();
+
+        Assert.Equal(new DateTime(2025, 4, 5), viewModel.LastFromFilter);
+        Assert.Equal(new DateTime(2025, 4, 7).Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+    }
+
     private static DatabaseService CreateDatabaseService()
         => new("Server=localhost;Database=unit_test;Uid=test;Pwd=test;");
 
