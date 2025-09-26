@@ -261,7 +261,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             StatusMessage = $"Loading {Title} records...";
             var records = await LoadAsync(parameter).ConfigureAwait(false);
             ApplyRecords(records);
-            StatusMessage = FormatLoadedStatus(Records.Count);
+            StatusMessage = FormatLoadedStatus(records.Count);
         }
         catch (Exception ex)
         {

@@ -49,6 +49,8 @@ public class AuditModuleViewModelTests
         viewModel.FilterFrom = new DateTime(2025, 1, 1);
         viewModel.FilterTo = new DateTime(2025, 1, 31);
 
+        viewModel.StatusMessage = "Placeholder";
+
         await viewModel.RefreshAsync();
 
         Assert.Single(viewModel.Records);
@@ -82,6 +84,8 @@ public class AuditModuleViewModelTests
 
         var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
 
+        viewModel.StatusMessage = "Placeholder";
+
         await viewModel.RefreshAsync();
 
         Assert.Empty(viewModel.Records);
@@ -105,6 +109,8 @@ public class AuditModuleViewModelTests
         };
 
         var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
+
+        viewModel.StatusMessage = "Placeholder";
 
         await viewModel.RefreshAsync();
 
