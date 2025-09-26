@@ -5,8 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
-             d:DesignHeight="400"
-             d:DesignWidth="600">
+             d:DesignHeight="600"
+             d:DesignWidth="960">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -26,33 +26,206 @@
             </ItemsControl>
             <Separator />
             <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
+            <Button Content="Execute Now"
+                    Command="{Binding ExecuteJobCommand}"
+                    Margin="8,0,0,0" />
+            <Button Content="Acknowledge"
+                    Command="{Binding AcknowledgeJobCommand}"
+                    Margin="8,0,0,0" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
+
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
                 <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Width="220"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
-            <DataGrid Grid.Row="1"
-                      ItemsSource="{Binding RecordsView}"
-                      SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
-                </DataGrid.Columns>
-            </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
+
+                <DataGrid Grid.Column="0"
+                          Margin="0,0,12,0"
+                          ItemsSource="{Binding RecordsView}"
+                          SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Title}" Width="2*" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
+                        <DataGridTextColumn Header="Recurrence" Binding="{Binding InspectorFields[1].Value}" Width="*" />
+                        <DataGridTextColumn Header="Next Due" Binding="{Binding InspectorFields[0].Value}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="Scheduled Job Details"
+                                   FontWeight="Bold"
+                                   FontSize="14"
+                                   Margin="0,0,0,12" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Status" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="0" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.Status, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Job Type" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.JobType, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Recurrence" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="1" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.RecurrencePattern, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Cron Expression" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.CronExpression, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Next Due" Margin="8,0,0,4" />
+                            <DatePicker Grid.Row="2" Grid.Column="1" Margin="8,0,0,12"
+                                        SelectedDate="{Binding Editor.NextDue, Mode=TwoWay}"
+                                        IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Entity Type" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="3" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.EntityType, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Entity Id" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="3" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.EntityId, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Comment" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
+                                     Text="{Binding Editor.Comment, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <CheckBox Grid.Row="5" Grid.Column="0" Margin="0,0,8,12"
+                                      Content="Is Critical"
+                                      IsChecked="{Binding Editor.IsCritical}"
+                                      IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <CheckBox Grid.Row="5" Grid.Column="1" Margin="8,0,0,12"
+                                      Content="Requires Acknowledgment"
+                                      IsChecked="{Binding Editor.NeedsAcknowledgment}"
+                                      IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <CheckBox Grid.Row="6" Grid.Column="0" Margin="0,0,8,12"
+                                      Content="Alert On Failure"
+                                      IsChecked="{Binding Editor.AlertOnFailure}"
+                                      IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="Escalation Note" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="6" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.EscalationNote, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Last Result" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="7" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.LastResult, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="Last Error" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="7" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.LastError, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Last Executed" Margin="0,0,8,4" />
+                            <DatePicker Grid.Row="8" Grid.Column="0" Margin="0,0,8,12"
+                                        SelectedDate="{Binding Editor.LastExecuted, Mode=TwoWay}"
+                                        IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="Retries" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="8" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.Retries, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Text="Max Retries" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="9" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.MaxRetries, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="9" Grid.Column="1" Text="Extra Params" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="9" Grid.Column="1" Margin="8,0,0,12"
+                                     TextWrapping="Wrap"
+                                     Text="{Binding Editor.ExtraParams, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="10" Grid.Column="0" Text="Device" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="10" Grid.Column="0" Margin="0,0,8,12"
+                                     Text="{Binding Editor.DeviceInfo, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="10" Grid.Column="1" Text="Session" Margin="8,0,0,4" />
+                            <TextBox Grid.Row="10" Grid.Column="1" Margin="8,0,0,12"
+                                     Text="{Binding Editor.SessionId, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+
+                            <TextBlock Grid.Row="11" Grid.Column="0" Text="IP Address" Margin="0,0,8,4" />
+                            <TextBox Grid.Row="11" Grid.Column="0" Margin="0,0,8,0"
+                                     Text="{Binding Editor.IpAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
+                        </Grid>
+
+                        <ItemsControl Margin="0,12,0,0"
+                                      ItemsSource="{Binding ValidationMessages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="•  {Binding}" Foreground="Tomato" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <TextBlock Grid.Row="2"
+                       Text="{Binding StatusMessage}"
+                       FontStyle="Italic"
+                       Foreground="Gray"
+                       Margin="0,8,0,0" />
         </Grid>
     </DockPanel>
 </UserControl>

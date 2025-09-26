@@ -26,8 +26,8 @@
   - Calibration — [x] done *(CRUD editor now supports attachment uploads via AttachmentService; e-signature/audit surfacing remains queued for Batch B2)*
   - Incident → CAPA → Change Control — [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments; signature/audit prompts queued for Batch B2)*
   - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, and attachment workflow; signature/audit prompts queued for Batch B2)*
-  - Scheduled Jobs — [ ] todo
-  - Users/Roles — [ ] todo
+  - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling and attachment workflow; signature/audit surfacing tracked under Batch B2)*
+ - Users/Roles — [ ] todo
   - Suppliers/External Servicers — [ ] todo
   - Audit/API Audit — [ ] todo
   - Documents/Attachments — [ ] todo
@@ -53,6 +53,7 @@
   - Work Orders module now drives CRUD through `IWorkOrderCrudService` with attachment uploads; e-signature/audit pane pending B2.
 - Calibration module now reuses `CalibrationService` through a new adapter with mode-aware editor, supplier/component lookups, and attachment uploads via `IAttachmentService`; signature/audit follow-ups remain planned under Batch B2.
 - Validations module now mirrors the MAUI experience with a CRUD-capable editor backed by `ValidationService`, machine/component lookups, CFL support, and attachment uploads; signature/audit surfacing targeted for Batch B2 once the SDK blocker clears.
+- Scheduling module now ships with a CRUD-capable editor backed by the new `IScheduledJobCrudService`, attachment uploads, and execute/acknowledge commands; e-signature/audit prompts remain planned for Batch B2.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

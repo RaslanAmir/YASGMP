@@ -29,7 +29,7 @@
     "CAPA": "done",
     "ChangeControl": "done",
     "Validations": "done",
-    "ScheduledJobs": "pending",
+    "ScheduledJobs": "done",
     "UsersRoles": "pending",
     "Suppliers": "pending",
     "ExternalServicers": "pending",
@@ -40,7 +40,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(validations): add validation editor with CRUD and attachments",
+  "lastCommitSummary": "feat(scheduling): add scheduled jobs editor with CRUD and actions",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -59,6 +59,7 @@
     "2025-10-01: Incidents editor exposes CFL-driven linking to work orders and CAPA cases with unit coverage for the new mode transitions.",
     "2025-10-02: CAPA module now persists via ICapaCrudService with component lookups, attachments, and unit coverage for save/attachment flows; Change Control still pending.",
     "2025-10-03: Change Control module now uses IChangeControlCrudService with a mode-aware editor, CFL picker, and attachment workflow; signature/audit prompts queued for Batch B2.",
-    "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available."
+    "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available.",
+    "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2."
   ]
 }
