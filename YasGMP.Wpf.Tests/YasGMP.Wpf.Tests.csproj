@@ -28,5 +28,6 @@
     <Compile Include="..\YasGMP.Wpf\Services\IIncidentCrudService.cs" Link="Wpf\Services\IIncidentCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\SchedulingModuleViewModel.cs" Link="Wpf\Modules\SchedulingModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IScheduledJobCrudService.cs" Link="Wpf\Services\IScheduledJobCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\IUserCrudService.cs" Link="Wpf\Services\IUserCrudService.cs" />
   </ItemGroup>
 </Project>

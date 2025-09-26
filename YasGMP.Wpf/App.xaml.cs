@@ -52,6 +52,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IAttachmentService, AttachmentService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<AuditService>();
+                        svc.AddSingleton<IRBACService, RBACService>();
                         svc.AddSingleton<WorkOrderAuditService>();
                         svc.AddTransient<ICapaAuditService, CapaAuditService>();
                         svc.AddTransient<INotificationService, NotificationService>();
@@ -75,8 +76,10 @@ namespace YasGMP.Wpf
                         svc.AddTransient<ICapaCrudService, CapaCrudServiceAdapter>();
                         svc.AddTransient<IChangeControlCrudService, ChangeControlCrudServiceAdapter>();
                         svc.AddTransient<IValidationCrudService, ValidationCrudServiceAdapter>();
+                        svc.AddTransient<IUserService, UserService>();
+                        svc.AddTransient<IUserCrudService, UserCrudServiceAdapter>();
                         svc.AddTransient<IScheduledJobCrudService, ScheduledJobCrudServiceAdapter>();
-                       svc.AddSingleton<ShellInteractionService>();
+                        svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<ModulesPaneViewModel>();

@@ -30,7 +30,7 @@
     "ChangeControl": "done",
     "Validations": "done",
     "ScheduledJobs": "done",
-    "UsersRoles": "pending",
+    "UsersRoles": "done",
     "Suppliers": "pending",
     "ExternalServicers": "pending",
     "Audit": "pending",
@@ -40,7 +40,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(scheduling): add scheduled jobs editor with CRUD and actions",
+  "lastCommitSummary": "feat(security): add user and role editor",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -60,6 +60,7 @@
     "2025-10-02: CAPA module now persists via ICapaCrudService with component lookups, attachments, and unit coverage for save/attachment flows; Change Control still pending.",
     "2025-10-03: Change Control module now uses IChangeControlCrudService with a mode-aware editor, CFL picker, and attachment workflow; signature/audit prompts queued for Batch B2.",
     "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available.",
-    "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2."
-  ]
+    "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2.",
+    "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2."
+ ]
 }
