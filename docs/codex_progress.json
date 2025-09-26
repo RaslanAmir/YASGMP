@@ -41,6 +41,7 @@
     "SettingsAdmin": "pending"
   },
   "lastCommitSummary": "feat(suppliers): add CRUD editor",
+
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -64,4 +65,5 @@
     "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2.",
     "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task."
   ]
+
 }
