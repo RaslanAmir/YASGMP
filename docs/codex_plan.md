@@ -69,6 +69,7 @@
 - 2025-10-19: B1 refresh status now pulls from the applied record count so overrides reflect the actual dataset after filtering; audit module retains zero/singular/plural messaging via `FormatLoadedStatus`.
 - 2025-10-20: Audit filters now centralize range normalization so date pickers can be left empty, clamp the start day to midnight, and expand the end day to its final tick; coverage asserts a date-only upper bound reaches the service as an end-of-day timestamp.
 - 2025-10-21: Confirmed the WPF host retains a singleton AuditService registration and added DI coverage ensuring AuditModuleViewModel resolves after the cleanup.
+- 2025-10-22: Hardened B1 status formatting to clamp negative counts and kept the Audit override routing zero-or-less results to the empty audit message; unit tests continue to assert the singular/plural/no-result wording via RefreshAsync.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
