@@ -12,7 +12,8 @@
       "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
       "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked.",
       "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container.",
-      "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container."
+      "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container.",
+      "2025-10-17: dotnet --info/restore/build retried; CLI still missing so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -93,6 +94,7 @@
     "2025-10-13: WPF host now keeps a single AuditService singleton aligned with MAUI; attempted dotnet restore/build still fail because the CLI is unavailable in the container.",
     "2025-10-14: dotnet restore/build retried for MAUI + WPF targets; CLI still missing so commands exit with 'command not found'.",
     "2025-10-15: Audit filters now clamp start/end days, auto-swap reversed ranges, and include WPF coverage for date-only end-of-day normalization.",
-    "2025-10-16: B1 refresh now calls FormatLoadedStatus with the loaded count so Audit overrides can emit zero/singular/plural strings; unit tests assert the formatted audit status messages."
+    "2025-10-16: B1 refresh now calls FormatLoadedStatus with the loaded count so Audit overrides can emit zero/singular/plural strings; unit tests assert the formatted audit status messages.",
+    "2025-10-17: Audit module date filters now accept null DatePicker inputs, default missing end dates to the start date, and expand the end boundary to the final tick of the day; WPF unit tests verify LastToFilter receives the end-of-day timestamp."
   ]
 }
