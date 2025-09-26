@@ -173,7 +173,15 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
            || (!string.IsNullOrWhiteSpace(record.Description) && record.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>Formats the status message after records have been loaded.</summary>
-    protected virtual string FormatLoadedStatus(int count) => $"Loaded {count} record(s).";
+    protected virtual string FormatLoadedStatus(int count)
+    {
+        if (count < 0)
+        {
+            count = 0;
+        }
+
+        return $"Loaded {count} record(s).";
+    }
 
     partial void OnModeChanged(FormMode value)
     {

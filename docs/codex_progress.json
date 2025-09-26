@@ -99,6 +99,7 @@
     "2025-10-18: WPF host now routes AuditService registration through YasGmpCoreServiceGuards to strip transient duplicates before adding the singleton; DI tests assert duplicate descriptors are removed and the singleton instance is reused.",
     "2025-10-19: B1 refresh status messaging now reads from the post-apply record count so overrides (Audit) emit accurate zero/singular/plural strings validated by unit coverage.",
     "2025-10-20: Audit module date normalization now centralizes range clamping so null DatePicker values fall back gracefully and date-only end bounds reach the service at the day's final tick with new WPF unit coverage.",
-    "2025-10-21: Confirmed singleton AuditService registration remains in the WPF host and added DI coverage to ensure AuditModuleViewModel resolves after the cleanup."
+    "2025-10-21: Confirmed singleton AuditService registration remains in the WPF host and added DI coverage to ensure AuditModuleViewModel resolves after the cleanup.",
+    "2025-10-22: B1 FormatLoadedStatus now clamps negative counts while the Audit override maps <=0 results to the no-audit message; WPF tests continue to assert the singular/plural/zero wording through RefreshAsync."
   ]
 }
