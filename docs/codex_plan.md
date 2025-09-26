@@ -73,6 +73,7 @@
 - 2025-10-23: Audit filters now normalize nullable DatePicker inputs with unspecified kinds, persisting sanitized start/end dates in the view-model while expanding the service-bound end date to the day's final tick; `dotnet --info`/restore/build attempts still fail because the CLI remains unavailable in the container.
 - 2025-10-24: WPF host now registers `AuditService` directly as a singleton (removing the stray transient), and DI coverage confirms `AuditModuleViewModel` resolves with the singleton; `dotnet restore`/`dotnet build` retries continue to fail with **command not found** until the SDK is installed.
 - 2025-10-25: Audit module now surfaces HasResults/HasError flags, highlights offline/error status text in the view, and relabels the inspector reason column; `dotnet` CLI is still unavailable so restore/build attempts continue to fail.
+- 2025-10-26: Audit filters now preserve the user-selected end date even when it predates the start picker, clamping the query's start bound to the chosen end day and covering the regression with WPF tests.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

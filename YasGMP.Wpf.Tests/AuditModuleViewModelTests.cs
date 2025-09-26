@@ -194,6 +194,28 @@ public class AuditModuleViewModelTests
     }
 
     [Fact]
+    public async Task RefreshAsync_FilterToBeforeFilterFrom_PreservesUpperBound()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        viewModel.FilterFrom = new DateTime(2025, 5, 10, 10, 30, 0);
+        viewModel.FilterTo = new DateTime(2025, 5, 1);
+
+        await viewModel.RefreshAsync();
+
+        Assert.Equal(new DateTime(2025, 5, 10), viewModel.FilterFrom!.Value);
+        Assert.Equal(new DateTime(2025, 5, 1), viewModel.FilterTo!.Value);
+        Assert.Equal(new DateTime(2025, 5, 1), viewModel.LastFromFilter);
+        Assert.Equal(new DateTime(2025, 5, 1).Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
+    }
+
+    [Fact]
     public async Task RefreshAsync_FilterToUnset_DefaultsToFilterFromEndOfDay()
     {
         var database = CreateDatabaseService();
