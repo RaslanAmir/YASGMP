@@ -43,7 +43,7 @@ namespace YasGMP.Wpf
                         core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
 
                         var svc = core.Services;
-                        YasGmpCoreServiceGuards.EnsureAuditServiceSingleton(svc);
+                        svc.AddSingleton<AuditService>();
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<IAuthContext, WpfAuthContext>();
