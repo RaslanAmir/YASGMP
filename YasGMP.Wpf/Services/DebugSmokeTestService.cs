@@ -30,6 +30,7 @@ public sealed class DebugSmokeTestService
         DashboardModuleViewModel.ModuleKey,
         AssetsModuleViewModel.ModuleKey,
         ComponentsModuleViewModel.ModuleKey,
+        ExternalServicersModuleViewModel.ModuleKey,
         WorkOrdersModuleViewModel.ModuleKey,
         AuditModuleViewModel.ModuleKey,
         ValidationsModuleViewModel.ModuleKey
@@ -120,6 +121,7 @@ public sealed class DebugSmokeTestService
 
             await AddStepAsync("Session bootstrap", token => Task.FromResult(BuildSessionMessage()));
             await AddStepAsync("Module navigation", NavigateModulesAsync);
+            await AddStepAsync("External servicers mode cycle", token => ExerciseFormModesAsync(ExternalServicersModuleViewModel.ModuleKey, token));
             await AddStepAsync("Add/Find cycle", token => ExerciseFormModesAsync(WorkOrdersModuleViewModel.ModuleKey, token));
             await AddStepAsync("Audit trail fetch", FetchAuditTrailAsync);
             await AddStepAsync("Digital signature verification", VerifyDigitalSignatureAsync);

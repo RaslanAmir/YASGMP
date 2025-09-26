@@ -63,6 +63,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<CalibrationService>();
                         svc.AddTransient<PartService>();
                         svc.AddTransient<SupplierService>();
+                        svc.AddTransient<ExternalServicerService>();
                         svc.AddTransient<ChangeControlService>();
                         svc.AddTransient<ValidationService>();
                         svc.AddTransient<IIncidentAuditService, IncidentAuditService>();
@@ -79,6 +80,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IValidationCrudService, ValidationCrudServiceAdapter>();
                         svc.AddTransient<ISupplierAuditService, SupplierAuditService>();
                         svc.AddTransient<ISupplierCrudService, SupplierCrudServiceAdapter>();
+                        svc.AddTransient<IExternalServicerCrudService, ExternalServicerCrudServiceAdapter>();
                         svc.AddTransient<IUserService, UserService>();
                         svc.AddTransient<IUserCrudService, UserCrudServiceAdapter>();
                         svc.AddTransient<IScheduledJobCrudService, ScheduledJobCrudServiceAdapter>();
@@ -97,6 +99,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<CalibrationModuleViewModel>();
                         svc.AddTransient<PartsModuleViewModel>();
                         svc.AddTransient<SuppliersModuleViewModel>();
+                        svc.AddTransient<ExternalServicersModuleViewModel>();
                         svc.AddTransient<CapaModuleViewModel>();
                         svc.AddTransient<IncidentsModuleViewModel>();
                         svc.AddTransient<ChangeControlModuleViewModel>();
@@ -119,6 +122,7 @@ namespace YasGMP.Wpf
                             registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey, "Calibration", "Maintenance", "Calibration records");
                             registry.Register<PartsModuleViewModel>(PartsModuleViewModel.ModuleKey, "Parts", "Maintenance", "Parts and spare stock");
                             registry.Register<SuppliersModuleViewModel>(SuppliersModuleViewModel.ModuleKey, "Suppliers", "Supply Chain", "Approved suppliers and contractors");
+                            registry.Register<ExternalServicersModuleViewModel>(ExternalServicersModuleViewModel.ModuleKey, "External Servicers", "Supply Chain", "Accredited laboratories and service partners");
                             registry.Register<CapaModuleViewModel>(CapaModuleViewModel.ModuleKey, "CAPA", "Quality", "Corrective actions and preventive plans");
                             registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
                             registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");

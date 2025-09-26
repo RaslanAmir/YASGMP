@@ -45,6 +45,9 @@
         <DataTemplate DataType="{x:Type vm:SuppliersModuleViewModel}">
             <views:SuppliersModuleView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExternalServicersModuleViewModel}">
+            <views:ExternalServicersModuleView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AdminModuleViewModel}">
             <views:AdminModuleView />
         </DataTemplate>
