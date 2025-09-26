@@ -27,7 +27,7 @@
   - Incident → CAPA → Change Control — [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments; signature/audit prompts queued for Batch B2)*
   - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, and attachment workflow; signature/audit prompts queued for Batch B2)*
   - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling and attachment workflow; signature/audit surfacing tracked under Batch B2)*
-  - Users/Roles — [ ] todo
+ - Users/Roles — [ ] todo
   - Suppliers/External Servicers — [ ] todo
   - Audit/API Audit — [ ] todo
   - Documents/Attachments — [ ] todo
