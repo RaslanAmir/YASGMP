@@ -61,6 +61,7 @@
 - 2025-10-10: Audit module now surfaces AuditService-backed filtering (user/entity/action/date) with richer inspector columns and WPF unit coverage; `dotnet --info` still reports `command not found` inside the container.
 - 2025-10-11: B1 form base now exposes FormatLoadedMessage, letting the Audit module emit entry-specific status text without collection hooks; tests cover singular/plural/no-result messages.
 - 2025-10-12: Audit module filters now normalize date ranges to inclusive day boundaries and backfill empty end dates so AuditService always receives valid bounds; unit tests cover the end-of-day behavior.
+- 2025-10-13: WPF host now keeps a single AuditService singleton registration aligned with MAUI; attempted `dotnet restore`/`dotnet build` still fail because the CLI is unavailable in the container.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
