@@ -91,10 +91,21 @@
                     <DataGridTextColumn Header="Device" Binding="{Binding InspectorFields[5].Value}" Width="2*" />
                     <DataGridTextColumn Header="Digital Signature" Binding="{Binding InspectorFields[7].Value}" Width="200" />
                     <DataGridTextColumn Header="Signature Hash" Binding="{Binding InspectorFields[8].Value}" Width="200" />
-                    <DataGridTextColumn Header="Note" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="Reason" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Margin="0,8,0,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="Gray" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasError}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Grid>
     </DockPanel>
 </UserControl>

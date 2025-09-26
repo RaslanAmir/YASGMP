@@ -40,15 +40,27 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             ? string.Empty
             : SelectedAction ?? string.Empty;
 
-        var audits = await QueryAuditsAsync(
-            FilterUser?.Trim() ?? string.Empty,
-            FilterEntity?.Trim() ?? string.Empty,
-            actionFilter.Trim(),
-            normalizedRange.QueryFrom,
-            normalizedRange.QueryTo).ConfigureAwait(false);
+        try
+        {
+            var audits = await QueryAuditsAsync(
+                FilterUser?.Trim() ?? string.Empty,
+                FilterEntity?.Trim() ?? string.Empty,
+                actionFilter.Trim(),
+                normalizedRange.QueryFrom,
+                normalizedRange.QueryTo).ConfigureAwait(false);
 
-        var records = audits?.Select(MapToRecord).ToList() ?? new List<ModuleRecord>();
-        return ToReadOnlyList(records);
+            var records = audits?.Select(MapToRecord).ToList() ?? new List<ModuleRecord>();
+            HasResults = records.Count > 0;
+            HasError = false;
+
+            return ToReadOnlyList(records);
+        }
+        catch
+        {
+            HasResults = false;
+            HasError = true;
+            throw;
+        }
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
@@ -112,6 +124,12 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
     [ObservableProperty]
     private DateTime? _filterTo;
+
+    [ObservableProperty]
+    private bool _hasResults;
+
+    [ObservableProperty]
+    private bool _hasError;
 
     private readonly AuditService _auditService;
 
@@ -181,7 +199,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             new("Session", entry.SessionId ?? string.Empty),
             new("Digital Signature", entry.DigitalSignature ?? string.Empty),
             new("Signature Hash", entry.SignatureHash ?? string.Empty),
-            new("Note", entry.Note ?? string.Empty)
+            new("Reason", entry.Note ?? string.Empty)
         };
 
         var key = entry.Id?.ToString(CultureInfo.InvariantCulture)
