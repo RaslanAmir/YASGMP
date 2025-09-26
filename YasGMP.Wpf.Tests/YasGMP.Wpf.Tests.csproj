@@ -10,7 +10,11 @@
     <PackageReference Include="xunit" Version="2.7.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\AssetsModuleViewModel.cs" Link="Wpf\Modules\AssetsModuleViewModel.cs" />

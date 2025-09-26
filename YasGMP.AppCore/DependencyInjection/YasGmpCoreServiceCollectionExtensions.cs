@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using YasGMP.Data;
 
@@ -230,6 +231,29 @@ namespace YasGMP.AppCore.DependencyInjection
             }
 
             return services;
+        }
+    }
+
+    /// <summary>
+    /// Guard helpers that ensure shared YasGMP services are registered with the expected lifetimes.
+    /// </summary>
+    public static class YasGmpCoreServiceGuards
+    {
+        /// <summary>
+        /// Removes any pre-existing registrations for <see cref="AuditService"/> and re-adds it as a singleton.
+        /// </summary>
+        /// <remarks>
+        /// Some hosts accidentally registered <see cref="AuditService"/> multiple times (e.g. transient + singleton).
+        /// This guard normalises the registration so dependents always resolve the singleton instance.
+        /// </remarks>
+        /// <param name="services">Service collection to normalise.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="services"/> is null.</exception>
+        public static void EnsureAuditServiceSingleton(IServiceCollection services)
+        {
+            if (services is null) throw new ArgumentNullException(nameof(services));
+
+            services.RemoveAll<AuditService>();
+            services.AddSingleton<AuditService>();
         }
     }
 }
