@@ -30,6 +30,8 @@
     <Compile Include="..\YasGMP.Wpf\Services\IScheduledJobCrudService.cs" Link="Wpf\Services\IScheduledJobCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IUserCrudService.cs" Link="Wpf\Services\IUserCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\ISupplierCrudService.cs" Link="Wpf\Services\ISupplierCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\IExternalServicerCrudService.cs" Link="Wpf\Services\IExternalServicerCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\SuppliersModuleViewModel.cs" Link="Wpf\Modules\SuppliersModuleViewModel.cs" />
+    <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\ExternalServicersModuleViewModel.cs" Link="Wpf\Modules\ExternalServicersModuleViewModel.cs" />
   </ItemGroup>
 </Project>
