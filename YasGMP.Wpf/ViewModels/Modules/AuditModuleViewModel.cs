@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,8 +27,6 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         FilterFrom = DateTime.Now.AddDays(-30);
         FilterTo = DateTime.Now;
         SelectedAction = ActionOptions[0];
-
-        Records.CollectionChanged += OnRecordsCollectionChanged;
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
@@ -181,16 +178,14 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             relatedParameter: null);
     }
 
-    private void OnRecordsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    protected override string FormatLoadedMessage(int count)
     {
-        if (Records.Count == 0)
+        if (count == 0)
         {
-            StatusMessage = "No audit entries match the current filters.";
+            return "No audit entries match the current filters.";
         }
-        else
-        {
-            var label = Records.Count == 1 ? "audit entry" : "audit entries";
-            StatusMessage = $"Loaded {Records.Count} {label}.";
-        }
+
+        var label = count == 1 ? "audit entry" : "audit entries";
+        return $"Loaded {count} {label}.";
     }
 }

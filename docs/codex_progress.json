@@ -10,14 +10,34 @@
       "2025-09-26: Batch 0 retry confirmed `dotnet --info` still returns 'command not found'.",
       "2025-09-27: dotnet --info/dotnet restore/dotnet build all continue to fail with 'command not found'.",
       "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
-      "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked."
+      "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked.",
+      "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container."
     ]
   },
   "batches": [
-    { "id": "B0", "name": "Environment stabilization", "status": "blocked", "notes": ["Awaiting .NET SDK installation"] },
-    { "id": "B1", "name": "Shell foundation", "status": "pending" },
-    { "id": "B2", "name": "Cross-cutting services", "status": "pending" },
-    { "id": "B3", "name": "Editor framework", "status": "pending" }
+    {
+      "id": "B0",
+      "name": "Environment stabilization",
+      "status": "blocked",
+      "notes": [
+        "Awaiting .NET SDK installation"
+      ]
+    },
+    {
+      "id": "B1",
+      "name": "Shell foundation",
+      "status": "pending"
+    },
+    {
+      "id": "B2",
+      "name": "Cross-cutting services",
+      "status": "pending"
+    },
+    {
+      "id": "B3",
+      "name": "Editor framework",
+      "status": "pending"
+    }
   ],
   "modules": {
     "Assets": "done",
@@ -41,8 +61,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat(audit): load WPF audit trail via audit service",
-
+  "lastCommitSummary": "fix(audit): format status messages via hook",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -64,10 +83,10 @@
     "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available.",
     "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2.",
     "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2.",
-      "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task.",
-      "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
-      "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access.",
-      "2025-10-10: Audit module now surfaces AuditService-backed filtering with richer inspector columns and WPF coverage; dotnet --info still fails with 'command not found'."
+    "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task.",
+    "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
+    "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access.",
+    "2025-10-10: Audit module now surfaces AuditService-backed filtering with richer inspector columns and WPF coverage; dotnet --info still fails with 'command not found'.",
+    "2025-10-11: B1 base now formats loaded status via a virtual hook so Audit module can emit singular/plural/no-results messaging validated by unit tests."
   ]
-
 }

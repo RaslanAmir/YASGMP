@@ -59,6 +59,7 @@
 - 2025-10-08: External Servicers module now mirrors MAUI CRUD with a dedicated adapter, WPF view, CFL picker, golden-arrow navigation, and unit/smoke coverage updates.
 - 2025-10-09: External Servicer service now delegates CRUD to `DatabaseServiceExternalServicersExtensions`; regression tests assert create/update/delete hit `external_contractors`. Restore/build remain blocked until the .NET CLI is available in the container.
 - 2025-10-10: Audit module now surfaces AuditService-backed filtering (user/entity/action/date) with richer inspector columns and WPF unit coverage; `dotnet --info` still reports `command not found` inside the container.
+- 2025-10-11: B1 form base now exposes FormatLoadedMessage, letting the Audit module emit entry-specific status text without collection hooks; tests cover singular/plural/no-result messages.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
