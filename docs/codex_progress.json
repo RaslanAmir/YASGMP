@@ -103,6 +103,7 @@
     "2025-10-21: Confirmed singleton AuditService registration remains in the WPF host and added DI coverage to ensure AuditModuleViewModel resolves after the cleanup.",
     "2025-10-22: B1 FormatLoadedStatus now clamps negative counts while the Audit override maps <=0 results to the no-audit message; WPF tests continue to assert the singular/plural/zero wording through RefreshAsync.",
     "2025-10-23: Audit module now normalizes nullable DatePicker inputs (including DateTimeKind.Unspecified) before querying AuditService, persists sanitized filter values, and remains blocked on dotnet restore/build due to the missing CLI.",
-    "2025-10-24: WPF host now registers AuditService as a singleton directly (removing the transient duplicate) and DI tests confirm AuditModuleViewModel resolves; dotnet restore/build retries still fail with 'command not found'."
+    "2025-10-24: WPF host now registers AuditService as a singleton directly (removing the transient duplicate) and DI tests confirm AuditModuleViewModel resolves; dotnet restore/build retries still fail with 'command not found'.",
+    "2025-10-25: Audit module now tracks HasResults/HasError flags, applies error highlighting in the view, and renames the inspector reason column; dotnet CLI remains unavailable so restore/build stay blocked."
   ]
 }

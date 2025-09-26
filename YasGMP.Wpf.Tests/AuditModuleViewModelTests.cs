@@ -64,6 +64,8 @@ public class AuditModuleViewModelTests
         Assert.Equal("qa-signature", record.InspectorFields[7].Value);
         Assert.Equal("AABBCCDDEE", record.InspectorFields[8].Value);
         Assert.Equal("Loaded 1 audit entry.", viewModel.StatusMessage);
+        Assert.True(viewModel.HasResults);
+        Assert.False(viewModel.HasError);
 
         Assert.Equal("qa", viewModel.LastUserFilter);
         Assert.Equal("work_orders", viewModel.LastEntityFilter);
@@ -91,6 +93,8 @@ public class AuditModuleViewModelTests
         Assert.Empty(viewModel.Records);
         Assert.Equal("No audit entries match the current filters.", viewModel.StatusMessage);
         Assert.Equal(string.Empty, viewModel.LastActionFilter);
+        Assert.False(viewModel.HasResults);
+        Assert.False(viewModel.HasError);
     }
 
     [Fact]
@@ -116,6 +120,8 @@ public class AuditModuleViewModelTests
 
         Assert.Equal(2, viewModel.Records.Count);
         Assert.Equal("Loaded 2 audit entries.", viewModel.StatusMessage);
+        Assert.True(viewModel.HasResults);
+        Assert.False(viewModel.HasError);
     }
 
     [Fact]
@@ -228,6 +234,32 @@ public class AuditModuleViewModelTests
         Assert.Equal(new DateTime(2025, 7, 5), viewModel.FilterTo!.Value);
     }
 
+    [Fact]
+    public async Task RefreshAsync_WhenServiceThrows_SetsErrorState()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new ThrowingAuditModuleViewModel(
+            database,
+            auditService,
+            cfl,
+            shell,
+            navigation,
+            new InvalidOperationException("forced failure"));
+
+        await viewModel.RefreshAsync();
+
+        Assert.True(viewModel.HasError);
+        Assert.False(viewModel.HasResults);
+        Assert.NotEmpty(viewModel.Records);
+        Assert.StartsWith("Offline data loaded because:", viewModel.StatusMessage);
+        Assert.Contains("forced failure", viewModel.StatusMessage);
+    }
+
     private static DatabaseService CreateDatabaseService()
         => new("Server=localhost;Database=unit_test;Uid=test;Pwd=test;");
 
@@ -267,6 +299,31 @@ public class AuditModuleViewModelTests
             LastToFilter = to;
             return Task.FromResult(_entries);
         }
+    }
+
+    private sealed class ThrowingAuditModuleViewModel : AuditModuleViewModel
+    {
+        private readonly Exception _exception;
+
+        public ThrowingAuditModuleViewModel(
+            DatabaseService databaseService,
+            AuditService auditService,
+            ICflDialogService cflDialogService,
+            IShellInteractionService shellInteraction,
+            IModuleNavigationService navigation,
+            Exception exception)
+            : base(databaseService, auditService, cflDialogService, shellInteraction, navigation)
+        {
+            _exception = exception;
+        }
+
+        protected override Task<IReadOnlyList<AuditEntryDto>> QueryAuditsAsync(
+            string user,
+            string entity,
+            string action,
+            DateTime from,
+            DateTime to)
+            => Task.FromException<IReadOnlyList<AuditEntryDto>>(_exception);
     }
 
     private sealed class StubCflDialogService : ICflDialogService

@@ -29,7 +29,7 @@
   - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling and attachment workflow; signature/audit surfacing tracked under Batch B2)*
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, and role assignment management; signature prompts queued for Batch B2)*
   - Suppliers/External Servicers — [x] done *(Suppliers module ships with attachments + CFL; External Servicers cockpit now live with mode-aware CRUD and navigation)*
-  - Audit/API Audit — [~] in-progress *(WPF audit trail now pulls filtered entries via AuditService with expanded inspector grid and filters.)*
+  - Audit/API Audit — [~] in-progress *(WPF audit trail now pulls filtered entries via AuditService with expanded inspector grid, filters, and explicit empty/error status flags.)*
   - Documents/Attachments — [ ] todo
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
@@ -72,6 +72,7 @@
 - 2025-10-22: Hardened B1 status formatting to clamp negative counts and kept the Audit override routing zero-or-less results to the empty audit message; unit tests continue to assert the singular/plural/no-result wording via RefreshAsync.
 - 2025-10-23: Audit filters now normalize nullable DatePicker inputs with unspecified kinds, persisting sanitized start/end dates in the view-model while expanding the service-bound end date to the day's final tick; `dotnet --info`/restore/build attempts still fail because the CLI remains unavailable in the container.
 - 2025-10-24: WPF host now registers `AuditService` directly as a singleton (removing the stray transient), and DI coverage confirms `AuditModuleViewModel` resolves with the singleton; `dotnet restore`/`dotnet build` retries continue to fail with **command not found** until the SDK is installed.
+- 2025-10-25: Audit module now surfaces HasResults/HasError flags, highlights offline/error status text in the view, and relabels the inspector reason column; `dotnet` CLI is still unavailable so restore/build attempts continue to fail.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.
