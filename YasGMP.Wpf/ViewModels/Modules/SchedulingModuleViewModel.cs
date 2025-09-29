@@ -22,7 +22,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
     private readonly IScheduledJobCrudService _scheduledJobService;
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
 
     private ScheduledJob? _loadedJob;
     private ScheduledJobEditor? _snapshot;
@@ -33,7 +33,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         IScheduledJobCrudService scheduledJobService,
         IAuthContext authContext,
         IFilePicker filePicker,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -42,7 +42,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         _scheduledJobService = scheduledJobService ?? throw new ArgumentNullException(nameof(scheduledJobService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
 
         Editor = ScheduledJobEditor.CreateEmpty();
 
@@ -329,7 +329,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 return;
             }
 
-            var uploads = 0;
+            var processed = 0;
+            var deduplicated = 0;
             var uploadedBy = _authContext.CurrentUser?.Id;
 
             foreach (var file in files)
@@ -348,13 +349,15 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
-                await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
-                uploads++;
+                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+                processed++;
+                if (result.Deduplicated)
+                {
+                    deduplicated++;
+                }
             }
 
-            StatusMessage = uploads == 1
-                ? "Attachment uploaded successfully."
-                : $"Uploaded {uploads} attachments successfully.";
+            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
         }
         catch (Exception ex)
         {

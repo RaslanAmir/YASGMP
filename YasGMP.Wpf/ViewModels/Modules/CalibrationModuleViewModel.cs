@@ -22,7 +22,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private readonly IComponentCrudService _componentService;
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
 
     private Calibration? _loadedCalibration;
     private CalibrationEditor? _snapshot;
@@ -36,7 +36,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         IComponentCrudService componentService,
         IAuthContext authContext,
         IFilePicker filePicker,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -46,7 +46,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
 
         Editor = CalibrationEditor.CreateEmpty();
         ComponentOptions = new ObservableCollection<ComponentOption>();
@@ -457,7 +457,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 return;
             }
 
-            var uploads = 0;
+            var processed = 0;
+            var deduplicated = 0;
             var uploadedBy = _authContext.CurrentUser?.Id;
 
             foreach (var file in files)
@@ -476,13 +477,15 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
-                await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
-                uploads++;
+                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+                processed++;
+                if (result.Deduplicated)
+                {
+                    deduplicated++;
+                }
             }
 
-            StatusMessage = uploads == 1
-                ? "Attachment uploaded successfully."
-                : $"Uploaded {uploads} attachments successfully.";
+            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
         }
         catch (Exception ex)
         {

@@ -15,7 +15,8 @@
       "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container.",
       "2025-10-17: dotnet --info/restore/build retried; CLI still missing so commands exit with 'command not found'.",
       "2025-10-23: dotnet --info/restore/build attempted again; CLI remains unavailable in the container.",
-      "2025-10-27: dotnet --info/restore/build/test retried; CLI still missing so commands exit with 'command not found'."
+      "2025-10-27: dotnet --info/restore/build/test retried; CLI still missing so commands exit with 'command not found'.",
+      "2025-10-30: dotnet --info/restore/build retried; CLI still absent in container so commands fail with 'command not found'."
     ]
   },
   "batches": [
@@ -65,7 +66,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: order audit query bounds while preserving filters",
+  "lastCommitSummary": "feat: add WPF attachment workflow adapter",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -109,6 +110,7 @@
     "2025-10-26: Audit filters now preserve a user-specified end date even when it predates the start picker by clamping the service query's start bound to that day and adding WPF regression coverage for the upper-bound behavior.",
     "2025-10-27: Audit filters now clamp the lower bound when the upper bound is moved earlier while keeping the selected end date intact; new WPF regression test ensures persisted filters and query arguments align.",
     "2025-10-28: Audit filters now retain the user's To picker while reordering the query bounds if the upper date precedes the lower; tests cover both existing From overrides and default-from scenarios.",
-    "2025-10-29: Audit module now orders inverted date ranges by min/max while preserving the user-selected To value; WPF tests assert the later bound reaches AuditService at end-of-day."
+    "2025-10-29: Audit module now orders inverted date ranges by min/max while preserving the user-selected To value; WPF tests assert the later bound reaches AuditService at end-of-day.",
+    "2025-10-30: WPF modules now route uploads through AttachmentWorkflowService so dedup, retention, and encryption follow the MAUI conventions; DI registration updated and commands now surface dedup status messaging."
   ]
 }

@@ -22,7 +22,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     private readonly IChangeControlCrudService _changeControlService;
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
 
     private ChangeControl? _loadedEntity;
     private ChangeControlEditor? _snapshot;
@@ -33,7 +33,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         IChangeControlCrudService changeControlService,
         IAuthContext authContext,
         IFilePicker filePicker,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -42,7 +42,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         _changeControlService = changeControlService ?? throw new ArgumentNullException(nameof(changeControlService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
 
         StatusOptions = Enum.GetNames(typeof(ChangeControlStatus));
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
@@ -393,7 +393,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 return;
             }
 
-            var uploads = 0;
+            var processed = 0;
+            var deduplicated = 0;
             foreach (var file in files)
             {
                 await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
@@ -410,13 +411,15 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
-                await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
-                uploads++;
+                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+                processed++;
+                if (result.Deduplicated)
+                {
+                    deduplicated++;
+                }
             }
 
-            StatusMessage = uploads == 1
-                ? "Attachment uploaded successfully."
-                : $"Uploaded {uploads} attachments.";
+            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
         }
         catch (Exception ex)
         {
