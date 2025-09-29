@@ -7,6 +7,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -21,7 +22,7 @@ public class WorkOrdersModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -90,7 +91,7 @@ public class WorkOrdersModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.25"
         };
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
