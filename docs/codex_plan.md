@@ -47,6 +47,7 @@
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
 - 2025-10-30: Introduced `AttachmentWorkflowService` in the WPF shell so module view-models share MAUI's dedup/encryption/retention workflow via `AttachmentService` + `DatabaseService.Attachments` helpers; registration and commands now rely on the adapter.
+- 2025-10-31: WPF shell now includes an electronic signature dialog that wraps the shared DigitalSignatureViewModel, captures password/PIN plus GMP reason text, and persists the note via the AppCore insert extension before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
 - Components module now completes the CRUD rollout with mode-aware editor, validation, and machine lookups; attachment/signature integration remains queued for Batch B2.
 - Parts and Warehouse modules now expose CRUD-capable editors with attachment upload support, stock-health warnings, and warehouse inventory previews; e-signatures and audit surfacing remain tied to Batch B2 once SDK access is restored.

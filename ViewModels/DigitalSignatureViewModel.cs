@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input; // AsyncRelayCommand / RelayCommand
@@ -145,6 +146,37 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Actions
+
+        /// <summary>
+        /// Persists the supplied digital signature record using the canonical database extension,
+        /// ensuring the view-model status reflects the outcome and the observable collection refreshes.
+        /// </summary>
+        /// <param name="signature">Digital signature instance to insert.</param>
+        /// <param name="token">Optional cancellation token.</param>
+        /// <returns>The database generated identifier.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="signature"/> is null.</exception>
+        public async Task<int> InsertSignatureAsync(DigitalSignature signature, CancellationToken token = default)
+        {
+            if (signature is null) throw new ArgumentNullException(nameof(signature));
+
+            IsBusy = true;
+            try
+            {
+                var id = await _dbService.InsertDigitalSignatureAsync(signature, token).ConfigureAwait(false);
+                await LoadSignaturesAsync().ConfigureAwait(false);
+                StatusMessage = "Signature recorded.";
+                return id;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Insert failed: {ex.Message}";
+                throw;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
 
         /// <summary>
         /// Adds a new digital signature (schema-tolerant, aligned with DatabaseService Region 17).

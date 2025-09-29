@@ -7,8 +7,10 @@ using YasGMP.AppCore.DependencyInjection;
 using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+using YasGMP.ViewModels;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
+using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf
@@ -46,7 +48,11 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<AuditService>();
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
-                        svc.AddSingleton<IAuthContext, WpfAuthContext>();
+                        svc.AddSingleton<WpfAuthContext>();
+                        svc.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<WpfAuthContext>());
+                        svc.AddSingleton<UserService>();
+                        svc.AddSingleton<IUserService>(sp => sp.GetRequiredService<UserService>());
+                        svc.AddSingleton<AuthService>();
                         svc.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
                         svc.AddSingleton<IDialogService, WpfDialogService>();
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();
@@ -82,7 +88,6 @@ namespace YasGMP.Wpf
                         svc.AddTransient<ISupplierAuditService, SupplierAuditService>();
                         svc.AddTransient<ISupplierCrudService, SupplierCrudServiceAdapter>();
                         svc.AddTransient<IExternalServicerCrudService, ExternalServicerCrudServiceAdapter>();
-                        svc.AddTransient<IUserService, UserService>();
                         svc.AddTransient<IUserCrudService, UserCrudServiceAdapter>();
                         svc.AddTransient<IScheduledJobCrudService, ScheduledJobCrudServiceAdapter>();
                         svc.AddSingleton<ShellInteractionService>();
@@ -92,6 +97,8 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
                         svc.AddSingleton<DebugSmokeTestService>();
+                        svc.AddTransient<DigitalSignatureViewModel>();
+                        svc.AddTransient<ElectronicSignatureDialogViewModel>();
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();
                         svc.AddTransient<ComponentsModuleViewModel>();
