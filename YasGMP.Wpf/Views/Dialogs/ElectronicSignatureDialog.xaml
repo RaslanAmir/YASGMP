@@ -1,0 +1,97 @@
+<Window x:Class="YasGMP.Wpf.Views.Dialogs.ElectronicSignatureDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Electronic Signature"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        MinWidth="460"
+        MinHeight="320"
+        ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </Window.Resources>
+    <Border Padding="16" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                       Text="Re-enter your credential and capture a GMP-compliant reason before applying the signature."
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,12"
+                       FontWeight="SemiBold" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="User:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentUserDisplay}" FontWeight="SemiBold" />
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Password/PIN:" VerticalAlignment="Center" Margin="0,12,8,0" />
+            <PasswordBox x:Name="PasswordBox"
+                         Grid.Row="2"
+                         Grid.Column="1"
+                         Margin="0,12,0,0"
+                         PasswordChanged="OnPasswordChanged"
+                         MinWidth="220"
+                         ToolTip="Enter your YasGMP password or PIN." />
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Reason code:" VerticalAlignment="Center" Margin="0,12,8,0" />
+            <ComboBox Grid.Row="3"
+                      Grid.Column="1"
+                      Margin="0,12,0,0"
+                      ItemsSource="{Binding Reasons}"
+                      SelectedItem="{Binding SelectedReason, Mode=TwoWay}"
+                      DisplayMemberPath="DisplayLabel"
+                      MinWidth="280" />
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Custom code:" VerticalAlignment="Center" Margin="0,12,8,0"
+                       Visibility="{Binding IsCustomReasonVisible, Converter={StaticResource BoolToVisibility}}" />
+            <TextBox Grid.Row="4"
+                     Grid.Column="1"
+                     Margin="0,12,0,0"
+                     Text="{Binding CustomReasonCode, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding IsCustomReasonVisible, Converter={StaticResource BoolToVisibility}}"
+                     MinWidth="200" />
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Reason note:" VerticalAlignment="Top" Margin="0,12,8,0" />
+            <TextBox Grid.Row="5"
+                     Grid.Column="1"
+                     Margin="0,12,0,0"
+                     Text="{Binding ReasonDetail, UpdateSourceTrigger=PropertyChanged}"
+                     AcceptsReturn="True"
+                     MinHeight="80"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto" />
+
+            <TextBlock Grid.Row="6" Grid.ColumnSpan="2"
+                       Margin="0,12,0,0"
+                       Foreground="DarkRed"
+                       Text="{Binding StatusMessage}" />
+
+            <StackPanel Grid.Row="7" Grid.ColumnSpan="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,20,0,0">
+                <Button Content="Confirm"
+                        Width="100"
+                        Margin="0,0,12,0"
+                        IsDefault="True"
+                        Command="{Binding ConfirmCommand}" />
+                <Button Content="Cancel"
+                        Width="100"
+                        IsCancel="True"
+                        Command="{Binding CancelCommand}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

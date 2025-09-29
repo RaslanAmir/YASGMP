@@ -28,4 +28,13 @@
   <ItemGroup>
     <ProjectReference Include="..\YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Helpers\DigitalSignatureHelper.cs">
+      <Link>Shared\Helpers\DigitalSignatureHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ViewModels\DigitalSignatureViewModel.cs">
+      <Link>Shared\ViewModels\DigitalSignatureViewModel.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>
