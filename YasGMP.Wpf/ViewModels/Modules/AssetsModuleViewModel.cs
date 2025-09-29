@@ -21,7 +21,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -31,7 +31,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         IMachineCrudService machineService,
         IAuthContext authContext,
         IFilePicker filePicker,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -40,7 +40,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         Editor = AssetEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
@@ -398,7 +398,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             }
 
             var uploadedBy = _authContext.CurrentUser?.Id;
-            var uploads = 0;
+            var processed = 0;
+            var deduplicated = 0;
 
             foreach (var file in files)
             {
@@ -416,13 +417,15 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
-                await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
-                uploads++;
+                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+                processed++;
+                if (result.Deduplicated)
+                {
+                    deduplicated++;
+                }
             }
 
-            StatusMessage = uploads == 1
-                ? "Attachment uploaded successfully."
-                : $"Uploaded {uploads} attachments successfully.";
+            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
         }
         catch (Exception ex)
         {

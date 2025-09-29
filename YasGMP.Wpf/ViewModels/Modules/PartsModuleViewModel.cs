@@ -19,7 +19,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     public new const string ModuleKey = "Parts";
 
     private readonly IPartCrudService _partService;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private Part? _loadedPart;
@@ -29,7 +29,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     public PartsModuleViewModel(
         DatabaseService databaseService,
         IPartCrudService partService,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
         ICflDialogService cflDialogService,
@@ -38,7 +38,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         : base(ModuleKey, "Parts & Stock", databaseService, cflDialogService, shellInteraction, navigation)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
 
@@ -408,6 +408,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             return;
         }
 
+        var processed = 0;
+        var deduplicated = 0;
+
         foreach (var file in files)
         {
             await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
@@ -423,10 +426,15 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 Reason = $"Attached via WPF on {DateTime.UtcNow:O}"
             };
 
-            await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
+            var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+            processed++;
+            if (result.Deduplicated)
+            {
+                deduplicated++;
+            }
         }
 
-        StatusMessage = $"Uploaded {files.Count} attachment(s) for {_loadedPart.Name}.";
+        StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
     }
 
     private void UpdateAttachmentCommandState()

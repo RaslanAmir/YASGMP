@@ -43,7 +43,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     });
 
     private readonly ISupplierCrudService _supplierService;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private Supplier? _loadedSupplier;
@@ -54,7 +54,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     public SuppliersModuleViewModel(
         DatabaseService databaseService,
         ISupplierCrudService supplierService,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
         ICflDialogService cflDialogService,
@@ -63,7 +63,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
 
@@ -427,6 +427,9 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             return;
         }
 
+        var processed = 0;
+        var deduplicated = 0;
+
         foreach (var file in files)
         {
             await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
@@ -442,10 +445,15 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
                 Reason = "Supplier document upload"
             };
 
-            await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
+            var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+            processed++;
+            if (result.Deduplicated)
+            {
+                deduplicated++;
+            }
         }
 
-        StatusMessage = "Attachment uploaded successfully.";
+        StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
     }
 
     private static ModuleRecord ToRecord(Supplier supplier)

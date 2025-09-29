@@ -19,7 +19,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     public new const string ModuleKey = "Warehouse";
 
     private readonly IWarehouseCrudService _warehouseService;
-    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private Warehouse? _loadedWarehouse;
@@ -29,7 +29,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     public WarehouseModuleViewModel(
         DatabaseService databaseService,
         IWarehouseCrudService warehouseService,
-        IAttachmentService attachmentService,
+        IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
         ICflDialogService cflDialogService,
@@ -38,7 +38,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         : base(ModuleKey, "Warehouse", databaseService, cflDialogService, shellInteraction, navigation)
     {
         _warehouseService = warehouseService ?? throw new ArgumentNullException(nameof(warehouseService));
-        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
 
@@ -392,6 +392,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             return;
         }
 
+        var processed = 0;
+        var deduplicated = 0;
+
         foreach (var file in files)
         {
             await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
@@ -407,10 +410,15 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 Reason = $"Warehouse attachment via WPF on {DateTime.UtcNow:O}"
             };
 
-            await _attachmentService.UploadAsync(stream, request).ConfigureAwait(false);
+            var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+            processed++;
+            if (result.Deduplicated)
+            {
+                deduplicated++;
+            }
         }
 
-        StatusMessage = $"Uploaded {files.Count} attachment(s) for {_loadedWarehouse.Name}.";
+        StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
     }
 
     private void UpdateAttachmentCommandState()
