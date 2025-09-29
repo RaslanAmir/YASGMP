@@ -26,7 +26,7 @@ public class WarehouseModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "192.168.1.25"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

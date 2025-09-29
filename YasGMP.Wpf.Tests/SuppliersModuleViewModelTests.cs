@@ -27,7 +27,7 @@ public class SuppliersModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -86,7 +86,7 @@ public class SuppliersModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.10.10.10"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -129,7 +129,7 @@ public class SuppliersModuleViewModelTests
         });
 
         var auth = new TestAuthContext();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

@@ -24,7 +24,7 @@ public class ChangeControlModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 7, FullName = "Quality Lead" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -111,7 +111,7 @@ public class ChangeControlModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "192.168.10.15"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

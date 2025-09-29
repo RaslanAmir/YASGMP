@@ -53,6 +53,7 @@
 - 2025-11-05: Electronic signature dialog service now separates capture from persistence, allowing modules to update generated record ids, persist the business entity first, and retry signature storage with clear status messaging when failures occur.
 - 2025-11-06: Assets editor now surfaces full e-sign metadata (hash, signer, reason, session/IP) via the new SignatureAwareEditor base and SignatureMetadataView control; save flow stamps the metadata before persistence while SDK access remains blocked.
 - 2025-11-07: Added `B1FormDocumentViewModel` regression coverage to ensure cancellation status text, dirty tracking, and form mode remain intact when `OnSaveAsync` returns false; SDK/tooling still blocked by missing `dotnet` CLI.
+- 2025-11-08: Introduced `TestElectronicSignatureDialogService` with queueable confirmations/cancellations/exceptions and updated module/unit factories to consume the new helper while keeping the legacy fake as an alias.
 - 2025-10-31: WPF shell now exposes an `IElectronicSignatureDialogService` that drives the signature dialog, captures password/PIN plus GMP reason text, and persists the note via the shared DatabaseService extensions before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
 - Components module now completes the CRUD rollout with mode-aware editor, validation, machine lookups, and electronic signature capture ahead of persistence.

@@ -27,7 +27,7 @@ public class PartsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.50"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -88,7 +88,7 @@ public class PartsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.42"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -134,7 +134,7 @@ public class PartsModuleViewModelTests
         });
 
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA" } };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

@@ -30,7 +30,7 @@ public class ModuleCflTests
             InstallDate = DateTime.UtcNow
         });
 
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -96,7 +96,7 @@ public class ModuleCflTests
             AssignedTo = new User { FullName = "Technician" }
         });
 
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -141,7 +141,7 @@ public class ModuleCflTests
             Comment = "All good"
         });
 
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

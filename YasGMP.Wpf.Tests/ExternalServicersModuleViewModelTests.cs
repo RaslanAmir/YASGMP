@@ -24,7 +24,7 @@ public class ExternalServicersModuleViewModelTests
             CurrentIpAddress = "127.0.0.1",
             CurrentSessionId = "session"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -72,7 +72,7 @@ public class ExternalServicersModuleViewModelTests
         });
 
         var auth = new TestAuthContext();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
