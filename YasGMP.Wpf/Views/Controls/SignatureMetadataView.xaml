@@ -1,0 +1,117 @@
+<UserControl x:Class="YasGMP.Wpf.Views.Controls.SignatureMetadataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="200"
+             d:DesignWidth="400">
+    <GroupBox Header="Signature Metadata"
+              Padding="8"
+              Margin="0,12,0,0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Signature Hash" Grid.Row="0" Margin="0,0,8,4" />
+            <TextBox Grid.Row="0"
+                     Grid.Column="1"
+                     Text="{Binding SignatureHash}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Reason" Grid.Row="1" Margin="0,0,8,4" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="1"
+                     Text="{Binding SignatureReason}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Reason Note" Grid.Row="2" Margin="0,0,8,4" />
+            <TextBox Grid.Row="2"
+                     Grid.Column="1"
+                     Text="{Binding SignatureNote}"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Signed By" Grid.Row="3" Margin="0,0,8,4" />
+            <TextBox Grid.Row="3"
+                     Grid.Column="1"
+                     Text="{Binding SignerUserName}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Signer ID" Grid.Row="4" Margin="0,0,8,4" />
+            <TextBox Grid.Row="4"
+                     Grid.Column="1"
+                     Text="{Binding SignerUserId}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Signed At (UTC)" Grid.Row="5" Margin="0,0,8,4" />
+            <TextBox Grid.Row="5"
+                     Grid.Column="1"
+                     Text="{Binding SignatureTimestampUtc, StringFormat=yyyy-MM-dd HH:mm:ss}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Source IP" Grid.Row="6" Margin="0,0,8,4" />
+            <TextBox Grid.Row="6"
+                     Grid.Column="1"
+                     Text="{Binding SourceIp}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Session ID" Grid.Row="7" Margin="0,0,8,4" />
+            <TextBox Grid.Row="7"
+                     Grid.Column="1"
+                     Text="{Binding SessionId}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Device Info" Grid.Row="8" Margin="0,0,8,4" />
+            <TextBox Grid.Row="8"
+                     Grid.Column="1"
+                     Text="{Binding DeviceInfo}"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     BorderThickness="0"
+                     Background="Transparent" />
+
+            <TextBlock Text="Last Modified (UTC)" Grid.Row="9" Margin="0,0,8,0" />
+            <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Vertical">
+                <TextBox Text="{Binding LastModifiedUtc, StringFormat=yyyy-MM-dd HH:mm:ss}"
+                         IsReadOnly="True"
+                         BorderThickness="0"
+                         Background="Transparent" />
+                <TextBox Text="{Binding LastModifiedByName}"
+                         IsReadOnly="True"
+                         BorderThickness="0"
+                         Background="Transparent" />
+            </StackPanel>
+        </Grid>
+    </GroupBox>
+</UserControl>

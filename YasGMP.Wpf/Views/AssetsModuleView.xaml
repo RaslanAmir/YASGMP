@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+             xmlns:shared="clr-namespace:YasGMP.Wpf.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="600">
@@ -179,6 +180,8 @@
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  IsEnabled="{Binding IsEditorEnabled}" />
+
+                        <shared:SignatureMetadataView DataContext="{Binding Editor}" />
 
                         <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>
