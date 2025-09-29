@@ -12,6 +12,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -43,6 +44,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private IReadOnlyList<Component> _components = Array.Empty<Component>();
     private CapaCase? _loadedCapa;
@@ -56,6 +58,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -66,6 +69,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         StatusOptions = Array.AsReadOnly(DefaultStatuses);
         PriorityOptions = Array.AsReadOnly(DefaultPriorities);
@@ -223,6 +227,12 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
     protected override async Task<bool> OnSaveAsync()
     {
+        if (Mode == FormMode.Update && _loadedCapa is null)
+        {
+            StatusMessage = "Select a CAPA case before saving.";
+            return false;
+        }
+
         var context = CapaCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
@@ -232,6 +242,31 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         var capa = Editor.ToCapaCase(_loadedCapa);
         capa.Status = _capaService.NormalizeStatus(capa.Status);
         capa.Priority = _capaService.NormalizePriority(capa.Priority);
+
+        var recordId = Mode == FormMode.Update ? _loadedCapa!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("capa_cases", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        capa.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        capa.LastModified = DateTime.UtcNow;
+        capa.LastModifiedById = _authContext.CurrentUser?.Id;
+        capa.SourceIp = _authContext.CurrentIpAddress ?? capa.SourceIp ?? string.Empty;
 
         if (Mode == FormMode.Add)
         {
@@ -243,20 +278,17 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
             _loadedCapa = capa;
             LoadEditor(capa);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_loadedCapa is null)
-            {
-                return false;
-            }
-
-            capa.Id = _loadedCapa.Id;
+            capa.Id = _loadedCapa!.Id;
             await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
             _loadedCapa = capa;
             LoadEditor(capa);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 

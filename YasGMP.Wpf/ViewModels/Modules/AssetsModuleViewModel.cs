@@ -294,6 +294,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         machine.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        machine.LastModified = DateTime.UtcNow;
+        machine.LastModifiedById = _authContext.CurrentUser?.Id ?? machine.LastModifiedById;
 
         if (Mode == FormMode.Add)
         {

@@ -12,6 +12,7 @@ using YasGMP.Models.Enums;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -23,6 +24,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private Validation? _loadedValidation;
     private ValidationEditor? _snapshot;
@@ -36,6 +38,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -45,6 +48,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = ValidationEditor.CreateEmpty();
         MachineOptions = new ObservableCollection<MachineOption>();
@@ -282,11 +286,44 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     {
         var entity = Editor.ToValidation(_loadedValidation);
 
+        if (Mode == FormMode.Update && _loadedValidation is null)
+        {
+            StatusMessage = "Select a validation before saving.";
+            return false;
+        }
+
         var context = ValidationCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId);
+
+        var recordId = Mode == FormMode.Update ? _loadedValidation!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("validations", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        entity.LastModified = DateTime.UtcNow;
+        entity.LastModifiedById = _authContext.CurrentUser?.Id;
+        entity.SourceIp = _authContext.CurrentIpAddress ?? entity.SourceIp ?? string.Empty;
+        entity.SessionId = _authContext.CurrentSessionId ?? entity.SessionId ?? string.Empty;
+        entity.SignatureTimestamp = DateTime.UtcNow;
 
         if (Mode == FormMode.Add)
         {
@@ -301,6 +338,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         else if (Mode == FormMode.Update)
         {
+            entity.Id = _loadedValidation!.Id;
             await _validationService.UpdateAsync(entity, context).ConfigureAwait(false);
             ReplaceRecord(entity);
         }
@@ -311,6 +349,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
         _loadedValidation = entity;
         LoadEditor(entity);
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        UpdateAttachmentCommandState();
         return true;
     }
 

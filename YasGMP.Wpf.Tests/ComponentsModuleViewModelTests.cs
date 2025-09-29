@@ -5,6 +5,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -34,11 +35,12 @@ public class ComponentsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.8"
         };
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, dialog, shell, navigation);
+        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -61,6 +63,12 @@ public class ComponentsModuleViewModelTests
         Assert.Equal("CMP-100", persisted.Code);
         Assert.Equal(machineAdapter.Saved[0].Id, persisted.MachineId);
         Assert.Equal("SOP-CMP-100", persisted.SopDoc);
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("components", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     private static Task<bool> InvokeSaveAsync(ComponentsModuleViewModel viewModel)

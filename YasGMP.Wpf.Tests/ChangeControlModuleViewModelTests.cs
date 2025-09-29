@@ -9,6 +9,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -23,11 +24,12 @@ public class ChangeControlModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 7, FullName = "Quality Lead" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -42,6 +44,12 @@ public class ChangeControlModuleViewModelTests
         var created = Assert.Single(crud.Saved);
         Assert.Equal("Validate HVAC filters", created.Title);
         Assert.Equal("CC-UNIT-100", created.Code);
+        Assert.True(created.LastModified.HasValue);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("change_controls", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
         Assert.False(viewModel.IsDirty);
     }
 
@@ -100,6 +108,7 @@ public class ChangeControlModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "192.168.10.15"
         };
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -112,7 +121,7 @@ public class ChangeControlModuleViewModelTests
             new PickedFile("impact.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

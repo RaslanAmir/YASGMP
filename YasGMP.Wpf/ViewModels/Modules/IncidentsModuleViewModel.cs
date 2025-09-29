@@ -12,6 +12,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -23,6 +24,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private const string WorkOrderCflPrefix = "WO:";
     private const string CapaCflPrefix = "CAPA:";
@@ -73,6 +75,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -82,6 +85,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = IncidentEditor.CreateEmpty();
         AttachEvidenceCommand = new AsyncRelayCommand(AttachEvidenceAsync, CanAttachEvidence);
@@ -347,6 +351,37 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         var incident = Editor.ToIncident(_loadedIncident);
         incident.Status = _incidentService.NormalizeStatus(incident.Status);
 
+        if (Mode == FormMode.Update && _loadedIncident is null)
+        {
+            StatusMessage = "Select an incident before saving.";
+            return false;
+        }
+
+        var recordId = Mode == FormMode.Update ? _loadedIncident!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("incidents", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        incident.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        incident.LastModified = DateTime.UtcNow;
+        incident.LastModifiedById = _authContext.CurrentUser?.Id;
+        incident.SourceIp = _authContext.CurrentIpAddress ?? incident.SourceIp ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
             var id = await _incidentService.CreateAsync(incident, context).ConfigureAwait(false);
@@ -357,20 +392,17 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
             _loadedIncident = incident;
             LoadEditor(incident);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_loadedIncident is null)
-            {
-                return false;
-            }
-
-            incident.Id = _loadedIncident.Id;
+            incident.Id = _loadedIncident!.Id;
             await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
             _loadedIncident = incident;
             LoadEditor(incident);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 

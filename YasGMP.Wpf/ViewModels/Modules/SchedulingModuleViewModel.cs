@@ -12,6 +12,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -23,6 +24,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private ScheduledJob? _loadedJob;
     private ScheduledJobEditor? _snapshot;
@@ -34,6 +36,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -43,6 +46,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = ScheduledJobEditor.CreateEmpty();
 
@@ -196,6 +200,12 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
     protected override async Task<bool> OnSaveAsync()
     {
+        if (Mode == FormMode.Update && _loadedJob is null)
+        {
+            StatusMessage = "Select a scheduled job before saving.";
+            return false;
+        }
+
         var context = CreateContext();
         var entity = Editor.ToEntity(_loadedJob);
         entity.LastModified = DateTime.UtcNow;
@@ -211,12 +221,36 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
         _scheduledJobService.Validate(entity);
 
+        var recordId = Mode == FormMode.Update ? _loadedJob!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("scheduled_jobs", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
             var id = await _scheduledJobService.CreateAsync(entity, context).ConfigureAwait(false);
             entity.Id = id;
             _loadedJob = entity;
             LoadEditor(entity);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+            UpdateActionStates();
             return true;
         }
 
@@ -225,6 +259,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             await _scheduledJobService.UpdateAsync(entity, context).ConfigureAwait(false);
             _loadedJob = entity;
             LoadEditor(entity);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+            UpdateActionStates();
             return true;
         }
 

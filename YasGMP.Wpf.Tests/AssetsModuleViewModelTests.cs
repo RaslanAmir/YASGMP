@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -55,6 +56,8 @@ public class AssetsModuleViewModelTests
         Assert.Equal("maintenance", persisted.Status);
         Assert.Equal("URS-LYO-01", persisted.UrsDoc);
         Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Equal(7, persisted.LastModifiedById);
+        Assert.NotEqual(default, persisted.LastModified);
         Assert.Collection(signatureDialog.Requests, ctx =>
         {
             Assert.Equal("machines", ctx.TableName);

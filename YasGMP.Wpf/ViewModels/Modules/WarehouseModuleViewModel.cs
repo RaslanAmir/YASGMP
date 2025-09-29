@@ -11,6 +11,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -22,6 +23,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
     private Warehouse? _loadedWarehouse;
     private WarehouseEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -32,6 +34,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -41,6 +44,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = WarehouseEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[] { "qualified", "in-qualification", "maintenance", "inactive" });
@@ -236,25 +240,55 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         var warehouse = Editor.ToWarehouse(_loadedWarehouse);
         warehouse.Status = _warehouseService.NormalizeStatus(warehouse.Status);
 
+        if (Mode == FormMode.Update && _loadedWarehouse is null)
+        {
+            StatusMessage = "Select a warehouse before saving.";
+            return false;
+        }
+
+        var recordId = Mode == FormMode.Update ? _loadedWarehouse!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("warehouses", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        warehouse.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        warehouse.LastModified = DateTime.UtcNow;
+        warehouse.LastModifiedById = _authContext.CurrentUser?.Id;
+        warehouse.LastModifiedByName = _authContext.CurrentUser?.FullName ?? warehouse.LastModifiedByName;
+        warehouse.SourceIp = _authContext.CurrentIpAddress ?? warehouse.SourceIp ?? string.Empty;
+        warehouse.SessionId = _authContext.CurrentSessionId ?? warehouse.SessionId ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
             await _warehouseService.CreateAsync(warehouse, context).ConfigureAwait(false);
             _loadedWarehouse = warehouse;
             LoadEditor(warehouse);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_loadedWarehouse is null)
-            {
-                return false;
-            }
-
-            warehouse.Id = _loadedWarehouse.Id;
+            warehouse.Id = _loadedWarehouse!.Id;
             await _warehouseService.UpdateAsync(warehouse, context).ConfigureAwait(false);
             _loadedWarehouse = warehouse;
             LoadEditor(warehouse);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
