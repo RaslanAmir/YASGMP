@@ -20,7 +20,8 @@
       "2025-11-01: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands fail with 'command not found'.",
       "2025-11-02: dotnet restore/build retried; CLI remains unavailable so commands exit with 'command not found'.",
       "2025-11-07: dotnet restore retried; CLI still missing in container so all dotnet commands fail with 'command not found'.",
-      "2025-11-08: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
+      "2025-11-08: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
+      "2025-11-09: dotnet restore/build/test retried; CLI still missing in the container so all dotnet commands fail with 'command not found'."
     ]
   },
   "batches": [
@@ -73,7 +74,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: introduce queueable electronic signature dialog service",
+  "lastCommitSummary": "fix: align WPF module tests with signature dialog injection",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -127,6 +128,7 @@
     "2025-11-05: Electronic signature capture now decouples persistence via PersistSignatureAsync so modules can persist business entities first, update signature record ids, and surface clear retry messaging when digital signature storage fails.",
     "2025-11-06: Assets module now derives from SignatureAwareEditor, capturing signer/session/IP metadata and exposing it via the shared SignatureMetadataView control after each save while SDK tooling remains unavailable.",
     "2025-11-07: Added B1FormDocumentViewModel cancellation regression test ensuring status text, dirty flag, and form mode remain intact when OnSaveAsync returns false; restore/build remain blocked pending dotnet CLI access.",
-    "2025-11-08: Replaced the legacy FakeElectronicSignatureDialogService with the queueable TestElectronicSignatureDialogService and updated module tests to consume the new helper while leaving an obsolete alias for backwards compatibility."
+    "2025-11-08: Replaced the legacy FakeElectronicSignatureDialogService with the queueable TestElectronicSignatureDialogService and updated module tests to consume the new helper while leaving an obsolete alias for backwards compatibility.",
+    "2025-11-09: Updated Change Control, External Servicers, Warehouse, Scheduling, and Incidents WPF tests to pass TestElectronicSignatureDialogService in the production constructor slot; test execution still blocked until dotnet CLI is available."
   ]
 }

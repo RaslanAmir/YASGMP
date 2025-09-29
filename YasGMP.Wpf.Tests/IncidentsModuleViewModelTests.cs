@@ -92,6 +92,7 @@ public class IncidentsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.5"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -104,7 +105,7 @@ public class IncidentsModuleViewModelTests
             new PickedFile("evidence.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachEvidenceCommand.CanExecute(null));
@@ -141,11 +142,12 @@ public class IncidentsModuleViewModelTests
         var auth = new TestAuthContext();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.Mode = FormMode.Add;
 
@@ -167,11 +169,12 @@ public class IncidentsModuleViewModelTests
         var auth = new TestAuthContext();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.Mode = FormMode.Add;
 
