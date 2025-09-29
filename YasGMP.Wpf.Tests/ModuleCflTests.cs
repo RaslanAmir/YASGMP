@@ -6,6 +6,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -29,7 +30,7 @@ public class ModuleCflTests
             InstallDate = DateTime.UtcNow
         });
 
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -95,7 +96,7 @@ public class ModuleCflTests
             AssignedTo = new User { FullName = "Technician" }
         });
 
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -140,7 +141,7 @@ public class ModuleCflTests
             Comment = "All good"
         });
 
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

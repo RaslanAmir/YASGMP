@@ -17,7 +17,8 @@
       "2025-10-23: dotnet --info/restore/build attempted again; CLI remains unavailable in the container.",
       "2025-10-27: dotnet --info/restore/build/test retried; CLI still missing so commands exit with 'command not found'.",
       "2025-10-30: dotnet --info/restore/build retried; CLI still absent in container so commands fail with 'command not found'.",
-      "2025-11-01: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands fail with 'command not found'."
+      "2025-11-01: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands fail with 'command not found'.",
+      "2025-11-02: dotnet restore/build retried; CLI remains unavailable so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -117,6 +118,7 @@
     "2025-10-29: Audit module now orders inverted date ranges by min/max while preserving the user-selected To value; WPF tests assert the later bound reaches AuditService at end-of-day.",
     "2025-10-30: WPF modules now route uploads through AttachmentWorkflowService so dedup, retention, and encryption follow the MAUI conventions; DI registration updated and commands now surface dedup status messaging.",
     "2025-10-31: WPF shell adds an IElectronicSignatureDialogService that drives the signature dialog, captures the operator password/PIN with GMP reason text, and persists through DatabaseServiceDigitalSignaturesExtensions before dismissing.",
-    "2025-11-01: Assets, Work Orders, Calibration, Suppliers, and Parts now require electronic signature capture before CRUD calls, propagate the resulting digital signature hash, and surface cancellation/failure states through StatusMessage."
+    "2025-11-01: Assets, Work Orders, Calibration, Suppliers, and Parts now require electronic signature capture before CRUD calls, propagate the resulting digital signature hash, and surface cancellation/failure states through StatusMessage.",
+    "2025-11-02: Test suite moved the electronic signature dialog fake under TestDoubles, added queueable results/exception hooks, and updated module tests to inject the dependency explicitly."
   ]
 }
