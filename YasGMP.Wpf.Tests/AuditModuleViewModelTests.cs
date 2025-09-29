@@ -194,7 +194,7 @@ public class AuditModuleViewModelTests
     }
 
     [Fact]
-    public async Task RefreshAsync_FilterToBeforeFilterFrom_ClampsLowerBoundToUpperBound()
+    public async Task RefreshAsync_FilterToBeforeFilterFrom_QueriesAcrossFullRange()
     {
         var database = CreateDatabaseService();
         var auditService = new AuditService(database);
@@ -203,17 +203,20 @@ public class AuditModuleViewModelTests
         var navigation = new StubModuleNavigationService();
 
         var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
-        viewModel.FilterFrom = new DateTime(2025, 5, 10, 10, 30, 0);
-        viewModel.FilterTo = new DateTime(2025, 5, 1);
+        var later = new DateTime(2025, 5, 10, 10, 30, 0);
+        var earlier = new DateTime(2025, 5, 1);
+        viewModel.FilterFrom = later;
+        viewModel.FilterTo = earlier;
 
         await viewModel.RefreshAsync();
 
-        var expectedUpperBound = new DateTime(2025, 5, 1);
-        var expectedFrom = new DateTime(2025, 5, 10);
-        Assert.Equal(expectedFrom, viewModel.FilterFrom!.Value);
-        Assert.Equal(expectedUpperBound, viewModel.FilterTo!.Value);
-        Assert.Equal(expectedUpperBound, viewModel.LastFromFilter);
-        Assert.Equal(expectedUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        var normalizedLater = later.Date;
+        var normalizedEarlier = earlier.Date;
+
+        Assert.Equal(normalizedLater, viewModel.FilterFrom!.Value);
+        Assert.Equal(normalizedEarlier, viewModel.FilterTo!.Value);
+        Assert.Equal(normalizedEarlier, viewModel.LastFromFilter);
+        Assert.Equal(normalizedLater.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
     }
 
@@ -227,22 +230,26 @@ public class AuditModuleViewModelTests
         var navigation = new StubModuleNavigationService();
 
         var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
-        viewModel.FilterFrom = new DateTime(2025, 8, 10, 8, 30, 0);
-        viewModel.FilterTo = new DateTime(2025, 8, 5);
+        var later = new DateTime(2025, 8, 10, 8, 30, 0);
+        var earlier = new DateTime(2025, 8, 5);
+        viewModel.FilterFrom = later;
+        viewModel.FilterTo = earlier;
 
         await viewModel.RefreshAsync();
 
         // User adjusts only the upper bound to an even earlier day without touching FilterFrom.
-        viewModel.FilterTo = new DateTime(2025, 7, 20);
+        var evenEarlier = new DateTime(2025, 7, 20);
+        viewModel.FilterTo = evenEarlier;
 
         await viewModel.RefreshAsync();
 
-        var expectedUpperBound = new DateTime(2025, 7, 20);
-        var expectedFrom = new DateTime(2025, 8, 10);
-        Assert.Equal(expectedFrom, viewModel.FilterFrom!.Value);
-        Assert.Equal(expectedUpperBound, viewModel.FilterTo!.Value);
-        Assert.Equal(expectedUpperBound, viewModel.LastFromFilter);
-        Assert.Equal(expectedUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        var normalizedLater = later.Date;
+        var normalizedEvenEarlier = evenEarlier.Date;
+
+        Assert.Equal(normalizedLater, viewModel.FilterFrom!.Value);
+        Assert.Equal(normalizedEvenEarlier, viewModel.FilterTo!.Value);
+        Assert.Equal(normalizedEvenEarlier, viewModel.LastFromFilter);
+        Assert.Equal(normalizedLater.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
     }
 
@@ -266,7 +273,7 @@ public class AuditModuleViewModelTests
         Assert.Equal(originalFrom, viewModel.FilterFrom!.Value);
         Assert.Equal(earlierUpperBound, viewModel.FilterTo!.Value);
         Assert.Equal(earlierUpperBound, viewModel.LastFromFilter);
-        Assert.Equal(earlierUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.Equal(originalFrom.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
     }
 

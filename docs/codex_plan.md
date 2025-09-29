@@ -76,6 +76,7 @@
 - 2025-10-26: Audit filters now preserve the user-selected end date even when it predates the start picker, clamping the query's start bound to the chosen end day and covering the regression with WPF tests.
 - 2025-10-27: Audit filters now clamp the lower bound when the upper bound is moved earlier while preserving the user's selected end day; WPF regression coverage verifies both persisted filters and query arguments.
 - 2025-10-28: Audit filters now keep the user's "To" picker intact while ordering the query bounds when the upper date precedes the lower; WPF coverage adds a default-from regression asserting the service respects the earlier upper bound.
+- 2025-10-29: Audit filters now order query bounds by min/max so inverted ranges still span the full window while preserving the user's "To" picker; WPF regression coverage asserts the service receives the later bound's end-of-day timestamp.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

@@ -149,13 +149,11 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         var normalizedTo = to?.Date
             ?? (from.HasValue ? normalizedFrom : today);
 
-        var queryFrom = normalizedFrom;
-        if (normalizedFrom > normalizedTo)
-        {
-            queryFrom = normalizedTo;
-        }
+        var earlier = normalizedFrom <= normalizedTo ? normalizedFrom : normalizedTo;
+        var later = normalizedFrom >= normalizedTo ? normalizedFrom : normalizedTo;
 
-        var queryTo = normalizedTo.Date.AddDays(1).AddTicks(-1);
+        var queryFrom = earlier;
+        var queryTo = later.Date.AddDays(1).AddTicks(-1);
 
         return (queryFrom, queryTo, normalizedFrom, normalizedTo);
     }
