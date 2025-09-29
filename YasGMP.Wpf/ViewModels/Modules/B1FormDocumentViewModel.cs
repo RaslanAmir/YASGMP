@@ -112,8 +112,35 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     [ObservableProperty]
     private bool _isBusy;
 
-    [ObservableProperty]
+    /// <summary>Monotonically increasing counter used to detect status updates.</summary>
+    private int _statusMessageVersion;
+
     private string _statusMessage = "Ready";
+
+    /// <summary>
+    /// Gets or sets the status message shown in the shell. The version counter increments on every
+    /// assignment so callers can detect programmatic updates even when the text itself is unchanged.
+    /// </summary>
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set
+        {
+            _statusMessageVersion++;
+            var coercedValue = value ?? string.Empty;
+
+            if (!string.Equals(_statusMessage, coercedValue, StringComparison.Ordinal))
+            {
+                SetProperty(ref _statusMessage, coercedValue);
+            }
+            else
+            {
+                OnPropertyChanged(nameof(StatusMessage));
+            }
+
+            _shellInteraction.UpdateStatus(coercedValue);
+        }
+    }
 
     [ObservableProperty]
     private string? _searchText;
@@ -206,11 +233,6 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     partial void OnIsBusyChanged(bool value)
     {
         RefreshCommandStates();
-    }
-
-    partial void OnStatusMessageChanged(string value)
-    {
-        _shellInteraction.UpdateStatus(value);
     }
 
     partial void OnSearchTextChanged(string? value)
@@ -345,10 +367,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             }
 
             var previousMessage = StatusMessage;
+            var previousMessageVersion = _statusMessageVersion;
             var saved = await OnSaveAsync().ConfigureAwait(false);
+            var statusCustomized = _statusMessageVersion != previousMessageVersion;
             if (saved)
             {
-                if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
+                if (!statusCustomized && (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage))
                 {
                     StatusMessage = $"{Title} saved successfully.";
                 }
@@ -359,7 +383,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             }
             else
             {
-                if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
+                if (!statusCustomized && (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage))
                 {
                     StatusMessage = $"No changes to save for {Title}.";
                 }
