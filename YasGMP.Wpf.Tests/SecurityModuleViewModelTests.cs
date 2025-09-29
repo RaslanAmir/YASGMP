@@ -58,6 +58,9 @@ public class SecurityModuleViewModelTests
             Assert.Equal("users", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(created.Id, persistedSignature.Signature.RecordId);
         var assignment = Assert.Single(userService.RoleAssignments);
         Assert.Equal(created.Id, assignment.UserId);
         Assert.Contains(adminRole.RoleId, assignment.Roles);
@@ -113,6 +116,14 @@ public class SecurityModuleViewModelTests
         Assert.Equal(7, updated.Id);
         Assert.Equal(string.Empty, viewModel.Editor.NewPassword);
         Assert.Equal(string.Empty, viewModel.Editor.ConfirmPassword);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("users", ctx.TableName);
+            Assert.Equal(7, ctx.RecordId);
+        });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(7, persistedSignature.Signature.RecordId);
         var assignment = userService.RoleAssignments.Last();
         Assert.Contains(2, assignment.Roles);
     }

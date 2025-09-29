@@ -276,6 +276,12 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         calibration.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
 
         var context = CalibrationCrudContext.Create(
@@ -284,24 +290,45 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId);
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
-            calibration.Id = id;
+            if (Mode == FormMode.Add)
+            {
+                var id = await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
+                calibration.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                calibration.Id = _loadedCalibration!.Id;
+                await _calibrationService.UpdateAsync(calibration, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-        else if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            calibration.Id = _loadedCalibration!.Id;
-            await _calibrationService.UpdateAsync(calibration, context).ConfigureAwait(false);
-        }
-        else
-        {
-            return false;
+            throw new InvalidOperationException($"Failed to persist calibration: {ex.Message}", ex);
         }
 
         _loadedCalibration = calibration;
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = calibration.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }

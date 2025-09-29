@@ -69,6 +69,9 @@ public class ComponentsModuleViewModelTests
             Assert.Equal("components", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(componentAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
     }
 
     private static Task<bool> InvokeSaveAsync(ComponentsModuleViewModel viewModel)

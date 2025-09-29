@@ -263,36 +263,60 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         capa.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         capa.LastModified = DateTime.UtcNow;
         capa.LastModifiedById = _authContext.CurrentUser?.Id;
         capa.SourceIp = _authContext.CurrentIpAddress ?? capa.SourceIp ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
-            if (capa.Id == 0 && id > 0)
+            if (Mode == FormMode.Add)
             {
-                capa.Id = id;
+                var id = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
+                if (capa.Id == 0 && id > 0)
+                {
+                    capa.Id = id;
+                }
             }
-
-            _loadedCapa = capa;
-            LoadEditor(capa);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            else if (Mode == FormMode.Update)
+            {
+                capa.Id = _loadedCapa!.Id;
+                await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-
-        if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            capa.Id = _loadedCapa!.Id;
-            await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
-            _loadedCapa = capa;
-            LoadEditor(capa);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            throw new InvalidOperationException($"Failed to persist CAPA case: {ex.Message}", ex);
         }
 
-        return false;
+        _loadedCapa = capa;
+        LoadEditor(capa);
+
+        signatureResult.Signature.RecordId = capa.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

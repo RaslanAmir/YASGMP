@@ -291,6 +291,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
 
         var context = WorkOrderCrudContext.Create(
@@ -299,35 +305,51 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId);
 
-        if (Mode == FormMode.Add)
+        try
         {
-            entity.CreatedById = Editor.CreatedById > 0 ? Editor.CreatedById : userId.Value;
-            entity.RequestedById = Editor.RequestedById > 0 ? Editor.RequestedById : userId.Value;
-            entity.AssignedToId = Editor.AssignedToId > 0 ? Editor.AssignedToId : userId.Value;
-            entity.DateOpen = Editor.DateOpen == default ? DateTime.UtcNow : Editor.DateOpen;
+            if (Mode == FormMode.Add)
+            {
+                entity.CreatedById = Editor.CreatedById > 0 ? Editor.CreatedById : userId.Value;
+                entity.RequestedById = Editor.RequestedById > 0 ? Editor.RequestedById : userId.Value;
+                entity.AssignedToId = Editor.AssignedToId > 0 ? Editor.AssignedToId : userId.Value;
+                entity.DateOpen = Editor.DateOpen == default ? DateTime.UtcNow : Editor.DateOpen;
 
-            var id = await _workOrderService.CreateAsync(entity, context).ConfigureAwait(false);
-            entity.Id = id;
-
-            _loadedEntity = entity;
-            LoadEditor(entity);
-            UpdateAttachmentCommandState();
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+                var id = await _workOrderService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                await _workOrderService.UpdateAsync(entity, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to persist work order: {ex.Message}", ex);
         }
 
-        if (Mode == FormMode.Update)
-        {
-            await _workOrderService.UpdateAsync(entity, context).ConfigureAwait(false);
+        _loadedEntity = entity;
+        LoadEditor(entity);
+        UpdateAttachmentCommandState();
 
-            _loadedEntity = entity;
-            LoadEditor(entity);
-            UpdateAttachmentCommandState();
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+        signatureResult.Signature.RecordId = entity.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
         }
 
-        return false;
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

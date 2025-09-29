@@ -241,30 +241,54 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _scheduledJobService.CreateAsync(entity, context).ConfigureAwait(false);
-            entity.Id = id;
-            _loadedJob = entity;
-            LoadEditor(entity);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            UpdateActionStates();
-            return true;
+            if (Mode == FormMode.Add)
+            {
+                var id = await _scheduledJobService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                await _scheduledJobService.UpdateAsync(entity, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to persist scheduled job: {ex.Message}", ex);
         }
 
-        if (Mode == FormMode.Update)
+        _loadedJob = entity;
+        LoadEditor(entity);
+        UpdateActionStates();
+
+        signatureResult.Signature.RecordId = entity.Id;
+
+        try
         {
-            await _scheduledJobService.UpdateAsync(entity, context).ConfigureAwait(false);
-            _loadedJob = entity;
-            LoadEditor(entity);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            UpdateActionStates();
-            return true;
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
         }
 
-        return false;
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

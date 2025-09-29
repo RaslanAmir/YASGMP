@@ -58,6 +58,9 @@ public class WarehouseModuleViewModelTests
             Assert.Equal("warehouses", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(warehouseAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
     }
 
     [Fact]

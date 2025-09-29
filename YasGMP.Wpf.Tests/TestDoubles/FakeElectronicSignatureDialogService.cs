@@ -13,6 +13,7 @@ public sealed class FakeElectronicSignatureDialogService : IElectronicSignatureD
     private readonly Queue<ElectronicSignatureDialogResult?> _queuedResults = new();
 
     public List<ElectronicSignatureContext> Requests { get; } = new();
+    public List<ElectronicSignatureDialogResult> PersistedResults { get; } = new();
 
     public ElectronicSignatureDialogResult? DefaultResult { get; set; } = new ElectronicSignatureDialogResult(
         "password",
@@ -27,8 +28,10 @@ public sealed class FakeElectronicSignatureDialogService : IElectronicSignatureD
         });
 
     public Exception? ExceptionToThrow { get; set; }
+    public Exception? PersistExceptionToThrow { get; set; }
 
     public Func<ElectronicSignatureContext, Exception?>? ExceptionFactory { get; set; }
+    public Func<ElectronicSignatureDialogResult, Exception?>? PersistExceptionFactory { get; set; }
 
     public Func<ElectronicSignatureContext, ElectronicSignatureDialogResult?>? ResultFactory { get; set; }
 
@@ -71,5 +74,34 @@ public sealed class FakeElectronicSignatureDialogService : IElectronicSignatureD
         }
 
         return Task.FromResult(DefaultResult);
+    }
+
+    public Task PersistSignatureAsync(
+        ElectronicSignatureDialogResult result,
+        CancellationToken cancellationToken = default)
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (PersistExceptionFactory is not null)
+        {
+            var exception = PersistExceptionFactory(result);
+            if (exception is not null)
+            {
+                throw exception;
+            }
+        }
+
+        if (PersistExceptionToThrow is not null)
+        {
+            var exception = PersistExceptionToThrow;
+            PersistExceptionToThrow = null;
+            throw exception;
+        }
+
+        PersistedResults.Add(result);
+        return Task.CompletedTask;
     }
 }

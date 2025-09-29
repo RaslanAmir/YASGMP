@@ -53,6 +53,9 @@ public class ExternalServicersModuleViewModelTests
             Assert.Equal("external_contractors", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(service.Saved[0].Id, persistedSignature.Signature.RecordId);
     }
 
     [Fact]

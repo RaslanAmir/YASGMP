@@ -377,36 +377,60 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         incident.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         incident.LastModified = DateTime.UtcNow;
         incident.LastModifiedById = _authContext.CurrentUser?.Id;
         incident.SourceIp = _authContext.CurrentIpAddress ?? incident.SourceIp ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _incidentService.CreateAsync(incident, context).ConfigureAwait(false);
-            if (incident.Id == 0 && id > 0)
+            if (Mode == FormMode.Add)
             {
-                incident.Id = id;
+                var id = await _incidentService.CreateAsync(incident, context).ConfigureAwait(false);
+                if (incident.Id == 0 && id > 0)
+                {
+                    incident.Id = id;
+                }
             }
-
-            _loadedIncident = incident;
-            LoadEditor(incident);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            else if (Mode == FormMode.Update)
+            {
+                incident.Id = _loadedIncident!.Id;
+                await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-
-        if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            incident.Id = _loadedIncident!.Id;
-            await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
-            _loadedIncident = incident;
-            LoadEditor(incident);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            throw new InvalidOperationException($"Failed to persist incident: {ex.Message}", ex);
         }
 
-        return false;
+        _loadedIncident = incident;
+        LoadEditor(incident);
+
+        signatureResult.Signature.RecordId = incident.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

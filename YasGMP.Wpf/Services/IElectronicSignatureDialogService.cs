@@ -13,9 +13,20 @@ public interface IElectronicSignatureDialogService
     /// Presents the electronic signature dialog and returns the captured metadata when confirmed.
     /// </summary>
     /// <param name="context">Target record context for the signature.</param>
-    /// <param name="cancellationToken">Token used to observe cancellation while persisting.</param>
+    /// <param name="cancellationToken">Token used to observe cancellation while the dialog is shown.</param>
     /// <returns>The captured signature metadata when confirmed; otherwise <c>null</c>.</returns>
     Task<ElectronicSignatureDialogResult?> CaptureSignatureAsync(
         ElectronicSignatureContext context,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Persists the supplied signature payload without re-opening the dialog.
+    /// Callers may update <see cref="ElectronicSignatureDialogResult.Signature"/> (e.g. record id)
+    /// before invoking this method.
+    /// </summary>
+    /// <param name="result">The capture result that should be persisted.</param>
+    /// <param name="cancellationToken">Token used to observe cancellation while persisting.</param>
+    Task PersistSignatureAsync(
+        ElectronicSignatureDialogResult result,
         CancellationToken cancellationToken = default);
 }

@@ -267,29 +267,55 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             return false;
         }
 
-        supplier.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
-
-        if (Mode == FormMode.Add)
+        if (signatureResult.Signature is null)
         {
-            var id = await _supplierService.CreateAsync(supplier, context).ConfigureAwait(false);
-            supplier.Id = id;
-            _loadedSupplier = supplier;
-            _lastSavedSupplierId = id;
-        }
-        else if (Mode == FormMode.Update)
-        {
-            supplier.Id = _loadedSupplier!.Id;
-            await _supplierService.UpdateAsync(supplier, context).ConfigureAwait(false);
-            _loadedSupplier = supplier;
-            _lastSavedSupplierId = supplier.Id;
-        }
-        else
-        {
+            StatusMessage = "Electronic signature was not captured.";
             return false;
         }
 
+        supplier.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
+        try
+        {
+            if (Mode == FormMode.Add)
+            {
+                var id = await _supplierService.CreateAsync(supplier, context).ConfigureAwait(false);
+                supplier.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                supplier.Id = _loadedSupplier!.Id;
+                await _supplierService.UpdateAsync(supplier, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to persist supplier: {ex.Message}", ex);
+        }
+
+        _loadedSupplier = supplier;
+        _lastSavedSupplierId = supplier.Id;
+
         LoadEditor(supplier);
         UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = supplier.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }

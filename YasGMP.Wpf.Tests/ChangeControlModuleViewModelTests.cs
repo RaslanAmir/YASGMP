@@ -50,6 +50,9 @@ public class ChangeControlModuleViewModelTests
             Assert.Equal("change_controls", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(crud.Saved[0].Id, persistedSignature.Signature.RecordId);
         Assert.False(viewModel.IsDirty);
     }
 

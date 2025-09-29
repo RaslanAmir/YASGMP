@@ -315,36 +315,60 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         component.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         component.LastModified = DateTime.UtcNow;
         component.LastModifiedById = _authContext.CurrentUser?.Id ?? component.LastModifiedById;
         component.SourceIp = _authContext.CurrentIpAddress ?? component.SourceIp ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _componentService.CreateAsync(component, context).ConfigureAwait(false);
-            if (component.Id == 0 && id > 0)
+            if (Mode == FormMode.Add)
             {
-                component.Id = id;
+                var id = await _componentService.CreateAsync(component, context).ConfigureAwait(false);
+                if (component.Id == 0 && id > 0)
+                {
+                    component.Id = id;
+                }
             }
-
-            _loadedComponent = component;
-            LoadEditor(component);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            else if (Mode == FormMode.Update)
+            {
+                component.Id = _loadedComponent!.Id;
+                await _componentService.UpdateAsync(component, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-
-        if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            component.Id = _loadedComponent!.Id;
-            await _componentService.UpdateAsync(component, context).ConfigureAwait(false);
-            _loadedComponent = component;
-            LoadEditor(component);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            throw new InvalidOperationException($"Failed to persist component: {ex.Message}", ex);
         }
 
-        return false;
+        _loadedComponent = component;
+        LoadEditor(component);
+
+        signatureResult.Signature.RecordId = component.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()
