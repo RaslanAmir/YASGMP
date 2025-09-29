@@ -299,9 +299,33 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return false;
         }
 
-        machine.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
-        machine.LastModified = DateTime.UtcNow;
-        machine.LastModifiedById = _authContext.CurrentUser?.Id ?? machine.LastModifiedById;
+        var signature = signatureResult.Signature;
+        var signerDisplayName = _authContext.CurrentUser?.FullName;
+        if (string.IsNullOrWhiteSpace(signerDisplayName))
+        {
+            signerDisplayName = _authContext.CurrentUser?.Username ?? string.Empty;
+        }
+
+        machine.DigitalSignature = signature.SignatureHash ?? string.Empty;
+        machine.LastModified = signature.SignedAt ?? DateTime.UtcNow;
+        machine.LastModifiedById = signature.UserId != 0
+            ? signature.UserId
+            : _authContext.CurrentUser?.Id ?? machine.LastModifiedById;
+
+        Editor.SignatureHash = machine.DigitalSignature;
+        Editor.SignatureReason = signatureResult.ReasonDisplay;
+        Editor.SignatureNote = signature.Note ?? string.Empty;
+        Editor.SignatureTimestampUtc = signature.SignedAt;
+        Editor.SignerUserId = signature.UserId == 0 ? _authContext.CurrentUser?.Id : signature.UserId;
+        Editor.SignerUserName = string.IsNullOrWhiteSpace(signature.UserName)
+            ? signerDisplayName ?? string.Empty
+            : signature.UserName;
+        Editor.LastModifiedUtc = machine.LastModified;
+        Editor.LastModifiedById = machine.LastModifiedById;
+        Editor.LastModifiedByName = Editor.SignerUserName;
+        Editor.SourceIp = signature.IpAddress ?? _authContext.CurrentIpAddress ?? string.Empty;
+        Editor.SessionId = signature.SessionId ?? _authContext.CurrentSessionId ?? string.Empty;
+        Editor.DeviceInfo = signature.DeviceInfo ?? _authContext.CurrentDeviceInfo ?? string.Empty;
 
         try
         {
@@ -521,7 +545,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             machine.Id);
     }
 
-    public sealed partial class AssetEditor : ObservableObject
+    public sealed partial class AssetEditor : SignatureAwareEditor
     {
         [ObservableProperty]
         private int _id;
@@ -571,10 +595,39 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         [ObservableProperty]
         private string _notes = string.Empty;
 
-        public static AssetEditor CreateEmpty() => new();
+        public static AssetEditor CreateEmpty() => new()
+        {
+            LastModifiedUtc = null,
+            LastModifiedById = null,
+            LastModifiedByName = string.Empty,
+            SignatureHash = string.Empty,
+            SignatureReason = string.Empty,
+            SignatureNote = string.Empty,
+            SignatureTimestampUtc = null,
+            SignerUserId = null,
+            SignerUserName = string.Empty,
+            SourceIp = string.Empty,
+            SessionId = string.Empty,
+            DeviceInfo = string.Empty
+        };
 
         public static AssetEditor CreateForNew(string normalizedStatus)
-            => new() { Status = normalizedStatus };
+            => new()
+            {
+                Status = normalizedStatus,
+                LastModifiedUtc = DateTime.UtcNow,
+                LastModifiedById = null,
+                LastModifiedByName = string.Empty,
+                SignatureHash = string.Empty,
+                SignatureReason = string.Empty,
+                SignatureNote = string.Empty,
+                SignatureTimestampUtc = null,
+                SignerUserId = null,
+                SignerUserName = string.Empty,
+                SourceIp = string.Empty,
+                SessionId = string.Empty,
+                DeviceInfo = string.Empty
+            };
 
         public static AssetEditor FromMachine(Machine machine, Func<string?, string> normalizer)
         {
@@ -595,7 +648,14 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 IsCritical = machine.IsCritical,
                 SerialNumber = machine.SerialNumber ?? string.Empty,
                 LifecyclePhase = machine.LifecyclePhase ?? string.Empty,
-                Notes = machine.Note ?? string.Empty
+                Notes = machine.Note ?? string.Empty,
+                SignatureHash = machine.DigitalSignature ?? string.Empty,
+                LastModifiedUtc = machine.LastModified,
+                LastModifiedById = machine.LastModifiedById,
+                LastModifiedByName = machine.LastModifiedBy?.FullName ?? string.Empty,
+                SignatureTimestampUtc = machine.LastModified,
+                SignerUserId = machine.LastModifiedById,
+                SignerUserName = machine.LastModifiedBy?.FullName ?? string.Empty
             };
         }
 
@@ -618,6 +678,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             machine.SerialNumber = string.IsNullOrWhiteSpace(SerialNumber) ? machine.SerialNumber : SerialNumber;
             machine.LifecyclePhase = LifecyclePhase;
             machine.Note = Notes;
+            machine.DigitalSignature = SignatureHash;
+            machine.LastModified = LastModifiedUtc ?? DateTime.UtcNow;
+            machine.LastModifiedById = LastModifiedById ?? machine.LastModifiedById;
             return machine;
         }
 
@@ -639,7 +702,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 IsCritical = IsCritical,
                 SerialNumber = SerialNumber,
                 LifecyclePhase = LifecyclePhase,
-                Notes = Notes
+                Notes = Notes,
+                SignatureHash = SignatureHash,
+                SignatureReason = SignatureReason,
+                SignatureNote = SignatureNote,
+                SignatureTimestampUtc = SignatureTimestampUtc,
+                SignerUserId = SignerUserId,
+                SignerUserName = SignerUserName,
+                LastModifiedUtc = LastModifiedUtc,
+                LastModifiedById = LastModifiedById,
+                LastModifiedByName = LastModifiedByName,
+                SourceIp = SourceIp,
+                SessionId = SessionId,
+                DeviceInfo = DeviceInfo
             };
 
         private static Machine CloneMachine(Machine source)

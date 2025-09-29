@@ -122,6 +122,7 @@
     "2025-11-02: Test suite moved the electronic signature dialog fake under TestDoubles, added queueable results/exception hooks, and updated module tests to inject the dependency explicitly.",
     "2025-11-03: Extended electronic signature gating and metadata propagation to Components, Warehouses, Incidents, Validations, CAPA, Change Control, External Servicers, Scheduled Jobs, and Security modules with refreshed unit coverage (audit surfacing still pending SDK access).",
     "2025-11-04: Machines save workflow now stamps last-modified metadata post signature capture so downstream persistence receives the enriched payload while SDK blockers remain.",
-    "2025-11-05: Electronic signature capture now decouples persistence via PersistSignatureAsync so modules can persist business entities first, update signature record ids, and surface clear retry messaging when digital signature storage fails."
+    "2025-11-05: Electronic signature capture now decouples persistence via PersistSignatureAsync so modules can persist business entities first, update signature record ids, and surface clear retry messaging when digital signature storage fails.",
+    "2025-11-06: Assets module now derives from SignatureAwareEditor, capturing signer/session/IP metadata and exposing it via the shared SignatureMetadataView control after each save while SDK tooling remains unavailable."
   ]
 }
