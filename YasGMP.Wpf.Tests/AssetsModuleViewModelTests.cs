@@ -24,13 +24,14 @@ public class AssetsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.25"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -52,6 +53,12 @@ public class AssetsModuleViewModelTests
         Assert.Equal("Lyophilizer", persisted.Name);
         Assert.Equal("maintenance", persisted.Status);
         Assert.Equal("URS-LYO-01", persisted.UrsDoc);
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("machines", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     [Fact]
@@ -75,6 +82,7 @@ public class AssetsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.42"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -87,7 +95,7 @@ public class AssetsModuleViewModelTests
             new PickedFile("hello.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));

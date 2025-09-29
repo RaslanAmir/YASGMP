@@ -24,6 +24,7 @@
     <Compile Include="..\YasGMP.Wpf\Services\IMachineCrudService.cs" Link="Wpf\Services\IMachineCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\IComponentCrudService.cs" Link="Wpf\Services\IComponentCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\Services\ICalibrationCrudService.cs" Link="Wpf\Services\ICalibrationCrudService.cs" />
+    <Compile Include="..\YasGMP.Wpf\Services\IElectronicSignatureDialogService.cs" Link="Wpf\Services\IElectronicSignatureDialogService.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\IncidentsModuleViewModel.cs" Link="Wpf\Modules\IncidentsModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\PartsModuleViewModel.cs" Link="Wpf\Modules\PartsModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\WarehouseModuleViewModel.cs" Link="Wpf\Modules\WarehouseModuleViewModel.cs" />
@@ -37,5 +38,6 @@
     <Compile Include="..\YasGMP.Wpf\Services\IExternalServicerCrudService.cs" Link="Wpf\Services\IExternalServicerCrudService.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\SuppliersModuleViewModel.cs" Link="Wpf\Modules\SuppliersModuleViewModel.cs" />
     <Compile Include="..\YasGMP.Wpf\ViewModels\Modules\ExternalServicersModuleViewModel.cs" Link="Wpf\Modules\ExternalServicersModuleViewModel.cs" />
+    <Compile Include="..\YasGMP.Wpf\ViewModels\Dialogs\ElectronicSignatureDialogViewModel.cs" Link="Wpf\Dialogs\ElectronicSignatureDialogViewModel.cs" />
   </ItemGroup>
 </Project>

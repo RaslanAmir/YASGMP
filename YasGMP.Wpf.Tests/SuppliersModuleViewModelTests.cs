@@ -26,13 +26,14 @@ public class SuppliersModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -52,6 +53,12 @@ public class SuppliersModuleViewModelTests
         Assert.Equal("contoso", supplier.Name.ToLowerInvariant());
         Assert.Equal("calibration", supplier.SupplierType.ToLowerInvariant());
         Assert.Equal("info@contoso.example", supplier.Email);
+        Assert.Equal("test-signature", supplier.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("suppliers", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     [Fact]
@@ -75,6 +82,7 @@ public class SuppliersModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.10.10.10"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -87,7 +95,7 @@ public class SuppliersModuleViewModelTests
             new PickedFile("supplier.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -117,13 +125,14 @@ public class SuppliersModuleViewModelTests
         });
 
         var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

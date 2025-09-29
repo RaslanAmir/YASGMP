@@ -11,6 +11,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -23,6 +24,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private Calibration? _loadedCalibration;
     private CalibrationEditor? _snapshot;
@@ -37,6 +39,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -47,6 +50,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = CalibrationEditor.CreateEmpty();
         ComponentOptions = new ObservableCollection<ComponentOption>();
@@ -245,7 +249,35 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     protected override async Task<bool> OnSaveAsync()
     {
+        if (Mode == FormMode.Update && _loadedCalibration is null)
+        {
+            StatusMessage = "Select a calibration before saving.";
+            return false;
+        }
+
         var calibration = Editor.ToCalibration(_loadedCalibration);
+        var recordId = Mode == FormMode.Update ? _loadedCalibration!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("calibrations", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        calibration.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
         var context = CalibrationCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
@@ -259,6 +291,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
         else if (Mode == FormMode.Update)
         {
+            calibration.Id = _loadedCalibration!.Id;
             await _calibrationService.UpdateAsync(calibration, context).ConfigureAwait(false);
         }
         else
@@ -269,6 +302,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _loadedCalibration = calibration;
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }
 

@@ -26,13 +26,14 @@ public class PartsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.50"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -54,6 +55,12 @@ public class PartsModuleViewModelTests
         Assert.Equal("Pressure Gauge", persisted.Name);
         Assert.Equal(3, persisted.DefaultSupplierId);
         Assert.Equal("contoso", persisted.DefaultSupplierName.ToLowerInvariant());
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("parts", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     [Fact]
@@ -77,6 +84,7 @@ public class PartsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.42"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -89,7 +97,7 @@ public class PartsModuleViewModelTests
             new PickedFile("part.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.SelectedRecord = viewModel.Records.First();
 
@@ -122,13 +130,14 @@ public class PartsModuleViewModelTests
         });
 
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA" } };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

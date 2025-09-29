@@ -11,6 +11,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -46,6 +47,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
     private Supplier? _loadedSupplier;
     private SupplierEditor? _snapshot;
     private bool _suppressDirtyNotifications;
@@ -57,6 +59,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -66,6 +69,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = SupplierEditor.CreateEmpty();
         StatusOptions = DefaultStatusOptions;
@@ -228,6 +232,12 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     protected override async Task<bool> OnSaveAsync()
     {
+        if (Mode == FormMode.Update && _loadedSupplier is null)
+        {
+            StatusMessage = "Select a supplier before saving.";
+            return false;
+        }
+
         var context = SupplierCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
@@ -237,30 +247,51 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         var supplier = Editor.ToSupplier(_loadedSupplier);
         supplier.Status = _supplierService.NormalizeStatus(supplier.Status);
 
+        var recordId = Mode == FormMode.Update ? _loadedSupplier!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("suppliers", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        supplier.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
             var id = await _supplierService.CreateAsync(supplier, context).ConfigureAwait(false);
+            supplier.Id = id;
             _loadedSupplier = supplier;
             _lastSavedSupplierId = id;
-            return true;
         }
-
-        if (Mode == FormMode.Update)
+        else if (Mode == FormMode.Update)
         {
-            if (_loadedSupplier is null)
-            {
-                return false;
-            }
-
-            supplier.Id = _loadedSupplier.Id;
-            supplier.DigitalSignature = _loadedSupplier.DigitalSignature;
+            supplier.Id = _loadedSupplier!.Id;
             await _supplierService.UpdateAsync(supplier, context).ConfigureAwait(false);
             _loadedSupplier = supplier;
             _lastSavedSupplierId = supplier.Id;
-            return true;
+        }
+        else
+        {
+            return false;
         }
 
-        return false;
+        LoadEditor(supplier);
+        UpdateAttachmentCommandState();
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

@@ -29,6 +29,7 @@ public class ModuleCflTests
             InstallDate = DateTime.UtcNow
         });
 
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -48,7 +49,7 @@ public class ModuleCflTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 
@@ -94,6 +95,7 @@ public class ModuleCflTests
             AssignedTo = new User { FullName = "Technician" }
         });
 
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -103,7 +105,7 @@ public class ModuleCflTests
         var workOrderCrud = new FakeWorkOrderCrudService();
         workOrderCrud.Saved.AddRange(db.WorkOrders);
 
-        var viewModel = new WorkOrdersModuleViewModel(db, workOrderCrud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new WorkOrdersModuleViewModel(db, workOrderCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 
@@ -138,11 +140,28 @@ public class ModuleCflTests
             Comment = "All good"
         });
 
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
+        var calibrationService = new FakeCalibrationCrudService();
+        calibrationService.Saved.AddRange(db.Calibrations);
+        var componentService = new FakeComponentCrudService();
+        var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
 
-        var viewModel = new CalibrationModuleViewModel(db, dialog, shell, navigation);
+        var viewModel = new CalibrationModuleViewModel(
+            db,
+            calibrationService,
+            componentService,
+            auth,
+            filePicker,
+            attachmentService,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 

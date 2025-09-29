@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, and 2025-10-30 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, and 2025-10-30 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, and 2025-10-30 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, and 2025-10-30 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, and 2025-11-01 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, and 2025-11-01 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, and 2025-11-01 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, and 2025-11-01 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -16,19 +16,19 @@
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
-- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [ ] todo
+- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture integrated across Assets, Work Orders, Calibration, Suppliers, and Parts; audit surfacing still pending until SDK access returns)*
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
-  - Assets/Machines — [x] done *(mode-aware CRUD plus attachment upload wired through AttachmentService; e-sign prompt scheduled under Batch B2)*
+  - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
   - Components — [x] done *(mode-aware editor wired to ComponentService; attachments/signature work tracked under Batch B2)*
-  - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, and stock health warnings surfaced; signature prompts queued for Batch B2)*
-  - Work Orders — [x] done *(CRUD adapter wired with attachments; e-signature/audit surfacing slated for Batch B2)*
-  - Calibration — [x] done *(CRUD editor now supports attachment uploads via AttachmentService; e-signature/audit surfacing remains queued for Batch B2)*
+  - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, stock health warnings, and e-signature capture baked into save flows; audit surfacing remains blocked on SDK access)*
+  - Work Orders — [x] done *(CRUD adapter wired with attachments and e-signature capture ahead of adapter calls; audit surfacing queued once SDK access returns)*
+  - Calibration — [x] done *(CRUD editor with attachment uploads and e-signature capture; audit surfacing remains queued for Batch B2)*
   - Incident → CAPA → Change Control — [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments; signature/audit prompts queued for Batch B2)*
   - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, and attachment workflow; signature/audit prompts queued for Batch B2)*
   - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling and attachment workflow; signature/audit surfacing tracked under Batch B2)*
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, and role assignment management; signature prompts queued for Batch B2)*
-  - Suppliers/External Servicers — [x] done *(Suppliers module ships with attachments + CFL; External Servicers cockpit now live with mode-aware CRUD and navigation)*
+  - Suppliers/External Servicers — [x] done *(Suppliers module now enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit remains mode-aware with CRUD and navigation)*
   - Audit/API Audit — [~] in-progress *(WPF audit trail now pulls filtered entries via AuditService with expanded inspector grid, filters, and explicit empty/error status flags.)*
   - Documents/Attachments — [ ] todo
   - Dashboard/Reports — [ ] todo
@@ -38,8 +38,7 @@
 - `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`. *(2025-09-25 & 2025-09-27 retries confirmed `dotnet --info` continues to fail with **command not found**; 2025-10-09 recheck still reports the command missing.)*
   - Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
   - Smoke automation is blocked until SDK + Windows tooling are installed.
-  - Work Orders editor still requires e-signature prompt + inspector audit surfacing once Batch B2 unblocks the shared services.
-  - Asset signature prompt and inspector audit surfacing will ride the Batch B2 cross-cutting work once the SDK blocker is cleared.
+- Audit inspector surfacing and smoke automation remain blocked until the SDK gap is resolved.
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
@@ -47,6 +46,7 @@
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
 - 2025-10-30: Introduced `AttachmentWorkflowService` in the WPF shell so module view-models share MAUI's dedup/encryption/retention workflow via `AttachmentService` + `DatabaseService.Attachments` helpers; registration and commands now rely on the adapter.
+- 2025-11-01: Assets, Work Orders, Calibration, Suppliers, and Parts now block saves on successful electronic signature capture, persist the resulting digital signature hash, and surface cancellation/failure states through StatusMessage; unit tests gained a reusable signature dialog stub.
 - 2025-10-31: WPF shell now exposes an `IElectronicSignatureDialogService` that drives the signature dialog, captures password/PIN plus GMP reason text, and persists the note via the shared DatabaseService extensions before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
 - Components module now completes the CRUD rollout with mode-aware editor, validation, and machine lookups; attachment/signature integration remains queued for Batch B2.

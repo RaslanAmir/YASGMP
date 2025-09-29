@@ -11,6 +11,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -22,6 +23,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -32,6 +34,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -41,6 +44,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         Editor = AssetEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
@@ -263,29 +267,54 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         var machine = Editor.ToMachine(_loadedMachine);
         machine.Status = _machineService.NormalizeStatus(machine.Status);
 
+        if (Mode == FormMode.Update && _loadedMachine is null)
+        {
+            StatusMessage = "Select an asset before saving.";
+            return false;
+        }
+
+        var recordId = Mode == FormMode.Update ? _loadedMachine!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("machines", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        machine.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
-            await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
-            _loadedMachine = machine;
-            LoadEditor(machine);
-            return true;
+            var id = await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
+            machine.Id = id;
         }
-
-        if (Mode == FormMode.Update)
+        else if (Mode == FormMode.Update)
         {
-            if (_loadedMachine is null)
-            {
-                return false;
-            }
-
-            machine.Id = _loadedMachine.Id;
+            machine.Id = _loadedMachine!.Id;
             await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
-            _loadedMachine = machine;
-            LoadEditor(machine);
-            return true;
+        }
+        else
+        {
+            return false;
         }
 
-        return false;
+        _loadedMachine = machine;
+        LoadEditor(machine);
+        UpdateAttachmentCommandState();
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()
