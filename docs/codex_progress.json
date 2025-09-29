@@ -14,7 +14,8 @@
       "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container.",
       "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container.",
       "2025-10-17: dotnet --info/restore/build retried; CLI still missing so commands exit with 'command not found'.",
-      "2025-10-23: dotnet --info/restore/build attempted again; CLI remains unavailable in the container."
+      "2025-10-23: dotnet --info/restore/build attempted again; CLI remains unavailable in the container.",
+      "2025-10-27: dotnet --info/restore/build/test retried; CLI still missing so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -64,7 +65,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test(di): ensure audit module resolves after singleton cleanup",
+  "lastCommitSummary": "test: clamp audit filters to user-selected upper bounds",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -105,6 +106,7 @@
     "2025-10-23: Audit module now normalizes nullable DatePicker inputs (including DateTimeKind.Unspecified) before querying AuditService, persists sanitized filter values, and remains blocked on dotnet restore/build due to the missing CLI.",
     "2025-10-24: WPF host now registers AuditService as a singleton directly (removing the transient duplicate) and DI tests confirm AuditModuleViewModel resolves; dotnet restore/build retries still fail with 'command not found'.",
     "2025-10-25: Audit module now tracks HasResults/HasError flags, applies error highlighting in the view, and renames the inspector reason column; dotnet CLI remains unavailable so restore/build stay blocked.",
-    "2025-10-26: Audit filters now preserve a user-specified end date even when it predates the start picker by clamping the service query's start bound to that day and adding WPF regression coverage for the upper-bound behavior."
+    "2025-10-26: Audit filters now preserve a user-specified end date even when it predates the start picker by clamping the service query's start bound to that day and adding WPF regression coverage for the upper-bound behavior.",
+    "2025-10-27: Audit filters now clamp the lower bound when the upper bound is moved earlier while keeping the selected end date intact; new WPF regression test ensures persisted filters and query arguments align."
   ]
 }

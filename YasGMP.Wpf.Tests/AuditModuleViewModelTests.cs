@@ -194,7 +194,7 @@ public class AuditModuleViewModelTests
     }
 
     [Fact]
-    public async Task RefreshAsync_FilterToBeforeFilterFrom_PreservesUpperBound()
+    public async Task RefreshAsync_FilterToBeforeFilterFrom_ClampsLowerBoundToUpperBound()
     {
         var database = CreateDatabaseService();
         var auditService = new AuditService(database);
@@ -208,10 +208,39 @@ public class AuditModuleViewModelTests
 
         await viewModel.RefreshAsync();
 
-        Assert.Equal(new DateTime(2025, 5, 10), viewModel.FilterFrom!.Value);
-        Assert.Equal(new DateTime(2025, 5, 1), viewModel.FilterTo!.Value);
-        Assert.Equal(new DateTime(2025, 5, 1), viewModel.LastFromFilter);
-        Assert.Equal(new DateTime(2025, 5, 1).Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        var expectedUpperBound = new DateTime(2025, 5, 1);
+        Assert.Equal(expectedUpperBound, viewModel.FilterTo!.Value);
+        Assert.Equal(expectedUpperBound, viewModel.FilterFrom!.Value);
+        Assert.Equal(expectedUpperBound, viewModel.LastFromFilter);
+        Assert.Equal(expectedUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_SetOnlyFilterToEarlierThanCurrentFrom_PersistsUpperBoundAcrossPropertiesAndQuery()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        viewModel.FilterFrom = new DateTime(2025, 8, 10, 8, 30, 0);
+        viewModel.FilterTo = new DateTime(2025, 8, 5);
+
+        await viewModel.RefreshAsync();
+
+        // User adjusts only the upper bound to an even earlier day without touching FilterFrom.
+        viewModel.FilterTo = new DateTime(2025, 7, 20);
+
+        await viewModel.RefreshAsync();
+
+        var expectedUpperBound = new DateTime(2025, 7, 20);
+        Assert.Equal(expectedUpperBound, viewModel.FilterTo!.Value);
+        Assert.Equal(expectedUpperBound, viewModel.FilterFrom!.Value);
+        Assert.Equal(expectedUpperBound, viewModel.LastFromFilter);
+        Assert.Equal(expectedUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
     }
 
