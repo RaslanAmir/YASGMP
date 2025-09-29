@@ -113,11 +113,12 @@ public class SchedulingModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

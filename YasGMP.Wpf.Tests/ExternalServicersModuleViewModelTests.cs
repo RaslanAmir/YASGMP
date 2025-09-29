@@ -95,11 +95,12 @@ public class ExternalServicersModuleViewModelTests
     {
         var service = new FakeExternalServicerCrudService();
         var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ExternalServicersModuleViewModel(service, auth, dialog, shell, navigation);
+        var viewModel = new ExternalServicersModuleViewModel(service, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         Assert.False(viewModel.IsEditorEnabled);

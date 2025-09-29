@@ -82,6 +82,7 @@ public class WarehouseModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.10.0.10"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -94,7 +95,7 @@ public class WarehouseModuleViewModelTests
             new PickedFile("warehouse.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.SelectedRecord = viewModel.Records.First();
 
@@ -142,13 +143,14 @@ public class WarehouseModuleViewModelTests
             PerformedById: 4));
 
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
