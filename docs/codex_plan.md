@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, and 2025-11-04 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, and 2025-11-04 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, and 2025-11-04 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, and 2025-11-04 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, and 2025-11-07 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, and 2025-11-07 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, and 2025-11-07 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, and 2025-11-07 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -52,6 +52,7 @@
 - 2025-11-04: Assets (machines) save flow now enriches the persisted machine with last-modified metadata after signature capture to keep downstream persistence aligned with Issue 3 requirements.
 - 2025-11-05: Electronic signature dialog service now separates capture from persistence, allowing modules to update generated record ids, persist the business entity first, and retry signature storage with clear status messaging when failures occur.
 - 2025-11-06: Assets editor now surfaces full e-sign metadata (hash, signer, reason, session/IP) via the new SignatureAwareEditor base and SignatureMetadataView control; save flow stamps the metadata before persistence while SDK access remains blocked.
+- 2025-11-07: Added `B1FormDocumentViewModel` regression coverage to ensure cancellation status text, dirty tracking, and form mode remain intact when `OnSaveAsync` returns false; SDK/tooling still blocked by missing `dotnet` CLI.
 - 2025-10-31: WPF shell now exposes an `IElectronicSignatureDialogService` that drives the signature dialog, captures password/PIN plus GMP reason text, and persists the note via the shared DatabaseService extensions before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
 - Components module now completes the CRUD rollout with mode-aware editor, validation, machine lookups, and electronic signature capture ahead of persistence.
