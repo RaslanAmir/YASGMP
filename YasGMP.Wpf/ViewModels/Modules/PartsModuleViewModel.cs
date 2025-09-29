@@ -11,6 +11,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -22,6 +23,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
     private Part? _loadedPart;
     private PartEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -32,6 +34,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -41,6 +44,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = PartEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[] { "active", "inactive", "blocked" });
@@ -242,6 +246,12 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
     protected override async Task<bool> OnSaveAsync()
     {
+        if (Mode == FormMode.Update && _loadedPart is null)
+        {
+            StatusMessage = "Select a part before saving.";
+            return false;
+        }
+
         var context = PartCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
@@ -259,29 +269,49 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             }
         }
 
+        var recordId = Mode == FormMode.Update ? _loadedPart!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("parts", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        part.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
-            await _partService.CreateAsync(part, context).ConfigureAwait(false);
-            _loadedPart = part;
-            LoadEditor(part);
-            return true;
+            var id = await _partService.CreateAsync(part, context).ConfigureAwait(false);
+            part.Id = id;
         }
-
-        if (Mode == FormMode.Update)
+        else if (Mode == FormMode.Update)
         {
-            if (_loadedPart is null)
-            {
-                return false;
-            }
-
-            part.Id = _loadedPart.Id;
+            part.Id = _loadedPart!.Id;
             await _partService.UpdateAsync(part, context).ConfigureAwait(false);
-            _loadedPart = part;
-            LoadEditor(part);
-            return true;
+        }
+        else
+        {
+            return false;
         }
 
-        return false;
+        _loadedPart = part;
+        LoadEditor(part);
+        UpdateStockHealth();
+        UpdateAttachmentCommandState();
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

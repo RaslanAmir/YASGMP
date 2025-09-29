@@ -16,7 +16,8 @@
       "2025-10-17: dotnet --info/restore/build retried; CLI still missing so commands exit with 'command not found'.",
       "2025-10-23: dotnet --info/restore/build attempted again; CLI remains unavailable in the container.",
       "2025-10-27: dotnet --info/restore/build/test retried; CLI still missing so commands exit with 'command not found'.",
-      "2025-10-30: dotnet --info/restore/build retried; CLI still absent in container so commands fail with 'command not found'."
+      "2025-10-30: dotnet --info/restore/build retried; CLI still absent in container so commands fail with 'command not found'.",
+      "2025-11-01: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands fail with 'command not found'."
     ]
   },
   "batches": [
@@ -36,7 +37,10 @@
     {
       "id": "B2",
       "name": "Cross-cutting services",
-      "status": "pending"
+      "status": "in-progress",
+      "notes": [
+        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; audit surfacing still pending"
+      ]
     },
     {
       "id": "B3",
@@ -70,9 +74,9 @@
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
-    "Work Orders editor now surfaces CRUD via adapter with attachments; e-signature/audit pending Batch B2",
-    "Calibration editor now exposes CRUD with supplier/component lookups and attachment uploads via IAttachmentService; signature + audit work remains queued for Batch B2",
-    "Assets module now uploads attachments via AttachmentService from the WPF shell; signature prompts tracked under Batch B2.",
+    "Work Orders editor now surfaces CRUD via adapter with attachments and mandatory e-signature capture; audit surfacing still pending Batch B2",
+    "Calibration editor now exposes CRUD with supplier/component lookups, attachment uploads, and mandatory e-signature capture; audit work remains queued for Batch B2",
+    "Assets module now uploads attachments via AttachmentService from the WPF shell and enforces electronic signatures before save; audit surfacing remains pending.",
     "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module.",
     "2025-09-25: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
     "2025-09-27: Batch 0 still blocked in container; dotnet CLI absent so restore/build/smoke cannot execute.",
@@ -80,7 +84,7 @@
     "2025-09-27: Components module reached CRUD parity through ComponentService with machine lookups; cross-cutting attachments/e-signature work scheduled under Batch B2.",
     "2025-09-27: Components module exposes B1-mode editor using ComponentService and machine lookups; attachments/e-signature follow-ups remain.",
     "2025-09-29: WPF mapping updated for Components; adapters documented while awaiting SDK to finish Batch B2 attachment/signature tasks.",
-    "2025-09-30: Parts & Warehouse editors now include stock health messaging, warehouse summaries, and inventory ledger previews while retaining attachment support; e-signature/audit surfacing will follow in Batch B2 once .NET 9 SDK is accessible.",
+    "2025-09-30: Parts & Warehouse editors now include stock health messaging, warehouse summaries, and inventory ledger previews while retaining attachment support; e-signature capture has been added while audit surfacing will follow once .NET 9 SDK is accessible.",
     "2025-09-30: Incidents module now runs through IIncidentCrudService with mode-aware editor and attachment uploads; CAPA/Change Control remain pending.",
     "2025-10-01: Incidents editor exposes CFL-driven linking to work orders and CAPA cases with unit coverage for the new mode transitions.",
     "2025-10-02: CAPA module now persists via ICapaCrudService with component lookups, attachments, and unit coverage for save/attachment flows; Change Control still pending.",
@@ -88,7 +92,7 @@
     "2025-10-04: Validations module now reuses ValidationService through a new adapter with machine/component lookups, CFL picker, and attachment uploads; signature/audit surfacing slated for Batch B2 once .NET 9 SDK is available.",
     "2025-10-05: Scheduled Jobs module now exposes a CRUD-capable editor with execute/acknowledge commands, CFL hooks, and attachment uploads via the new IScheduledJobCrudService adapter; signature/audit prompts remain queued for Batch B2.",
     "2025-10-06: Security (Users/Roles) module now leverages IUserCrudService with RBAC role assignment management, CFL, and unit coverage; signature/audit surfacing will follow under Batch B2.",
-    "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, and mode-aware editor coverage; External Servicers remain a follow-up task.",
+    "2025-10-07: Suppliers module now uses ISupplierCrudService with attachments, CFL, mode-aware editor coverage, and mandatory e-signature capture; External Servicers remain a follow-up task.",
     "2025-10-08: External Servicers module now has a dedicated adapter, WPF document, CFL picker, golden-arrow navigation, and unit/smoke harness coverage.",
     "2025-10-09: External Servicer database extensions now drive CRUD (list/load/save/delete) with unit tests asserting `external_contractors` access.",
     "2025-10-10: Audit module now surfaces AuditService-backed filtering with richer inspector columns and WPF coverage; dotnet --info still fails with 'command not found'.",
@@ -112,6 +116,7 @@
     "2025-10-28: Audit filters now retain the user's To picker while reordering the query bounds if the upper date precedes the lower; tests cover both existing From overrides and default-from scenarios.",
     "2025-10-29: Audit module now orders inverted date ranges by min/max while preserving the user-selected To value; WPF tests assert the later bound reaches AuditService at end-of-day.",
     "2025-10-30: WPF modules now route uploads through AttachmentWorkflowService so dedup, retention, and encryption follow the MAUI conventions; DI registration updated and commands now surface dedup status messaging.",
-    "2025-10-31: WPF shell adds an IElectronicSignatureDialogService that drives the signature dialog, captures the operator password/PIN with GMP reason text, and persists through DatabaseServiceDigitalSignaturesExtensions before dismissing."
+    "2025-10-31: WPF shell adds an IElectronicSignatureDialogService that drives the signature dialog, captures the operator password/PIN with GMP reason text, and persists through DatabaseServiceDigitalSignaturesExtensions before dismissing.",
+    "2025-11-01: Assets, Work Orders, Calibration, Suppliers, and Parts now require electronic signature capture before CRUD calls, propagate the resulting digital signature hash, and surface cancellation/failure states through StatusMessage."
   ]
 }

@@ -21,11 +21,12 @@ public class WorkOrdersModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new WorkOrdersModuleViewModel(database, workOrders, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new WorkOrdersModuleViewModel(database, workOrders, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -49,6 +50,12 @@ public class WorkOrdersModuleViewModelTests
         Assert.Equal("Replace gaskets", persisted.Title);
         Assert.Equal(12, persisted.MachineId);
         Assert.Equal(9, persisted.CreatedById);
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("work_orders", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
         Assert.False(viewModel.IsDirty);
     }
 
@@ -83,6 +90,7 @@ public class WorkOrdersModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.25"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -95,7 +103,7 @@ public class WorkOrdersModuleViewModelTests
             new PickedFile("evidence.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new WorkOrdersModuleViewModel(database, workOrders, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new WorkOrdersModuleViewModel(database, workOrders, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));

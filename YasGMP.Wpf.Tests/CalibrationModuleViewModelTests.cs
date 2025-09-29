@@ -39,6 +39,7 @@ public class CalibrationModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.5"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -52,6 +53,7 @@ public class CalibrationModuleViewModelTests
             auth,
             filePicker,
             attachmentService,
+            signatureDialog,
             dialog,
             shell,
             navigation);
@@ -76,6 +78,12 @@ public class CalibrationModuleViewModelTests
         Assert.Equal(database.Suppliers[0].Id, persisted.SupplierId);
         Assert.Equal("PASS", persisted.Result);
         Assert.Equal("CERT-001.pdf", persisted.CertDoc);
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("calibrations", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     [Fact]
@@ -104,6 +112,7 @@ public class CalibrationModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.15"
         };
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -126,6 +135,7 @@ public class CalibrationModuleViewModelTests
             auth,
             filePicker,
             attachmentService,
+            signatureDialog,
             dialog,
             shell,
             navigation);

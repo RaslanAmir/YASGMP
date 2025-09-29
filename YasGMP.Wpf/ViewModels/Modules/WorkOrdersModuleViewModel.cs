@@ -10,6 +10,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -21,6 +22,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private readonly IWorkOrderCrudService _workOrderService;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private WorkOrder? _loadedEntity;
     private WorkOrderEditor? _snapshot;
@@ -32,6 +34,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -41,6 +44,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         Editor = WorkOrderEditor.CreateEmpty();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
@@ -261,6 +265,34 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         entity.SourceIp = _authContext.CurrentIpAddress;
         entity.SessionId = _authContext.CurrentSessionId;
 
+        if (Mode == FormMode.Update && _loadedEntity is null)
+        {
+            StatusMessage = "Select a work order before saving.";
+            return false;
+        }
+
+        var recordId = Mode == FormMode.Update ? _loadedEntity!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("work_orders", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
         var context = WorkOrderCrudContext.Create(
             userId.Value,
             _authContext.CurrentIpAddress,
@@ -280,6 +312,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             _loadedEntity = entity;
             LoadEditor(entity);
             UpdateAttachmentCommandState();
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
@@ -290,6 +323,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             _loadedEntity = entity;
             LoadEditor(entity);
             UpdateAttachmentCommandState();
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
