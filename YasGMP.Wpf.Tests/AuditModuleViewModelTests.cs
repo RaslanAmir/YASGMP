@@ -209,8 +209,9 @@ public class AuditModuleViewModelTests
         await viewModel.RefreshAsync();
 
         var expectedUpperBound = new DateTime(2025, 5, 1);
+        var expectedFrom = new DateTime(2025, 5, 10);
+        Assert.Equal(expectedFrom, viewModel.FilterFrom!.Value);
         Assert.Equal(expectedUpperBound, viewModel.FilterTo!.Value);
-        Assert.Equal(expectedUpperBound, viewModel.FilterFrom!.Value);
         Assert.Equal(expectedUpperBound, viewModel.LastFromFilter);
         Assert.Equal(expectedUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
@@ -237,10 +238,35 @@ public class AuditModuleViewModelTests
         await viewModel.RefreshAsync();
 
         var expectedUpperBound = new DateTime(2025, 7, 20);
+        var expectedFrom = new DateTime(2025, 8, 10);
+        Assert.Equal(expectedFrom, viewModel.FilterFrom!.Value);
         Assert.Equal(expectedUpperBound, viewModel.FilterTo!.Value);
-        Assert.Equal(expectedUpperBound, viewModel.FilterFrom!.Value);
         Assert.Equal(expectedUpperBound, viewModel.LastFromFilter);
         Assert.Equal(expectedUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_DefaultFilterFrom_SetEarlierFilterTo_PreservesUpperBound()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+
+        var originalFrom = viewModel.FilterFrom!.Value.Date;
+        var earlierUpperBound = originalFrom.AddDays(-5);
+        viewModel.FilterTo = earlierUpperBound;
+
+        await viewModel.RefreshAsync();
+
+        Assert.Equal(originalFrom, viewModel.FilterFrom!.Value);
+        Assert.Equal(earlierUpperBound, viewModel.FilterTo!.Value);
+        Assert.Equal(earlierUpperBound, viewModel.LastFromFilter);
+        Assert.Equal(earlierUpperBound.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
     }
 

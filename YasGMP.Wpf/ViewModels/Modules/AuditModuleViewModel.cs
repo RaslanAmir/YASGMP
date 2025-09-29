@@ -146,18 +146,18 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         var today = DateTime.Today;
 
         var normalizedFrom = from?.Date ?? today.AddDays(-30);
-        var normalizedToCandidate = to?.Date
+        var normalizedTo = to?.Date
             ?? (from.HasValue ? normalizedFrom : today);
 
-        var effectiveFilterTo = normalizedToCandidate;
-        var effectiveFilterFrom = normalizedFrom > effectiveFilterTo
-            ? effectiveFilterTo
-            : normalizedFrom;
+        var queryFrom = normalizedFrom;
+        if (normalizedFrom > normalizedTo)
+        {
+            queryFrom = normalizedTo;
+        }
 
-        var queryFrom = effectiveFilterFrom;
-        var queryTo = effectiveFilterTo.Date.AddDays(1).AddTicks(-1);
+        var queryTo = normalizedTo.Date.AddDays(1).AddTicks(-1);
 
-        return (queryFrom, queryTo, effectiveFilterFrom, effectiveFilterTo);
+        return (queryFrom, queryTo, normalizedFrom, normalizedTo);
     }
 
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
