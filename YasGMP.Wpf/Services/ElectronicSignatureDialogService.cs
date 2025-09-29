@@ -11,8 +11,8 @@ using YasGMP.Wpf.Views.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Concrete implementation that displays the WPF electronic signature dialog and persists
-/// the captured signature through the shared database extensions.
+/// Concrete implementation that displays the WPF electronic signature dialog and exposes
+/// persistence of the captured signature as an explicit follow-up step.
 /// </summary>
 public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialogService
 {
@@ -59,14 +59,24 @@ public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialo
             }
         }).ConfigureAwait(false);
 
-        cancellationToken.ThrowIfCancellationRequested();
+        return result;
+    }
 
-        if (result?.Signature is null)
+    public Task PersistSignatureAsync(
+        ElectronicSignatureDialogResult result,
+        CancellationToken cancellationToken = default)
+    {
+        if (result is null)
         {
-            return result;
+            throw new ArgumentNullException(nameof(result));
         }
 
-        await _databaseService.InsertDigitalSignatureAsync(result.Signature, cancellationToken).ConfigureAwait(false);
-        return result;
+        if (result.Signature is null)
+        {
+            throw new ArgumentException("Signature result does not contain a digital signature.", nameof(result));
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        return _databaseService.InsertDigitalSignatureAsync(result.Signature, cancellationToken);
     }
 }

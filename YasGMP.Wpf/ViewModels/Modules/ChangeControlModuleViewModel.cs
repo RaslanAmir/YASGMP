@@ -242,30 +242,57 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         entity.LastModified = DateTime.UtcNow;
         entity.LastModifiedById = _authContext.CurrentUser?.Id;
         entity.UpdatedAt = DateTime.UtcNow;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
-            entity.Id = id;
-            Records.Add(ToRecord(entity));
+            if (Mode == FormMode.Add)
+            {
+                var id = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = id;
+                Records.Add(ToRecord(entity));
+            }
+            else if (Mode == FormMode.Update && _loadedEntity is not null)
+            {
+                entity.Id = _loadedEntity.Id;
+                await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-        else if (Mode == FormMode.Update && _loadedEntity is not null)
+        catch (Exception ex)
         {
-            entity.Id = _loadedEntity.Id;
-            await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
-        }
-        else
-        {
-            return false;
+            throw new InvalidOperationException($"Failed to persist change control: {ex.Message}", ex);
         }
 
         _loadedEntity = entity;
         LoadEditor(entity);
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = entity.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }
 

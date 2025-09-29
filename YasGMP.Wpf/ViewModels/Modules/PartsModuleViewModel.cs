@@ -289,27 +289,54 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         part.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _partService.CreateAsync(part, context).ConfigureAwait(false);
-            part.Id = id;
+            if (Mode == FormMode.Add)
+            {
+                var id = await _partService.CreateAsync(part, context).ConfigureAwait(false);
+                part.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                part.Id = _loadedPart!.Id;
+                await _partService.UpdateAsync(part, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-        else if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            part.Id = _loadedPart!.Id;
-            await _partService.UpdateAsync(part, context).ConfigureAwait(false);
-        }
-        else
-        {
-            return false;
+            throw new InvalidOperationException($"Failed to persist part: {ex.Message}", ex);
         }
 
         _loadedPart = part;
         LoadEditor(part);
         UpdateStockHealth();
         UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = part.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }

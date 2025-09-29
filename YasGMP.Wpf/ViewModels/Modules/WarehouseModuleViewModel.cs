@@ -266,6 +266,12 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         warehouse.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         warehouse.LastModified = DateTime.UtcNow;
         warehouse.LastModifiedById = _authContext.CurrentUser?.Id;
@@ -273,26 +279,45 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         warehouse.SourceIp = _authContext.CurrentIpAddress ?? warehouse.SourceIp ?? string.Empty;
         warehouse.SessionId = _authContext.CurrentSessionId ?? warehouse.SessionId ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            await _warehouseService.CreateAsync(warehouse, context).ConfigureAwait(false);
-            _loadedWarehouse = warehouse;
-            LoadEditor(warehouse);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            if (Mode == FormMode.Add)
+            {
+                await _warehouseService.CreateAsync(warehouse, context).ConfigureAwait(false);
+            }
+            else if (Mode == FormMode.Update)
+            {
+                warehouse.Id = _loadedWarehouse!.Id;
+                await _warehouseService.UpdateAsync(warehouse, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to persist warehouse: {ex.Message}", ex);
         }
 
-        if (Mode == FormMode.Update)
+        _loadedWarehouse = warehouse;
+        LoadEditor(warehouse);
+
+        signatureResult.Signature.RecordId = warehouse.Id;
+
+        try
         {
-            warehouse.Id = _loadedWarehouse!.Id;
-            await _warehouseService.UpdateAsync(warehouse, context).ConfigureAwait(false);
-            _loadedWarehouse = warehouse;
-            LoadEditor(warehouse);
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
         }
 
-        return false;
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()

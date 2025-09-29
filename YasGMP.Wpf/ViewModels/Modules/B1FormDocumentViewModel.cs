@@ -344,17 +344,25 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
                 return false;
             }
 
+            var previousMessage = StatusMessage;
             var saved = await OnSaveAsync().ConfigureAwait(false);
             if (saved)
             {
-                StatusMessage = $"{Title} saved successfully.";
+                if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
+                {
+                    StatusMessage = $"{Title} saved successfully.";
+                }
+
                 ResetDirty();
                 Mode = FormMode.View;
                 await RefreshAsync().ConfigureAwait(false);
             }
             else
             {
-                StatusMessage = $"No changes to save for {Title}.";
+                if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
+                {
+                    StatusMessage = $"No changes to save for {Title}.";
+                }
             }
 
             return saved;

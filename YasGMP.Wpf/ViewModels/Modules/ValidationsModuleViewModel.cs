@@ -318,6 +318,12 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         entity.LastModified = DateTime.UtcNow;
         entity.LastModifiedById = _authContext.CurrentUser?.Id;
@@ -325,32 +331,53 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         entity.SessionId = _authContext.CurrentSessionId ?? entity.SessionId ?? string.Empty;
         entity.SignatureTimestamp = DateTime.UtcNow;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            if (string.IsNullOrWhiteSpace(entity.Code))
+            if (Mode == FormMode.Add)
             {
-                entity.Code = $"VAL-{DateTime.UtcNow:yyyyMMddHHmmss}";
-            }
+                if (string.IsNullOrWhiteSpace(entity.Code))
+                {
+                    entity.Code = $"VAL-{DateTime.UtcNow:yyyyMMddHHmmss}";
+                }
 
-            var id = await _validationService.CreateAsync(entity, context).ConfigureAwait(false);
-            entity.Id = id;
-            Records.Add(ToRecord(entity));
+                var id = await _validationService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = id;
+                Records.Add(ToRecord(entity));
+            }
+            else if (Mode == FormMode.Update)
+            {
+                entity.Id = _loadedValidation!.Id;
+                await _validationService.UpdateAsync(entity, context).ConfigureAwait(false);
+                ReplaceRecord(entity);
+            }
+            else
+            {
+                return false;
+            }
         }
-        else if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            entity.Id = _loadedValidation!.Id;
-            await _validationService.UpdateAsync(entity, context).ConfigureAwait(false);
-            ReplaceRecord(entity);
-        }
-        else
-        {
-            return false;
+            throw new InvalidOperationException($"Failed to persist validation: {ex.Message}", ex);
         }
 
         _loadedValidation = entity;
         LoadEditor(entity);
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = entity.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }
 

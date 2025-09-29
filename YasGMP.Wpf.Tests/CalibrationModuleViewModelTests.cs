@@ -85,6 +85,9 @@ public class CalibrationModuleViewModelTests
             Assert.Equal("calibrations", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(calibrationAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
     }
 
     [Fact]

@@ -293,28 +293,55 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         machine.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         machine.LastModified = DateTime.UtcNow;
         machine.LastModifiedById = _authContext.CurrentUser?.Id ?? machine.LastModifiedById;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
-            machine.Id = id;
+            if (Mode == FormMode.Add)
+            {
+                var id = await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
+                machine.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                machine.Id = _loadedMachine!.Id;
+                await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
         }
-        else if (Mode == FormMode.Update)
+        catch (Exception ex)
         {
-            machine.Id = _loadedMachine!.Id;
-            await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
-        }
-        else
-        {
-            return false;
+            throw new InvalidOperationException($"Failed to persist asset: {ex.Message}", ex);
         }
 
         _loadedMachine = machine;
         LoadEditor(machine);
         UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = machine.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }

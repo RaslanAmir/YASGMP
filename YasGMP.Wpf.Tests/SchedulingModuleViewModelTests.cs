@@ -43,6 +43,14 @@ public class SchedulingModuleViewModelTests
         var created = Assert.Single(crud.Saved);
         Assert.Equal("weekly digest", created.JobType);
         Assert.False(viewModel.IsDirty);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("scheduled_jobs", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
+        Assert.Single(signatureDialog.PersistedResults);
+        var persistedSignature = signatureDialog.PersistedResults[0];
+        Assert.Equal(created.Id, persistedSignature.Signature.RecordId);
     }
 
     [Fact]

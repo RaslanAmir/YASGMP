@@ -315,32 +315,45 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         var signatureHash = signatureResult.Signature.SignatureHash ?? string.Empty;
         user.DigitalSignature = signatureHash;
         user.LastChangeSignature = signatureHash;
         user.LastModified = DateTime.UtcNow;
         user.LastModifiedById = _authContext.CurrentUser?.Id;
 
-        if (user.Id == 0)
+        try
         {
-            if (password is null)
+            if (user.Id == 0)
             {
-                throw new InvalidOperationException("Password is required for new users.");
+                if (password is null)
+                {
+                    throw new InvalidOperationException("Password is required for new users.");
+                }
+
+                await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
+            }
+            else
+            {
+                if (password is null && _loadedUser is not null)
+                {
+                    user.PasswordHash = _loadedUser.PasswordHash;
+                }
+
+                await _userService.UpdateAsync(user, password, context).ConfigureAwait(false);
             }
 
-            await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
+            await _userService.UpdateRoleAssignmentsAsync(user.Id, user.RoleIds, context).ConfigureAwait(false);
         }
-        else
+        catch (Exception ex)
         {
-            if (password is null && _loadedUser is not null)
-            {
-                user.PasswordHash = _loadedUser.PasswordHash;
-            }
-
-            await _userService.UpdateAsync(user, password, context).ConfigureAwait(false);
+            throw new InvalidOperationException($"Failed to persist user: {ex.Message}", ex);
         }
-
-        await _userService.UpdateRoleAssignmentsAsync(user.Id, user.RoleIds, context).ConfigureAwait(false);
 
         _loadedUser = user;
         _snapshot = null;
@@ -352,6 +365,20 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
         ApplyRoleSelection(user.RoleIds);
         ResetDirty();
+
+        signatureResult.Signature.RecordId = user.Id;
+
+        try
+        {
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
+        }
+
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }

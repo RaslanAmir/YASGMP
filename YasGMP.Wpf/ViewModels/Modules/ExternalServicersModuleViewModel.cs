@@ -281,31 +281,59 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             return false;
         }
 
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
         servicer.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
         servicer.LastModified = DateTime.UtcNow;
         servicer.LastModifiedById = _authContext.CurrentUser?.Id ?? servicer.LastModifiedById;
         servicer.SourceIp = _authContext.CurrentIpAddress ?? servicer.SourceIp ?? string.Empty;
 
-        if (Mode == FormMode.Add)
+        try
         {
-            var id = await _servicerService.CreateAsync(servicer, context).ConfigureAwait(false);
-            _loadedServicer = servicer;
-            _lastSavedServicerId = id;
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            if (Mode == FormMode.Add)
+            {
+                var id = await _servicerService.CreateAsync(servicer, context).ConfigureAwait(false);
+                servicer.Id = id;
+            }
+            else if (Mode == FormMode.Update)
+            {
+                servicer.Id = _loadedServicer.Id;
+                await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to persist external servicer: {ex.Message}", ex);
         }
 
-        if (Mode == FormMode.Update)
+        _loadedServicer = servicer;
+        _lastSavedServicerId = servicer.Id;
+        LoadEditor(servicer);
+        UpdateAttachmentCommandState();
+
+        signatureResult.Signature.RecordId = servicer.Id;
+
+        try
         {
-            servicer.Id = _loadedServicer.Id;
-            await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
-            _loadedServicer = servicer;
-            _lastSavedServicerId = servicer.Id;
-            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-            return true;
+            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            Mode = FormMode.Update;
+            return false;
         }
 
-        return false;
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        return true;
     }
 
     protected override void OnCancel()
