@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -61,6 +62,86 @@ public class WorkOrdersModuleViewModelTests
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(workOrders.Saved[0].Id, persistedSignature.Signature.RecordId);
         Assert.False(viewModel.IsDirty);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCancelled_LeavesWorkOrderUnsaved()
+    {
+        var database = new DatabaseService();
+        var workOrders = new FakeWorkOrderCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCancellation();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new WorkOrdersModuleViewModel(database, workOrders, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.Title = "Replace gaskets";
+        viewModel.Editor.Description = "Replace gaskets on pump";
+        viewModel.Editor.TaskDescription = "Shutdown, lockout, replace";
+        viewModel.Editor.Type = "MAINTENANCE";
+        viewModel.Editor.Priority = "High";
+        viewModel.Editor.Status = "OPEN";
+        viewModel.Editor.MachineId = 12;
+        viewModel.Editor.RequestedById = 9;
+        viewModel.Editor.CreatedById = 9;
+        viewModel.Editor.AssignedToId = 10;
+        viewModel.Editor.Result = "Pending";
+        viewModel.Editor.Notes = "Initial";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Empty(workOrders.Saved);
+        Assert.Empty(signatureDialog.PersistedResults);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCaptureThrows_SetsStatusAndSkipsPersist()
+    {
+        var database = new DatabaseService();
+        var workOrders = new FakeWorkOrderCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCaptureException(new InvalidOperationException("Dialog offline"));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new WorkOrdersModuleViewModel(database, workOrders, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.Title = "Replace gaskets";
+        viewModel.Editor.Description = "Replace gaskets on pump";
+        viewModel.Editor.TaskDescription = "Shutdown, lockout, replace";
+        viewModel.Editor.Type = "MAINTENANCE";
+        viewModel.Editor.Priority = "High";
+        viewModel.Editor.Status = "OPEN";
+        viewModel.Editor.MachineId = 12;
+        viewModel.Editor.RequestedById = 9;
+        viewModel.Editor.CreatedById = 9;
+        viewModel.Editor.AssignedToId = 10;
+        viewModel.Editor.Result = "Pending";
+        viewModel.Editor.Notes = "Initial";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature failed: Dialog offline", viewModel.StatusMessage);
+        Assert.Empty(workOrders.Saved);
+        Assert.Empty(signatureDialog.PersistedResults);
     }
 
     [Fact]

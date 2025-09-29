@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
@@ -72,6 +73,110 @@ public class ComponentsModuleViewModelTests
         Assert.Single(signatureDialog.PersistedResults);
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(componentAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCancelled_LeavesEditorDirtyAndSkipsPersist()
+    {
+        var database = new DatabaseService();
+        var componentAdapter = new FakeComponentCrudService();
+        var machineAdapter = new FakeMachineCrudService();
+
+        await machineAdapter.CreateAsync(new Machine
+        {
+            Id = 1,
+            Code = "AST-001",
+            Name = "Autoclave",
+            Manufacturer = "Steris",
+            Location = "Suite A",
+            UrsDoc = "URS-AUTO"
+        }, MachineCrudContext.Create(1, "127.0.0.1", "TestRig", "unit"));
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 5, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.8"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCancellation();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
+        viewModel.Editor.Code = "CMP-100";
+        viewModel.Editor.Name = "Pressure Sensor";
+        viewModel.Editor.Type = "sensor";
+        viewModel.Editor.SopDoc = "SOP-CMP-100";
+        viewModel.Editor.Status = "active";
+        viewModel.Editor.SerialNumber = "SN-001";
+        viewModel.Editor.Supplier = "Contoso";
+        viewModel.Editor.Comments = "Initial install";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Empty(componentAdapter.Saved);
+        Assert.Empty(signatureDialog.PersistedResults);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCaptureThrows_SetsStatusAndSkipsPersist()
+    {
+        var database = new DatabaseService();
+        var componentAdapter = new FakeComponentCrudService();
+        var machineAdapter = new FakeMachineCrudService();
+
+        await machineAdapter.CreateAsync(new Machine
+        {
+            Id = 1,
+            Code = "AST-001",
+            Name = "Autoclave",
+            Manufacturer = "Steris",
+            Location = "Suite A",
+            UrsDoc = "URS-AUTO"
+        }, MachineCrudContext.Create(1, "127.0.0.1", "TestRig", "unit"));
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 5, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.8"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCaptureException(new InvalidOperationException("Dialog offline"));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
+        viewModel.Editor.Code = "CMP-100";
+        viewModel.Editor.Name = "Pressure Sensor";
+        viewModel.Editor.Type = "sensor";
+        viewModel.Editor.SopDoc = "SOP-CMP-100";
+        viewModel.Editor.Status = "active";
+        viewModel.Editor.SerialNumber = "SN-001";
+        viewModel.Editor.Supplier = "Contoso";
+        viewModel.Editor.Comments = "Initial install";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature failed: Dialog offline", viewModel.StatusMessage);
+        Assert.Empty(componentAdapter.Saved);
+        Assert.Empty(signatureDialog.PersistedResults);
     }
 
     private static Task<bool> InvokeSaveAsync(ComponentsModuleViewModel viewModel)

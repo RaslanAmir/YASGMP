@@ -69,6 +69,88 @@ public class AssetsModuleViewModelTests
     }
 
     [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCancelled_StaysInEditModeAndSkipsPersist()
+    {
+        var database = new DatabaseService();
+        var machineAdapter = new FakeMachineCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 7, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.25"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCancellation();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.Code = "AST-500";
+        viewModel.Editor.Name = "Lyophilizer";
+        viewModel.Editor.Description = "Freeze dryer";
+        viewModel.Editor.Manufacturer = "Contoso";
+        viewModel.Editor.Model = "LX-10";
+        viewModel.Editor.Location = "Suite A";
+        viewModel.Editor.Status = "maintenance";
+        viewModel.Editor.UrsDoc = "URS-LYO-01";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Empty(machineAdapter.Saved);
+        Assert.Empty(signatureDialog.PersistedResults);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCaptureThrows_SurfacesStatusAndSkipsPersist()
+    {
+        var database = new DatabaseService();
+        var machineAdapter = new FakeMachineCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 7, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.25"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCaptureException(new InvalidOperationException("Dialog offline"));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.Code = "AST-500";
+        viewModel.Editor.Name = "Lyophilizer";
+        viewModel.Editor.Description = "Freeze dryer";
+        viewModel.Editor.Manufacturer = "Contoso";
+        viewModel.Editor.Model = "LX-10";
+        viewModel.Editor.Location = "Suite A";
+        viewModel.Editor.Status = "maintenance";
+        viewModel.Editor.UrsDoc = "URS-LYO-01";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature failed: Dialog offline", viewModel.StatusMessage);
+        Assert.Empty(machineAdapter.Saved);
+        Assert.Empty(signatureDialog.PersistedResults);
+    }
+
+    [Fact]
     public async Task AttachDocumentCommand_UploadsAttachmentViaService()
     {
         var database = new DatabaseService();
