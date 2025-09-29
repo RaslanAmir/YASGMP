@@ -24,7 +24,7 @@ public class IncidentsModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA Manager" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

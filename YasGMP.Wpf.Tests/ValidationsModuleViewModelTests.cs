@@ -24,7 +24,7 @@ public class ValidationsModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 4 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -74,7 +74,7 @@ public class ValidationsModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -116,7 +116,7 @@ public class ValidationsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest"
         };
 
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

@@ -31,7 +31,7 @@ public class CapaModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 8, FullName = "QA Lead" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -86,7 +86,7 @@ public class CapaModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "10.0.0.10"
         };
-        var signatureDialog = new FakeElectronicSignatureDialogService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();

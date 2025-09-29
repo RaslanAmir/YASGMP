@@ -1,0 +1,222 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using YasGMP.Models;
+using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
+
+namespace YasGMP.Wpf.Tests.TestDoubles;
+
+public sealed class TestElectronicSignatureDialogService : IElectronicSignatureDialogService
+{
+    private readonly Queue<CaptureInstruction> _captureQueue = new();
+    private readonly Queue<Func<ElectronicSignatureDialogResult, Exception?>> _persistQueue = new();
+
+    public List<ElectronicSignatureContext> Requests { get; } = new();
+    public List<ElectronicSignatureDialogResult> PersistedResults { get; } = new();
+
+    public ElectronicSignatureDialogResult DefaultResult { get; set; } = new ElectronicSignatureDialogResult(
+        "password",
+        "QA",
+        "Automated test",
+        "QA Reason",
+        new DigitalSignature
+        {
+            SignatureHash = "test-signature",
+            Method = "password",
+            Status = "valid"
+        });
+
+    public Exception? ExceptionToThrow { get; set; }
+    public Exception? PersistExceptionToThrow { get; set; }
+
+    public Func<ElectronicSignatureContext, Exception?>? ExceptionFactory { get; set; }
+    public Func<ElectronicSignatureDialogResult, Exception?>? PersistExceptionFactory { get; set; }
+
+    public Func<ElectronicSignatureContext, ElectronicSignatureDialogResult?>? ResultFactory { get; set; }
+
+    public static TestElectronicSignatureDialogService CreateConfirmed(ElectronicSignatureDialogResult? result = null)
+    {
+        var service = new TestElectronicSignatureDialogService();
+        service.QueueResult(result ?? service.DefaultResult);
+        return service;
+    }
+
+    public static TestElectronicSignatureDialogService CreateCancelled()
+    {
+        var service = new TestElectronicSignatureDialogService();
+        service.QueueCancellation();
+        return service;
+    }
+
+    public static TestElectronicSignatureDialogService CreateCaptureException(Exception exception)
+    {
+        if (exception is null)
+        {
+            throw new ArgumentNullException(nameof(exception));
+        }
+
+        var service = new TestElectronicSignatureDialogService();
+        service.QueueCaptureException(exception);
+        return service;
+    }
+
+    public void QueueResult(ElectronicSignatureDialogResult? result)
+        => _captureQueue.Enqueue(CaptureInstruction.FromResult(result));
+
+    public void QueueCancellation()
+        => QueueResult(null);
+
+    public void QueueCapture(Func<ElectronicSignatureContext, ElectronicSignatureDialogResult?> factory)
+    {
+        if (factory is null)
+        {
+            throw new ArgumentNullException(nameof(factory));
+        }
+
+        _captureQueue.Enqueue(CaptureInstruction.FromResultFactory(factory));
+    }
+
+    public void QueueCaptureException(Exception exception)
+    {
+        if (exception is null)
+        {
+            throw new ArgumentNullException(nameof(exception));
+        }
+
+        _captureQueue.Enqueue(CaptureInstruction.FromException(exception));
+    }
+
+    public void QueueCaptureException(Func<ElectronicSignatureContext, Exception?> factory)
+    {
+        if (factory is null)
+        {
+            throw new ArgumentNullException(nameof(factory));
+        }
+
+        _captureQueue.Enqueue(CaptureInstruction.FromExceptionFactory(factory));
+    }
+
+    public void ClearQueuedResults()
+        => _captureQueue.Clear();
+
+    public void QueuePersist(Func<ElectronicSignatureDialogResult, Exception?> factory)
+    {
+        if (factory is null)
+        {
+            throw new ArgumentNullException(nameof(factory));
+        }
+
+        _persistQueue.Enqueue(factory);
+    }
+
+    public void QueuePersistException(Exception exception)
+    {
+        if (exception is null)
+        {
+            throw new ArgumentNullException(nameof(exception));
+        }
+
+        _persistQueue.Enqueue(_ => exception);
+    }
+
+    public Task<ElectronicSignatureDialogResult?> CaptureSignatureAsync(
+        ElectronicSignatureContext context,
+        CancellationToken cancellationToken = default)
+    {
+        Requests.Add(context);
+
+        if (_captureQueue.Count > 0)
+        {
+            var outcome = _captureQueue.Dequeue().Execute(context);
+            if (outcome.Exception is not null)
+            {
+                throw outcome.Exception;
+            }
+
+            return Task.FromResult(outcome.Result);
+        }
+
+        if (ExceptionFactory is not null)
+        {
+            var exception = ExceptionFactory(context);
+            if (exception is not null)
+            {
+                throw exception;
+            }
+        }
+
+        if (ExceptionToThrow is not null)
+        {
+            var exception = ExceptionToThrow;
+            ExceptionToThrow = null;
+            throw exception;
+        }
+
+        if (ResultFactory is not null)
+        {
+            return Task.FromResult(ResultFactory(context));
+        }
+
+        return Task.FromResult<ElectronicSignatureDialogResult?>(DefaultResult);
+    }
+
+    public Task PersistSignatureAsync(
+        ElectronicSignatureDialogResult result,
+        CancellationToken cancellationToken = default)
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (_persistQueue.Count > 0)
+        {
+            var exception = _persistQueue.Dequeue()(result);
+            if (exception is not null)
+            {
+                throw exception;
+            }
+        }
+
+        if (PersistExceptionFactory is not null)
+        {
+            var exception = PersistExceptionFactory(result);
+            if (exception is not null)
+            {
+                throw exception;
+            }
+        }
+
+        if (PersistExceptionToThrow is not null)
+        {
+            var exception = PersistExceptionToThrow;
+            PersistExceptionToThrow = null;
+            throw exception;
+        }
+
+        PersistedResults.Add(result);
+        return Task.CompletedTask;
+    }
+
+    private sealed record CaptureInstruction(Func<ElectronicSignatureContext, CaptureOutcome> Resolver)
+    {
+        public CaptureOutcome Execute(ElectronicSignatureContext context)
+            => Resolver(context);
+
+        public static CaptureInstruction FromResult(ElectronicSignatureDialogResult? result)
+            => new(_ => new CaptureOutcome(result, null));
+
+        public static CaptureInstruction FromResultFactory(Func<ElectronicSignatureContext, ElectronicSignatureDialogResult?> factory)
+            => new(ctx => new CaptureOutcome(factory(ctx), null));
+
+        public static CaptureInstruction FromException(Exception exception)
+            => new(_ => new CaptureOutcome(null, exception));
+
+        public static CaptureInstruction FromExceptionFactory(Func<ElectronicSignatureContext, Exception?> factory)
+            => new(ctx => new CaptureOutcome(null, factory(ctx)));
+    }
+
+    private readonly record struct CaptureOutcome(ElectronicSignatureDialogResult? Result, Exception? Exception);
+}
