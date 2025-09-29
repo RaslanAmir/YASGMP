@@ -10,6 +10,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -19,6 +20,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
     private readonly IUserCrudService _userService;
     private readonly IAuthContext _authContext;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ObservableCollection<RoleOption> _roleOptions = new();
     private readonly List<Role> _availableRoles = new();
     private User? _loadedUser;
@@ -30,6 +32,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         DatabaseService databaseService,
         IUserCrudService userService,
         IAuthContext authContext,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -37,6 +40,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         Editor = UserEditor.CreateEmpty();
         RoleOptions = new ReadOnlyObservableCollection<RoleOption>(_roleOptions);
     }
@@ -280,10 +284,42 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
         _userService.Validate(user);
 
+        if (Mode == FormMode.Update && _loadedUser is null)
+        {
+            StatusMessage = "Select a user before saving.";
+            return false;
+        }
+
         var context = CreateCrudContext();
         var password = string.IsNullOrWhiteSpace(editor.NewPassword)
             ? null
             : editor.NewPassword.Trim();
+
+        var recordId = user.Id;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("users", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        var signatureHash = signatureResult.Signature.SignatureHash ?? string.Empty;
+        user.DigitalSignature = signatureHash;
+        user.LastChangeSignature = signatureHash;
+        user.LastModified = DateTime.UtcNow;
+        user.LastModifiedById = _authContext.CurrentUser?.Id;
 
         if (user.Id == 0)
         {
@@ -316,6 +352,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
         ApplyRoleSelection(user.RoleIds);
         ResetDirty();
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }
 

@@ -5,6 +5,7 @@ using Xunit;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -25,11 +26,12 @@ public class SecurityModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SecurityModuleViewModel(database, userService, auth, dialog, shell, navigation);
+        var viewModel = new SecurityModuleViewModel(database, userService, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -50,6 +52,12 @@ public class SecurityModuleViewModelTests
         var created = Assert.Single(userService.CreatedUsers);
         Assert.Equal("new.user", created.Username);
         Assert.Equal("New User", created.FullName);
+        Assert.Equal("test-signature", created.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("users", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
         var assignment = Assert.Single(userService.RoleAssignments);
         Assert.Equal(created.Id, assignment.UserId);
         Assert.Contains(adminRole.RoleId, assignment.Roles);
@@ -79,11 +87,12 @@ public class SecurityModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SecurityModuleViewModel(database, userService, auth, dialog, shell, navigation);
+        var viewModel = new SecurityModuleViewModel(database, userService, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

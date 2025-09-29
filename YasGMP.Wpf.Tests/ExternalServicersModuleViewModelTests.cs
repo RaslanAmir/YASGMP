@@ -6,6 +6,7 @@ using Xunit;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -23,11 +24,12 @@ public class ExternalServicersModuleViewModelTests
             CurrentIpAddress = "127.0.0.1",
             CurrentSessionId = "session"
         };
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ExternalServicersModuleViewModel(service, auth, dialog, shell, navigation);
+        var viewModel = new ExternalServicersModuleViewModel(service, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -45,6 +47,12 @@ public class ExternalServicersModuleViewModelTests
         Assert.Equal("Contoso Labs", servicer.Name);
         Assert.Equal("calibration", servicer.Type?.ToLowerInvariant());
         Assert.Equal("labs@contoso.example", servicer.Email);
+        Assert.Equal("test-signature", servicer.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("external_contractors", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     [Fact]
@@ -61,11 +69,12 @@ public class ExternalServicersModuleViewModelTests
         });
 
         var auth = new TestAuthContext();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ExternalServicersModuleViewModel(service, auth, dialog, shell, navigation);
+        var viewModel = new ExternalServicersModuleViewModel(service, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

@@ -8,6 +8,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -25,13 +26,14 @@ public class WarehouseModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "192.168.1.25"
         };
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, dialog, shell, navigation);
+        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -50,6 +52,12 @@ public class WarehouseModuleViewModelTests
         Assert.Equal("Cleanroom Store", persisted.Name);
         Assert.Equal("building c", persisted.Location.ToLowerInvariant());
         Assert.Equal("qualified", persisted.Status);
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("warehouses", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
     }
 
     [Fact]

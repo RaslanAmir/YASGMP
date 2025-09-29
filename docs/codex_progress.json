@@ -119,6 +119,8 @@
     "2025-10-30: WPF modules now route uploads through AttachmentWorkflowService so dedup, retention, and encryption follow the MAUI conventions; DI registration updated and commands now surface dedup status messaging.",
     "2025-10-31: WPF shell adds an IElectronicSignatureDialogService that drives the signature dialog, captures the operator password/PIN with GMP reason text, and persists through DatabaseServiceDigitalSignaturesExtensions before dismissing.",
     "2025-11-01: Assets, Work Orders, Calibration, Suppliers, and Parts now require electronic signature capture before CRUD calls, propagate the resulting digital signature hash, and surface cancellation/failure states through StatusMessage.",
-    "2025-11-02: Test suite moved the electronic signature dialog fake under TestDoubles, added queueable results/exception hooks, and updated module tests to inject the dependency explicitly."
+    "2025-11-02: Test suite moved the electronic signature dialog fake under TestDoubles, added queueable results/exception hooks, and updated module tests to inject the dependency explicitly.",
+    "2025-11-03: Extended electronic signature gating and metadata propagation to Components, Warehouses, Incidents, Validations, CAPA, Change Control, External Servicers, Scheduled Jobs, and Security modules with refreshed unit coverage (audit surfacing still pending SDK access).",
+    "2025-11-04: Machines save workflow now stamps last-modified metadata post signature capture so downstream persistence receives the enriched payload while SDK blockers remain."
   ]
 }

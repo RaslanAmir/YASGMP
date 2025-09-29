@@ -10,6 +10,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -37,6 +38,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     private readonly IComponentCrudService _componentService;
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private Component? _loadedComponent;
     private ComponentEditor? _snapshot;
@@ -48,6 +50,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         IComponentCrudService componentService,
         IMachineCrudService machineService,
         IAuthContext authContext,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -56,6 +59,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = ComponentEditor.CreateEmpty();
         StatusOptions = Array.AsReadOnly(DefaultStatuses);
@@ -285,6 +289,37 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         component.Status = _componentService.NormalizeStatus(component.Status);
         component.MachineName = ResolveMachineName(component.MachineId);
 
+        if (Mode == FormMode.Update && _loadedComponent is null)
+        {
+            StatusMessage = "Select a component before saving.";
+            return false;
+        }
+
+        var recordId = Mode == FormMode.Update ? _loadedComponent!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("components", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        component.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        component.LastModified = DateTime.UtcNow;
+        component.LastModifiedById = _authContext.CurrentUser?.Id ?? component.LastModifiedById;
+        component.SourceIp = _authContext.CurrentIpAddress ?? component.SourceIp ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
             var id = await _componentService.CreateAsync(component, context).ConfigureAwait(false);
@@ -295,20 +330,17 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
             _loadedComponent = component;
             LoadEditor(component);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_loadedComponent is null)
-            {
-                return false;
-            }
-
-            component.Id = _loadedComponent.Id;
+            component.Id = _loadedComponent!.Id;
             await _componentService.UpdateAsync(component, context).ConfigureAwait(false);
             _loadedComponent = component;
             LoadEditor(component);
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 

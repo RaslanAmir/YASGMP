@@ -9,6 +9,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -23,11 +24,12 @@ public class ValidationsModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 4 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -42,6 +44,12 @@ public class ValidationsModuleViewModelTests
         var created = Assert.Single(crud.Saved);
         Assert.Equal("VAL-100", created.Code);
         Assert.Equal("IQ", created.Type);
+        Assert.Equal("test-signature", created.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("validations", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
         Assert.False(viewModel.IsDirty);
     }
 
@@ -63,11 +71,12 @@ public class ValidationsModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -104,6 +113,7 @@ public class ValidationsModuleViewModelTests
             CurrentDeviceInfo = "UnitTest"
         };
 
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -116,7 +126,7 @@ public class ValidationsModuleViewModelTests
             new PickedFile("protocol.pdf", "application/pdf", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

@@ -12,6 +12,7 @@ using YasGMP.Models.Enums;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -23,6 +24,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private ChangeControl? _loadedEntity;
     private ChangeControlEditor? _snapshot;
@@ -34,6 +36,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         IAuthContext authContext,
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -43,6 +46,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         StatusOptions = Enum.GetNames(typeof(ChangeControlStatus));
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
@@ -201,6 +205,12 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         var entity = Editor.ToEntity(_loadedEntity ?? new ChangeControl());
         entity.StatusRaw = _changeControlService.NormalizeStatus(Editor.Status);
 
+        if (Mode == FormMode.Update && _loadedEntity is null)
+        {
+            StatusMessage = "Select a change control before saving.";
+            return false;
+        }
+
         if (Mode == FormMode.Add && string.IsNullOrWhiteSpace(entity.Code))
         {
             entity.Code = $"CC-{DateTime.UtcNow:yyyyMMddHHmmss}";
@@ -211,6 +221,30 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             _authContext.CurrentIpAddress,
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId);
+
+        var recordId = Mode == FormMode.Update ? _loadedEntity!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("change_controls", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        entity.LastModified = DateTime.UtcNow;
+        entity.LastModifiedById = _authContext.CurrentUser?.Id;
+        entity.UpdatedAt = DateTime.UtcNow;
 
         if (Mode == FormMode.Add)
         {
@@ -230,6 +264,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
         _loadedEntity = entity;
         LoadEditor(entity);
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        UpdateAttachmentCommandState();
         return true;
     }
 

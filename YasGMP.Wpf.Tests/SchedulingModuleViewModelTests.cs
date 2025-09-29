@@ -7,6 +7,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -21,11 +22,12 @@ public class SchedulingModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, Username = "scheduler" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -63,11 +65,12 @@ public class SchedulingModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 7 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

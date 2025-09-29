@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, and 2025-11-01 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, and 2025-11-02 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, and 2025-11-02 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, and 2025-11-02 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, and 2025-11-04 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, and 2025-11-04 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, and 2025-11-04 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, and 2025-11-04 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -16,19 +16,19 @@
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
-- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture integrated across Assets, Work Orders, Calibration, Suppliers, and Parts; audit surfacing still pending until SDK access returns)*
+- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; audit surfacing still pending until SDK access returns)*
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
   - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
-  - Components — [x] done *(mode-aware editor wired to ComponentService; attachments/signature work tracked under Batch B2)*
+  - Components — [x] done *(mode-aware editor wired to ComponentService with IElectronicSignatureDialogService gating persistence; audit surfacing remains blocked on SDK access)*
   - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, stock health warnings, and e-signature capture baked into save flows; audit surfacing remains blocked on SDK access)*
   - Work Orders — [x] done *(CRUD adapter wired with attachments and e-signature capture ahead of adapter calls; audit surfacing queued once SDK access returns)*
   - Calibration — [x] done *(CRUD editor with attachment uploads and e-signature capture; audit surfacing remains queued for Batch B2)*
-  - Incident → CAPA → Change Control — [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments; signature/audit prompts queued for Batch B2)*
-  - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, and attachment workflow; signature/audit prompts queued for Batch B2)*
-  - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling and attachment workflow; signature/audit surfacing tracked under Batch B2)*
-  - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, and role assignment management; signature prompts queued for Batch B2)*
-  - Suppliers/External Servicers — [x] done *(Suppliers module now enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit remains mode-aware with CRUD and navigation)*
+  - Incident → CAPA → Change Control — [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments and signature capture; audit surfacing still queued for SDK access)*
+  - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, attachment workflow, and signature capture; audit surfacing queued once the SDK blocker clears)*
+  - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling, attachment workflow, and enforced signature capture; audit surfacing tracked under Batch B2)*
+  - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
+  - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
   - Audit/API Audit — [~] in-progress *(WPF audit trail now pulls filtered entries via AuditService with expanded inspector grid, filters, and explicit empty/error status flags.)*
   - Documents/Attachments — [ ] todo
   - Dashboard/Reports — [ ] todo
@@ -48,17 +48,19 @@
 - 2025-10-30: Introduced `AttachmentWorkflowService` in the WPF shell so module view-models share MAUI's dedup/encryption/retention workflow via `AttachmentService` + `DatabaseService.Attachments` helpers; registration and commands now rely on the adapter.
 - 2025-11-01: Assets, Work Orders, Calibration, Suppliers, and Parts now block saves on successful electronic signature capture, persist the resulting digital signature hash, and surface cancellation/failure states through StatusMessage; unit tests gained a reusable signature dialog stub.
 - 2025-11-02: Test project relocated the electronic signature dialog fake into `TestDoubles`, added queueable results/exception hooks, and updated module/unit factories to inject the dependency explicitly.
+- 2025-11-03: Extended IElectronicSignatureDialogService integration across Components, Warehouses, Incidents, Validations, CAPA, Change Control, External Servicers, Scheduling, and Security modules with metadata propagation and refreshed unit coverage.
+- 2025-11-04: Assets (machines) save flow now enriches the persisted machine with last-modified metadata after signature capture to keep downstream persistence aligned with Issue 3 requirements.
 - 2025-10-31: WPF shell now exposes an `IElectronicSignatureDialogService` that drives the signature dialog, captures password/PIN plus GMP reason text, and persists the note via the shared DatabaseService extensions before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
-- Components module now completes the CRUD rollout with mode-aware editor, validation, and machine lookups; attachment/signature integration remains queued for Batch B2.
-- Parts and Warehouse modules now expose CRUD-capable editors with attachment upload support, stock-health warnings, and warehouse inventory previews; e-signatures and audit surfacing remain tied to Batch B2 once SDK access is restored.
+- Components module now completes the CRUD rollout with mode-aware editor, validation, machine lookups, and electronic signature capture ahead of persistence.
+- Parts and Warehouse modules now expose CRUD-capable editors with attachment upload support, stock-health warnings, warehouse inventory previews, and enforced e-signature capture; audit surfacing remains tied to Batch B2 once SDK access is restored.
 - 2025-09-29: WPF mapping updated to reflect the Components document and adapter usage; attachment/e-signature work still planned for Batch B2 once SDK access restored.
   - Work Orders module now drives CRUD through `IWorkOrderCrudService` with attachment uploads; e-signature/audit pane pending B2.
 - Calibration module now reuses `CalibrationService` through a new adapter with mode-aware editor, supplier/component lookups, and attachment uploads via `IAttachmentService`; signature/audit follow-ups remain planned under Batch B2.
-- Validations module now mirrors the MAUI experience with a CRUD-capable editor backed by `ValidationService`, machine/component lookups, CFL support, and attachment uploads; signature/audit surfacing targeted for Batch B2 once the SDK blocker clears.
-- Scheduling module now ships with a CRUD-capable editor backed by the new `IScheduledJobCrudService`, attachment uploads, and execute/acknowledge commands; e-signature/audit prompts remain planned for Batch B2.
-- 2025-10-06: Users/Roles (Security) module now reuses the shared user/RBAC services through a new adapter, exposing a mode-aware editor with CFL, role assignments, and unit coverage; signature/audit surfacing remains queued for Batch B2.
-- 2025-10-07: Suppliers module now leverages ISupplierCrudService with a mode-aware editor, attachments via AttachmentService, CFL/golden-arrow integration, and unit coverage; External Servicers remain queued for follow-up.
+- Validations module now mirrors the MAUI experience with a CRUD-capable editor backed by `ValidationService`, machine/component lookups, CFL support, attachment uploads, and signature capture; audit surfacing targeted for Batch B2 once the SDK blocker clears.
+- Scheduling module now ships with a CRUD-capable editor backed by the new `IScheduledJobCrudService`, attachment uploads, execute/acknowledge commands, and signature gating; audit prompts remain planned for Batch B2.
+- 2025-10-06: Users/Roles (Security) module now reuses the shared user/RBAC services through a new adapter, exposing a mode-aware editor with CFL, role assignments, unit coverage, and e-signature enforcement; audit surfacing remains queued for Batch B2.
+- 2025-10-07: Suppliers module now leverages ISupplierCrudService with a mode-aware editor, attachments via AttachmentService, CFL/golden-arrow integration, and unit coverage; External Servicers now share the same signature enforcement path.
 - 2025-10-08: External Servicers module now mirrors MAUI CRUD with a dedicated adapter, WPF view, CFL picker, golden-arrow navigation, and unit/smoke coverage updates.
 - 2025-10-09: External Servicer service now delegates CRUD to `DatabaseServiceExternalServicersExtensions`; regression tests assert create/update/delete hit `external_contractors`. Restore/build remain blocked until the .NET CLI is available in the container.
 - 2025-10-10: Audit module now surfaces AuditService-backed filtering (user/entity/action/date) with richer inspector columns and WPF unit coverage; `dotnet --info` still reports `command not found` inside the container.

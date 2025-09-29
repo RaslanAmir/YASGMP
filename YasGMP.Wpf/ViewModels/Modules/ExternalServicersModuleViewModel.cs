@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -38,6 +39,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 
     private readonly IExternalServicerCrudService _servicerService;
     private readonly IAuthContext _authContext;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
 
     private ExternalServicer? _loadedServicer;
     private ExternalServicerEditor? _snapshot;
@@ -47,6 +49,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
     public ExternalServicersModuleViewModel(
         IExternalServicerCrudService servicerService,
         IAuthContext authContext,
+        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
@@ -54,6 +57,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
     {
         _servicerService = servicerService ?? throw new ArgumentNullException(nameof(servicerService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         Editor = ExternalServicerEditor.CreateEmpty();
         StatusOptions = DefaultStatusOptions;
@@ -242,6 +246,12 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 
     protected override async Task<bool> OnSaveAsync()
     {
+        if (Mode == FormMode.Update && _loadedServicer is null)
+        {
+            StatusMessage = "Select an external servicer before saving.";
+            return false;
+        }
+
         var context = ExternalServicerCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
@@ -251,25 +261,47 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         var servicer = Editor.ToServicer(_loadedServicer);
         servicer.Status = _servicerService.NormalizeStatus(servicer.Status);
 
+        var recordId = Mode == FormMode.Update ? _loadedServicer!.Id : 0;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("external_contractors", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        servicer.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        servicer.LastModified = DateTime.UtcNow;
+        servicer.LastModifiedById = _authContext.CurrentUser?.Id ?? servicer.LastModifiedById;
+        servicer.SourceIp = _authContext.CurrentIpAddress ?? servicer.SourceIp ?? string.Empty;
+
         if (Mode == FormMode.Add)
         {
             var id = await _servicerService.CreateAsync(servicer, context).ConfigureAwait(false);
             _loadedServicer = servicer;
             _lastSavedServicerId = id;
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_loadedServicer is null)
-            {
-                return false;
-            }
-
             servicer.Id = _loadedServicer.Id;
             await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
             _loadedServicer = servicer;
             _lastSavedServicerId = servicer.Id;
+            StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
             return true;
         }
 

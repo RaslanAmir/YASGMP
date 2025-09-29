@@ -9,6 +9,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -23,11 +24,12 @@ public class IncidentsModuleViewModelTests
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA Manager" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var signatureDialog = new FakeElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -45,6 +47,12 @@ public class IncidentsModuleViewModelTests
         var persisted = Assert.Single(incidents.Saved);
         Assert.Equal("Temperature deviation", persisted.Title);
         Assert.Equal("Deviation", persisted.Type);
+        Assert.Equal("test-signature", persisted.DigitalSignature);
+        Assert.Collection(signatureDialog.Requests, ctx =>
+        {
+            Assert.Equal("incidents", ctx.TableName);
+            Assert.Equal(0, ctx.RecordId);
+        });
         Assert.False(viewModel.IsDirty);
     }
 
