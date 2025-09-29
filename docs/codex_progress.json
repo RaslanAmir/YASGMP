@@ -112,6 +112,6 @@
     "2025-10-28: Audit filters now retain the user's To picker while reordering the query bounds if the upper date precedes the lower; tests cover both existing From overrides and default-from scenarios.",
     "2025-10-29: Audit module now orders inverted date ranges by min/max while preserving the user-selected To value; WPF tests assert the later bound reaches AuditService at end-of-day.",
     "2025-10-30: WPF modules now route uploads through AttachmentWorkflowService so dedup, retention, and encryption follow the MAUI conventions; DI registration updated and commands now surface dedup status messaging.",
-    "2025-10-31: WPF shell adds an electronic signature dialog that wraps DigitalSignatureViewModel, captures the operator password/PIN with GMP reason text, and persists the note via DatabaseService.DigitalSignatures.Insert before dismissing."
+    "2025-10-31: WPF shell adds an IElectronicSignatureDialogService that drives the signature dialog, captures the operator password/PIN with GMP reason text, and persists through DatabaseServiceDigitalSignaturesExtensions before dismissing."
   ]
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,26 +7,22 @@ using YasGMP.Common;
 using YasGMP.Helpers;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
-using YasGMP.ViewModels;
 
 namespace YasGMP.Wpf.ViewModels.Dialogs;
 
 /// <summary>
 /// View-model backing the WPF electronic signature dialog. Collects the operator credential
-/// and GMP reason metadata, forwards persistence through the shared DigitalSignatureViewModel,
-/// and exposes a result describing the captured signature.
+/// and GMP reason metadata, composes the resulting signature payload, and exposes a result
+/// describing the captured signature.
 /// </summary>
 public sealed partial class ElectronicSignatureDialogViewModel : ObservableObject
 {
-    private readonly DigitalSignatureViewModel _digitalSignatureViewModel;
     private readonly IAuthContext _authContext;
 
     public ElectronicSignatureDialogViewModel(
-        DigitalSignatureViewModel digitalSignatureViewModel,
         IAuthContext authContext,
         ElectronicSignatureContext context)
     {
-        _digitalSignatureViewModel = digitalSignatureViewModel ?? throw new ArgumentNullException(nameof(digitalSignatureViewModel));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         Context = context ?? throw new ArgumentNullException(nameof(context));
 
@@ -96,12 +91,12 @@ public sealed partial class ElectronicSignatureDialogViewModel : ObservableObjec
     private bool CanConfirm()
         => !IsBusy && !string.IsNullOrWhiteSpace(Password) && SelectedReason is not null;
 
-    private async Task ConfirmAsync()
+    private Task ConfirmAsync()
     {
         if (SelectedReason is null)
         {
             StatusMessage = "Select a signature reason.";
-            return;
+            return Task.CompletedTask;
         }
 
         string reasonCode = SelectedReason.Code;
@@ -111,7 +106,7 @@ public sealed partial class ElectronicSignatureDialogViewModel : ObservableObjec
             if (string.IsNullOrWhiteSpace(reasonCode))
             {
                 StatusMessage = "Custom reason code is required.";
-                return;
+                return Task.CompletedTask;
             }
         }
 
@@ -120,7 +115,7 @@ public sealed partial class ElectronicSignatureDialogViewModel : ObservableObjec
         if (user is null || user.Id == 0)
         {
             StatusMessage = "Active user session is required.";
-            return;
+            return Task.CompletedTask;
         }
 
         IsBusy = true;
@@ -150,8 +145,6 @@ public sealed partial class ElectronicSignatureDialogViewModel : ObservableObjec
                 Note = ComposeNote(reasonCode, reasonDetail)
             };
 
-            await _digitalSignatureViewModel.InsertSignatureAsync(signature, CancellationToken.None).ConfigureAwait(false);
-
             Result = new ElectronicSignatureDialogResult(
                 Password,
                 reasonCode,
@@ -169,6 +162,8 @@ public sealed partial class ElectronicSignatureDialogViewModel : ObservableObjec
         {
             IsBusy = false;
         }
+
+        return Task.CompletedTask;
     }
 
     private static string ComposeNote(string reasonCode, string? reasonDetail)

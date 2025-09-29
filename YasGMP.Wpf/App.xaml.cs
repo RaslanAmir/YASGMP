@@ -58,6 +58,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();
                         svc.AddSingleton<IAttachmentService, AttachmentService>();
                         svc.AddSingleton<IAttachmentWorkflowService, AttachmentWorkflowService>();
+                        svc.AddSingleton<IElectronicSignatureDialogService, ElectronicSignatureDialogService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<IRBACService, RBACService>();
                         svc.AddSingleton<WorkOrderAuditService>();
