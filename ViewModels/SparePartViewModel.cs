@@ -195,7 +195,15 @@ namespace YasGMP.ViewModels
                 await _dbService.AddSparePartAsync(SelectedSparePart, actor, _currentIpAddress, _currentDeviceInfo);
 
                 // Log: partId + action + actor + optional note/ip/device/session
-                await _dbService.LogSparePartAuditAsync(SelectedSparePart.Id, "CREATE", actor, sig, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
+                await _dbService.LogSparePartAuditAsync(
+                    SelectedSparePart.Id,
+                    "CREATE",
+                    actor,
+                    ip: _currentIpAddress,
+                    deviceInfo: _currentDeviceInfo,
+                    sessionId: _currentSessionId,
+                    signatureHash: sig,
+                    signatureId: SelectedSparePart.DigitalSignatureId);
 
                 StatusMessage = $"Spare part '{SelectedSparePart.Name}' added.";
                 await LoadSparePartsAsync();
@@ -218,7 +226,15 @@ namespace YasGMP.ViewModels
                 int actor = _authService.CurrentUser?.Id ?? 0;
 
                 await _dbService.UpdateSparePartAsync(SelectedSparePart, actor, _currentIpAddress, _currentDeviceInfo);
-                await _dbService.LogSparePartAuditAsync(SelectedSparePart.Id, "UPDATE", actor, sig, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
+                await _dbService.LogSparePartAuditAsync(
+                    SelectedSparePart.Id,
+                    "UPDATE",
+                    actor,
+                    ip: _currentIpAddress,
+                    deviceInfo: _currentDeviceInfo,
+                    sessionId: _currentSessionId,
+                    signatureHash: sig,
+                    signatureId: SelectedSparePart.DigitalSignatureId);
 
                 StatusMessage = $"Spare part '{SelectedSparePart.Name}' updated.";
                 await LoadSparePartsAsync();
@@ -240,7 +256,13 @@ namespace YasGMP.ViewModels
                 int actor = _authService.CurrentUser?.Id ?? 0;
 
                 await _dbService.DeleteSparePartAsync(SelectedSparePart.Id, actor, _currentIpAddress);
-                await _dbService.LogSparePartAuditAsync(SelectedSparePart.Id, "DELETE", actor, null, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
+                await _dbService.LogSparePartAuditAsync(
+                    SelectedSparePart.Id,
+                    "DELETE",
+                    actor,
+                    ip: _currentIpAddress,
+                    deviceInfo: _currentDeviceInfo,
+                    sessionId: _currentSessionId);
 
                 StatusMessage = $"Spare part '{SelectedSparePart.Name}' deleted.";
                 await LoadSparePartsAsync();
@@ -281,7 +303,14 @@ namespace YasGMP.ViewModels
                 int actor = _authService.CurrentUser?.Id ?? 0;
                 var fmt = await YasGMP.Helpers.ExportFormatPrompt.PromptAsync();
                 await _dbService.ExportSparePartsAsync(FilteredSpareParts.ToList(), fmt, actor, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
-                await _dbService.LogSparePartAuditAsync(0, "EXPORT", actor, null, _currentIpAddress, _currentDeviceInfo, _currentSessionId);
+                await _dbService.LogSparePartAuditAsync(
+                    0,
+                    "EXPORT",
+                    actor,
+                    details: $"fmt={fmt}; items={SpareParts.Count}; lowOnly={_lowOnly}",
+                    ip: _currentIpAddress,
+                    deviceInfo: _currentDeviceInfo,
+                    sessionId: _currentSessionId);
                 StatusMessage = "Spare parts exported successfully.";
             }
             catch (Exception ex)

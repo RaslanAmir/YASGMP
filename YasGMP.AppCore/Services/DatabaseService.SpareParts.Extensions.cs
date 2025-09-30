@@ -146,7 +146,16 @@ ORDER BY p.name, p.id";
             }
             var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
             part.Id = Convert.ToInt32(idObj);
-            await db.LogSparePartAuditAsync(part.Id, "CREATE", actorUserId, part.DigitalSignature, effectiveIp, effectiveDevice, effectiveSession, token).ConfigureAwait(false);
+            await db.LogSparePartAuditAsync(
+                part.Id,
+                "CREATE",
+                actorUserId,
+                ip: effectiveIp,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureHash: part.DigitalSignature,
+                signatureId: part.DigitalSignatureId,
+                token: token).ConfigureAwait(false);
 
             if (signatureMetadata != null)
             {
@@ -207,7 +216,16 @@ ORDER BY p.name, p.id";
                 legacyPars.RemoveAll(p => p.ParameterName.Equals("@sig_id", StringComparison.OrdinalIgnoreCase));
                 await db.ExecuteNonQueryAsync(updateLegacy, legacyPars, token).ConfigureAwait(false);
             }
-            await db.LogSparePartAuditAsync(part.Id, "UPDATE", actorUserId, part.DigitalSignature, effectiveIp, effectiveDevice, effectiveSession, token).ConfigureAwait(false);
+            await db.LogSparePartAuditAsync(
+                part.Id,
+                "UPDATE",
+                actorUserId,
+                ip: effectiveIp,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureHash: part.DigitalSignature,
+                signatureId: part.DigitalSignatureId,
+                token: token).ConfigureAwait(false);
 
             if (signatureMetadata != null)
             {
@@ -246,11 +264,24 @@ ORDER BY p.name, p.id";
         public static async Task DeleteSparePartAsync(this DatabaseService db, int id, int actorUserId, string ip, CancellationToken token = default)
         {
             await db.ExecuteNonQueryAsync("DELETE FROM parts WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
-            await db.LogSparePartAuditAsync(id, "DELETE", actorUserId, null, ip, null, null, token).ConfigureAwait(false);
+            await db.LogSparePartAuditAsync(
+                id,
+                "DELETE",
+                actorUserId,
+                ip: ip,
+                signatureHash: null,
+                token: token).ConfigureAwait(false);
         }
 
         public static Task RollbackSparePartAsync(this DatabaseService db, int id, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
-            => db.LogSparePartAuditAsync(id, "ROLLBACK", actorUserId, null, ip, deviceInfo, sessionId, token);
+            => db.LogSparePartAuditAsync(
+                id,
+                "ROLLBACK",
+                actorUserId,
+                ip: ip,
+                deviceInfo: deviceInfo,
+                sessionId: sessionId,
+                token: token);
 
         public static Task ExportSparePartsAsync(this DatabaseService db, List<Part> items, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
@@ -293,11 +324,43 @@ ORDER BY p.name, p.id";
                         ("Price", p => p.Price)
                     });
             }
-            return db.LogSparePartAuditAsync(0, "EXPORT", actorUserId, $"fmt={format}; file={path}", ip, deviceInfo, sessionId, token);
+            return db.LogSparePartAuditAsync(
+                0,
+                "EXPORT",
+                actorUserId,
+                details: $"fmt={format}; file={path}",
+                ip: ip,
+                deviceInfo: deviceInfo,
+                sessionId: sessionId,
+                token: token);
         }
 
-        public static Task LogSparePartAuditAsync(this DatabaseService db, int partId, string action, int actorUserId, string? signature, string? ip, string? deviceInfo, string? sessionId, CancellationToken token = default)
-            => db.LogSystemEventAsync(actorUserId, $"PART_{action}", "parts", "PartModule", partId == 0 ? null : partId, signature, ip, "audit", deviceInfo, sessionId, token: token);
+        public static Task LogSparePartAuditAsync(
+            this DatabaseService db,
+            int partId,
+            string action,
+            int actorUserId,
+            string? details = null,
+            string? ip = null,
+            string? deviceInfo = null,
+            string? sessionId = null,
+            string? signatureHash = null,
+            int? signatureId = null,
+            CancellationToken token = default)
+            => db.LogSystemEventAsync(
+                actorUserId,
+                $"PART_{action}",
+                "parts",
+                "PartModule",
+                partId == 0 ? null : partId,
+                details,
+                ip,
+                "audit",
+                deviceInfo,
+                sessionId,
+                signatureId: signatureId,
+                signatureHash: signatureHash,
+                token: token);
 
         public static Task AddPartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
             => db.AddSparePartAsync(part, actorUserId, ip, deviceInfo, token);

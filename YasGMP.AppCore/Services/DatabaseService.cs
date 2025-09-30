@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -267,6 +268,7 @@ namespace YasGMP.Services
         /// <param name="eventCode">Legacy alias for eventType used if eventType is null/empty.</param>
         /// <param name="table">Legacy alias for tableName used if tableName is null.</param>
         /// <param name="token">Cancellation token for the async operation.</param>
+
         public async Task LogSystemEventAsync(
             int? userId,
             string? eventType,
@@ -283,21 +285,45 @@ namespace YasGMP.Services
             string? newValue = null,
             string? eventCode = null,
             string? table = null,
+            int? signatureId = null,
+            string? signatureHash = null,
             CancellationToken token = default)
         {
             // Normalize + legacy fallbacks
             var type  = string.IsNullOrWhiteSpace(eventType) ? (eventCode ?? "EVENT") : eventType;
             var tableResolved = string.IsNullOrWhiteSpace(tableName) ? (table ?? "system") : tableName;
             var sev   = string.IsNullOrWhiteSpace(severity) ? "info" : severity;
+            var normalizedSignatureHash = string.IsNullOrWhiteSpace(signatureHash) ? null : signatureHash;
+
+            string? descriptionWithSignature = description;
+            if (signatureId.HasValue || !string.IsNullOrWhiteSpace(normalizedSignatureHash))
+            {
+                var idPart = signatureId.HasValue
+                    ? signatureId.Value.ToString(CultureInfo.InvariantCulture)
+                    : "-";
+                var hashPart = normalizedSignatureHash ?? "-";
+                var suffix = $"sigId={idPart}; sigHash={hashPart}";
+                descriptionWithSignature = string.IsNullOrWhiteSpace(descriptionWithSignature)
+                    ? suffix
+                    : $"{descriptionWithSignature} [{suffix}]";
+            }
 
             // Preferred full insert including device/session/field deltas
             const string sqlFull = @"
 INSERT INTO system_event_log
     (user_id, event_type, table_name, related_module, record_id, field_name,
-     old_value, new_value, description, source_ip, device_info, session_id, severity)
+     old_value, new_value, description, source_ip, device_info, session_id, severity, digital_signature_id, digital_signature)
 VALUES
     (@uid, @etype, @table, @module, @rid, @field,
-     @old, @new, @desc, @ip, @dev, @sid, @sev);";
+     @old, @new, @desc, @ip, @dev, @sid, @sev, @sigId, @sigHash);";
+
+            const string sqlFullHashOnly = @"
+INSERT INTO system_event_log
+    (user_id, event_type, table_name, related_module, record_id, field_name,
+     old_value, new_value, description, source_ip, device_info, session_id, severity, digital_signature)
+VALUES
+    (@uid, @etype, @table, @module, @rid, @field,
+     @old, @new, @desc, @ip, @dev, @sid, @sev, @sigHash);";
 
             var pars = new List<MySqlParameter>
             {
@@ -309,7 +335,7 @@ VALUES
                 new("@field", (object?)fieldName ?? DBNull.Value),
                 new("@old",   (object?)oldValue ?? DBNull.Value),
                 new("@new",   (object?)newValue ?? DBNull.Value),
-                new("@desc",  (object?)description ?? DBNull.Value),
+                new("@desc",  (object?)descriptionWithSignature ?? DBNull.Value),
                 new("@ip",    (object?)ip ?? DBNull.Value),
                 new("@dev",   (object?)deviceInfo ?? DBNull.Value),
                 new("@sid",   (object?)sessionId ?? DBNull.Value),
@@ -318,7 +344,31 @@ VALUES
 
             try
             {
-                _ = await ExecuteNonQueryAsync(sqlFull, pars, token).ConfigureAwait(false);
+                var fullPars = new List<MySqlParameter>(pars)
+                {
+                    new("@sigId", (object?)signatureId ?? DBNull.Value),
+                    new("@sigHash", (object?)normalizedSignatureHash ?? DBNull.Value),
+                };
+                _ = await ExecuteNonQueryAsync(sqlFull, fullPars, token).ConfigureAwait(false);
+                return;
+            }
+            catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
+            {
+                // Unknown column or missing table -> try minimal legacy shape
+            }
+            catch
+            {
+                // Last resort: swallow to avoid cascading failures in UI flows
+                return;
+            }
+
+            try
+            {
+                var hashOnlyPars = new List<MySqlParameter>(pars)
+                {
+                    new("@sigHash", (object?)normalizedSignatureHash ?? DBNull.Value),
+                };
+                _ = await ExecuteNonQueryAsync(sqlFullHashOnly, hashOnlyPars, token).ConfigureAwait(false);
                 return;
             }
             catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
@@ -344,7 +394,7 @@ VALUES (@uid, @etype, @table, @module, @rid, @desc, @ip, @sev);";
                     new("@table", tableResolved ?? "system"),
                     new("@module", (object?)module ?? DBNull.Value),
                     new("@rid",   (object?)recordId ?? DBNull.Value),
-                    new("@desc",  (object?)description ?? DBNull.Value),
+                    new("@desc",  (object?)descriptionWithSignature ?? DBNull.Value),
                     new("@ip",    (object?)ip ?? DBNull.Value),
                     new("@sev",   sev ?? "info"),
                 };
@@ -355,7 +405,6 @@ VALUES (@uid, @etype, @table, @module, @rid, @desc, @ip, @sev);";
                 // Give up silently; audit tables may not exist in dev databases.
             }
         }
-
         /// <summary>
         /// Writes a permission-change style audit entry (used by RBAC shims).
         /// Schema-tolerant: emits to system_event_log with details payload.
