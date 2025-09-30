@@ -157,7 +157,7 @@ namespace YasGMP.Services
         /// <summary>
         /// Logs an audit entry for any entity (table). Also mirrors to system log for dashboards.
         /// </summary>
-        public async Task LogEntityAuditAsync(string? tableName, int entityId, string? action, string? details)
+        public virtual async Task LogEntityAuditAsync(string? tableName, int entityId, string? action, string? details)
         {
             var t = string.IsNullOrWhiteSpace(tableName) ? "entity" : tableName!;
             var a = string.IsNullOrWhiteSpace(action) ? "EVENT" : action!;
