@@ -19,11 +19,15 @@ public class WorkOrdersModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsWorkOrderThroughAdapter()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
+        var audit = new RecordingAuditService(database);
         var workOrders = new FakeWorkOrderCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
+        auth.CurrentSessionId = "SESSION-123";
+        auth.CurrentDeviceInfo = "UnitTestRig";
+        auth.CurrentIpAddress = "10.0.0.42";
         var filePicker = new TestFilePicker();
-        var attachments = new TestAttachmentService();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
         var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
@@ -76,6 +80,13 @@ public class WorkOrdersModuleViewModelTests
         Assert.Equal("password", persistedMetadata.Method);
         Assert.Equal("valid", persistedMetadata.Status);
         Assert.Equal("Automated test", persistedMetadata.Note);
+        var auditEntry = Assert.Single(audit.EntityAudits);
+        Assert.Equal("work_orders", auditEntry.Table);
+        Assert.Equal(workOrders.Saved[0].Id, auditEntry.EntityId);
+        Assert.Equal("CREATE", auditEntry.Action);
+        Assert.Equal(
+            "user=9, reason=QA Reason, status=OPEN, signature=test-signature, method=password, outcome=valid, ip=10.0.0.42, device=UnitTestRig, session=SESSION-123",
+            auditEntry.Details);
         Assert.False(viewModel.IsDirty);
     }
 
@@ -83,11 +94,12 @@ public class WorkOrdersModuleViewModelTests
     public async Task OnSaveAsync_AddMode_SignatureCancelled_LeavesWorkOrderUnsaved()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
+        var audit = new RecordingAuditService(database);
         var workOrders = new FakeWorkOrderCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
         var filePicker = new TestFilePicker();
-        var attachments = new TestAttachmentService();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
         var signatureDialog = new TestElectronicSignatureDialogService();
         signatureDialog.QueueCancellation();
         var dialog = new TestCflDialogService();
@@ -118,17 +130,19 @@ public class WorkOrdersModuleViewModelTests
         Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
         Assert.Empty(workOrders.Saved);
         Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Empty(audit.EntityAudits);
     }
 
     [Fact]
     public async Task OnSaveAsync_AddMode_SignatureCaptureThrows_SetsStatusAndSkipsPersist()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
+        var audit = new RecordingAuditService(database);
         var workOrders = new FakeWorkOrderCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
         var filePicker = new TestFilePicker();
-        var attachments = new TestAttachmentService();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
         var signatureDialog = new TestElectronicSignatureDialogService();
         signatureDialog.QueueCaptureException(new InvalidOperationException("Dialog offline"));
         var dialog = new TestCflDialogService();
@@ -159,6 +173,7 @@ public class WorkOrdersModuleViewModelTests
         Assert.Equal("Electronic signature failed: Dialog offline", viewModel.StatusMessage);
         Assert.Empty(workOrders.Saved);
         Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Empty(audit.EntityAudits);
     }
 
     [Fact]
@@ -183,7 +198,7 @@ public class WorkOrdersModuleViewModelTests
             Notes = "Initial"
         });
 
-        var audit = new AuditService(database);
+        var audit = new RecordingAuditService(database);
         var workOrders = new FakeWorkOrderCrudService();
         workOrders.Saved.AddRange(database.WorkOrders);
 
@@ -198,7 +213,8 @@ public class WorkOrdersModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
-        var attachments = new TestAttachmentService();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
 
         var bytes = Encoding.UTF8.GetBytes("work-order evidence");
         filePicker.Files = new[]
@@ -212,10 +228,74 @@ public class WorkOrdersModuleViewModelTests
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
         await viewModel.AttachDocumentCommand.ExecuteAsync(null);
 
-        var upload = Assert.Single(attachments.Uploads);
+        var upload = Assert.Single(attachmentService.Uploads);
         Assert.Equal("work_orders", upload.EntityType);
         Assert.Equal(42, upload.EntityId);
         Assert.Equal("evidence.txt", upload.FileName);
+    }
+
+    [Fact]
+    public async Task AttachDocumentCommand_RecordsAuditEventForUpload()
+    {
+        var database = new DatabaseService();
+        database.WorkOrders.Add(new WorkOrder
+        {
+            Id = 42,
+            Title = "Inspect autoclave",
+            Description = "Routine inspection",
+            TaskDescription = "Visual check",
+            Type = "MAINTENANCE",
+            Priority = "Medium",
+            Status = "OPEN",
+            DateOpen = System.DateTime.UtcNow,
+            RequestedById = 6,
+            CreatedById = 6,
+            AssignedToId = 7,
+            MachineId = 5,
+            Result = "Pending",
+            Notes = "Initial"
+        });
+
+        var audit = new RecordingAuditService(database);
+        var workOrders = new FakeWorkOrderCrudService();
+        workOrders.Saved.AddRange(database.WorkOrders);
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 6, FullName = "Tech" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.25",
+            CurrentSessionId = "SESSION-UPLOAD"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var bytes = Encoding.UTF8.GetBytes("work-order evidence");
+        filePicker.Files = new[]
+        {
+            new PickedFile("evidence.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
+        };
+
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
+
+        var viewModel = new WorkOrdersModuleViewModel(database, audit, workOrders, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
+        await viewModel.AttachDocumentCommand.ExecuteAsync(null);
+
+        var upload = Assert.Single(attachmentService.Uploads);
+        var auditEntry = Assert.Single(audit.AttachmentAudits);
+        Assert.Equal(upload.EntityType, auditEntry.EntityType);
+        Assert.Equal(upload.EntityId, auditEntry.EntityId);
+        Assert.Equal(auth.CurrentUser?.Id, auditEntry.ActorUserId);
+        Assert.Equal(1, auditEntry.AttachmentId);
+        Assert.Contains("actor=6", auditEntry.Description);
+        Assert.Contains("entity=work_orders:42", auditEntry.Description);
+        Assert.Contains("dedup=new", auditEntry.Description);
     }
 
     private static Task<bool> InvokeSaveAsync(WorkOrdersModuleViewModel viewModel)
