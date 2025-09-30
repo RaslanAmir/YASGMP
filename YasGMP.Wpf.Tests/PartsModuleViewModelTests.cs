@@ -20,6 +20,9 @@ public class PartsModuleViewModelTests
     {
         var database = new DatabaseService();
         database.Suppliers.Add(new Supplier { Id = 3, Name = "Contoso" });
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var partAdapter = new FakePartCrudService();
         var auth = new TestAuthContext
         {
@@ -34,7 +37,7 @@ public class PartsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new PartsModuleViewModel(database, audit, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -115,7 +118,7 @@ public class PartsModuleViewModelTests
             new PickedFile("part.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new PartsModuleViewModel(database, audit, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.SelectedRecord = viewModel.Records.First();
 
@@ -155,7 +158,7 @@ public class PartsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new PartsModuleViewModel(database, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new PartsModuleViewModel(database, audit, partAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

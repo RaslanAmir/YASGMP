@@ -53,6 +53,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
     public CapaModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICapaCrudService capaService,
         IComponentCrudService componentService,
         IAuthContext authContext,
@@ -62,7 +63,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "CAPA", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "CAPA", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _capaService = capaService ?? throw new ArgumentNullException(nameof(capaService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));

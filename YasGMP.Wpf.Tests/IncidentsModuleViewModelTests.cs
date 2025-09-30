@@ -20,6 +20,10 @@ public class IncidentsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsIncidentThroughAdapter()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var incidents = new FakeIncidentCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA Manager" } };
         var filePicker = new TestFilePicker();
@@ -29,7 +33,7 @@ public class IncidentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -119,7 +123,7 @@ public class IncidentsModuleViewModelTests
             new PickedFile("evidence.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachEvidenceCommand.CanExecute(null));
@@ -161,7 +165,7 @@ public class IncidentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.Mode = FormMode.Add;
 
@@ -188,7 +192,7 @@ public class IncidentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new IncidentsModuleViewModel(database, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.Mode = FormMode.Add;
 

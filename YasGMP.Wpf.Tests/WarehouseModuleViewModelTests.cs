@@ -19,6 +19,8 @@ public class WarehouseModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsWarehouse()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var warehouseAdapter = new FakeWarehouseCrudService();
         var auth = new TestAuthContext
         {
@@ -33,7 +35,7 @@ public class WarehouseModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new WarehouseModuleViewModel(database, audit, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -81,6 +83,7 @@ public class WarehouseModuleViewModelTests
     public async Task AttachCommand_UploadsWarehouseDocument()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var warehouseAdapter = new FakeWarehouseCrudService();
         warehouseAdapter.Saved.Add(new Warehouse
         {
@@ -109,7 +112,7 @@ public class WarehouseModuleViewModelTests
             new PickedFile("warehouse.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new WarehouseModuleViewModel(database, audit, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         viewModel.SelectedRecord = viewModel.Records.First();
 
@@ -164,7 +167,7 @@ public class WarehouseModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new WarehouseModuleViewModel(database, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new WarehouseModuleViewModel(database, audit, warehouseAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

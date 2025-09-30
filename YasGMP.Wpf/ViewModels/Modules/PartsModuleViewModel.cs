@@ -30,6 +30,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
     public PartsModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IPartCrudService partService,
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
@@ -38,7 +39,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Parts & Stock", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Parts & Stock", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));

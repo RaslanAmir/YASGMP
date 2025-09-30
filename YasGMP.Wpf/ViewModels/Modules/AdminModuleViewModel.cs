@@ -13,10 +13,11 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
 
     public AdminModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Administration", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Administration", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

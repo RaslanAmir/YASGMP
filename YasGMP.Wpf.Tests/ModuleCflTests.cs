@@ -50,7 +50,8 @@ public class ModuleCflTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(db, machineCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var audit = new AuditService(db);
+        var viewModel = new AssetsModuleViewModel(db, audit, machineCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 
@@ -106,7 +107,8 @@ public class ModuleCflTests
         var workOrderCrud = new FakeWorkOrderCrudService();
         workOrderCrud.Saved.AddRange(db.WorkOrders);
 
-        var viewModel = new WorkOrdersModuleViewModel(db, workOrderCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var audit = new AuditService(db);
+        var viewModel = new WorkOrdersModuleViewModel(db, audit, workOrderCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 
@@ -151,9 +153,11 @@ public class ModuleCflTests
         var auth = new TestAuthContext();
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
+        var audit = new AuditService(db);
 
         var viewModel = new CalibrationModuleViewModel(
             db,
+            audit,
             calibrationService,
             componentService,
             auth,

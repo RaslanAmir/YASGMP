@@ -46,9 +46,11 @@ public class CalibrationModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
+        var audit = new AuditService(database);
 
         var viewModel = new CalibrationModuleViewModel(
             database,
+            audit,
             calibrationAdapter,
             componentAdapter,
             auth,
@@ -137,9 +139,11 @@ public class CalibrationModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
+        var audit = new AuditService(database);
 
         var viewModel = new CalibrationModuleViewModel(
             database,
+            audit,
             calibrationAdapter,
             componentAdapter,
             auth,
@@ -208,9 +212,11 @@ public class CalibrationModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
+        var audit = new AuditService(database);
 
         var viewModel = new CalibrationModuleViewModel(
             database,
+            audit,
             calibrationAdapter,
             componentAdapter,
             auth,
@@ -287,9 +293,11 @@ public class CalibrationModuleViewModelTests
                     () => Task.FromResult<Stream>(new MemoryStream(new byte[] { 1, 2, 3 })))
             }
         };
+        var audit = new AuditService(database);
 
         var viewModel = new CalibrationModuleViewModel(
             database,
+            audit,
             calibrationAdapter,
             componentAdapter,
             auth,

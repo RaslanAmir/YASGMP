@@ -6726,8 +6726,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
             DatabaseService database,
             ICflDialogService _,
             IShellInteractionService __,
-            IModuleNavigationService ___)
-            : base(key, title, _, __, ___)
+            IModuleNavigationService ___,
+            AuditService? audit = null)
+            : base(key, title, _, __, ___, audit)
         {
             Database = database;
         }
