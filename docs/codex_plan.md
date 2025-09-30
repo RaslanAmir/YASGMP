@@ -65,6 +65,7 @@
 - 2025-11-09: Updated WPF module unit tests to inject `TestElectronicSignatureDialogService` in the new constructor slot after attachment workflow services; dotnet CLI still unavailable so test runs remain blocked.
 - 2025-11-10: Added WPF module regression tests covering electronic signature cancellation/exception flows to ensure edit mode persists and adapters are not invoked when capture fails; dotnet CLI remains unavailable so restore/build/test steps are still blocked.
 - 2025-11-21: Calibration module unit tests now queue cancellation/exception paths on the signature dialog to assert saves abort before persistence and no signature metadata is stored when capture fails.
+- 2025-11-22: Suppliers module unit tests now cover electronic signature cancellation and capture exception flows to ensure form mode/status remain stable and no supplier/signature data persists when capture fails; dotnet CLI access is still pending for restore/build validation.
 - 2025-10-31: WPF shell now exposes an `IElectronicSignatureDialogService` that drives the signature dialog, captures password/PIN plus GMP reason text, and persists the note via the shared DatabaseService extensions before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
 - Components module now completes the CRUD rollout with mode-aware editor, validation, machine lookups, and electronic signature capture ahead of persistence.
