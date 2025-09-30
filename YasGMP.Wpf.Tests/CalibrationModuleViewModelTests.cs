@@ -105,6 +105,148 @@ public class CalibrationModuleViewModelTests
     }
 
     [Fact]
+    public async Task OnSaveAsync_CancelledSignature_SkipsPersistence()
+    {
+        var database = new DatabaseService();
+        database.Suppliers.Add(new Supplier { Id = 8, Name = "Precision Labs" });
+
+        var calibrationAdapter = new FakeCalibrationCrudService();
+        var componentAdapter = new FakeComponentCrudService();
+
+        await componentAdapter.CreateAsync(new Component
+        {
+            Id = 21,
+            MachineId = 4,
+            MachineName = "Sterilizer",
+            Code = "CMP-21",
+            Name = "Gauge",
+            SopDoc = "SOP-CAL-021",
+            Status = "active"
+        }, ComponentCrudContext.Create(2, "127.0.0.1", "Unit", "session"));
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 11, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.10.0.5"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCancellation();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+
+        var viewModel = new CalibrationModuleViewModel(
+            database,
+            calibrationAdapter,
+            componentAdapter,
+            auth,
+            filePicker,
+            attachmentService,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation);
+
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.ComponentId = componentAdapter.Saved[0].Id;
+        viewModel.Editor.SupplierId = database.Suppliers[0].Id;
+        viewModel.Editor.CalibrationDate = new DateTime(2025, 5, 5);
+        viewModel.Editor.NextDue = new DateTime(2025, 11, 5);
+        viewModel.Editor.Result = "PASS";
+        viewModel.Editor.CertDoc = "CERT-2021.pdf";
+        viewModel.Editor.Comment = "Cancelled flow";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Empty(calibrationAdapter.Saved);
+        Assert.Empty(calibrationAdapter.SavedContexts);
+        var request = Assert.Single(signatureDialog.Requests);
+        Assert.Equal("calibrations", request.TableName);
+        Assert.Equal(0, request.RecordId);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Empty(signatureDialog.PersistedSignatureRecords);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_CaptureException_SurfacesError()
+    {
+        var database = new DatabaseService();
+        database.Suppliers.Add(new Supplier { Id = 12, Name = "Metrology Experts" });
+
+        var calibrationAdapter = new FakeCalibrationCrudService();
+        var componentAdapter = new FakeComponentCrudService();
+
+        await componentAdapter.CreateAsync(new Component
+        {
+            Id = 31,
+            MachineId = 6,
+            MachineName = "Lyophilizer",
+            Code = "CMP-31",
+            Name = "Thermocouple",
+            SopDoc = "SOP-CAL-031",
+            Status = "active"
+        }, ComponentCrudContext.Create(3, "127.0.0.1", "Unit", "session"));
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 13, FullName = "QA Supervisor" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.10.0.6"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCaptureException(new InvalidOperationException("Capture failure"));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+
+        var viewModel = new CalibrationModuleViewModel(
+            database,
+            calibrationAdapter,
+            componentAdapter,
+            auth,
+            filePicker,
+            attachmentService,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation);
+
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.ComponentId = componentAdapter.Saved[0].Id;
+        viewModel.Editor.SupplierId = database.Suppliers[0].Id;
+        viewModel.Editor.CalibrationDate = new DateTime(2025, 6, 6);
+        viewModel.Editor.NextDue = new DateTime(2025, 12, 6);
+        viewModel.Editor.Result = "PASS";
+        viewModel.Editor.CertDoc = "CERT-2031.pdf";
+        viewModel.Editor.Comment = "Exception flow";
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature failed: Capture failure", viewModel.StatusMessage);
+        Assert.Empty(calibrationAdapter.Saved);
+        Assert.Empty(calibrationAdapter.SavedContexts);
+        var request = Assert.Single(signatureDialog.Requests);
+        Assert.Equal("calibrations", request.TableName);
+        Assert.Equal(0, request.RecordId);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Empty(signatureDialog.PersistedSignatureRecords);
+    }
+
+    [Fact]
     public async Task AttachDocumentCommand_UploadsFiles_WhenCalibrationPersisted()
     {
         var database = new DatabaseService();
