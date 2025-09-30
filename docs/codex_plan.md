@@ -16,7 +16,7 @@
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
-- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services now propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; audit surfacing still pending until SDK access returns)*
+- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; the WPF dialog service now emits audit events on capture/persist while broader audit surfacing remains gated on SDK access)*
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
   - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
@@ -67,6 +67,7 @@
 - 2025-11-21: Calibration module unit tests now queue cancellation/exception paths on the signature dialog to assert saves abort before persistence and no signature metadata is stored when capture fails.
 - 2025-11-22: Suppliers module unit tests now cover electronic signature cancellation and capture exception flows to ensure form mode/status remain stable and no supplier/signature data persists when capture fails; dotnet CLI access is still pending for restore/build validation.
 - 2025-11-23: Attachment workflow now injects AuditService to stamp upload metadata (actor/entity/dedup/reason/timestamp) and unit coverage verifies the audit hook fires for both new and deduplicated uploads; dotnet CLI remains unavailable so restore/build/test attempts still fail with `command not found`.
+- 2025-11-24: ElectronicSignatureDialogService now resolves AuditService, logging capture and persistence events with reason metadata; WPF dialog service tests assert both audit emissions alongside digital signature persistence while the dotnet CLI gap persists.
 - 2025-10-31: WPF shell now exposes an `IElectronicSignatureDialogService` that drives the signature dialog, captures password/PIN plus GMP reason text, and persists the note via the shared DatabaseService extensions before closing.
 - Assets module now exposes an attachment command that uploads via `IAttachmentService`; coverage added in unit tests.
 - Components module now completes the CRUD rollout with mode-aware editor, validation, machine lookups, and electronic signature capture ahead of persistence.
