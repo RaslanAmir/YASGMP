@@ -38,8 +38,12 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
             throw new ArgumentNullException(nameof(supplier));
         }
 
+        var signature = ApplyContext(supplier, context);
+
         await _supplierService.CreateAsync(supplier, context.UserId).ConfigureAwait(false);
-        await StampAsync(supplier, context, "CREATE").ConfigureAwait(false);
+
+        supplier.DigitalSignature = signature;
+        await StampAsync(supplier, context, "CREATE", signature).ConfigureAwait(false);
         return supplier.Id;
     }
 
@@ -50,8 +54,12 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
             throw new ArgumentNullException(nameof(supplier));
         }
 
+        var signature = ApplyContext(supplier, context);
+
         await _supplierService.UpdateAsync(supplier, context.UserId).ConfigureAwait(false);
-        await StampAsync(supplier, context, "UPDATE").ConfigureAwait(false);
+
+        supplier.DigitalSignature = signature;
+        await StampAsync(supplier, context, "UPDATE", signature).ConfigureAwait(false);
     }
 
     public void Validate(Supplier supplier)
@@ -85,8 +93,9 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 
     public string NormalizeStatus(string? status) => SupplierCrudExtensions.NormalizeStatusDefault(status);
 
-    private async Task StampAsync(Supplier supplier, SupplierCrudContext context, string action)
+    private async Task StampAsync(Supplier supplier, SupplierCrudContext context, string action, string signature)
     {
+        var modifiedAt = DateTime.UtcNow;
         const string ensureSql = @"CREATE TABLE IF NOT EXISTS suppliers (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
@@ -102,6 +111,7 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
   contract_file VARCHAR(255) NULL,
   status VARCHAR(40) NULL,
   source_ip VARCHAR(45) NULL,
+  digital_signature VARCHAR(128) NULL,
   session_id VARCHAR(80) NULL,
   last_modified DATETIME NULL,
   last_modified_by_id INT NULL
@@ -113,22 +123,62 @@ SET source_ip=@ip,
     session_id=@session,
     last_modified=@modified,
     last_modified_by_id=@user,
-    status=@status
+    status=@status,
+    digital_signature=@signature
 WHERE id=@id";
 
         var parameters = new[]
         {
             new MySqlParameter("@ip", context.Ip),
             new MySqlParameter("@session", context.SessionId ?? string.Empty),
-            new MySqlParameter("@modified", DateTime.UtcNow),
+            new MySqlParameter("@modified", modifiedAt),
             new MySqlParameter("@user", context.UserId),
             new MySqlParameter("@status", NormalizeStatus(supplier.Status)),
+            new MySqlParameter("@signature", signature ?? string.Empty),
             new MySqlParameter("@id", supplier.Id)
         };
 
-        await _databaseService.ExecuteNonQueryAsync(updateSql, parameters).ConfigureAwait(false);
+        try
+        {
+            await _databaseService.ExecuteNonQueryAsync(updateSql, parameters).ConfigureAwait(false);
+        }
+        catch (MySqlException ex) when (ex.Number == 1054)
+        {
+            const string legacySql = @"UPDATE suppliers
+SET source_ip=@ip,
+    session_id=@session,
+    last_modified=@modified,
+    last_modified_by_id=@user,
+    status=@status
+WHERE id=@id";
 
-        var details = string.Format(CultureInfo.InvariantCulture, "status={0}; country={1}", supplier.Status, supplier.Country);
+            var legacyParameters = new[]
+            {
+                new MySqlParameter("@ip", context.Ip),
+                new MySqlParameter("@session", context.SessionId ?? string.Empty),
+                new MySqlParameter("@modified", modifiedAt),
+                new MySqlParameter("@user", context.UserId),
+                new MySqlParameter("@status", NormalizeStatus(supplier.Status)),
+                new MySqlParameter("@id", supplier.Id)
+            };
+
+            await _databaseService.ExecuteNonQueryAsync(legacySql, legacyParameters).ConfigureAwait(false);
+        }
+
+        var signatureHash = string.IsNullOrWhiteSpace(signature)
+            ? context.SignatureHash ?? supplier.DigitalSignature ?? string.Empty
+            : signature;
+
+        var details = string.Format(
+            CultureInfo.InvariantCulture,
+            "status={0}; country={1}; sigId={2}; sigHash={3}; sigMethod={4}; sigStatus={5}; sigNote={6}",
+            supplier.Status ?? string.Empty,
+            supplier.Country ?? string.Empty,
+            context.SignatureId?.ToString(CultureInfo.InvariantCulture) ?? "-",
+            signatureHash,
+            context.SignatureMethod ?? "-",
+            context.SignatureStatus ?? "-",
+            string.IsNullOrWhiteSpace(context.SignatureNote) ? "-" : context.SignatureNote);
         await _databaseService.LogSupplierAuditAsync(
             supplier.Id,
             action,
@@ -137,5 +187,28 @@ WHERE id=@id";
             context.Ip,
             context.DeviceInfo,
             context.SessionId).ConfigureAwait(false);
+    }
+
+    private static string ApplyContext(Supplier supplier, SupplierCrudContext context)
+    {
+        var signature = context.SignatureHash ?? supplier.DigitalSignature ?? string.Empty;
+        supplier.DigitalSignature = signature;
+
+        if (context.UserId > 0)
+        {
+            supplier.LastModifiedById = context.UserId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.Ip))
+        {
+            supplier.SourceIp = context.Ip;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.SessionId))
+        {
+            supplier.SessionId = context.SessionId!;
+        }
+
+        return signature;
     }
 }

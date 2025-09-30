@@ -46,15 +46,23 @@ namespace YasGMP.Wpf.Services
 
         public async Task<int> CreateAsync(Part part, PartCrudContext context)
         {
+            var signature = ApplyContext(part, context);
+
             await _partService.CreateAsync(part, context.UserId).ConfigureAwait(false);
-            await StampAsync(part, context).ConfigureAwait(false);
+
+            part.DigitalSignature = signature;
+            await StampAsync(part, context, signature).ConfigureAwait(false);
             return part.Id;
         }
 
         public async Task UpdateAsync(Part part, PartCrudContext context)
         {
+            var signature = ApplyContext(part, context);
+
             await _partService.UpdateAsync(part, context.UserId).ConfigureAwait(false);
-            await StampAsync(part, context).ConfigureAwait(false);
+
+            part.DigitalSignature = signature;
+            await StampAsync(part, context, signature).ConfigureAwait(false);
         }
 
         public void Validate(Part part)
@@ -83,28 +91,70 @@ namespace YasGMP.Wpf.Services
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLower(CultureInfo.InvariantCulture);
 
-        private async Task StampAsync(Part part, PartCrudContext context)
+        private async Task StampAsync(Part part, PartCrudContext context, string signature)
         {
-            const string sql = "UPDATE parts SET source_ip=@ip, last_modified_by_id=@user, session_id=@session WHERE id=@id";
+            const string sql = "UPDATE parts SET source_ip=@ip, last_modified_by_id=@user, session_id=@session, digital_signature=@signature WHERE id=@id";
             var parameters = new[]
             {
                 new MySqlParameter("@ip", context.Ip),
                 new MySqlParameter("@user", context.UserId),
                 new MySqlParameter("@session", context.SessionId ?? string.Empty),
+                new MySqlParameter("@signature", signature ?? string.Empty),
                 new MySqlParameter("@id", part.Id)
             };
-            await _database.ExecuteNonQueryAsync(sql, parameters).ConfigureAwait(false);
+            try
+            {
+                await _database.ExecuteNonQueryAsync(sql, parameters).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                const string legacySql = "UPDATE parts SET source_ip=@ip, last_modified_by_id=@user, session_id=@session WHERE id=@id";
+                var legacyParameters = new[]
+                {
+                    new MySqlParameter("@ip", context.Ip),
+                    new MySqlParameter("@user", context.UserId),
+                    new MySqlParameter("@session", context.SessionId ?? string.Empty),
+                    new MySqlParameter("@id", part.Id)
+                };
+                await _database.ExecuteNonQueryAsync(legacySql, legacyParameters).ConfigureAwait(false);
+            }
+            var details = string.Format(
+                CultureInfo.InvariantCulture,
+                "sigId={0}; sigHash={1}; sigMethod={2}; sigStatus={3}; sigNote={4}",
+                context.SignatureId?.ToString(CultureInfo.InvariantCulture) ?? "-",
+                string.IsNullOrWhiteSpace(signature) ? part.DigitalSignature ?? string.Empty : signature,
+                context.SignatureMethod ?? "-",
+                context.SignatureStatus ?? "-",
+                string.IsNullOrWhiteSpace(context.SignatureNote) ? "-" : context.SignatureNote);
             await _audit.LogSystemEventAsync(
                 context.UserId,
                 "PART_STAMP",
                 "parts",
                 "PartCrud",
                 part.Id,
-                part.DigitalSignature,
+                details,
                 context.Ip,
                 "wpf",
                 context.DeviceInfo,
                 context.SessionId).ConfigureAwait(false);
+        }
+
+        private static string ApplyContext(Part part, PartCrudContext context)
+        {
+            var signature = context.SignatureHash ?? part.DigitalSignature ?? string.Empty;
+            part.DigitalSignature = signature;
+
+            if (context.UserId > 0)
+            {
+                part.LastModifiedById = context.UserId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(context.Ip))
+            {
+                part.SourceIp = context.Ip;
+            }
+
+            return signature;
         }
     }
 }
