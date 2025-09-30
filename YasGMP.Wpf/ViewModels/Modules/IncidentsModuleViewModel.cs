@@ -342,12 +342,6 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
     protected override async Task<bool> OnSaveAsync()
     {
-        var context = IncidentCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var incident = Editor.ToIncident(_loadedIncident);
         incident.Status = _incidentService.NormalizeStatus(incident.Status);
 
@@ -387,6 +381,13 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         incident.LastModified = DateTime.UtcNow;
         incident.LastModifiedById = _authContext.CurrentUser?.Id;
         incident.SourceIp = _authContext.CurrentIpAddress ?? incident.SourceIp ?? string.Empty;
+
+        var context = IncidentCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

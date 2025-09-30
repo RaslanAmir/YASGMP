@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
@@ -20,12 +21,66 @@ public interface IChangeControlCrudService
     string NormalizeStatus(string? status);
 }
 
-public readonly record struct ChangeControlCrudContext(int UserId, string IpAddress, string DeviceInfo, string? SessionId)
+/// <summary>Context metadata propagated when persisting change control edits.</summary>
+/// <param name="UserId">Authenticated user identifier.</param>
+/// <param name="IpAddress">Source IP recorded for auditing.</param>
+/// <param name="DeviceInfo">Originating device fingerprint.</param>
+/// <param name="SessionId">Logical session identifier.</param>
+/// <param name="SignatureId">Database identifier for the captured signature.</param>
+/// <param name="SignatureHash">Hash persisted alongside the signature.</param>
+/// <param name="SignatureMethod">Method used to authenticate the signature.</param>
+/// <param name="SignatureStatus">Status of the captured signature (valid/revoked).</param>
+/// <param name="SignatureNote">Reason or note supplied during signing.</param>
+public readonly record struct ChangeControlCrudContext(
+    int UserId,
+    string IpAddress,
+    string DeviceInfo,
+    string? SessionId,
+    int? SignatureId,
+    string? SignatureHash,
+    string? SignatureMethod,
+    string? SignatureStatus,
+    string? SignatureNote)
 {
+    private const string DefaultSignatureMethod = "password";
+    private const string DefaultSignatureStatus = "valid";
+
     public static ChangeControlCrudContext Create(int userId, string? ip, string? device, string? sessionId)
         => new(
             userId <= 0 ? 1 : userId,
             string.IsNullOrWhiteSpace(ip) ? "unknown" : ip!,
             string.IsNullOrWhiteSpace(device) ? "WPF" : device!,
-            string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId);
+            string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId,
+            null,
+            null,
+            DefaultSignatureMethod,
+            DefaultSignatureStatus,
+            null);
+
+    public static ChangeControlCrudContext Create(
+        int userId,
+        string? ip,
+        string? device,
+        string? sessionId,
+        ElectronicSignatureDialogResult signatureResult)
+    {
+        ArgumentNullException.ThrowIfNull(signatureResult);
+        ArgumentNullException.ThrowIfNull(signatureResult.Signature);
+
+        var context = Create(userId, ip, device, sessionId);
+        var signature = signatureResult.Signature;
+
+        return context with
+        {
+            SignatureId = signature.Id > 0 ? signature.Id : null,
+            SignatureHash = string.IsNullOrWhiteSpace(signature.SignatureHash) ? null : signature.SignatureHash,
+            SignatureMethod = string.IsNullOrWhiteSpace(signature.Method) ? DefaultSignatureMethod : signature.Method,
+            SignatureStatus = string.IsNullOrWhiteSpace(signature.Status) ? DefaultSignatureStatus : signature.Status,
+            SignatureNote = !string.IsNullOrWhiteSpace(signature.Note)
+                ? signature.Note
+                : !string.IsNullOrWhiteSpace(signatureResult.ReasonDetail)
+                    ? signatureResult.ReasonDetail
+                    : signatureResult.ReasonCode
+        };
+    }
 }

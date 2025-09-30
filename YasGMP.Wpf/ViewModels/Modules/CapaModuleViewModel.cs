@@ -233,12 +233,6 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             return false;
         }
 
-        var context = CapaCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var capa = Editor.ToCapaCase(_loadedCapa);
         capa.Status = _capaService.NormalizeStatus(capa.Status);
         capa.Priority = _capaService.NormalizePriority(capa.Priority);
@@ -273,6 +267,13 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         capa.LastModified = DateTime.UtcNow;
         capa.LastModifiedById = _authContext.CurrentUser?.Id;
         capa.SourceIp = _authContext.CurrentIpAddress ?? capa.SourceIp ?? string.Empty;
+
+        var context = CapaCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

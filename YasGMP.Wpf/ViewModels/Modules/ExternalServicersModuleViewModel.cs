@@ -252,12 +252,6 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             return false;
         }
 
-        var context = ExternalServicerCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var servicer = Editor.ToServicer(_loadedServicer);
         servicer.Status = _servicerService.NormalizeStatus(servicer.Status);
 
@@ -291,6 +285,13 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         servicer.LastModified = DateTime.UtcNow;
         servicer.LastModifiedById = _authContext.CurrentUser?.Id ?? servicer.LastModifiedById;
         servicer.SourceIp = _authContext.CurrentIpAddress ?? servicer.SourceIp ?? string.Empty;
+
+        var context = ExternalServicerCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

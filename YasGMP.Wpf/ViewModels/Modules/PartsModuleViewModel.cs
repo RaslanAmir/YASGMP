@@ -252,12 +252,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             return false;
         }
 
-        var context = PartCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var part = Editor.ToPart(_loadedPart);
         part.Status = _partService.NormalizeStatus(part.Status);
         if (SupplierOptions.Count > 0 && part.DefaultSupplierId.HasValue)
@@ -296,6 +290,13 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         }
 
         part.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
+        var context = PartCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

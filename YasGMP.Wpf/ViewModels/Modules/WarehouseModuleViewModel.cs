@@ -231,12 +231,6 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
 
     protected override async Task<bool> OnSaveAsync()
     {
-        var context = WarehouseCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var warehouse = Editor.ToWarehouse(_loadedWarehouse);
         warehouse.Status = _warehouseService.NormalizeStatus(warehouse.Status);
 
@@ -278,6 +272,13 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         warehouse.LastModifiedByName = _authContext.CurrentUser?.FullName ?? warehouse.LastModifiedByName;
         warehouse.SourceIp = _authContext.CurrentIpAddress ?? warehouse.SourceIp ?? string.Empty;
         warehouse.SessionId = _authContext.CurrentSessionId ?? warehouse.SessionId ?? string.Empty;
+
+        var context = WarehouseCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {
