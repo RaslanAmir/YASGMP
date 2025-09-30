@@ -78,7 +78,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: assert WPF signature metadata propagation",
+  "lastCommitSummary": "chore: add calibration signature failure coverage",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -143,6 +143,7 @@
     "2025-11-16: CAPA service/interface now forward optional SignatureMetadataDto payloads through DatabaseService.Capa helpers so signatures persist with IP/device/session context while dotnet restore/build remain blocked by the missing CLI.",
     "2025-11-17: System event logging now records digital signature ids/hashes with legacy fallbacks verified by new unit tests.",
     "2025-11-18: TestElectronicSignatureDialogService now auto-increments signature ids, clones persisted results, and stores hash/method/status/note metadata for downstream assertions; dotnet CLI remains unavailable so restore/build stay blocked.",
-    "2025-11-20: WPF module tests now assert CRUD contexts expose signature hash/method/status/note metadata and verify persisted signature ids returned from the enhanced dialog service while dotnet CLI access is still blocked."
+    "2025-11-20: WPF module tests now assert CRUD contexts expose signature hash/method/status/note metadata and verify persisted signature ids returned from the enhanced dialog service while dotnet CLI access is still blocked.",
+    "2025-11-21: Calibration module tests cover signature cancellation and capture exceptions to ensure persistence is skipped and no metadata is stored when the dialog fails."
   ]
 }
