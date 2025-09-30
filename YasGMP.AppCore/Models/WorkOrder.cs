@@ -162,6 +162,10 @@ namespace YasGMP.Models
         public string Notes { get; set; } = string.Empty;
 
         // ========== ADVANCED / FORENSIC ==========
+        [Column("digital_signature_id")]
+        [Display(Name = "ID digitalnog potpisa")]
+        public int? DigitalSignatureId { get; set; }
+
         [StringLength(128)]
         [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]

@@ -48,6 +48,11 @@ namespace YasGMP.Services
                 wo.DigitalSignature = signatureMetadata!.Hash!;
             }
 
+            if (signatureMetadata?.Id.HasValue == true)
+            {
+                wo.DigitalSignatureId = signatureMetadata.Id;
+            }
+
             if (!string.IsNullOrWhiteSpace(signatureMetadata?.Device))
             {
                 wo.DeviceInfo = signatureMetadata!.Device;
@@ -73,29 +78,56 @@ namespace YasGMP.Services
 
             wo.SourceIp = effectiveIp;
 
+            int? initialSignatureId = wo.DigitalSignatureId;
+
             string insert = @"INSERT INTO work_orders
- (title, description, task_description, type, priority, status,
-  date_open, due_date, date_close,
-  requested_by_id, created_by_id, assigned_to_id,
-  machine_id, component_id,
-  result, notes,
-  digital_signature, device_info, source_ip, session_id)
- VALUES
- (@title, @desc, @task, @type, @prio, @status,
-  @open, @due, @close,
-  @req, @crt, @ass,
-  @mach, @comp,
-  @res, @notes,
-  @sig, @device, @ip, @session)";
+(title, description, task_description, type, priority, status,
+ date_open, due_date, date_close,
+ requested_by_id, created_by_id, assigned_to_id,
+ machine_id, component_id,
+ result, notes,
+ digital_signature, device_info, source_ip, session_id, digital_signature_id)
+VALUES
+(@title, @desc, @task, @type, @prio, @status,
+ @open, @due, @close,
+ @req, @crt, @ass,
+ @mach, @comp,
+ @res, @notes,
+ @sig, @device, @ip, @session, @sig_id)";
+
+            string insertLegacy = @"INSERT INTO work_orders
+(title, description, task_description, type, priority, status,
+ date_open, due_date, date_close,
+ requested_by_id, created_by_id, assigned_to_id,
+ machine_id, component_id,
+ result, notes,
+ digital_signature, device_info, source_ip, session_id)
+VALUES
+(@title, @desc, @task, @type, @prio, @status,
+ @open, @due, @close,
+ @req, @crt, @ass,
+ @mach, @comp,
+ @res, @notes,
+ @sig, @device, @ip, @session)";
 
             string updateSql = @"UPDATE work_orders SET
-  title=@title, description=@desc, task_description=@task,
-  type=@type, priority=@prio, status=@status,
-  date_open=@open, due_date=@due, date_close=@close,
-  requested_by_id=@req, created_by_id=@crt, assigned_to_id=@ass,
-  machine_id=@mach, component_id=@comp,
-  result=@res, notes=@notes,
-  digital_signature=@sig, device_info=@device, source_ip=@ip, session_id=@session
+ title=@title, description=@desc, task_description=@task,
+ type=@type, priority=@prio, status=@status,
+ date_open=@open, due_date=@due, date_close=@close,
+ requested_by_id=@req, created_by_id=@crt, assigned_to_id=@ass,
+ machine_id=@mach, component_id=@comp,
+ result=@res, notes=@notes,
+ digital_signature=@sig, device_info=@device, source_ip=@ip, session_id=@session, digital_signature_id=@sig_id
+WHERE id=@id";
+
+            string updateLegacy = @"UPDATE work_orders SET
+ title=@title, description=@desc, task_description=@task,
+ type=@type, priority=@prio, status=@status,
+ date_open=@open, due_date=@due, date_close=@close,
+ requested_by_id=@req, created_by_id=@crt, assigned_to_id=@ass,
+ machine_id=@mach, component_id=@comp,
+ result=@res, notes=@notes,
+ digital_signature=@sig, device_info=@device, source_ip=@ip, session_id=@session
 WHERE id=@id";
 
             var pars = new List<MySqlParameter>
@@ -119,19 +151,39 @@ WHERE id=@id";
                 new("@sig",     (object?)wo.DigitalSignature ?? DBNull.Value),
                 new("@device",  (object?)wo.DeviceInfo ?? DBNull.Value),
                 new("@ip",      effectiveIp),
-                new("@session", (object?)effectiveSession ?? DBNull.Value)
+                new("@session", (object?)effectiveSession ?? DBNull.Value),
+                new("@sig_id",  (object?)wo.DigitalSignatureId ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", wo.Id));
 
             if (!update)
             {
-                await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
+                try
+                {
+                    await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
+                }
+                catch (MySqlException ex) when (ex.Number == 1054)
+                {
+                    var legacyPars = new List<MySqlParameter>(pars);
+                    legacyPars.RemoveAll(p => p.ParameterName.Equals("@sig_id", StringComparison.OrdinalIgnoreCase));
+                    await db.ExecuteNonQueryAsync(insertLegacy, legacyPars, token).ConfigureAwait(false);
+                }
+
                 var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
                 wo.Id = Convert.ToInt32(idObj);
             }
             else
             {
-                await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
+                try
+                {
+                    await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
+                }
+                catch (MySqlException ex) when (ex.Number == 1054)
+                {
+                    var legacyPars = new List<MySqlParameter>(pars);
+                    legacyPars.RemoveAll(p => p.ParameterName.Equals("@sig_id", StringComparison.OrdinalIgnoreCase));
+                    await db.ExecuteNonQueryAsync(updateLegacy, legacyPars, token).ConfigureAwait(false);
+                }
             }
 
             await db.LogSystemEventAsync(
@@ -147,6 +199,39 @@ WHERE id=@id";
                 effectiveSession,
                 token: token
             ).ConfigureAwait(false);
+
+            if (signatureMetadata != null)
+            {
+                var signatureRecord = new DigitalSignature
+                {
+                    Id = signatureMetadata.Id ?? 0,
+                    TableName = "work_orders",
+                    RecordId = wo.Id,
+                    UserId = actorUserId,
+                    SignatureHash = signatureMetadata.Hash ?? wo.DigitalSignature,
+                    Method = signatureMetadata.Method,
+                    Status = signatureMetadata.Status,
+                    Note = signatureMetadata.Note,
+                    SignedAt = DateTime.UtcNow,
+                    DeviceInfo = signatureMetadata.Device ?? effectiveDevice,
+                    IpAddress = effectiveIp,
+                    SessionId = signatureMetadata.Session ?? effectiveSession
+                };
+
+                var persistedId = await db.InsertDigitalSignatureAsync(signatureRecord, token).ConfigureAwait(false);
+                if (persistedId > 0)
+                {
+                    signatureMetadata.Id = persistedId;
+                    if (wo.DigitalSignatureId != persistedId)
+                    {
+                        wo.DigitalSignatureId = persistedId;
+                        if (persistedId != initialSignatureId)
+                        {
+                            await db.TryUpdateEntitySignatureIdAsync("work_orders", "id", wo.Id, "digital_signature_id", persistedId, token).ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
 
             return wo.Id;
         }
@@ -184,7 +269,20 @@ WHERE id=@id";
             this DatabaseService db,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
+            const string sqlPreferred = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
+       w.date_open, w.due_date, w.date_close,
+       w.requested_by_id, w.created_by_id, w.assigned_to_id,
+       w.machine_id, w.component_id,
+       w.result, w.notes,
+       w.digital_signature, w.digital_signature_id,
+       (SELECT COUNT(*) FROM work_order_parts p WHERE p.work_order_id = w.id) AS parts_count,
+       (SELECT COUNT(*) FROM document_links dl WHERE dl.entity_type='WorkOrder' AND dl.entity_id = w.id) AS photos_count,
+       m.name AS machine_name
+FROM work_orders w
+LEFT JOIN machines m ON m.id = w.machine_id
+ORDER BY w.date_open DESC, w.id DESC";
+
+            const string sqlLegacy = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
        w.date_open, w.due_date, w.date_close,
        w.requested_by_id, w.created_by_id, w.assigned_to_id,
        w.machine_id, w.component_id,
@@ -197,7 +295,15 @@ FROM work_orders w
 LEFT JOIN machines m ON m.id = w.machine_id
 ORDER BY w.date_open DESC, w.id DESC";
 
-            var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
+            System.Data.DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, null, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, null, token).ConfigureAwait(false);
+            }
             var list = new List<WorkOrder>(dt.Rows.Count);
             foreach (System.Data.DataRow r in dt.Rows) list.Add(MapWorkOrder(r));
             return list;
@@ -230,6 +336,7 @@ ORDER BY w.date_open DESC, w.id DESC";
                 Result = S("result"),
                 Notes = S("notes"),
                 DigitalSignature = S("digital_signature"),
+                DigitalSignatureId = IN("digital_signature_id"),
                 PhotosCount = I("photos_count"),
                 PartsCount = I("parts_count"),
                 Machine = new Machine { Id = I("machine_id"), Name = S("machine_name") }
@@ -242,7 +349,18 @@ ORDER BY w.date_open DESC, w.id DESC";
             int id,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
+            const string sqlPreferred = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
+       w.date_open, w.due_date, w.date_close,
+       w.requested_by_id, w.created_by_id, w.assigned_to_id,
+       w.machine_id, w.component_id,
+       w.result, w.notes,
+       w.digital_signature, w.digital_signature_id,
+       m.name AS machine_name
+FROM work_orders w
+LEFT JOIN machines m ON m.id = w.machine_id
+WHERE w.id=@id";
+
+            const string sqlLegacy = @"SELECT w.id, w.title, w.description, w.task_description, w.type, w.priority, w.status,
        w.date_open, w.due_date, w.date_close,
        w.requested_by_id, w.created_by_id, w.assigned_to_id,
        w.machine_id, w.component_id,
@@ -252,7 +370,16 @@ ORDER BY w.date_open DESC, w.id DESC";
 FROM work_orders w
 LEFT JOIN machines m ON m.id = w.machine_id
 WHERE w.id=@id";
-            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+
+            System.Data.DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
             if (dt.Rows.Count == 0) return null;
             return MapWorkOrder(dt.Rows[0]);
         }

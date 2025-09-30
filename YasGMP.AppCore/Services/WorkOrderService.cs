@@ -217,6 +217,11 @@ namespace YasGMP.Services
             string hash = metadata?.Hash ?? order.DigitalSignature ?? legacyFactory();
             order.DigitalSignature = hash;
 
+            if (metadata?.Id.HasValue == true)
+            {
+                order.DigitalSignatureId = metadata.Id;
+            }
+
             if (!string.IsNullOrWhiteSpace(metadata?.Device))
             {
                 order.DeviceInfo = metadata.Device;

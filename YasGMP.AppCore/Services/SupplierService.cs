@@ -42,7 +42,14 @@ namespace YasGMP.Services
             ValidateSupplier(supplier);
 
             ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeLegacyDigitalSignature(supplier));
-            await _db.InsertOrUpdateSupplierAsync(supplier, update: false, signatureMetadata: signatureMetadata);
+            await _db.InsertOrUpdateSupplierAsync(
+                supplier,
+                update: false,
+                signatureMetadata: signatureMetadata,
+                actorUserId: userId,
+                ip: signatureMetadata?.IpAddress ?? string.Empty,
+                device: signatureMetadata?.Device ?? string.Empty,
+                sessionId: signatureMetadata?.Session);
 
             await LogAudit(
                 supplier.Id,
@@ -56,7 +63,14 @@ namespace YasGMP.Services
             ValidateSupplier(supplier);
 
             ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeLegacyDigitalSignature(supplier));
-            await _db.InsertOrUpdateSupplierAsync(supplier, update: true, signatureMetadata: signatureMetadata);
+            await _db.InsertOrUpdateSupplierAsync(
+                supplier,
+                update: true,
+                signatureMetadata: signatureMetadata,
+                actorUserId: userId,
+                ip: signatureMetadata?.IpAddress ?? string.Empty,
+                device: signatureMetadata?.Device ?? string.Empty,
+                sessionId: signatureMetadata?.Session);
 
             await LogAudit(
                 supplier.Id,
@@ -101,7 +115,14 @@ namespace YasGMP.Services
                 " | Suspended: ", reason, " (", DateTime.UtcNow.ToString("dd.MM.yyyy"), ")");
 
             ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeLegacyDigitalSignature(supplier));
-            await _db.InsertOrUpdateSupplierAsync(supplier, update: true, signatureMetadata: signatureMetadata);
+            await _db.InsertOrUpdateSupplierAsync(
+                supplier,
+                update: true,
+                signatureMetadata: signatureMetadata,
+                actorUserId: userId,
+                ip: signatureMetadata?.IpAddress ?? string.Empty,
+                device: signatureMetadata?.Device ?? string.Empty,
+                sessionId: signatureMetadata?.Session);
 
             await LogAudit(
                 supplierId,
@@ -150,6 +171,11 @@ namespace YasGMP.Services
 
             string hash = metadata?.Hash ?? supplier.DigitalSignature ?? legacyFactory();
             supplier.DigitalSignature = hash;
+
+            if (metadata?.Id.HasValue == true)
+            {
+                supplier.DigitalSignatureId = metadata.Id;
+            }
 
             if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
             {

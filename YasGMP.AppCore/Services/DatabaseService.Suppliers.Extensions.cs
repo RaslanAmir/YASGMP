@@ -48,7 +48,7 @@ namespace YasGMP.Services
             }
         }
 
-        public static async Task<int> InsertOrUpdateSupplierAsync(this DatabaseService db, Supplier s, bool update, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
+        public static async Task<int> InsertOrUpdateSupplierAsync(this DatabaseService db, Supplier s, bool update, SignatureMetadataDto? signatureMetadata = null, int actorUserId = 0, string ip = "", string device = "", string? sessionId = null, CancellationToken token = default)
         {
             if (s == null) throw new ArgumentNullException(nameof(s));
 
@@ -57,9 +57,19 @@ namespace YasGMP.Services
                 s.DigitalSignature = signatureMetadata!.Hash!;
             }
 
-            string insert = @"INSERT INTO suppliers (name, vat_number, address, city, country, email, phone, website, supplier_type, notes, contract_file, status, digital_signature)
+            if (signatureMetadata?.Id.HasValue == true)
+            {
+                s.DigitalSignatureId = signatureMetadata.Id;
+            }
+
+            int? initialSignatureId = s.DigitalSignatureId;
+
+            string insert = @"INSERT INTO suppliers (name, vat_number, address, city, country, email, phone, website, supplier_type, notes, contract_file, status, digital_signature, digital_signature_id)
+                             VALUES (@name,@vat,@addr,@city,@country,@em,@ph,@web,@type,@notes,@contract,@status,@sig,@sig_id)";
+            string insertLegacy = @"INSERT INTO suppliers (name, vat_number, address, city, country, email, phone, website, supplier_type, notes, contract_file, status, digital_signature)
                              VALUES (@name,@vat,@addr,@city,@country,@em,@ph,@web,@type,@notes,@contract,@status,@sig)";
-            string updateSql = @"UPDATE suppliers SET name=@name, vat_number=@vat, address=@addr, city=@city, country=@country,email=@em, phone=@ph, website=@web, supplier_type=@type, notes=@notes, contract_file=@contract, status=@status, digital_signature=@sig WHERE id=@id";
+            string updateSql = @"UPDATE suppliers SET name=@name, vat_number=@vat, address=@addr, city=@city, country=@country,email=@em, phone=@ph, website=@web, supplier_type=@type, notes=@notes, contract_file=@contract, status=@status, digital_signature=@sig, digital_signature_id=@sig_id WHERE id=@id";
+            string updateLegacy = @"UPDATE suppliers SET name=@name, vat_number=@vat, address=@addr, city=@city, country=@country,email=@em, phone=@ph, website=@web, supplier_type=@type, notes=@notes, contract_file=@contract, status=@status, digital_signature=@sig WHERE id=@id";
 
             var pars = new List<MySqlParameter>
             {
@@ -75,37 +85,106 @@ namespace YasGMP.Services
                 new("@notes", s.Notes ?? string.Empty),
                 new("@contract", s.ContractFile ?? string.Empty),
                 new("@status", s.Status ?? string.Empty),
-                new("@sig", (object?)s.DigitalSignature ?? DBNull.Value)
+                new("@sig", (object?)s.DigitalSignature ?? DBNull.Value),
+                new("@sig_id", (object?)s.DigitalSignatureId ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", s.Id));
+
+            async Task ExecuteWithSignatureFallbackAsync(string preferredSql, string legacySql, List<MySqlParameter> parameters)
+            {
+                try
+                {
+                    await db.ExecuteNonQueryAsync(preferredSql, parameters, token).ConfigureAwait(false);
+                }
+                catch (MySqlException ex) when (ex.Number == 1054)
+                {
+                    var legacyPars = new List<MySqlParameter>(parameters);
+                    legacyPars.RemoveAll(p => p.ParameterName.Equals("@sig_id", StringComparison.OrdinalIgnoreCase));
+                    await db.ExecuteNonQueryAsync(legacySql, legacyPars, token).ConfigureAwait(false);
+                }
+            }
+
+            async Task ExecuteInsertAsync()
+            {
+                await ExecuteWithSignatureFallbackAsync(insert, insertLegacy, pars);
+                var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
+                s.Id = Convert.ToInt32(idObj);
+            }
+
+            async Task ExecuteUpdateAsync()
+            {
+                await ExecuteWithSignatureFallbackAsync(updateSql, updateLegacy, pars);
+            }
+
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress)
+                ? signatureMetadata!.IpAddress!
+                : ip ?? string.Empty;
+            string effectiveDevice = signatureMetadata?.Device ?? device ?? string.Empty;
+            string? effectiveSession = signatureMetadata?.Session ?? sessionId;
+
+            if (!string.IsNullOrWhiteSpace(effectiveIp))
+            {
+                s.SourceIp = effectiveIp;
+            }
 
             try
             {
                 if (!update)
                 {
-                    await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
-                    var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
-                    s.Id = Convert.ToInt32(idObj);
+                    await ExecuteInsertAsync();
                 }
                 else
                 {
-                    await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
+                    await ExecuteUpdateAsync();
                 }
             }
             catch (MySqlException ex) when (ex.Number == 1146)
             {
                 // Singular table fallback
                 insert = insert.Replace("suppliers", "supplier /* ANALYZER_IGNORE: legacy table */");
+                insertLegacy = insertLegacy.Replace("suppliers", "supplier /* ANALYZER_IGNORE: legacy table */");
                 updateSql = updateSql.Replace("suppliers", "supplier /* ANALYZER_IGNORE: legacy table */");
+                updateLegacy = updateLegacy.Replace("suppliers", "supplier /* ANALYZER_IGNORE: legacy table */");
                 if (!update)
                 {
-                    await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
-                    var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
-                    s.Id = Convert.ToInt32(idObj);
+                    await ExecuteInsertAsync();
                 }
                 else
                 {
-                    await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
+                    await ExecuteUpdateAsync();
+                }
+            }
+
+            if (signatureMetadata != null)
+            {
+                var signatureRecord = new DigitalSignature
+                {
+                    Id = signatureMetadata.Id ?? 0,
+                    TableName = "suppliers",
+                    RecordId = s.Id,
+                    UserId = actorUserId,
+                    SignatureHash = signatureMetadata.Hash ?? s.DigitalSignature,
+                    Method = signatureMetadata.Method,
+                    Status = signatureMetadata.Status,
+                    Note = signatureMetadata.Note,
+                    SignedAt = DateTime.UtcNow,
+                    DeviceInfo = signatureMetadata.Device ?? effectiveDevice,
+                    IpAddress = effectiveIp,
+                    SessionId = signatureMetadata.Session ?? effectiveSession
+                };
+
+                var persistedId = await db.InsertDigitalSignatureAsync(signatureRecord, token).ConfigureAwait(false);
+                if (persistedId > 0)
+                {
+                    signatureMetadata.Id = persistedId;
+                    if (s.DigitalSignatureId != persistedId)
+                    {
+                        s.DigitalSignatureId = persistedId;
+                        if (persistedId != initialSignatureId)
+                        {
+                            await db.TryUpdateEntitySignatureIdAsync("suppliers", "id", s.Id, "digital_signature_id", persistedId, token).ConfigureAwait(false);
+                        }
+                    }
                 }
             }
 
@@ -177,14 +256,14 @@ namespace YasGMP.Services
         // ViewModel-friendly helpers
         public static async Task<int> AddSupplierAsync(this DatabaseService db, Supplier supplier, int actorUserId, string ip, string device, CancellationToken token = default)
         {
-            var id = await db.InsertOrUpdateSupplierAsync(supplier, update: false, signatureMetadata: null, token).ConfigureAwait(false);
+            var id = await db.InsertOrUpdateSupplierAsync(supplier, update: false, signatureMetadata: null, actorUserId: actorUserId, ip: ip, device: device, sessionId: null, token: token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(id, "CREATE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
             return id;
         }
 
         public static async Task UpdateSupplierAsync(this DatabaseService db, Supplier supplier, int actorUserId, string ip, string device, CancellationToken token = default)
         {
-            await db.InsertOrUpdateSupplierAsync(supplier, update: true, signatureMetadata: null, token).ConfigureAwait(false);
+            await db.InsertOrUpdateSupplierAsync(supplier, update: true, signatureMetadata: null, actorUserId: actorUserId, ip: ip, device: device, sessionId: null, token: token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(supplier.Id, "UPDATE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
         }
 
@@ -230,7 +309,8 @@ namespace YasGMP.Services
                 RegisteredAuthorities = S("registered_authorities"),
                 RiskLevel = S("risk_level"),
                 EntryHash = S("entry_hash"),
-                DigitalSignature = S("digital_signature")
+                DigitalSignature = S("digital_signature"),
+                DigitalSignatureId = r.Table.Columns.Contains("digital_signature_id") && r["digital_signature_id"] != DBNull.Value ? Convert.ToInt32(r["digital_signature_id"]) : (int?)null
             };
         }
     }

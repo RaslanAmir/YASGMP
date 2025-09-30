@@ -84,6 +84,9 @@ namespace YasGMP.Models
         [NotMapped]
         public string GmpComment { get; set; } = string.Empty;
 
+        [Column("digital_signature_id")]
+        public int? DigitalSignatureId { get; set; }
+
         [MaxLength(128)]
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;

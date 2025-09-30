@@ -44,41 +44,76 @@ FROM digital_signatures ORDER BY signed_at DESC, id DESC";
         public static async Task<int> InsertDigitalSignatureAsync(this DatabaseService db, DigitalSignature sig, CancellationToken token = default)
         {
             if (sig == null) throw new ArgumentNullException(nameof(sig));
-            const string sqlPreferred = @"INSERT INTO digital_signatures (table_name, record_id, user_id, signature_hash, method, status, signed_at, device_info, ip_address, note, public_key, session_id)
-                                VALUES (@table,@rid,@uid,@hash,@method,@status,@at,@dev,@ip,@note,@pk,@sid)";
-            const string sqlLegacy = @"INSERT INTO digital_signatures (table_name, record_id, user_id, signature_hash, method, status, signed_at, device_info, ip_address, note, public_key)
-                                VALUES (@table,@rid,@uid,@hash,@method,@status,@at,@dev,@ip,@note,@pk)";
-            var pars = new List<MySqlParameter>
+
+            sig.SignedAt ??= DateTime.UtcNow;
+
+            const string insertPreferred = @"INSERT INTO digital_signatures (table_name, record_id, user_id, signature_hash, method, status, signed_at, device_info, ip_address, note, public_key, session_id)"
+                                         + @" VALUES (@table,@rid,@uid,@hash,@method,@status,@at,@dev,@ip,@note,@pk,@sid)";
+            const string insertLegacy = @"INSERT INTO digital_signatures (table_name, record_id, user_id, signature_hash, method, status, signed_at, device_info, ip_address, note, public_key)"
+                                         + @" VALUES (@table,@rid,@uid,@hash,@method,@status,@at,@dev,@ip,@note,@pk)";
+            const string updatePreferred = @"UPDATE digital_signatures SET table_name=@table, record_id=@rid, user_id=@uid, signature_hash=@hash, method=@method, status=@status, signed_at=@at, device_info=@dev, ip_address=@ip, note=@note, public_key=@pk, session_id=@sid WHERE id=@id";
+            const string updateLegacy = @"UPDATE digital_signatures SET table_name=@table, record_id=@rid, user_id=@uid, signature_hash=@hash, method=@method, status=@status, signed_at=@at, device_info=@dev, ip_address=@ip, note=@note, public_key=@pk WHERE id=@id";
+
+            List<MySqlParameter> BuildParameters(bool includeSession)
             {
-                new("@table", (object?)sig.TableName ?? DBNull.Value),
-                new("@rid", sig.RecordId),
-                new("@uid", sig.UserId),
-                new("@hash", (object?)sig.SignatureHash ?? DBNull.Value),
-                new("@method", (object?)sig.Method ?? DBNull.Value),
-                new("@status", (object?)sig.Status ?? DBNull.Value),
-                new("@at", (object?)sig.SignedAt ?? DBNull.Value),
-                new("@dev", (object?)sig.DeviceInfo ?? DBNull.Value),
-                new("@ip", (object?)sig.IpAddress ?? DBNull.Value),
-                new("@note", (object?)sig.Note ?? DBNull.Value),
-                new("@pk", (object?)sig.PublicKey ?? DBNull.Value),
-                new("@sid", (object?)sig.SessionId ?? DBNull.Value)
-            };
+                var list = new List<MySqlParameter>
+                {
+                    new("@table", (object?)sig.TableName ?? DBNull.Value),
+                    new("@rid", sig.RecordId),
+                    new("@uid", sig.UserId),
+                    new("@hash", (object?)sig.SignatureHash ?? DBNull.Value),
+                    new("@method", (object?)sig.Method ?? DBNull.Value),
+                    new("@status", (object?)sig.Status ?? DBNull.Value),
+                    new("@at", (object?)sig.SignedAt ?? DBNull.Value),
+                    new("@dev", (object?)sig.DeviceInfo ?? DBNull.Value),
+                    new("@ip", (object?)sig.IpAddress ?? DBNull.Value),
+                    new("@note", (object?)sig.Note ?? DBNull.Value),
+                    new("@pk", (object?)sig.PublicKey ?? DBNull.Value)
+                };
+
+                if (includeSession)
+                {
+                    list.Add(new MySqlParameter("@sid", (object?)sig.SessionId ?? DBNull.Value));
+                }
+
+                return list;
+            }
+
+            if (sig.Id > 0)
+            {
+                var updatePars = BuildParameters(includeSession: true);
+                updatePars.Add(new MySqlParameter("@id", sig.Id));
+                try
+                {
+                    await db.ExecuteNonQueryAsync(updatePreferred, updatePars, token).ConfigureAwait(false);
+                }
+                catch (MySqlException ex) when (ex.Number == 1054)
+                {
+                    var legacyPars = BuildParameters(includeSession: false);
+                    legacyPars.Add(new MySqlParameter("@id", sig.Id));
+                    await db.ExecuteNonQueryAsync(updateLegacy, legacyPars, token).ConfigureAwait(false);
+                }
+
+                await db.LogSystemEventAsync(sig.UserId, "SIG_UPDATE", "digital_signatures", "DigitalSignatures", sig.Id, sig.SignatureHash, sig.IpAddress, "audit", sig.DeviceInfo, sig.SessionId, token: token).ConfigureAwait(false);
+                return sig.Id;
+            }
+
+            var insertPars = BuildParameters(includeSession: true);
             try
             {
-                await db.ExecuteNonQueryAsync(sqlPreferred, pars, token).ConfigureAwait(false);
+                await db.ExecuteNonQueryAsync(insertPreferred, insertPars, token).ConfigureAwait(false);
             }
             catch (MySqlException ex) when (ex.Number == 1054)
             {
-                var legacyPars = new List<MySqlParameter>(pars);
-                legacyPars.RemoveAll(p => p.ParameterName.Equals("@sid", StringComparison.OrdinalIgnoreCase));
-                await db.ExecuteNonQueryAsync(sqlLegacy, legacyPars, token).ConfigureAwait(false);
+                var legacyPars = BuildParameters(includeSession: false);
+                await db.ExecuteNonQueryAsync(insertLegacy, legacyPars, token).ConfigureAwait(false);
             }
+
             var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
             sig.Id = Convert.ToInt32(idObj);
-            await db.LogSystemEventAsync(sig.UserId, "SIG_CREATE", "digital_signatures", "DigitalSignatures", sig.Id, sig.SignatureHash, sig.IpAddress, "audit", sig.DeviceInfo, null, token: token).ConfigureAwait(false);
+            await db.LogSystemEventAsync(sig.UserId, "SIG_CREATE", "digital_signatures", "DigitalSignatures", sig.Id, sig.SignatureHash, sig.IpAddress, "audit", sig.DeviceInfo, sig.SessionId, token: token).ConfigureAwait(false);
             return sig.Id;
         }
-
         public static async Task RevokeSignatureAsync(this DatabaseService db, int id, string reason, CancellationToken token = default)
         {
             try
@@ -140,6 +175,25 @@ FROM digital_signatures ORDER BY signed_at DESC, id DESC";
 
         public static Task ExportSignaturesAsync(this DatabaseService db, List<DigitalSignature> rows, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SIG_EXPORT", "digital_signatures", "DigitalSignatures", null, $"count={rows?.Count ?? 0}; fmt={format}", ip, "info", deviceInfo, sessionId, token: token);
+
+        internal static async Task TryUpdateEntitySignatureIdAsync(this DatabaseService db, string tableName, string keyColumn, int recordId, string signatureColumn, int signatureId, CancellationToken token)
+        {
+            if (signatureId <= 0) return;
+
+            string sql = $"UPDATE {tableName} SET {signatureColumn}=@sig WHERE {keyColumn}=@id";
+            try
+            {
+                await db.ExecuteNonQueryAsync(sql, new[]
+                {
+                    new MySqlParameter("@sig", signatureId),
+                    new MySqlParameter("@id", recordId)
+                }, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
+            {
+                // Legacy schema without the signature column/table – safe to ignore.
+            }
+        }
 
         private static DigitalSignature Map(DataRow r)
         {
