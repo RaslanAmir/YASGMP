@@ -80,6 +80,84 @@ public class SuppliersModuleViewModelTests
     }
 
     [Fact]
+    public async Task OnSaveAsync_AddMode_CancelledSignatureAbortsWithoutPersistence()
+    {
+        var database = new DatabaseService();
+        var supplierAdapter = new FakeSupplierCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 42, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "127.0.0.1"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCancellation();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog,
+            dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Empty(supplierAdapter.Saved);
+        Assert.Empty(supplierAdapter.SavedContexts);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Empty(signatureDialog.PersistedSignatureRecords);
+        var context = Assert.Single(signatureDialog.Requests);
+        Assert.Equal("suppliers", context.TableName);
+        Assert.Equal(0, context.RecordId);
+    }
+
+    [Fact]
+    public async Task OnSaveAsync_AddMode_SignatureCaptureExceptionSurfacesError()
+    {
+        var database = new DatabaseService();
+        var supplierAdapter = new FakeSupplierCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 84, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "127.0.0.1"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        signatureDialog.QueueCaptureException(new InvalidOperationException("Simulated capture failure."));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog,
+            dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.False(saved);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.Equal("Electronic signature failed: Simulated capture failure.", viewModel.StatusMessage);
+        Assert.Empty(supplierAdapter.Saved);
+        Assert.Empty(supplierAdapter.SavedContexts);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Empty(signatureDialog.PersistedSignatureRecords);
+        var context = Assert.Single(signatureDialog.Requests);
+        Assert.Equal("suppliers", context.TableName);
+        Assert.Equal(0, context.RecordId);
+    }
+
+    [Fact]
     public async Task AttachCommand_UploadsAttachment()
     {
         var database = new DatabaseService();
