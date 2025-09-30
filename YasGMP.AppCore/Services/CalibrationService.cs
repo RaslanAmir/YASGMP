@@ -267,6 +267,11 @@ namespace YasGMP.Services
             string hash = metadata?.Hash ?? cal.DigitalSignature ?? legacyFactory();
             cal.DigitalSignature = hash;
 
+            if (metadata?.Id.HasValue == true)
+            {
+                cal.DigitalSignatureId = metadata.Id;
+            }
+
             if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
             {
                 cal.SourceIp = metadata.IpAddress!;

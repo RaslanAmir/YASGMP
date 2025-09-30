@@ -68,6 +68,11 @@ namespace YasGMP.Models
         [Display(Name = "Napomena/uvjeti")]
         public string Comment { get; set; } = string.Empty;
 
+        /// <summary>Reference to persisted digital signature metadata.</summary>
+        [Column("digital_signature_id")]
+        [Display(Name = "ID digitalnog potpisa")]
+        public int? DigitalSignatureId { get; set; }
+
         /// <summary>Digital signature (name, hash, or e-signature of creator or approver).</summary>
         [MaxLength(128)]
         [Column("digital_signature")]

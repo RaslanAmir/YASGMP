@@ -168,6 +168,10 @@ namespace YasGMP.Models
         [ForeignKey(nameof(LastModifiedById))]
         public virtual User? LastModifiedBy { get; set; }
 
+        [Column("digital_signature_id")]
+        [Display(Name = "ID digitalnog potpisa")]
+        public int? DigitalSignatureId { get; set; }
+
         [StringLength(128)]
         [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]

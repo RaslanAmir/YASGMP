@@ -53,7 +53,8 @@ SELECT
     m.install_date, m.procurement_date,
     COALESCE(ms.name, m.status)             AS status,
     m.urs_doc, m.qr_code,
-    m.internal_code, m.qr_payload
+    m.internal_code, m.qr_payload,
+    m.digital_signature, m.digital_signature_id
 FROM machines m
 LEFT JOIN machine_types        mt ON m.machine_type_id       = mt.id
 LEFT JOIN manufacturers        mf ON m.manufacturer_id       = mf.id
@@ -74,7 +75,8 @@ SELECT
     m.install_date, m.procurement_date,
     COALESCE(ms.name, m.status) AS status,
     m.urs_doc, m.qr_code,
-    m.internal_code, m.qr_payload
+    m.internal_code, m.qr_payload,
+    m.digital_signature
 FROM machines m
 LEFT JOIN machine_types        mt ON m.machine_type_id       = mt.id
 LEFT JOIN manufacturers        mf ON m.manufacturer_id       = mf.id
@@ -98,6 +100,7 @@ ORDER BY m.name, m.id";
             {
                 string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
                 DateTime? DN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
+                int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
 
                 list.Add(new Machine
                 {
@@ -117,7 +120,9 @@ ORDER BY m.name, m.id";
                     UrsDoc = S("urs_doc"),
                     QrCode = S("qr_code"),
                     InternalCode = S("internal_code"),
-                    QrPayload = S("qr_payload")
+                    QrPayload = S("qr_payload"),
+                    DigitalSignature = S("digital_signature"),
+                    DigitalSignatureId = IN("digital_signature_id")
                 });
             }
             return list;
@@ -137,7 +142,9 @@ SELECT
     m.serial_number,
     COALESCE(mf.name, m.manufacturer)      AS manufacturer,
     COALESCE(l.name,  m.location)          AS location,
-    COALESCE(rp.name, m.responsible_party) AS responsible_party
+    COALESCE(rp.name, m.responsible_party) AS responsible_party,
+    m.digital_signature,
+    m.digital_signature_id
 FROM machines m
 LEFT JOIN machine_types        mt ON m.machine_type_id       = mt.id
 LEFT JOIN manufacturers        mf ON m.manufacturer_id       = mf.id
@@ -186,7 +193,9 @@ LIMIT 1";
                 SerialNumber = r.Table.Columns.Contains("serial_number") ? r["serial_number"]?.ToString() ?? string.Empty : string.Empty,
                 Manufacturer = r.Table.Columns.Contains("manufacturer") ? r["manufacturer"]?.ToString() ?? string.Empty : string.Empty,
                 Location = r.Table.Columns.Contains("location") ? r["location"]?.ToString() ?? string.Empty : string.Empty,
-                ResponsibleParty = r.Table.Columns.Contains("responsible_party") ? r["responsible_party"]?.ToString() ?? string.Empty : string.Empty
+                ResponsibleParty = r.Table.Columns.Contains("responsible_party") ? r["responsible_party"]?.ToString() ?? string.Empty : string.Empty,
+                DigitalSignature = r.Table.Columns.Contains("digital_signature") ? r["digital_signature"]?.ToString() ?? string.Empty : string.Empty,
+                DigitalSignatureId = r.Table.Columns.Contains("digital_signature_id") && r["digital_signature_id"] != DBNull.Value ? Convert.ToInt32(r["digital_signature_id"]) : (int?)null
             };
         }
 
@@ -213,6 +222,13 @@ LIMIT 1";
             {
                 m.DigitalSignature = signatureMetadata!.Hash!;
             }
+
+            if (signatureMetadata?.Id.HasValue == true)
+            {
+                m.DigitalSignatureId = signatureMetadata.Id;
+            }
+
+            int? initialSignatureId = m.DigitalSignatureId;
 
             // Hard guard: ensure non-null/non-empty machine code so DB never receives NULL
             string codeVal = m.Code ?? string.Empty;
@@ -243,7 +259,7 @@ INSERT INTO machines
   urs_doc, serial_number, acquisition_cost,
   rfid_tag, qr_code, iot_device_id, cloud_device_guid,
   is_critical, lifecycle_phase, note,
-  internal_code, qr_payload, digital_signature)
+  internal_code, qr_payload, digital_signature, digital_signature_id)
 VALUES
  (COALESCE(NULLIF(@code,''), CONCAT('MCH-AUTO-', DATE_FORMAT(UTC_TIMESTAMP(), '%Y%m%d%H%i%s'))), @name,
   (SELECT id FROM machine_types       WHERE name=@type     LIMIT 1),
@@ -258,7 +274,7 @@ VALUES
   @rfid, @qr, @iot, @cloud,
   @critical, @phase, @note,
   @internal_code, @qr_payload,
-  @sig)";
+  @sig, @sig_id)";
 
             // Robust UPDATE: do not allow NULL/empty code to overwrite existing
             string updateSql = @"
@@ -291,6 +307,7 @@ UPDATE machines SET
   note                 = @note,
   internal_code        = COALESCE(@internal_code, internal_code),
   qr_payload           = COALESCE(@qr_payload,  qr_payload),
+  digital_signature_id = @sig_id,
   digital_signature    = @sig
 WHERE id=@id";
 
@@ -322,7 +339,8 @@ WHERE id=@id";
                 new("@note", (object?)m.Note ?? DBNull.Value),
                 new("@internal_code", (object?)m.InternalCode ?? DBNull.Value),
                 new("@qr_payload",  (object?)m.QrPayload  ?? DBNull.Value),
-                new("@sig", (object?)m.DigitalSignature ?? DBNull.Value)
+                new("@sig", (object?)m.DigitalSignature ?? DBNull.Value),
+                new("@sig_id", (object?)m.DigitalSignatureId ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", m.Id));
 
@@ -369,6 +387,7 @@ WHERE id=@id";
                     Add("internal_code",     "@internal_code");
                     Add("qr_payload",        "@qr_payload");
                     Add("digital_signature", "@sig");
+                    Add("digital_signature_id", "@sig_id");
 
                     string fallbackInsert = $"INSERT INTO machines (" + string.Join(",", colList) + ") VALUES (" + string.Join(",", valList) + ")";
                     await db.ExecuteNonQueryAsync(fallbackInsert, pars.ToArray(), token).ConfigureAwait(false);
@@ -415,6 +434,7 @@ WHERE id=@id";
                     S("internal_code",     "COALESCE(@internal_code, internal_code)");
                     S("qr_payload",        "COALESCE(@qr_payload,  qr_payload)");
                     S("digital_signature", "@sig");
+                    S("digital_signature_id", "@sig_id");
 
                     string fallbackUpdate = "UPDATE machines SET " + string.Join(", ", sets) + " WHERE id=@id";
                     await db.ExecuteNonQueryAsync(fallbackUpdate, pars, token).ConfigureAwait(false);
@@ -434,6 +454,39 @@ WHERE id=@id";
                 effectiveSession,
                 token: token
             ).ConfigureAwait(false);
+
+            if (signatureMetadata != null)
+            {
+                var signatureRecord = new DigitalSignature
+                {
+                    Id = signatureMetadata.Id ?? 0,
+                    TableName = "machines",
+                    RecordId = m.Id,
+                    UserId = actorUserId,
+                    SignatureHash = signatureMetadata.Hash ?? m.DigitalSignature,
+                    Method = signatureMetadata.Method,
+                    Status = signatureMetadata.Status,
+                    Note = signatureMetadata.Note,
+                    SignedAt = DateTime.UtcNow,
+                    DeviceInfo = signatureMetadata.Device ?? effectiveDevice,
+                    IpAddress = effectiveIp,
+                    SessionId = signatureMetadata.Session ?? effectiveSession
+                };
+
+                var persistedId = await db.InsertDigitalSignatureAsync(signatureRecord, token).ConfigureAwait(false);
+                if (persistedId > 0)
+                {
+                    signatureMetadata.Id = persistedId;
+                    if (m.DigitalSignatureId != persistedId)
+                    {
+                        m.DigitalSignatureId = persistedId;
+                        if (persistedId != initialSignatureId)
+                        {
+                            await db.TryUpdateEntitySignatureIdAsync("machines", "id", m.Id, "digital_signature_id", persistedId, token).ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
 
             return m.Id;
         }

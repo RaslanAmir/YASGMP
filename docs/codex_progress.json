@@ -74,7 +74,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: cover signature cancellation flows",
+  "lastCommitSummary": "fix: hydrate signature ids on read queries",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -133,6 +133,8 @@
     "2025-11-08: Replaced the legacy FakeElectronicSignatureDialogService with the queueable TestElectronicSignatureDialogService and updated module tests to consume the new helper while leaving an obsolete alias for backwards compatibility.",
     "2025-11-09: Updated Change Control, External Servicers, Warehouse, Scheduling, and Incidents WPF tests to pass TestElectronicSignatureDialogService in the production constructor slot; test execution still blocked until dotnet CLI is available.",
     "2025-11-10: Added signature cancellation/exception coverage across Assets, Components, and Work Orders WPF tests to ensure edit mode persists and adapters are skipped when capture fails; dotnet CLI remains unavailable so restore/build/test commands continue to be blocked.",
-    "2025-11-13: AppCore services and database helpers now accept optional SignatureMetadataDto values, persisting supplied hashes/IP/session/device data while falling back to the legacy generator when metadata is absent; WPF adapters forward DTOs downstream."
+    "2025-11-13: AppCore services and database helpers now accept optional SignatureMetadataDto values, persisting supplied hashes/IP/session/device data while falling back to the legacy generator when metadata is absent; WPF adapters forward DTOs downstream.",
+    "2025-11-14: DatabaseService helpers now write digital_signature_id columns when present, fall back for legacy schemas, and upsert digital_signatures with method/status/note metadata while propagating the resulting id back to SignatureMetadataDto consumers.",
+    "2025-11-15: Read paths for work orders, calibrations, and parts now include digital_signature_id with safe fallbacks so UI/audit layers can rely on persisted signature references even on legacy schemas."
   ]
 }

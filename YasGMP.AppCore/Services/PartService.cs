@@ -134,6 +134,11 @@ namespace YasGMP.Services
             string hash = metadata?.Hash ?? part.DigitalSignature ?? legacyFactory();
             part.DigitalSignature = hash;
 
+            if (metadata?.Id.HasValue == true)
+            {
+                part.DigitalSignatureId = metadata.Id;
+            }
+
             if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
             {
                 part.SourceIp = metadata.IpAddress!;

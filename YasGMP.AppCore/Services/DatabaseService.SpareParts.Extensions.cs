@@ -24,7 +24,18 @@ namespace YasGMP.Services
 
         public static async Task<Part?> GetPartByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync("SELECT id, code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, last_modified, last_modified_by_id, source_ip FROM parts WHERE id=@id LIMIT 1", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            const string sqlPreferred = "SELECT id, code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, digital_signature_id, last_modified, last_modified_by_id, source_ip FROM parts WHERE id=@id LIMIT 1";
+            const string sqlLegacy = "SELECT id, code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, last_modified, last_modified_by_id, source_ip FROM parts WHERE id=@id LIMIT 1";
+
+            System.Data.DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
             return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
         }
 
@@ -37,6 +48,11 @@ namespace YasGMP.Services
                 part.DigitalSignature = signatureMetadata!.Hash!;
             }
 
+            if (signatureMetadata?.Id.HasValue == true)
+            {
+                part.DigitalSignatureId = signatureMetadata.Id;
+            }
+
             if (!string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress))
             {
                 part.SourceIp = signatureMetadata!.IpAddress!;
@@ -47,10 +63,10 @@ namespace YasGMP.Services
 
             if (!update)
             {
-                return await db.AddSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, token).ConfigureAwait(false);
+                return await db.AddSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, signatureMetadata: signatureMetadata, token: token).ConfigureAwait(false);
             }
 
-            await db.UpdateSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, token).ConfigureAwait(false);
+            await db.UpdateSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, signatureMetadata: signatureMetadata, token: token).ConfigureAwait(false);
             return part.Id;
         }
 
@@ -58,7 +74,21 @@ namespace YasGMP.Services
             => db.DeleteSparePartAsync(id, actorUserId: 0, ip: string.Empty, token);
         public static async Task<List<Part>> GetAllSparePartsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
-            const string sql = @"SELECT p.id, p.code, p.name, p.description, p.category, p.barcode, p.rfid, p.serial_or_lot,
+            const string sqlPreferred = @"SELECT p.id, p.code, p.name, p.description, p.category, p.barcode, p.rfid, p.serial_or_lot,
+       p.default_supplier_id, p.price, p.stock, p.min_stock_alert, p.location, p.image, p.status, p.blocked,
+       p.regulatory_certificates, p.digital_signature, p.digital_signature_id, p.last_modified, p.last_modified_by_id, p.source_ip,
+       (
+         SELECT SUM(CASE WHEN sl.quantity < COALESCE(sl.min_threshold, 2147483647) THEN 1 ELSE 0 END)
+         FROM stock_levels sl WHERE sl.part_id = p.id
+       ) AS low_wh_count,
+       (
+         SELECT GROUP_CONCAT(CONCAT(COALESCE(w.name, CONCAT('WH-', sl.warehouse_id)), ':', sl.quantity) ORDER BY w.name SEPARATOR ', ')
+         FROM stock_levels sl LEFT JOIN warehouses w ON w.id = sl.warehouse_id WHERE sl.part_id = p.id
+       ) AS wh_summary
+FROM parts p
+ORDER BY p.name, p.id";
+
+            const string sqlLegacy = @"SELECT p.id, p.code, p.name, p.description, p.category, p.barcode, p.rfid, p.serial_or_lot,
        p.default_supplier_id, p.price, p.stock, p.min_stock_alert, p.location, p.image, p.status, p.blocked,
        p.regulatory_certificates, p.digital_signature, p.last_modified, p.last_modified_by_id, p.source_ip,
        (
@@ -71,34 +101,143 @@ namespace YasGMP.Services
        ) AS wh_summary
 FROM parts p
 ORDER BY p.name, p.id";
-            var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
+
+            System.Data.DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, null, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, null, token).ConfigureAwait(false);
+            }
             var list = new List<Part>(dt.Rows.Count);
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
 
-        public static async Task<int> AddSparePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
+        public static async Task<int> AddSparePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
             if (part == null) throw new ArgumentNullException(nameof(part));
-            string insert = @"INSERT INTO parts (code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, last_modified, last_modified_by_id, source_ip)
+            string insert = @"INSERT INTO parts (code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, last_modified, last_modified_by_id, source_ip, digital_signature_id)
+                             VALUES (@code,@name,@desc,@cat,@bar,@rfid,@serial,@supp,@price,@stock,@min,@loc,@img,@status,@blocked,@reg,@sig,NOW(),@lmb,@ip,@sig_id)";
+            string insertLegacy = @"INSERT INTO parts (code, name, description, category, barcode, rfid, serial_or_lot, default_supplier_id, price, stock, min_stock_alert, location, image, status, blocked, regulatory_certificates, digital_signature, last_modified, last_modified_by_id, source_ip)
                              VALUES (@code,@name,@desc,@cat,@bar,@rfid,@serial,@supp,@price,@stock,@min,@loc,@img,@status,@blocked,@reg,@sig,NOW(),@lmb,@ip)";
 
-            var pars = BuildParams(part, actorUserId, ip);
-            await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress) ? signatureMetadata!.IpAddress! : ip;
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo;
+            string? effectiveSession = signatureMetadata?.Session;
+
+            if (!string.IsNullOrWhiteSpace(effectiveIp))
+            {
+                part.SourceIp = effectiveIp;
+            }
+
+            var pars = BuildParams(part, actorUserId, effectiveIp);
+            try
+            {
+                await db.ExecuteNonQueryAsync(insert, pars, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                var legacyPars = new List<MySqlParameter>(pars);
+                legacyPars.RemoveAll(p => p.ParameterName.Equals("@sig_id", StringComparison.OrdinalIgnoreCase));
+                await db.ExecuteNonQueryAsync(insertLegacy, legacyPars, token).ConfigureAwait(false);
+            }
             var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false);
             part.Id = Convert.ToInt32(idObj);
-            await db.LogSparePartAuditAsync(part.Id, "CREATE", actorUserId, part.DigitalSignature, ip, deviceInfo, null, token).ConfigureAwait(false);
+            await db.LogSparePartAuditAsync(part.Id, "CREATE", actorUserId, part.DigitalSignature, effectiveIp, effectiveDevice, effectiveSession, token).ConfigureAwait(false);
+
+            if (signatureMetadata != null)
+            {
+                var signatureRecord = new DigitalSignature
+                {
+                    Id = signatureMetadata.Id ?? 0,
+                    TableName = "parts",
+                    RecordId = part.Id,
+                    UserId = actorUserId,
+                    SignatureHash = signatureMetadata.Hash ?? part.DigitalSignature,
+                    Method = signatureMetadata.Method,
+                    Status = signatureMetadata.Status,
+                    Note = signatureMetadata.Note,
+                    SignedAt = DateTime.UtcNow,
+                    DeviceInfo = signatureMetadata.Device ?? effectiveDevice,
+                    IpAddress = effectiveIp,
+                    SessionId = signatureMetadata.Session ?? effectiveSession
+                };
+
+                var persistedId = await db.InsertDigitalSignatureAsync(signatureRecord, token).ConfigureAwait(false);
+                if (persistedId > 0)
+                {
+                    signatureMetadata.Id = persistedId;
+                    if (part.DigitalSignatureId != persistedId)
+                    {
+                        part.DigitalSignatureId = persistedId;
+                        await db.TryUpdateEntitySignatureIdAsync("parts", "id", part.Id, "digital_signature_id", persistedId, token).ConfigureAwait(false);
+                    }
+                }
+            }
             return part.Id;
         }
 
-        public static async Task UpdateSparePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
+        public static async Task UpdateSparePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
             if (part == null) throw new ArgumentNullException(nameof(part));
-            string update = @"UPDATE parts SET code=@code, name=@name, description=@desc, category=@cat, barcode=@bar, rfid=@rfid, serial_or_lot=@serial, default_supplier_id=@supp, price=@price, stock=@stock, min_stock_alert=@min, location=@loc, image=@img, status=@status, blocked=@blocked, regulatory_certificates=@reg, digital_signature=@sig, last_modified=NOW(), last_modified_by_id=@lmb, source_ip=@ip WHERE id=@id";
-            var pars = BuildParams(part, actorUserId, ip);
+            string update = @"UPDATE parts SET code=@code, name=@name, description=@desc, category=@cat, barcode=@bar, rfid=@rfid, serial_or_lot=@serial, default_supplier_id=@supp, price=@price, stock=@stock, min_stock_alert=@min, location=@loc, image=@img, status=@status, blocked=@blocked, regulatory_certificates=@reg, digital_signature=@sig, last_modified=NOW(), last_modified_by_id=@lmb, source_ip=@ip, digital_signature_id=@sig_id WHERE id=@id";
+            string updateLegacy = @"UPDATE parts SET code=@code, name=@name, description=@desc, category=@cat, barcode=@bar, rfid=@rfid, serial_or_lot=@serial, default_supplier_id=@supp, price=@price, stock=@stock, min_stock_alert=@min, location=@loc, image=@img, status=@status, blocked=@blocked, regulatory_certificates=@reg, digital_signature=@sig, last_modified=NOW(), last_modified_by_id=@lmb, source_ip=@ip WHERE id=@id";
+
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress) ? signatureMetadata!.IpAddress! : ip;
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo;
+            string? effectiveSession = signatureMetadata?.Session;
+
+            if (!string.IsNullOrWhiteSpace(effectiveIp))
+            {
+                part.SourceIp = effectiveIp;
+            }
+
+            var pars = BuildParams(part, actorUserId, effectiveIp);
             pars.Add(new MySqlParameter("@id", part.Id));
-            await db.ExecuteNonQueryAsync(update, pars, token).ConfigureAwait(false);
-            await db.LogSparePartAuditAsync(part.Id, "UPDATE", actorUserId, part.DigitalSignature, ip, deviceInfo, null, token).ConfigureAwait(false);
+            try
+            {
+                await db.ExecuteNonQueryAsync(update, pars, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                var legacyPars = new List<MySqlParameter>(pars);
+                legacyPars.RemoveAll(p => p.ParameterName.Equals("@sig_id", StringComparison.OrdinalIgnoreCase));
+                await db.ExecuteNonQueryAsync(updateLegacy, legacyPars, token).ConfigureAwait(false);
+            }
+            await db.LogSparePartAuditAsync(part.Id, "UPDATE", actorUserId, part.DigitalSignature, effectiveIp, effectiveDevice, effectiveSession, token).ConfigureAwait(false);
+
+            if (signatureMetadata != null)
+            {
+                var signatureRecord = new DigitalSignature
+                {
+                    Id = signatureMetadata.Id ?? 0,
+                    TableName = "parts",
+                    RecordId = part.Id,
+                    UserId = actorUserId,
+                    SignatureHash = signatureMetadata.Hash ?? part.DigitalSignature,
+                    Method = signatureMetadata.Method,
+                    Status = signatureMetadata.Status,
+                    Note = signatureMetadata.Note,
+                    SignedAt = DateTime.UtcNow,
+                    DeviceInfo = signatureMetadata.Device ?? effectiveDevice,
+                    IpAddress = effectiveIp,
+                    SessionId = signatureMetadata.Session ?? effectiveSession
+                };
+
+                var persistedId = await db.InsertDigitalSignatureAsync(signatureRecord, token).ConfigureAwait(false);
+                if (persistedId > 0)
+                {
+                    signatureMetadata.Id = persistedId;
+                    if (part.DigitalSignatureId != persistedId)
+                    {
+                        part.DigitalSignatureId = persistedId;
+                        await db.TryUpdateEntitySignatureIdAsync("parts", "id", part.Id, "digital_signature_id", persistedId, token).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
         public static Task UpdatePartMinStockAlertAsync(this DatabaseService db, int partId, int? minStock, CancellationToken token = default)
@@ -198,6 +337,7 @@ ORDER BY p.name, p.id";
                 new("@blocked", p.Blocked),
                 new("@reg", NV(p.RegulatoryCertificates)),
                 new("@sig", NV(p.DigitalSignature)),
+                new("@sig_id", NV(p.DigitalSignatureId)),
                 new("@lmb", actorUserId),
                 new("@ip", NV(ip))
             };
@@ -231,6 +371,7 @@ ORDER BY p.name, p.id";
                 Blocked = B("blocked"),
                 RegulatoryCertificates = S("regulatory_certificates"),
                 DigitalSignature = S("digital_signature"),
+                DigitalSignatureId = IN("digital_signature_id"),
                 LastModified = DateTime.UtcNow,
                 LastModifiedById = IN("last_modified_by_id") ?? 0,
                 SourceIp = S("source_ip")

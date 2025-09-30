@@ -106,6 +106,9 @@ namespace YasGMP.Models
         [MaxLength(255)]
         public string? RegulatoryCertificates { get; set; }
 
+        [Column("digital_signature_id")]
+        public int? DigitalSignatureId { get; set; }
+
         [Column("digital_signature")]
         [MaxLength(255)]
         public string? DigitalSignature { get; set; }
