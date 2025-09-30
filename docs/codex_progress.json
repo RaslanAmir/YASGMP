@@ -23,7 +23,8 @@
       "2025-11-08: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-11-09: dotnet restore/build/test retried; CLI still missing in the container so all dotnet commands fail with 'command not found'.",
       "2025-11-17: dotnet restore/build retried; CLI still missing in container so commands exit with 'command not found'.",
-      "2025-11-18: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
+      "2025-11-18: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
+      "2025-11-19: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -77,7 +78,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: capture persisted signature metadata for assertions",
+  "lastCommitSummary": "test: track WPF CRUD contexts in fakes",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",

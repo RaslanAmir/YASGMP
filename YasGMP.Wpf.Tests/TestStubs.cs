@@ -634,6 +634,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -669,6 +670,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -717,8 +721,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -734,6 +744,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -749,6 +760,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -766,6 +778,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -809,8 +824,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -826,6 +847,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -841,6 +863,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -859,6 +882,9 @@ namespace YasGMP.Services.Interfaces
             if (string.IsNullOrWhiteSpace(calibration.Result))
                 throw new InvalidOperationException("Calibration result is required.");
         }
+
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
 
         private static Calibration Clone(Calibration source)
         {
@@ -893,8 +919,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -909,6 +941,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -924,6 +957,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -943,6 +977,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -990,8 +1027,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -1007,6 +1050,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -1022,6 +1066,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -1039,6 +1084,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -1083,8 +1131,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -1099,6 +1153,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -1114,6 +1169,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -1133,6 +1189,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -1315,6 +1374,7 @@ namespace YasGMP.Services.Interfaces
 
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -1430,6 +1490,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -1448,6 +1509,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -1492,8 +1556,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -1509,6 +1579,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -1524,6 +1595,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -1542,6 +1614,9 @@ namespace YasGMP.Services.Interfaces
             if (string.IsNullOrWhiteSpace(calibration.Result))
                 throw new InvalidOperationException("Calibration result is required.");
         }
+
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
 
         private static Calibration Clone(Calibration source)
         {
@@ -1575,8 +1650,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -1591,6 +1672,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -1606,6 +1688,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -1625,6 +1708,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -1672,8 +1758,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -1689,6 +1781,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -1704,6 +1797,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -1721,6 +1815,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -1879,6 +1976,7 @@ namespace YasGMP.Services.Interfaces
         public List<Warehouse> Warehouses { get; } = new();
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -1998,6 +2096,9 @@ namespace YasGMP.Services.Interfaces
                 throw new InvalidOperationException("Calibration result is required.");
         }
 
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
+
         private static Calibration Clone(Calibration source)
         {
             return new Calibration
@@ -2030,8 +2131,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -2046,6 +2153,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -2061,6 +2169,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -2080,6 +2189,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -2127,8 +2239,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -2144,6 +2262,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -2159,6 +2278,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -2176,6 +2296,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -2474,6 +2597,9 @@ namespace YasGMP.Services.Interfaces
                 throw new InvalidOperationException("Calibration result is required.");
         }
 
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
+
         private static Calibration Clone(Calibration source)
         {
             return new Calibration
@@ -2506,8 +2632,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -2522,6 +2654,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -2537,6 +2670,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -2556,6 +2690,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -2603,8 +2740,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -2620,6 +2763,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -2635,6 +2779,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -2652,6 +2797,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -2695,8 +2843,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -2712,6 +2866,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -2727,6 +2882,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -3031,6 +3187,9 @@ namespace YasGMP.Services.Interfaces
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
 
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
+
         private static Machine Clone(Machine source)
         {
             return new Machine
@@ -3077,8 +3236,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
+        private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
 
         public List<Incident> Saved => _store;
+        public IReadOnlyList<(Incident Entity, IncidentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public IncidentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Incident? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<IncidentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Incident> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
@@ -3091,6 +3256,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(incident));
+            TrackSnapshot(incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -3106,6 +3272,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(incident, existing);
             }
 
+            TrackSnapshot(incident, context);
             return Task.CompletedTask;
         }
 
@@ -3119,6 +3286,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
+
+        private void TrackSnapshot(Incident incident, IncidentCrudContext context)
+            => _savedSnapshots.Add((Clone(incident), context));
 
         private static Incident Clone(Incident source)
             => new()
@@ -3182,8 +3352,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -3199,6 +3375,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -3214,6 +3391,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -3231,6 +3409,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -3274,8 +3455,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -3291,6 +3478,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -3306,6 +3494,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -3539,6 +3728,7 @@ namespace YasGMP.Services.Interfaces
         public List<CapaCase> CapaCases { get; } = new();
 
             _store.Add(Clone(incident));
+            TrackSnapshot(incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -3659,6 +3849,9 @@ namespace YasGMP.Services.Interfaces
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
 
+        private void TrackSnapshot(Incident incident, IncidentCrudContext context)
+            => _savedSnapshots.Add((Clone(incident), context));
+
         private static Incident Clone(Incident source)
             => new()
             {
@@ -3721,8 +3914,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCapaCrudService : ICapaCrudService
     {
         private readonly List<CapaCase> _store = new();
+        private readonly List<(CapaCase Entity, CapaCrudContext Context)> _savedSnapshots = new();
 
         public List<CapaCase> Saved => _store;
+        public IReadOnlyList<(CapaCase Entity, CapaCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CapaCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public CapaCase? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CapaCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<CapaCase> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<CapaCase>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<CapaCase>>(_store.ToList());
@@ -3738,6 +3937,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(capa));
+            TrackSnapshot(capa, context);
             return Task.FromResult(capa.Id);
         }
 
@@ -3753,6 +3953,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(capa, existing);
             }
 
+            TrackSnapshot(capa, context);
             return Task.CompletedTask;
         }
 
@@ -3781,6 +3982,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(capa));
         }
+
+        private void TrackSnapshot(CapaCase capa, CapaCrudContext context)
+            => _savedSnapshots.Add((Clone(capa), context));
 
         private static CapaCase Clone(CapaCase source)
         {
@@ -3830,8 +4034,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -3847,6 +4057,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -3862,6 +4073,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -3879,6 +4091,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -3922,8 +4137,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -3939,6 +4160,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -3954,6 +4176,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -3972,6 +4195,9 @@ namespace YasGMP.Services.Interfaces
             if (string.IsNullOrWhiteSpace(calibration.Result))
                 throw new InvalidOperationException("Calibration result is required.");
         }
+
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
 
         private static Calibration Clone(Calibration source)
         {
@@ -4005,8 +4231,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -4021,6 +4253,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -4036,6 +4269,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -4055,6 +4289,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -4102,8 +4339,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
+        private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
 
         public List<Incident> Saved => _store;
+        public IReadOnlyList<(Incident Entity, IncidentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public IncidentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Incident? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<IncidentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Incident> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
@@ -4116,6 +4359,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(incident));
+            TrackSnapshot(incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -4131,6 +4375,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(incident, existing);
             }
 
+            TrackSnapshot(incident, context);
             return Task.CompletedTask;
         }
 
@@ -4144,6 +4389,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
+
+        private void TrackSnapshot(Incident incident, IncidentCrudContext context)
+            => _savedSnapshots.Add((Clone(incident), context));
 
         private static Incident Clone(Incident source)
             => new()
@@ -4207,8 +4455,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeChangeControlCrudService : IChangeControlCrudService
     {
         private readonly List<ChangeControl> _store = new();
+        private readonly List<(ChangeControl Entity, ChangeControlCrudContext Context)> _savedSnapshots = new();
 
         public List<ChangeControl> Saved => _store;
+        public IReadOnlyList<(ChangeControl Entity, ChangeControlCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ChangeControlCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public ChangeControl? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ChangeControlCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<ChangeControl> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<ChangeControl>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<ChangeControl>>(_store.Select(Clone).ToList());
@@ -4227,6 +4481,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(changeControl));
+            TrackSnapshot(changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -4523,6 +4778,9 @@ namespace YasGMP.Services.Interfaces
             _store.Add(Clone(capa));
         }
 
+        private void TrackSnapshot(CapaCase capa, CapaCrudContext context)
+            => _savedSnapshots.Add((Clone(capa), context));
+
         private static CapaCase Clone(CapaCase source)
         {
             return new CapaCase
@@ -4589,6 +4847,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -4604,6 +4863,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -4621,6 +4881,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -4664,8 +4927,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -4681,6 +4950,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -4696,6 +4966,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -4714,6 +4985,9 @@ namespace YasGMP.Services.Interfaces
             if (string.IsNullOrWhiteSpace(calibration.Result))
                 throw new InvalidOperationException("Calibration result is required.");
         }
+
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
 
         private static Calibration Clone(Calibration source)
         {
@@ -4747,8 +5021,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -4763,6 +5043,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -4778,6 +5059,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -4797,6 +5079,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -4844,8 +5129,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
+        private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
 
         public List<Incident> Saved => _store;
+        public IReadOnlyList<(Incident Entity, IncidentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public IncidentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Incident? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<IncidentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Incident> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
@@ -4858,6 +5149,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(incident));
+            TrackSnapshot(incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -4874,6 +5166,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(incident, existing);
             }
 
+            TrackSnapshot(incident, context);
             return Task.CompletedTask;
         }
 
@@ -4887,6 +5180,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
+
+        private void TrackSnapshot(Incident incident, IncidentCrudContext context)
+            => _savedSnapshots.Add((Clone(incident), context));
 
         private static Incident Clone(Incident source)
             => new()
@@ -4950,8 +5246,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeChangeControlCrudService : IChangeControlCrudService
     {
         private readonly List<ChangeControl> _store = new();
+        private readonly List<(ChangeControl Entity, ChangeControlCrudContext Context)> _savedSnapshots = new();
 
         public List<ChangeControl> Saved => _store;
+        public IReadOnlyList<(ChangeControl Entity, ChangeControlCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ChangeControlCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public ChangeControl? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ChangeControlCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<ChangeControl> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<ChangeControl>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<ChangeControl>>(_store.Select(Clone).ToList());
@@ -4970,6 +5272,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(changeControl));
+            TrackSnapshot(changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -4985,6 +5288,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(changeControl, existing);
             }
 
+            TrackSnapshot(changeControl, context);
             return Task.CompletedTask;
         }
 
@@ -5013,6 +5317,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(changeControl));
         }
+
+        private void TrackSnapshot(ChangeControl changeControl, ChangeControlCrudContext context)
+            => _savedSnapshots.Add((Clone(changeControl), context));
 
         private static ChangeControl Clone(ChangeControl source)
             => new ChangeControl
@@ -5052,8 +5359,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeValidationCrudService : IValidationCrudService
     {
         private readonly List<Validation> _store = new();
+        private readonly List<(Validation Entity, ValidationCrudContext Context)> _savedSnapshots = new();
 
         public List<Validation> Saved => _store;
+        public IReadOnlyList<(Validation Entity, ValidationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ValidationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Validation? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ValidationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Validation> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Validation>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Validation>>(_store.Select(Clone).ToList());
@@ -5072,6 +5385,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(validation));
+            TrackSnapshot(validation, context);
             return Task.FromResult(validation.Id);
         }
 
@@ -5087,6 +5401,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(validation, existing);
             }
 
+            TrackSnapshot(validation, context);
             return Task.CompletedTask;
         }
 
@@ -5117,6 +5432,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(validation));
         }
+
+        private void TrackSnapshot(Validation validation, ValidationCrudContext context)
+            => _savedSnapshots.Add((Clone(validation), context));
 
         private static Validation Clone(Validation source)
             => new Validation
@@ -5152,8 +5470,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCapaCrudService : ICapaCrudService
     {
         private readonly List<CapaCase> _store = new();
+        private readonly List<(CapaCase Entity, CapaCrudContext Context)> _savedSnapshots = new();
 
         public List<CapaCase> Saved => _store;
+        public IReadOnlyList<(CapaCase Entity, CapaCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CapaCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public CapaCase? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CapaCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<CapaCase> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<CapaCase>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<CapaCase>>(_store.ToList());
@@ -5169,6 +5493,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(capa));
+            TrackSnapshot(capa, context);
             return Task.FromResult(capa.Id);
         }
 
@@ -5184,6 +5509,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(capa, existing);
             }
 
+            TrackSnapshot(capa, context);
             return Task.CompletedTask;
         }
 
@@ -5212,6 +5538,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(capa));
         }
+
+        private void TrackSnapshot(CapaCase capa, CapaCrudContext context)
+            => _savedSnapshots.Add((Clone(capa), context));
 
         private static CapaCase Clone(CapaCase source)
         {
@@ -5261,8 +5590,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -5278,6 +5613,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -5293,6 +5629,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -5310,6 +5647,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -5353,8 +5693,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -5370,6 +5716,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -5385,6 +5732,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -5403,6 +5751,9 @@ namespace YasGMP.Services.Interfaces
             if (string.IsNullOrWhiteSpace(calibration.Result))
                 throw new InvalidOperationException("Calibration result is required.");
         }
+
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
 
         private static Calibration Clone(Calibration source)
         {
@@ -5436,8 +5787,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
+        private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
 
         public List<Machine> Saved => _store;
+        public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public MachineCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -5452,6 +5809,7 @@ namespace YasGMP.Services.Interfaces
                 machine.Id = _store.Count == 0 ? 1 : _store.Max(m => m.Id) + 1;
             }
             _store.Add(Clone(machine));
+            TrackSnapshot(machine, context);
             return Task.FromResult(machine.Id);
         }
 
@@ -5467,6 +5825,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(machine, existing);
             }
 
+            TrackSnapshot(machine, context);
             return Task.CompletedTask;
         }
 
@@ -5486,6 +5845,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Machine machine, MachineCrudContext context)
+            => _savedSnapshots.Add((Clone(machine), context));
 
         private static Machine Clone(Machine source)
         {
@@ -5533,8 +5895,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
+        private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
 
         public List<Incident> Saved => _store;
+        public IReadOnlyList<(Incident Entity, IncidentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public IncidentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Incident? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<IncidentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Incident> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
@@ -5547,6 +5915,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(incident));
+            TrackSnapshot(incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -5563,6 +5932,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(incident, existing);
             }
 
+            TrackSnapshot(incident, context);
             return Task.CompletedTask;
         }
 
@@ -5576,6 +5946,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
+
+        private void TrackSnapshot(Incident incident, IncidentCrudContext context)
+            => _savedSnapshots.Add((Clone(incident), context));
 
         private static Incident Clone(Incident source)
             => new()
@@ -5639,8 +6012,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeChangeControlCrudService : IChangeControlCrudService
     {
         private readonly List<ChangeControl> _store = new();
+        private readonly List<(ChangeControl Entity, ChangeControlCrudContext Context)> _savedSnapshots = new();
 
         public List<ChangeControl> Saved => _store;
+        public IReadOnlyList<(ChangeControl Entity, ChangeControlCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ChangeControlCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public ChangeControl? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ChangeControlCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<ChangeControl> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<ChangeControl>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<ChangeControl>>(_store.Select(Clone).ToList());
@@ -5659,6 +6038,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(changeControl));
+            TrackSnapshot(changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -5674,6 +6054,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(changeControl, existing);
             }
 
+            TrackSnapshot(changeControl, context);
             return Task.CompletedTask;
         }
 
@@ -5702,6 +6083,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(changeControl));
         }
+
+        private void TrackSnapshot(ChangeControl changeControl, ChangeControlCrudContext context)
+            => _savedSnapshots.Add((Clone(changeControl), context));
 
         private static ChangeControl Clone(ChangeControl source)
             => new ChangeControl
@@ -5741,8 +6125,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeValidationCrudService : IValidationCrudService
     {
         private readonly List<Validation> _store = new();
+        private readonly List<(Validation Entity, ValidationCrudContext Context)> _savedSnapshots = new();
 
         public List<Validation> Saved => _store;
+        public IReadOnlyList<(Validation Entity, ValidationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ValidationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Validation? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ValidationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Validation> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Validation>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Validation>>(_store.Select(Clone).ToList());
@@ -5761,6 +6151,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(validation));
+            TrackSnapshot(validation, context);
             return Task.FromResult(validation.Id);
         }
 
@@ -5776,6 +6167,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(validation, existing);
             }
 
+            TrackSnapshot(validation, context);
             return Task.CompletedTask;
         }
 
@@ -5806,6 +6198,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(validation));
         }
+
+        private void TrackSnapshot(Validation validation, ValidationCrudContext context)
+            => _savedSnapshots.Add((Clone(validation), context));
 
         private static Validation Clone(Validation source)
             => new Validation
@@ -5841,8 +6236,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCapaCrudService : ICapaCrudService
     {
         private readonly List<CapaCase> _store = new();
+        private readonly List<(CapaCase Entity, CapaCrudContext Context)> _savedSnapshots = new();
 
         public List<CapaCase> Saved => _store;
+        public IReadOnlyList<(CapaCase Entity, CapaCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CapaCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public CapaCase? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CapaCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<CapaCase> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<CapaCase>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<CapaCase>>(_store.ToList());
@@ -5858,6 +6259,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(capa));
+            TrackSnapshot(capa, context);
             return Task.FromResult(capa.Id);
         }
 
@@ -5873,6 +6275,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(capa, existing);
             }
 
+            TrackSnapshot(capa, context);
             return Task.CompletedTask;
         }
 
@@ -5901,6 +6304,9 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(capa));
         }
+
+        private void TrackSnapshot(CapaCase capa, CapaCrudContext context)
+            => _savedSnapshots.Add((Clone(capa), context));
 
         private static CapaCase Clone(CapaCase source)
         {
@@ -5950,8 +6356,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
+        private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
 
         public List<Component> Saved => _store;
+        public IReadOnlyList<(Component Entity, ComponentCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ComponentCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Component? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ComponentCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Component> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Component>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
@@ -5967,6 +6379,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(component));
+            TrackSnapshot(component, context);
             return Task.FromResult(component.Id);
         }
 
@@ -5982,6 +6395,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(component, existing);
             }
 
+            TrackSnapshot(component, context);
             return Task.CompletedTask;
         }
 
@@ -5999,6 +6413,9 @@ namespace YasGMP.Services.Interfaces
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Component component, ComponentCrudContext context)
+            => _savedSnapshots.Add((Clone(component), context));
 
         private static Component Clone(Component source)
         {
@@ -6042,8 +6459,14 @@ namespace YasGMP.Services.Interfaces
     public sealed class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
+        private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
 
         public List<Calibration> Saved => _store;
+        public IReadOnlyList<(Calibration Entity, CalibrationCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public CalibrationCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Calibration? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<CalibrationCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Calibration> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
@@ -6059,6 +6482,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             _store.Add(Clone(calibration));
+            TrackSnapshot(calibration, context);
             return Task.FromResult(calibration.Id);
         }
 
@@ -6074,6 +6498,7 @@ namespace YasGMP.Services.Interfaces
                 Copy(calibration, existing);
             }
 
+            TrackSnapshot(calibration, context);
             return Task.CompletedTask;
         }
 
@@ -6092,6 +6517,9 @@ namespace YasGMP.Services.Interfaces
             if (string.IsNullOrWhiteSpace(calibration.Result))
                 throw new InvalidOperationException("Calibration result is required.");
         }
+
+        private void TrackSnapshot(Calibration calibration, CalibrationCrudContext context)
+            => _savedSnapshots.Add((Clone(calibration), context));
 
         private static Calibration Clone(Calibration source)
         {
@@ -6311,8 +6739,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
     public sealed class FakePartCrudService : IPartCrudService
     {
         private readonly List<Part> _store = new();
+        private readonly List<(Part Entity, PartCrudContext Context)> _savedSnapshots = new();
 
         public List<Part> Saved => _store;
+        public IReadOnlyList<(Part Entity, PartCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public PartCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Part? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<PartCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Part> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Part>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Part>>(_store.ToList());
@@ -6328,6 +6762,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(part));
+            TrackSnapshot(part, context);
             return Task.FromResult(part.Id);
         }
 
@@ -6343,6 +6778,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(part, existing);
             }
 
+            TrackSnapshot(part, context);
             return Task.CompletedTask;
         }
 
@@ -6358,6 +6794,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(Part part, PartCrudContext context)
+            => _savedSnapshots.Add((Clone(part), context));
 
         private static Part Clone(Part source)
         {
@@ -6399,8 +6838,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
     public sealed class FakeSupplierCrudService : ISupplierCrudService
     {
         private readonly List<Supplier> _store = new();
+        private readonly List<(Supplier Entity, SupplierCrudContext Context)> _savedSnapshots = new();
 
         public List<Supplier> Saved => _store;
+        public IReadOnlyList<(Supplier Entity, SupplierCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public SupplierCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Supplier? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<SupplierCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Supplier> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<Supplier>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Supplier>>(_store.ToList());
@@ -6416,6 +6861,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(supplier));
+            TrackSnapshot(supplier, context);
             return Task.FromResult(supplier.Id);
         }
 
@@ -6431,6 +6877,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(supplier, existing);
             }
 
+            TrackSnapshot(supplier, context);
             return Task.CompletedTask;
         }
 
@@ -6449,6 +6896,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public string NormalizeStatus(string? status)
             => SupplierCrudExtensions.NormalizeStatusDefault(status);
+
+        private void TrackSnapshot(Supplier supplier, SupplierCrudContext context)
+            => _savedSnapshots.Add((Clone(supplier), context));
 
         private static Supplier Clone(Supplier source)
         {
@@ -6502,8 +6952,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
     public sealed class FakeWarehouseCrudService : IWarehouseCrudService
     {
         private readonly List<Warehouse> _store = new();
+        private readonly List<(Warehouse Entity, WarehouseCrudContext Context)> _savedSnapshots = new();
 
         public List<Warehouse> Saved => _store;
+        public IReadOnlyList<(Warehouse Entity, WarehouseCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public WarehouseCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public Warehouse? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<WarehouseCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<Warehouse> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public List<WarehouseStockSnapshot> StockSnapshots { get; } = new();
 
@@ -6523,6 +6979,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(warehouse));
+            TrackSnapshot(warehouse, context);
             return Task.FromResult(warehouse.Id);
         }
 
@@ -6538,6 +6995,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(warehouse, existing);
             }
 
+            TrackSnapshot(warehouse, context);
             return Task.CompletedTask;
         }
 
@@ -6568,6 +7026,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 .ToList();
             return Task.FromResult<IReadOnlyList<InventoryMovementEntry>>(items);
         }
+
+        private void TrackSnapshot(Warehouse warehouse, WarehouseCrudContext context)
+            => _savedSnapshots.Add((Clone(warehouse), context));
 
         private static Warehouse Clone(Warehouse source)
         {
@@ -6605,8 +7066,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
     public sealed class FakeScheduledJobCrudService : IScheduledJobCrudService
     {
         private readonly List<ScheduledJob> _store = new();
+        private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _savedSnapshots = new();
 
         public List<ScheduledJob> Saved => _store;
+        public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ScheduledJobCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public ScheduledJob? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ScheduledJobCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<ScheduledJob> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public List<int> Executed { get; } = new();
 
@@ -6636,6 +7103,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(job));
+            TrackSnapshot(job, context);
             return Task.FromResult(job.Id);
         }
 
@@ -6651,6 +7119,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(job, existing);
             }
 
+            TrackSnapshot(job, context);
             return Task.CompletedTask;
         }
 
@@ -6693,6 +7162,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "scheduled" : status.Trim().ToLowerInvariant();
+
+        private void TrackSnapshot(ScheduledJob job, ScheduledJobCrudContext context)
+            => _savedSnapshots.Add((Clone(job), context));
 
         private static ScheduledJob Clone(ScheduledJob source)
         {
@@ -6763,12 +7235,19 @@ namespace YasGMP.Wpf.ViewModels.Modules
     {
         private readonly List<User> _users = new();
         private readonly List<Role> _roles = new();
+        private readonly List<(User Entity, UserCrudContext Context)> _savedSnapshots = new();
 
         public List<User> CreatedUsers { get; } = new();
 
         public List<User> UpdatedUsers { get; } = new();
 
         public List<(int UserId, IReadOnlyCollection<int> Roles)> RoleAssignments { get; } = new();
+
+        public IReadOnlyList<(User Entity, UserCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public UserCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public User? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<UserCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<User> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public void SeedUser(User user)
         {
@@ -6820,6 +7299,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             var clone = Clone(user);
             _users.Add(clone);
             CreatedUsers.Add(Clone(user));
+            TrackSnapshot(user, context);
             return Task.FromResult(user.Id);
         }
 
@@ -6840,6 +7320,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             UpdatedUsers.Add(Clone(user));
+            TrackSnapshot(user, context);
             return Task.CompletedTask;
         }
 
@@ -6869,6 +7350,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
             if (string.IsNullOrWhiteSpace(user.Role))
                 throw new InvalidOperationException("Role required");
         }
+
+        private void TrackSnapshot(User user, UserCrudContext context)
+            => _savedSnapshots.Add((Clone(user), context));
 
         private static User Clone(User source)
         {
@@ -6911,8 +7395,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
     public sealed class FakeWorkOrderCrudService : IWorkOrderCrudService
     {
         private readonly List<WorkOrder> _store = new();
+        private readonly List<(WorkOrder Entity, WorkOrderCrudContext Context)> _savedSnapshots = new();
 
         public List<WorkOrder> Saved => _store;
+        public IReadOnlyList<(WorkOrder Entity, WorkOrderCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public WorkOrderCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public WorkOrder? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<WorkOrderCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<WorkOrder> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<WorkOrder?> TryGetByIdAsync(int id)
             => Task.FromResult<WorkOrder?>(_store.FirstOrDefault(w => w.Id == id));
@@ -6925,6 +7415,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(workOrder));
+            TrackSnapshot(workOrder, context);
             return Task.FromResult(workOrder.Id);
         }
 
@@ -6940,6 +7431,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(workOrder, existing);
             }
 
+            TrackSnapshot(workOrder, context);
             return Task.CompletedTask;
         }
 
@@ -6956,6 +7448,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
             if (workOrder.CreatedById <= 0)
                 throw new InvalidOperationException("CreatedBy is required.");
         }
+
+        private void TrackSnapshot(WorkOrder workOrder, WorkOrderCrudContext context)
+            => _savedSnapshots.Add((Clone(workOrder), context));
 
         private static WorkOrder Clone(WorkOrder source)
             => new()
