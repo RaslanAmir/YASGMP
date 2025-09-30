@@ -303,7 +303,8 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             userId.Value,
             _authContext.CurrentIpAddress,
             _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

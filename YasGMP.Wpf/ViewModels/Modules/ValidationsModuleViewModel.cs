@@ -292,12 +292,6 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             return false;
         }
 
-        var context = ValidationCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var recordId = Mode == FormMode.Update ? _loadedValidation!.Id : 0;
         ElectronicSignatureDialogResult? signatureResult;
         try
@@ -330,6 +324,13 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         entity.SourceIp = _authContext.CurrentIpAddress ?? entity.SourceIp ?? string.Empty;
         entity.SessionId = _authContext.CurrentSessionId ?? entity.SessionId ?? string.Empty;
         entity.SignatureTimestamp = DateTime.UtcNow;
+
+        var context = ValidationCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

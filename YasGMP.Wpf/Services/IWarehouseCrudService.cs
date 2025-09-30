@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services
 {
@@ -34,13 +35,62 @@ namespace YasGMP.Wpf.Services
     /// <param name="Ip">Source IP address.</param>
     /// <param name="DeviceInfo">Device or workstation info.</param>
     /// <param name="SessionId">Logical session id.</param>
-    public readonly record struct WarehouseCrudContext(int UserId, string Ip, string DeviceInfo, string? SessionId)
+    /// <param name="SignatureId">Database identifier for the captured signature.</param>
+    /// <param name="SignatureHash">Hash associated with the captured signature.</param>
+    /// <param name="SignatureMethod">Method used to authenticate the signature.</param>
+    /// <param name="SignatureStatus">Status of the signature at capture.</param>
+    /// <param name="SignatureNote">Operator reason captured during signing.</param>
+    public readonly record struct WarehouseCrudContext(
+        int UserId,
+        string Ip,
+        string DeviceInfo,
+        string? SessionId,
+        int? SignatureId,
+        string? SignatureHash,
+        string? SignatureMethod,
+        string? SignatureStatus,
+        string? SignatureNote)
     {
+        private const string DefaultSignatureMethod = "password";
+        private const string DefaultSignatureStatus = "valid";
+
         public static WarehouseCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
             => new(userId <= 0 ? 1 : userId,
                    string.IsNullOrWhiteSpace(ip) ? "unknown" : ip,
                    string.IsNullOrWhiteSpace(deviceInfo) ? "WPF" : deviceInfo,
-                   string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId);
+                   string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId,
+                   null,
+                   null,
+                   DefaultSignatureMethod,
+                   DefaultSignatureStatus,
+                   null);
+
+        public static WarehouseCrudContext Create(
+            int userId,
+            string ip,
+            string deviceInfo,
+            string? sessionId,
+            ElectronicSignatureDialogResult signatureResult)
+        {
+            ArgumentNullException.ThrowIfNull(signatureResult);
+            ArgumentNullException.ThrowIfNull(signatureResult.Signature);
+
+            var context = Create(userId, ip, deviceInfo, sessionId);
+            var signature = signatureResult.Signature;
+
+            return context with
+            {
+                SignatureId = signature.Id > 0 ? signature.Id : null,
+                SignatureHash = string.IsNullOrWhiteSpace(signature.SignatureHash) ? null : signature.SignatureHash,
+                SignatureMethod = string.IsNullOrWhiteSpace(signature.Method) ? DefaultSignatureMethod : signature.Method,
+                SignatureStatus = string.IsNullOrWhiteSpace(signature.Status) ? DefaultSignatureStatus : signature.Status,
+                SignatureNote = !string.IsNullOrWhiteSpace(signature.Note)
+                    ? signature.Note
+                    : !string.IsNullOrWhiteSpace(signatureResult.ReasonDetail)
+                        ? signatureResult.ReasonDetail
+                        : signatureResult.ReasonCode
+            };
+        }
     }
 
     public sealed record WarehouseStockSnapshot(

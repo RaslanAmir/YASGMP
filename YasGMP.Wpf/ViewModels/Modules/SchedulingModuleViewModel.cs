@@ -206,17 +206,17 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             return false;
         }
 
-        var context = CreateContext();
+        var baseContext = CreateContext();
         var entity = Editor.ToEntity(_loadedJob);
         entity.LastModified = DateTime.UtcNow;
-        entity.LastModifiedById = context.UserId;
-        entity.DeviceInfo = context.DeviceInfo;
-        entity.SessionId = context.SessionId ?? string.Empty;
-        entity.IpAddress = context.Ip;
-        entity.CreatedById ??= context.UserId;
+        entity.LastModifiedById = baseContext.UserId;
+        entity.DeviceInfo = baseContext.DeviceInfo;
+        entity.SessionId = baseContext.SessionId ?? string.Empty;
+        entity.IpAddress = baseContext.Ip;
+        entity.CreatedById ??= baseContext.UserId;
         if (string.IsNullOrWhiteSpace(entity.CreatedBy))
         {
-            entity.CreatedBy = context.UserName;
+            entity.CreatedBy = baseContext.UserName;
         }
 
         _scheduledJobService.Validate(entity);
@@ -248,6 +248,14 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         }
 
         entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
+        var context = ScheduledJobCrudContext.Create(
+            baseContext.UserId,
+            baseContext.UserName,
+            baseContext.Ip,
+            baseContext.DeviceInfo,
+            baseContext.SessionId,
+            signatureResult);
 
         try
         {

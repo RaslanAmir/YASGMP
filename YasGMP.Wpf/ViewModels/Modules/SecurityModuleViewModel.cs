@@ -290,7 +290,6 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             return false;
         }
 
-        var context = CreateCrudContext();
         var password = string.IsNullOrWhiteSpace(editor.NewPassword)
             ? null
             : editor.NewPassword.Trim();
@@ -320,6 +319,13 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             StatusMessage = "Electronic signature was not captured.";
             return false;
         }
+
+        var context = UserCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         var signatureHash = signatureResult.Signature.SignatureHash ?? string.Empty;
         user.DigitalSignature = signatureHash;
@@ -507,12 +513,6 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         {
             MarkDirty();
         }
-    }
-
-    private UserCrudContext CreateCrudContext()
-    {
-        var currentUserId = _authContext.CurrentUser?.Id ?? 0;
-        return UserCrudContext.Create(currentUserId, _authContext.CurrentIpAddress, _authContext.CurrentDeviceInfo, _authContext.CurrentSessionId);
     }
 
     private static User CloneUser(User source)

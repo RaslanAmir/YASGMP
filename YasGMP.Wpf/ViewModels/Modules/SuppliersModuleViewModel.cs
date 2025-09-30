@@ -238,12 +238,6 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             return false;
         }
 
-        var context = SupplierCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var supplier = Editor.ToSupplier(_loadedSupplier);
         supplier.Status = _supplierService.NormalizeStatus(supplier.Status);
 
@@ -274,6 +268,13 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         }
 
         supplier.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+
+        var context = SupplierCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

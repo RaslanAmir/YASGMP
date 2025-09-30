@@ -258,12 +258,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<bool> OnSaveAsync()
     {
-        var context = MachineCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var machine = Editor.ToMachine(_loadedMachine);
         machine.Status = _machineService.NormalizeStatus(machine.Status);
 
@@ -311,6 +305,13 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         machine.LastModifiedById = signature.UserId != 0
             ? signature.UserId
             : _authContext.CurrentUser?.Id ?? machine.LastModifiedById;
+
+        var context = MachineCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         Editor.SignatureHash = machine.DigitalSignature;
         Editor.SignatureReason = signatureResult.ReasonDisplay;

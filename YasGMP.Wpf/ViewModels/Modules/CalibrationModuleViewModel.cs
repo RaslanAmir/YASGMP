@@ -288,7 +288,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             _authContext.CurrentUser?.Id ?? 0,
             _authContext.CurrentIpAddress,
             _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

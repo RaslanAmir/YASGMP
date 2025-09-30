@@ -279,12 +279,6 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
     protected override async Task<bool> OnSaveAsync()
     {
-        var context = ComponentCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var component = Editor.ToComponent(_loadedComponent);
         component.Status = _componentService.NormalizeStatus(component.Status);
         component.MachineName = ResolveMachineName(component.MachineId);
@@ -325,6 +319,13 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         component.LastModified = DateTime.UtcNow;
         component.LastModifiedById = _authContext.CurrentUser?.Id ?? component.LastModifiedById;
         component.SourceIp = _authContext.CurrentIpAddress ?? component.SourceIp ?? string.Empty;
+
+        var context = ComponentCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {

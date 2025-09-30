@@ -216,12 +216,6 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             entity.Code = $"CC-{DateTime.UtcNow:yyyyMMddHHmmss}";
         }
 
-        var context = ChangeControlCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId);
-
         var recordId = Mode == FormMode.Update ? _loadedEntity!.Id : 0;
         ElectronicSignatureDialogResult? signatureResult;
         try
@@ -251,6 +245,13 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         entity.LastModified = DateTime.UtcNow;
         entity.LastModifiedById = _authContext.CurrentUser?.Id;
         entity.UpdatedAt = DateTime.UtcNow;
+
+        var context = ChangeControlCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signatureResult);
 
         try
         {
