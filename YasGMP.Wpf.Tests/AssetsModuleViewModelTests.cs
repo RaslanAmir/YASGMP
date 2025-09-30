@@ -19,6 +19,10 @@ public class AssetsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsMachineThroughAdapter()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var machineAdapter = new FakeMachineCrudService();
         var auth = new TestAuthContext
         {
@@ -33,7 +37,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -101,7 +105,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -142,7 +146,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -198,7 +202,7 @@ public class AssetsModuleViewModelTests
             new PickedFile("hello.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new AssetsModuleViewModel(database, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));

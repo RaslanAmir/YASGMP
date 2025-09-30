@@ -16,6 +16,8 @@ public class SecurityModuleViewModelTests
     public async Task OnSaveAsync_AddMode_CreatesUserAndAssignsRoles()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var userService = new FakeUserCrudService();
         userService.SeedRole(new Role { Id = 1, Name = "Administrator", Description = "Admin" });
         userService.SeedRole(new Role { Id = 2, Name = "Quality", Description = "QA" });
@@ -31,7 +33,7 @@ public class SecurityModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SecurityModuleViewModel(database, userService, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -109,7 +111,7 @@ public class SecurityModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SecurityModuleViewModel(database, userService, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

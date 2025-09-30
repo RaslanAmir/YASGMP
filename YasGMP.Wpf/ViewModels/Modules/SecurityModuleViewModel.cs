@@ -30,13 +30,14 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
     public SecurityModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IUserCrudService userService,
         IAuthContext authContext,
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Security", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Security", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

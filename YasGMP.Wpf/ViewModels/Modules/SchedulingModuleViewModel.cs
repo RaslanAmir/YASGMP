@@ -32,6 +32,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
     public SchedulingModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IScheduledJobCrudService scheduledJobService,
         IAuthContext authContext,
         IFilePicker filePicker,
@@ -40,7 +41,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Scheduled Jobs", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Scheduled Jobs", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _scheduledJobService = scheduledJobService ?? throw new ArgumentNullException(nameof(scheduledJobService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

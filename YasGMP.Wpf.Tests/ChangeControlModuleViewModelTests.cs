@@ -20,6 +20,9 @@ public class ChangeControlModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsChangeControl()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var crud = new FakeChangeControlCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 7, FullName = "Quality Lead" } };
         var filePicker = new TestFilePicker();
@@ -29,7 +32,7 @@ public class ChangeControlModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ChangeControlModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -92,7 +95,7 @@ public class ChangeControlModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ChangeControlModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -139,7 +142,7 @@ public class ChangeControlModuleViewModelTests
             new PickedFile("impact.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new ChangeControlModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ChangeControlModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

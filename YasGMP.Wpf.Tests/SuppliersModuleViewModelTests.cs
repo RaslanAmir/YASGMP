@@ -20,6 +20,7 @@ public class SuppliersModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsSupplier()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var supplierAdapter = new FakeSupplierCrudService();
         var auth = new TestAuthContext
         {
@@ -34,7 +35,7 @@ public class SuppliersModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -97,8 +98,9 @@ public class SuppliersModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var audit = new AuditService(database);
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog,
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth, signatureDialog,
             dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
@@ -136,8 +138,9 @@ public class SuppliersModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var audit = new AuditService(database);
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog,
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth, signatureDialog,
             dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
@@ -184,6 +187,7 @@ public class SuppliersModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var audit = new AuditService(database);
 
         var bytes = Encoding.UTF8.GetBytes("supplier document");
         filePicker.Files = new[]
@@ -191,7 +195,7 @@ public class SuppliersModuleViewModelTests
             new PickedFile("supplier.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -227,8 +231,9 @@ public class SuppliersModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var audit = new AuditService(database);
 
-        var viewModel = new SuppliersModuleViewModel(database, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

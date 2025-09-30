@@ -47,6 +47,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
     public ComponentsModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IComponentCrudService componentService,
         IMachineCrudService machineService,
         IAuthContext authContext,
@@ -54,7 +55,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Components", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Components", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));

@@ -17,6 +17,9 @@ public class ComponentsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsComponentViaAdapter()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var componentAdapter = new FakeComponentCrudService();
         var machineAdapter = new FakeMachineCrudService();
 
@@ -41,7 +44,7 @@ public class ComponentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ComponentsModuleViewModel(database, audit, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -118,7 +121,7 @@ public class ComponentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ComponentsModuleViewModel(database, audit, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -170,7 +173,7 @@ public class ComponentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ComponentsModuleViewModel(database, audit, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;

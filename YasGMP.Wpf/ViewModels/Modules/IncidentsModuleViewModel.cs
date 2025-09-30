@@ -71,6 +71,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
     public IncidentsModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IIncidentCrudService incidentService,
         IAuthContext authContext,
         IFilePicker filePicker,
@@ -79,7 +80,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Incidents", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Incidents", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _incidentService = incidentService ?? throw new ArgumentNullException(nameof(incidentService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

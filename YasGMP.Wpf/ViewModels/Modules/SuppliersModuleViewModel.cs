@@ -55,6 +55,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     public SuppliersModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ISupplierCrudService supplierService,
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
@@ -63,7 +64,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));

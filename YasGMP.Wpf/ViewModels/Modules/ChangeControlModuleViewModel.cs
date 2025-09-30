@@ -32,6 +32,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
     public ChangeControlModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IChangeControlCrudService changeControlService,
         IAuthContext authContext,
         IFilePicker filePicker,
@@ -40,7 +41,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Change Control", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Change Control", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _changeControlService = changeControlService ?? throw new ArgumentNullException(nameof(changeControlService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

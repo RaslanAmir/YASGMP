@@ -20,7 +20,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Audit Trail", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Audit Trail", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
 

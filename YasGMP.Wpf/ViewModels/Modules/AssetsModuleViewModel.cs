@@ -30,6 +30,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     public AssetsModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IMachineCrudService machineService,
         IAuthContext authContext,
         IFilePicker filePicker,
@@ -38,7 +39,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Assets", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Assets", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

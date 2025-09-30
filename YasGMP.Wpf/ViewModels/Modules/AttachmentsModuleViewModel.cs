@@ -14,10 +14,11 @@ public sealed class AttachmentsModuleViewModel : DataDrivenModuleDocumentViewMod
 
     public AttachmentsModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Attachments", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Attachments", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

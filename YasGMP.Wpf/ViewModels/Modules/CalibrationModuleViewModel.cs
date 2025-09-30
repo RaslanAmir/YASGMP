@@ -34,6 +34,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     public CalibrationModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICalibrationCrudService calibrationService,
         IComponentCrudService componentService,
         IAuthContext authContext,
@@ -43,7 +44,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Calibration", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Calibration", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _calibrationService = calibrationService ?? throw new ArgumentNullException(nameof(calibrationService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));

@@ -18,6 +18,9 @@ public class SchedulingModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsJob()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var crud = new FakeScheduledJobCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, Username = "scheduler" } };
         var filePicker = new TestFilePicker();
@@ -27,7 +30,7 @@ public class SchedulingModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -92,7 +95,7 @@ public class SchedulingModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -132,7 +135,7 @@ public class SchedulingModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

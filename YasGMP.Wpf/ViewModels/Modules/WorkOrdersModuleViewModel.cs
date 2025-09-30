@@ -18,6 +18,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 {
     public new const string ModuleKey = "WorkOrders";
 
+    private readonly AuditService _auditService;
     private readonly IAuthContext _authContext;
     private readonly IWorkOrderCrudService _workOrderService;
     private readonly IFilePicker _filePicker;
@@ -30,6 +31,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
     public WorkOrdersModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         IWorkOrderCrudService workOrderService,
         IAuthContext authContext,
         IFilePicker filePicker,
@@ -38,8 +40,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Work Orders", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Work Orders", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
+        _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _workOrderService = workOrderService ?? throw new ArgumentNullException(nameof(workOrderService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
@@ -350,6 +353,31 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
 
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+
+        var auditAction = Mode == FormMode.Add ? "CREATE" : "UPDATE";
+        var currentUserId = userId ?? 0;
+        var currentIp = _authContext.CurrentIpAddress ?? string.Empty;
+        var currentDevice = _authContext.CurrentDeviceInfo ?? string.Empty;
+        var currentSession = _authContext.CurrentSessionId ?? string.Empty;
+        var signature = signatureResult.Signature;
+        var details = string.Join(", ", new[]
+        {
+            $"user={currentUserId}",
+            $"reason={signatureResult.ReasonDisplay ?? string.Empty}",
+            $"status={entity.Status ?? string.Empty}",
+            $"signature={signature?.SignatureHash ?? string.Empty}",
+            $"method={signature?.Method ?? string.Empty}",
+            $"outcome={signature?.Status ?? string.Empty}",
+            $"ip={currentIp}",
+            $"device={currentDevice}",
+            $"session={currentSession}"
+        });
+
+        await LogAuditAsync(
+                _ => _auditService.LogEntityAuditAsync("work_orders", entity.Id, auditAction, details),
+                "Failed to log work order audit.")
+            .ConfigureAwait(false);
+
         return true;
     }
 

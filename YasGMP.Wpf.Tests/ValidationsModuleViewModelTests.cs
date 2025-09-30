@@ -20,6 +20,9 @@ public class ValidationsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsValidation()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var crud = new FakeValidationCrudService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 4 } };
         var filePicker = new TestFilePicker();
@@ -29,7 +32,7 @@ public class ValidationsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ValidationsModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -93,7 +96,7 @@ public class ValidationsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ValidationsModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -143,7 +146,7 @@ public class ValidationsModuleViewModelTests
             new PickedFile("protocol.pdf", "application/pdf", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new ValidationsModuleViewModel(database, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new ValidationsModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

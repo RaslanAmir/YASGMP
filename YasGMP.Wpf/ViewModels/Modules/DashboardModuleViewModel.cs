@@ -15,10 +15,11 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
 
     public DashboardModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Dashboard", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Dashboard", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

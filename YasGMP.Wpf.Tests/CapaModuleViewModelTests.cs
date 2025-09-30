@@ -20,6 +20,8 @@ public class CapaModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsCapaThroughAdapter()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         var capaCrud = new FakeCapaCrudService();
         var componentCrud = new FakeComponentCrudService();
         componentCrud.Saved.Add(new Component
@@ -36,7 +38,7 @@ public class CapaModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new CapaModuleViewModel(database, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -124,7 +126,7 @@ public class CapaModuleViewModelTests
             new PickedFile("plan.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new CapaModuleViewModel(database, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();

@@ -12,10 +12,11 @@ public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewMod
 
     public DiagnosticsModuleViewModel(
         DatabaseService databaseService,
+        AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Diagnostics", databaseService, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Diagnostics", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 
