@@ -145,6 +145,7 @@
     "2025-11-18: TestElectronicSignatureDialogService now auto-increments signature ids, clones persisted results, and stores hash/method/status/note metadata for downstream assertions; dotnet CLI remains unavailable so restore/build stay blocked.",
     "2025-11-20: WPF module tests now assert CRUD contexts expose signature hash/method/status/note metadata and verify persisted signature ids returned from the enhanced dialog service while dotnet CLI access is still blocked.",
     "2025-11-21: Calibration module tests cover signature cancellation and capture exceptions to ensure persistence is skipped and no metadata is stored when the dialog fails.",
-    "2025-11-22: Suppliers module tests now assert cancellation and capture exception flows so persistence is skipped, mode/status remain stable, and digital signature storage stays empty when the dialog fails; dotnet CLI remains unavailable for restore/build/test runs."
+    "2025-11-22: Suppliers module tests now assert cancellation and capture exception flows so persistence is skipped, mode/status remain stable, and digital signature storage stays empty when the dialog fails; dotnet CLI remains unavailable for restore/build/test runs.",
+    "2025-11-23: AttachmentWorkflowService now routes uploads through AuditService for audit logging with actor/entity/dedup/reason/timestamp metadata and WPF unit coverage verifies both new and deduplicated uploads; dotnet CLI remains unavailable so restore/build/test attempts still fail with 'command not found'."
   ]
 }
