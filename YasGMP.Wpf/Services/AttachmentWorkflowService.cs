@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
@@ -57,16 +58,22 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
 {
     private readonly IAttachmentService _attachmentService;
     private readonly DatabaseService _databaseService;
+    private readonly AuditService _auditService;
+    private readonly IAttachmentWorkflowAudit _auditWorkflow;
     private readonly AttachmentEncryptionOptions _encryptionOptions;
 
     public AttachmentWorkflowService(
         IAttachmentService attachmentService,
         DatabaseService databaseService,
-        AttachmentEncryptionOptions encryptionOptions)
+        AttachmentEncryptionOptions encryptionOptions,
+        AuditService auditService)
     {
         _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _encryptionOptions = encryptionOptions ?? throw new ArgumentNullException(nameof(encryptionOptions));
+        _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+        _auditWorkflow = _auditService as IAttachmentWorkflowAudit
+            ?? new AuditServiceAttachmentWorkflowAdapter(_auditService);
     }
 
     public bool IsEncryptionEnabled => !string.IsNullOrWhiteSpace(_encryptionOptions.KeyMaterial);
@@ -94,6 +101,17 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
             .ConfigureAwait(false);
 
         bool deduplicated = existing is not null && upload.Attachment.Id == existing.Id;
+
+        var timestamp = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture);
+        var actor = request.UploadedById?.ToString(CultureInfo.InvariantCulture) ?? "unknown";
+        var reason = string.IsNullOrWhiteSpace(request.Reason) ? "none" : request.Reason;
+        var dedupState = deduplicated ? "deduplicated" : "new";
+        var existingId = existing?.Id.ToString(CultureInfo.InvariantCulture) ?? "-";
+        var description = $"actor={actor}; entity={request.EntityType}:{request.EntityId}; attachment={upload.Attachment.Id}; sha={(string.IsNullOrWhiteSpace(prepared.Hash) ? "n/a" : prepared.Hash)}; size={prepared.Length}; dedup={dedupState}; existing={existingId}; reason={reason}; ts={timestamp}";
+
+        await _auditWorkflow
+            .LogAttachmentUploadAsync(request.UploadedById, request.EntityType, request.EntityId, description, upload.Attachment.Id, token)
+            .ConfigureAwait(false);
 
         return new AttachmentWorkflowUploadResult(upload, prepared.Hash, prepared.Length, deduplicated, existing);
     }
@@ -203,6 +221,27 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
             return ValueTask.CompletedTask;
         }
     }
+}
+
+/// <summary>
+/// Contract used by <see cref="AttachmentWorkflowService"/> to emit audit metadata after uploads.
+/// </summary>
+public interface IAttachmentWorkflowAudit
+{
+    Task LogAttachmentUploadAsync(int? actorUserId, string entityType, int entityId, string description, int attachmentId, CancellationToken token);
+}
+
+internal sealed class AuditServiceAttachmentWorkflowAdapter : IAttachmentWorkflowAudit
+{
+    private readonly AuditService _auditService;
+
+    public AuditServiceAttachmentWorkflowAdapter(AuditService auditService)
+    {
+        _auditService = auditService;
+    }
+
+    public Task LogAttachmentUploadAsync(int? actorUserId, string entityType, int entityId, string description, int attachmentId, CancellationToken token)
+        => _auditService.LogSystemEventForUserAsync(actorUserId, "ATTACHMENT_UPLOAD", description, entityType, attachmentId);
 }
 
 /// <summary>
