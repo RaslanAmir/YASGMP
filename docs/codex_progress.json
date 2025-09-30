@@ -135,6 +135,7 @@
     "2025-11-10: Added signature cancellation/exception coverage across Assets, Components, and Work Orders WPF tests to ensure edit mode persists and adapters are skipped when capture fails; dotnet CLI remains unavailable so restore/build/test commands continue to be blocked.",
     "2025-11-13: AppCore services and database helpers now accept optional SignatureMetadataDto values, persisting supplied hashes/IP/session/device data while falling back to the legacy generator when metadata is absent; WPF adapters forward DTOs downstream.",
     "2025-11-14: DatabaseService helpers now write digital_signature_id columns when present, fall back for legacy schemas, and upsert digital_signatures with method/status/note metadata while propagating the resulting id back to SignatureMetadataDto consumers.",
-    "2025-11-15: Read paths for work orders, calibrations, and parts now include digital_signature_id with safe fallbacks so UI/audit layers can rely on persisted signature references even on legacy schemas."
+    "2025-11-15: Read paths for work orders, calibrations, and parts now include digital_signature_id with safe fallbacks so UI/audit layers can rely on persisted signature references even on legacy schemas.",
+    "2025-11-16: CAPA service/interface now forward optional SignatureMetadataDto payloads through DatabaseService.Capa helpers so signatures persist with IP/device/session context while dotnet restore/build remain blocked by the missing CLI."
   ]
 }

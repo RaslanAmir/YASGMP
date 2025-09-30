@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
+using YasGMP.AppCore.Models.Signatures;
 
 
 namespace YasGMP.Services.Interfaces
@@ -32,14 +33,14 @@ namespace YasGMP.Services.Interfaces
         /// </summary>
         /// <param name="capa">CAPA case to create.</param>
         /// <param name="userId">User ID performing the operation.</param>
-        Task CreateAsync(CapaCase capa, int userId);
+        Task CreateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Updates an existing CAPA case.
         /// </summary>
         /// <param name="capa">CAPA case with new data.</param>
         /// <param name="userId">User ID performing the update.</param>
-        Task UpdateAsync(CapaCase capa, int userId);
+        Task UpdateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Deletes a CAPA case.
@@ -54,7 +55,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User starting investigation.</param>
         /// <param name="investigator">Investigator's name.</param>
-        Task StartInvestigationAsync(int capaId, int userId, string investigator);
+        Task StartInvestigationAsync(int capaId, int userId, string investigator, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Defines action plan for a CAPA case.
@@ -62,14 +63,14 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User defining plan.</param>
         /// <param name="actionPlan">Action plan string.</param>
-        Task DefineActionPlanAsync(int capaId, int userId, string actionPlan);
+        Task DefineActionPlanAsync(int capaId, int userId, string actionPlan, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Approves CAPA action plan.
         /// </summary>
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="approverId">User approving.</param>
-        Task ApproveActionPlanAsync(int capaId, int approverId);
+        Task ApproveActionPlanAsync(int capaId, int approverId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Marks CAPA actions as executed.
@@ -77,7 +78,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User executing.</param>
         /// <param name="executionComment">Execution notes.</param>
-        Task MarkActionExecutedAsync(int capaId, int userId, string executionComment);
+        Task MarkActionExecutedAsync(int capaId, int userId, string executionComment, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Verifies CAPA effectiveness.
@@ -85,7 +86,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="verifierId">Verifier user ID.</param>
         /// <param name="effective">Is it effective?</param>
-        Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective);
+        Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Closes a CAPA case.
@@ -93,7 +94,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User closing.</param>
         /// <param name="closureComment">Closure comments.</param>
-        Task CloseCapaAsync(int capaId, int userId, string closureComment);
+        Task CloseCapaAsync(int capaId, int userId, string closureComment, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Calculates risk score for a CAPA case.

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.Models.DTO;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models.Enums;
 using YasGMP.Services.Interfaces;
 
