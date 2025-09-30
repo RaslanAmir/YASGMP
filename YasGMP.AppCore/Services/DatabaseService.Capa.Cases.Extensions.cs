@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.AppCore.Models.Signatures;
 
 namespace YasGMP.Services
 {
@@ -75,6 +76,33 @@ FROM capa_cases WHERE id=@id LIMIT 1";
             return c.Id;
         }
 
+        public static async Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, int actorUserId, CancellationToken token = default)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            if (c == null) throw new ArgumentNullException(nameof(c));
+
+            string signature = signatureMetadata?.Hash ?? c.DigitalSignature ?? string.Empty;
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress) ? signatureMetadata!.IpAddress! : ip ?? string.Empty;
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo ?? string.Empty;
+            string effectiveSession = signatureMetadata?.Session ?? sessionId ?? string.Empty;
+
+            c.DigitalSignature = signature;
+            c.SourceIp = effectiveIp;
+
+            int id = await db.AddCapaCaseAsync(c, signature, effectiveIp, effectiveDevice, effectiveSession, actorUserId, token).ConfigureAwait(false);
+
+            if (signatureMetadata != null)
+            {
+                signatureMetadata.Hash ??= signature;
+                await PersistSignatureMetadataAsync(db, signatureMetadata, "capa_cases", c.Id, actorUserId, effectiveDevice, effectiveIp, effectiveSession, token).ConfigureAwait(false);
+            }
+
+            return id;
+        }
+
+        public static Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
+            => db.AddCapaCaseAsync(c, signatureMetadata, ip, deviceInfo, sessionId, actorUserId: 0, token);
+
         // Overload without actor parameter (VM convenience)
         public static Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, string signature, string ip, string deviceInfo, string sessionId, CancellationToken token = default)
             => db.AddCapaCaseAsync(c, signature, ip, deviceInfo, sessionId, actorUserId: 0, token);
@@ -105,6 +133,68 @@ FROM capa_cases WHERE id=@id LIMIT 1";
             await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false);
 
             await db.LogSystemEventAsync(actorUserId, "CAPA_UPDATE", "capa_cases", "CAPA", c.Id, c.Title, ip, "audit", deviceInfo, sessionId, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task UpdateCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, int actorUserId, CancellationToken token = default)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            if (c == null) throw new ArgumentNullException(nameof(c));
+
+            string signature = signatureMetadata?.Hash ?? c.DigitalSignature ?? string.Empty;
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress) ? signatureMetadata!.IpAddress! : ip ?? string.Empty;
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo ?? string.Empty;
+            string effectiveSession = signatureMetadata?.Session ?? sessionId ?? string.Empty;
+
+            c.DigitalSignature = signature;
+            c.SourceIp = effectiveIp;
+
+            await db.UpdateCapaCaseAsync(c, signature, effectiveIp, effectiveDevice, effectiveSession, actorUserId, token).ConfigureAwait(false);
+
+            if (signatureMetadata != null)
+            {
+                signatureMetadata.Hash ??= signature;
+                await PersistSignatureMetadataAsync(db, signatureMetadata, "capa_cases", c.Id, actorUserId, effectiveDevice, effectiveIp, effectiveSession, token).ConfigureAwait(false);
+            }
+        }
+
+        public static Task UpdateCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
+            => db.UpdateCapaCaseAsync(c, signatureMetadata, ip, deviceInfo, sessionId, actorUserId: 0, token);
+
+        private static async Task PersistSignatureMetadataAsync(
+            DatabaseService db,
+            SignatureMetadataDto metadata,
+            string tableName,
+            int recordId,
+            int actorUserId,
+            string deviceInfo,
+            string ip,
+            string? sessionId,
+            CancellationToken token)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            if (metadata == null) throw new ArgumentNullException(nameof(metadata));
+
+            var signature = new DigitalSignature
+            {
+                Id = metadata.Id ?? 0,
+                TableName = tableName,
+                RecordId = recordId,
+                UserId = actorUserId,
+                SignatureHash = metadata.Hash,
+                Method = metadata.Method,
+                Status = metadata.Status,
+                Note = metadata.Note,
+                DeviceInfo = deviceInfo,
+                IpAddress = ip,
+                SessionId = sessionId,
+                SignedAt = DateTime.UtcNow
+            };
+
+            var persistedId = await db.InsertDigitalSignatureAsync(signature, token).ConfigureAwait(false);
+            if (!metadata.Id.HasValue)
+            {
+                metadata.Id = persistedId;
+            }
         }
 
         // Overload without actor parameter (VM convenience)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
@@ -41,7 +42,8 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         }
 
         Validate(capa);
-        await _service.CreateAsync(capa, context.UserId).ConfigureAwait(false);
+        var metadata = CreateMetadata(context, capa.DigitalSignature);
+        await _service.CreateAsync(capa, context.UserId, metadata).ConfigureAwait(false);
         return capa.Id;
     }
 
@@ -53,7 +55,8 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         }
 
         Validate(capa);
-        await _service.UpdateAsync(capa, context.UserId).ConfigureAwait(false);
+        var metadata = CreateMetadata(context, capa.DigitalSignature);
+        await _service.UpdateAsync(capa, context.UserId, metadata).ConfigureAwait(false);
     }
 
     public void Validate(CapaCase capa)
@@ -75,4 +78,17 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         => string.IsNullOrWhiteSpace(priority)
             ? "Medium"
             : priority.Trim();
+
+    private static SignatureMetadataDto? CreateMetadata(CapaCrudContext context, string? signature)
+        => new SignatureMetadataDto
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

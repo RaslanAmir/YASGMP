@@ -1,6 +1,6 @@
 using System;
 
-namespace YasGMP.Models.DTO
+namespace YasGMP.AppCore.Models.Signatures
 {
     /// <summary>
     /// Canonical metadata captured whenever an electronic signature is taken.

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.Models.DTO;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;

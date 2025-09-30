@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.Models.DTO;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;

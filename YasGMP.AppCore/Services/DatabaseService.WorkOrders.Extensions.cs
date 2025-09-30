@@ -15,7 +15,7 @@ using QuestPDF.Infrastructure;
 using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models;
-using YasGMP.Models.DTO;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services

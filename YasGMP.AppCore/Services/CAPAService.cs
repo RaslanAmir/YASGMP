@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
@@ -70,15 +71,20 @@ namespace YasGMP.Services
         /// <param name="capa">CAPA case to create.</param>
         /// <param name="userId">User performing the action.</param>
         /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
-        public async Task CreateAsync(CapaCase capa, int userId)
+        public async Task CreateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateCapa(capa);
             capa.Status = CapaStatus.OPEN.ToString();
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            // DatabaseService signature: AddCapaCaseAsync(capa, sig, ip, deviceInfo, sessionId, actorUserId, token)
-            int id = await _db.AddCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, userId);
+            int id = await _db.AddCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                userId).ConfigureAwait(false);
             await LogAudit(id, userId, CapaActionType.CREATE, $"Created CAPA: {capa.Reason}");
 
             await CheckAndNotifyRisk(capa);
@@ -91,13 +97,19 @@ namespace YasGMP.Services
         /// <param name="capa">CAPA case with updated data.</param>
         /// <param name="userId">User performing the update.</param>
         /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
-        public async Task UpdateAsync(CapaCase capa, int userId)
+        public async Task UpdateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateCapa(capa);
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, userId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                userId).ConfigureAwait(false);
             await LogAudit(capa.Id, userId, CapaActionType.UPDATE, $"Updated CAPA ID={capa.Id}");
 
             await CheckAndNotifyRisk(capa);
@@ -126,14 +138,20 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">Investigator user ID.</param>
         /// <param name="investigator">Investigator's name.</param>
-        public async Task StartInvestigationAsync(int capaId, int userId, string investigator)
+        public async Task StartInvestigationAsync(int capaId, int userId, string investigator, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
             capa.Status = CapaStatus.INVESTIGATION.ToString();
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, userId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                userId).ConfigureAwait(false);
             await LogAudit(capa.Id, userId, CapaActionType.INVESTIGATION_START, $"Investigation started by: {investigator}");
             OnInvestigationStarted(capa, investigator);
         }
@@ -144,15 +162,21 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">User defining action plan.</param>
         /// <param name="actionPlan">Action plan details.</param>
-        public async Task DefineActionPlanAsync(int capaId, int userId, string actionPlan)
+        public async Task DefineActionPlanAsync(int capaId, int userId, string actionPlan, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
             capa.Status = CapaStatus.ACTION_DEFINED.ToString();
             capa.Actions = actionPlan;
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, userId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                userId).ConfigureAwait(false);
             await LogAudit(capa.Id, userId, CapaActionType.ACTION_PLAN_DEFINED, $"Action plan defined: {actionPlan}");
             OnActionPlanDefined(capa, actionPlan);
         }
@@ -162,16 +186,22 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="approverId">Approving user ID.</param>
-        public async Task ApproveActionPlanAsync(int capaId, int approverId)
+        public async Task ApproveActionPlanAsync(int capaId, int approverId, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
             capa.Approved = true;
             capa.ApprovedById = approverId;
             capa.ApprovedAt = DateTime.UtcNow;
             capa.Status = CapaStatus.ACTION_APPROVED.ToString();
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, approverId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                approverId).ConfigureAwait(false);
             await LogAudit(capa.Id, approverId, CapaActionType.APPROVE, "Action plan approved.");
             OnActionPlanApproved(capa, approverId);
         }
@@ -182,15 +212,21 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">User who executed the action.</param>
         /// <param name="executionComment">Execution notes/comments.</param>
-        public async Task MarkActionExecutedAsync(int capaId, int userId, string executionComment)
+        public async Task MarkActionExecutedAsync(int capaId, int userId, string executionComment, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
             capa.Status = CapaStatus.ACTION_EXECUTED.ToString();
             capa.Actions = (capa.Actions ?? string.Empty) + $" | Executed: {executionComment}";
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, userId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                userId).ConfigureAwait(false);
             await LogAudit(capa.Id, userId, CapaActionType.ACTION_EXECUTED, $"Action executed: {executionComment}");
             OnActionExecuted(capa, executionComment);
         }
@@ -201,15 +237,21 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="verifierId">User who verifies effectiveness.</param>
         /// <param name="effective">Whether the action was effective.</param>
-        public async Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective)
+        public async Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
             capa.Status = CapaStatus.VERIFICATION.ToString();
             capa.IsEffective = effective;
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, verifierId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                verifierId).ConfigureAwait(false);
             await LogAudit(capa.Id, verifierId, CapaActionType.VERIFICATION, $"Effectiveness verified: {(effective ? "Effective" : "Not Effective")}");
             OnEffectivenessVerified(capa, effective);
         }
@@ -220,14 +262,20 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">User closing the CAPA.</param>
         /// <param name="closureComment">Closure notes/comments.</param>
-        public async Task CloseCapaAsync(int capaId, int userId, string closureComment)
+        public async Task CloseCapaAsync(int capaId, int userId, string closureComment, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
             capa.Status = CapaStatus.CLOSED.ToString();
             capa.LastModified = DateTime.UtcNow;
-            capa.DigitalSignature = GenerateDigitalSignature(capa);
+            ApplySignatureMetadata(capa, signatureMetadata, () => GenerateDigitalSignature(capa));
 
-            await _db.UpdateCapaCaseAsync(capa, capa.DigitalSignature, string.Empty, string.Empty, string.Empty, userId);
+            await _db.UpdateCapaCaseAsync(
+                capa,
+                signatureMetadata,
+                signatureMetadata?.IpAddress ?? string.Empty,
+                signatureMetadata?.Device ?? string.Empty,
+                signatureMetadata?.Session,
+                userId).ConfigureAwait(false);
             await LogAudit(capa.Id, userId, CapaActionType.CLOSE, $"CAPA closed. Comment: {closureComment}");
             OnCapaClosed(capa, closureComment);
         }
@@ -290,6 +338,31 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="c">The CAPA case.</param>
         /// <returns>Base64 SHA256 hash.</returns>
+        private static void ApplySignatureMetadata(CapaCase capa, SignatureMetadataDto? metadata, Func<string> legacyFactory)
+        {
+            if (capa == null) throw new ArgumentNullException(nameof(capa));
+            if (legacyFactory == null) throw new ArgumentNullException(nameof(legacyFactory));
+
+            string hash = metadata?.Hash ?? capa.DigitalSignature ?? legacyFactory();
+            capa.DigitalSignature = hash;
+
+            if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
+            {
+                capa.SourceIp = metadata.IpAddress!;
+                capa.IpAddress = metadata.IpAddress!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata?.Device))
+            {
+                capa.DeviceInfo = metadata.Device!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata?.Session))
+            {
+                capa.SessionId = metadata.Session!;
+            }
+        }
+
         public string GenerateDigitalSignature(CapaCase c)
         {
             string raw = $"{c.Id}|{c.Reason}|{c.Status}|{DateTime.UtcNow:O}";

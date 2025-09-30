@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.Models.DTO;
+using YasGMP.AppCore.Models.Signatures;
 
 namespace YasGMP.Services
 {
