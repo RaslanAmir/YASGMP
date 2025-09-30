@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -47,13 +48,18 @@ namespace YasGMP.Services
             }
         }
 
-        public static async Task<int> InsertOrUpdateSupplierAsync(this DatabaseService db, Supplier s, bool update, CancellationToken token = default)
+        public static async Task<int> InsertOrUpdateSupplierAsync(this DatabaseService db, Supplier s, bool update, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
             if (s == null) throw new ArgumentNullException(nameof(s));
 
-            string insert = @"INSERT INTO suppliers (name, vat_number, address, city, country, email, phone, website, supplier_type, notes, contract_file, status)
-                             VALUES (@name,@vat,@addr,@city,@country,@em,@ph,@web,@type,@notes,@contract,@status)";
-            string updateSql = @"UPDATE suppliers SET name=@name, vat_number=@vat, address=@addr, city=@city, country=@country, email=@em, phone=@ph, website=@web, supplier_type=@type, notes=@notes, contract_file=@contract, status=@status WHERE id=@id";
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Hash))
+            {
+                s.DigitalSignature = signatureMetadata!.Hash!;
+            }
+
+            string insert = @"INSERT INTO suppliers (name, vat_number, address, city, country, email, phone, website, supplier_type, notes, contract_file, status, digital_signature)
+                             VALUES (@name,@vat,@addr,@city,@country,@em,@ph,@web,@type,@notes,@contract,@status,@sig)";
+            string updateSql = @"UPDATE suppliers SET name=@name, vat_number=@vat, address=@addr, city=@city, country=@country,email=@em, phone=@ph, website=@web, supplier_type=@type, notes=@notes, contract_file=@contract, status=@status, digital_signature=@sig WHERE id=@id";
 
             var pars = new List<MySqlParameter>
             {
@@ -68,7 +74,8 @@ namespace YasGMP.Services
                 new("@type", s.SupplierType ?? string.Empty),
                 new("@notes", s.Notes ?? string.Empty),
                 new("@contract", s.ContractFile ?? string.Empty),
-                new("@status", s.Status ?? string.Empty)
+                new("@status", s.Status ?? string.Empty),
+                new("@sig", (object?)s.DigitalSignature ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", s.Id));
 
@@ -170,14 +177,14 @@ namespace YasGMP.Services
         // ViewModel-friendly helpers
         public static async Task<int> AddSupplierAsync(this DatabaseService db, Supplier supplier, int actorUserId, string ip, string device, CancellationToken token = default)
         {
-            var id = await db.InsertOrUpdateSupplierAsync(supplier, update: false, token).ConfigureAwait(false);
+            var id = await db.InsertOrUpdateSupplierAsync(supplier, update: false, signatureMetadata: null, token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(id, "CREATE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
             return id;
         }
 
         public static async Task UpdateSupplierAsync(this DatabaseService db, Supplier supplier, int actorUserId, string ip, string device, CancellationToken token = default)
         {
-            await db.InsertOrUpdateSupplierAsync(supplier, update: true, token).ConfigureAwait(false);
+            await db.InsertOrUpdateSupplierAsync(supplier, update: true, signatureMetadata: null, token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(supplier.Id, "UPDATE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
         }
 

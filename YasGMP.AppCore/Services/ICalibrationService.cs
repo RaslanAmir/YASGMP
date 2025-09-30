@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Models.Enums;
 
 namespace YasGMP.Services.Interfaces
@@ -46,12 +47,12 @@ namespace YasGMP.Services.Interfaces
         /// <summary>
         /// Creates a new calibration record.
         /// </summary>
-        Task CreateAsync(Calibration cal, int userId);
+        Task CreateAsync(Calibration cal, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Updates an existing calibration record.
         /// </summary>
-        Task UpdateAsync(Calibration cal, int userId);
+        Task UpdateAsync(Calibration cal, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Deletes a calibration by its ID.
@@ -61,17 +62,17 @@ namespace YasGMP.Services.Interfaces
         /// <summary>
         /// Attaches a certificate file to a calibration.
         /// </summary>
-        Task AttachCertificateAsync(int calibrationId, string certFilePath, int userId);
+        Task AttachCertificateAsync(int calibrationId, string certFilePath, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Revokes a certificate for a calibration.
         /// </summary>
-        Task RevokeCertificateAsync(int calibrationId, string reason, int userId);
+        Task RevokeCertificateAsync(int calibrationId, string reason, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Marks a calibration as successful.
         /// </summary>
-        Task MarkAsSuccessfulAsync(int calibrationId, int userId);
+        Task MarkAsSuccessfulAsync(int calibrationId, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
         /// Validates if a calibration is still within its valid period.

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 
@@ -47,8 +48,9 @@ namespace YasGMP.Wpf.Services
         public async Task<int> CreateAsync(Part part, PartCrudContext context)
         {
             var signature = ApplyContext(part, context);
+            var metadata = CreateMetadata(context, signature);
 
-            await _partService.CreateAsync(part, context.UserId).ConfigureAwait(false);
+            await _partService.CreateAsync(part, context.UserId, metadata).ConfigureAwait(false);
 
             part.DigitalSignature = signature;
             await StampAsync(part, context, signature).ConfigureAwait(false);
@@ -58,8 +60,9 @@ namespace YasGMP.Wpf.Services
         public async Task UpdateAsync(Part part, PartCrudContext context)
         {
             var signature = ApplyContext(part, context);
+            var metadata = CreateMetadata(context, signature);
 
-            await _partService.UpdateAsync(part, context.UserId).ConfigureAwait(false);
+            await _partService.UpdateAsync(part, context.UserId, metadata).ConfigureAwait(false);
 
             part.DigitalSignature = signature;
             await StampAsync(part, context, signature).ConfigureAwait(false);
@@ -156,5 +159,18 @@ namespace YasGMP.Wpf.Services
 
             return signature;
         }
-    }
+
+        private static SignatureMetadataDto CreateMetadata(PartCrudContext context, string signature)
+            => new()
+            {
+                Id = context.SignatureId,
+                Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+                Method = context.SignatureMethod,
+                Status = context.SignatureStatus,
+                Note = context.SignatureNote,
+                Session = context.SessionId,
+                Device = context.DeviceInfo,
+                IpAddress = context.Ip
+            };
+}
 }

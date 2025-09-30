@@ -302,7 +302,7 @@ namespace YasGMP.ViewModels
                 var actorId = _authService.CurrentUser?.Id ?? 0;
                 SelectedWorkOrder.DigitalSignature = ComputeSignature(SelectedWorkOrder, _currentSessionId, _currentDeviceInfo);
 
-                await _dbService.InsertOrUpdateWorkOrderAsync(SelectedWorkOrder, update: true, actorUserId: actorId, ip: _currentIpAddress, deviceInfo: _currentDeviceInfo, sessionId: _currentSessionId).ConfigureAwait(false);
+                await _dbService.InsertOrUpdateWorkOrderAsync(SelectedWorkOrder, update: true, actorUserId: actorId, ip: _currentIpAddress, deviceInfo: _currentDeviceInfo, sessionId: _currentSessionId, signatureMetadata: null).ConfigureAwait(false);
                 await _dbService.LogWorkOrderAuditAsync(SelectedWorkOrder.Id, actorId, "UPDATE", null, _currentIpAddress, _currentDeviceInfo).ConfigureAwait(false);
 
                 StatusMessage = $"Work order '{(SelectedWorkOrder.Title ?? $"#{SelectedWorkOrder.Id}")}' updated.";

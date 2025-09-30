@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Models.Enums;
 
 namespace YasGMP.Services
@@ -68,14 +69,25 @@ namespace YasGMP.Services
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="ArgumentNullException">Ako je <paramref name="order"/> <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">Ako validacija ne prođe.</exception>
-        public async Task CreateAsync(WorkOrder order, int userId)
+        public async Task CreateAsync(WorkOrder order, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateOrder(order);
             order.Status ??= "OPEN";
-            order.DigitalSignature = GenerateDigitalSignature(order);
+            ApplySignatureMetadata(order, signatureMetadata, () => ComputeLegacyDigitalSignature(order));
+
+            string effectiveIp = signatureMetadata?.IpAddress ?? "system";
+            string effectiveDevice = signatureMetadata?.Device ?? Environment.MachineName;
+            string? effectiveSession = signatureMetadata?.Session;
 
             // DatabaseService API (InsertOrUpdate...): (workorder, update, actorUserId, ip, device)
-            await _db.InsertOrUpdateWorkOrderAsync(order, update: false, actorUserId: userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null).ConfigureAwait(false);
+            await _db.InsertOrUpdateWorkOrderAsync(
+                order,
+                update: false,
+                actorUserId: userId,
+                ip: effectiveIp,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureMetadata: signatureMetadata).ConfigureAwait(false);
             await LogAudit(order.Id, userId, WorkOrderActionType.Create, $"Kreiran radni nalog {order.Type} za stroj {order.MachineId}").ConfigureAwait(false);
         }
 
@@ -87,13 +99,24 @@ namespace YasGMP.Services
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="ArgumentNullException">Ako je <paramref name="order"/> <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">Ako validacija ne prođe.</exception>
-        public async Task UpdateAsync(WorkOrder order, int userId)
+        public async Task UpdateAsync(WorkOrder order, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateOrder(order);
-            order.DigitalSignature = GenerateDigitalSignature(order);
+            ApplySignatureMetadata(order, signatureMetadata, () => ComputeLegacyDigitalSignature(order));
 
-            await _db.InsertOrUpdateWorkOrderAsync(order, update: true, actorUserId: userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null).ConfigureAwait(false);
-            await LogAudit(order.Id, userId, WorkOrderActionType.Update, $"AĹľuriran radni nalog ID={order.Id}").ConfigureAwait(false);
+            string effectiveIp = signatureMetadata?.IpAddress ?? "system";
+            string effectiveDevice = signatureMetadata?.Device ?? Environment.MachineName;
+            string? effectiveSession = signatureMetadata?.Session ?? order.SessionId;
+
+            await _db.InsertOrUpdateWorkOrderAsync(
+                order,
+                update: true,
+                actorUserId: userId,
+                ip: effectiveIp,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureMetadata: signatureMetadata).ConfigureAwait(false);
+            await LogAudit(order.Id, userId, WorkOrderActionType.Update, $"AĹžuriran radni nalog ID={order.Id}").ConfigureAwait(false);
         }
 
         /// <summary>
@@ -104,17 +127,28 @@ namespace YasGMP.Services
         /// <param name="resultNote">Zavrˇna napomena/rezultat.</param>
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="InvalidOperationException">Ako nalog ne postoji ili je već zatvoren.</exception>
-        public async Task CloseWorkOrderAsync(int workOrderId, int userId, string resultNote)
+        public async Task CloseWorkOrderAsync(int workOrderId, int userId, string resultNote, SignatureMetadataDto? signatureMetadata = null)
         {
             var order = await _db.GetWorkOrderByIdAsync(workOrderId).ConfigureAwait(false);
             if (order == null) throw new InvalidOperationException("Radni nalog ne postoji.");
-            if (IsClosed(order)) throw new InvalidOperationException("Radni nalog je veÄ‡ zatvoren.");
+            if (IsClosed(order)) throw new InvalidOperationException("Radni nalog je već zatvoren.");
 
             order.Status = "CLOSED";
             order.Result = resultNote ?? string.Empty;
-            order.DigitalSignature = GenerateDigitalSignature(order);
+            ApplySignatureMetadata(order, signatureMetadata, () => ComputeLegacyDigitalSignature(order));
 
-            await _db.InsertOrUpdateWorkOrderAsync(order, update: true, actorUserId: userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null).ConfigureAwait(false);
+            string effectiveIp = signatureMetadata?.IpAddress ?? "system";
+            string effectiveDevice = signatureMetadata?.Device ?? Environment.MachineName;
+            string? effectiveSession = signatureMetadata?.Session ?? order.SessionId;
+
+            await _db.InsertOrUpdateWorkOrderAsync(
+                order,
+                update: true,
+                actorUserId: userId,
+                ip: effectiveIp,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureMetadata: signatureMetadata).ConfigureAwait(false);
             await LogAudit(order.Id, userId, WorkOrderActionType.Closed, $"Zatvoren nalog ID={order.Id} | Rezultat: {resultNote}").ConfigureAwait(false);
         }
 
@@ -175,22 +209,43 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="order">Radni nalog.</param>
         /// <returns>Base64 SHA-256 hash.</returns>
-        private static string GenerateDigitalSignature(WorkOrder order)
+        private static void ApplySignatureMetadata(WorkOrder order, SignatureMetadataDto? metadata, Func<string> legacyFactory)
         {
-            string raw = $"{order.Id}|{order.MachineId}|{order.ComponentId}|{order.Status}|{DateTime.UtcNow:O}|{Guid.NewGuid()}";
-            using var sha = SHA256.Create();
-            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
+            if (order == null) throw new ArgumentNullException(nameof(order));
+            if (legacyFactory == null) throw new ArgumentNullException(nameof(legacyFactory));
+
+            string hash = metadata?.Hash ?? order.DigitalSignature ?? legacyFactory();
+            order.DigitalSignature = hash;
+
+            if (!string.IsNullOrWhiteSpace(metadata?.Device))
+            {
+                order.DeviceInfo = metadata.Device;
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata?.Session))
+            {
+                order.SessionId = metadata.Session;
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
+            {
+                order.SourceIp = metadata.IpAddress;
+            }
         }
 
-        /// <summary>
-        /// Overload za kreiranje potpisa iz proizvoljnog tekstualnog payload-a (npr. za audit događaje).
-        /// </summary>
-        /// <param name="data">Ulazni tekst za potpisivanje.</param>
-        /// <returns>Base64 SHA-256 hash.</returns>
-        private static string GenerateDigitalSignature(string data)
+        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
+        private static string ComputeLegacyDigitalSignature(WorkOrder order)
         {
-            using var sha = SHA256.Create();
-            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes($"{data}|{Guid.NewGuid()}")));
+            string raw = $"{order.Id}|{order.MachineId}|{order.ComponentId}|{order.Status}|{DateTime.UtcNow:O}|{Guid.NewGuid()}";
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw)));
+        }
+
+        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
+        private static string ComputeLegacyDigitalSignature(string data)
+        {
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes($"{data}|{Guid.NewGuid()}")));
         }
 
         #endregion
@@ -214,7 +269,7 @@ namespace YasGMP.Services
                 Action = action,
                 Note = details,
                 ChangedAt = DateTime.UtcNow,
-                DigitalSignature = GenerateDigitalSignature(details),
+                DigitalSignature = ComputeLegacyDigitalSignature(details),
                 SourceIp = "system",
                 DeviceInfo = Environment.MachineName
             }).ConfigureAwait(false);

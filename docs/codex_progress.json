@@ -43,7 +43,7 @@
       "name": "Cross-cutting services",
       "status": "in-progress",
       "notes": [
-        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters now hydrate captured signature metadata onto entities/audit stamps while core APIs await expansion; audit surfacing still pending"
+        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters and AppCore services propagate optional signature metadata through to persistence with legacy hash fallback when metadata is absent; audit surfacing still pending until SDK access returns"
       ]
     },
     {
@@ -132,6 +132,7 @@
     "2025-11-07: Added B1FormDocumentViewModel cancellation regression test ensuring status text, dirty flag, and form mode remain intact when OnSaveAsync returns false; restore/build remain blocked pending dotnet CLI access.",
     "2025-11-08: Replaced the legacy FakeElectronicSignatureDialogService with the queueable TestElectronicSignatureDialogService and updated module tests to consume the new helper while leaving an obsolete alias for backwards compatibility.",
     "2025-11-09: Updated Change Control, External Servicers, Warehouse, Scheduling, and Incidents WPF tests to pass TestElectronicSignatureDialogService in the production constructor slot; test execution still blocked until dotnet CLI is available.",
-    "2025-11-10: Added signature cancellation/exception coverage across Assets, Components, and Work Orders WPF tests to ensure edit mode persists and adapters are skipped when capture fails; dotnet CLI remains unavailable so restore/build/test commands continue to be blocked."
+    "2025-11-10: Added signature cancellation/exception coverage across Assets, Components, and Work Orders WPF tests to ensure edit mode persists and adapters are skipped when capture fails; dotnet CLI remains unavailable so restore/build/test commands continue to be blocked.",
+    "2025-11-13: AppCore services and database helpers now accept optional SignatureMetadataDto values, persisting supplied hashes/IP/session/device data while falling back to the legacy generator when metadata is absent; WPF adapters forward DTOs downstream."
   ]
 }

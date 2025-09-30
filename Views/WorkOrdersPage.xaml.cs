@@ -137,7 +137,7 @@ namespace YasGMP.Views
                 await Navigation.PushModalAsync(dlg);
                 if (await dlg.Result)
                 {
-                    await _dbService.InsertOrUpdateWorkOrderAsync(wo, false, 0, "ui", "WorkOrdersPage", null);
+                    await _dbService.InsertOrUpdateWorkOrderAsync(wo, false, 0, "ui", "WorkOrdersPage", null, signatureMetadata: null);
                     // attempt to refresh via VM if present
                     var vm = BindingContext;
                     var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
@@ -163,7 +163,7 @@ namespace YasGMP.Views
                 await Navigation.PushModalAsync(dlg);
                 if (await dlg.Result)
                 {
-                    await _dbService.InsertOrUpdateWorkOrderAsync(wo, true, 0, "ui", "WorkOrdersPage", null);
+                    await _dbService.InsertOrUpdateWorkOrderAsync(wo, true, 0, "ui", "WorkOrdersPage", null, signatureMetadata: null);
                     var vm = BindingContext;
                     var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
                     if (cmd?.CanExecute(null) == true) cmd.Execute(null);

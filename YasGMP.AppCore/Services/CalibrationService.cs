@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Models.Enums;
 using YasGMP.Services.Interfaces;
 
@@ -83,10 +84,10 @@ namespace YasGMP.Services
         }
 
         /// <inheritdoc />
-        public async Task CreateAsync(Calibration cal, int userId)
+        public async Task CreateAsync(Calibration cal, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateCalibration(cal);
-            cal.DigitalSignature = GenerateDigitalSignature(cal);
+            ApplySignatureMetadata(cal, signatureMetadata, () => ComputeLegacyDigitalSignature(cal));
             cal.LastModified = DateTime.UtcNow;
             cal.LastModifiedById = userId;
 
@@ -96,6 +97,7 @@ namespace YasGMP.Services
                 update: false,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
             cal.Id = newId;
@@ -105,10 +107,10 @@ namespace YasGMP.Services
         }
 
         /// <inheritdoc />
-        public async Task UpdateAsync(Calibration cal, int userId)
+        public async Task UpdateAsync(Calibration cal, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateCalibration(cal);
-            cal.DigitalSignature = GenerateDigitalSignature(cal);
+            ApplySignatureMetadata(cal, signatureMetadata, () => ComputeLegacyDigitalSignature(cal));
             cal.LastModified = DateTime.UtcNow;
             cal.LastModifiedById = userId;
 
@@ -117,6 +119,7 @@ namespace YasGMP.Services
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
 
@@ -143,19 +146,20 @@ namespace YasGMP.Services
         #region === CERTIFICATE MANAGEMENT ===
 
         /// <inheritdoc />
-        public async Task AttachCertificateAsync(int calibrationId, string certFilePath, int userId)
+        public async Task AttachCertificateAsync(int calibrationId, string certFilePath, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             var cal = await _db.GetCalibrationByIdAsync(calibrationId)
                 ?? throw new InvalidOperationException("Calibration not found.");
 
             cal.CertDoc = certFilePath;
-            cal.DigitalSignature = GenerateDigitalSignature(cal);
+            ApplySignatureMetadata(cal, signatureMetadata, () => ComputeLegacyDigitalSignature(cal));
 
             await _db.InsertOrUpdateCalibrationAsync(
                 cal,
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
 
@@ -164,19 +168,20 @@ namespace YasGMP.Services
         }
 
         /// <inheritdoc />
-        public async Task RevokeCertificateAsync(int calibrationId, string reason, int userId)
+        public async Task RevokeCertificateAsync(int calibrationId, string reason, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             var cal = await _db.GetCalibrationByIdAsync(calibrationId)
                 ?? throw new InvalidOperationException("Calibration not found.");
 
             cal.Comment = (cal.Comment ?? string.Empty) + $" | Certificate revoked: {reason} ({DateTime.UtcNow:dd.MM.yyyy})";
-            cal.DigitalSignature = GenerateDigitalSignature(cal);
+            ApplySignatureMetadata(cal, signatureMetadata, () => ComputeLegacyDigitalSignature(cal));
 
             await _db.InsertOrUpdateCalibrationAsync(
                 cal,
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
 
@@ -189,7 +194,7 @@ namespace YasGMP.Services
         #region === STATUS & ADVANCED MONITORING ===
 
         /// <inheritdoc />
-        public async Task MarkAsSuccessfulAsync(int calibrationId, int userId)
+        public async Task MarkAsSuccessfulAsync(int calibrationId, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             var cal = await _db.GetCalibrationByIdAsync(calibrationId)
                 ?? throw new InvalidOperationException("Calibration not found.");
@@ -203,7 +208,7 @@ namespace YasGMP.Services
             var prop = typeof(Calibration).GetProperty("NextDue");
             prop?.SetValue(cal, next);
 
-            cal.DigitalSignature = GenerateDigitalSignature(cal);
+            ApplySignatureMetadata(cal, signatureMetadata, () => ComputeLegacyDigitalSignature(cal));
             cal.LastModified = DateTime.UtcNow;
             cal.LastModifiedById = userId;
 
@@ -212,6 +217,7 @@ namespace YasGMP.Services
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
 
@@ -253,24 +259,38 @@ namespace YasGMP.Services
         /// Generates a digital signature for the calibration (Base64 SHA-256).
         /// </summary>
         /// <param name="cal">Calibration entity to sign.</param>
-        private static string GenerateDigitalSignature(Calibration cal)
+        private static void ApplySignatureMetadata(Calibration cal, SignatureMetadataDto? metadata, Func<string> legacyFactory)
+        {
+            if (cal == null) throw new ArgumentNullException(nameof(cal));
+            if (legacyFactory == null) throw new ArgumentNullException(nameof(legacyFactory));
+
+            string hash = metadata?.Hash ?? cal.DigitalSignature ?? legacyFactory();
+            cal.DigitalSignature = hash;
+
+            if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
+            {
+                cal.SourceIp = metadata.IpAddress!;
+            }
+
+        }
+
+        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
+        private static string ComputeLegacyDigitalSignature(Calibration cal)
         {
             string raw = $"{cal.Id}|{cal.ComponentId}|{cal.SupplierId}|{cal.CalibrationDate:O}|{cal.Result}|{DateTime.UtcNow:O}";
             using var sha = SHA256.Create();
             return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
         }
 
-        /// <summary>
-        /// Generates a digital signature for a text payload (Base64 SHA-256).
-        /// </summary>
-        private static string GenerateDigitalSignature(string payload)
+        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
+        private static string ComputeLegacyDigitalSignature(string payload)
         {
             using var sha = SHA256.Create();
-            var text = $"{payload}|{Guid.NewGuid()}";
-            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(text)));
+            var toHash = $"{payload}|{Guid.NewGuid():N}";
+            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)));
         }
 
-        #endregion
+        #endregion        #endregion
 
         #region === AUDIT INTEGRATION ===
 
@@ -286,7 +306,7 @@ namespace YasGMP.Services
                 Action = action,
                 Details = details,
                 ChangedAt = DateTime.UtcNow,
-                DigitalSignature = GenerateDigitalSignature(details)
+                DigitalSignature = ComputeLegacyDigitalSignature(details)
             };
             await _audit.CreateAsync(auditEntry);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -33,12 +34,13 @@ namespace YasGMP.Services
             string ip,
             string deviceInfo,
             string? sessionId,
+            SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
             if (m  is null) throw new ArgumentNullException(nameof(m));
 
-            return db.InsertOrUpdateMachineAsync(m, update: false, actorUserId, ip, deviceInfo, sessionId, token);
+            return db.InsertOrUpdateMachineAsync(m, update: false, actorUserId, ip, deviceInfo, sessionId, signatureMetadata, token);
         }
 
         /// <summary>
@@ -61,12 +63,13 @@ namespace YasGMP.Services
             string ip,
             string deviceInfo,
             string? sessionId,
+            SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
             if (m  is null) throw new ArgumentNullException(nameof(m));
 
-            return db.InsertOrUpdateMachineAsync(m, update: true, actorUserId, ip, deviceInfo, sessionId, token);
+            return db.InsertOrUpdateMachineAsync(m, update: true, actorUserId, ip, deviceInfo, sessionId, signatureMetadata, token);
         }
 
         /// <summary>
@@ -88,12 +91,13 @@ namespace YasGMP.Services
             string ip,
             string deviceInfo,
             string? sessionId,
+            SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
             if (snapshot is null) throw new ArgumentNullException(nameof(snapshot));
 
-            return db.RollbackMachineAsync(snapshot, actorUserId, ip, deviceInfo, sessionId, token);
+            return db.RollbackMachineAsync(snapshot, actorUserId, ip, deviceInfo, sessionId, signatureMetadata, token);
         }
 
         /// <summary>

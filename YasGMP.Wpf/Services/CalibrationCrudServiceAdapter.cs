@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
@@ -42,7 +43,8 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             }
 
             var signature = ApplyContext(calibration, context);
-            await _inner.CreateAsync(calibration, context.UserId).ConfigureAwait(false);
+            var metadata = CreateMetadata(context, signature);
+            await _inner.CreateAsync(calibration, context.UserId, metadata).ConfigureAwait(false);
             calibration.DigitalSignature = signature;
             return calibration.Id;
         }
@@ -55,7 +57,8 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             }
 
             var signature = ApplyContext(calibration, context);
-            await _inner.UpdateAsync(calibration, context.UserId).ConfigureAwait(false);
+            var metadata = CreateMetadata(context, signature);
+            await _inner.UpdateAsync(calibration, context.UserId, metadata).ConfigureAwait(false);
             calibration.DigitalSignature = signature;
         }
 
@@ -114,4 +117,17 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
 
         return signature;
     }
+
+    private static SignatureMetadataDto CreateMetadata(CalibrationCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }
