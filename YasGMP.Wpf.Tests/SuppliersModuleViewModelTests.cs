@@ -55,6 +55,11 @@ public class SuppliersModuleViewModelTests
         Assert.Equal("calibration", supplier.SupplierType.ToLowerInvariant());
         Assert.Equal("info@contoso.example", supplier.Email);
         Assert.Equal("test-signature", supplier.DigitalSignature);
+        var context = Assert.Single(supplierAdapter.SavedContexts);
+        Assert.Equal("test-signature", context.SignatureHash);
+        Assert.Equal("password", context.SignatureMethod);
+        Assert.Equal("valid", context.SignatureStatus);
+        Assert.Equal("Automated test", context.SignatureNote);
         Assert.Collection(signatureDialog.Requests, ctx =>
         {
             Assert.Equal("suppliers", ctx.TableName);
@@ -63,6 +68,15 @@ public class SuppliersModuleViewModelTests
         Assert.Single(signatureDialog.PersistedResults);
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(supplierAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
+        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
+        Assert.True(persistedSignature.Signature.Id > 0);
+        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
+        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
+        Assert.Equal(supplierAdapter.Saved[0].Id, persistedMetadata.RecordId);
+        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
+        Assert.Equal("password", persistedMetadata.Method);
+        Assert.Equal("valid", persistedMetadata.Status);
+        Assert.Equal("Automated test", persistedMetadata.Note);
     }
 
     [Fact]

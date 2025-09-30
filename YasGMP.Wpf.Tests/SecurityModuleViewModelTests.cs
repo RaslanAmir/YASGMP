@@ -53,6 +53,11 @@ public class SecurityModuleViewModelTests
         Assert.Equal("new.user", created.Username);
         Assert.Equal("New User", created.FullName);
         Assert.Equal("test-signature", created.DigitalSignature);
+        var context = Assert.Single(userService.SavedContexts);
+        Assert.Equal("test-signature", context.SignatureHash);
+        Assert.Equal("password", context.SignatureMethod);
+        Assert.Equal("valid", context.SignatureStatus);
+        Assert.Equal("Automated test", context.SignatureNote);
         Assert.Collection(signatureDialog.Requests, ctx =>
         {
             Assert.Equal("users", ctx.TableName);
@@ -61,6 +66,15 @@ public class SecurityModuleViewModelTests
         Assert.Single(signatureDialog.PersistedResults);
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(created.Id, persistedSignature.Signature.RecordId);
+        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
+        Assert.True(persistedSignature.Signature.Id > 0);
+        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
+        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
+        Assert.Equal(created.Id, persistedMetadata.RecordId);
+        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
+        Assert.Equal("password", persistedMetadata.Method);
+        Assert.Equal("valid", persistedMetadata.Status);
+        Assert.Equal("Automated test", persistedMetadata.Note);
         var assignment = Assert.Single(userService.RoleAssignments);
         Assert.Equal(created.Id, assignment.UserId);
         Assert.Contains(adminRole.RoleId, assignment.Roles);
@@ -116,6 +130,13 @@ public class SecurityModuleViewModelTests
         Assert.Equal(7, updated.Id);
         Assert.Equal(string.Empty, viewModel.Editor.NewPassword);
         Assert.Equal(string.Empty, viewModel.Editor.ConfirmPassword);
+        var contexts = userService.SavedContexts.ToList();
+        Assert.NotEmpty(contexts);
+        var context = contexts[^1];
+        Assert.Equal("test-signature", context.SignatureHash);
+        Assert.Equal("password", context.SignatureMethod);
+        Assert.Equal("valid", context.SignatureStatus);
+        Assert.Equal("Automated test", context.SignatureNote);
         Assert.Collection(signatureDialog.Requests, ctx =>
         {
             Assert.Equal("users", ctx.TableName);
@@ -124,6 +145,15 @@ public class SecurityModuleViewModelTests
         Assert.Single(signatureDialog.PersistedResults);
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(7, persistedSignature.Signature.RecordId);
+        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
+        Assert.True(persistedSignature.Signature.Id > 0);
+        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
+        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
+        Assert.Equal(7, persistedMetadata.RecordId);
+        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
+        Assert.Equal("password", persistedMetadata.Method);
+        Assert.Equal("valid", persistedMetadata.Status);
+        Assert.Equal("Automated test", persistedMetadata.Note);
         var assignment = userService.RoleAssignments.Last();
         Assert.Contains(2, assignment.Roles);
     }

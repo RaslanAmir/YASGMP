@@ -65,6 +65,11 @@ public class ComponentsModuleViewModelTests
         Assert.Equal(machineAdapter.Saved[0].Id, persisted.MachineId);
         Assert.Equal("SOP-CMP-100", persisted.SopDoc);
         Assert.Equal("test-signature", persisted.DigitalSignature);
+        var context = Assert.Single(componentAdapter.SavedContexts);
+        Assert.Equal("test-signature", context.SignatureHash);
+        Assert.Equal("password", context.SignatureMethod);
+        Assert.Equal("valid", context.SignatureStatus);
+        Assert.Equal("Automated test", context.SignatureNote);
         Assert.Collection(signatureDialog.Requests, ctx =>
         {
             Assert.Equal("components", ctx.TableName);
@@ -73,6 +78,15 @@ public class ComponentsModuleViewModelTests
         Assert.Single(signatureDialog.PersistedResults);
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(componentAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
+        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
+        Assert.True(persistedSignature.Signature.Id > 0);
+        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
+        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
+        Assert.Equal(componentAdapter.Saved[0].Id, persistedMetadata.RecordId);
+        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
+        Assert.Equal("password", persistedMetadata.Method);
+        Assert.Equal("valid", persistedMetadata.Status);
+        Assert.Equal("Automated test", persistedMetadata.Note);
     }
 
     [Fact]

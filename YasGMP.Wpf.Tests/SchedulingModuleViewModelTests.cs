@@ -43,6 +43,11 @@ public class SchedulingModuleViewModelTests
         var created = Assert.Single(crud.Saved);
         Assert.Equal("weekly digest", created.JobType);
         Assert.False(viewModel.IsDirty);
+        var context = Assert.Single(crud.SavedContexts);
+        Assert.Equal("test-signature", context.SignatureHash);
+        Assert.Equal("password", context.SignatureMethod);
+        Assert.Equal("valid", context.SignatureStatus);
+        Assert.Equal("Automated test", context.SignatureNote);
         Assert.Collection(signatureDialog.Requests, ctx =>
         {
             Assert.Equal("scheduled_jobs", ctx.TableName);
@@ -51,6 +56,15 @@ public class SchedulingModuleViewModelTests
         Assert.Single(signatureDialog.PersistedResults);
         var persistedSignature = signatureDialog.PersistedResults[0];
         Assert.Equal(created.Id, persistedSignature.Signature.RecordId);
+        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
+        Assert.True(persistedSignature.Signature.Id > 0);
+        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
+        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
+        Assert.Equal(created.Id, persistedMetadata.RecordId);
+        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
+        Assert.Equal("password", persistedMetadata.Method);
+        Assert.Equal("valid", persistedMetadata.Status);
+        Assert.Equal("Automated test", persistedMetadata.Note);
     }
 
     [Fact]

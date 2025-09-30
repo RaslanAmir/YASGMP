@@ -49,6 +49,7 @@
 - 2025-11-17: System event logging now records digital signature ids/hashes alongside audit payloads with automatic fallbacks for legacy schemas; unit coverage verifies both the enriched insert and the legacy downgrade path.
 - 2025-11-18: Test electronic signature dialog service now assigns incremental signature ids, clones persisted results, and records hash/method/status/note metadata for assertions while dotnet CLI access remains blocked.
 - 2025-11-19: WPF test CRUD fakes now capture create/update snapshots with contexts to simplify module assertions; dotnet restore/build retries still fail because the CLI is absent in the container.
+- 2025-11-20: WPF module regression tests now pin signature dialog ids, assert CRUD contexts surface signature hash/method/status/note metadata, and confirm persisted signature ids are returned from the enhanced dialog service while dotnet CLI access remains unavailable.
 - `scripts/bootstrap-dotnet9.ps1` added to guide host setup *(installs/verifies .NET 9, Windows SDK, runs restore/build, seeds smoke test fixture).* 
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
