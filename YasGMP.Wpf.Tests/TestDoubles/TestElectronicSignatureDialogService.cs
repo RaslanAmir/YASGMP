@@ -12,9 +12,18 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
 {
     private readonly Queue<CaptureInstruction> _captureQueue = new();
     private readonly Queue<Func<ElectronicSignatureDialogResult, Exception?>> _persistQueue = new();
+    private int _nextSignatureId = 1;
 
     public List<ElectronicSignatureContext> Requests { get; } = new();
     public List<ElectronicSignatureDialogResult> PersistedResults { get; } = new();
+    public List<PersistedSignatureRecord> PersistedSignatureRecords { get; } = new();
+
+    public PersistedSignatureRecord? LastPersistedSignature
+        => PersistedSignatureRecords.Count > 0 ? PersistedSignatureRecords[^1] : null;
+
+    public int? LastPersistedSignatureId => LastPersistedSignature?.SignatureId;
+
+    public int? LastPersistedRecordId => LastPersistedSignature?.RecordId;
 
     public ElectronicSignatureDialogResult DefaultResult { get; set; } = new ElectronicSignatureDialogResult(
         "password",
@@ -196,9 +205,69 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
             throw exception;
         }
 
-        PersistedResults.Add(result);
+        var persistedResult = CloneResult(result);
+        PersistedResults.Add(persistedResult);
+
+        if (persistedResult.Signature is null)
+        {
+            throw new InvalidOperationException("Persisted signature result must include a signature instance.");
+        }
+
+        var assignedSignatureId = _nextSignatureId++;
+
+        result.Signature.Id = assignedSignatureId;
+        persistedResult.Signature.Id = assignedSignatureId;
+
+        PersistedSignatureRecords.Add(new PersistedSignatureRecord(
+            assignedSignatureId,
+            persistedResult.Signature.SignatureHash,
+            persistedResult.Signature.Method,
+            persistedResult.Signature.Status,
+            persistedResult.Signature.Note,
+            persistedResult.Signature.RecordId));
+
         return Task.CompletedTask;
     }
+
+    private static ElectronicSignatureDialogResult CloneResult(ElectronicSignatureDialogResult result)
+    {
+        if (result.Signature is null)
+        {
+            throw new InvalidOperationException("ElectronicSignatureDialogResult.Signature cannot be null.");
+        }
+
+        return result with
+        {
+            Signature = CloneSignature(result.Signature)
+        };
+    }
+
+    private static DigitalSignature CloneSignature(DigitalSignature signature)
+        => new()
+        {
+            Id = signature.Id,
+            TableName = signature.TableName,
+            RecordId = signature.RecordId,
+            UserId = signature.UserId,
+            SignatureHash = signature.SignatureHash,
+            Method = signature.Method,
+            Status = signature.Status,
+            SignedAt = signature.SignedAt,
+            DeviceInfo = signature.DeviceInfo,
+            IpAddress = signature.IpAddress,
+            Note = signature.Note,
+            SessionId = signature.SessionId,
+            UserName = signature.UserName,
+            PublicKey = signature.PublicKey
+        };
+
+    public sealed record PersistedSignatureRecord(
+        int SignatureId,
+        string? SignatureHash,
+        string? Method,
+        string? Status,
+        string? Note,
+        int RecordId);
 
     private sealed record CaptureInstruction(Func<ElectronicSignatureContext, CaptureOutcome> Resolver)
     {
