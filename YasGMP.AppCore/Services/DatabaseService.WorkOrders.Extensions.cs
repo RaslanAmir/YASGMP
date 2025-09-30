@@ -197,6 +197,8 @@ WHERE id=@id";
                 "audit",
                 effectiveDevice,
                 effectiveSession,
+                signatureId: wo.DigitalSignatureId,
+                signatureHash: wo.DigitalSignature,
                 token: token
             ).ConfigureAwait(false);
 
@@ -551,6 +553,8 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                 "audit",
                 request.DeviceInfo,
                 request.SessionId,
+                signatureId: signatureId,
+                signatureHash: request.SignatureHash,
                 token: token).ConfigureAwait(false);
 
             attachmentService ??= ServiceLocator.GetRequiredService<IAttachmentService>();

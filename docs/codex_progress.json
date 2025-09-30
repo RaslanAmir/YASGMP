@@ -21,7 +21,8 @@
       "2025-11-02: dotnet restore/build retried; CLI remains unavailable so commands exit with 'command not found'.",
       "2025-11-07: dotnet restore retried; CLI still missing in container so all dotnet commands fail with 'command not found'.",
       "2025-11-08: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
-      "2025-11-09: dotnet restore/build/test retried; CLI still missing in the container so all dotnet commands fail with 'command not found'."
+      "2025-11-09: dotnet restore/build/test retried; CLI still missing in the container so all dotnet commands fail with 'command not found'.",
+      "2025-11-17: dotnet restore/build retried; CLI still missing in container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -43,7 +44,8 @@
       "name": "Cross-cutting services",
       "status": "in-progress",
       "notes": [
-        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters and AppCore services propagate optional signature metadata through to persistence with legacy hash fallback when metadata is absent; audit surfacing still pending until SDK access returns"
+        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters and AppCore services propagate optional signature metadata through to persistence with legacy hash fallback when metadata is absent; audit surfacing still pending until SDK access returns",
+        "Audit logging now includes signature id/hash metadata with graceful fallbacks and unit coverage for both modern and legacy schemas."
       ]
     },
     {
@@ -74,7 +76,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: hydrate signature ids on read queries",
+  "lastCommitSummary": "feat: enrich audit logs with signature identifiers",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -136,6 +138,7 @@
     "2025-11-13: AppCore services and database helpers now accept optional SignatureMetadataDto values, persisting supplied hashes/IP/session/device data while falling back to the legacy generator when metadata is absent; WPF adapters forward DTOs downstream.",
     "2025-11-14: DatabaseService helpers now write digital_signature_id columns when present, fall back for legacy schemas, and upsert digital_signatures with method/status/note metadata while propagating the resulting id back to SignatureMetadataDto consumers.",
     "2025-11-15: Read paths for work orders, calibrations, and parts now include digital_signature_id with safe fallbacks so UI/audit layers can rely on persisted signature references even on legacy schemas.",
-    "2025-11-16: CAPA service/interface now forward optional SignatureMetadataDto payloads through DatabaseService.Capa helpers so signatures persist with IP/device/session context while dotnet restore/build remain blocked by the missing CLI."
+    "2025-11-16: CAPA service/interface now forward optional SignatureMetadataDto payloads through DatabaseService.Capa helpers so signatures persist with IP/device/session context while dotnet restore/build remain blocked by the missing CLI.",
+    "2025-11-17: System event logging now records digital signature ids/hashes with legacy fallbacks verified by new unit tests."
   ]
 }

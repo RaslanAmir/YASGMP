@@ -46,6 +46,7 @@
 - 2025-11-14: Database helpers for machines, work orders, calibrations, suppliers, and parts now persist digital_signature_id columns when present, tolerate legacy schemas, and upsert the digital_signatures table with hash/method/status/note metadata while propagating the resulting signature id back to DTOs and audit flows.
 - 2025-11-15: Read-side queries for calibrations, work orders, and parts now prefer the digital_signature_id column with legacy fallbacks so editors and audit trails can reuse persisted signature references regardless of schema vintage.
 - 2025-11-16: CAPA service/interface now accept optional `SignatureMetadataDto` arguments propagated from the WPF adapter; DatabaseService.Capa helpers persist the metadata into `digital_signatures` while preserving legacy overloads, and `dotnet restore/build` attempts still fail because the CLI is absent inside the container (`command not found`).
+- 2025-11-17: System event logging now records digital signature ids/hashes alongside audit payloads with automatic fallbacks for legacy schemas; unit coverage verifies both the enriched insert and the legacy downgrade path.
 - `scripts/bootstrap-dotnet9.ps1` added to guide host setup *(installs/verifies .NET 9, Windows SDK, runs restore/build, seeds smoke test fixture).* 
 - `YasGMP.Wpf` already targets .NET 9 and references pinned packages; validate once builds are possible.
 - `tests/fixtures/hello.txt` seeded for upcoming smoke harness scenarios.
