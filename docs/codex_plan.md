@@ -16,7 +16,7 @@
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
-- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; audit surfacing still pending until SDK access returns)*
+- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters now push captured signature metadata into entities/audit stamps while core APIs await expansion; audit surfacing still pending until SDK access returns)*
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
   - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
@@ -89,6 +89,7 @@
 - 2025-10-28: Audit filters now keep the user's "To" picker intact while ordering the query bounds when the upper date precedes the lower; WPF coverage adds a default-from regression asserting the service respects the earlier upper bound.
 - 2025-10-29: Audit filters now order query bounds by min/max so inverted ranges still span the full window while preserving the user's "To" picker; WPF regression coverage asserts the service receives the later bound's end-of-day timestamp.
 - 2025-11-11: CRUD context factories now expose signature id/hash/method/status/note members with an overload that accepts `ElectronicSignatureDialogResult`, letting module save flows hydrate audit metadata alongside user/IP/session defaults.
+- 2025-11-12: Machine, Work Order, Calibration, Supplier, and Part adapters now hydrate captured signature hash/method/status/note onto their entities before persistence and include the metadata in supplier/part audit stamps while core services await extended signatures support.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
 - 2025-09-26: Assets editor now drives MachineService CRUD + validation with mode-aware UI; run smoke harness once SDK restored.
 - 2025-09-27: Components module now surfaces a CRUD-capable editor using ComponentService with machine lookups; attachments/e-signature integration tracked under Batch B2.

@@ -37,15 +37,27 @@ namespace YasGMP.Wpf.Services
         public async Task<int> CreateAsync(Machine machine, MachineCrudContext context)
         {
             if (machine is null) throw new ArgumentNullException(nameof(machine));
+
+            var signature = ApplyContext(machine, context);
+
             await _inner.CreateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId)
                 .ConfigureAwait(false);
+
+            // Preserve the captured signature metadata for the caller until core services accept it directly.
+            machine.DigitalSignature = signature;
             return machine.Id;
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public async Task UpdateAsync(Machine machine, MachineCrudContext context)
         {
             if (machine is null) throw new ArgumentNullException(nameof(machine));
-            return _inner.UpdateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId);
+
+            var signature = ApplyContext(machine, context);
+
+            await _inner.UpdateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId)
+                .ConfigureAwait(false);
+
+            machine.DigitalSignature = signature;
         }
 
         public void Validate(Machine machine)
@@ -55,5 +67,44 @@ namespace YasGMP.Wpf.Services
         }
 
         public string NormalizeStatus(string? status) => MachineService.NormalizeStatus(status);
+
+        private static string ApplyContext(Machine machine, MachineCrudContext context)
+        {
+            var signature = context.SignatureHash ?? machine.DigitalSignature ?? string.Empty;
+            machine.DigitalSignature = signature;
+
+            if (context.UserId > 0)
+            {
+                machine.LastModifiedById = context.UserId;
+            }
+
+            SetExtraField(machine, "signature.id", context.SignatureId);
+            SetExtraField(machine, "signature.hash", signature);
+            SetExtraField(machine, "signature.method", context.SignatureMethod);
+            SetExtraField(machine, "signature.status", context.SignatureStatus);
+            SetExtraField(machine, "signature.note", context.SignatureNote);
+            SetExtraField(machine, "signature.ip", context.Ip);
+            SetExtraField(machine, "signature.device", context.DeviceInfo);
+            SetExtraField(machine, "signature.session", context.SessionId);
+
+            return signature;
+        }
+
+        private static void SetExtraField(Machine machine, string key, object? value)
+        {
+            if (machine.ExtraFields is null)
+            {
+                return;
+            }
+
+            if (value is null)
+            {
+                machine.ExtraFields.Remove(key);
+            }
+            else
+            {
+                machine.ExtraFields[key] = value;
+            }
+        }
     }
 }

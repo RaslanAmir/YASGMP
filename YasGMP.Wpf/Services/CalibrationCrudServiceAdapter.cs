@@ -34,28 +34,30 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
         }
     }
 
-    public async Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
-    {
-        if (calibration is null)
+        public async Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
         {
-            throw new ArgumentNullException(nameof(calibration));
+            if (calibration is null)
+            {
+                throw new ArgumentNullException(nameof(calibration));
+            }
+
+            var signature = ApplyContext(calibration, context);
+            await _inner.CreateAsync(calibration, context.UserId).ConfigureAwait(false);
+            calibration.DigitalSignature = signature;
+            return calibration.Id;
         }
 
-        ApplyContext(calibration, context);
-        await _inner.CreateAsync(calibration, context.UserId).ConfigureAwait(false);
-        return calibration.Id;
-    }
-
-    public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
-    {
-        if (calibration is null)
+        public async Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
         {
-            throw new ArgumentNullException(nameof(calibration));
-        }
+            if (calibration is null)
+            {
+                throw new ArgumentNullException(nameof(calibration));
+            }
 
-        ApplyContext(calibration, context);
-        return _inner.UpdateAsync(calibration, context.UserId);
-    }
+            var signature = ApplyContext(calibration, context);
+            await _inner.UpdateAsync(calibration, context.UserId).ConfigureAwait(false);
+            calibration.DigitalSignature = signature;
+        }
 
     public void Validate(Calibration calibration)
     {
@@ -95,9 +97,21 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
         }
     }
 
-    private static void ApplyContext(Calibration calibration, CalibrationCrudContext context)
+    private static string ApplyContext(Calibration calibration, CalibrationCrudContext context)
     {
-        calibration.LastModifiedById = context.UserId;
-        calibration.SourceIp = context.Ip;
+        var signature = context.SignatureHash ?? calibration.DigitalSignature ?? string.Empty;
+        calibration.DigitalSignature = signature;
+
+        if (context.UserId > 0)
+        {
+            calibration.LastModifiedById = context.UserId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.Ip))
+        {
+            calibration.SourceIp = context.Ip;
+        }
+
+        return signature;
     }
 }

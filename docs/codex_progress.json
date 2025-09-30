@@ -43,7 +43,7 @@
       "name": "Cross-cutting services",
       "status": "in-progress",
       "notes": [
-        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; audit surfacing still pending"
+        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters now hydrate captured signature metadata onto entities/audit stamps while core APIs await expansion; audit surfacing still pending"
       ]
     },
     {
@@ -119,6 +119,7 @@
     "2025-10-27: Audit filters now clamp the lower bound when the upper bound is moved earlier while keeping the selected end date intact; new WPF regression test ensures persisted filters and query arguments align.",
     "2025-10-28: Audit filters now retain the user's To picker while reordering the query bounds if the upper date precedes the lower; tests cover both existing From overrides and default-from scenarios.",
     "2025-11-11: CRUD context factories in the WPF services now capture signature id/hash/method/status/note and surface an overload that accepts `ElectronicSignatureDialogResult`, enabling modules to forward dialog metadata alongside user/IP/session defaults before hitting adapters.",
+    "2025-11-12: Machine, Work Order, Calibration, Supplier, and Part WPF adapters now apply captured signature hash/method/status/note to entities before persistence and include the metadata in supplier/part audit logging while awaiting core signature API expansion.",
     "2025-10-29: Audit module now orders inverted date ranges by min/max while preserving the user-selected To value; WPF tests assert the later bound reaches AuditService at end-of-day.",
     "2025-10-30: WPF modules now route uploads through AttachmentWorkflowService so dedup, retention, and encryption follow the MAUI conventions; DI registration updated and commands now surface dedup status messaging.",
     "2025-10-31: WPF shell adds an IElectronicSignatureDialogService that drives the signature dialog, captures the operator password/PIN with GMP reason text, and persists through DatabaseServiceDigitalSignaturesExtensions before dismissing.",

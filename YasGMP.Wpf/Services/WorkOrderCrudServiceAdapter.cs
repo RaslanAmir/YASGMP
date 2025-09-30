@@ -29,28 +29,38 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
         }
     }
 
-    public async Task<int> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
-    {
-        if (workOrder is null)
+        public async Task<int> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
-            throw new ArgumentNullException(nameof(workOrder));
+            if (workOrder is null)
+            {
+                throw new ArgumentNullException(nameof(workOrder));
+            }
+
+            Validate(workOrder);
+
+            var signature = ApplyContext(workOrder, context);
+
+            await _service.CreateAsync(workOrder, context.UserId).ConfigureAwait(false);
+
+            workOrder.DigitalSignature = signature;
+            return workOrder.Id;
         }
 
-        Validate(workOrder);
-        await _service.CreateAsync(workOrder, context.UserId).ConfigureAwait(false);
-        return workOrder.Id;
-    }
-
-    public async Task UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
-    {
-        if (workOrder is null)
+        public async Task UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
-            throw new ArgumentNullException(nameof(workOrder));
-        }
+            if (workOrder is null)
+            {
+                throw new ArgumentNullException(nameof(workOrder));
+            }
 
-        Validate(workOrder);
-        await _service.UpdateAsync(workOrder, context.UserId).ConfigureAwait(false);
-    }
+            Validate(workOrder);
+
+            var signature = ApplyContext(workOrder, context);
+
+            await _service.UpdateAsync(workOrder, context.UserId).ConfigureAwait(false);
+
+            workOrder.DigitalSignature = signature;
+        }
 
     public void Validate(WorkOrder workOrder)
     {
@@ -83,5 +93,33 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
         {
             throw new InvalidOperationException("Work order must record the creator.");
         }
+    }
+
+    private static string ApplyContext(WorkOrder workOrder, WorkOrderCrudContext context)
+    {
+        var signature = context.SignatureHash ?? workOrder.DigitalSignature ?? string.Empty;
+        workOrder.DigitalSignature = signature;
+
+        if (context.UserId > 0)
+        {
+            workOrder.LastModifiedById = context.UserId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.DeviceInfo))
+        {
+            workOrder.DeviceInfo = context.DeviceInfo;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.Ip))
+        {
+            workOrder.SourceIp = context.Ip;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.SessionId))
+        {
+            workOrder.SessionId = context.SessionId!;
+        }
+
+        return signature;
     }
 }
