@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -43,14 +42,30 @@ namespace YasGMP.Services
         /// <summary>
         /// Kreira novi stroj (potpis + audit). Status se normalizira na kanonsku vrijednost.
         /// </summary>
-        public async Task CreateAsync(Machine machine, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
+        public async Task CreateAsync(
+            Machine machine,
+            int userId,
+            string ip = "system",
+            string deviceInfo = "server",
+            string? sessionId = null,
+            SignatureMetadataDto? signatureMetadata = null)
         {
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             ValidateMachine(machine);
             machine.Status = NormalizeStatus(machine.Status);
-            machine.DigitalSignature = GenerateDigitalSignature(machine);
+            ApplySignatureMetadata(machine, signatureMetadata, () => GenerateLegacyDigitalSignature(machine));
 
-            await _db.InsertOrUpdateMachineAsync(machine, update: false, actorUserId: userId, ip: ip, deviceInfo: deviceInfo, sessionId: sessionId);
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo;
+            string? effectiveSession = signatureMetadata?.Session ?? sessionId;
+
+            await _db.InsertOrUpdateMachineAsync(
+                machine,
+                update: false,
+                actorUserId: userId,
+                ip: ip,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureMetadata: signatureMetadata);
 
             await _audit.LogSystemEventAsync("MACHINE_CREATE",
                 $"✅ Kreiran novi stroj: ID={machine.Id}, Name={machine.Name}, Location={machine.Location}");
@@ -59,14 +74,30 @@ namespace YasGMP.Services
         /// <summary>
         /// Ažurira postojeći stroj (novi potpis + audit). Status se normalizira.
         /// </summary>
-        public async Task UpdateAsync(Machine machine, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
+        public async Task UpdateAsync(
+            Machine machine,
+            int userId,
+            string ip = "system",
+            string deviceInfo = "server",
+            string? sessionId = null,
+            SignatureMetadataDto? signatureMetadata = null)
         {
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             ValidateMachine(machine);
             machine.Status = NormalizeStatus(machine.Status);
-            machine.DigitalSignature = GenerateDigitalSignature(machine);
+            ApplySignatureMetadata(machine, signatureMetadata, () => GenerateLegacyDigitalSignature(machine));
 
-            await _db.InsertOrUpdateMachineAsync(machine, update: true, actorUserId: userId, ip: ip, deviceInfo: deviceInfo, sessionId: sessionId);
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo;
+            string? effectiveSession = signatureMetadata?.Session ?? sessionId;
+
+            await _db.InsertOrUpdateMachineAsync(
+                machine,
+                update: true,
+                actorUserId: userId,
+                ip: ip,
+                deviceInfo: effectiveDevice,
+                sessionId: effectiveSession,
+                signatureMetadata: signatureMetadata);
 
             await _audit.LogSystemEventAsync("MACHINE_UPDATE",
                 $"♻️ Ažuriran stroj: ID={machine.Id}, Name={machine.Name}, Location={machine.Location}");
@@ -146,13 +177,24 @@ namespace YasGMP.Services
 
         #region === DIGITAL SIGNATURE =========================================================
 
-        /// <summary>Generira deterministički potpis (SHA-256) koji uključuje i normalizirani status.</summary>
-        private string GenerateDigitalSignature(Machine machine)
+        /// <summary>Applies captured signature metadata (or generates a legacy signature when absent).</summary>
+        private static void ApplySignatureMetadata(Machine machine, SignatureMetadataDto? metadata, Func<string> legacyFactory)
+        {
+            if (machine == null) throw new ArgumentNullException(nameof(machine));
+            if (legacyFactory == null) throw new ArgumentNullException(nameof(legacyFactory));
+
+            string hash = metadata?.Hash ?? machine.DigitalSignature ?? legacyFactory();
+            machine.DigitalSignature = hash;
+        }
+
+        /// <summary>Legacy deterministic signature generator retained for backward compatibility.</summary>
+        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
+        private string GenerateLegacyDigitalSignature(Machine machine)
         {
             string status = NormalizeStatus(machine.Status);
             string raw = $"{machine.Id}|{machine.Name}|{machine.Location}|{machine.UrsDoc}|{status}|{DateTime.UtcNow:O}";
-            using var sha = SHA256.Create();
-            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw)));
         }
 
         #endregion

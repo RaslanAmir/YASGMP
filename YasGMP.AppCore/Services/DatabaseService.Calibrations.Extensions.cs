@@ -88,13 +88,24 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
             return list;
         }
 
-        public static async Task<int> InsertOrUpdateCalibrationAsync(this DatabaseService db, Calibration c, bool update, int actorUserId, string ip, string device, CancellationToken token = default)
+        public static async Task<int> InsertOrUpdateCalibrationAsync(this DatabaseService db, Calibration c, bool update, int actorUserId, string ip, string device, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
             if (c == null) throw new ArgumentNullException(nameof(c));
 
-            string insert = @"INSERT INTO calibrations (component_id, supplier_id, calibration_date, next_due, cert_doc, result, comment, digital_signature)
-                              VALUES (@cid,@sid,@cd,@due,@doc,@res,@comm,@sig)";
-            string updateSql = @"UPDATE calibrations SET component_id=@cid, supplier_id=@sid, calibration_date=@cd, next_due=@due, cert_doc=@doc, result=@res, comment=@comm, digital_signature=@sig WHERE id=@id";
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress) ? signatureMetadata!.IpAddress! : ip ?? string.Empty;
+            string effectiveDevice = signatureMetadata?.Device ?? device ?? string.Empty;
+            string? effectiveSession = signatureMetadata?.Session;
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Hash))
+            {
+                c.DigitalSignature = signatureMetadata!.Hash!;
+            }
+
+            c.SourceIp = effectiveIp;
+
+            string insert = @"INSERT INTO calibrations (component_id, supplier_id, calibration_date, next_due, cert_doc, result, comment, digital_signature, source_ip)
+                              VALUES (@cid,@sid,@cd,@due,@doc,@res,@comm,@sig,@ip)";
+            string updateSql = @"UPDATE calibrations SET component_id=@cid, supplier_id=@sid, calibration_date=@cd, next_due=@due, cert_doc=@doc, result=@res, comment=@comm, digital_signature=@sig, source_ip=@ip WHERE id=@id";
 
             var pars = new List<MySqlParameter>
             {
@@ -105,7 +116,8 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
                 new("@doc", c.CertDoc ?? string.Empty),
                 new("@res", c.Result ?? string.Empty),
                 new("@comm", c.Comment ?? string.Empty),
-                new("@sig", c.DigitalSignature ?? string.Empty)
+                new("@sig", c.DigitalSignature ?? string.Empty),
+                new("@ip", effectiveIp)
             };
             if (update) pars.Add(new MySqlParameter("@id", c.Id));
 
@@ -120,13 +132,13 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
                 await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
             }
 
-            await db.LogSystemEventAsync(actorUserId, update ? "CAL_UPDATE" : "CAL_CREATE", "calibrations", "CalibrationModule", c.Id, null, ip, "audit", device, null, token: token).ConfigureAwait(false);
+            await db.LogSystemEventAsync(actorUserId, update ? "CAL_UPDATE" : "CAL_CREATE", "calibrations", "CalibrationModule", c.Id, null, effectiveIp, "audit", effectiveDevice, effectiveSession, token: token).ConfigureAwait(false);
             return c.Id;
         }
 
         // Overload without device parameter (back-compat with callers)
         public static Task<int> InsertOrUpdateCalibrationAsync(this DatabaseService db, Calibration c, bool update, int actorUserId, string ip, CancellationToken token = default)
-            => db.InsertOrUpdateCalibrationAsync(c, update, actorUserId, ip, device: string.Empty, token);
+            => db.InsertOrUpdateCalibrationAsync(c, update, actorUserId, ip, device: string.Empty, signatureMetadata: null, token);
 
         public static async Task DeleteCalibrationAsync(this DatabaseService db, int id, int actorUserId, string ip, string device, CancellationToken token = default)
         {

@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -27,10 +28,29 @@ namespace YasGMP.Services
             return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
         }
 
-        public static async Task<int> InsertOrUpdatePartAsync(this DatabaseService db, Part part, bool update, CancellationToken token = default)
+        public static async Task<int> InsertOrUpdatePartAsync(this DatabaseService db, Part part, bool update, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
-            if (!update) return await db.AddSparePartAsync(part, actorUserId: 0, ip: string.Empty, deviceInfo: string.Empty, token).ConfigureAwait(false);
-            await db.UpdateSparePartAsync(part, actorUserId: 0, ip: string.Empty, deviceInfo: string.Empty, token).ConfigureAwait(false);
+            if (part == null) throw new ArgumentNullException(nameof(part));
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Hash))
+            {
+                part.DigitalSignature = signatureMetadata!.Hash!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress))
+            {
+                part.SourceIp = signatureMetadata!.IpAddress!;
+            }
+
+            string ip = signatureMetadata?.IpAddress ?? string.Empty;
+            string device = signatureMetadata?.Device ?? string.Empty;
+
+            if (!update)
+            {
+                return await db.AddSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, token).ConfigureAwait(false);
+            }
+
+            await db.UpdateSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, token).ConfigureAwait(false);
             return part.Id;
         }
 

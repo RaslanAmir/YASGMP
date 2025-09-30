@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -197,9 +198,21 @@ LIMIT 1";
             string ip,
             string deviceInfo,
             string? sessionId,
+            SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
         {
             if (m == null) throw new ArgumentNullException(nameof(m));
+
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress)
+                ? signatureMetadata!.IpAddress!
+                : ip ?? string.Empty;
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo ?? string.Empty;
+            string? effectiveSession = signatureMetadata?.Session ?? sessionId;
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Hash))
+            {
+                m.DigitalSignature = signatureMetadata!.Hash!;
+            }
 
             // Hard guard: ensure non-null/non-empty machine code so DB never receives NULL
             string codeVal = m.Code ?? string.Empty;
@@ -230,7 +243,7 @@ INSERT INTO machines
   urs_doc, serial_number, acquisition_cost,
   rfid_tag, qr_code, iot_device_id, cloud_device_guid,
   is_critical, lifecycle_phase, note,
-  internal_code, qr_payload)
+  internal_code, qr_payload, digital_signature)
 VALUES
  (COALESCE(NULLIF(@code,''), CONCAT('MCH-AUTO-', DATE_FORMAT(UTC_TIMESTAMP(), '%Y%m%d%H%i%s'))), @name,
   (SELECT id FROM machine_types       WHERE name=@type     LIMIT 1),
@@ -244,7 +257,8 @@ VALUES
   @urs, @sn, @cost,
   @rfid, @qr, @iot, @cloud,
   @critical, @phase, @note,
-  @internal_code, @qr_payload)";
+  @internal_code, @qr_payload,
+  @sig)";
 
             // Robust UPDATE: do not allow NULL/empty code to overwrite existing
             string updateSql = @"
@@ -276,7 +290,8 @@ UPDATE machines SET
   lifecycle_phase      = @phase,
   note                 = @note,
   internal_code        = COALESCE(@internal_code, internal_code),
-  qr_payload           = COALESCE(@qr_payload,  qr_payload)
+  qr_payload           = COALESCE(@qr_payload,  qr_payload),
+  digital_signature    = @sig
 WHERE id=@id";
 
             var pars = new List<MySqlParameter>
@@ -306,7 +321,8 @@ WHERE id=@id";
                 new("@phase", (object?)m.LifecyclePhase ?? DBNull.Value),
                 new("@note", (object?)m.Note ?? DBNull.Value),
                 new("@internal_code", (object?)m.InternalCode ?? DBNull.Value),
-                new("@qr_payload",  (object?)m.QrPayload  ?? DBNull.Value)
+                new("@qr_payload",  (object?)m.QrPayload  ?? DBNull.Value),
+                new("@sig", (object?)m.DigitalSignature ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", m.Id));
 
@@ -352,6 +368,7 @@ WHERE id=@id";
                     Add("note",              "@note");
                     Add("internal_code",     "@internal_code");
                     Add("qr_payload",        "@qr_payload");
+                    Add("digital_signature", "@sig");
 
                     string fallbackInsert = $"INSERT INTO machines (" + string.Join(",", colList) + ") VALUES (" + string.Join(",", valList) + ")";
                     await db.ExecuteNonQueryAsync(fallbackInsert, pars.ToArray(), token).ConfigureAwait(false);
@@ -397,6 +414,7 @@ WHERE id=@id";
                     S("note",              "@note");
                     S("internal_code",     "COALESCE(@internal_code, internal_code)");
                     S("qr_payload",        "COALESCE(@qr_payload,  qr_payload)");
+                    S("digital_signature", "@sig");
 
                     string fallbackUpdate = "UPDATE machines SET " + string.Join(", ", sets) + " WHERE id=@id";
                     await db.ExecuteNonQueryAsync(fallbackUpdate, pars, token).ConfigureAwait(false);
@@ -410,10 +428,10 @@ WHERE id=@id";
                 "MachineModule",
                 m.Id,
                 m.Name,
-                ip,
+                effectiveIp,
                 "audit",
-                deviceInfo,
-                sessionId,
+                effectiveDevice,
+                effectiveSession,
                 token: token
             ).ConfigureAwait(false);
 
@@ -427,8 +445,9 @@ WHERE id=@id";
             string ip,
             string deviceInfo,
             string? sessionId,
+            SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
-            => db.InsertOrUpdateMachineAsync(snapshot, update: true, actorUserId, ip, deviceInfo, sessionId, token);
+            => db.InsertOrUpdateMachineAsync(snapshot, update: true, actorUserId, ip, deviceInfo, sessionId, signatureMetadata, token);
 
         public static async Task<string> ExportMachinesAsync(
             this DatabaseService db,

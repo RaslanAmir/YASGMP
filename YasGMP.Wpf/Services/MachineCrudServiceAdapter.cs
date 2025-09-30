@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
@@ -39,8 +40,9 @@ namespace YasGMP.Wpf.Services
             if (machine is null) throw new ArgumentNullException(nameof(machine));
 
             var signature = ApplyContext(machine, context);
+            var metadata = CreateMetadata(context, signature);
 
-            await _inner.CreateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId)
+            await _inner.CreateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId, metadata)
                 .ConfigureAwait(false);
 
             // Preserve the captured signature metadata for the caller until core services accept it directly.
@@ -53,8 +55,9 @@ namespace YasGMP.Wpf.Services
             if (machine is null) throw new ArgumentNullException(nameof(machine));
 
             var signature = ApplyContext(machine, context);
+            var metadata = CreateMetadata(context, signature);
 
-            await _inner.UpdateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId)
+            await _inner.UpdateAsync(machine, context.UserId, context.Ip, context.DeviceInfo, context.SessionId, metadata)
                 .ConfigureAwait(false);
 
             machine.DigitalSignature = signature;
@@ -106,5 +109,18 @@ namespace YasGMP.Wpf.Services
                 machine.ExtraFields[key] = value;
             }
         }
+
+        private static SignatureMetadataDto CreateMetadata(MachineCrudContext context, string signature)
+            => new()
+            {
+                Id = context.SignatureId,
+                Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+                Method = context.SignatureMethod,
+                Status = context.SignatureStatus,
+                Note = context.SignatureNote,
+                Session = context.SessionId,
+                Device = context.DeviceInfo,
+                IpAddress = context.Ip
+            };
     }
 }

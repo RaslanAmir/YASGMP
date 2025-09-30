@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -42,25 +43,25 @@ namespace YasGMP.Services
         }
 
         /// <summary>Kreira novi rezervni dio i bilježi audit događaj.</summary>
-        public async Task CreateAsync(Part part, int userId)
+        public async Task CreateAsync(Part part, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             if (part == null) throw new ArgumentNullException(nameof(part));
             ValidatePart(part);
 
-            part.DigitalSignature = GenerateDigitalSignature(part);
-            await _db.InsertOrUpdatePartAsync(part, update: false);
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
+            await _db.InsertOrUpdatePartAsync(part, update: false, signatureMetadata: signatureMetadata);
 
             await _audit.LogSystemEventAsync("PART_CREATE", $"Dodani novi dio ID={part.Id}, Name={part.Name}, Stock={part.Stock}");
         }
 
         /// <summary>Ažurira postojeći rezervni dio i bilježi audit događaj.</summary>
-        public async Task UpdateAsync(Part part, int userId)
+        public async Task UpdateAsync(Part part, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             if (part == null) throw new ArgumentNullException(nameof(part));
             ValidatePart(part);
 
-            part.DigitalSignature = GenerateDigitalSignature(part);
-            await _db.InsertOrUpdatePartAsync(part, update: true);
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
+            await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
 
             await _audit.LogSystemEventAsync("PART_UPDATE", $"Ažuriran dio ID={part.Id}, Name={part.Name}, Stock={part.Stock}");
         }
@@ -76,26 +77,26 @@ namespace YasGMP.Services
 
         #region === STOCK MANAGEMENT ===
 
-        public async Task IncreaseStockAsync(int partId, int amount, int userId)
+        public async Task IncreaseStockAsync(int partId, int amount, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             var part = await GetByIdAsync(partId);
             part.Stock += amount;
-            part.DigitalSignature = GenerateDigitalSignature(part);
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
 
-            await _db.InsertOrUpdatePartAsync(part, update: true);
+            await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
             await _audit.LogSystemEventAsync("PART_STOCK_INCREASE", $"Povećana zaliha za dio ID={part.Id} za {amount}, nova zaliha={part.Stock}");
         }
 
-        public async Task DecreaseStockAsync(int partId, int amount, int userId)
+        public async Task DecreaseStockAsync(int partId, int amount, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             var part = await GetByIdAsync(partId);
             if (part.Stock - amount < 0)
                 throw new InvalidOperationException("Zaliha ne može biti negativna.");
 
             part.Stock -= amount;
-            part.DigitalSignature = GenerateDigitalSignature(part);
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
 
-            await _db.InsertOrUpdatePartAsync(part, update: true);
+            await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
             await _audit.LogSystemEventAsync("PART_STOCK_DECREASE", $"Smanjena zaliha za dio ID={part.Id} za {amount}, nova zaliha={part.Stock}");
         }
 
@@ -125,7 +126,22 @@ namespace YasGMP.Services
 
         #region === DIGITAL SIGNATURE ===
 
-        private string GenerateDigitalSignature(Part part)
+        private static void ApplySignatureMetadata(Part part, SignatureMetadataDto? metadata, Func<string> legacyFactory)
+        {
+            if (part == null) throw new ArgumentNullException(nameof(part));
+            if (legacyFactory == null) throw new ArgumentNullException(nameof(legacyFactory));
+
+            string hash = metadata?.Hash ?? part.DigitalSignature ?? legacyFactory();
+            part.DigitalSignature = hash;
+
+            if (!string.IsNullOrWhiteSpace(metadata?.IpAddress))
+            {
+                part.SourceIp = metadata.IpAddress!;
+            }
+        }
+
+        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
+        private string ComputeLegacyDigitalSignature(Part part)
         {
             string supplierName = GetSupplierNameForSignature(part);
             string raw = $"{part.Id}|{part.Code}|{part.Name}|{supplierName}|{DateTime.UtcNow:O}";

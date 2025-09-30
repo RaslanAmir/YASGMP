@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
@@ -39,8 +40,9 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             Validate(workOrder);
 
             var signature = ApplyContext(workOrder, context);
+            var metadata = CreateMetadata(context, signature);
 
-            await _service.CreateAsync(workOrder, context.UserId).ConfigureAwait(false);
+            await _service.CreateAsync(workOrder, context.UserId, metadata).ConfigureAwait(false);
 
             workOrder.DigitalSignature = signature;
             return workOrder.Id;
@@ -56,8 +58,9 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             Validate(workOrder);
 
             var signature = ApplyContext(workOrder, context);
+            var metadata = CreateMetadata(context, signature);
 
-            await _service.UpdateAsync(workOrder, context.UserId).ConfigureAwait(false);
+            await _service.UpdateAsync(workOrder, context.UserId, metadata).ConfigureAwait(false);
 
             workOrder.DigitalSignature = signature;
         }
@@ -122,4 +125,17 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
 
         return signature;
     }
+
+    private static SignatureMetadataDto CreateMetadata(WorkOrderCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

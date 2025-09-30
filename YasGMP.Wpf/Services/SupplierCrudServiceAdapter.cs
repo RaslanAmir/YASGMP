@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
@@ -39,8 +40,9 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
         }
 
         var signature = ApplyContext(supplier, context);
+        var metadata = CreateMetadata(context, signature);
 
-        await _supplierService.CreateAsync(supplier, context.UserId).ConfigureAwait(false);
+        await _supplierService.CreateAsync(supplier, context.UserId, metadata).ConfigureAwait(false);
 
         supplier.DigitalSignature = signature;
         await StampAsync(supplier, context, "CREATE", signature).ConfigureAwait(false);
@@ -55,8 +57,9 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
         }
 
         var signature = ApplyContext(supplier, context);
+        var metadata = CreateMetadata(context, signature);
 
-        await _supplierService.UpdateAsync(supplier, context.UserId).ConfigureAwait(false);
+        await _supplierService.UpdateAsync(supplier, context.UserId, metadata).ConfigureAwait(false);
 
         supplier.DigitalSignature = signature;
         await StampAsync(supplier, context, "UPDATE", signature).ConfigureAwait(false);
@@ -211,4 +214,17 @@ WHERE id=@id";
 
         return signature;
     }
+
+    private static SignatureMetadataDto CreateMetadata(SupplierCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

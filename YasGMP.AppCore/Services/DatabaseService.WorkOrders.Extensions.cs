@@ -34,20 +34,59 @@ namespace YasGMP.Services
             string ip,
             string deviceInfo,
             string? sessionId,
+            SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
         {
+            if (wo == null) throw new ArgumentNullException(nameof(wo));
+
+            string effectiveIp = !string.IsNullOrWhiteSpace(signatureMetadata?.IpAddress) ? signatureMetadata!.IpAddress! : ip ?? string.Empty;
+            string effectiveDevice = signatureMetadata?.Device ?? deviceInfo ?? string.Empty;
+            string? effectiveSession = signatureMetadata?.Session ?? sessionId;
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Hash))
+            {
+                wo.DigitalSignature = signatureMetadata!.Hash!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Device))
+            {
+                wo.DeviceInfo = signatureMetadata!.Device;
+            }
+            else if (!string.IsNullOrWhiteSpace(wo.DeviceInfo))
+            {
+                effectiveDevice = wo.DeviceInfo!;
+            }
+            else if (!string.IsNullOrWhiteSpace(effectiveDevice))
+            {
+                wo.DeviceInfo = effectiveDevice;
+            }
+
+            if (!string.IsNullOrWhiteSpace(signatureMetadata?.Session))
+            {
+                wo.SessionId = signatureMetadata!.Session;
+                effectiveSession = signatureMetadata.Session;
+            }
+            else if (!string.IsNullOrWhiteSpace(wo.SessionId))
+            {
+                effectiveSession = wo.SessionId;
+            }
+
+            wo.SourceIp = effectiveIp;
+
             string insert = @"INSERT INTO work_orders
  (title, description, task_description, type, priority, status,
   date_open, due_date, date_close,
   requested_by_id, created_by_id, assigned_to_id,
   machine_id, component_id,
-  result, notes)
+  result, notes,
+  digital_signature, device_info, source_ip, session_id)
  VALUES
  (@title, @desc, @task, @type, @prio, @status,
   @open, @due, @close,
   @req, @crt, @ass,
   @mach, @comp,
-  @res, @notes)";
+  @res, @notes,
+  @sig, @device, @ip, @session)";
 
             string updateSql = @"UPDATE work_orders SET
   title=@title, description=@desc, task_description=@task,
@@ -55,7 +94,8 @@ namespace YasGMP.Services
   date_open=@open, due_date=@due, date_close=@close,
   requested_by_id=@req, created_by_id=@crt, assigned_to_id=@ass,
   machine_id=@mach, component_id=@comp,
-  result=@res, notes=@notes
+  result=@res, notes=@notes,
+  digital_signature=@sig, device_info=@device, source_ip=@ip, session_id=@session
 WHERE id=@id";
 
             var pars = new List<MySqlParameter>
@@ -75,7 +115,11 @@ WHERE id=@id";
                 new("@mach",    wo.MachineId),
                 new("@comp",    (object?)wo.ComponentId ?? DBNull.Value),
                 new("@res",     wo.Result ?? string.Empty),
-                new("@notes",   (object?)wo.Notes ?? DBNull.Value)
+                new("@notes",   (object?)wo.Notes ?? DBNull.Value),
+                new("@sig",     (object?)wo.DigitalSignature ?? DBNull.Value),
+                new("@device",  (object?)wo.DeviceInfo ?? DBNull.Value),
+                new("@ip",      effectiveIp),
+                new("@session", (object?)effectiveSession ?? DBNull.Value)
             };
             if (update) pars.Add(new MySqlParameter("@id", wo.Id));
 
@@ -97,10 +141,10 @@ WHERE id=@id";
                 "WorkOrders",
                 wo.Id,
                 wo.Title,
-                ip,
+                effectiveIp,
                 "audit",
-                deviceInfo,
-                sessionId,
+                effectiveDevice,
+                effectiveSession,
                 token: token
             ).ConfigureAwait(false);
 
@@ -116,7 +160,7 @@ WHERE id=@id";
             string device,
             string? sessionId,
             CancellationToken token = default)
-            => db.InsertOrUpdateWorkOrderAsync(wo, update: false, actorUserId, ip, device, sessionId, token);
+            => db.InsertOrUpdateWorkOrderAsync(wo, update: false, actorUserId, ip, device, sessionId, signatureMetadata: null, token);
 
         public static async Task DeleteWorkOrderAsync(
             this DatabaseService db,
