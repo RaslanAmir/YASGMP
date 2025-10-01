@@ -5448,6 +5448,9 @@ namespace YasGMP.Services.Interfaces
                 DateEnd = source.DateEnd,
                 Status = source.Status,
                 Documentation = source.Documentation,
+                DigitalSignature = source.DigitalSignature,
+                SourceIp = source.SourceIp,
+                SessionId = source.SessionId,
                 Comment = source.Comment,
                 NextDue = source.NextDue
             };
@@ -5462,6 +5465,9 @@ namespace YasGMP.Services.Interfaces
             destination.DateEnd = source.DateEnd;
             destination.Status = source.Status;
             destination.Documentation = source.Documentation;
+            destination.DigitalSignature = source.DigitalSignature;
+            destination.SourceIp = source.SourceIp;
+            destination.SessionId = source.SessionId;
             destination.Comment = source.Comment;
             destination.NextDue = source.NextDue;
         }
@@ -6214,6 +6220,9 @@ namespace YasGMP.Services.Interfaces
                 DateEnd = source.DateEnd,
                 Status = source.Status,
                 Documentation = source.Documentation,
+                DigitalSignature = source.DigitalSignature,
+                SourceIp = source.SourceIp,
+                SessionId = source.SessionId,
                 Comment = source.Comment,
                 NextDue = source.NextDue
             };
@@ -6228,6 +6237,9 @@ namespace YasGMP.Services.Interfaces
             destination.DateEnd = source.DateEnd;
             destination.Status = source.Status;
             destination.Documentation = source.Documentation;
+            destination.DigitalSignature = source.DigitalSignature;
+            destination.SourceIp = source.SourceIp;
+            destination.SessionId = source.SessionId;
             destination.Comment = source.Comment;
             destination.NextDue = source.NextDue;
         }
