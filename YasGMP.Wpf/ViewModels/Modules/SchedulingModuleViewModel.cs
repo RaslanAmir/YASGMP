@@ -258,16 +258,19 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             baseContext.SessionId,
             signatureResult);
 
+        ScheduledJob adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 var id = await _scheduledJobService.CreateAsync(entity, context).ConfigureAwait(false);
                 entity.Id = id;
+                adapterResult = entity;
             }
             else if (Mode == FormMode.Update)
             {
                 await _scheduledJobService.UpdateAsync(entity, context).ConfigureAwait(false);
+                adapterResult = entity;
             }
             else
             {
@@ -283,11 +286,25 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         LoadEditor(entity);
         UpdateActionStates();
 
-        signatureResult.Signature.RecordId = entity.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "scheduled_jobs",
+            recordId: adapterResult.Id,
+            signatureId: null,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

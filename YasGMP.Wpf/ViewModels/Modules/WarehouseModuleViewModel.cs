@@ -281,16 +281,19 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             _authContext.CurrentSessionId,
             signatureResult);
 
+        Warehouse adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 await _warehouseService.CreateAsync(warehouse, context).ConfigureAwait(false);
+                adapterResult = warehouse;
             }
             else if (Mode == FormMode.Update)
             {
                 warehouse.Id = _loadedWarehouse!.Id;
                 await _warehouseService.UpdateAsync(warehouse, context).ConfigureAwait(false);
+                adapterResult = warehouse;
             }
             else
             {
@@ -305,11 +308,25 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         _loadedWarehouse = warehouse;
         LoadEditor(warehouse);
 
-        signatureResult.Signature.RecordId = warehouse.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "warehouses",
+            recordId: adapterResult.Id,
+            signatureId: null,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

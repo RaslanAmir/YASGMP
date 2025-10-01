@@ -254,6 +254,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             _authContext.CurrentSessionId,
             signatureResult);
 
+        ChangeControl adapterResult;
         try
         {
             if (Mode == FormMode.Add)
@@ -261,11 +262,13 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 var id = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
                 entity.Id = id;
                 Records.Add(ToRecord(entity));
+                adapterResult = entity;
             }
             else if (Mode == FormMode.Update && _loadedEntity is not null)
             {
                 entity.Id = _loadedEntity.Id;
                 await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
+                adapterResult = entity;
             }
             else
             {
@@ -281,11 +284,25 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         LoadEditor(entity);
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = entity.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "change_controls",
+            recordId: adapterResult.Id,
+            signatureId: context.SignatureId,
+            signatureHash: context.SignatureHash ?? signatureResult.Signature.SignatureHash,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.IpAddress,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

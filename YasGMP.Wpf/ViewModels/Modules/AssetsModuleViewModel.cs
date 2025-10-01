@@ -329,17 +329,20 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         Editor.SessionId = signature.SessionId ?? _authContext.CurrentSessionId ?? string.Empty;
         Editor.DeviceInfo = signature.DeviceInfo ?? _authContext.CurrentDeviceInfo ?? string.Empty;
 
+        Machine adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 var id = await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
                 machine.Id = id;
+                adapterResult = machine;
             }
             else if (Mode == FormMode.Update)
             {
                 machine.Id = _loadedMachine!.Id;
                 await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
+                adapterResult = machine;
             }
             else
             {
@@ -355,11 +358,25 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         LoadEditor(machine);
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = machine.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "machines",
+            recordId: adapterResult.Id,
+            signatureId: adapterResult.DigitalSignatureId,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

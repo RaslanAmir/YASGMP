@@ -390,6 +390,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             _authContext.CurrentSessionId,
             signatureResult);
 
+        Incident adapterResult;
         try
         {
             if (Mode == FormMode.Add)
@@ -399,11 +400,14 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 {
                     incident.Id = id;
                 }
+
+                adapterResult = incident;
             }
             else if (Mode == FormMode.Update)
             {
                 incident.Id = _loadedIncident!.Id;
                 await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
+                adapterResult = incident;
             }
             else
             {
@@ -418,11 +422,25 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         _loadedIncident = incident;
         LoadEditor(incident);
 
-        signatureResult.Signature.RecordId = incident.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "incidents",
+            recordId: adapterResult.Id,
+            signatureId: null,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

@@ -276,6 +276,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             _authContext.CurrentSessionId,
             signatureResult);
 
+        CapaCase adapterResult;
         try
         {
             if (Mode == FormMode.Add)
@@ -285,11 +286,14 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
                 {
                     capa.Id = id;
                 }
+
+                adapterResult = capa;
             }
             else if (Mode == FormMode.Update)
             {
                 capa.Id = _loadedCapa!.Id;
                 await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
+                adapterResult = capa;
             }
             else
             {
@@ -304,11 +308,25 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         _loadedCapa = capa;
         LoadEditor(capa);
 
-        signatureResult.Signature.RecordId = capa.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "capa_cases",
+            recordId: adapterResult.Id,
+            signatureId: null,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

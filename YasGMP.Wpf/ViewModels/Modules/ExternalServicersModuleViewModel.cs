@@ -293,17 +293,20 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             _authContext.CurrentSessionId,
             signatureResult);
 
+        ExternalServicer adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 var id = await _servicerService.CreateAsync(servicer, context).ConfigureAwait(false);
                 servicer.Id = id;
+                adapterResult = servicer;
             }
             else if (Mode == FormMode.Update)
             {
                 servicer.Id = _loadedServicer.Id;
                 await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
+                adapterResult = servicer;
             }
             else
             {
@@ -320,11 +323,25 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         LoadEditor(servicer);
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = servicer.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "external_contractors",
+            recordId: adapterResult.Id,
+            signatureId: null,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
