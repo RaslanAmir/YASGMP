@@ -71,6 +71,21 @@ namespace YasGMP.Models
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
 
+        /// <summary>Device fingerprint captured at the time of the last persisted change.</summary>
+        [MaxLength(255)]
+        [Column("device_info")]
+        public string DeviceInfo { get; set; } = string.Empty;
+
+        /// <summary>Source IP recorded alongside the latest signature update.</summary>
+        [MaxLength(45)]
+        [Column("source_ip")]
+        public string SourceIp { get; set; } = string.Empty;
+
+        /// <summary>Session identifier associated with the last persisted change.</summary>
+        [MaxLength(128)]
+        [Column("session_id")]
+        public string SessionId { get; set; } = string.Empty;
+
         [Column("department_id")]
         public int? DepartmentId { get; set; }
 
