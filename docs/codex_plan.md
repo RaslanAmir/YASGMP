@@ -42,6 +42,9 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2025-12-05: Added WPF unit coverage exercising ValidationCrudServiceAdapter context propagation, updated the validation CRUD
+  fake to retain signature/IP/session metadata, and asserted CrudSaveResult mirrors the persisted entity so regressions surface
+  quickly while dotnet CLI access remains blocked.
 - 2025-12-04: Validation persistence now writes `source_ip`/`session_id` on insert/update and ValidationService unit tests assert the metadata survives adapter calls; dotnet CLI still missing so restore/build/test remain blocked.
 - 2025-12-01: Change Control schema/service now persist digital signature hash plus IP/session/device context so adapter metadata flows through unchanged; database scripts updated accordingly while CLI validation remains blocked.
 - 2025-12-03: ValidationService now preserves adapter-provided digital signature hashes on create/update paths, only regenerating during forced transitions (e.g., Execute); unit coverage added to confirm the adapter hash survives persistence while dotnet CLI access remains blocked.
