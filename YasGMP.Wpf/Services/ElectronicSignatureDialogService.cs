@@ -83,13 +83,20 @@ public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialo
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        await _databaseService.InsertDigitalSignatureAsync(result.Signature, cancellationToken).ConfigureAwait(false);
+        if (result.Signature.Id == 0)
+        {
+            int signatureId = await _databaseService
+                .InsertDigitalSignatureAsync(result.Signature, cancellationToken)
+                .ConfigureAwait(false);
 
-        await _auditService.LogSystemEventAsync(
-            "SIGNATURE_PERSISTED",
-            BuildPersistAuditDetails(result),
-            result.Signature.TableName,
-            result.Signature.RecordId).ConfigureAwait(false);
+            result.Signature.Id = signatureId;
+
+            await LogSignaturePersistedAsync(result, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            await LogSignaturePersistedAsync(result, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private bool? ShowDialog(ElectronicSignatureDialogViewModel viewModel)
@@ -125,5 +132,26 @@ public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialo
         string status = string.IsNullOrWhiteSpace(signature.Status) ? "-" : signature.Status;
 
         return $"reason={result.ReasonCode}; detail={result.ReasonDetail ?? "-"}; method={method}; status={status}; hash={hash}; note={note}; session={signature.SessionId ?? _authContext.CurrentSessionId}";
+    }
+
+    private Task LogSignaturePersistedAsync(ElectronicSignatureDialogResult result, CancellationToken cancellationToken)
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (result.Signature is null)
+        {
+            throw new ArgumentException("Signature result does not contain a digital signature.", nameof(result));
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return _auditService.LogSystemEventAsync(
+            "SIGNATURE_PERSISTED",
+            BuildPersistAuditDetails(result),
+            result.Signature.TableName,
+            result.Signature.RecordId);
     }
 }
