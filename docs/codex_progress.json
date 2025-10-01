@@ -25,7 +25,8 @@
       "2025-11-17: dotnet restore/build retried; CLI still missing in container so commands exit with 'command not found'.",
       "2025-11-18: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-11-19: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
-      "2025-11-30: dotnet restore retried; CLI still missing so commands exit with \"command not found\"."
+      "2025-11-30: dotnet restore retried; CLI still missing so commands exit with \"command not found\".",
+      "2025-12-04: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -85,8 +86,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: preserve validation signature metadata",
+  "lastCommitSummary": "fix: persist validation source metadata",
   "notes": [
+    "2025-12-04: Validation persistence now writes source_ip/session_id columns and ValidationService tests assert metadata pass-through while dotnet CLI access remains unavailable for restore/build/test.",
     "2025-12-03: ValidationService now preserves adapter-supplied validation signature hashes during create/update and forces regeneration only when executing a validation; unit tests cover the persistence path while dotnet CLI access remains unavailable for restore/build/test.",
     "2025-12-02: ComponentService and DatabaseService.ComponentOverloads now persist adapter-supplied component signature hash/IP/device/session metadata with new unit coverage verifying the stored hash matches the adapter payload; dotnet CLI still unavailable for restore/build/smoke runs.",
     "2025-12-01: dotnet restore/build/smoke harness attempts blocked by missing CLI while validating Change Control signature metadata persistence; rerun once .NET 9 SDK installed.",
