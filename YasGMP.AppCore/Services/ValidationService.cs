@@ -52,7 +52,7 @@ namespace YasGMP.Services
         public async Task CreateAsync(Validation validation, int userId)
         {
             Validate(validation);
-            validation.DigitalSignature = GenerateDigitalSignature(validation);
+            EnsureDigitalSignature(validation);
             await _db.InsertOrUpdateValidationAsync(validation, update: false).ConfigureAwait(false);
 
             await LogAudit(
@@ -67,7 +67,7 @@ namespace YasGMP.Services
         public async Task UpdateAsync(Validation validation, int userId)
         {
             Validate(validation);
-            validation.DigitalSignature = GenerateDigitalSignature(validation);
+            EnsureDigitalSignature(validation);
             await _db.InsertOrUpdateValidationAsync(validation, update: true).ConfigureAwait(false);
 
             await LogAudit(
@@ -89,7 +89,7 @@ namespace YasGMP.Services
             val.Status = "EXECUTED";
             val.DateEnd = DateTime.UtcNow;
             val.NextDue = CalculateNextDue(DateTime.UtcNow, "1y");
-            val.DigitalSignature = GenerateDigitalSignature(val);
+            EnsureDigitalSignature(val, forceRefresh: true);
 
             await _db.InsertOrUpdateValidationAsync(val, update: true).ConfigureAwait(false);
 
@@ -163,6 +163,15 @@ namespace YasGMP.Services
         #endregion
 
         #region Signatures
+
+        private static void EnsureDigitalSignature(Validation val, bool forceRefresh = false)
+        {
+            if (val == null) throw new ArgumentNullException(nameof(val));
+            if (forceRefresh || string.IsNullOrWhiteSpace(val.DigitalSignature))
+            {
+                val.DigitalSignature = GenerateDigitalSignature(val);
+            }
+        }
 
         private static string GenerateDigitalSignature(Validation val)
         {
