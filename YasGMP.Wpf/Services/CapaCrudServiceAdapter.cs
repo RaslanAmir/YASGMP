@@ -34,7 +34,7 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         }
     }
 
-    public async Task<int> CreateAsync(CapaCase capa, CapaCrudContext context)
+    public async Task<CrudSaveResult> CreateAsync(CapaCase capa, CapaCrudContext context)
     {
         if (capa is null)
         {
@@ -44,10 +44,10 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         Validate(capa);
         var metadata = CreateMetadata(context, capa.DigitalSignature);
         await _service.CreateAsync(capa, context.UserId, metadata).ConfigureAwait(false);
-        return capa.Id;
+        return new CrudSaveResult(capa.Id, metadata);
     }
 
-    public async Task UpdateAsync(CapaCase capa, CapaCrudContext context)
+    public async Task<CrudSaveResult> UpdateAsync(CapaCase capa, CapaCrudContext context)
     {
         if (capa is null)
         {
@@ -57,6 +57,7 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         Validate(capa);
         var metadata = CreateMetadata(context, capa.DigitalSignature);
         await _service.UpdateAsync(capa, context.UserId, metadata).ConfigureAwait(false);
+        return new CrudSaveResult(capa.Id, metadata);
     }
 
     public void Validate(CapaCase capa)

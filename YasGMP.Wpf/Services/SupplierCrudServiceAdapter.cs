@@ -32,7 +32,7 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 
     public Task<Supplier?> TryGetByIdAsync(int id) => _supplierService.GetByIdAsync(id);
 
-    public async Task<int> CreateAsync(Supplier supplier, SupplierCrudContext context)
+    public async Task<CrudSaveResult> CreateAsync(Supplier supplier, SupplierCrudContext context)
     {
         if (supplier is null)
         {
@@ -46,10 +46,10 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 
         supplier.DigitalSignature = signature;
         await StampAsync(supplier, context, "CREATE", signature).ConfigureAwait(false);
-        return supplier.Id;
+        return new CrudSaveResult(supplier.Id, metadata);
     }
 
-    public async Task UpdateAsync(Supplier supplier, SupplierCrudContext context)
+    public async Task<CrudSaveResult> UpdateAsync(Supplier supplier, SupplierCrudContext context)
     {
         if (supplier is null)
         {
@@ -63,6 +63,7 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 
         supplier.DigitalSignature = signature;
         await StampAsync(supplier, context, "UPDATE", signature).ConfigureAwait(false);
+        return new CrudSaveResult(supplier.Id, metadata);
     }
 
     public void Validate(Supplier supplier)

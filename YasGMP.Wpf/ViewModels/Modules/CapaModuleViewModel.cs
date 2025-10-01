@@ -277,14 +277,15 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             signatureResult);
 
         CapaCase adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
-                if (capa.Id == 0 && id > 0)
+                saveResult = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
+                if (capa.Id == 0 && saveResult.Id > 0)
                 {
-                    capa.Id = id;
+                    capa.Id = saveResult.Id;
                 }
 
                 adapterResult = capa;
@@ -292,7 +293,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             else if (Mode == FormMode.Update)
             {
                 capa.Id = _loadedCapa!.Id;
-                await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
+                saveResult = await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
                 adapterResult = capa;
             }
             else
@@ -312,15 +313,15 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             signatureResult,
             tableName: "capa_cases",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

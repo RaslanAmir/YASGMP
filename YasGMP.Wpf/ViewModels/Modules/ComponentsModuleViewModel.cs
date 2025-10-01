@@ -329,14 +329,15 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             signatureResult);
 
         Component adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _componentService.CreateAsync(component, context).ConfigureAwait(false);
-                if (component.Id == 0 && id > 0)
+                saveResult = await _componentService.CreateAsync(component, context).ConfigureAwait(false);
+                if (component.Id == 0 && saveResult.Id > 0)
                 {
-                    component.Id = id;
+                    component.Id = saveResult.Id;
                 }
 
                 adapterResult = component;
@@ -344,7 +345,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             else if (Mode == FormMode.Update)
             {
                 component.Id = _loadedComponent!.Id;
-                await _componentService.UpdateAsync(component, context).ConfigureAwait(false);
+                saveResult = await _componentService.UpdateAsync(component, context).ConfigureAwait(false);
                 adapterResult = component;
             }
             else
@@ -364,15 +365,15 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             signatureResult,
             tableName: "components",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

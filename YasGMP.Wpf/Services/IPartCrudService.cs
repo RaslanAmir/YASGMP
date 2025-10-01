@@ -16,9 +16,15 @@ namespace YasGMP.Wpf.Services
 
         Task<Part?> TryGetByIdAsync(int id);
 
-        Task<int> CreateAsync(Part part, PartCrudContext context);
+        /// <summary>
+        /// Persists a new part and returns the saved identifier alongside captured signature metadata.
+        /// </summary>
+        Task<CrudSaveResult> CreateAsync(Part part, PartCrudContext context);
 
-        Task UpdateAsync(Part part, PartCrudContext context);
+        /// <summary>
+        /// Updates an existing part and returns the signature metadata that was persisted.
+        /// </summary>
+        Task<CrudSaveResult> UpdateAsync(Part part, PartCrudContext context);
 
         void Validate(Part part);
 

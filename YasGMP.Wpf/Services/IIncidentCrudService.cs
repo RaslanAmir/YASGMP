@@ -13,9 +13,15 @@ public interface IIncidentCrudService
 {
     Task<Incident?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(Incident incident, IncidentCrudContext context);
+    /// <summary>
+    /// Persists a new incident and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(Incident incident, IncidentCrudContext context);
 
-    Task UpdateAsync(Incident incident, IncidentCrudContext context);
+    /// <summary>
+    /// Updates an existing incident and returns the signature metadata captured during persistence.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(Incident incident, IncidentCrudContext context);
 
     void Validate(Incident incident);
 

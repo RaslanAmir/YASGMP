@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -34,17 +35,24 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
         }
     }
 
-    public async Task<int> CreateAsync(Component component, ComponentCrudContext context)
+    public async Task<CrudSaveResult> CreateAsync(Component component, ComponentCrudContext context)
     {
         if (component is null) throw new ArgumentNullException(nameof(component));
+
+        var signature = ApplyContext(component, context);
         await _inner.CreateAsync(component, context.UserId).ConfigureAwait(false);
-        return component.Id;
+
+        return new CrudSaveResult(component.Id, CreateMetadata(context, signature));
     }
 
-    public Task UpdateAsync(Component component, ComponentCrudContext context)
+    public async Task<CrudSaveResult> UpdateAsync(Component component, ComponentCrudContext context)
     {
         if (component is null) throw new ArgumentNullException(nameof(component));
-        return _inner.UpdateAsync(component, context.UserId);
+
+        var signature = ApplyContext(component, context);
+        await _inner.UpdateAsync(component, context.UserId).ConfigureAwait(false);
+
+        return new CrudSaveResult(component.Id, CreateMetadata(context, signature));
     }
 
     public void Validate(Component component)
@@ -77,4 +85,24 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
 
     public string NormalizeStatus(string? status)
         => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
+
+    private static string ApplyContext(Component component, ComponentCrudContext context)
+    {
+        var signature = context.SignatureHash ?? component.DigitalSignature ?? string.Empty;
+        component.DigitalSignature = signature;
+        return signature;
+    }
+
+    private static SignatureMetadataDto CreateMetadata(ComponentCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

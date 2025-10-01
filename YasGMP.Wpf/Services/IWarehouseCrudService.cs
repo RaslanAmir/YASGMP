@@ -15,9 +15,15 @@ namespace YasGMP.Wpf.Services
 
         Task<Warehouse?> TryGetByIdAsync(int id);
 
-        Task<int> CreateAsync(Warehouse warehouse, WarehouseCrudContext context);
+        /// <summary>
+        /// Persists a new warehouse and returns the saved identifier together with signature metadata.
+        /// </summary>
+        Task<CrudSaveResult> CreateAsync(Warehouse warehouse, WarehouseCrudContext context);
 
-        Task UpdateAsync(Warehouse warehouse, WarehouseCrudContext context);
+        /// <summary>
+        /// Updates an existing warehouse and returns the signature metadata captured during persistence.
+        /// </summary>
+        Task<CrudSaveResult> UpdateAsync(Warehouse warehouse, WarehouseCrudContext context);
 
         void Validate(Warehouse warehouse);
 

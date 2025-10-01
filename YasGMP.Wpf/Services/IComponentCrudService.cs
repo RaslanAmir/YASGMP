@@ -17,9 +17,17 @@ public interface IComponentCrudService
 
     Task<Component?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(Component component, ComponentCrudContext context);
+    /// <summary>
+    /// Persists a new <paramref name="component"/> and returns the saved identifier together with
+    /// the captured signature metadata so callers can refresh editor state.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(Component component, ComponentCrudContext context);
 
-    Task UpdateAsync(Component component, ComponentCrudContext context);
+    /// <summary>
+    /// Updates an existing <paramref name="component"/> and returns the signature metadata that was
+    /// persisted so the caller can surface the latest signing details.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(Component component, ComponentCrudContext context);
 
     void Validate(Component component);
 

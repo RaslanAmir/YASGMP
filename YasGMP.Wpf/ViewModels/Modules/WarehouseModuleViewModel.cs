@@ -282,17 +282,18 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             signatureResult);
 
         Warehouse adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                await _warehouseService.CreateAsync(warehouse, context).ConfigureAwait(false);
+                saveResult = await _warehouseService.CreateAsync(warehouse, context).ConfigureAwait(false);
                 adapterResult = warehouse;
             }
             else if (Mode == FormMode.Update)
             {
                 warehouse.Id = _loadedWarehouse!.Id;
-                await _warehouseService.UpdateAsync(warehouse, context).ConfigureAwait(false);
+                saveResult = await _warehouseService.UpdateAsync(warehouse, context).ConfigureAwait(false);
                 adapterResult = warehouse;
             }
             else
@@ -312,15 +313,15 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             signatureResult,
             tableName: "warehouses",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

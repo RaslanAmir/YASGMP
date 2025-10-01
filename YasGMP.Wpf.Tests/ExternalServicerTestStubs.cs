@@ -29,7 +29,7 @@ namespace YasGMP.Models
 
 namespace YasGMP.Wpf.Services
 {
-    public sealed class FakeExternalServicerCrudService : IExternalServicerCrudService
+    public sealed partial class FakeExternalServicerCrudService : IExternalServicerCrudService
     {
         private readonly List<ExternalServicer> _store = new();
 
@@ -41,7 +41,7 @@ namespace YasGMP.Wpf.Services
         public Task<ExternalServicer?> TryGetByIdAsync(int id)
             => Task.FromResult<ExternalServicer?>(_store.FirstOrDefault(s => s.Id == id));
 
-        public Task<int> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
+        public Task<int> CreateCoreAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
         {
             if (servicer.Id == 0)
             {
@@ -52,7 +52,7 @@ namespace YasGMP.Wpf.Services
             return Task.FromResult(servicer.Id);
         }
 
-        public Task UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
+        public Task UpdateCoreAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
         {
             var existing = _store.FirstOrDefault(s => s.Id == servicer.Id);
             if (existing is null)

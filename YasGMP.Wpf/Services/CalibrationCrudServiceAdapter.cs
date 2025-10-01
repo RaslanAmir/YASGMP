@@ -35,7 +35,7 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
         }
     }
 
-        public async Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public async Task<CrudSaveResult> CreateAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration is null)
             {
@@ -46,10 +46,10 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             var metadata = CreateMetadata(context, signature);
             await _inner.CreateAsync(calibration, context.UserId, metadata).ConfigureAwait(false);
             calibration.DigitalSignature = signature;
-            return calibration.Id;
+            return new CrudSaveResult(calibration.Id, metadata);
         }
 
-        public async Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public async Task<CrudSaveResult> UpdateAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration is null)
             {
@@ -60,6 +60,7 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             var metadata = CreateMetadata(context, signature);
             await _inner.UpdateAsync(calibration, context.UserId, metadata).ConfigureAwait(false);
             calibration.DigitalSignature = signature;
+            return new CrudSaveResult(calibration.Id, metadata);
         }
 
     public void Validate(Calibration calibration)

@@ -16,9 +16,15 @@ public interface ICalibrationCrudService
 
     Task<Calibration?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context);
+    /// <summary>
+    /// Persists a new calibration entry and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(Calibration calibration, CalibrationCrudContext context);
 
-    Task UpdateAsync(Calibration calibration, CalibrationCrudContext context);
+    /// <summary>
+    /// Updates an existing calibration entry and returns the captured signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(Calibration calibration, CalibrationCrudContext context);
 
     void Validate(Calibration calibration);
 }

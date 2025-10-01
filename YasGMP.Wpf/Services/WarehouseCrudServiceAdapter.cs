@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 
@@ -45,17 +46,20 @@ namespace YasGMP.Wpf.Services
             return null;
         }
 
-        public async Task<int> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
+        public async Task<CrudSaveResult> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
+            var signature = ApplyContext(warehouse, context);
             var id = await _database.AddWarehouseAsync(warehouse.Name, warehouse.Location).ConfigureAwait(false);
             warehouse.Id = id;
             await UpdateWarehouseDetailsAsync(warehouse, context).ConfigureAwait(false);
-            return id;
+            return new CrudSaveResult(id, CreateMetadata(context, signature));
         }
 
-        public async Task UpdateAsync(Warehouse warehouse, WarehouseCrudContext context)
+        public async Task<CrudSaveResult> UpdateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
+            var signature = ApplyContext(warehouse, context);
             await UpdateWarehouseDetailsAsync(warehouse, context).ConfigureAwait(false);
+            return new CrudSaveResult(warehouse.Id, CreateMetadata(context, signature));
         }
 
         public void Validate(Warehouse warehouse)
@@ -208,6 +212,26 @@ WHERE id=@id";
                 context.DeviceInfo,
                 context.SessionId).ConfigureAwait(false);
         }
+
+        private static string ApplyContext(Warehouse warehouse, WarehouseCrudContext context)
+        {
+            var signature = context.SignatureHash ?? warehouse.DigitalSignature ?? string.Empty;
+            warehouse.DigitalSignature = signature;
+            return signature;
+        }
+
+        private static SignatureMetadataDto CreateMetadata(WarehouseCrudContext context, string signature)
+            => new()
+            {
+                Id = context.SignatureId,
+                Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+                Method = context.SignatureMethod,
+                Status = context.SignatureStatus,
+                Note = context.SignatureNote,
+                Session = context.SessionId,
+                Device = context.DeviceInfo,
+                IpAddress = context.Ip
+            };
 
         private static int SafeInt(DataRow row, string column)
             => row.Table.Columns.Contains(column) && row[column] != DBNull.Value

@@ -343,7 +343,7 @@ namespace YasGMP.Models
 
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
 
         public int Id { get; set; }
@@ -627,7 +627,7 @@ namespace YasGMP.Services.Interfaces
     }
 }
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -638,7 +638,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -718,7 +718,7 @@ namespace YasGMP.Services.Interfaces
     }
 
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -736,7 +736,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -748,7 +748,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -821,7 +821,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -839,7 +839,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -851,7 +851,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -916,7 +916,7 @@ namespace YasGMP.Services.Interfaces
     }
 
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -934,7 +934,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -945,7 +945,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -1024,7 +1024,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -1042,7 +1042,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -1054,7 +1054,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -1128,7 +1128,7 @@ namespace YasGMP.Services.Interfaces
     }
 
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -1146,7 +1146,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -1157,7 +1157,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -1341,7 +1341,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
 
@@ -1365,7 +1365,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -1478,7 +1478,7 @@ namespace YasGMP.Services.Interfaces
             => Task.CompletedTask;
     }
 }
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -1553,7 +1553,7 @@ namespace YasGMP.Services.Interfaces
     }
 
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -1571,7 +1571,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -1583,7 +1583,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -1647,7 +1647,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -1665,7 +1665,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -1676,7 +1676,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -1755,7 +1755,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -1773,7 +1773,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -1785,7 +1785,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -1858,7 +1858,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         public int Id { get; set; }
         public string? FullName { get; set; }
@@ -2128,7 +2128,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -2146,7 +2146,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -2157,7 +2157,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -2236,7 +2236,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -2254,7 +2254,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -2266,7 +2266,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -2468,7 +2468,7 @@ namespace YasGMP.Services.Interfaces
         public List<Warehouse> Warehouses { get; } = new();
         public List<Incident> Incidents { get; } = new();
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -2629,7 +2629,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -2647,7 +2647,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -2658,7 +2658,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -2737,7 +2737,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -2755,7 +2755,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -2767,7 +2767,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -2840,7 +2840,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -2858,7 +2858,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -2870,7 +2870,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -3015,7 +3015,7 @@ namespace YasGMP.Services.Interfaces
         public DateTime? RetainUntil { get; set; }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         public int Id { get; set; }
         public int ComponentId { get; set; }
@@ -3233,7 +3233,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeIncidentCrudService : IIncidentCrudService
+    public sealed partial class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
         private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
@@ -3248,7 +3248,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
-        public Task<int> CreateAsync(Incident incident, IncidentCrudContext context)
+        public Task<int> CreateCoreAsync(Incident incident, IncidentCrudContext context)
         {
             if (incident.Id == 0)
             {
@@ -3260,7 +3260,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(incident.Id);
         }
 
-        public Task UpdateAsync(Incident incident, IncidentCrudContext context)
+        public Task UpdateCoreAsync(Incident incident, IncidentCrudContext context)
         {
             var existing = _store.FirstOrDefault(i => i.Id == incident.Id);
             if (existing is null)
@@ -3349,7 +3349,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -3367,7 +3367,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -3379,7 +3379,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -3452,7 +3452,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -3470,7 +3470,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -3482,7 +3482,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -3911,7 +3911,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCapaCrudService : ICapaCrudService
+    public sealed partial class FakeCapaCrudService : ICapaCrudService
     {
         private readonly List<CapaCase> _store = new();
         private readonly List<(CapaCase Entity, CapaCrudContext Context)> _savedSnapshots = new();
@@ -3929,7 +3929,7 @@ namespace YasGMP.Services.Interfaces
         public Task<CapaCase?> TryGetByIdAsync(int id)
             => Task.FromResult<CapaCase?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(CapaCase capa, CapaCrudContext context)
+        public Task<int> CreateCoreAsync(CapaCase capa, CapaCrudContext context)
         {
             if (capa.Id == 0)
             {
@@ -3941,7 +3941,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(capa.Id);
         }
 
-        public Task UpdateAsync(CapaCase capa, CapaCrudContext context)
+        public Task UpdateCoreAsync(CapaCase capa, CapaCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == capa.Id);
             if (existing is null)
@@ -4031,7 +4031,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -4049,7 +4049,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -4061,7 +4061,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -4134,7 +4134,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -4152,7 +4152,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -4164,7 +4164,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -4228,7 +4228,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -4246,7 +4246,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -4257,7 +4257,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -4336,7 +4336,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeIncidentCrudService : IIncidentCrudService
+    public sealed partial class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
         private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
@@ -4351,7 +4351,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
-        public Task<int> CreateAsync(Incident incident, IncidentCrudContext context)
+        public Task<int> CreateCoreAsync(Incident incident, IncidentCrudContext context)
         {
             if (incident.Id == 0)
             {
@@ -4363,7 +4363,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(incident.Id);
         }
 
-        public Task UpdateAsync(Incident incident, IncidentCrudContext context)
+        public Task UpdateCoreAsync(Incident incident, IncidentCrudContext context)
         {
             var existing = _store.FirstOrDefault(i => i.Id == incident.Id);
             if (existing is null)
@@ -4452,7 +4452,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeChangeControlCrudService : IChangeControlCrudService
+    public sealed partial class FakeChangeControlCrudService : IChangeControlCrudService
     {
         private readonly List<ChangeControl> _store = new();
         private readonly List<(ChangeControl Entity, ChangeControlCrudContext Context)> _savedSnapshots = new();
@@ -4473,7 +4473,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(match is null ? null : Clone(match));
         }
 
-        public Task<int> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        public Task<int> CreateCoreAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             if (changeControl.Id == 0)
             {
@@ -4485,7 +4485,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(changeControl.Id);
         }
 
-        public Task UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        public Task UpdateCoreAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == changeControl.Id);
             if (existing is null)
@@ -4627,7 +4627,7 @@ namespace YasGMP.Services.Interfaces
         public DateTime? RetainUntil { get; set; }
     }
 
-    public sealed class FakeCapaCrudService : ICapaCrudService
+    public sealed partial class FakeCapaCrudService : ICapaCrudService
     {
         public int Id { get; set; }
         public int ComponentId { get; set; }
@@ -4826,7 +4826,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
 
@@ -4839,7 +4839,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -4851,7 +4851,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -4924,7 +4924,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -4942,7 +4942,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -4954,7 +4954,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -5018,7 +5018,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -5036,7 +5036,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -5047,7 +5047,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -5126,7 +5126,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeIncidentCrudService : IIncidentCrudService
+    public sealed partial class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
         private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
@@ -5141,7 +5141,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
-        public Task<int> CreateAsync(Incident incident, IncidentCrudContext context)
+        public Task<int> CreateCoreAsync(Incident incident, IncidentCrudContext context)
         {
             if (incident.Id == 0)
             {
@@ -5153,7 +5153,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(incident.Id);
         }
 
-        public Task UpdateAsync(Incident incident, IncidentCrudContext context)
+        public Task UpdateCoreAsync(Incident incident, IncidentCrudContext context)
 
         {
             var existing = _store.FirstOrDefault(i => i.Id == incident.Id);
@@ -5243,7 +5243,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeChangeControlCrudService : IChangeControlCrudService
+    public sealed partial class FakeChangeControlCrudService : IChangeControlCrudService
     {
         private readonly List<ChangeControl> _store = new();
         private readonly List<(ChangeControl Entity, ChangeControlCrudContext Context)> _savedSnapshots = new();
@@ -5264,7 +5264,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(match is null ? null : Clone(match));
         }
 
-        public Task<int> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        public Task<int> CreateCoreAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             if (changeControl.Id == 0)
             {
@@ -5276,7 +5276,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(changeControl.Id);
         }
 
-        public Task UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        public Task UpdateCoreAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == changeControl.Id);
             if (existing is null)
@@ -5356,7 +5356,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeValidationCrudService : IValidationCrudService
+    public sealed partial class FakeValidationCrudService : IValidationCrudService
     {
         private readonly List<Validation> _store = new();
         private readonly List<(Validation Entity, ValidationCrudContext Context)> _savedSnapshots = new();
@@ -5377,7 +5377,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(match is null ? null : Clone(match));
         }
 
-        public Task<int> CreateAsync(Validation validation, ValidationCrudContext context)
+        public Task<int> CreateCoreAsync(Validation validation, ValidationCrudContext context)
         {
             if (validation.Id == 0)
             {
@@ -5389,7 +5389,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(validation.Id);
         }
 
-        public Task UpdateAsync(Validation validation, ValidationCrudContext context)
+        public Task UpdateCoreAsync(Validation validation, ValidationCrudContext context)
         {
             var existing = _store.FirstOrDefault(v => v.Id == validation.Id);
             if (existing is null)
@@ -5467,7 +5467,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCapaCrudService : ICapaCrudService
+    public sealed partial class FakeCapaCrudService : ICapaCrudService
     {
         private readonly List<CapaCase> _store = new();
         private readonly List<(CapaCase Entity, CapaCrudContext Context)> _savedSnapshots = new();
@@ -5485,7 +5485,7 @@ namespace YasGMP.Services.Interfaces
         public Task<CapaCase?> TryGetByIdAsync(int id)
             => Task.FromResult<CapaCase?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(CapaCase capa, CapaCrudContext context)
+        public Task<int> CreateCoreAsync(CapaCase capa, CapaCrudContext context)
         {
             if (capa.Id == 0)
             {
@@ -5497,7 +5497,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(capa.Id);
         }
 
-        public Task UpdateAsync(CapaCase capa, CapaCrudContext context)
+        public Task UpdateCoreAsync(CapaCase capa, CapaCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == capa.Id);
             if (existing is null)
@@ -5587,7 +5587,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -5605,7 +5605,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -5617,7 +5617,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -5690,7 +5690,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -5708,7 +5708,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -5720,7 +5720,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -5784,7 +5784,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeMachineCrudService : IMachineCrudService
+    public sealed partial class FakeMachineCrudService : IMachineCrudService
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
@@ -5802,7 +5802,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Machine?> TryGetByIdAsync(int id)
             => Task.FromResult<Machine?>(_store.FirstOrDefault(m => m.Id == id));
 
-        public Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public Task<int> CreateCoreAsync(Machine machine, MachineCrudContext context)
         {
             if (machine.Id == 0)
             {
@@ -5813,7 +5813,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(machine.Id);
         }
 
-        public Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public Task UpdateCoreAsync(Machine machine, MachineCrudContext context)
         {
             var existing = _store.FirstOrDefault(m => m.Id == machine.Id);
             if (existing is null)
@@ -5892,7 +5892,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeIncidentCrudService : IIncidentCrudService
+    public sealed partial class FakeIncidentCrudService : IIncidentCrudService
     {
         private readonly List<Incident> _store = new();
         private readonly List<(Incident Entity, IncidentCrudContext Context)> _savedSnapshots = new();
@@ -5907,7 +5907,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
-        public Task<int> CreateAsync(Incident incident, IncidentCrudContext context)
+        public Task<int> CreateCoreAsync(Incident incident, IncidentCrudContext context)
         {
             if (incident.Id == 0)
             {
@@ -5919,7 +5919,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(incident.Id);
         }
 
-        public Task UpdateAsync(Incident incident, IncidentCrudContext context)
+        public Task UpdateCoreAsync(Incident incident, IncidentCrudContext context)
 
         {
             var existing = _store.FirstOrDefault(i => i.Id == incident.Id);
@@ -6009,7 +6009,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeChangeControlCrudService : IChangeControlCrudService
+    public sealed partial class FakeChangeControlCrudService : IChangeControlCrudService
     {
         private readonly List<ChangeControl> _store = new();
         private readonly List<(ChangeControl Entity, ChangeControlCrudContext Context)> _savedSnapshots = new();
@@ -6030,7 +6030,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(match is null ? null : Clone(match));
         }
 
-        public Task<int> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        public Task<int> CreateCoreAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             if (changeControl.Id == 0)
             {
@@ -6042,7 +6042,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(changeControl.Id);
         }
 
-        public Task UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
+        public Task UpdateCoreAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == changeControl.Id);
             if (existing is null)
@@ -6122,7 +6122,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeValidationCrudService : IValidationCrudService
+    public sealed partial class FakeValidationCrudService : IValidationCrudService
     {
         private readonly List<Validation> _store = new();
         private readonly List<(Validation Entity, ValidationCrudContext Context)> _savedSnapshots = new();
@@ -6143,7 +6143,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(match is null ? null : Clone(match));
         }
 
-        public Task<int> CreateAsync(Validation validation, ValidationCrudContext context)
+        public Task<int> CreateCoreAsync(Validation validation, ValidationCrudContext context)
         {
             if (validation.Id == 0)
             {
@@ -6155,7 +6155,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(validation.Id);
         }
 
-        public Task UpdateAsync(Validation validation, ValidationCrudContext context)
+        public Task UpdateCoreAsync(Validation validation, ValidationCrudContext context)
         {
             var existing = _store.FirstOrDefault(v => v.Id == validation.Id);
             if (existing is null)
@@ -6233,7 +6233,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCapaCrudService : ICapaCrudService
+    public sealed partial class FakeCapaCrudService : ICapaCrudService
     {
         private readonly List<CapaCase> _store = new();
         private readonly List<(CapaCase Entity, CapaCrudContext Context)> _savedSnapshots = new();
@@ -6251,7 +6251,7 @@ namespace YasGMP.Services.Interfaces
         public Task<CapaCase?> TryGetByIdAsync(int id)
             => Task.FromResult<CapaCase?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(CapaCase capa, CapaCrudContext context)
+        public Task<int> CreateCoreAsync(CapaCase capa, CapaCrudContext context)
         {
             if (capa.Id == 0)
             {
@@ -6263,7 +6263,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(capa.Id);
         }
 
-        public Task UpdateAsync(CapaCase capa, CapaCrudContext context)
+        public Task UpdateCoreAsync(CapaCase capa, CapaCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == capa.Id);
             if (existing is null)
@@ -6353,7 +6353,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeComponentCrudService : IComponentCrudService
+    public sealed partial class FakeComponentCrudService : IComponentCrudService
     {
         private readonly List<Component> _store = new();
         private readonly List<(Component Entity, ComponentCrudContext Context)> _savedSnapshots = new();
@@ -6371,7 +6371,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Component?> TryGetByIdAsync(int id)
             => Task.FromResult<Component?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Component component, ComponentCrudContext context)
+        public Task<int> CreateCoreAsync(Component component, ComponentCrudContext context)
         {
             if (component.Id == 0)
             {
@@ -6383,7 +6383,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(component.Id);
         }
 
-        public Task UpdateAsync(Component component, ComponentCrudContext context)
+        public Task UpdateCoreAsync(Component component, ComponentCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == component.Id);
             if (existing is null)
@@ -6456,7 +6456,7 @@ namespace YasGMP.Services.Interfaces
         }
     }
 
-    public sealed class FakeCalibrationCrudService : ICalibrationCrudService
+    public sealed partial class FakeCalibrationCrudService : ICalibrationCrudService
     {
         private readonly List<Calibration> _store = new();
         private readonly List<(Calibration Entity, CalibrationCrudContext Context)> _savedSnapshots = new();
@@ -6474,7 +6474,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-        public Task<int> CreateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task<int> CreateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             if (calibration.Id == 0)
             {
@@ -6486,7 +6486,7 @@ namespace YasGMP.Services.Interfaces
             return Task.FromResult(calibration.Id);
         }
 
-        public Task UpdateAsync(Calibration calibration, CalibrationCrudContext context)
+        public Task UpdateCoreAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var existing = _store.FirstOrDefault(c => c.Id == calibration.Id);
             if (existing is null)
@@ -6737,7 +6737,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
     }
 }
 
-    public sealed class FakePartCrudService : IPartCrudService
+    public sealed partial class FakePartCrudService : IPartCrudService
     {
         private readonly List<Part> _store = new();
         private readonly List<(Part Entity, PartCrudContext Context)> _savedSnapshots = new();
@@ -6755,7 +6755,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<Part?> TryGetByIdAsync(int id)
             => Task.FromResult<Part?>(_store.FirstOrDefault(p => p.Id == id));
 
-        public Task<int> CreateAsync(Part part, PartCrudContext context)
+        public Task<int> CreateCoreAsync(Part part, PartCrudContext context)
         {
             if (part.Id == 0)
             {
@@ -6767,7 +6767,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult(part.Id);
         }
 
-        public Task UpdateAsync(Part part, PartCrudContext context)
+        public Task UpdateCoreAsync(Part part, PartCrudContext context)
         {
             var existing = _store.FirstOrDefault(p => p.Id == part.Id);
             if (existing is null)
@@ -6836,7 +6836,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         }
     }
 
-    public sealed class FakeSupplierCrudService : ISupplierCrudService
+    public sealed partial class FakeSupplierCrudService : ISupplierCrudService
     {
         private readonly List<Supplier> _store = new();
         private readonly List<(Supplier Entity, SupplierCrudContext Context)> _savedSnapshots = new();
@@ -6854,7 +6854,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<Supplier?> TryGetByIdAsync(int id)
             => Task.FromResult<Supplier?>(_store.FirstOrDefault(s => s.Id == id));
 
-        public Task<int> CreateAsync(Supplier supplier, SupplierCrudContext context)
+        public Task<int> CreateCoreAsync(Supplier supplier, SupplierCrudContext context)
         {
             if (supplier.Id == 0)
             {
@@ -6866,7 +6866,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult(supplier.Id);
         }
 
-        public Task UpdateAsync(Supplier supplier, SupplierCrudContext context)
+        public Task UpdateCoreAsync(Supplier supplier, SupplierCrudContext context)
         {
             var existing = _store.FirstOrDefault(s => s.Id == supplier.Id);
             if (existing is null)
@@ -6950,7 +6950,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         }
     }
 
-    public sealed class FakeWarehouseCrudService : IWarehouseCrudService
+    public sealed partial class FakeWarehouseCrudService : IWarehouseCrudService
     {
         private readonly List<Warehouse> _store = new();
         private readonly List<(Warehouse Entity, WarehouseCrudContext Context)> _savedSnapshots = new();
@@ -6972,7 +6972,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<Warehouse?> TryGetByIdAsync(int id)
             => Task.FromResult<Warehouse?>(_store.FirstOrDefault(w => w.Id == id));
 
-        public Task<int> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
+        public Task<int> CreateCoreAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
             if (warehouse.Id == 0)
             {
@@ -6984,7 +6984,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult(warehouse.Id);
         }
 
-        public Task UpdateAsync(Warehouse warehouse, WarehouseCrudContext context)
+        public Task UpdateCoreAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
             var existing = _store.FirstOrDefault(w => w.Id == warehouse.Id);
             if (existing is null)
@@ -7064,7 +7064,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         }
     }
 
-    public sealed class FakeScheduledJobCrudService : IScheduledJobCrudService
+    public sealed partial class FakeScheduledJobCrudService : IScheduledJobCrudService
     {
         private readonly List<ScheduledJob> _store = new();
         private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _savedSnapshots = new();
@@ -7096,7 +7096,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<ScheduledJob?> TryGetByIdAsync(int id)
             => Task.FromResult<ScheduledJob?>(_store.FirstOrDefault(j => j.Id == id));
 
-        public Task<int> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context)
+        public Task<int> CreateCoreAsync(ScheduledJob job, ScheduledJobCrudContext context)
         {
             if (job.Id == 0)
             {
@@ -7108,7 +7108,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult(job.Id);
         }
 
-        public Task UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context)
+        public Task UpdateCoreAsync(ScheduledJob job, ScheduledJobCrudContext context)
         {
             var existing = _store.FirstOrDefault(j => j.Id == job.Id);
             if (existing is null)
@@ -7232,7 +7232,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         }
     }
 
-    public sealed class FakeUserCrudService : IUserCrudService
+    public sealed partial class FakeUserCrudService : IUserCrudService
     {
         private readonly List<User> _users = new();
         private readonly List<Role> _roles = new();
@@ -7289,7 +7289,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<IReadOnlyList<Role>> GetAllRolesAsync()
             => Task.FromResult<IReadOnlyList<Role>>(_roles.Select(Clone).ToList());
 
-        public Task<int> CreateAsync(User user, string password, UserCrudContext context)
+        public Task<int> CreateCoreAsync(User user, string password, UserCrudContext context)
         {
             if (user.Id == 0)
             {
@@ -7304,7 +7304,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult(user.Id);
         }
 
-        public Task UpdateAsync(User user, string? password, UserCrudContext context)
+        public Task UpdateCoreAsync(User user, string? password, UserCrudContext context)
         {
             var existing = _users.FirstOrDefault(u => u.Id == user.Id);
             if (existing is null)
@@ -7393,7 +7393,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             => new() { Id = source.Id, Name = source.Name, Description = source.Description };
     }
 
-    public sealed class FakeWorkOrderCrudService : IWorkOrderCrudService
+    public sealed partial class FakeWorkOrderCrudService : IWorkOrderCrudService
     {
         private readonly List<WorkOrder> _store = new();
         private readonly List<(WorkOrder Entity, WorkOrderCrudContext Context)> _savedSnapshots = new();
@@ -7408,7 +7408,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<WorkOrder?> TryGetByIdAsync(int id)
             => Task.FromResult<WorkOrder?>(_store.FirstOrDefault(w => w.Id == id));
 
-        public Task<int> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
+        public Task<int> CreateCoreAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
             if (workOrder.Id == 0)
             {
@@ -7420,7 +7420,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult(workOrder.Id);
         }
 
-        public Task UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
+        public Task UpdateCoreAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
             var existing = _store.FirstOrDefault(w => w.Id == workOrder.Id);
             if (existing is null)

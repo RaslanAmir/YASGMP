@@ -16,9 +16,15 @@ public interface IExternalServicerCrudService
 
     Task<ExternalServicer?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context);
+    /// <summary>
+    /// Persists a new external servicer and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context);
 
-    Task UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context);
+    /// <summary>
+    /// Updates an existing external servicer and returns the signature metadata captured during persistence.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context);
 
     Task DeleteAsync(int id, ExternalServicerCrudContext context);
 

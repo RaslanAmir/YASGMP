@@ -12,9 +12,15 @@ public interface IChangeControlCrudService
 
     Task<ChangeControl?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context);
+    /// <summary>
+    /// Persists a new change control record and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context);
 
-    Task UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context);
+    /// <summary>
+    /// Updates an existing change control record and returns the signature metadata captured during persistence.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context);
 
     void Validate(ChangeControl changeControl);
 

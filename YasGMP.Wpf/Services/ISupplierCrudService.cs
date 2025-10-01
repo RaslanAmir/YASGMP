@@ -17,9 +17,15 @@ public interface ISupplierCrudService
 
     Task<Supplier?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(Supplier supplier, SupplierCrudContext context);
+    /// <summary>
+    /// Persists a new supplier and returns the saved identifier with captured signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(Supplier supplier, SupplierCrudContext context);
 
-    Task UpdateAsync(Supplier supplier, SupplierCrudContext context);
+    /// <summary>
+    /// Updates an existing supplier and returns the signature metadata that was persisted.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(Supplier supplier, SupplierCrudContext context);
 
     void Validate(Supplier supplier);
 

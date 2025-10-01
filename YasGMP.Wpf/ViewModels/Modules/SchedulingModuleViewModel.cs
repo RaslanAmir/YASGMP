@@ -259,17 +259,18 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             signatureResult);
 
         ScheduledJob adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _scheduledJobService.CreateAsync(entity, context).ConfigureAwait(false);
-                entity.Id = id;
+                saveResult = await _scheduledJobService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = saveResult.Id;
                 adapterResult = entity;
             }
             else if (Mode == FormMode.Update)
             {
-                await _scheduledJobService.UpdateAsync(entity, context).ConfigureAwait(false);
+                saveResult = await _scheduledJobService.UpdateAsync(entity, context).ConfigureAwait(false);
                 adapterResult = entity;
             }
             else
@@ -290,15 +291,15 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             signatureResult,
             tableName: "scheduled_jobs",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

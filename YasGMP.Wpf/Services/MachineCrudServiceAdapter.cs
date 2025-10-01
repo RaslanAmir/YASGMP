@@ -35,7 +35,7 @@ namespace YasGMP.Wpf.Services
             }
         }
 
-        public async Task<int> CreateAsync(Machine machine, MachineCrudContext context)
+        public async Task<CrudSaveResult> CreateAsync(Machine machine, MachineCrudContext context)
         {
             if (machine is null) throw new ArgumentNullException(nameof(machine));
 
@@ -47,10 +47,10 @@ namespace YasGMP.Wpf.Services
 
             // Preserve the captured signature metadata for the caller until core services accept it directly.
             machine.DigitalSignature = signature;
-            return machine.Id;
+            return new CrudSaveResult(machine.Id, metadata);
         }
 
-        public async Task UpdateAsync(Machine machine, MachineCrudContext context)
+        public async Task<CrudSaveResult> UpdateAsync(Machine machine, MachineCrudContext context)
         {
             if (machine is null) throw new ArgumentNullException(nameof(machine));
 
@@ -61,6 +61,7 @@ namespace YasGMP.Wpf.Services
                 .ConfigureAwait(false);
 
             machine.DigitalSignature = signature;
+            return new CrudSaveResult(machine.Id, metadata);
         }
 
         public void Validate(Machine machine)

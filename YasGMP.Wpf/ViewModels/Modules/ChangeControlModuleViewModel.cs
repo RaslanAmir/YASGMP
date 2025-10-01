@@ -255,19 +255,20 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             signatureResult);
 
         ChangeControl adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
-                entity.Id = id;
+                saveResult = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = saveResult.Id;
                 Records.Add(ToRecord(entity));
                 adapterResult = entity;
             }
             else if (Mode == FormMode.Update && _loadedEntity is not null)
             {
                 entity.Id = _loadedEntity.Id;
-                await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
+                saveResult = await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
                 adapterResult = entity;
             }
             else
@@ -288,15 +289,15 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             signatureResult,
             tableName: "change_controls",
             recordId: adapterResult.Id,
-            signatureId: context.SignatureId,
-            signatureHash: context.SignatureHash ?? signatureResult.Signature.SignatureHash,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: context.SignatureHash ?? signatureResult.Signature.SignatureHash,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.IpAddress,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.IpAddress,
+            fallbackSessionId: context.SessionId);
 
         try
         {

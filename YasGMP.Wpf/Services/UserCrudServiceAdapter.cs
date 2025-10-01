@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
 
@@ -45,7 +46,7 @@ namespace YasGMP.Wpf.Services
             return roles.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
-        public async Task<int> CreateAsync(User user, string password, UserCrudContext context)
+        public async Task<CrudSaveResult> CreateAsync(User user, string password, UserCrudContext context)
         {
             if (user is null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(password))
@@ -54,11 +55,12 @@ namespace YasGMP.Wpf.Services
             }
 
             user.PasswordHash = password;
+            var signature = ApplyContext(user, context);
             await _userService.CreateUserAsync(user, context.UserId).ConfigureAwait(false);
-            return user.Id;
+            return new CrudSaveResult(user.Id, CreateMetadata(context, signature));
         }
 
-        public async Task UpdateAsync(User user, string? password, UserCrudContext context)
+        public async Task<CrudSaveResult> UpdateAsync(User user, string? password, UserCrudContext context)
         {
             if (user is null) throw new ArgumentNullException(nameof(user));
 
@@ -67,7 +69,9 @@ namespace YasGMP.Wpf.Services
                 user.PasswordHash = _userService.HashPassword(password);
             }
 
+            var signature = ApplyContext(user, context);
             await _userService.UpdateUserAsync(user, context.UserId).ConfigureAwait(false);
+            return new CrudSaveResult(user.Id, CreateMetadata(context, signature));
         }
 
         public async Task UpdateRoleAssignmentsAsync(int userId, IReadOnlyCollection<int> roleIds, UserCrudContext context)
@@ -108,5 +112,28 @@ namespace YasGMP.Wpf.Services
                 throw new InvalidOperationException("Primary role is required.");
             }
         }
+
+        private static string ApplyContext(User user, UserCrudContext context)
+        {
+            var signature = context.SignatureHash ?? user.DigitalSignature ?? string.Empty;
+            user.DigitalSignature = signature;
+            user.LastChangeSignature = signature;
+            user.LastModifiedById = context.UserId;
+            user.LastModified = DateTime.UtcNow;
+            return signature;
+        }
+
+        private static SignatureMetadataDto CreateMetadata(UserCrudContext context, string signature)
+            => new()
+            {
+                Id = context.SignatureId,
+                Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+                Method = context.SignatureMethod,
+                Status = context.SignatureStatus,
+                Note = context.SignatureNote,
+                Session = context.SessionId,
+                Device = context.DeviceInfo,
+                IpAddress = context.Ip
+            };
     }
 }
