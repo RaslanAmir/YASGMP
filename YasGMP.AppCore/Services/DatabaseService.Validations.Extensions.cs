@@ -76,9 +76,9 @@ namespace YasGMP.Services
             {
                 const string ins = @"
 INSERT INTO validations
-(code, type, machine_id, component_id, date_start, date_end, documentation, comment, status, digital_signature, next_due)
+(code, type, machine_id, component_id, date_start, date_end, documentation, comment, status, digital_signature, next_due, source_ip, session_id)
 VALUES
-(@code,@type,@machine,@comp,@ds,@de,@doc,@comm,@status,@sig,@next);";
+(@code,@type,@machine,@comp,@ds,@de,@doc,@comm,@status,@sig,@next,@source_ip,@session);";
                 var insPars = BuildParameters(v, includeId: false);
                 await db.ExecuteNonQueryAsync(ins, insPars, token).ConfigureAwait(false);
 
@@ -103,7 +103,8 @@ VALUES
                 const string upd = @"
 UPDATE validations SET
  code=@code, type=@type, machine_id=@machine, component_id=@comp, date_start=@ds, date_end=@de,
- documentation=@doc, comment=@comm, status=@status, digital_signature=@sig, next_due=@next
+ documentation=@doc, comment=@comm, status=@status, digital_signature=@sig, next_due=@next,
+ source_ip=@source_ip, session_id=@session
 WHERE id=@id;";
                 var updPars = BuildParameters(v, includeId: true);
                 await db.ExecuteNonQueryAsync(upd, updPars, token).ConfigureAwait(false);
@@ -368,6 +369,8 @@ VALUES
                 new("@status", v.Status ?? string.Empty),
                 new("@sig",    v.DigitalSignature ?? string.Empty),
                 new("@next",   v.NextDue ?? (object)DBNull.Value),
+                new("@source_ip", string.IsNullOrWhiteSpace(v.SourceIp) ? (object)DBNull.Value : v.SourceIp),
+                new("@session",   string.IsNullOrWhiteSpace(v.SessionId) ? (object)DBNull.Value : v.SessionId),
             };
             if (includeId) list.Add(new MySqlParameter("@id", v.Id));
             return list.ToArray();

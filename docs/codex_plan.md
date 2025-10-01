@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -42,6 +42,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2025-12-04: Validation persistence now writes `source_ip`/`session_id` on insert/update and ValidationService unit tests assert the metadata survives adapter calls; dotnet CLI still missing so restore/build/test remain blocked.
 - 2025-12-01: Change Control schema/service now persist digital signature hash plus IP/session/device context so adapter metadata flows through unchanged; database scripts updated accordingly while CLI validation remains blocked.
 - 2025-12-03: ValidationService now preserves adapter-provided digital signature hashes on create/update paths, only regenerating during forced transitions (e.g., Execute); unit coverage added to confirm the adapter hash survives persistence while dotnet CLI access remains blocked.
 - 2025-12-02: ComponentService now accepts a ComponentSaveContext so WPF adapters can persist signature hash/IP/device/session without regeneration; machine_components INSERT/UPDATE now write digital_signature/source_ip/device/session columns and unit coverage asserts the stored hash matches the adapter payload while dotnet CLI validation remains blocked.
