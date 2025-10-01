@@ -15,8 +15,13 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
     private int _nextSignatureId = 1;
 
     public List<ElectronicSignatureContext> Requests { get; } = new();
+    public List<ElectronicSignatureDialogResult?> CapturedResults { get; } = new();
     public List<ElectronicSignatureDialogResult> PersistedResults { get; } = new();
     public List<PersistedSignatureRecord> PersistedSignatureRecords { get; } = new();
+
+    public int PersistInvocationCount { get; private set; }
+
+    public bool WasPersistInvoked => PersistInvocationCount > 0;
 
     public PersistedSignatureRecord? LastPersistedSignature
         => PersistedSignatureRecords.Count > 0 ? PersistedSignatureRecords[^1] : null;
@@ -144,6 +149,7 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
                 throw outcome.Exception;
             }
 
+            CapturedResults.Add(outcome.Result);
             return Task.FromResult(outcome.Result);
         }
 
@@ -165,10 +171,14 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
 
         if (ResultFactory is not null)
         {
-            return Task.FromResult(ResultFactory(context));
+            var result = ResultFactory(context);
+            CapturedResults.Add(result);
+            return Task.FromResult(result);
         }
 
-        return Task.FromResult<ElectronicSignatureDialogResult?>(DefaultResult);
+        var defaultResultClone = CloneResult(DefaultResult);
+        CapturedResults.Add(defaultResultClone);
+        return Task.FromResult<ElectronicSignatureDialogResult?>(defaultResultClone);
     }
 
     public Task PersistSignatureAsync(
@@ -205,6 +215,17 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
             throw exception;
         }
 
+        var signature = result.Signature;
+        if (signature is null)
+        {
+            throw new InvalidOperationException("Persisted signature result must include a signature instance.");
+        }
+
+        PersistInvocationCount++;
+
+        var assignedSignatureId = signature.Id > 0 ? signature.Id : _nextSignatureId++;
+        signature.Id = assignedSignatureId;
+
         var persistedResult = CloneResult(result);
         PersistedResults.Add(persistedResult);
 
@@ -213,9 +234,6 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
             throw new InvalidOperationException("Persisted signature result must include a signature instance.");
         }
 
-        var assignedSignatureId = _nextSignatureId++;
-
-        result.Signature.Id = assignedSignatureId;
         persistedResult.Signature.Id = assignedSignatureId;
 
         PersistedSignatureRecords.Add(new PersistedSignatureRecord(

@@ -24,7 +24,11 @@ public class IncidentsModuleViewModelTests
         var audit = new AuditService(database);
         var audit = new AuditService(database);
         var audit = new AuditService(database);
-        var incidents = new FakeIncidentCrudService();
+        const int adapterSignatureId = 9087;
+        var incidents = new FakeIncidentCrudService
+        {
+            SignatureMetadataIdSource = _ => adapterSignatureId
+        };
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, FullName = "QA Manager" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
@@ -48,6 +52,7 @@ public class IncidentsModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var persisted = Assert.Single(incidents.Saved);
         Assert.Equal("Temperature deviation", persisted.Title);
         Assert.Equal("Deviation", persisted.Type);
@@ -62,18 +67,12 @@ public class IncidentsModuleViewModelTests
             Assert.Equal("incidents", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(incidents.Saved[0].Id, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(incidents.Saved[0].Id, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
+        var signatureResult = Assert.NotNull(capturedResult);
+        Assert.Equal(incidents.Saved[0].Id, signatureResult.Signature.RecordId);
+        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
         Assert.False(viewModel.IsDirty);
     }
 

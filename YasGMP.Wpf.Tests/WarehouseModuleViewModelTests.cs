@@ -21,7 +21,11 @@ public class WarehouseModuleViewModelTests
         var database = new DatabaseService();
         var audit = new AuditService(database);
         var audit = new AuditService(database);
-        var warehouseAdapter = new FakeWarehouseCrudService();
+        const int adapterSignatureId = 4789;
+        var warehouseAdapter = new FakeWarehouseCrudService
+        {
+            SignatureMetadataIdSource = _ => adapterSignatureId
+        };
         var auth = new TestAuthContext
         {
             CurrentUser = new User { Id = 4, FullName = "QA" },
@@ -49,6 +53,7 @@ public class WarehouseModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         Assert.Single(warehouseAdapter.Saved);
         var persisted = warehouseAdapter.Saved[0];
         Assert.Equal("Cleanroom Store", persisted.Name);
@@ -65,18 +70,12 @@ public class WarehouseModuleViewModelTests
             Assert.Equal("warehouses", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(warehouseAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(warehouseAdapter.Saved[0].Id, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
+        var signatureResult = Assert.NotNull(capturedResult);
+        Assert.Equal(warehouseAdapter.Saved[0].Id, signatureResult.Signature.RecordId);
+        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
     }
 
     [Fact]

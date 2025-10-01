@@ -20,7 +20,11 @@ public class CalibrationModuleViewModelTests
         var database = new DatabaseService();
         database.Suppliers.Add(new Supplier { Id = 7, Name = "Metrologix" });
 
-        var calibrationAdapter = new FakeCalibrationCrudService();
+        const int adapterSignatureId = 2451;
+        var calibrationAdapter = new FakeCalibrationCrudService
+        {
+            SignatureMetadataIdSource = _ => adapterSignatureId
+        };
         var componentAdapter = new FakeComponentCrudService();
 
         _ = await componentAdapter.CreateAsync(new Component
@@ -75,6 +79,7 @@ public class CalibrationModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         Assert.Single(calibrationAdapter.Saved);
         var persisted = calibrationAdapter.Saved[0];
         Assert.Equal(componentAdapter.Saved[0].Id, persisted.ComponentId);
@@ -92,18 +97,12 @@ public class CalibrationModuleViewModelTests
             Assert.Equal("calibrations", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(calibrationAdapter.Saved[0].Id, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(calibrationAdapter.Saved[0].Id, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
+        var signatureResult = Assert.NotNull(capturedResult);
+        Assert.Equal(calibrationAdapter.Saved[0].Id, signatureResult.Signature.RecordId);
+        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
     }
 
     [Fact]

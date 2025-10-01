@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Wpf.Services;
@@ -6,6 +7,8 @@ namespace YasGMP.Models
 {
     public sealed partial class FakeMachineCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Machine machine, MachineCrudContext context)
         {
             var id = await CreateCoreAsync(machine, context).ConfigureAwait(false);
@@ -18,10 +21,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(machine.Id, BuildMetadata(context, machine.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(MachineCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(MachineCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -30,10 +33,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeComponentCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Component component, ComponentCrudContext context)
         {
             var id = await CreateCoreAsync(component, context).ConfigureAwait(false);
@@ -46,10 +54,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(component.Id, BuildMetadata(context, component.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(ComponentCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(ComponentCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -58,10 +66,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeCalibrationCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Calibration calibration, CalibrationCrudContext context)
         {
             var id = await CreateCoreAsync(calibration, context).ConfigureAwait(false);
@@ -74,10 +87,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(calibration.Id, BuildMetadata(context, calibration.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(CalibrationCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(CalibrationCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -86,10 +99,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeIncidentCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Incident incident, IncidentCrudContext context)
         {
             var id = await CreateCoreAsync(incident, context).ConfigureAwait(false);
@@ -102,10 +120,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(incident.Id, BuildMetadata(context, incident.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(IncidentCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(IncidentCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -114,10 +132,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeChangeControlCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
             var id = await CreateCoreAsync(changeControl, context).ConfigureAwait(false);
@@ -130,10 +153,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(changeControl.Id, BuildMetadata(context, changeControl.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(ChangeControlCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(ChangeControlCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -142,10 +165,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.IpAddress
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeCapaCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(CapaCase capa, CapaCrudContext context)
         {
             var id = await CreateCoreAsync(capa, context).ConfigureAwait(false);
@@ -158,10 +186,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(capa.Id, BuildMetadata(context, capa.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(CapaCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(CapaCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -170,10 +198,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeValidationCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Validation validation, ValidationCrudContext context)
         {
             var id = await CreateCoreAsync(validation, context).ConfigureAwait(false);
@@ -186,10 +219,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(validation.Id, BuildMetadata(context, validation.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(ValidationCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(ValidationCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -198,10 +231,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakePartCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Part part, PartCrudContext context)
         {
             var id = await CreateCoreAsync(part, context).ConfigureAwait(false);
@@ -214,10 +252,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(part.Id, BuildMetadata(context, part.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(PartCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(PartCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -226,10 +264,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeSupplierCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Supplier supplier, SupplierCrudContext context)
         {
             var id = await CreateCoreAsync(supplier, context).ConfigureAwait(false);
@@ -242,10 +285,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(supplier.Id, BuildMetadata(context, supplier.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(SupplierCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(SupplierCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -254,10 +297,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeWarehouseCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
             var id = await CreateCoreAsync(warehouse, context).ConfigureAwait(false);
@@ -270,10 +318,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(warehouse.Id, BuildMetadata(context, warehouse.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(WarehouseCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(WarehouseCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -282,10 +330,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeScheduledJobCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context)
         {
             var id = await CreateCoreAsync(job, context).ConfigureAwait(false);
@@ -298,10 +351,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(job.Id, BuildMetadata(context, job.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(ScheduledJobCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(ScheduledJobCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -310,10 +363,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeUserCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(User user, string password, UserCrudContext context)
         {
             var id = await CreateCoreAsync(user, password, context).ConfigureAwait(false);
@@ -326,10 +384,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(user.Id, BuildMetadata(context, user.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(UserCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(UserCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -338,10 +396,15 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeWorkOrderCrudService
     {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
         public async Task<CrudSaveResult> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
             var id = await CreateCoreAsync(workOrder, context).ConfigureAwait(false);
@@ -354,10 +417,10 @@ namespace YasGMP.Models
             return new CrudSaveResult(workOrder.Id, BuildMetadata(context, workOrder.DigitalSignature));
         }
 
-        private static SignatureMetadataDto BuildMetadata(WorkOrderCrudContext context, string? signature)
+        private SignatureMetadataDto BuildMetadata(WorkOrderCrudContext context, string? signature)
             => new()
             {
-                Id = context.SignatureId,
+                Id = ResolveMetadataId(context.SignatureId),
                 Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
                 Method = context.SignatureMethod,
                 Status = context.SignatureStatus,
@@ -366,5 +429,8 @@ namespace YasGMP.Models
                 Device = context.DeviceInfo,
                 IpAddress = context.Ip
             };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 }
