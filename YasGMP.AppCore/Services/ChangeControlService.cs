@@ -52,6 +52,9 @@ public class ChangeControlService
         changeControl.DateRequested ??= DateTime.UtcNow;
         changeControl.LastModifiedById = userId;
         changeControl.LastModified = DateTime.UtcNow;
+        changeControl.SourceIp = ip;
+        changeControl.DeviceInfo = deviceInfo;
+        changeControl.SessionId = sessionId;
 
         var id = await _database.InsertChangeControlAsync(
             changeControl,
@@ -87,6 +90,9 @@ public class ChangeControlService
 
         changeControl.LastModifiedById = userId;
         changeControl.LastModified = DateTime.UtcNow;
+        changeControl.SourceIp = ip;
+        changeControl.DeviceInfo = deviceInfo;
+        changeControl.SessionId = sessionId;
 
         await _database.UpdateChangeControlAsync(
             changeControl,

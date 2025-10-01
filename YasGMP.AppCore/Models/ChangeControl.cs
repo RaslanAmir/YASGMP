@@ -68,5 +68,21 @@ namespace YasGMP.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+
+        [Column("digital_signature")]
+        [MaxLength(512)]
+        public string? DigitalSignature { get; set; }
+
+        [Column("source_ip")]
+        [MaxLength(255)]
+        public string? SourceIp { get; set; }
+
+        [Column("session_id")]
+        [MaxLength(255)]
+        public string? SessionId { get; set; }
+
+        [Column("device_info")]
+        [MaxLength(255)]
+        public string? DeviceInfo { get; set; }
     }
 }

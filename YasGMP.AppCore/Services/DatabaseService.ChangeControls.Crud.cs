@@ -22,7 +22,8 @@ public static class DatabaseServiceChangeControlsCrudExtensions
         const string sql = @"SELECT
     id, description, title, date_requested, code, status,
     requested_by_id, assigned_to_id, date_assigned, last_modified,
-    last_modified_by_id, created_at, updated_at
+    last_modified_by_id, created_at, updated_at, digital_signature,
+    source_ip, session_id, device_info
 FROM change_controls
 ORDER BY id DESC";
 
@@ -44,7 +45,8 @@ ORDER BY id DESC";
         const string sql = @"SELECT
     id, description, title, date_requested, code, status,
     requested_by_id, assigned_to_id, date_assigned, last_modified,
-    last_modified_by_id, created_at, updated_at
+    last_modified_by_id, created_at, updated_at, digital_signature,
+    source_ip, session_id, device_info
 FROM change_controls
 WHERE id = @id
 LIMIT 1";
@@ -71,10 +73,12 @@ LIMIT 1";
 
         const string sql = @"INSERT INTO change_controls
     (description, title, date_requested, code, status, requested_by_id, assigned_to_id,
-     date_assigned, last_modified, last_modified_by_id, created_at, updated_at)
+     date_assigned, last_modified, last_modified_by_id, created_at, updated_at,
+     digital_signature, source_ip, session_id, device_info)
 VALUES
     (@description, @title, @date_requested, @code, @status, @requested_by_id, @assigned_to_id,
-     @date_assigned, @last_modified, @last_modified_by_id, @created_at, @updated_at);";
+     @date_assigned, @last_modified, @last_modified_by_id, @created_at, @updated_at,
+     @digital_signature, @source_ip, @session_id, @device_info);";
 
         var parameters = BuildParameterList(changeControl);
         await db.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
@@ -124,7 +128,11 @@ VALUES
     date_assigned = @date_assigned,
     last_modified = @last_modified,
     last_modified_by_id = @last_modified_by_id,
-    updated_at = @updated_at
+    updated_at = @updated_at,
+    digital_signature = @digital_signature,
+    source_ip = @source_ip,
+    session_id = @session_id,
+    device_info = @device_info
 WHERE id = @id";
 
         var parameters = BuildParameterList(changeControl);
@@ -161,7 +169,11 @@ WHERE id = @id";
             LastModified = row.Field<DateTime?>("last_modified"),
             LastModifiedById = row.Field<int?>("last_modified_by_id"),
             CreatedAt = row.Field<DateTime?>("created_at"),
-            UpdatedAt = row.Field<DateTime?>("updated_at")
+            UpdatedAt = row.Field<DateTime?>("updated_at"),
+            DigitalSignature = row.Field<string?>("digital_signature"),
+            SourceIp = row.Field<string?>("source_ip"),
+            SessionId = row.Field<string?>("session_id"),
+            DeviceInfo = row.Field<string?>("device_info")
         };
 
         return changeControl;
@@ -193,7 +205,11 @@ WHERE id = @id";
             new("@last_modified", changeControl.LastModified ?? (object)DBNull.Value),
             new("@last_modified_by_id", changeControl.LastModifiedById ?? (object)DBNull.Value),
             new("@created_at", changeControl.CreatedAt ?? (object)DBNull.Value),
-            new("@updated_at", changeControl.UpdatedAt ?? (object)DBNull.Value)
+            new("@updated_at", changeControl.UpdatedAt ?? (object)DBNull.Value),
+            new("@digital_signature", changeControl.DigitalSignature ?? (object)DBNull.Value),
+            new("@source_ip", changeControl.SourceIp ?? (object)DBNull.Value),
+            new("@session_id", changeControl.SessionId ?? (object)DBNull.Value),
+            new("@device_info", changeControl.DeviceInfo ?? (object)DBNull.Value)
         };
     }
 }
