@@ -42,6 +42,8 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2025-12-01: Change Control schema/service now persist digital signature hash plus IP/session/device context so adapter metadata flows through unchanged; database scripts updated accordingly while CLI validation remains blocked.
+- 2025-12-01: dotnet restore/build and WPF smoke harness still blocked by missing dotnet CLI; rerun once host installs .NET 9/Windows SDK.
 - 2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; build validation remains blocked pending dotnet CLI access.
 - 2025-11-13: Completed signature metadata DTO propagation through Machine, Work Order, Calibration, Supplier, and Part services plus DatabaseService helpers; persistence now accepts optional metadata and falls back to the legacy hash generator when absent, while WPF adapters feed DTOs downstream.
 - 2025-11-14: Database helpers for machines, work orders, calibrations, suppliers, and parts now persist digital_signature_id columns when present, tolerate legacy schemas, and upsert the digital_signatures table with hash/method/status/note metadata while propagating the resulting signature id back to DTOs and audit flows.
