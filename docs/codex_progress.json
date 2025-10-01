@@ -28,7 +28,8 @@
       "2025-11-30: dotnet restore retried; CLI still missing so commands exit with \"command not found\".",
       "2025-12-04: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-12-07: dotnet restore/build attempted again for yasgmp.sln; CLI still missing in container so commands exit with 'command not found'.",
-      "2025-12-08: dotnet --version/restore/build retried; CLI still missing in container so commands exit with 'command not found'."
+      "2025-12-08: dotnet --version/restore/build retried; CLI still missing in container so commands exit with 'command not found'.",
+      "2025-12-13: dotnet restore yasgmp.sln retried; CLI remains unavailable so the command fails with 'command not found'."
     ]
   },
   "batches": [
@@ -177,6 +178,7 @@
     "2025-12-09: ElectronicSignatureDialogService now reuses persisted digital signature ids when present, updates the dialog result with the generated id on insert, and funnels SIGNATURE_PERSISTED auditing through a reusable helper while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-10: ElectronicSignatureDialogService now exposes LogPersistedSignatureAsync so modules can log SIGNATURE_PERSISTED without re-inserting signatures, SignaturePersistenceHelper calls the new hook when persistence is skipped, and WPF tests assert the log-only path while dotnet CLI access continues to block restore/build/smoke.",
     "2025-12-11: SignaturePersistenceHelper now awaits the log-only audit path and WPF unit tests cover both persisted-id logging and new-signature insert flows while dotnet CLI access still blocks restore/build/test.",
-    "2025-12-12: TestElectronicSignatureDialogService records log-only persisted signature metadata without mutating identifiers and SignaturePersistenceHelper tests assert the audit log path while dotnet restore/build remain blocked by the missing CLI."
+    "2025-12-12: TestElectronicSignatureDialogService records log-only persisted signature metadata without mutating identifiers and SignaturePersistenceHelper tests assert the audit log path while dotnet restore/build remain blocked by the missing CLI.",
+    "2025-12-13: ElectronicSignatureDialogService WPF tests now assert log-only persistence skips redundant inserts, validate the audit hook for existing signatures, and confirm the dotnet CLI gap still blocks restore/build/test execution."
   ]
 }
