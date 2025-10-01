@@ -23,7 +23,7 @@ public class ComponentsModuleViewModelTests
         var componentAdapter = new FakeComponentCrudService();
         var machineAdapter = new FakeMachineCrudService();
 
-        await machineAdapter.CreateAsync(new Machine
+        _ = await machineAdapter.CreateAsync(new Machine
         {
             Id = 1,
             Code = "AST-001",
@@ -99,7 +99,7 @@ public class ComponentsModuleViewModelTests
         var componentAdapter = new FakeComponentCrudService();
         var machineAdapter = new FakeMachineCrudService();
 
-        await machineAdapter.CreateAsync(new Machine
+        _ = await machineAdapter.CreateAsync(new Machine
         {
             Id = 1,
             Code = "AST-001",
@@ -151,7 +151,7 @@ public class ComponentsModuleViewModelTests
         var componentAdapter = new FakeComponentCrudService();
         var machineAdapter = new FakeMachineCrudService();
 
-        await machineAdapter.CreateAsync(new Machine
+        _ = await machineAdapter.CreateAsync(new Machine
         {
             Id = 1,
             Code = "AST-001",

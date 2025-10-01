@@ -14,9 +14,15 @@ public interface IWorkOrderCrudService
 {
     Task<WorkOrder?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context);
+    /// <summary>
+    /// Persists a new work order and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context);
 
-    Task UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context);
+    /// <summary>
+    /// Updates an existing work order and returns the signature metadata that was persisted.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context);
 
     void Validate(WorkOrder workOrder);
 }

@@ -334,6 +334,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             signatureResult);
 
         Validation adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
@@ -343,15 +344,15 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                     entity.Code = $"VAL-{DateTime.UtcNow:yyyyMMddHHmmss}";
                 }
 
-                var id = await _validationService.CreateAsync(entity, context).ConfigureAwait(false);
-                entity.Id = id;
+                saveResult = await _validationService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = saveResult.Id;
                 Records.Add(ToRecord(entity));
                 adapterResult = entity;
             }
             else if (Mode == FormMode.Update)
             {
                 entity.Id = _loadedValidation!.Id;
-                await _validationService.UpdateAsync(entity, context).ConfigureAwait(false);
+                saveResult = await _validationService.UpdateAsync(entity, context).ConfigureAwait(false);
                 ReplaceRecord(entity);
                 adapterResult = entity;
             }
@@ -373,15 +374,15 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             signatureResult,
             tableName: "validations",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

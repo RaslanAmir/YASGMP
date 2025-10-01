@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -34,27 +35,28 @@ public sealed class ValidationCrudServiceAdapter : IValidationCrudService
         }
     }
 
-    public async Task<int> CreateAsync(Validation validation, ValidationCrudContext context)
+    public async Task<CrudSaveResult> CreateAsync(Validation validation, ValidationCrudContext context)
     {
         if (validation is null)
         {
             throw new ArgumentNullException(nameof(validation));
         }
 
-        ApplyContext(validation, context);
+        var signature = ApplyContext(validation, context);
         await _inner.CreateAsync(validation, context.UserId).ConfigureAwait(false);
-        return validation.Id;
+        return new CrudSaveResult(validation.Id, CreateMetadata(context, signature));
     }
 
-    public Task UpdateAsync(Validation validation, ValidationCrudContext context)
+    public async Task<CrudSaveResult> UpdateAsync(Validation validation, ValidationCrudContext context)
     {
         if (validation is null)
         {
             throw new ArgumentNullException(nameof(validation));
         }
 
-        ApplyContext(validation, context);
-        return _inner.UpdateAsync(validation, context.UserId);
+        var signature = ApplyContext(validation, context);
+        await _inner.UpdateAsync(validation, context.UserId).ConfigureAwait(false);
+        return new CrudSaveResult(validation.Id, CreateMetadata(context, signature));
     }
 
     public void Validate(Validation validation)
@@ -90,10 +92,26 @@ public sealed class ValidationCrudServiceAdapter : IValidationCrudService
         }
     }
 
-    private static void ApplyContext(Validation validation, ValidationCrudContext context)
+    private static string ApplyContext(Validation validation, ValidationCrudContext context)
     {
         validation.LastModifiedById = context.UserId;
         validation.SourceIp = context.Ip;
         validation.SessionId = context.SessionId ?? string.Empty;
+        var signature = context.SignatureHash ?? validation.DigitalSignature ?? string.Empty;
+        validation.DigitalSignature = signature;
+        return signature;
     }
+
+    private static SignatureMetadataDto CreateMetadata(ValidationCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

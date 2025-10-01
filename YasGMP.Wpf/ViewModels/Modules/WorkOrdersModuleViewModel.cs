@@ -310,6 +310,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             signatureResult);
 
         WorkOrder adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
@@ -319,13 +320,13 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 entity.AssignedToId = Editor.AssignedToId > 0 ? Editor.AssignedToId : userId.Value;
                 entity.DateOpen = Editor.DateOpen == default ? DateTime.UtcNow : Editor.DateOpen;
 
-                var id = await _workOrderService.CreateAsync(entity, context).ConfigureAwait(false);
-                entity.Id = id;
+                saveResult = await _workOrderService.CreateAsync(entity, context).ConfigureAwait(false);
+                entity.Id = saveResult.Id;
                 adapterResult = entity;
             }
             else if (Mode == FormMode.Update)
             {
-                await _workOrderService.UpdateAsync(entity, context).ConfigureAwait(false);
+                saveResult = await _workOrderService.UpdateAsync(entity, context).ConfigureAwait(false);
                 adapterResult = entity;
             }
             else
@@ -338,6 +339,11 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             throw new InvalidOperationException($"Failed to persist work order: {ex.Message}", ex);
         }
 
+        if (saveResult.SignatureMetadata?.Id is { } signatureId)
+        {
+            adapterResult.DigitalSignatureId = signatureId;
+        }
+
         _loadedEntity = entity;
         LoadEditor(entity);
         UpdateAttachmentCommandState();
@@ -346,15 +352,15 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             signatureResult,
             tableName: "work_orders",
             recordId: adapterResult.Id,
-            signatureId: adapterResult.DigitalSignatureId,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

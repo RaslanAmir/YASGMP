@@ -300,18 +300,19 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             signatureResult);
 
         Part adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _partService.CreateAsync(part, context).ConfigureAwait(false);
-                part.Id = id;
+                saveResult = await _partService.CreateAsync(part, context).ConfigureAwait(false);
+                part.Id = saveResult.Id;
                 adapterResult = part;
             }
             else if (Mode == FormMode.Update)
             {
                 part.Id = _loadedPart!.Id;
-                await _partService.UpdateAsync(part, context).ConfigureAwait(false);
+                saveResult = await _partService.UpdateAsync(part, context).ConfigureAwait(false);
                 adapterResult = part;
             }
             else
@@ -324,6 +325,11 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             throw new InvalidOperationException($"Failed to persist part: {ex.Message}", ex);
         }
 
+        if (saveResult.SignatureMetadata?.Id is { } signatureId)
+        {
+            adapterResult.DigitalSignatureId = signatureId;
+        }
+
         _loadedPart = part;
         LoadEditor(part);
         UpdateStockHealth();
@@ -333,15 +339,15 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             signatureResult,
             tableName: "parts",
             recordId: adapterResult.Id,
-            signatureId: adapterResult.DigitalSignatureId,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

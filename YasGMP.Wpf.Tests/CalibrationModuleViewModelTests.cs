@@ -23,7 +23,7 @@ public class CalibrationModuleViewModelTests
         var calibrationAdapter = new FakeCalibrationCrudService();
         var componentAdapter = new FakeComponentCrudService();
 
-        await componentAdapter.CreateAsync(new Component
+        _ = await componentAdapter.CreateAsync(new Component
         {
             Id = 3,
             MachineId = 1,
@@ -115,7 +115,7 @@ public class CalibrationModuleViewModelTests
         var calibrationAdapter = new FakeCalibrationCrudService();
         var componentAdapter = new FakeComponentCrudService();
 
-        await componentAdapter.CreateAsync(new Component
+        _ = await componentAdapter.CreateAsync(new Component
         {
             Id = 21,
             MachineId = 4,
@@ -188,7 +188,7 @@ public class CalibrationModuleViewModelTests
         var calibrationAdapter = new FakeCalibrationCrudService();
         var componentAdapter = new FakeComponentCrudService();
 
-        await componentAdapter.CreateAsync(new Component
+        _ = await componentAdapter.CreateAsync(new Component
         {
             Id = 31,
             MachineId = 6,
@@ -261,7 +261,7 @@ public class CalibrationModuleViewModelTests
         var calibrationAdapter = new FakeCalibrationCrudService();
         var componentAdapter = new FakeComponentCrudService();
 
-        await componentAdapter.CreateAsync(new Component
+        _ = await componentAdapter.CreateAsync(new Component
         {
             Id = 11,
             MachineId = 2,

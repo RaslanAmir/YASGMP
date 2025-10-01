@@ -16,9 +16,15 @@ public interface IValidationCrudService
 
     Task<Validation?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(Validation validation, ValidationCrudContext context);
+    /// <summary>
+    /// Persists a new validation record and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(Validation validation, ValidationCrudContext context);
 
-    Task UpdateAsync(Validation validation, ValidationCrudContext context);
+    /// <summary>
+    /// Updates an existing validation record and returns the signature metadata captured during the operation.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(Validation validation, ValidationCrudContext context);
 
     void Validate(Validation validation);
 }

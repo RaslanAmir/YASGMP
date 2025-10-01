@@ -16,9 +16,15 @@ namespace YasGMP.Wpf.Services
 
         Task<Machine?> TryGetByIdAsync(int id);
 
-        Task<int> CreateAsync(Machine machine, MachineCrudContext context);
+        /// <summary>
+        /// Persists a new machine and returns the saved identifier together with captured signature metadata.
+        /// </summary>
+        Task<CrudSaveResult> CreateAsync(Machine machine, MachineCrudContext context);
 
-        Task UpdateAsync(Machine machine, MachineCrudContext context);
+        /// <summary>
+        /// Updates an existing machine and returns the updated signature metadata so callers can refresh UI state.
+        /// </summary>
+        Task<CrudSaveResult> UpdateAsync(Machine machine, MachineCrudContext context);
 
         void Validate(Machine machine);
 

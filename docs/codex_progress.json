@@ -81,7 +81,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: add CrudSaveResult payload for save results",
+  "lastCommitSummary": "feat: propagate CrudSaveResult through WPF editors",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -154,6 +154,7 @@
     "2025-11-25: DataDrivenModuleDocumentViewModel gains an optional AuditService injection so every WPF module can share audit helpers, and Work Orders now records CREATE/UPDATE audit events with signature/user/IP/device/session details post-save; unit tests inject the service while dotnet CLI access remains unavailable.",
     "2025-11-26: RecordingAuditService test double added to the WPF harness so Work Orders save and attachment tests assert audit payloads with signer context while dotnet restore/build stay blocked.",
     "2025-11-27: Module save flows now rehydrate adapter-supplied signature metadata and skip redundant dialog persistence when ids are present so the stored record matches the UX status messaging.",
-    "2025-11-28: Introduced a shared CrudSaveResult record so adapters can return the persisted identifier together with signature metadata, keeping downstream editors and audit logging aligned once saves complete."
+    "2025-11-28: Introduced a shared CrudSaveResult record so adapters can return the persisted identifier together with signature metadata, keeping downstream editors and audit logging aligned once saves complete.",
+    "2025-11-29: CRUD service interfaces, adapters, module view-models, and WPF test doubles now return/consume CrudSaveResult so save flows refresh ids and expose signature metadata with regression coverage validating the new payload."
   ]
 }

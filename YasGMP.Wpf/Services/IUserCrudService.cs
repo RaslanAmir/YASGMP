@@ -18,9 +18,15 @@ namespace YasGMP.Wpf.Services
 
         Task<IReadOnlyList<Role>> GetAllRolesAsync();
 
-        Task<int> CreateAsync(User user, string password, UserCrudContext context);
+        /// <summary>
+        /// Persists a new user and returns the saved identifier with signature metadata.
+        /// </summary>
+        Task<CrudSaveResult> CreateAsync(User user, string password, UserCrudContext context);
 
-        Task UpdateAsync(User user, string? password, UserCrudContext context);
+        /// <summary>
+        /// Updates an existing user and returns the signature metadata captured during persistence.
+        /// </summary>
+        Task<CrudSaveResult> UpdateAsync(User user, string? password, UserCrudContext context);
 
         Task UpdateRoleAssignmentsAsync(int userId, IReadOnlyCollection<int> roleIds, UserCrudContext context);
 

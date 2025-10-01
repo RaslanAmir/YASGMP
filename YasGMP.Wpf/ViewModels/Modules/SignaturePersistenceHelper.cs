@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -12,15 +13,15 @@ internal static class SignaturePersistenceHelper
         ElectronicSignatureDialogResult signatureResult,
         string tableName,
         int recordId,
-        int? signatureId,
-        string? signatureHash,
-        string? method,
-        string? status,
-        string? note,
+        SignatureMetadataDto? metadata,
+        string? fallbackSignatureHash,
+        string? fallbackMethod,
+        string? fallbackStatus,
+        string? fallbackNote,
         DateTime? signedAt,
-        string? deviceInfo,
-        string? ipAddress,
-        string? sessionId)
+        string? fallbackDeviceInfo,
+        string? fallbackIpAddress,
+        string? fallbackSessionId)
     {
         if (signatureResult is null)
         {
@@ -36,26 +37,38 @@ internal static class SignaturePersistenceHelper
         signature.TableName = tableName ?? signature.TableName;
         signature.RecordId = recordId;
 
-        if (signatureId.HasValue && signatureId.Value > 0)
+        if (metadata?.Id is { } metadataId && metadataId > 0)
         {
-            signature.Id = signatureId.Value;
+            signature.Id = metadataId;
         }
 
+        var signatureHash = !string.IsNullOrWhiteSpace(metadata?.Hash)
+            ? metadata!.Hash
+            : fallbackSignatureHash;
         if (!string.IsNullOrWhiteSpace(signatureHash))
         {
             signature.SignatureHash = signatureHash;
         }
 
+        var method = !string.IsNullOrWhiteSpace(metadata?.Method)
+            ? metadata!.Method
+            : fallbackMethod;
         if (!string.IsNullOrWhiteSpace(method))
         {
             signature.Method = method;
         }
 
+        var status = !string.IsNullOrWhiteSpace(metadata?.Status)
+            ? metadata!.Status
+            : fallbackStatus;
         if (!string.IsNullOrWhiteSpace(status))
         {
             signature.Status = status;
         }
 
+        var note = !string.IsNullOrWhiteSpace(metadata?.Note)
+            ? metadata!.Note
+            : fallbackNote;
         if (!string.IsNullOrWhiteSpace(note))
         {
             signature.Note = note;
@@ -66,16 +79,25 @@ internal static class SignaturePersistenceHelper
             signature.SignedAt = signedAt;
         }
 
+        var deviceInfo = !string.IsNullOrWhiteSpace(metadata?.Device)
+            ? metadata!.Device
+            : fallbackDeviceInfo;
         if (!string.IsNullOrWhiteSpace(deviceInfo))
         {
             signature.DeviceInfo = deviceInfo;
         }
 
+        var ipAddress = !string.IsNullOrWhiteSpace(metadata?.IpAddress)
+            ? metadata!.IpAddress
+            : fallbackIpAddress;
         if (!string.IsNullOrWhiteSpace(ipAddress))
         {
             signature.IpAddress = ipAddress;
         }
 
+        var sessionId = !string.IsNullOrWhiteSpace(metadata?.Session)
+            ? metadata!.Session
+            : fallbackSessionId;
         if (!string.IsNullOrWhiteSpace(sessionId))
         {
             signature.SessionId = sessionId;

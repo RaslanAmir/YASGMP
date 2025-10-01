@@ -13,9 +13,15 @@ public interface IScheduledJobCrudService
 {
     Task<ScheduledJob?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context);
+    /// <summary>
+    /// Persists a new scheduled job and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context);
 
-    Task UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context);
+    /// <summary>
+    /// Updates an existing scheduled job and returns the signature metadata captured during persistence.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context);
 
     Task ExecuteAsync(int jobId, ScheduledJobCrudContext context);
 

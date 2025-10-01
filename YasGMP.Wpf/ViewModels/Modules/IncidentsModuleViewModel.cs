@@ -391,14 +391,15 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             signatureResult);
 
         Incident adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _incidentService.CreateAsync(incident, context).ConfigureAwait(false);
-                if (incident.Id == 0 && id > 0)
+                saveResult = await _incidentService.CreateAsync(incident, context).ConfigureAwait(false);
+                if (incident.Id == 0 && saveResult.Id > 0)
                 {
-                    incident.Id = id;
+                    incident.Id = saveResult.Id;
                 }
 
                 adapterResult = incident;
@@ -406,7 +407,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             else if (Mode == FormMode.Update)
             {
                 incident.Id = _loadedIncident!.Id;
-                await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
+                saveResult = await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
                 adapterResult = incident;
             }
             else
@@ -426,15 +427,15 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             signatureResult,
             tableName: "incidents",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

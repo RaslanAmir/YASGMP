@@ -45,7 +45,7 @@ namespace YasGMP.Wpf.Services
             }
         }
 
-        public async Task<int> CreateAsync(Part part, PartCrudContext context)
+        public async Task<CrudSaveResult> CreateAsync(Part part, PartCrudContext context)
         {
             var signature = ApplyContext(part, context);
             var metadata = CreateMetadata(context, signature);
@@ -54,10 +54,10 @@ namespace YasGMP.Wpf.Services
 
             part.DigitalSignature = signature;
             await StampAsync(part, context, signature).ConfigureAwait(false);
-            return part.Id;
+            return new CrudSaveResult(part.Id, metadata);
         }
 
-        public async Task UpdateAsync(Part part, PartCrudContext context)
+        public async Task<CrudSaveResult> UpdateAsync(Part part, PartCrudContext context)
         {
             var signature = ApplyContext(part, context);
             var metadata = CreateMetadata(context, signature);
@@ -66,6 +66,7 @@ namespace YasGMP.Wpf.Services
 
             part.DigitalSignature = signature;
             await StampAsync(part, context, signature).ConfigureAwait(false);
+            return new CrudSaveResult(part.Id, metadata);
         }
 
         public void Validate(Part part)

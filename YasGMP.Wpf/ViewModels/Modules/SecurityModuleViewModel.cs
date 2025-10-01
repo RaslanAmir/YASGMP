@@ -335,6 +335,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         user.LastModifiedById = _authContext.CurrentUser?.Id;
 
         User adapterResult = user;
+        CrudSaveResult saveResult;
         try
         {
             if (user.Id == 0)
@@ -344,10 +345,10 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
                     throw new InvalidOperationException("Password is required for new users.");
                 }
 
-                var newId = await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
-                if (user.Id == 0 && newId > 0)
+                saveResult = await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
+                if (user.Id == 0 && saveResult.Id > 0)
                 {
-                    user.Id = newId;
+                    user.Id = saveResult.Id;
                 }
             }
             else
@@ -357,7 +358,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
                     user.PasswordHash = _loadedUser.PasswordHash;
                 }
 
-                await _userService.UpdateAsync(user, password, context).ConfigureAwait(false);
+                saveResult = await _userService.UpdateAsync(user, password, context).ConfigureAwait(false);
             }
 
             await _userService.UpdateRoleAssignmentsAsync(user.Id, user.RoleIds, context).ConfigureAwait(false);
@@ -382,15 +383,15 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             signatureResult,
             tableName: "users",
             recordId: adapterResult.Id,
-            signatureId: context.SignatureId,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

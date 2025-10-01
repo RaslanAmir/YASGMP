@@ -293,18 +293,19 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             signatureResult);
 
         Calibration adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
-                calibration.Id = id;
+                saveResult = await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
+                calibration.Id = saveResult.Id;
                 adapterResult = calibration;
             }
             else if (Mode == FormMode.Update)
             {
                 calibration.Id = _loadedCalibration!.Id;
-                await _calibrationService.UpdateAsync(calibration, context).ConfigureAwait(false);
+                saveResult = await _calibrationService.UpdateAsync(calibration, context).ConfigureAwait(false);
                 adapterResult = calibration;
             }
             else
@@ -317,6 +318,11 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             throw new InvalidOperationException($"Failed to persist calibration: {ex.Message}", ex);
         }
 
+        if (saveResult.SignatureMetadata?.Id is { } signatureId)
+        {
+            adapterResult.DigitalSignatureId = signatureId;
+        }
+
         _loadedCalibration = calibration;
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
@@ -325,15 +331,15 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             signatureResult,
             tableName: "calibrations",
             recordId: adapterResult.Id,
-            signatureId: adapterResult.DigitalSignatureId,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

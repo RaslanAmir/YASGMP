@@ -294,18 +294,19 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             signatureResult);
 
         ExternalServicer adapterResult;
+        CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                var id = await _servicerService.CreateAsync(servicer, context).ConfigureAwait(false);
-                servicer.Id = id;
+                saveResult = await _servicerService.CreateAsync(servicer, context).ConfigureAwait(false);
+                servicer.Id = saveResult.Id;
                 adapterResult = servicer;
             }
             else if (Mode == FormMode.Update)
             {
                 servicer.Id = _loadedServicer.Id;
-                await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
+                saveResult = await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
                 adapterResult = servicer;
             }
             else
@@ -327,15 +328,15 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             signatureResult,
             tableName: "external_contractors",
             recordId: adapterResult.Id,
-            signatureId: null,
-            signatureHash: adapterResult.DigitalSignature,
-            method: context.SignatureMethod,
-            status: context.SignatureStatus,
-            note: context.SignatureNote,
+            metadata: saveResult.SignatureMetadata,
+            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackMethod: context.SignatureMethod,
+            fallbackStatus: context.SignatureStatus,
+            fallbackNote: context.SignatureNote,
             signedAt: signatureResult.Signature.SignedAt,
-            deviceInfo: context.DeviceInfo,
-            ipAddress: context.Ip,
-            sessionId: context.SessionId);
+            fallbackDeviceInfo: context.DeviceInfo,
+            fallbackIpAddress: context.Ip,
+            fallbackSessionId: context.SessionId);
 
         try
         {

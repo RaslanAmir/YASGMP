@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using MySqlConnector;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -27,7 +28,7 @@ public sealed class ScheduledJobCrudServiceAdapter : IScheduledJobCrudService
         return jobs.FirstOrDefault(j => j.Id == id);
     }
 
-    public async Task<int> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context)
+    public async Task<CrudSaveResult> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context)
     {
         if (job is null)
         {
@@ -39,6 +40,7 @@ public sealed class ScheduledJobCrudServiceAdapter : IScheduledJobCrudService
         job.Status = NormalizeStatus(job.Status);
         job.JobType = NormalizeJobType(job.JobType);
 
+        var signature = ApplyContext(job, context);
         var parameters = CreateCommonParameters(job, context, includeId: false);
 
         const string sql = @"INSERT INTO scheduled_jobs
@@ -60,10 +62,10 @@ SELECT LAST_INSERT_ID();";
         await _database.LogScheduledJobAuditAsync(job, "CREATE", context.Ip, context.DeviceInfo, context.SessionId, null)
             .ConfigureAwait(false);
 
-        return id;
+        return new CrudSaveResult(id, CreateMetadata(context, signature));
     }
 
-    public async Task UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context)
+    public async Task<CrudSaveResult> UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context)
     {
         if (job is null)
         {
@@ -75,6 +77,7 @@ SELECT LAST_INSERT_ID();";
         job.Status = NormalizeStatus(job.Status);
         job.JobType = NormalizeJobType(job.JobType);
 
+        var signature = ApplyContext(job, context);
         var parameters = CreateCommonParameters(job, context, includeId: true);
 
         const string sql = @"UPDATE scheduled_jobs SET
@@ -107,6 +110,8 @@ WHERE id=@id";
         await _database.ExecuteNonQueryAsync(sql, parameters).ConfigureAwait(false);
         await _database.LogScheduledJobAuditAsync(job, "UPDATE", context.Ip, context.DeviceInfo, context.SessionId, null)
             .ConfigureAwait(false);
+
+        return new CrudSaveResult(job.Id, CreateMetadata(context, signature));
     }
 
     public async Task ExecuteAsync(int jobId, ScheduledJobCrudContext context)
@@ -236,4 +241,30 @@ WHERE id=@id";
 
         return parameters;
     }
+
+    private static string ApplyContext(ScheduledJob job, ScheduledJobCrudContext context)
+    {
+        var signature = context.SignatureHash ?? job.DigitalSignature ?? string.Empty;
+        job.DigitalSignature = signature;
+        job.LastModifiedById = context.UserId;
+        job.LastModified = DateTime.UtcNow;
+        job.LastModifiedAt = DateTime.UtcNow;
+        job.DeviceInfo = string.IsNullOrWhiteSpace(job.DeviceInfo) ? context.DeviceInfo : job.DeviceInfo;
+        job.SessionId = string.IsNullOrWhiteSpace(job.SessionId) ? context.SessionId ?? string.Empty : job.SessionId;
+        job.IpAddress = string.IsNullOrWhiteSpace(job.IpAddress) ? context.Ip : job.IpAddress;
+        return signature;
+    }
+
+    private static SignatureMetadataDto CreateMetadata(ScheduledJobCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -29,7 +30,7 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
     public async Task<ExternalServicer?> TryGetByIdAsync(int id)
         => await _externalServicerService.TryGetByIdAsync(id).ConfigureAwait(false);
 
-    public async Task<int> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
+    public async Task<CrudSaveResult> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
     {
         if (servicer is null)
         {
@@ -37,12 +38,14 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
         }
 
         Validate(servicer);
+        var signature = ApplyContext(servicer, context);
+        var metadata = CreateMetadata(context, signature);
         await _externalServicerService.CreateAsync(servicer, context.UserId).ConfigureAwait(false);
         await StampAsync(servicer, context, "CREATE").ConfigureAwait(false);
-        return servicer.Id;
+        return new CrudSaveResult(servicer.Id, metadata);
     }
 
-    public async Task UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
+    public async Task<CrudSaveResult> UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
     {
         if (servicer is null)
         {
@@ -50,8 +53,11 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
         }
 
         Validate(servicer);
+        var signature = ApplyContext(servicer, context);
+        var metadata = CreateMetadata(context, signature);
         await _externalServicerService.UpdateAsync(servicer, context.UserId).ConfigureAwait(false);
         await StampAsync(servicer, context, "UPDATE").ConfigureAwait(false);
+        return new CrudSaveResult(servicer.Id, metadata);
     }
 
     public async Task DeleteAsync(int id, ExternalServicerCrudContext context)
@@ -134,4 +140,23 @@ WHERE id=@id";
             context.SessionId).ConfigureAwait(false);
     }
 
+    private static string ApplyContext(ExternalServicer servicer, ExternalServicerCrudContext context)
+    {
+        var signature = context.SignatureHash ?? servicer.DigitalSignature ?? string.Empty;
+        servicer.DigitalSignature = signature;
+        return signature;
+    }
+
+    private static SignatureMetadataDto CreateMetadata(ExternalServicerCrudContext context, string signature)
+        => new()
+        {
+            Id = context.SignatureId,
+            Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+            Method = context.SignatureMethod,
+            Status = context.SignatureStatus,
+            Note = context.SignatureNote,
+            Session = context.SessionId,
+            Device = context.DeviceInfo,
+            IpAddress = context.Ip
+        };
 }

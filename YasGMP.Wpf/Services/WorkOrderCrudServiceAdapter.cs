@@ -30,7 +30,7 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
         }
     }
 
-        public async Task<int> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
+        public async Task<CrudSaveResult> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
             if (workOrder is null)
             {
@@ -45,10 +45,10 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             await _service.CreateAsync(workOrder, context.UserId, metadata).ConfigureAwait(false);
 
             workOrder.DigitalSignature = signature;
-            return workOrder.Id;
+            return new CrudSaveResult(workOrder.Id, metadata);
         }
 
-        public async Task UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
+        public async Task<CrudSaveResult> UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
             if (workOrder is null)
             {
@@ -63,6 +63,7 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             await _service.UpdateAsync(workOrder, context.UserId, metadata).ConfigureAwait(false);
 
             workOrder.DigitalSignature = signature;
+            return new CrudSaveResult(workOrder.Id, metadata);
         }
 
     public void Validate(WorkOrder workOrder)

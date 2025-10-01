@@ -16,9 +16,15 @@ public interface ICapaCrudService
 
     Task<CapaCase?> TryGetByIdAsync(int id);
 
-    Task<int> CreateAsync(CapaCase capa, CapaCrudContext context);
+    /// <summary>
+    /// Persists a new CAPA case and returns the saved identifier with signature metadata.
+    /// </summary>
+    Task<CrudSaveResult> CreateAsync(CapaCase capa, CapaCrudContext context);
 
-    Task UpdateAsync(CapaCase capa, CapaCrudContext context);
+    /// <summary>
+    /// Updates an existing CAPA case and returns the signature metadata captured during persistence.
+    /// </summary>
+    Task<CrudSaveResult> UpdateAsync(CapaCase capa, CapaCrudContext context);
 
     void Validate(CapaCase capa);
 
