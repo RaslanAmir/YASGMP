@@ -126,7 +126,7 @@ internal static class SignaturePersistenceHelper
 
         if (signatureResult.Signature.Id > 0)
         {
-            return Task.CompletedTask;
+            return signatureDialog.LogPersistedSignatureAsync(signatureResult, cancellationToken);
         }
 
         return signatureDialog.PersistSignatureAsync(signatureResult, cancellationToken);

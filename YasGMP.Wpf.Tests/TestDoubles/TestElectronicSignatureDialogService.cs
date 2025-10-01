@@ -18,10 +18,13 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
     public List<ElectronicSignatureDialogResult?> CapturedResults { get; } = new();
     public List<ElectronicSignatureDialogResult> PersistedResults { get; } = new();
     public List<PersistedSignatureRecord> PersistedSignatureRecords { get; } = new();
+    public List<ElectronicSignatureDialogResult> LoggedAuditResults { get; } = new();
 
     public int PersistInvocationCount { get; private set; }
+    public int LogPersistInvocationCount { get; private set; }
 
     public bool WasPersistInvoked => PersistInvocationCount > 0;
+    public bool WasLogPersistInvoked => LogPersistInvocationCount > 0;
 
     public PersistedSignatureRecord? LastPersistedSignature
         => PersistedSignatureRecords.Count > 0 ? PersistedSignatureRecords[^1] : null;
@@ -243,6 +246,26 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
             persistedResult.Signature.Status,
             persistedResult.Signature.Note,
             persistedResult.Signature.RecordId));
+
+        return Task.CompletedTask;
+    }
+
+    public Task LogPersistedSignatureAsync(
+        ElectronicSignatureDialogResult result,
+        CancellationToken cancellationToken = default)
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (result.Signature is null)
+        {
+            throw new ArgumentException("Signature result must include a signature payload.", nameof(result));
+        }
+
+        LogPersistInvocationCount++;
+        LoggedAuditResults.Add(CloneResult(result));
 
         return Task.CompletedTask;
     }

@@ -91,12 +91,31 @@ public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialo
 
             result.Signature.Id = signatureId;
 
-            await LogSignaturePersistedAsync(result, cancellationToken).ConfigureAwait(false);
+            await LogPersistedSignatureAsync(result, cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            await LogSignaturePersistedAsync(result, cancellationToken).ConfigureAwait(false);
+            await LogPersistedSignatureAsync(result, cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    public Task LogPersistedSignatureAsync(
+        ElectronicSignatureDialogResult result,
+        CancellationToken cancellationToken = default)
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (result.Signature is null)
+        {
+            throw new ArgumentException("Signature result does not contain a digital signature.", nameof(result));
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return LogSignaturePersistedAsync(result, cancellationToken);
     }
 
     private bool? ShowDialog(ElectronicSignatureDialogViewModel viewModel)

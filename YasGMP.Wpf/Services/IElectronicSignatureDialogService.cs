@@ -29,4 +29,15 @@ public interface IElectronicSignatureDialogService
     Task PersistSignatureAsync(
         ElectronicSignatureDialogResult result,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Emits the persisted signature audit event without touching the database.
+    /// Callers must ensure the signature has already been saved and includes any
+    /// updated identifiers prior to invoking this helper.
+    /// </summary>
+    /// <param name="result">The capture result that was previously persisted.</param>
+    /// <param name="cancellationToken">Token used to observe cancellation while logging.</param>
+    Task LogPersistedSignatureAsync(
+        ElectronicSignatureDialogResult result,
+        CancellationToken cancellationToken = default);
 }

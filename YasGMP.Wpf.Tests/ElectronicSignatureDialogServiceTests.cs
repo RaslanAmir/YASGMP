@@ -147,6 +147,47 @@ public sealed class ElectronicSignatureDialogServiceTests : IDisposable
         Assert.Contains("hash=hash-xyz", persistEvent.Description, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task LogPersistedSignatureAsync_LogsWithoutDatabaseWrites()
+    {
+        var signature = new DigitalSignature
+        {
+            Id = 305,
+            TableName = "validations",
+            RecordId = 910,
+            UserId = _authContext.CurrentUser!.Id,
+            SignatureHash = "hash-logged",
+            Method = "password",
+            Status = "valid",
+            SessionId = _authContext.CurrentSessionId,
+            Note = "Post-persist log"
+        };
+
+        var result = new ElectronicSignatureDialogResult(
+            "password",
+            "QA",
+            "detail",
+            "QA Reason",
+            signature);
+
+        var service = new ElectronicSignatureDialogService(
+            _dispatcher,
+            _databaseService,
+            _authContext,
+            _auditService,
+            _ => true);
+
+        await service.LogPersistedSignatureAsync(result);
+
+        Assert.Empty(_signatureCommands);
+        var auditEvent = Assert.Single(_systemEvents.Where(e => e.EventType == "SIGNATURE_PERSISTED"));
+        Assert.Equal(signature.TableName, auditEvent.TableName);
+        Assert.Equal(signature.RecordId, auditEvent.RecordId);
+        Assert.Equal(_authContext.CurrentUser!.Id, auditEvent.UserId);
+        Assert.Contains("hash=hash-logged", auditEvent.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("session=session-xyz", auditEvent.Description, StringComparison.OrdinalIgnoreCase);
+    }
+
     public void Dispose()
     {
         _databaseService.ResetTestOverrides();
