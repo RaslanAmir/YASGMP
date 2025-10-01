@@ -49,7 +49,8 @@
         "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters and AppCore services propagate optional signature metadata through to persistence with legacy hash fallback when metadata is absent; audit surfacing still pending until SDK access returns",
         "Audit logging now includes signature id/hash metadata with graceful fallbacks and unit coverage for both modern and legacy schemas.",
         "DataDrivenModuleDocumentViewModel exposes a shared AuditService hook and Work Orders now logs CREATE/UPDATE audit entries with signature, user, IP, device, and session context immediately after successful persistence.",
-        "WPF test harness now uses a RecordingAuditService spy so Work Orders save and attachment flows assert audit payloads with signer context while the dotnet CLI remains unavailable."
+        "WPF test harness now uses a RecordingAuditService spy so Work Orders save and attachment flows assert audit payloads with signer context while the dotnet CLI remains unavailable.",
+        "Module save flows now rehydrate adapter-provided signature ids/hashes before optional persistence, skipping redundant dialog writes when a signature already exists while preserving current UX messaging."
       ]
     },
     {
@@ -80,7 +81,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: record work order audit expectations",
+  "lastCommitSummary": "fix: rehydrate signature metadata before persistence",
   "notes": [
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
@@ -151,6 +152,7 @@
     "2025-11-23: AttachmentWorkflowService now routes uploads through AuditService for audit logging with actor/entity/dedup/reason/timestamp metadata and WPF unit coverage verifies both new and deduplicated uploads; dotnet CLI remains unavailable so restore/build/test attempts still fail with 'command not found'.",
     "2025-11-24: ElectronicSignatureDialogService now resolves AuditService, emitting capture and persistence audit events with reason metadata; new WPF dialog service tests assert both audit calls and signature persistence while dotnet CLI access remains blocked.",
     "2025-11-25: DataDrivenModuleDocumentViewModel gains an optional AuditService injection so every WPF module can share audit helpers, and Work Orders now records CREATE/UPDATE audit events with signature/user/IP/device/session details post-save; unit tests inject the service while dotnet CLI access remains unavailable.",
-    "2025-11-26: RecordingAuditService test double added to the WPF harness so Work Orders save and attachment tests assert audit payloads with signer context while dotnet restore/build stay blocked."
+    "2025-11-26: RecordingAuditService test double added to the WPF harness so Work Orders save and attachment tests assert audit payloads with signer context while dotnet restore/build stay blocked.",
+    "2025-11-27: Module save flows now rehydrate adapter-supplied signature metadata and skip redundant dialog persistence when ids are present so the stored record matches the UX status messaging."
   ]
 }

@@ -277,17 +277,20 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             _authContext.CurrentSessionId,
             signatureResult);
 
+        Supplier adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 var id = await _supplierService.CreateAsync(supplier, context).ConfigureAwait(false);
                 supplier.Id = id;
+                adapterResult = supplier;
             }
             else if (Mode == FormMode.Update)
             {
                 supplier.Id = _loadedSupplier!.Id;
                 await _supplierService.UpdateAsync(supplier, context).ConfigureAwait(false);
+                adapterResult = supplier;
             }
             else
             {
@@ -305,11 +308,25 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         LoadEditor(supplier);
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = supplier.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "suppliers",
+            recordId: adapterResult.Id,
+            signatureId: adapterResult.DigitalSignatureId,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

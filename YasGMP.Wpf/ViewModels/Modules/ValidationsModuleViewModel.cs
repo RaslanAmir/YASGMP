@@ -333,6 +333,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             _authContext.CurrentSessionId,
             signatureResult);
 
+        Validation adapterResult;
         try
         {
             if (Mode == FormMode.Add)
@@ -345,12 +346,14 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 var id = await _validationService.CreateAsync(entity, context).ConfigureAwait(false);
                 entity.Id = id;
                 Records.Add(ToRecord(entity));
+                adapterResult = entity;
             }
             else if (Mode == FormMode.Update)
             {
                 entity.Id = _loadedValidation!.Id;
                 await _validationService.UpdateAsync(entity, context).ConfigureAwait(false);
                 ReplaceRecord(entity);
+                adapterResult = entity;
             }
             else
             {
@@ -366,11 +369,25 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         LoadEditor(entity);
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = entity.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "validations",
+            recordId: adapterResult.Id,
+            signatureId: null,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

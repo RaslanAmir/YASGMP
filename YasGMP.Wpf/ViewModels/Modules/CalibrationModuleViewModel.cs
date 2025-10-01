@@ -292,17 +292,20 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             _authContext.CurrentSessionId,
             signatureResult);
 
+        Calibration adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 var id = await _calibrationService.CreateAsync(calibration, context).ConfigureAwait(false);
                 calibration.Id = id;
+                adapterResult = calibration;
             }
             else if (Mode == FormMode.Update)
             {
                 calibration.Id = _loadedCalibration!.Id;
                 await _calibrationService.UpdateAsync(calibration, context).ConfigureAwait(false);
+                adapterResult = calibration;
             }
             else
             {
@@ -318,11 +321,25 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = calibration.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "calibrations",
+            recordId: adapterResult.Id,
+            signatureId: adapterResult.DigitalSignatureId,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

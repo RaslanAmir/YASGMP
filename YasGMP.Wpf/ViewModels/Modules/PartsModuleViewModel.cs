@@ -299,17 +299,20 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             _authContext.CurrentSessionId,
             signatureResult);
 
+        Part adapterResult;
         try
         {
             if (Mode == FormMode.Add)
             {
                 var id = await _partService.CreateAsync(part, context).ConfigureAwait(false);
                 part.Id = id;
+                adapterResult = part;
             }
             else if (Mode == FormMode.Update)
             {
                 part.Id = _loadedPart!.Id;
                 await _partService.UpdateAsync(part, context).ConfigureAwait(false);
+                adapterResult = part;
             }
             else
             {
@@ -326,11 +329,25 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         UpdateStockHealth();
         UpdateAttachmentCommandState();
 
-        signatureResult.Signature.RecordId = part.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "parts",
+            recordId: adapterResult.Id,
+            signatureId: adapterResult.DigitalSignatureId,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

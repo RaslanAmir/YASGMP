@@ -334,6 +334,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         user.LastModified = DateTime.UtcNow;
         user.LastModifiedById = _authContext.CurrentUser?.Id;
 
+        User adapterResult = user;
         try
         {
             if (user.Id == 0)
@@ -343,7 +344,11 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
                     throw new InvalidOperationException("Password is required for new users.");
                 }
 
-                await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
+                var newId = await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
+                if (user.Id == 0 && newId > 0)
+                {
+                    user.Id = newId;
+                }
             }
             else
             {
@@ -373,11 +378,25 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         ApplyRoleSelection(user.RoleIds);
         ResetDirty();
 
-        signatureResult.Signature.RecordId = user.Id;
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "users",
+            recordId: adapterResult.Id,
+            signatureId: context.SignatureId,
+            signatureHash: adapterResult.DigitalSignature,
+            method: context.SignatureMethod,
+            status: context.SignatureStatus,
+            note: context.SignatureNote,
+            signedAt: signatureResult.Signature.SignedAt,
+            deviceInfo: context.DeviceInfo,
+            ipAddress: context.Ip,
+            sessionId: context.SessionId);
 
         try
         {
-            await _signatureDialog.PersistSignatureAsync(signatureResult).ConfigureAwait(false);
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
