@@ -1,10 +1,10 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19 → **command not found**)*
+- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
+- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
+- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
+- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30 → **command not found**)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -42,6 +42,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; build validation remains blocked pending dotnet CLI access.
 - 2025-11-13: Completed signature metadata DTO propagation through Machine, Work Order, Calibration, Supplier, and Part services plus DatabaseService helpers; persistence now accepts optional metadata and falls back to the legacy hash generator when absent, while WPF adapters feed DTOs downstream.
 - 2025-11-14: Database helpers for machines, work orders, calibrations, suppliers, and parts now persist digital_signature_id columns when present, tolerate legacy schemas, and upsert the digital_signatures table with hash/method/status/note metadata while propagating the resulting signature id back to DTOs and audit flows.
 - 2025-11-15: Read-side queries for calibrations, work orders, and parts now prefer the digital_signature_id column with legacy fallbacks so editors and audit trails can reuse persisted signature references regardless of schema vintage.

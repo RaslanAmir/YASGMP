@@ -24,7 +24,8 @@
       "2025-11-09: dotnet restore/build/test retried; CLI still missing in the container so all dotnet commands fail with 'command not found'.",
       "2025-11-17: dotnet restore/build retried; CLI still missing in container so commands exit with 'command not found'.",
       "2025-11-18: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
-      "2025-11-19: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
+      "2025-11-19: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
+      "2025-11-30: dotnet restore retried; CLI still missing so commands exit with \"command not found\"."
     ]
   },
   "batches": [
@@ -155,6 +156,7 @@
     "2025-11-26: RecordingAuditService test double added to the WPF harness so Work Orders save and attachment tests assert audit payloads with signer context while dotnet restore/build stay blocked.",
     "2025-11-27: Module save flows now rehydrate adapter-supplied signature metadata and skip redundant dialog persistence when ids are present so the stored record matches the UX status messaging.",
     "2025-11-28: Introduced a shared CrudSaveResult record so adapters can return the persisted identifier together with signature metadata, keeping downstream editors and audit logging aligned once saves complete.",
-    "2025-11-29: CRUD service interfaces, adapters, module view-models, and WPF test doubles now return/consume CrudSaveResult so save flows refresh ids and expose signature metadata with regression coverage validating the new payload."
+    "2025-11-29: CRUD service interfaces, adapters, module view-models, and WPF test doubles now return/consume CrudSaveResult so save flows refresh ids and expose signature metadata with regression coverage validating the new payload.",
+    "2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; dotnet restore/build remain blocked by missing CLI."
   ]
 }
