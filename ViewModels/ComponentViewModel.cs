@@ -237,9 +237,10 @@ namespace YasGMP.ViewModels
                     SelectedComponent,
                     isUpdate: false,
                     _authService.CurrentUser?.Id ?? 1,
-                    _currentIpAddress ?? string.Empty,
-                    _currentDeviceInfo ?? string.Empty,
-                    default
+                    ip: _currentIpAddress ?? string.Empty,
+                    deviceInfo: _currentDeviceInfo ?? string.Empty,
+                    sessionId: null,
+                    cancellationToken: default
                 ).ConfigureAwait(false);
 
                 StatusMessage = $"Component '{SelectedComponent.Name}' added.";
@@ -269,9 +270,10 @@ namespace YasGMP.ViewModels
                     SelectedComponent,
                     isUpdate: true,
                     _authService.CurrentUser?.Id ?? 1,
-                    _currentIpAddress ?? string.Empty,
-                    _currentDeviceInfo ?? string.Empty,
-                    default
+                    ip: _currentIpAddress ?? string.Empty,
+                    deviceInfo: _currentDeviceInfo ?? string.Empty,
+                    sessionId: null,
+                    cancellationToken: default
                 ).ConfigureAwait(false);
 
                 StatusMessage = $"Component '{SelectedComponent.Name}' updated.";

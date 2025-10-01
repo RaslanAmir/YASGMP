@@ -70,6 +70,23 @@ namespace YasGMP.Services
             }
         }
 
+        private static string? ResolveDeviceInfo(string? deviceInfo)
+        {
+            if (!string.IsNullOrWhiteSpace(deviceInfo))
+            {
+                return deviceInfo;
+            }
+
+            try
+            {
+                return TryResolveAuthContext()?.CurrentDeviceInfo;
+            }
+            catch
+            {
+                return deviceInfo;
+            }
+        }
+
         private static string ResolveSessionId(string? sessionId)
         {
             if (!string.IsNullOrWhiteSpace(sessionId))
@@ -104,6 +121,8 @@ namespace YasGMP.Services
             bool update,
             int actorUserId,
             string ip = "system",
+            string? deviceInfo = null,
+            string? sessionId = null,
             CancellationToken token = default)
         {
             if (component is null) throw new ArgumentNullException(nameof(component));
@@ -111,18 +130,24 @@ namespace YasGMP.Services
             // Wire real user/IP when caller passed defaults
             actorUserId = ResolveActorUserId(actorUserId);
             ip = ResolveIp(ip);
+            deviceInfo = ResolveDeviceInfo(deviceInfo);
+            sessionId = ResolveSessionId(sessionId);
 
             // Map to low-level DTO to stay consistent with DB column names.
             var c = ComponentMapper.ToMachineComponent(component);
+            var lastModified = TryGet<DateTime>(c, nameof(component.LastModified)) ?? DateTime.UtcNow;
+            var signature = TryGetString(c, nameof(component.DigitalSignature));
 
             string sql = !update
                 ? @"INSERT INTO machine_components
-                       (machine_id, code, name, type, sop_doc, status, install_date, last_modified_by_id)
+                       (machine_id, code, name, type, sop_doc, status, install_date, last_modified_by_id,
+                        digital_signature, last_modified, source_ip, device_info, session_id)
                     VALUES
-                       (@mid,@code,@name,@type,@sop,@status,@install,@modby)"
+                       (@mid,@code,@name,@type,@sop,@status,@install,@modby,@sig,@last,@ip,@device,@session)"
                 : @"UPDATE machine_components SET
                        machine_id=@mid, code=@code, name=@name, type=@type, sop_doc=@sop, status=@status,
-                       install_date=@install, last_modified_by_id=@modby
+                       install_date=@install, last_modified_by_id=@modby, digital_signature=@sig,
+                       last_modified=@last, source_ip=@ip, device_info=@device, session_id=@session
                    WHERE id=@id";
 
             var pars = new List<MySqlParameter>
@@ -134,7 +159,12 @@ namespace YasGMP.Services
                 new("@sop",     (object?)TryGetString(c, "SopDoc")   ?? DBNull.Value),
                 new("@status",  (object?)TryGetString(c, "Status")   ?? DBNull.Value),
                 new("@install", (object?)TryGet<DateTime>(c, "InstallDate") ?? DBNull.Value),
-                new("@modby",   actorUserId)
+                new("@modby",   actorUserId),
+                new("@sig",     (object?)signature ?? DBNull.Value),
+                new("@last",    lastModified),
+                new("@ip",      string.IsNullOrWhiteSpace(ip) ? (object)DBNull.Value : ip),
+                new("@device",  string.IsNullOrWhiteSpace(deviceInfo) ? (object)DBNull.Value : deviceInfo),
+                new("@session", string.IsNullOrWhiteSpace(sessionId) ? (object)DBNull.Value : sessionId)
             };
             if (update) pars.Add(new MySqlParameter("@id", TryGet<int>(c, "Id") ?? 0));
 
@@ -153,8 +183,8 @@ namespace YasGMP.Services
                 description: update ? "Component updated" : "Component created",
                 ip: ip,
                 severity: "audit",
-                deviceInfo: null,
-                sessionId: null
+                deviceInfo: deviceInfo,
+                sessionId: string.IsNullOrWhiteSpace(sessionId) ? null : sessionId
             ).ConfigureAwait(false);
 
             return id;
@@ -174,7 +204,16 @@ namespace YasGMP.Services
             // Wire real user/IP when caller passed defaults
             actorUserId = ResolveActorUserId(actorUserId);
             ip = ResolveIp(ip);
-            int id = await InsertOrUpdateComponentAsync(component, update, actorUserId, ip, token).ConfigureAwait(false);
+            string? resolvedDevice = ResolveDeviceInfo(deviceInfo);
+            int id = await InsertOrUpdateComponentAsync(
+                component,
+                update,
+                actorUserId,
+                ip,
+                resolvedDevice,
+                sessionId: null,
+                token: token
+            ).ConfigureAwait(false);
 
             await LogSystemEventAsync(
                 userId: actorUserId,
@@ -185,7 +224,7 @@ namespace YasGMP.Services
                 description: $"client-device={deviceInfo ?? string.Empty}",
                 ip: ip,
                 severity: "info",
-                deviceInfo: deviceInfo,
+                deviceInfo: resolvedDevice,
                 sessionId: null
             ).ConfigureAwait(false);
 
@@ -204,9 +243,17 @@ namespace YasGMP.Services
             string? sessionId,
             CancellationToken token = default)
         {
-            int id = await InsertOrUpdateComponentAsync(component, update, actorUserId, ip, token).ConfigureAwait(false);
-
+            string? resolvedDevice = ResolveDeviceInfo(deviceInfo);
             sessionId = ResolveSessionId(sessionId);
+            int id = await InsertOrUpdateComponentAsync(
+                component,
+                update,
+                actorUserId,
+                ip,
+                resolvedDevice,
+                sessionId,
+                token
+            ).ConfigureAwait(false);
 
             await LogSystemEventAsync(
                 userId: actorUserId,
@@ -217,7 +264,7 @@ namespace YasGMP.Services
                 description: $"client-device={deviceInfo ?? string.Empty}",
                 ip: ip,
                 severity: "info",
-                deviceInfo: deviceInfo,
+                deviceInfo: resolvedDevice,
                 sessionId: sessionId
             ).ConfigureAwait(false);
 
@@ -237,7 +284,7 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             var domain = ComponentMapper.ToComponent(component);
-            return InsertOrUpdateComponentAsync(domain, update, actorUserId, ip, deviceInfo, token);
+            return InsertOrUpdateComponentAsync(domain, update, actorUserId, ip, deviceInfo, sessionId: null, token: token);
         }
 
         /// <summary>
