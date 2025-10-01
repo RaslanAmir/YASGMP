@@ -104,7 +104,7 @@ internal static class SignaturePersistenceHelper
         }
     }
 
-    public static Task PersistIfRequiredAsync(
+    public static async Task PersistIfRequiredAsync(
         IElectronicSignatureDialogService signatureDialog,
         ElectronicSignatureDialogResult signatureResult,
         CancellationToken cancellationToken = default)
@@ -126,9 +126,14 @@ internal static class SignaturePersistenceHelper
 
         if (signatureResult.Signature.Id > 0)
         {
-            return signatureDialog.LogPersistedSignatureAsync(signatureResult, cancellationToken);
+            await signatureDialog
+                .LogPersistedSignatureAsync(signatureResult, cancellationToken)
+                .ConfigureAwait(false);
+            return;
         }
 
-        return signatureDialog.PersistSignatureAsync(signatureResult, cancellationToken);
+        await signatureDialog
+            .PersistSignatureAsync(signatureResult, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

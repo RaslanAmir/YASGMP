@@ -175,6 +175,7 @@
     "2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; dotnet restore/build remain blocked by missing CLI.",
     "2025-12-08: Test signature dialog now tracks captured results/persist invocations, CRUD fakes accept configurable signature id providers, and module tests assert adapter ids while dotnet CLI remains unavailable.",
     "2025-12-09: ElectronicSignatureDialogService now reuses persisted digital signature ids when present, updates the dialog result with the generated id on insert, and funnels SIGNATURE_PERSISTED auditing through a reusable helper while dotnet restore/build remain blocked by the missing CLI.",
-    "2025-12-10: ElectronicSignatureDialogService now exposes LogPersistedSignatureAsync so modules can log SIGNATURE_PERSISTED without re-inserting signatures, SignaturePersistenceHelper calls the new hook when persistence is skipped, and WPF tests assert the log-only path while dotnet CLI access continues to block restore/build/smoke."
+    "2025-12-10: ElectronicSignatureDialogService now exposes LogPersistedSignatureAsync so modules can log SIGNATURE_PERSISTED without re-inserting signatures, SignaturePersistenceHelper calls the new hook when persistence is skipped, and WPF tests assert the log-only path while dotnet CLI access continues to block restore/build/smoke.",
+    "2025-12-11: SignaturePersistenceHelper now awaits the log-only audit path and WPF unit tests cover both persisted-id logging and new-signature insert flows while dotnet CLI access still blocks restore/build/test."
   ]
 }
