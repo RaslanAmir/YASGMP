@@ -208,11 +208,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
-        if (saveResult.SignatureMetadata?.Id is { } signatureId)
-        {
-            adapterResult.DigitalSignatureId = signatureId;
-        }
-
         _loadedMachine = machine;
         LoadEditor(machine);
         UpdateAttachmentCommandState();
@@ -358,6 +353,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to persist asset: {ex.Message}", ex);
+        }
+
+        if (saveResult.SignatureMetadata?.Id is { } signatureId)
+        {
+            adapterResult.DigitalSignatureId = signatureId;
         }
 
         _loadedMachine = machine;
