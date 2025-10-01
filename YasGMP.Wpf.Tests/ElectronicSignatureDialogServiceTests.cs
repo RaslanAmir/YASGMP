@@ -136,15 +136,59 @@ public sealed class ElectronicSignatureDialogServiceTests : IDisposable
         await service.PersistSignatureAsync(result);
 
         Assert.Equal(101, result.Signature.Id);
-        Assert.Contains(_signatureCommands, cmd =>
-            string.Equals(GetString(cmd, "@table"), signature.TableName, StringComparison.OrdinalIgnoreCase)
-            && Convert.ToInt32(cmd["@rid"] ?? 0) == signature.RecordId);
+        var insertCommand = Assert.Single(_signatureCommands);
+        Assert.True(
+            string.Equals(GetString(insertCommand, "@table"), signature.TableName, StringComparison.OrdinalIgnoreCase)
+            && Convert.ToInt32(insertCommand["@rid"] ?? 0) == signature.RecordId,
+            "Expected persisted signature insert to target the original record.");
 
         var persistEvent = Assert.Single(_systemEvents.Where(e => e.EventType == "SIGNATURE_PERSISTED"));
         Assert.Equal(signature.TableName, persistEvent.TableName);
         Assert.Equal(signature.RecordId, persistEvent.RecordId);
         Assert.Equal(_authContext.CurrentUser!.Id, persistEvent.UserId);
         Assert.Contains("hash=hash-xyz", persistEvent.Description, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PersistSignatureAsync_SkipsInsertWhenSignatureIdExists()
+    {
+        var signature = new DigitalSignature
+        {
+            Id = 245,
+            TableName = "calibration",
+            RecordId = 654,
+            UserId = _authContext.CurrentUser!.Id,
+            SignatureHash = "hash-existing",
+            Method = "password",
+            Status = "valid",
+            SessionId = _authContext.CurrentSessionId,
+            Note = "Existing signature"
+        };
+
+        var result = new ElectronicSignatureDialogResult(
+            "password",
+            "QA",
+            "detail",
+            "Existing Signature",
+            signature);
+
+        var service = new ElectronicSignatureDialogService(
+            _dispatcher,
+            _databaseService,
+            _authContext,
+            _auditService,
+            _ => true);
+
+        await service.PersistSignatureAsync(result);
+
+        Assert.Equal(245, result.Signature.Id);
+        Assert.Empty(_signatureCommands);
+
+        var persistEvent = Assert.Single(_systemEvents.Where(e => e.EventType == "SIGNATURE_PERSISTED"));
+        Assert.Equal(signature.TableName, persistEvent.TableName);
+        Assert.Equal(signature.RecordId, persistEvent.RecordId);
+        Assert.Equal(_authContext.CurrentUser!.Id, persistEvent.UserId);
+        Assert.Contains("hash=hash-existing", persistEvent.Description, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
