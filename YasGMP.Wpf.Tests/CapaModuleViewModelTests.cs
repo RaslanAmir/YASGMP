@@ -22,7 +22,11 @@ public class CapaModuleViewModelTests
         var database = new DatabaseService();
         var audit = new AuditService(database);
         var audit = new AuditService(database);
-        var capaCrud = new FakeCapaCrudService();
+        const int adapterSignatureId = 5120;
+        var capaCrud = new FakeCapaCrudService
+        {
+            SignatureMetadataIdSource = _ => adapterSignatureId
+        };
         var componentCrud = new FakeComponentCrudService();
         componentCrud.Saved.Add(new Component
         {
@@ -54,6 +58,7 @@ public class CapaModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var persisted = Assert.Single(capaCrud.Saved);
         Assert.Equal("Supplier qualification", persisted.Title);
         Assert.Equal("High", persisted.Priority);
@@ -68,18 +73,12 @@ public class CapaModuleViewModelTests
             Assert.Equal("capa_cases", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(capaCrud.Saved[0].Id, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(capaCrud.Saved[0].Id, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
+        var signatureResult = Assert.NotNull(capturedResult);
+        Assert.Equal(capaCrud.Saved[0].Id, signatureResult.Signature.RecordId);
+        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
         Assert.False(viewModel.IsDirty);
     }
 

@@ -27,7 +27,8 @@
       "2025-11-19: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-11-30: dotnet restore retried; CLI still missing so commands exit with \"command not found\".",
       "2025-12-04: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
-      "2025-12-07: dotnet restore/build attempted again for yasgmp.sln; CLI still missing in container so commands exit with 'command not found'."
+      "2025-12-07: dotnet restore/build attempted again for yasgmp.sln; CLI still missing in container so commands exit with 'command not found'.",
+      "2025-12-08: dotnet --version/restore/build retried; CLI still missing in container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -57,7 +58,8 @@
         "WPF test harness now uses a RecordingAuditService spy so Work Orders save and attachment flows assert audit payloads with signer context while the dotnet CLI remains unavailable.",
         "Module save flows now rehydrate adapter-provided signature ids/hashes before optional persistence, skipping redundant dialog writes when a signature already exists while preserving current UX messaging.",
         "ValidationService now keeps adapter-supplied validation signature hashes intact on create/update and only regenerates when explicitly forced (e.g., MarkExecuted), with new unit coverage confirming the stored hash matches the adapter payload.",
-        "WPF ValidationCrudServiceAdapter test now asserts signature hash/IP/session context persist alongside CrudSaveResult metadata, and validation CRUD fakes retain those fields for downstream assertions while CLI validation stays blocked."
+        "WPF ValidationCrudServiceAdapter test now asserts signature hash/IP/session context persist alongside CrudSaveResult metadata, and validation CRUD fakes retain those fields for downstream assertions while CLI validation stays blocked.",
+        "Test signature dialog now records capture results and persist calls, CRUD fakes expose configurable signature id providers, and module regression tests assert adapter-assigned ids skip redundant persistence while CLI validation remains blocked."
       ]
     },
     {
@@ -88,7 +90,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: track external servicer snapshots",
+  "lastCommitSummary": "test: honor adapter-provided signature ids",
   "notes": [
     "2025-12-07: External Servicer CRUD fake now mirrors other module doubles by capturing saved snapshots with contexts, cloning entities for assertions, and clearing deleted entries; CrudSaveResult coverage confirms metadata still flows from the provided context while dotnet CLI access remains blocked for restore/build/smoke.",
     "2025-12-06: DatabaseService.Users insert/update now persist digital_signature/last_change_signature with IP/device/session metadata, and new UserCrudServiceAdapter tests verify the context flows end-to-end while the dotnet CLI remains unavailable for restore/build/test.",
@@ -170,6 +172,7 @@
     "2025-11-27: Module save flows now rehydrate adapter-supplied signature metadata and skip redundant dialog persistence when ids are present so the stored record matches the UX status messaging.",
     "2025-11-28: Introduced a shared CrudSaveResult record so adapters can return the persisted identifier together with signature metadata, keeping downstream editors and audit logging aligned once saves complete.",
     "2025-11-29: CRUD service interfaces, adapters, module view-models, and WPF test doubles now return/consume CrudSaveResult so save flows refresh ids and expose signature metadata with regression coverage validating the new payload.",
-    "2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; dotnet restore/build remain blocked by missing CLI."
+    "2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; dotnet restore/build remain blocked by missing CLI.",
+    "2025-12-08: Test signature dialog now tracks captured results/persist invocations, CRUD fakes accept configurable signature id providers, and module tests assert adapter ids while dotnet CLI remains unavailable."
   ]
 }

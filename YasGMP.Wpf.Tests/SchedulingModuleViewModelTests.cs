@@ -21,7 +21,11 @@ public class SchedulingModuleViewModelTests
         var audit = new AuditService(database);
         var audit = new AuditService(database);
         var audit = new AuditService(database);
-        var crud = new FakeScheduledJobCrudService();
+        const int adapterSignatureId = 9135;
+        var crud = new FakeScheduledJobCrudService
+        {
+            SignatureMetadataIdSource = _ => adapterSignatureId
+        };
         var auth = new TestAuthContext { CurrentUser = new User { Id = 5, Username = "scheduler" } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
@@ -43,6 +47,7 @@ public class SchedulingModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var created = Assert.Single(crud.Saved);
         Assert.Equal("weekly digest", created.JobType);
         Assert.False(viewModel.IsDirty);
@@ -56,18 +61,12 @@ public class SchedulingModuleViewModelTests
             Assert.Equal("scheduled_jobs", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(created.Id, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(created.Id, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
+        var signatureResult = Assert.NotNull(capturedResult);
+        Assert.Equal(created.Id, signatureResult.Signature.RecordId);
+        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
     }
 
     [Fact]

@@ -18,7 +18,11 @@ public class SecurityModuleViewModelTests
         var database = new DatabaseService();
         var audit = new AuditService(database);
         var audit = new AuditService(database);
-        var userService = new FakeUserCrudService();
+        const int adapterSignatureId = 4623;
+        var userService = new FakeUserCrudService
+        {
+            SignatureMetadataIdSource = _ => adapterSignatureId
+        };
         userService.SeedRole(new Role { Id = 1, Name = "Administrator", Description = "Admin" });
         userService.SeedRole(new Role { Id = 2, Name = "Quality", Description = "QA" });
 
@@ -51,6 +55,7 @@ public class SecurityModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var created = Assert.Single(userService.CreatedUsers);
         Assert.Equal("new.user", created.Username);
         Assert.Equal("New User", created.FullName);
@@ -65,18 +70,12 @@ public class SecurityModuleViewModelTests
             Assert.Equal("users", ctx.TableName);
             Assert.Equal(0, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(created.Id, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(created.Id, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
+        var signatureResult = Assert.NotNull(capturedResult);
+        Assert.Equal(created.Id, signatureResult.Signature.RecordId);
+        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
         var assignment = Assert.Single(userService.RoleAssignments);
         Assert.Equal(created.Id, assignment.UserId);
         Assert.Contains(adminRole.RoleId, assignment.Roles);
@@ -86,7 +85,11 @@ public class SecurityModuleViewModelTests
     public async Task OnSaveAsync_UpdateMode_UpdatesExistingUserAndClearsPassword()
     {
         var database = new DatabaseService();
-        var userService = new FakeUserCrudService();
+        const int updateAdapterSignatureId = 5824;
+        var userService = new FakeUserCrudService
+        {
+            SignatureMetadataIdSource = _ => updateAdapterSignatureId
+        };
         userService.SeedRole(new Role { Id = 1, Name = "Administrator" });
         userService.SeedRole(new Role { Id = 2, Name = "Quality" });
         userService.SeedUser(new User
@@ -127,6 +130,7 @@ public class SecurityModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
+        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var updated = Assert.Single(userService.UpdatedUsers);
         Assert.Equal("updated@example.com", updated.Email);
         Assert.Equal(7, updated.Id);
@@ -144,18 +148,12 @@ public class SecurityModuleViewModelTests
             Assert.Equal("users", ctx.TableName);
             Assert.Equal(7, ctx.RecordId);
         });
-        Assert.Single(signatureDialog.PersistedResults);
-        var persistedSignature = signatureDialog.PersistedResults[0];
-        Assert.Equal(7, persistedSignature.Signature.RecordId);
-        Assert.Equal(signatureDialog.LastPersistedSignatureId, persistedSignature.Signature.Id);
-        Assert.True(persistedSignature.Signature.Id > 0);
-        var persistedMetadata = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(persistedSignature.Signature.Id, persistedMetadata.SignatureId);
-        Assert.Equal(7, persistedMetadata.RecordId);
-        Assert.Equal("test-signature", persistedMetadata.SignatureHash);
-        Assert.Equal("password", persistedMetadata.Method);
-        Assert.Equal("valid", persistedMetadata.Status);
-        Assert.Equal("Automated test", persistedMetadata.Note);
+        var capturedUpdateResult = Assert.Single(signatureDialog.CapturedResults);
+        var updateSignatureResult = Assert.NotNull(capturedUpdateResult);
+        Assert.Equal(7, updateSignatureResult.Signature.RecordId);
+        Assert.Equal(updateAdapterSignatureId, updateSignatureResult.Signature.Id);
+        Assert.Empty(signatureDialog.PersistedResults);
+        Assert.Equal(0, signatureDialog.PersistInvocationCount);
         var assignment = userService.RoleAssignments.Last();
         Assert.Contains(2, assignment.Roles);
     }
