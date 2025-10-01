@@ -32,7 +32,14 @@ namespace YasGMP.Services
         {
             // Forward to the robust instance implementation (maps domain -> low-level inside).
             // Actor/comment are recorded via LogSystemEventAsync in the instance method.
-            return db.InsertOrUpdateComponentAsync(component, isUpdate, userId, actor, cancellationToken);
+            return db.InsertOrUpdateComponentAsync(
+                component,
+                isUpdate,
+                userId,
+                ip: actor,
+                deviceInfo: comment,
+                sessionId: null,
+                token: cancellationToken);
         }
 
         /// <summary>Upsert using IP/Device context.</summary>
@@ -48,7 +55,13 @@ namespace YasGMP.Services
         {
             var actor = $"IP:{ipAddress}|Device:{deviceInfo}";
             return db.InsertOrUpdateComponentAsync(
-                component, isUpdate, userId, actor, comment ?? "Component upsert", cancellationToken);
+                component,
+                isUpdate,
+                userId,
+                ip: ipAddress,
+                deviceInfo: deviceInfo,
+                sessionId: null,
+                token: cancellationToken);
         }
 
         // =========================================================================
@@ -67,7 +80,14 @@ namespace YasGMP.Services
         {
             // Convert to domain model and forward to instance method that accepts actor context.
             var domain = Helpers.ComponentMapper.ToComponent(component);
-            return db.InsertOrUpdateComponentAsync(domain, isUpdate, userId, actor, cancellationToken);
+            return db.InsertOrUpdateComponentAsync(
+                domain,
+                isUpdate,
+                userId,
+                ip: actor,
+                deviceInfo: comment,
+                sessionId: null,
+                token: cancellationToken);
         }
 
         /// <summary>Upsert MachineComponent using IP/Device context.</summary>
@@ -84,7 +104,13 @@ namespace YasGMP.Services
             var actor = $"IP:{ipAddress}|Device:{deviceInfo}";
             var domain = Helpers.ComponentMapper.ToComponent(component);
             return db.InsertOrUpdateComponentAsync(
-                domain, isUpdate, userId, actor, comment ?? "Component upsert", cancellationToken);
+                domain,
+                isUpdate,
+                userId,
+                ip: ipAddress,
+                deviceInfo: deviceInfo,
+                sessionId: null,
+                token: cancellationToken);
         }
 
         // =========================================================================

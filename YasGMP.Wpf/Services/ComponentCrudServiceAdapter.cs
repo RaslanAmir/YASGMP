@@ -40,7 +40,12 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
         if (component is null) throw new ArgumentNullException(nameof(component));
 
         var signature = ApplyContext(component, context);
-        await _inner.CreateAsync(component, context.UserId).ConfigureAwait(false);
+        var saveContext = ComponentSaveContext.Create(
+            signature,
+            context.Ip,
+            context.DeviceInfo,
+            context.SessionId);
+        await _inner.CreateAsync(component, context.UserId, saveContext).ConfigureAwait(false);
 
         return new CrudSaveResult(component.Id, CreateMetadata(context, signature));
     }
@@ -50,7 +55,12 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
         if (component is null) throw new ArgumentNullException(nameof(component));
 
         var signature = ApplyContext(component, context);
-        await _inner.UpdateAsync(component, context.UserId).ConfigureAwait(false);
+        var saveContext = ComponentSaveContext.Create(
+            signature,
+            context.Ip,
+            context.DeviceInfo,
+            context.SessionId);
+        await _inner.UpdateAsync(component, context.UserId, saveContext).ConfigureAwait(false);
 
         return new CrudSaveResult(component.Id, CreateMetadata(context, signature));
     }

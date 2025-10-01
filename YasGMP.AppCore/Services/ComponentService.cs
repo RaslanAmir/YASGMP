@@ -58,22 +58,39 @@ namespace YasGMP.Services
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="component"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">If validation fails.</exception>
-        public async Task CreateAsync(Component component, int userId, CancellationToken cancellationToken = default)
+        public Task CreateAsync(Component component, int userId, CancellationToken cancellationToken = default)
+            => CreateAsync(component, userId, context: null, cancellationToken);
+
+        /// <summary>
+        /// Creates a new component using the supplied persistence context so adapter-provided
+        /// signature metadata (hash/IP/device/session) flows through unchanged.
+        /// </summary>
+        public async Task CreateAsync(
+            Component component,
+            int userId,
+            ComponentSaveContext? context,
+            CancellationToken cancellationToken = default)
         {
             if (component == null) throw new ArgumentNullException(nameof(component));
             ValidateComponent(component);
 
-            component.DigitalSignature = GenerateDigitalSignature(component, DateTime.UtcNow);
-            component.LastModified = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            ApplySignatureContext(component, context, now);
+            component.LastModified = now;
             component.LastModifiedById = userId;
 
-            // Call the domain overload (avoids MachineComponent binding issues).
+            var ip = ResolveIp(component, context);
+            var device = Normalize(context?.DeviceInfo);
+            var session = Normalize(context?.SessionId);
+
             await _db.InsertOrUpdateComponentAsync(
                 component,
-                false,                 // update?
-                userId,                // actorUserId
-                "system",              // ip
-                cancellationToken      // token
+                update: false,
+                actorUserId: userId,
+                ip: ip,
+                deviceInfo: device,
+                sessionId: session,
+                token: cancellationToken
             ).ConfigureAwait(false);
 
             await _audit.LogEntityAuditAsync(
@@ -92,21 +109,38 @@ namespace YasGMP.Services
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="component"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">If validation fails.</exception>
-        public async Task UpdateAsync(Component component, int userId, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(Component component, int userId, CancellationToken cancellationToken = default)
+            => UpdateAsync(component, userId, context: null, cancellationToken);
+
+        /// <summary>
+        /// Updates an existing component while preserving adapter-provided signature metadata.
+        /// </summary>
+        public async Task UpdateAsync(
+            Component component,
+            int userId,
+            ComponentSaveContext? context,
+            CancellationToken cancellationToken = default)
         {
             if (component == null) throw new ArgumentNullException(nameof(component));
             ValidateComponent(component);
 
-            component.DigitalSignature = GenerateDigitalSignature(component, DateTime.UtcNow);
-            component.LastModified = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            ApplySignatureContext(component, context, now);
+            component.LastModified = now;
             component.LastModifiedById = userId;
+
+            var ip = ResolveIp(component, context);
+            var device = Normalize(context?.DeviceInfo);
+            var session = Normalize(context?.SessionId);
 
             await _db.InsertOrUpdateComponentAsync(
                 component,
-                true,                  // update?
-                userId,                // actorUserId
-                "system",              // ip
-                cancellationToken      // token
+                update: true,
+                actorUserId: userId,
+                ip: ip,
+                deviceInfo: device,
+                sessionId: session,
+                token: cancellationToken
             ).ConfigureAwait(false);
 
             await _audit.LogEntityAuditAsync(
@@ -168,6 +202,38 @@ namespace YasGMP.Services
             using var sha = SHA256.Create();
             return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
         }
+
+        private static void ApplySignatureContext(Component component, ComponentSaveContext? context, DateTime timestampUtc)
+        {
+            if (!string.IsNullOrWhiteSpace(context?.SignatureHash))
+            {
+                component.DigitalSignature = context!.SignatureHash!;
+            }
+            else if (string.IsNullOrWhiteSpace(component.DigitalSignature))
+            {
+                component.DigitalSignature = GenerateDigitalSignature(component, timestampUtc);
+            }
+        }
+
+        private static string ResolveIp(Component component, ComponentSaveContext? context)
+        {
+            if (!string.IsNullOrWhiteSpace(context?.IpAddress))
+            {
+                component.SourceIp = context!.IpAddress!;
+                return context.IpAddress!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(component.SourceIp))
+            {
+                return component.SourceIp;
+            }
+
+            component.SourceIp = "system";
+            return component.SourceIp;
+        }
+
+        private static string? Normalize(string? value)
+            => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
         #endregion
 

@@ -43,6 +43,7 @@
 
 ## Notes
 - 2025-12-01: Change Control schema/service now persist digital signature hash plus IP/session/device context so adapter metadata flows through unchanged; database scripts updated accordingly while CLI validation remains blocked.
+- 2025-12-02: ComponentService now accepts a ComponentSaveContext so WPF adapters can persist signature hash/IP/device/session without regeneration; machine_components INSERT/UPDATE now write digital_signature/source_ip/device/session columns and unit coverage asserts the stored hash matches the adapter payload while dotnet CLI validation remains blocked.
 - 2025-12-01: dotnet restore/build and WPF smoke harness still blocked by missing dotnet CLI; rerun once host installs .NET 9/Windows SDK.
 - 2025-11-30: Assets save flow now applies CrudSaveResult digital signature ids immediately after persistence and removes the stale OnRecordSelected signature block; build validation remains blocked pending dotnet CLI access.
 - 2025-11-13: Completed signature metadata DTO propagation through Machine, Work Order, Calibration, Supplier, and Part services plus DatabaseService helpers; persistence now accepts optional metadata and falls back to the legacy hash generator when absent, while WPF adapters feed DTOs downstream.
