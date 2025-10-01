@@ -26,7 +26,8 @@
       "2025-11-18: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-11-19: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-11-30: dotnet restore retried; CLI still missing so commands exit with \"command not found\".",
-      "2025-12-04: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
+      "2025-12-04: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
+      "2025-12-07: dotnet restore/build attempted again for yasgmp.sln; CLI still missing in container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -87,8 +88,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: persist user signature context",
+  "lastCommitSummary": "test: track external servicer snapshots",
   "notes": [
+    "2025-12-07: External Servicer CRUD fake now mirrors other module doubles by capturing saved snapshots with contexts, cloning entities for assertions, and clearing deleted entries; CrudSaveResult coverage confirms metadata still flows from the provided context while dotnet CLI access remains blocked for restore/build/smoke.",
     "2025-12-06: DatabaseService.Users insert/update now persist digital_signature/last_change_signature with IP/device/session metadata, and new UserCrudServiceAdapter tests verify the context flows end-to-end while the dotnet CLI remains unavailable for restore/build/test.",
     "2025-12-05: Added WPF ValidationCrudServiceAdapter test to confirm signature hash/IP/session metadata persists and matches returned CrudSaveResult while validation CRUD fakes retain the fields; dotnet CLI remains unavailable for restore/build/test.",
     "2025-12-04: Validation persistence now writes source_ip/session_id columns and ValidationService tests assert metadata pass-through while dotnet CLI access remains unavailable for restore/build/test.",

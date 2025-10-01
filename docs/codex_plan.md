@@ -45,6 +45,7 @@
 - 2025-12-05: Added WPF unit coverage exercising ValidationCrudServiceAdapter context propagation, updated the validation CRUD
   fake to retain signature/IP/session metadata, and asserted CrudSaveResult mirrors the persisted entity so regressions surface
   quickly while dotnet CLI access remains blocked.
+- 2025-12-07: External Servicer CRUD fake now records saved snapshots alongside contexts, cleans up deleted entries, and confirms CrudSaveResult metadata still flows from the provided context; attempted dotnet restore/build/smoke remain blocked because the CLI is still missing in the container.
 - 2025-12-06: Security persistence now writes `digital_signature`/`last_change_signature` along with IP/device/session metadata via DatabaseService.Users extensions, and new UserCrudServiceAdapter tests assert the context and signatures persist end-to-end while the dotnet CLI gap continues to block restore/build.
 - 2025-12-04: Validation persistence now writes `source_ip`/`session_id` on insert/update and ValidationService unit tests assert the metadata survives adapter calls; dotnet CLI still missing so restore/build/test remain blocked.
 - 2025-12-01: Change Control schema/service now persist digital signature hash plus IP/session/device context so adapter metadata flows through unchanged; database scripts updated accordingly while CLI validation remains blocked.

@@ -32,8 +32,14 @@ namespace YasGMP.Wpf.Services
     public sealed partial class FakeExternalServicerCrudService : IExternalServicerCrudService
     {
         private readonly List<ExternalServicer> _store = new();
+        private readonly List<(ExternalServicer Entity, ExternalServicerCrudContext Context)> _savedSnapshots = new();
 
         public List<ExternalServicer> Saved => _store;
+        public IReadOnlyList<(ExternalServicer Entity, ExternalServicerCrudContext Context)> SavedWithContext => _savedSnapshots;
+        public ExternalServicerCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
+        public ExternalServicer? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
+        public IEnumerable<ExternalServicerCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
+        public IEnumerable<ExternalServicer> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
         public Task<IReadOnlyList<ExternalServicer>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<ExternalServicer>>(_store.ToList());
@@ -48,7 +54,9 @@ namespace YasGMP.Wpf.Services
                 servicer.Id = _store.Count == 0 ? 1 : _store.Max(s => s.Id) + 1;
             }
 
-            _store.Add(Clone(servicer));
+            var stored = Clone(servicer);
+            _store.Add(stored);
+            TrackSnapshot(stored, context);
             return Task.FromResult(servicer.Id);
         }
 
@@ -57,11 +65,14 @@ namespace YasGMP.Wpf.Services
             var existing = _store.FirstOrDefault(s => s.Id == servicer.Id);
             if (existing is null)
             {
-                _store.Add(Clone(servicer));
+                var stored = Clone(servicer);
+                _store.Add(stored);
+                TrackSnapshot(stored, context);
             }
             else
             {
                 Copy(servicer, existing);
+                TrackSnapshot(existing, context);
             }
 
             return Task.CompletedTask;
@@ -70,6 +81,7 @@ namespace YasGMP.Wpf.Services
         public Task DeleteAsync(int id, ExternalServicerCrudContext context)
         {
             _store.RemoveAll(s => s.Id == id);
+            _savedSnapshots.RemoveAll(tuple => tuple.Entity.Id == id);
             return Task.CompletedTask;
         }
 
@@ -94,6 +106,9 @@ namespace YasGMP.Wpf.Services
 
         public string NormalizeStatus(string? status)
             => ExternalServicerCrudExtensions.NormalizeStatusDefault(status);
+
+        private void TrackSnapshot(ExternalServicer servicer, ExternalServicerCrudContext context)
+            => _savedSnapshots.Add((Clone(servicer), context));
 
         private static ExternalServicer Clone(ExternalServicer source)
             => new()
