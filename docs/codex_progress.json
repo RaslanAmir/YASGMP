@@ -87,8 +87,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: persist validation source metadata",
+  "lastCommitSummary": "feat: persist user signature context",
   "notes": [
+    "2025-12-06: DatabaseService.Users insert/update now persist digital_signature/last_change_signature with IP/device/session metadata, and new UserCrudServiceAdapter tests verify the context flows end-to-end while the dotnet CLI remains unavailable for restore/build/test.",
     "2025-12-05: Added WPF ValidationCrudServiceAdapter test to confirm signature hash/IP/session metadata persists and matches returned CrudSaveResult while validation CRUD fakes retain the fields; dotnet CLI remains unavailable for restore/build/test.",
     "2025-12-04: Validation persistence now writes source_ip/session_id columns and ValidationService tests assert metadata pass-through while dotnet CLI access remains unavailable for restore/build/test.",
     "2025-12-03: ValidationService now preserves adapter-supplied validation signature hashes during create/update and forces regeneration only when executing a validation; unit tests cover the persistence path while dotnet CLI access remains unavailable for restore/build/test.",

@@ -59,7 +59,7 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             const string sqlPreferred = @"SELECT id, username, password_hash, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
-       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_change_signature, last_modified, last_modified_by_id, source_ip, device_info, session_id
 FROM users WHERE id=@id LIMIT 1;";
             const string sqlLegacy = @"SELECT id, username, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
        last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
@@ -89,7 +89,7 @@ FROM users WHERE id=@id LIMIT 1;";
             if (string.IsNullOrWhiteSpace(username)) return null;
 
             const string sqlPreferred = @"SELECT id, username, password_hash, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
-       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_change_signature, last_modified, last_modified_by_id, source_ip, device_info, session_id
 FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
             const string sqlLegacy = @"SELECT id, username, password, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
        last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
@@ -120,9 +120,19 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
             bool includeAudit,
             CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync(
-                "SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled, last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id FROM users ORDER BY username",
-                null, token).ConfigureAwait(false);
+            DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(
+                    "SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled, last_login, last_failed_login, failed_login_attempts, digital_signature, last_change_signature, last_modified, last_modified_by_id, source_ip, device_info, session_id FROM users ORDER BY username",
+                    null, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(
+                    "SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled, last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id FROM users ORDER BY username",
+                    null, token).ConfigureAwait(false);
+            }
 
             var list = new List<User>(dt.Rows.Count);
             foreach (DataRow r in dt.Rows) list.Add(MapUser(r));
@@ -142,44 +152,136 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
-            // Preferred SQL (schema-correct: password_hash)
-            var sqlPreferred = !update
-                ? @"INSERT INTO users
+            var parameterValues = new Dictionary<string, object?>
+            {
+                ["@un"] = user.Username ?? string.Empty,
+                ["@ph"] = user.PasswordHash ?? string.Empty,
+                ["@fn"] = user.FullName ?? string.Empty,
+                ["@em"] = string.IsNullOrWhiteSpace(user.Email) ? DBNull.Value : user.Email!,
+                ["@ro"] = string.IsNullOrWhiteSpace(user.Role) ? DBNull.Value : user.Role!,
+                ["@ac"] = user.Active,
+                ["@lk"] = user.IsLocked,
+                ["@tfa"] = user.IsTwoFactorEnabled
+            };
+
+            var normalizedSignature = string.IsNullOrWhiteSpace(user.DigitalSignature) ? null : user.DigitalSignature;
+            var normalizedLastChange = string.IsNullOrWhiteSpace(user.LastChangeSignature)
+                ? normalizedSignature
+                : user.LastChangeSignature;
+
+            parameterValues["@sig"] = normalizedSignature ?? (object)DBNull.Value;
+            parameterValues["@lsig"] = normalizedLastChange ?? (object)DBNull.Value;
+            parameterValues["@lmb"] = user.LastModifiedById.HasValue ? user.LastModifiedById.Value : (object)DBNull.Value;
+            parameterValues["@lm"] = user.LastModified == default ? DateTime.UtcNow : user.LastModified;
+            parameterValues["@ip"] = string.IsNullOrWhiteSpace(user.SourceIp) ? (object)DBNull.Value : user.SourceIp!;
+            parameterValues["@dev"] = string.IsNullOrWhiteSpace(user.DeviceInfo) ? (object)DBNull.Value : user.DeviceInfo!;
+            parameterValues["@sid"] = string.IsNullOrWhiteSpace(user.SessionId) ? (object)DBNull.Value : user.SessionId!;
+
+            if (update)
+            {
+                parameterValues["@id"] = user.Id;
+            }
+
+            const string insertFull = @"INSERT INTO users
+                       (username, password_hash, full_name, email, role, active, is_locked, is_two_factor_enabled, digital_signature, last_change_signature, last_modified_by_id, last_modified, source_ip, device_info, session_id)
+                    VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa, @sig, @lsig, @lmb, @lm, @ip, @dev, @sid);";
+
+            const string updateFull = @"UPDATE users SET
+                        username=@un, password_hash=@ph, full_name=@fn, email=@em, role=@ro,
+                        active=@ac, is_locked=@lk, is_two_factor_enabled=@tfa,
+                        digital_signature=@sig, last_change_signature=@lsig,
+                        last_modified_by_id=@lmb, last_modified=@lm,
+                        source_ip=@ip, device_info=@dev, session_id=@sid
+                    WHERE id=@id;";
+
+            const string insertNoContext = @"INSERT INTO users
+                       (username, password_hash, full_name, email, role, active, is_locked, is_two_factor_enabled, digital_signature, last_change_signature, last_modified_by_id, last_modified)
+                    VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa, @sig, @lsig, @lmb, @lm);";
+
+            const string updateNoContext = @"UPDATE users SET
+                        username=@un, password_hash=@ph, full_name=@fn, email=@em, role=@ro,
+                        active=@ac, is_locked=@lk, is_two_factor_enabled=@tfa,
+                        digital_signature=@sig, last_change_signature=@lsig,
+                        last_modified_by_id=@lmb, last_modified=@lm
+                    WHERE id=@id;";
+
+            const string insertLegacyModern = @"INSERT INTO users
                        (username, password_hash, full_name, email, role, active, is_locked, is_two_factor_enabled)
-                    VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa);"
-                : @"UPDATE users SET
+                    VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa);";
+
+            const string updateLegacyModern = @"UPDATE users SET
                         username=@un, password_hash=@ph, full_name=@fn, email=@em, role=@ro,
                         active=@ac, is_locked=@lk, is_two_factor_enabled=@tfa
                     WHERE id=@id;";
 
-            var pars = new List<MySqlParameter>
-            {
-                new("@un", user.Username ?? string.Empty),
-                new("@ph", user.PasswordHash ?? string.Empty),
-                new("@fn", user.FullName ?? string.Empty),
-                new("@em", (object?)user.Email ?? DBNull.Value),
-                new("@ro", (object?)user.Role ?? DBNull.Value),
-                new("@ac", user.Active),
-                new("@lk", user.IsLocked),
-                new("@tfa", user.IsTwoFactorEnabled)
-            };
-            if (update) pars.Add(new MySqlParameter("@id", user.Id));
+            const string insertPasswordFallback = @"INSERT INTO users /* ANALYZER_IGNORE: legacy schema */
+                       (username, password, full_name, email, role, active, is_locked, is_two_factor_enabled)
+                    VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa);";
 
-            try
+            const string updatePasswordFallback = @"UPDATE users /* ANALYZER_IGNORE: legacy schema */ SET
+                        username=@un, password=@ph, full_name=@fn, email=@em, role=@ro,
+                        active=@ac, is_locked=@lk, is_two_factor_enabled=@tfa
+                    WHERE id=@id;";
+
+            static MySqlParameter[] BuildParameters(Dictionary<string, object?> values, IReadOnlyCollection<string> names)
             {
-                await db.ExecuteNonQueryAsync(sqlPreferred, pars.ToArray(), token).ConfigureAwait(false);
+                var list = new List<MySqlParameter>(names.Count);
+                foreach (var name in names)
+                {
+                    if (!values.TryGetValue(name, out var val))
+                    {
+                        continue;
+                    }
+
+                    list.Add(new MySqlParameter(name, val ?? DBNull.Value));
+                }
+
+                return list.ToArray();
             }
-            catch (MySqlException ex) when (ex.Number == 1054) // unknown column -> legacy "password"
+
+            var attempts = update
+                ? new[]
+                {
+                    (Sql: updateFull, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa", "@sig", "@lsig", "@lmb", "@lm", "@ip", "@dev", "@sid", "@id" }),
+                    (Sql: updateNoContext, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa", "@sig", "@lsig", "@lmb", "@lm", "@id" }),
+                    (Sql: updateLegacyModern, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa", "@id" }),
+                    (Sql: updatePasswordFallback, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa", "@id" })
+                }
+                : new[]
+                {
+                    (Sql: insertFull, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa", "@sig", "@lsig", "@lmb", "@lm", "@ip", "@dev", "@sid" }),
+                    (Sql: insertNoContext, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa", "@sig", "@lsig", "@lmb", "@lm" }),
+                    (Sql: insertLegacyModern, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa" }),
+                    (Sql: insertPasswordFallback, Params: new[] { "@un", "@ph", "@fn", "@em", "@ro", "@ac", "@lk", "@tfa" })
+                };
+
+            var executed = false;
+            MySqlException? schemaException = null;
+
+            foreach (var attempt in attempts)
             {
-                var sqlLegacy = !update
-                    ? @"INSERT INTO users /* ANALYZER_IGNORE: legacy schema */
-                           (username, password, full_name, email, role, active, is_locked, is_two_factor_enabled)
-                        VALUES(@un, @ph, @fn, @em, @ro, @ac, @lk, @tfa);"
-                    : @"UPDATE users /* ANALYZER_IGNORE: legacy schema */ SET
-                            username=@un, password=@ph, full_name=@fn, email=@em, role=@ro,
-                            active=@ac, is_locked=@lk, is_two_factor_enabled=@tfa
-                        WHERE id=@id;";
-                await db.ExecuteNonQueryAsync(sqlLegacy, pars.ToArray(), token).ConfigureAwait(false);
+                var parameters = BuildParameters(parameterValues, attempt.Params);
+
+                try
+                {
+                    await db.ExecuteNonQueryAsync(attempt.Sql, parameters, token).ConfigureAwait(false);
+                    executed = true;
+                    break;
+                }
+                catch (MySqlException ex) when (ex.Number is 1054 or 1146)
+                {
+                    schemaException = ex;
+                }
+            }
+
+            if (!executed)
+            {
+                if (schemaException != null)
+                {
+                    throw schemaException;
+                }
+
+                throw new InvalidOperationException("InsertOrUpdateUserAsync failed due to an unexpected schema mismatch.");
             }
 
             if (!update)
@@ -344,7 +446,12 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
                 Role               = S("role"),
                 Active             = r.Table.Columns.Contains("active") ? GetBool("active") : true,
                 IsLocked           = GetBool("is_locked"),
-                IsTwoFactorEnabled = GetBool("is_two_factor_enabled")
+                IsTwoFactorEnabled = GetBool("is_two_factor_enabled"),
+                DigitalSignature   = S("digital_signature"),
+                LastChangeSignature = S("last_change_signature"),
+                DeviceInfo         = S("device_info"),
+                SourceIp           = S("source_ip"),
+                SessionId          = S("session_id")
             };
 
             u.FailedLoginAttempts =
@@ -356,6 +463,12 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
 
             if (r.Table.Columns.Contains("last_failed_login") && r["last_failed_login"] != DBNull.Value)
                 u.LastFailedLogin = Convert.ToDateTime(r["last_failed_login"]);
+
+            if (r.Table.Columns.Contains("last_modified") && r["last_modified"] != DBNull.Value)
+                u.LastModified = Convert.ToDateTime(r["last_modified"]);
+
+            if (r.Table.Columns.Contains("last_modified_by_id") && r["last_modified_by_id"] != DBNull.Value)
+                u.LastModifiedById = Convert.ToInt32(r["last_modified_by_id"]);
 
             return u;
         }

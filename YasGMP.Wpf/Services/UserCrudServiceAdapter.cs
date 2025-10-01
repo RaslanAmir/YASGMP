@@ -118,6 +118,9 @@ namespace YasGMP.Wpf.Services
             var signature = context.SignatureHash ?? user.DigitalSignature ?? string.Empty;
             user.DigitalSignature = signature;
             user.LastChangeSignature = signature;
+            user.SourceIp = context.Ip;
+            user.DeviceInfo = context.DeviceInfo;
+            user.SessionId = context.SessionId ?? user.SessionId;
             user.LastModifiedById = context.UserId;
             user.LastModified = DateTime.UtcNow;
             return signature;

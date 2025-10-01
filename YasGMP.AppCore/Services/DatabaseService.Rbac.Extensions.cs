@@ -53,7 +53,7 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
-       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_change_signature, last_modified, last_modified_by_id, source_ip, device_info, session_id
 FROM users ORDER BY full_name, username, id;";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
 
@@ -106,7 +106,7 @@ FROM users ORDER BY full_name, username, id;";
             CancellationToken token = default)
         {
             const string sql = @"SELECT id, username, full_name, email, role, role_id, active, is_locked, is_two_factor_enabled,
-       last_login, last_failed_login, failed_login_attempts, digital_signature, last_modified, last_modified_by_id
+       last_login, last_failed_login, failed_login_attempts, digital_signature, last_change_signature, last_modified, last_modified_by_id, source_ip, device_info, session_id
 FROM users WHERE id=@id LIMIT 1;";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 1 ? ParseUser(dt.Rows[0]) : null;
@@ -595,6 +595,13 @@ VALUES (NULL,@fmt,'permissions',@filter,@path,@ip,'Permissions export')",
             SetIfExists(u, nameof(User.IsLocked), GetBool(r, "is_locked") ?? false);
             SetIfExists(u, nameof(User.IsTwoFactorEnabled), GetBool(r, "is_two_factor_enabled") ?? false);
             SetIfExists(u, nameof(User.LastLogin), GetDate(r, "last_login"));
+            SetIfExists(u, nameof(User.DigitalSignature), GetString(r, "digital_signature"));
+            SetIfExists(u, nameof(User.LastChangeSignature), GetString(r, "last_change_signature"));
+            SetIfExists(u, nameof(User.LastModifiedById), GetInt(r, "last_modified_by_id"));
+            SetIfExists(u, nameof(User.LastModified), GetDate(r, "last_modified") ?? u.LastModified);
+            SetIfExists(u, nameof(User.SourceIp), GetString(r, "source_ip"));
+            SetIfExists(u, nameof(User.DeviceInfo), GetString(r, "device_info"));
+            SetIfExists(u, nameof(User.SessionId), GetString(r, "session_id"));
 
             var fail = GetInt(r, "failed_login_attempts") ?? GetInt(r, "failed_logins") ?? 0;
             SetIfExists(u, nameof(User.FailedLoginAttempts), fail);
