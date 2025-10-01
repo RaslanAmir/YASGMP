@@ -33,11 +33,21 @@ public sealed class SignaturePersistenceHelperTests
 
         Assert.Equal(0, dialogService.PersistInvocationCount);
         Assert.Empty(dialogService.PersistedResults);
+        Assert.Equal(1, dialogService.LogPersistInvocationCount);
+        Assert.Equal(1, dialogService.LogOnlyInvocationCount);
 
         var logResult = Assert.Single(dialogService.LoggedAuditResults);
         Assert.Equal(signature.Id, logResult.Signature?.Id);
         Assert.Equal(signature.TableName, logResult.Signature?.TableName);
         Assert.Equal(signature.RecordId, logResult.Signature?.RecordId);
+
+        var logRecord = Assert.Single(dialogService.LoggedSignatureRecords);
+        Assert.Equal(signature.Id, logRecord.SignatureId);
+        Assert.Equal(signature.SignatureHash, logRecord.SignatureHash);
+        Assert.Equal(signature.Method, logRecord.Method);
+        Assert.Equal(signature.Status, logRecord.Status);
+        Assert.Equal(signature.Note, logRecord.Note);
+        Assert.Equal(signature.RecordId, logRecord.RecordId);
     }
 
     [Fact]
@@ -64,5 +74,7 @@ public sealed class SignaturePersistenceHelperTests
         Assert.Equal(1, dialogService.PersistInvocationCount);
         Assert.Single(dialogService.PersistedResults);
         Assert.Empty(dialogService.LoggedAuditResults);
+        Assert.Empty(dialogService.LoggedSignatureRecords);
+        Assert.Equal(0, dialogService.LogOnlyInvocationCount);
     }
 }
