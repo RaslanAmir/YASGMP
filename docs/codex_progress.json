@@ -94,7 +94,7 @@
     "Audit": "in-progress",
     "ApiAudit": "in-progress",
     "AuditDashboard": "in-progress",
-    "Attachments": "pending",
+    "Attachments": "in-progress",
     "Dashboard": "pending",
     "Reports": "pending",
     "SettingsAdmin": "pending"
@@ -108,6 +108,7 @@
     "2025-12-26: Window menu now surfaces Audit, Audit Dashboard, and API Audit commands so the shell can launch the compliance modules directly; dotnet restore/build/smoke remain blocked without the CLI.",
     "2025-12-28: Ribbon Home tab and backstage now include a Quality & Compliance group exposing Audit Trail, Audit Dashboard, and API Audit buttons wired to the shared window commands; dotnet restore/build/run remain blocked because the CLI is unavailable in the container.",
     "2025-12-29: Stub shell services promoted into TestDoubles and new AuditDashboardDocumentViewModel tests cover load/export overrides for MAUI and fallback paths while dotnet restore/build/smoke remain blocked by the missing CLI.",
+    "2025-12-29: Attachments module now inherits ModuleDocumentViewModel, stores DI-provided services for the B1 toolbar workflow, and seeds design-time records so the shell and design tools align while dotnet restore/build/smoke remain blocked without the CLI.",
     "2025-12-30: AuditLogDocumentViewModel tests now reuse the shared shell stubs with a configurable MAUI AuditLogViewModel double to validate refresh/filter/export busy lifecycles, status propagation, and fallback error messaging while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2025-12-21: Audit log document now wraps the MAUI AuditLogViewModel with synchronized records, exports, and status propagation while the module registry targets the new adapter; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-16: Audit module unit tests now override ExportService calls to exercise PDF export success and failure paths, verifying busy state transitions and status/error messaging while dotnet restore/build remain blocked by the missing CLI.",

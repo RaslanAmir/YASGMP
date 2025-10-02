@@ -1,30 +1,69 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed class AttachmentsModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed class AttachmentsModuleViewModel : ModuleDocumentViewModel
 {
     public const string ModuleKey = "Attachments";
 
     public AttachmentsModuleViewModel(
         DatabaseService databaseService,
+        IAttachmentService attachmentService,
+        IFilePicker filePicker,
+        IElectronicSignatureDialogService signatureDialogService,
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Attachments", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, "Attachments", cflDialogService, shellInteraction, navigation)
     {
+        _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _signatureDialogService = signatureDialogService ?? throw new ArgumentNullException(nameof(signatureDialogService));
+        _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+        _cflDialogService = cflDialogService ?? throw new ArgumentNullException(nameof(cflDialogService));
+        _shellInteractionService = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
+        _navigationService = navigation ?? throw new ArgumentNullException(nameof(navigation));
+
+        HasAttachmentWorkflow = _attachmentService is not null
+            && _filePicker is not null
+            && _signatureDialogService is not null
+            && _auditService is not null;
+
+        HasShellIntegration = _cflDialogService is not null
+            && _shellInteractionService is not null
+            && _navigationService is not null;
+
+        if (IsInDesignMode())
+        {
+            Records.Clear();
+            foreach (var record in CreateDesignTimeRecords())
+            {
+                Records.Add(record);
+            }
+
+            SelectedRecord = Records.Count > 0 ? Records[0] : null;
+            StatusMessage = FormatLoadedStatus(Records.Count);
+        }
     }
+
+    public bool HasAttachmentWorkflow { get; }
+
+    public bool HasShellIntegration { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var attachments = await Database.GetAttachmentsFilteredAsync(null, null, null).ConfigureAwait(false);
+        var attachments = await _databaseService.GetAttachmentsFilteredAsync(null, null, null).ConfigureAwait(false);
         return attachments.Select(ToRecord).ToList();
     }
 
@@ -79,4 +118,16 @@ public sealed class AttachmentsModuleViewModel : DataDrivenModuleDocumentViewMod
             moduleKey,
             attachment.EntityId);
     }
+
+    private static bool IsInDesignMode()
+        => DesignerProperties.GetIsInDesignMode(new DependencyObject());
+
+    private readonly DatabaseService _databaseService;
+    private readonly IAttachmentService _attachmentService;
+    private readonly IFilePicker _filePicker;
+    private readonly IElectronicSignatureDialogService _signatureDialogService;
+    private readonly AuditService _auditService;
+    private readonly ICflDialogService _cflDialogService;
+    private readonly IShellInteractionService _shellInteractionService;
+    private readonly IModuleNavigationService _navigationService;
 }
