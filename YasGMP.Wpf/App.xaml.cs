@@ -101,7 +101,11 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<DebugSmokeTestService>();
                         svc.AddTransient<DigitalSignatureViewModel>();
                         svc.AddTransient<ElectronicSignatureDialogViewModel>();
-                        svc.AddTransient<AuditLogViewModel>();
+                        svc.AddTransient<AuditLogViewModel>(sp =>
+                        {
+                            var database = sp.GetRequiredService<DatabaseService>();
+                            return new AuditLogViewModel(database);
+                        });
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();
                         svc.AddTransient<ComponentsModuleViewModel>();
