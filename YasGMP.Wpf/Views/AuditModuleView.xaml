@@ -7,6 +7,18 @@
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="600">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="BusyAwareToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="Padding" Value="12,4" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -27,6 +39,13 @@
             <Separator />
             <Button Content="CFL" Command="{Binding ShowCflCommand}" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Separator />
+            <Button Content="Export PDF"
+                    Command="{Binding ExportToPdfCommand}"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
+            <Button Content="Export Excel"
+                    Command="{Binding ExportToExcelCommand}"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -74,26 +93,42 @@
                             Padding="12,4" />
                 </Grid>
             </StackPanel>
-            <DataGrid Grid.Row="1"
-                      ItemsSource="{Binding RecordsView}"
-                      SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
-                    <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[1].Value}" Width="200" />
-                    <DataGridTextColumn Header="Entity" Binding="{Binding Title}" Width="200" />
-                    <DataGridTextColumn Header="Action" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
-                    <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[4].Value}" Width="160" />
-                    <DataGridTextColumn Header="Device" Binding="{Binding InspectorFields[5].Value}" Width="2*" />
-                    <DataGridTextColumn Header="Digital Signature" Binding="{Binding InspectorFields[7].Value}" Width="200" />
-                    <DataGridTextColumn Header="Signature Hash" Binding="{Binding InspectorFields[8].Value}" Width="200" />
-                    <DataGridTextColumn Header="Reason" Binding="{Binding Description}" Width="2*" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid Grid.Row="1">
+                <DataGrid ItemsSource="{Binding RecordsView}"
+                          SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
+                        <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[1].Value}" Width="200" />
+                        <DataGridTextColumn Header="Entity" Binding="{Binding Title}" Width="200" />
+                        <DataGridTextColumn Header="Action" Binding="{Binding Code}" Width="120" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
+                        <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[4].Value}" Width="160" />
+                        <DataGridTextColumn Header="Device" Binding="{Binding InspectorFields[5].Value}" Width="2*" />
+                        <DataGridTextColumn Header="Digital Signature" Binding="{Binding InspectorFields[7].Value}" Width="200" />
+                        <DataGridTextColumn Header="Signature Hash" Binding="{Binding InspectorFields[8].Value}" Width="200" />
+                        <DataGridTextColumn Header="Reason" Binding="{Binding Description}" Width="2*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Border Background="#80FFFFFF"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        IsHitTestVisible="True">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Orientation="Vertical"
+                                Margin="24">
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
+                        <TextBlock Text="Loading..."
+                                   Margin="0,12,0,0"
+                                   HorizontalAlignment="Center"
+                                   Foreground="Gray"
+                                   FontStyle="Italic" />
+                    </StackPanel>
+                </Border>
+            </Grid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Margin="0,8,0,0">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
