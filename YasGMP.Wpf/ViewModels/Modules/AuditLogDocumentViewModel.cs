@@ -344,6 +344,16 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 
     private void SyncStatusFromAuditLog()
     {
+        if (HasError)
+        {
+            if (!string.IsNullOrWhiteSpace(_auditLogViewModel.StatusMessage))
+            {
+                StatusMessage = _auditLogViewModel.StatusMessage!;
+            }
+
+            return;
+        }
+
         if (!string.IsNullOrWhiteSpace(_auditLogViewModel.StatusMessage))
         {
             StatusMessage = _auditLogViewModel.StatusMessage!;
