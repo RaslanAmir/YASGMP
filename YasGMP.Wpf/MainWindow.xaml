@@ -34,6 +34,48 @@
                                                Command="{Binding WindowCommands.ResetLayoutCommand}" />
                             </StackPanel>
                         </fluent:BackstageTabItem>
+                        <fluent:BackstageTabItem Header="Quality &amp; Compliance">
+                            <StackPanel Margin="16">
+                                <fluent:Button Header="Audit Trail"
+                                               Width="220"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.OpenAuditTrailCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="&#xE81C;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Open the immutable audit trail browser." />
+                                    </ToolTipService.ToolTip>
+                                </fluent:Button>
+                                <fluent:Button Header="Audit Dashboard"
+                                               Width="220"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="&#xE9D2;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Launch the live audit dashboard with trend analytics." />
+                                    </ToolTipService.ToolTip>
+                                </fluent:Button>
+                                <fluent:Button Header="API Audit Trail"
+                                               Width="220"
+                                               Command="{Binding WindowCommands.OpenApiAuditCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="&#xEBC3;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Review API key usage and forensic request payloads." />
+                                    </ToolTipService.ToolTip>
+                                </fluent:Button>
+                            </StackPanel>
+                        </fluent:BackstageTabItem>
                     </fluent:BackstageTabControl>
                 </fluent:Backstage>
             </fluent:Ribbon.Menu>
@@ -64,6 +106,41 @@
                                    Command="{Binding WindowCommands.OpenChangeControlCommand}" />
                     <fluent:Button Header="Validations"
                                    Command="{Binding WindowCommands.OpenValidationsCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Quality &amp; Compliance">
+                    <fluent:Button Header="Audit Trail"
+                                   Command="{Binding WindowCommands.OpenAuditTrailCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xE81C;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Open the immutable audit trail browser." />
+                        </ToolTipService.ToolTip>
+                    </fluent:Button>
+                    <fluent:Button Header="Audit Dashboard"
+                                   Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xE9D2;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Launch the live audit dashboard with trend analytics." />
+                        </ToolTipService.ToolTip>
+                    </fluent:Button>
+                    <fluent:Button Header="API Audit Trail"
+                                   Command="{Binding WindowCommands.OpenApiAuditCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xEBC3;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Review API key usage and forensic request payloads." />
+                        </ToolTipService.ToolTip>
+                    </fluent:Button>
                 </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Supply Chain">
                     <fluent:Button Header="Suppliers"
