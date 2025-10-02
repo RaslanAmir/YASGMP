@@ -106,6 +106,7 @@ namespace YasGMP.Wpf
                             var database = sp.GetRequiredService<DatabaseService>();
                             return new AuditLogViewModel(database);
                         });
+                        svc.AddTransient<AuditDashboardViewModel>();
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();
                         svc.AddTransient<ComponentsModuleViewModel>();
