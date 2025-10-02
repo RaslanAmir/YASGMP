@@ -91,8 +91,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: add log-only signature audit hook",
+  "lastCommitSummary": "feat: surface audit export ui polish",
   "notes": [
+    "2025-12-15: Audit module WPF view adds Export PDF/Excel buttons that respect IsBusy and introduces a progress overlay so busy/export errors mirror the MAUI experience while the dotnet CLI remains unavailable for restore/build/smoke.",
     "2025-12-14: Audit module now retains the most recent audit query payload plus filter summary for export reuse, added guarded AsyncRelayCommand PDF/Excel exports, and registered ExportService so DI resolves the new constructor; dotnet CLI remains unavailable so restore/build/test stay blocked.",
     "2025-12-07: External Servicer CRUD fake now mirrors other module doubles by capturing saved snapshots with contexts, cloning entities for assertions, and clearing deleted entries; CrudSaveResult coverage confirms metadata still flows from the provided context while dotnet CLI access remains blocked for restore/build/smoke.",
     "2025-12-06: DatabaseService.Users insert/update now persist digital_signature/last_change_signature with IP/device/session metadata, and new UserCrudServiceAdapter tests verify the context flows end-to-end while the dotnet CLI remains unavailable for restore/build/test.",
