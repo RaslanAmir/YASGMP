@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
-using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
+using YasGMP.Wpf.Tests.TestDoubles;
 
 namespace YasGMP.Wpf.Tests;
 
@@ -614,21 +614,4 @@ public class AuditModuleViewModelTests
             => Task.FromException<IReadOnlyList<AuditEntryDto>>(_exception);
     }
 
-    private sealed class StubCflDialogService : ICflDialogService
-    {
-        public Task<CflResult?> ShowAsync(CflRequest request) => Task.FromResult<CflResult?>(null);
-    }
-
-    private sealed class StubShellInteractionService : IShellInteractionService
-    {
-        public void UpdateInspector(InspectorContext context) { }
-        public void UpdateStatus(string message) { }
-    }
-
-    private sealed class StubModuleNavigationService : IModuleNavigationService
-    {
-        public void Activate(ModuleDocumentViewModel document) { }
-        public ModuleDocumentViewModel OpenModule(string moduleKey, object? parameter = null)
-            => throw new NotSupportedException();
-    }
 }

@@ -28,12 +28,21 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         AuditDashboardViewModel dashboardViewModel,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
+        IModuleNavigationService navigation,
+        Func<AuditDashboardViewModel, Task<IReadOnlyList<AuditEntryDto>>>? loadOverride = null,
+        Func<AuditDashboardViewModel, Task<string>>? exportPdfOverride = null,
+        Func<AuditDashboardViewModel, Task<string>>? exportExcelOverride = null)
         : base(ModuleKey, "Audit Dashboard", cflDialogService, shellInteraction, navigation)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         _dashboardViewModel = dashboardViewModel ?? throw new ArgumentNullException(nameof(dashboardViewModel));
+        _loadOverride = loadOverride;
+        _exportPdfOverride = exportPdfOverride;
+        _exportExcelOverride = exportExcelOverride;
+
+        _loadAuditsMethod = _dashboardViewModel.GetType()
+            .GetMethod("LoadAuditsAsync", BindingFlags.Instance | BindingFlags.NonPublic);
 
         _dashboardViewModel.FilteredAudits.CollectionChanged += OnFilteredAuditsChanged;
 
@@ -67,7 +76,22 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         try
         {
             _suppressProjection = true;
-            await InvokeDashboardLoadAsync().ConfigureAwait(false);
+            if (_loadOverride is not null)
+            {
+                var audits = await _loadOverride(_dashboardViewModel).ConfigureAwait(false);
+                _dashboardViewModel.FilteredAudits.Clear();
+                if (audits is not null)
+                {
+                    foreach (var entry in audits)
+                    {
+                        _dashboardViewModel.FilteredAudits.Add(entry);
+                    }
+                }
+            }
+            else
+            {
+                await InvokeDashboardLoadAsync().ConfigureAwait(false);
+            }
             var records = ProjectRecords();
             HasError = false;
             HasResults = records.Count > 0;
@@ -138,8 +162,10 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
     private readonly AsyncRelayCommand _applyFilterCommand;
     private readonly AsyncRelayCommand _exportPdfCommand;
     private readonly AsyncRelayCommand _exportExcelCommand;
-    private readonly MethodInfo? _loadAuditsMethod = typeof(AuditDashboardViewModel)
-        .GetMethod("LoadAuditsAsync", BindingFlags.Instance | BindingFlags.NonPublic);
+    private readonly MethodInfo? _loadAuditsMethod;
+    private readonly Func<AuditDashboardViewModel, Task<IReadOnlyList<AuditEntryDto>>>? _loadOverride;
+    private readonly Func<AuditDashboardViewModel, Task<string>>? _exportPdfOverride;
+    private readonly Func<AuditDashboardViewModel, Task<string>>? _exportExcelOverride;
     private bool _suppressProjection;
 
     private async Task ExecuteApplyFilterAsync()
@@ -184,6 +210,18 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
             {
                 await mauiCommand.ExecuteAsync(null).ConfigureAwait(false);
                 StatusMessage = $"Audit dashboard exported to {formatLabel}.";
+            }
+            else if (string.Equals(formatLabel, "PDF", StringComparison.OrdinalIgnoreCase)
+                && _exportPdfOverride is not null)
+            {
+                var path = await _exportPdfOverride(_dashboardViewModel).ConfigureAwait(false);
+                StatusMessage = $"Audit dashboard exported to {formatLabel}: {path}";
+            }
+            else if (string.Equals(formatLabel, "Excel", StringComparison.OrdinalIgnoreCase)
+                && _exportExcelOverride is not null)
+            {
+                var path = await _exportExcelOverride(_dashboardViewModel).ConfigureAwait(false);
+                StatusMessage = $"Audit dashboard exported to {formatLabel}: {path}";
             }
             else
             {
