@@ -42,6 +42,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2025-10-02: Added the AuditDashboardDocument WPF view with toolbar/filter parity, busy overlay, and shell DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.
 - 2025-12-05: Added WPF unit coverage exercising ValidationCrudServiceAdapter context propagation, updated the validation CRUD
   fake to retain signature/IP/session metadata, and asserted CrudSaveResult mirrors the persisted entity so regressions surface
   quickly while dotnet CLI access remains blocked.
