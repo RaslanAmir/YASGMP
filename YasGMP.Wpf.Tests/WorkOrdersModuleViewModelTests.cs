@@ -18,21 +18,67 @@ public class WorkOrdersModuleViewModelTests
     [Fact]
     public async Task OnSaveAsync_AddMode_PersistsWorkOrderThroughAdapter()
     {
-        var database = new DatabaseService();
-        var audit = new RecordingAuditService(database);
         const int adapterSignatureId = 7204;
-        var workOrders = new FakeWorkOrderCrudService
+        var database = new CountingDatabaseService
         {
-            SignatureMetadataIdSource = _ => adapterSignatureId
+            NextSignatureId = adapterSignatureId
         };
+        var audit = new RecordingAuditService(database);
+        var signatureDialog = new TestElectronicSignatureDialogService();
         var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
         auth.CurrentSessionId = "SESSION-123";
         auth.CurrentDeviceInfo = "UnitTestRig";
         auth.CurrentIpAddress = "10.0.0.42";
+        var workOrders = new FakeWorkOrderCrudService
+        {
+            SignatureMetadataIdSource = _ =>
+            {
+                var savedEntity = workOrders.LastSavedEntity
+                    ?? throw new InvalidOperationException("Work order was not saved before metadata resolution.");
+
+                var savedContext = workOrders.LastSavedContext
+                    ?? throw new InvalidOperationException("Work order context is unavailable for metadata.");
+
+                var capturedResult = signatureDialog.CapturedResults.Count > 0
+                    ? signatureDialog.CapturedResults[^1]
+                    : signatureDialog.DefaultResult;
+
+                var signature = capturedResult?.Signature ?? new DigitalSignature();
+
+                var persistedSignature = new DigitalSignature
+                {
+                    TableName = "work_orders",
+                    RecordId = savedEntity.Id,
+                    UserId = signature.UserId == 0 ? auth.CurrentUser!.Id : signature.UserId,
+                    SignatureHash = string.IsNullOrWhiteSpace(signature.SignatureHash)
+                        ? savedContext.SignatureHash
+                        : signature.SignatureHash,
+                    Method = string.IsNullOrWhiteSpace(signature.Method)
+                        ? savedContext.SignatureMethod
+                        : signature.Method,
+                    Status = string.IsNullOrWhiteSpace(signature.Status)
+                        ? savedContext.SignatureStatus
+                        : signature.Status,
+                    Note = string.IsNullOrWhiteSpace(signature.Note)
+                        ? savedContext.SignatureNote
+                        : signature.Note,
+                    SessionId = string.IsNullOrWhiteSpace(signature.SessionId)
+                        ? savedContext.SessionId
+                        : signature.SessionId,
+                    DeviceInfo = string.IsNullOrWhiteSpace(signature.DeviceInfo)
+                        ? savedContext.DeviceInfo
+                        : signature.DeviceInfo,
+                    IpAddress = string.IsNullOrWhiteSpace(signature.IpAddress)
+                        ? savedContext.Ip
+                        : signature.IpAddress
+                };
+
+                return database.InsertDigitalSignatureAsync(persistedSignature).GetAwaiter().GetResult();
+            }
+        };
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
         var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
-        var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -79,6 +125,12 @@ public class WorkOrdersModuleViewModelTests
         Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
         Assert.Empty(signatureDialog.PersistedResults);
         Assert.Equal(0, signatureDialog.PersistInvocationCount);
+        Assert.Equal(1, signatureDialog.LogPersistInvocationCount);
+        Assert.Equal(1, database.InsertDigitalSignatureCallCount);
+        var insertedSignature = Assert.Single(database.InsertedSignatures);
+        Assert.Equal(adapterSignatureId, insertedSignature.Id);
+        Assert.Equal("work_orders", insertedSignature.TableName);
+        Assert.Equal(workOrders.Saved[0].Id, insertedSignature.RecordId);
         var auditEntry = Assert.Single(audit.EntityAudits);
         Assert.Equal("work_orders", auditEntry.Table);
         Assert.Equal(workOrders.Saved[0].Id, auditEntry.EntityId);

@@ -192,6 +192,58 @@ public sealed class ElectronicSignatureDialogServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task PersistSignatureAsync_PrepopulatedId_LogsWithoutInvokingInsertOverride()
+    {
+        var signature = new DigitalSignature
+        {
+            Id = 612,
+            TableName = "components",
+            RecordId = 777,
+            UserId = _authContext.CurrentUser!.Id,
+            SignatureHash = "hash-pre", 
+            Method = "password",
+            Status = "valid",
+            SessionId = _authContext.CurrentSessionId,
+            Note = "Pre-existing signature"
+        };
+
+        var result = new ElectronicSignatureDialogResult(
+            "password",
+            "QA",
+            "detail",
+            "Existing Signature",
+            signature);
+
+        var insertAttempts = 0;
+        _databaseService.ExecuteNonQueryOverride = async (sql, parameters, token) =>
+        {
+            if (sql.Contains("digital_signatures", StringComparison.OrdinalIgnoreCase)
+                && sql.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase))
+            {
+                insertAttempts++;
+            }
+
+            return await CaptureNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+        };
+
+        var service = new ElectronicSignatureDialogService(
+            _dispatcher,
+            _databaseService,
+            _authContext,
+            _auditService,
+            _ => true);
+
+        await service.PersistSignatureAsync(result);
+
+        Assert.Equal(0, insertAttempts);
+        var persistEvent = Assert.Single(_systemEvents.Where(e => e.EventType == "SIGNATURE_PERSISTED"));
+        Assert.Equal(signature.TableName, persistEvent.TableName);
+        Assert.Equal(signature.RecordId, persistEvent.RecordId);
+        Assert.Equal(_authContext.CurrentUser!.Id, persistEvent.UserId);
+        Assert.Contains("hash=hash-pre", persistEvent.Description, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task LogPersistedSignatureAsync_LogsWithoutDatabaseWrites()
     {
         var signature = new DigitalSignature
