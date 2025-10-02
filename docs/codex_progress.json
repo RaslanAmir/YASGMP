@@ -96,8 +96,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: wire audit log document factory",
+  "lastCommitSummary": "feat: add audit dashboard document view",
   "notes": [
+    "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-23: WPF host now constructs AuditLogDocumentViewModel via DI so AuditService, ExportService, and the DatabaseService-backed AuditLogViewModel flow into the shell toolbar; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-22: AuditLogViewModel now resolves through a DI factory so the shared DatabaseService reaches the WPF audit adapter when modules open; module registry mapping stays on the new document while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-21: Audit log document now wraps the MAUI AuditLogViewModel with synchronized records, exports, and status propagation while the module registry targets the new adapter; dotnet restore/build remain blocked by the missing CLI.",
