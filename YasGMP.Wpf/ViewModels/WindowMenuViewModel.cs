@@ -28,6 +28,9 @@ namespace YasGMP.Wpf.ViewModels
             OpenSecurityCommand = new RelayCommand(() => _shell.OpenModule(SecurityModuleViewModel.ModuleKey));
             OpenAdministrationCommand = new RelayCommand(() => _shell.OpenModule(AdminModuleViewModel.ModuleKey));
             OpenDiagnosticsCommand = new RelayCommand(() => _shell.OpenModule(DiagnosticsModuleViewModel.ModuleKey));
+            OpenAuditCommand = new RelayCommand(() => _shell.OpenModule(AuditModuleViewModel.ModuleKey));
+            OpenAuditDashboardCommand = new RelayCommand(() => _shell.OpenModule(AuditDashboardDocumentViewModel.ModuleKey));
+            OpenApiAuditCommand = new RelayCommand(() => _shell.OpenModule(ApiAuditModuleViewModel.ModuleKey));
             SaveLayoutCommand = new AsyncRelayCommand(ExecuteSaveLayoutAsync);
             ResetLayoutCommand = new AsyncRelayCommand(ExecuteResetLayoutAsync);
         }
@@ -61,6 +64,15 @@ namespace YasGMP.Wpf.ViewModels
         public IRelayCommand OpenAdministrationCommand { get; }
 
         public IRelayCommand OpenDiagnosticsCommand { get; }
+
+        /// <summary>Opens the immutable audit trail module.</summary>
+        public IRelayCommand OpenAuditCommand { get; }
+
+        /// <summary>Opens the audit dashboard document.</summary>
+        public IRelayCommand OpenAuditDashboardCommand { get; }
+
+        /// <summary>Opens the API audit module.</summary>
+        public IRelayCommand OpenApiAuditCommand { get; }
 
         public IAsyncRelayCommand SaveLayoutCommand { get; }
 
