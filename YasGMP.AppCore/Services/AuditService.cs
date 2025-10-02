@@ -242,7 +242,7 @@ VALUES
         private async Task<List<AuditEntryDto>> QueryEntityAuditAsync(string user, string entity, string action, DateTime from, DateTime to)
         {
             var select = @"
-                SELECT 
+                SELECT
                     a.id,
                     a.entity AS Entity,
                     a.entity_id AS EntityId,
@@ -420,6 +420,299 @@ VALUES
             }
 
             return results;
+        }
+
+        #endregion
+
+        #region === 🌐 API AUDIT TRAIL ===
+
+        /// <summary>
+        /// Retrieves API audit entries joined with API key and user metadata.
+        /// </summary>
+        /// <param name="apiKey">Partial API key filter (matches id, description, key value, or owner).</param>
+        /// <param name="user">Partial user filter (username/full name/id).</param>
+        /// <param name="action">Exact action filter (verb/endpoint); pass "All" or empty to disable.</param>
+        /// <param name="from">Inclusive lower bound (UTC/local accepted).</param>
+        /// <param name="to">Inclusive upper bound (UTC/local accepted).</param>
+        /// <param name="limit">Maximum number of rows to return (capped at 1000).</param>
+        public async Task<List<ApiAuditEntryDto>> GetApiAuditEntriesAsync(
+            string apiKey,
+            string user,
+            string action,
+            DateTime from,
+            DateTime to,
+            int limit = 500)
+        {
+            var results = new List<ApiAuditEntryDto>();
+
+            if (!await TableExistsAsync("api_audit_log").ConfigureAwait(false))
+            {
+                results.Add(new ApiAuditEntryDto
+                {
+                    Action = "MISSING_TABLE",
+                    Details = "Tabela api_audit_log nije pronađena u bazi.",
+                    Timestamp = DateTime.UtcNow
+                });
+                return results;
+            }
+
+            var normalizedLimit = Math.Clamp(limit, 1, 1000);
+
+            bool hasTimestamp = await ColumnExistsAsync("api_audit_log", "timestamp").ConfigureAwait(false);
+            bool hasCreatedAt = await ColumnExistsAsync("api_audit_log", "created_at").ConfigureAwait(false);
+            bool hasUpdatedAt = await ColumnExistsAsync("api_audit_log", "updated_at").ConfigureAwait(false);
+            bool hasRequestDetails = await ColumnExistsAsync("api_audit_log", "request_details").ConfigureAwait(false);
+            bool hasDetails = await ColumnExistsAsync("api_audit_log", "details").ConfigureAwait(false);
+
+            bool hasApiKeysTable = await TableExistsAsync("api_keys").ConfigureAwait(false);
+            bool hasUsersTable = await TableExistsAsync("users").ConfigureAwait(false);
+            bool hasOwnerColumn = hasApiKeysTable && await ColumnExistsAsync("api_keys", "owner_id").ConfigureAwait(false);
+            bool hasKeyUpdated = hasApiKeysTable && await ColumnExistsAsync("api_keys", "updated_at").ConfigureAwait(false);
+            bool hasKeyLastUsed = hasApiKeysTable && await ColumnExistsAsync("api_keys", "last_used_at").ConfigureAwait(false);
+
+            var dateColumns = new List<string>();
+            if (hasTimestamp) dateColumns.Add("a.`timestamp`");
+            if (hasCreatedAt) dateColumns.Add("a.created_at");
+            if (hasUpdatedAt) dateColumns.Add("a.updated_at");
+
+            string rangeExpression = dateColumns.Count switch
+            {
+                0 => "a.id",
+                1 => dateColumns[0],
+                _ => $"COALESCE({string.Join(", ", dateColumns)})"
+            };
+
+            string orderExpression = hasTimestamp
+                ? "a.`timestamp`"
+                : hasCreatedAt
+                    ? "a.created_at"
+                    : hasUpdatedAt
+                        ? "a.updated_at"
+                        : "a.id";
+
+            var columns = new List<string>
+            {
+                "a.id AS Id",
+                "a.api_key_id AS ApiKeyId",
+                "a.user_id AS UserId",
+                "a.action AS Action",
+                hasTimestamp ? "a.`timestamp` AS Timestamp" : "NULL AS Timestamp",
+                hasCreatedAt ? "a.created_at AS CreatedAt" : "NULL AS CreatedAt",
+                hasUpdatedAt ? "a.updated_at AS UpdatedAt" : "NULL AS UpdatedAt",
+                "a.ip_address AS IpAddress",
+                hasRequestDetails ? "a.request_details AS RequestDetails" : "NULL AS RequestDetails",
+                hasDetails ? "a.details AS Details" : "NULL AS Details"
+            };
+
+            if (hasApiKeysTable)
+            {
+                columns.Add("k.`key` AS ApiKeyValue");
+                columns.Add("k.description AS ApiKeyDescription");
+                columns.Add("k.is_active AS ApiKeyIsActive");
+                columns.Add("k.created_at AS ApiKeyCreatedAt");
+                columns.Add(hasKeyUpdated ? "k.updated_at AS ApiKeyUpdatedAt" : "NULL AS ApiKeyUpdatedAt");
+                columns.Add(hasKeyLastUsed ? "k.last_used_at AS ApiKeyLastUsedAt" : "NULL AS ApiKeyLastUsedAt");
+                columns.Add(hasOwnerColumn ? "k.owner_id AS ApiKeyOwnerId" : "NULL AS ApiKeyOwnerId");
+            }
+            else
+            {
+                columns.Add("NULL AS ApiKeyValue");
+                columns.Add("NULL AS ApiKeyDescription");
+                columns.Add("NULL AS ApiKeyIsActive");
+                columns.Add("NULL AS ApiKeyCreatedAt");
+                columns.Add("NULL AS ApiKeyUpdatedAt");
+                columns.Add("NULL AS ApiKeyLastUsedAt");
+                columns.Add("NULL AS ApiKeyOwnerId");
+            }
+
+            if (hasUsersTable)
+            {
+                columns.Add("u.username AS Username");
+                columns.Add("u.full_name AS UserFullName");
+            }
+            else
+            {
+                columns.Add("NULL AS Username");
+                columns.Add("NULL AS UserFullName");
+            }
+
+            if (hasApiKeysTable && hasUsersTable && hasOwnerColumn)
+            {
+                columns.Add("owner.username AS ApiKeyOwnerUsername");
+                columns.Add("owner.full_name AS ApiKeyOwnerFullName");
+            }
+            else
+            {
+                columns.Add("NULL AS ApiKeyOwnerUsername");
+                columns.Add("NULL AS ApiKeyOwnerFullName");
+            }
+
+            var joins = new List<string>();
+            if (hasApiKeysTable)
+            {
+                joins.Add("LEFT JOIN api_keys k ON k.id = a.api_key_id");
+            }
+
+            if (hasUsersTable)
+            {
+                joins.Add("LEFT JOIN users u ON u.id = a.user_id");
+            }
+
+            if (hasApiKeysTable && hasUsersTable && hasOwnerColumn)
+            {
+                joins.Add("LEFT JOIN users owner ON owner.id = k.owner_id");
+            }
+
+            var sql = $@"
+SELECT
+    {string.Join(",\n    ", columns)}
+FROM api_audit_log a
+    {string.Join("\n    ", joins)}
+WHERE {rangeExpression} BETWEEN @from AND @to";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@from", from),
+                new("@to", to)
+            };
+
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                var trimmed = apiKey.Trim();
+                var apiKeyConditions = new List<string>();
+
+                if (hasApiKeysTable)
+                {
+                    apiKeyConditions.Add("k.description LIKE @apiKey");
+                    apiKeyConditions.Add("k.`key` LIKE @apiKey");
+                }
+
+                if (hasApiKeysTable && hasUsersTable && hasOwnerColumn)
+                {
+                    apiKeyConditions.Add("owner.username LIKE @apiKey");
+                    apiKeyConditions.Add("owner.full_name LIKE @apiKey");
+                }
+
+                apiKeyConditions.Add("a.api_key_id = @apiKeyId");
+
+                sql += $" AND ({string.Join(" OR ", apiKeyConditions)})";
+
+                parameters.Add(new MySqlParameter("@apiKey", "%" + trimmed + "%"));
+                if (int.TryParse(trimmed, out var apiKeyId))
+                {
+                    parameters.Add(new MySqlParameter("@apiKeyId", apiKeyId));
+                }
+                else
+                {
+                    parameters.Add(new MySqlParameter("@apiKeyId", -1));
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(user))
+            {
+                if (hasUsersTable)
+                {
+                    sql += " AND (u.username LIKE @user OR u.full_name LIKE @user OR a.user_id = @userId)";
+                }
+                else
+                {
+                    sql += " AND a.user_id = @userId";
+                }
+
+                parameters.Add(new MySqlParameter("@user", "%" + user.Trim() + "%"));
+                if (int.TryParse(user, out var userId))
+                {
+                    parameters.Add(new MySqlParameter("@userId", userId));
+                }
+                else
+                {
+                    parameters.Add(new MySqlParameter("@userId", -1));
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(action) && !string.Equals(action, "All", StringComparison.OrdinalIgnoreCase))
+            {
+                sql += " AND a.action = @action";
+                parameters.Add(new MySqlParameter("@action", action));
+            }
+
+            sql += $" ORDER BY {orderExpression} DESC LIMIT {normalizedLimit};";
+
+            try
+            {
+                var reader = await _dbService.ExecuteReaderAsync(sql, parameters).ConfigureAwait(false);
+                if (reader == null)
+                {
+                    return results;
+                }
+
+                using (reader)
+                {
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        var entry = new ApiAuditEntryDto
+                        {
+                            Id = reader.IsDBNull(reader.GetOrdinal("Id")) ? 0 : Convert.ToInt32(reader["Id"]),
+                            ApiKeyId = SafeGetNullableInt(reader, "ApiKeyId"),
+                            ApiKeyValue = SafeGetString(reader, "ApiKeyValue"),
+                            ApiKeyDescription = SafeGetString(reader, "ApiKeyDescription"),
+                            ApiKeyCreatedAt = SafeGetDateTime(reader, "ApiKeyCreatedAt"),
+                            ApiKeyUpdatedAt = SafeGetDateTime(reader, "ApiKeyUpdatedAt"),
+                            ApiKeyLastUsedAt = SafeGetDateTime(reader, "ApiKeyLastUsedAt"),
+                            ApiKeyOwnerId = SafeGetNullableInt(reader, "ApiKeyOwnerId"),
+                            ApiKeyOwnerUsername = SafeGetString(reader, "ApiKeyOwnerUsername"),
+                            ApiKeyOwnerFullName = SafeGetString(reader, "ApiKeyOwnerFullName"),
+                            UserId = SafeGetNullableInt(reader, "UserId"),
+                            Username = SafeGetString(reader, "Username"),
+                            UserFullName = SafeGetString(reader, "UserFullName"),
+                            Action = SafeGetString(reader, "Action"),
+                            Timestamp = SafeGetDateTime(reader, "Timestamp"),
+                            CreatedAt = SafeGetDateTime(reader, "CreatedAt"),
+                            UpdatedAt = SafeGetDateTime(reader, "UpdatedAt"),
+                            IpAddress = SafeGetString(reader, "IpAddress"),
+                            RequestDetails = SafeGetString(reader, "RequestDetails"),
+                            Details = SafeGetString(reader, "Details")
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("ApiKeyIsActive")))
+                        {
+                            entry.ApiKeyIsActive = Convert.ToBoolean(reader["ApiKeyIsActive"]);
+                        }
+
+                        results.Add(entry);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[AuditService.GetApiAuditEntriesAsync] ERROR: " + ex);
+                results.Add(new ApiAuditEntryDto
+                {
+                    Action = "ERROR",
+                    Details = "Greška kod dohvaćanja API audita: " + ex.Message,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return results;
+
+            static string? SafeGetString(MySqlDataReader reader, string column)
+            {
+                var ordinal = reader.GetOrdinal(column);
+                return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+            }
+
+            static DateTime? SafeGetDateTime(MySqlDataReader reader, string column)
+            {
+                var ordinal = reader.GetOrdinal(column);
+                return reader.IsDBNull(ordinal) ? (DateTime?)null : reader.GetDateTime(ordinal);
+            }
+
+            static int? SafeGetNullableInt(MySqlDataReader reader, string column)
+            {
+                var ordinal = reader.GetOrdinal(column);
+                return reader.IsDBNull(ordinal) ? (int?)null : reader.GetInt32(ordinal);
+            }
         }
 
         #endregion

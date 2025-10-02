@@ -62,6 +62,33 @@ public class ServiceRegistrationTests
         Assert.NotNull(viewModel);
     }
 
+    [Fact]
+    public void WpfShellServices_ResolveApiAuditModuleViewModel()
+    {
+        const string connection = "Server=localhost;Database=unit_test;Uid=test;Pwd=test;";
+        var services = new ServiceCollection();
+
+        services.AddYasGmpCoreServices(core =>
+        {
+            core.UseConnectionString(connection);
+            core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
+
+            var svc = core.Services;
+            svc.AddSingleton<AuditService>();
+            svc.AddSingleton<ICflDialogService, StubCflDialogService>();
+            svc.AddSingleton<IShellInteractionService, StubShellInteractionService>();
+            svc.AddSingleton<IModuleNavigationService, StubModuleNavigationService>();
+            svc.AddTransient<ApiAuditModuleViewModel>();
+        });
+
+        using var provider = services.BuildServiceProvider();
+        var descriptor = services.Single(d => d.ServiceType == typeof(AuditService));
+        Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
+
+        var viewModel = provider.GetRequiredService<ApiAuditModuleViewModel>();
+        Assert.NotNull(viewModel);
+    }
+
     private sealed class StubCflDialogService : ICflDialogService
     {
         public Task<CflResult?> ShowAsync(CflRequest request) => Task.FromResult<CflResult?>(null);
