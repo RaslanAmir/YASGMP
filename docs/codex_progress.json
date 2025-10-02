@@ -202,6 +202,7 @@
     "2025-12-14: CountingDatabaseService test double tracks InsertDigitalSignatureAsync usage so Work Orders coverage simulates adapter-driven signature inserts while verifying SIGNATURE_PERSISTED auditing; dotnet CLI access remains unavailable for restore/build/test.",
     "2025-12-23: WPF host now constructs AuditLogDocumentViewModel through DI so AuditService, ExportService, and the DatabaseService-backed AuditLogViewModel reach the toolbar commands while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-24: Added the WPF Audit Log document view mirroring the dashboard resource patterns with toolbar buttons, filter inputs, busy overlay, and status styling so the shell can display audit log records; dotnet restore/build remain blocked because the CLI is unavailable in the container.",
-    "2025-12-26: ModuleRegistry retagged Audit Log, Audit Dashboard, and API Audit modules under \"Quality & Compliance\" to align taxonomy while dotnet CLI access remains blocked."
+    "2025-12-26: ModuleRegistry retagged Audit Log, Audit Dashboard, and API Audit modules under \"Quality & Compliance\" to align taxonomy while dotnet CLI access remains blocked.",
+    "2025-12-27: Updated codex artifacts to explicitly note that Audit Log, Audit Dashboard, and API Audit modules now live under the \"Quality & Compliance\" category so documentation and ModuleRegistry stay synchronized; dotnet CLI availability still required for restore/build/smoke."
   ]
 }
