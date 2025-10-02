@@ -30,7 +30,7 @@
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
   - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
   - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity and resolves through DI with the shared DatabaseService; WPF Audit Log document view mirrors the dashboard patterns with toolbar buttons, filters, busy overlay, and status styling; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration. These audit-focused modules are now grouped under the "Quality & Compliance" category in the ModuleRegistry.)*
-  - Documents/Attachments — [ ] todo
+  - Documents/Attachments — [~] in-progress *(Attachments module now inherits ModuleDocumentViewModel, wires shared shell services, and seeds design-time records while the toolbar workflow is expanded.)*
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
 
@@ -69,6 +69,7 @@
 - 2025-12-27: Documentation updated to highlight that Audit Log, Audit Dashboard, and API Audit modules now reside in the "Quality & Compliance" category so plan artifacts stay aligned with the ModuleRegistry regrouping; dotnet CLI access remains a prerequisite for restore/build/smoke.
 - 2025-12-28: Home ribbon and backstage now surface Quality & Compliance buttons (Audit Trail, Audit Dashboard, API Audit) wired to the shared window commands; dotnet restore/build/run attempts remain blocked because the CLI is still unavailable in the container.
 - 2025-12-29: Promoted shell stub services into shared TestDoubles and added AuditDashboardDocument unit coverage that exercises load/export success and failure flows while dotnet restore/build/smoke remain blocked by the missing CLI.
+- 2025-12-29: Attachments module now rides on ModuleDocumentViewModel with DI-aligned services, design-time records, and attachment workflow guards while dotnet restore/build/smoke remain blocked until the CLI is installed.
 - 2025-12-14: Audit trail module now caches the latest query payload and formatted filters so export commands can reuse them, added async PDF/Excel exports with busy/error guards, and refreshed DI to supply ExportService; dotnet restore/build/smoke still blocked until the CLI is installed.
 - 2025-12-13: Added a counting DatabaseService double plus module/service tests that simulate adapter-driven signature inserts, asserting a single InsertDigitalSignatureAsync call still yields SIGNATURE_PERSISTED auditing while dotnet CLI access remains unavailable.
 - 2025-12-13: ElectronicSignatureDialogService WPF tests now assert insert skips fire when a signature id already exists, confirm audit logging for both persisted and log-only flows, and reiterate that dotnet restore/build remain blocked because the CLI is unavailable in the container.
