@@ -128,6 +128,93 @@ public class AuditModuleViewModelTests
     }
 
     [Fact]
+    public async Task ExportToPdfCommand_Succeeds_UpdatesStatusAndBusyLifecycle()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto
+            {
+                Id = 9,
+                Entity = "systems",
+                EntityId = "12",
+                Action = "EXPORT",
+                Timestamp = DateTime.UtcNow
+            }
+        };
+
+        var busyStates = new List<bool>();
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits)
+        {
+            PdfExportHandler = (entries, description) =>
+            {
+                busyStates.Add(viewModel.IsBusy);
+                Assert.Same(audits, entries);
+                Assert.False(string.IsNullOrWhiteSpace(description));
+                return Task.FromResult("C:/exports/audit.pdf");
+            }
+        };
+
+        await viewModel.RefreshAsync();
+
+        viewModel.HasError = true;
+        viewModel.StatusMessage = "stale";
+
+        Assert.True(viewModel.ExportToPdfCommand.CanExecute(null));
+
+        await viewModel.ExportToPdfCommand.ExecuteAsync(null);
+
+        Assert.NotEmpty(busyStates);
+        Assert.All(busyStates, state => Assert.True(state));
+        Assert.False(viewModel.IsBusy);
+        Assert.False(viewModel.HasError);
+        Assert.Equal("Audit log exported to PDF: C:/exports/audit.pdf", viewModel.StatusMessage);
+        Assert.True(viewModel.ExportToPdfCommand.CanExecute(null));
+        Assert.True(viewModel.ExportToExcelCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task ExportToPdfCommand_WhenExportThrows_SetsErrorAndReenablesCommands()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 10, Entity = "systems", Action = "EXPORT", Timestamp = DateTime.UtcNow }
+        };
+
+        var exception = new InvalidOperationException("export failed");
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits)
+        {
+            PdfExportHandler = (_, _) => throw exception
+        };
+
+        await viewModel.RefreshAsync();
+
+        Assert.True(viewModel.ExportToPdfCommand.CanExecute(null));
+
+        var thrown = await Assert.ThrowsAsync<InvalidOperationException>(() => viewModel.ExportToPdfCommand.ExecuteAsync(null));
+
+        Assert.Same(exception, thrown);
+        Assert.True(viewModel.HasError);
+        Assert.False(viewModel.IsBusy);
+        Assert.Equal("Failed to export audit log to PDF: export failed", viewModel.StatusMessage);
+        Assert.True(viewModel.ExportToPdfCommand.CanExecute(null));
+        Assert.True(viewModel.ExportToExcelCommand.CanExecute(null));
+    }
+
+    [Fact]
     public async Task InitializeAsync_NormalizesDateFiltersBeforeQuery()
     {
         var database = CreateDatabaseService();
@@ -380,6 +467,10 @@ public class AuditModuleViewModelTests
             _entries = entries;
         }
 
+        public Func<IReadOnlyList<AuditEntryDto>, string, Task<string>>? PdfExportHandler { get; set; }
+
+        public Func<IReadOnlyList<AuditEntryDto>, string, Task<string>>? ExcelExportHandler { get; set; }
+
         public string? LastUserFilter { get; private set; }
         public string? LastEntityFilter { get; private set; }
         public string LastActionFilter { get; private set; } = string.Empty;
@@ -400,6 +491,14 @@ public class AuditModuleViewModelTests
             LastToFilter = to;
             return Task.FromResult(_entries);
         }
+
+        protected override Task<string> ExportAuditToPdfAsync(IReadOnlyList<AuditEntryDto> entries, string filterDescription)
+            => PdfExportHandler?.Invoke(entries, filterDescription)
+               ?? Task.FromResult("C:/exports/audit.pdf");
+
+        protected override Task<string> ExportAuditToExcelAsync(IReadOnlyList<AuditEntryDto> entries, string filterDescription)
+            => ExcelExportHandler?.Invoke(entries, filterDescription)
+               ?? Task.FromResult("C:/exports/audit.xlsx");
     }
 
     private sealed class ThrowingAuditModuleViewModel : AuditModuleViewModel

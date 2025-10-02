@@ -29,7 +29,8 @@
       "2025-12-04: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-12-07: dotnet restore/build attempted again for yasgmp.sln; CLI still missing in container so commands exit with 'command not found'.",
       "2025-12-08: dotnet --version/restore/build retried; CLI still missing in container so commands exit with 'command not found'.",
-      "2025-12-13: dotnet restore yasgmp.sln retried; CLI remains unavailable so the command fails with 'command not found'."
+      "2025-12-13: dotnet restore yasgmp.sln retried; CLI remains unavailable so the command fails with 'command not found'.",
+      "2025-12-16: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -91,8 +92,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: surface audit export ui polish",
+  "lastCommitSummary": "test: cover audit export commands",
   "notes": [
+    "2025-12-16: Audit module unit tests now override ExportService calls to exercise PDF export success and failure paths, verifying busy state transitions and status/error messaging while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-15: Audit module WPF view adds Export PDF/Excel buttons that respect IsBusy and introduces a progress overlay so busy/export errors mirror the MAUI experience while the dotnet CLI remains unavailable for restore/build/smoke.",
     "2025-12-14: Audit module now retains the most recent audit query payload plus filter summary for export reuse, added guarded AsyncRelayCommand PDF/Excel exports, and registered ExportService so DI resolves the new constructor; dotnet CLI remains unavailable so restore/build/test stay blocked.",
     "2025-12-07: External Servicer CRUD fake now mirrors other module doubles by capturing saved snapshots with contexts, cloning entities for assertions, and clearing deleted entries; CrudSaveResult coverage confirms metadata still flows from the provided context while dotnet CLI access remains blocked for restore/build/smoke.",
