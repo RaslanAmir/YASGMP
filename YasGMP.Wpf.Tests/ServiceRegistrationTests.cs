@@ -45,6 +45,7 @@ public class ServiceRegistrationTests
 
             var svc = core.Services;
             svc.AddSingleton<AuditService>();
+            svc.AddSingleton<ExportService>();
             svc.AddSingleton<ICflDialogService, StubCflDialogService>();
             svc.AddSingleton<IShellInteractionService, StubShellInteractionService>();
             svc.AddSingleton<IModuleNavigationService, StubModuleNavigationService>();
