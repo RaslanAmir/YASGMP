@@ -155,9 +155,9 @@ namespace YasGMP.Wpf
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
                             registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");
-                            registry.Register<AuditLogDocumentViewModel>(AuditLogDocumentViewModel.ModuleKey, "Audit Trail", "Compliance", "System event history");
-                            registry.Register<AuditDashboardDocumentViewModel>(AuditDashboardDocumentViewModel.ModuleKey, "Audit Dashboard", "Compliance", "Real-time audit feed and exports");
-                            registry.Register<ApiAuditModuleViewModel>(ApiAuditModuleViewModel.ModuleKey, "API Audit Trail", "Compliance", "API key activity history and forensic request payloads");
+                            registry.Register<AuditLogDocumentViewModel>(AuditLogDocumentViewModel.ModuleKey, "Audit Trail", "Quality & Compliance", "System event history");
+                            registry.Register<AuditDashboardDocumentViewModel>(AuditDashboardDocumentViewModel.ModuleKey, "Audit Dashboard", "Quality & Compliance", "Real-time audit feed and exports");
+                            registry.Register<ApiAuditModuleViewModel>(ApiAuditModuleViewModel.ModuleKey, "API Audit Trail", "Quality & Compliance", "API key activity history and forensic request payloads");
                             registry.Register<DiagnosticsModuleViewModel>(DiagnosticsModuleViewModel.ModuleKey, "Diagnostics", "Diagnostics", "Telemetry snapshots and health checks");
                             registry.Register<AttachmentsModuleViewModel>(AttachmentsModuleViewModel.ModuleKey, "Attachments", "Documents", "File attachments and certificates");
                             return registry;

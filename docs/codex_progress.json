@@ -34,7 +34,8 @@
       "2025-12-18: dotnet restore yasgmp.sln retried; CLI still missing in the container so the command fails with 'command not found'.",
       "2025-12-20: dotnet restore/build retried for MAUI + WPF projects; CLI remains unavailable so commands exit with 'command not found'.",
       "2025-12-23: dotnet restore/build retried for yasgmp.sln and YasGMP.Wpf; CLI remains unavailable so commands exit with 'command not found'.",
-      "2025-12-24: dotnet restore yasgmp.sln and dotnet build (YasGMP.Wpf.csproj, yasgmp.csproj net9.0-windows10.0.19041.0) retried; CLI still missing so each command exits with 'command not found'."
+      "2025-12-24: dotnet restore yasgmp.sln and dotnet build (YasGMP.Wpf.csproj, yasgmp.csproj net9.0-windows10.0.19041.0) retried; CLI still missing so each command exits with 'command not found'.",
+      "2025-12-26: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -97,7 +98,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: register audit dashboard dependencies",
+  "lastCommitSummary": "chore: retag compliance modules",
   "notes": [
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-23: WPF host now constructs AuditLogDocumentViewModel via DI so AuditService, ExportService, and the DatabaseService-backed AuditLogViewModel flow into the shell toolbar; dotnet restore/build remain blocked by the missing CLI.",
@@ -200,6 +201,7 @@
     "2025-12-13: ElectronicSignatureDialogService WPF tests now assert log-only persistence skips redundant inserts, validate the audit hook for existing signatures, and confirm the dotnet CLI gap still blocks restore/build/test execution.",
     "2025-12-14: CountingDatabaseService test double tracks InsertDigitalSignatureAsync usage so Work Orders coverage simulates adapter-driven signature inserts while verifying SIGNATURE_PERSISTED auditing; dotnet CLI access remains unavailable for restore/build/test.",
     "2025-12-23: WPF host now constructs AuditLogDocumentViewModel through DI so AuditService, ExportService, and the DatabaseService-backed AuditLogViewModel reach the toolbar commands while dotnet restore/build remain blocked by the missing CLI.",
-    "2025-12-24: Added the WPF Audit Log document view mirroring the dashboard resource patterns with toolbar buttons, filter inputs, busy overlay, and status styling so the shell can display audit log records; dotnet restore/build remain blocked because the CLI is unavailable in the container."
+    "2025-12-24: Added the WPF Audit Log document view mirroring the dashboard resource patterns with toolbar buttons, filter inputs, busy overlay, and status styling so the shell can display audit log records; dotnet restore/build remain blocked because the CLI is unavailable in the container.",
+    "2025-12-26: ModuleRegistry retagged Audit Log, Audit Dashboard, and API Audit modules under \"Quality & Compliance\" to align taxonomy while dotnet CLI access remains blocked."
   ]
 }
