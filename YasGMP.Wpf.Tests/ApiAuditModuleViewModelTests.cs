@@ -96,6 +96,59 @@ public class ApiAuditModuleViewModelTests
     }
 
     [Fact]
+    public async Task RefreshAsync_WhenFromAfterTo_SwapsAndNormalizesRange()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var later = new DateTime(2025, 5, 10);
+        var earlier = new DateTime(2025, 5, 1);
+
+        var viewModel = new TestApiAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<ApiAuditEntryDto>());
+        viewModel.FilterFrom = later;
+        viewModel.FilterTo = earlier;
+
+        await viewModel.RefreshAsync();
+
+        Assert.Equal(earlier, viewModel.FilterFrom!.Value);
+        Assert.Equal(later, viewModel.FilterTo!.Value);
+        Assert.Equal(earlier, viewModel.LastFromFilter);
+        Assert.Equal(later.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.False(viewModel.HasError);
+        Assert.False(viewModel.HasResults);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_WhenFiltersNull_DefaultsToTodayRange()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestApiAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<ApiAuditEntryDto>());
+        viewModel.FilterFrom = null;
+        viewModel.FilterTo = null;
+
+        await viewModel.RefreshAsync();
+
+        var today = DateTime.Today;
+        var expectedFrom = today.AddDays(-30);
+        var expectedTo = today;
+
+        Assert.Equal(expectedFrom, viewModel.FilterFrom!.Value);
+        Assert.Equal(expectedTo, viewModel.FilterTo!.Value);
+        Assert.Equal(expectedFrom, viewModel.LastFromFilter);
+        Assert.Equal(expectedTo.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+        Assert.False(viewModel.HasError);
+        Assert.False(viewModel.HasResults);
+    }
+
+    [Fact]
     public async Task RefreshAsync_WhenQueryThrows_LoadsDesignTimeRecordsAndFlagsError()
     {
         var database = CreateDatabaseService();
