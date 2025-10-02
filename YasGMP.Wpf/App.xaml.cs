@@ -123,7 +123,13 @@ namespace YasGMP.Wpf
                         svc.AddTransient<SecurityModuleViewModel>();
                         svc.AddTransient<AdminModuleViewModel>();
                         svc.AddTransient<AuditModuleViewModel>();
-                        svc.AddTransient<AuditLogDocumentViewModel>();
+                        svc.AddTransient<AuditLogDocumentViewModel>(sp => new AuditLogDocumentViewModel(
+                            sp.GetRequiredService<AuditService>(),
+                            sp.GetRequiredService<ExportService>(),
+                            sp.GetRequiredService<AuditLogViewModel>(),
+                            sp.GetRequiredService<ICflDialogService>(),
+                            sp.GetRequiredService<IShellInteractionService>(),
+                            sp.GetRequiredService<IModuleNavigationService>()));
                         svc.AddTransient<AuditDashboardDocumentViewModel>();
                         svc.AddTransient<ApiAuditModuleViewModel>();
                         svc.AddTransient<DiagnosticsModuleViewModel>();
