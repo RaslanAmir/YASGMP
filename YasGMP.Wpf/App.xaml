@@ -57,6 +57,9 @@
         <DataTemplate DataType="{x:Type vm:AuditDashboardDocumentViewModel}">
             <views:AuditDashboardDocument />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AuditLogDocumentViewModel}">
+            <views:AuditLogDocument />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ApiAuditModuleViewModel}">
             <views:ApiAuditModuleView />
         </DataTemplate>
