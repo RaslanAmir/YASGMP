@@ -33,6 +33,7 @@ public sealed class DebugSmokeTestService
         ExternalServicersModuleViewModel.ModuleKey,
         WorkOrdersModuleViewModel.ModuleKey,
         AuditModuleViewModel.ModuleKey,
+        ApiAuditModuleViewModel.ModuleKey,
         ValidationsModuleViewModel.ModuleKey
     };
 

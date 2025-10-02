@@ -29,7 +29,7 @@
   - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling, attachment workflow, and enforced signature capture; audit surfacing tracked under Batch B2)*
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
   - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
-  - Audit/API Audit — [~] in-progress *(WPF audit trail now pulls filtered entries via AuditService with expanded inspector grid, filters, and explicit empty/error status flags.)*
+  - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration.)*
   - Documents/Attachments — [ ] todo
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
@@ -53,6 +53,7 @@
 - 2025-12-12: TestElectronicSignatureDialogService now records log-only signature payloads without mutating identifiers, and SignaturePersistenceHelper tests assert the log path replays persisted metadata while dotnet CLI access remains blocked for restore/build/test.
 - 2025-12-15: Audit trail WPF view now surfaces Export PDF/Excel toolbar buttons tied to the async commands, shows a busy overlay aligned with IsBusy, and keeps the status text/error styling wired so export failures bubble immediately; dotnet restore/build/smoke remain blocked without the CLI.
 - 2025-12-16: Audit trail unit tests now stub ExportService to exercise PDF export success/failure flows, asserting busy flag lifecycles and status messaging while dotnet restore/build/smoke remain blocked by the missing CLI.
+- 2025-12-17: API audit module added to the WPF shell with masked inspector payloads, dynamic action filters, module registration, smoke coverage updates, and unit tests alongside a new AuditService.GetApiAuditEntriesAsync helper; dotnet restore/build/test still blocked because the CLI is unavailable in the container.
 - 2025-12-14: Audit trail module now caches the latest query payload and formatted filters so export commands can reuse them, added async PDF/Excel exports with busy/error guards, and refreshed DI to supply ExportService; dotnet restore/build/smoke still blocked until the CLI is installed.
 - 2025-12-13: Added a counting DatabaseService double plus module/service tests that simulate adapter-driven signature inserts, asserting a single InsertDigitalSignatureAsync call still yields SIGNATURE_PERSISTED auditing while dotnet CLI access remains unavailable.
 - 2025-12-13: ElectronicSignatureDialogService WPF tests now assert insert skips fire when a signature id already exists, confirm audit logging for both persisted and log-only flows, and reiterate that dotnet restore/build remain blocked because the CLI is unavailable in the container.

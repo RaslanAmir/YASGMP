@@ -86,15 +86,16 @@
     "Suppliers": "done",
     "ExternalServicers": "done",
     "Audit": "in-progress",
-    "ApiAudit": "pending",
+    "ApiAudit": "in-progress",
     "Attachments": "pending",
     "Dashboard": "pending",
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "test: cover audit export commands",
+  "lastCommitSummary": "feat: add API audit module to WPF shell",
   "notes": [
     "2025-12-16: Audit module unit tests now override ExportService calls to exercise PDF export success and failure paths, verifying busy state transitions and status/error messaging while dotnet restore/build remain blocked by the missing CLI.",
+    "2025-12-17: API audit module added to the WPF shell with masked inspector payloads, new AuditService.GetApiAuditEntriesAsync helper, module registry/smoke updates, and dedicated unit coverage; dotnet restore/build/test still fail because the CLI is unavailable.",
     "2025-12-15: Audit module WPF view adds Export PDF/Excel buttons that respect IsBusy and introduces a progress overlay so busy/export errors mirror the MAUI experience while the dotnet CLI remains unavailable for restore/build/smoke.",
     "2025-12-14: Audit module now retains the most recent audit query payload plus filter summary for export reuse, added guarded AsyncRelayCommand PDF/Excel exports, and registered ExportService so DI resolves the new constructor; dotnet CLI remains unavailable so restore/build/test stay blocked.",
     "2025-12-07: External Servicer CRUD fake now mirrors other module doubles by capturing saved snapshots with contexts, cloning entities for assertions, and clearing deleted entries; CrudSaveResult coverage confirms metadata still flows from the provided context while dotnet CLI access remains blocked for restore/build/smoke.",
