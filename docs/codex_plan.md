@@ -29,7 +29,7 @@
   - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling, attachment workflow, and enforced signature capture; audit surfacing tracked under Batch B2)*
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
   - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
-  - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration.)*
+  - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration.)*
   - Documents/Attachments — [ ] todo
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
@@ -57,6 +57,7 @@
 - 2025-12-18: Audit module tests now cover Excel export success/failure paths using the TestAuditModuleViewModel overrides to stub ExportService handlers; attempted dotnet restore continues to fail with `command not found` because the CLI is unavailable in the container.
 - 2025-12-19: API audit module unit tests now assert reversed/null date filters normalize to swapped day bounds and end-of-day query ranges via TestApiAuditModuleViewModel captures; dotnet restore/build remain blocked because the CLI is unavailable in the container.
 - 2025-12-20: Added WPF Audit Dashboard document that reuses the MAUI dashboard filters/exports, wired toolbar commands to the shared AsyncRelayCommand logic, and registered the module so compliance users can open the live feed; dotnet restore/build attempts still fail with "command not found" because the CLI is missing in the container.
+- 2025-12-21: Introduced AuditLogDocumentViewModel to project the MAUI AuditLogViewModel into the WPF shell with synchronized records, inspector payloads, and export commands; module registry now opens the new document while dotnet CLI access remains blocked.
 - 2025-12-14: Audit trail module now caches the latest query payload and formatted filters so export commands can reuse them, added async PDF/Excel exports with busy/error guards, and refreshed DI to supply ExportService; dotnet restore/build/smoke still blocked until the CLI is installed.
 - 2025-12-13: Added a counting DatabaseService double plus module/service tests that simulate adapter-driven signature inserts, asserting a single InsertDigitalSignatureAsync call still yields SIGNATURE_PERSISTED auditing while dotnet CLI access remains unavailable.
 - 2025-12-13: ElectronicSignatureDialogService WPF tests now assert insert skips fire when a signature id already exists, confirm audit logging for both persisted and log-only flows, and reiterate that dotnet restore/build remain blocked because the CLI is unavailable in the container.

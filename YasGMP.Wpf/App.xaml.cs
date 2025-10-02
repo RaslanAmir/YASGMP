@@ -101,6 +101,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<DebugSmokeTestService>();
                         svc.AddTransient<DigitalSignatureViewModel>();
                         svc.AddTransient<ElectronicSignatureDialogViewModel>();
+                        svc.AddTransient<AuditLogViewModel>();
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>();
                         svc.AddTransient<ComponentsModuleViewModel>();
@@ -118,6 +119,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<SecurityModuleViewModel>();
                         svc.AddTransient<AdminModuleViewModel>();
                         svc.AddTransient<AuditModuleViewModel>();
+                        svc.AddTransient<AuditLogDocumentViewModel>();
                         svc.AddTransient<AuditDashboardDocumentViewModel>();
                         svc.AddTransient<ApiAuditModuleViewModel>();
                         svc.AddTransient<DiagnosticsModuleViewModel>();
@@ -142,7 +144,7 @@ namespace YasGMP.Wpf
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
                             registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");
-                            registry.Register<AuditModuleViewModel>(AuditModuleViewModel.ModuleKey, "Audit Trail", "Compliance", "System event history");
+                            registry.Register<AuditLogDocumentViewModel>(AuditLogDocumentViewModel.ModuleKey, "Audit Trail", "Compliance", "System event history");
                             registry.Register<AuditDashboardDocumentViewModel>(AuditDashboardDocumentViewModel.ModuleKey, "Audit Dashboard", "Compliance", "Real-time audit feed and exports");
                             registry.Register<ApiAuditModuleViewModel>(ApiAuditModuleViewModel.ModuleKey, "API Audit Trail", "Compliance", "API key activity history and forensic request payloads");
                             registry.Register<DiagnosticsModuleViewModel>(DiagnosticsModuleViewModel.ModuleKey, "Diagnostics", "Diagnostics", "Telemetry snapshots and health checks");

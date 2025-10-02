@@ -95,8 +95,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: add audit dashboard document to WPF shell",
+  "lastCommitSummary": "feat: bridge WPF audit log to MAUI view-model",
   "notes": [
+    "2025-12-21: Audit log document now wraps the MAUI AuditLogViewModel with synchronized records, exports, and status propagation while the module registry targets the new adapter; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-16: Audit module unit tests now override ExportService calls to exercise PDF export success and failure paths, verifying busy state transitions and status/error messaging while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-20: WPF shell now exposes an Audit Dashboard document that reuses the MAUI dashboard filters/exports, updates inspector records when SignalR pushes arrive, and adds module registry wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-17: API audit module added to the WPF shell with masked inspector payloads, new AuditService.GetApiAuditEntriesAsync helper, module registry/smoke updates, and dedicated unit coverage; dotnet restore/build/test still fail because the CLI is unavailable.",
