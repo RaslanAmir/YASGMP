@@ -31,7 +31,8 @@
       "2025-12-08: dotnet --version/restore/build retried; CLI still missing in container so commands exit with 'command not found'.",
       "2025-12-13: dotnet restore yasgmp.sln retried; CLI remains unavailable so the command fails with 'command not found'.",
       "2025-12-16: dotnet restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
-      "2025-12-18: dotnet restore yasgmp.sln retried; CLI still missing in the container so the command fails with 'command not found'."
+      "2025-12-18: dotnet restore yasgmp.sln retried; CLI still missing in the container so the command fails with 'command not found'.",
+      "2025-12-20: dotnet restore/build retried for MAUI + WPF projects; CLI remains unavailable so commands exit with 'command not found'."
     ]
   },
   "batches": [
@@ -88,14 +89,16 @@
     "ExternalServicers": "done",
     "Audit": "in-progress",
     "ApiAudit": "in-progress",
+    "AuditDashboard": "in-progress",
     "Attachments": "pending",
     "Dashboard": "pending",
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: add API audit module to WPF shell",
+  "lastCommitSummary": "feat: add audit dashboard document to WPF shell",
   "notes": [
     "2025-12-16: Audit module unit tests now override ExportService calls to exercise PDF export success and failure paths, verifying busy state transitions and status/error messaging while dotnet restore/build remain blocked by the missing CLI.",
+    "2025-12-20: WPF shell now exposes an Audit Dashboard document that reuses the MAUI dashboard filters/exports, updates inspector records when SignalR pushes arrive, and adds module registry wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-17: API audit module added to the WPF shell with masked inspector payloads, new AuditService.GetApiAuditEntriesAsync helper, module registry/smoke updates, and dedicated unit coverage; dotnet restore/build/test still fail because the CLI is unavailable.",
     "2025-12-19: API audit module tests now assert reversed/null date filters normalize to swapped ranges and end-of-day query bounds via TestApiAuditModuleViewModel captures; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-18: Audit module Excel export tests now cover success and exception flows via TestAuditModuleViewModel overrides, asserting status messaging, busy lifecycle, and command availability without invoking real exports; dotnet restore continues to fail with 'command not found'.",
