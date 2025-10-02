@@ -215,6 +215,93 @@ public class AuditModuleViewModelTests
     }
 
     [Fact]
+    public async Task ExportToExcelCommand_Succeeds_UpdatesStatusAndBusyLifecycle()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto
+            {
+                Id = 15,
+                Entity = "systems",
+                EntityId = "55",
+                Action = "EXPORT",
+                Timestamp = DateTime.UtcNow
+            }
+        };
+
+        var busyStates = new List<bool>();
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits)
+        {
+            ExcelExportHandler = (entries, description) =>
+            {
+                busyStates.Add(viewModel.IsBusy);
+                Assert.Same(audits, entries);
+                Assert.False(string.IsNullOrWhiteSpace(description));
+                return Task.FromResult("C:/exports/audit.xlsx");
+            }
+        };
+
+        await viewModel.RefreshAsync();
+
+        viewModel.HasError = true;
+        viewModel.StatusMessage = "stale";
+
+        Assert.True(viewModel.ExportToExcelCommand.CanExecute(null));
+
+        await viewModel.ExportToExcelCommand.ExecuteAsync(null);
+
+        Assert.NotEmpty(busyStates);
+        Assert.All(busyStates, state => Assert.True(state));
+        Assert.False(viewModel.IsBusy);
+        Assert.False(viewModel.HasError);
+        Assert.Equal("Audit log exported to Excel: C:/exports/audit.xlsx", viewModel.StatusMessage);
+        Assert.True(viewModel.ExportToPdfCommand.CanExecute(null));
+        Assert.True(viewModel.ExportToExcelCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task ExportToExcelCommand_WhenExportThrows_SetsErrorAndReenablesCommands()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 16, Entity = "systems", Action = "EXPORT", Timestamp = DateTime.UtcNow }
+        };
+
+        var exception = new InvalidOperationException("excel export failed");
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits)
+        {
+            ExcelExportHandler = (_, _) => throw exception
+        };
+
+        await viewModel.RefreshAsync();
+
+        Assert.True(viewModel.ExportToExcelCommand.CanExecute(null));
+
+        var thrown = await Assert.ThrowsAsync<InvalidOperationException>(() => viewModel.ExportToExcelCommand.ExecuteAsync(null));
+
+        Assert.Same(exception, thrown);
+        Assert.True(viewModel.HasError);
+        Assert.False(viewModel.IsBusy);
+        Assert.Equal("Failed to export audit log to Excel: excel export failed", viewModel.StatusMessage);
+        Assert.True(viewModel.ExportToPdfCommand.CanExecute(null));
+        Assert.True(viewModel.ExportToExcelCommand.CanExecute(null));
+    }
+
+    [Fact]
     public async Task InitializeAsync_NormalizesDateFiltersBeforeQuery()
     {
         var database = CreateDatabaseService();
