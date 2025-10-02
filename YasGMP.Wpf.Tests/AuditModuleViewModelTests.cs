@@ -20,6 +20,7 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
         var sampleTimestamp = new DateTime(2025, 1, 15, 8, 30, 0, DateTimeKind.Utc);
         var audits = new[]
@@ -42,7 +43,7 @@ public class AuditModuleViewModelTests
             }
         };
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
         viewModel.FilterUser = "qa";
         viewModel.FilterEntity = "work_orders";
         viewModel.SelectedAction = "UPDATE";
@@ -83,8 +84,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
 
         viewModel.StatusMessage = "Placeholder";
 
@@ -105,6 +107,7 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
         var audits = new[]
         {
@@ -112,7 +115,7 @@ public class AuditModuleViewModelTests
             new AuditEntryDto { Id = 2, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
         };
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
 
         viewModel.StatusMessage = "Placeholder";
 
@@ -132,6 +135,7 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
         var audits = new[]
         {
@@ -145,7 +149,7 @@ public class AuditModuleViewModelTests
             }
         };
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, audits);
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
         viewModel.FilterFrom = new DateTime(2025, 3, 10, 14, 30, 0);
         viewModel.FilterTo = new DateTime(2025, 3, 15);
 
@@ -163,8 +167,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
         viewModel.FilterFrom = new DateTime(2025, 4, 5, 13, 45, 0);
         viewModel.FilterTo = new DateTime(2025, 4, 7);
 
@@ -182,8 +187,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
         viewModel.FilterFrom = new DateTime(2025, 6, 15, 10, 30, 0);
         viewModel.FilterTo = new DateTime(2025, 6, 17);
 
@@ -201,8 +207,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
         var later = new DateTime(2025, 5, 10, 10, 30, 0);
         var earlier = new DateTime(2025, 5, 1);
         viewModel.FilterFrom = later;
@@ -228,8 +235,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
         var later = new DateTime(2025, 8, 10, 8, 30, 0);
         var earlier = new DateTime(2025, 8, 5);
         viewModel.FilterFrom = later;
@@ -261,8 +269,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
 
         var originalFrom = viewModel.FilterFrom!.Value.Date;
         var earlierUpperBound = originalFrom.AddDays(-5);
@@ -285,8 +294,9 @@ public class AuditModuleViewModelTests
         var cfl = new StubCflDialogService();
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
         viewModel.FilterFrom = new DateTime(2025, 5, 1, 9, 30, 0);
         viewModel.FilterTo = null;
 
@@ -306,7 +316,7 @@ public class AuditModuleViewModelTests
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
 
-        var viewModel = new TestAuditModuleViewModel(database, auditService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, Array.Empty<AuditEntryDto>());
         viewModel.FilterFrom = new DateTime(2025, 7, 1, 15, 30, 0);
         viewModel.FilterTo = DateTime.SpecifyKind(new DateTime(2025, 7, 5), DateTimeKind.Unspecified);
 
@@ -327,9 +337,12 @@ public class AuditModuleViewModelTests
         var shell = new StubShellInteractionService();
         var navigation = new StubModuleNavigationService();
 
+        var exportService = CreateExportService(database, auditService);
+
         var viewModel = new ThrowingAuditModuleViewModel(
             database,
             auditService,
+            exportService,
             cfl,
             shell,
             navigation,
@@ -347,6 +360,9 @@ public class AuditModuleViewModelTests
     private static DatabaseService CreateDatabaseService()
         => new("Server=localhost;Database=unit_test;Uid=test;Pwd=test;");
 
+    private static ExportService CreateExportService(DatabaseService databaseService, AuditService auditService)
+        => new(databaseService, auditService);
+
     private sealed class TestAuditModuleViewModel : AuditModuleViewModel
     {
         private readonly IReadOnlyList<AuditEntryDto> _entries;
@@ -354,11 +370,12 @@ public class AuditModuleViewModelTests
         public TestAuditModuleViewModel(
             DatabaseService databaseService,
             AuditService auditService,
+            ExportService exportService,
             ICflDialogService cflDialogService,
             IShellInteractionService shellInteraction,
             IModuleNavigationService navigation,
             IReadOnlyList<AuditEntryDto> entries)
-            : base(databaseService, auditService, cflDialogService, shellInteraction, navigation)
+            : base(databaseService, auditService, exportService, cflDialogService, shellInteraction, navigation)
         {
             _entries = entries;
         }
@@ -392,11 +409,12 @@ public class AuditModuleViewModelTests
         public ThrowingAuditModuleViewModel(
             DatabaseService databaseService,
             AuditService auditService,
+            ExportService exportService,
             ICflDialogService cflDialogService,
             IShellInteractionService shellInteraction,
             IModuleNavigationService navigation,
             Exception exception)
-            : base(databaseService, auditService, cflDialogService, shellInteraction, navigation)
+            : base(databaseService, auditService, exportService, cflDialogService, shellInteraction, navigation)
         {
             _exception = exception;
         }

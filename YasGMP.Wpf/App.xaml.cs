@@ -46,6 +46,7 @@ namespace YasGMP.Wpf
 
                         var svc = core.Services;
                         svc.AddSingleton<AuditService>();
+                        svc.AddSingleton<ExportService>();
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<WpfAuthContext>();

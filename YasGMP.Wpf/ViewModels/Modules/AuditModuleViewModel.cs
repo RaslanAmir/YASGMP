@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
@@ -17,17 +18,26 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     public AuditModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
+        ExportService exportService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
         : base(ModuleKey, "Audit Trail", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+        _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+
+        _exportToPdfCommand = new AsyncRelayCommand(ExportToPdfAsync, CanExecuteExport);
+        _exportToExcelCommand = new AsyncRelayCommand(ExportToExcelAsync, CanExecuteExport);
 
         FilterFrom = DateTime.Today.AddDays(-30);
         FilterTo = DateTime.Today;
         SelectedAction = ActionOptions[0];
     }
+
+    public IAsyncRelayCommand ExportToPdfCommand => _exportToPdfCommand;
+
+    public IAsyncRelayCommand ExportToExcelCommand => _exportToExcelCommand;
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -49,7 +59,16 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
                 normalizedRange.QueryFrom,
                 normalizedRange.QueryTo).ConfigureAwait(false);
 
-            var records = audits?.Select(MapToRecord).ToList() ?? new List<ModuleRecord>();
+            var auditEntries = audits?.ToList() ?? new List<AuditEntryDto>();
+            _lastAuditEntries = auditEntries;
+            _lastFilterDescription = FormatFilterDescription(
+                FilterUser,
+                FilterEntity,
+                SelectedAction,
+                normalizedRange.FilterFrom,
+                normalizedRange.FilterTo);
+
+            var records = auditEntries.Select(MapToRecord).ToList();
             HasResults = records.Count > 0;
             HasError = false;
 
@@ -59,6 +78,8 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         {
             HasResults = false;
             HasError = true;
+            _lastAuditEntries = null;
+            _lastFilterDescription = null;
             throw;
         }
     }
@@ -132,6 +153,11 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     private bool _hasError;
 
     private readonly AuditService _auditService;
+    private readonly ExportService _exportService;
+    private readonly AsyncRelayCommand _exportToPdfCommand;
+    private readonly AsyncRelayCommand _exportToExcelCommand;
+    private IReadOnlyList<AuditEntryDto>? _lastAuditEntries;
+    private string? _lastFilterDescription;
 
     protected virtual async Task<IReadOnlyList<AuditEntryDto>> QueryAuditsAsync(
         string user,
@@ -140,6 +166,12 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         DateTime from,
         DateTime to)
         => await _auditService.GetFilteredAudits(user, entity, action, from, to).ConfigureAwait(false);
+
+    protected virtual Task<string> ExportAuditToPdfAsync(IReadOnlyList<AuditEntryDto> entries, string filterDescription)
+        => _exportService.ExportAuditToPdf(entries, filterDescription);
+
+    protected virtual Task<string> ExportAuditToExcelAsync(IReadOnlyList<AuditEntryDto> entries, string filterDescription)
+        => _exportService.ExportAuditToExcel(entries, filterDescription);
 
     private static (DateTime QueryFrom, DateTime QueryTo, DateTime FilterFrom, DateTime FilterTo) NormalizeDateRange(DateTime? from, DateTime? to)
     {
@@ -162,6 +194,10 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         => base.MatchesSearch(record, searchText)
            || record.InspectorFields.Any(field =>
                field.Value?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
+
+    partial void OnHasResultsChanged(bool value) => UpdateExportCommandStates();
+
+    partial void OnIsBusyChanged(bool value) => UpdateExportCommandStates();
 
     private ModuleRecord MapToRecord(AuditEntryDto entry)
     {
@@ -222,4 +258,73 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             1 => "Loaded 1 audit entry.",
             _ => $"Loaded {count} audit entries."
         };
+
+    private bool CanExecuteExport() => HasResults && !IsBusy;
+
+    private async Task ExportToPdfAsync()
+        => await ExecuteExportAsync(ExportAuditToPdfAsync, "PDF").ConfigureAwait(false);
+
+    private async Task ExportToExcelAsync()
+        => await ExecuteExportAsync(ExportAuditToExcelAsync, "Excel").ConfigureAwait(false);
+
+    private async Task ExecuteExportAsync(
+        Func<IReadOnlyList<AuditEntryDto>, string, Task<string>> exportOperation,
+        string formatLabel)
+    {
+        if (exportOperation is null)
+        {
+            throw new ArgumentNullException(nameof(exportOperation));
+        }
+
+        if (_lastAuditEntries is null || _lastAuditEntries.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            HasError = false;
+
+            var path = await exportOperation(_lastAuditEntries, _lastFilterDescription ?? string.Empty)
+                .ConfigureAwait(false);
+
+            StatusMessage = $"Audit log exported to {formatLabel}: {path}";
+        }
+        catch (Exception ex)
+        {
+            HasError = true;
+            StatusMessage = $"Failed to export audit log to {formatLabel}: {ex.Message}";
+            throw;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void UpdateExportCommandStates()
+    {
+        _exportToPdfCommand.NotifyCanExecuteChanged();
+        _exportToExcelCommand.NotifyCanExecuteChanged();
+    }
+
+    private static string FormatFilterDescription(
+        string? user,
+        string? entity,
+        string? action,
+        DateTime filterFrom,
+        DateTime filterTo)
+    {
+        var userText = string.IsNullOrWhiteSpace(user) ? "All Users" : user.Trim();
+        var entityText = string.IsNullOrWhiteSpace(entity) ? "All Entities" : entity.Trim();
+        var actionText = string.IsNullOrWhiteSpace(action) || string.Equals(action, "All", StringComparison.OrdinalIgnoreCase)
+            ? "All Actions"
+            : action.Trim();
+
+        var fromText = filterFrom.ToString("d", CultureInfo.CurrentCulture);
+        var toText = filterTo.ToString("d", CultureInfo.CurrentCulture);
+
+        return $"User: {userText}; Entity: {entityText}; Action: {actionText}; Range: {fromText} – {toText}";
+    }
 }
