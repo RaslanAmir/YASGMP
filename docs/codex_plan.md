@@ -33,6 +33,7 @@
   - Documents/Attachments — [~] in-progress *(Attachments module now inherits ModuleDocumentViewModel, wires shared shell services, seeds design-time records, tracks AttachmentRows/StagedUploads/SelectedAttachment observables to drive the inspector payload, and now surfaces upload/download/delete toolbar commands with SHA-256 deduplication, streaming downloads, and status updates.)*
     - 2026-01-05: Attachments view now splits the layout into a records grid and inspector/editor pane that surfaces SelectedAttachment metadata alongside staged upload previews.
     - 2026-01-06: Editor pane now exposes HasAttachmentWorkflow-gated upload, download, and delete buttons bound to SelectedAttachment so commands hide when the attachment service is unavailable.
+    - 2026-01-07: Attachments editor now shows a busy overlay tied to IsBusy, lists validation messages inline, and styles the status text to highlight validation errors while dotnet restore/build remain blocked by the missing CLI.
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
 
