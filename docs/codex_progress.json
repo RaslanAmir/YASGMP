@@ -100,9 +100,10 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "chore: retag compliance modules",
+  "lastCommitSummary": "fix: register attachments module factory",
   "notes": [
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
+    "2026-01-04: WPF host now resolves AttachmentsModuleViewModel via an explicit service provider factory so DatabaseService, attachment workflow, file picker, signature dialog, audit, CFL, shell interaction, and navigation services align with the current constructor order; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-23: WPF host now constructs AuditLogDocumentViewModel via DI so AuditService, ExportService, and the DatabaseService-backed AuditLogViewModel flow into the shell toolbar; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-25: Added DI registration for AuditDashboardViewModel so the WPF audit dashboard/log documents resolve consistently alongside ModuleRegistry/DataTemplate wiring; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-22: AuditLogViewModel now resolves through a DI factory so the shared DatabaseService reaches the WPF audit adapter when modules open; module registry mapping stays on the new document while dotnet restore/build remain blocked by the missing CLI.",
