@@ -61,6 +61,16 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
     private readonly AuditService _auditService;
     private readonly ObservableCollection<string> _actionOptions;
 
+    partial void OnFilterApiKeyChanged(string? value) => TriggerRefreshForFilterChange();
+
+    partial void OnFilterUserChanged(string? value) => TriggerRefreshForFilterChange();
+
+    partial void OnSelectedActionChanged(string? value) => TriggerRefreshForFilterChange();
+
+    partial void OnFilterFromChanged(DateTime? value) => TriggerRefreshForFilterChange();
+
+    partial void OnFilterToChanged(DateTime? value) => TriggerRefreshForFilterChange();
+
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var normalized = NormalizeDateRange(FilterFrom, FilterTo);
@@ -261,5 +271,18 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         }
 
         return value.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
+    }
+
+    private void TriggerRefreshForFilterChange()
+    {
+        if (!IsInitialized || IsBusy)
+        {
+            return;
+        }
+
+        HasError = false;
+        HasResults = false;
+        StatusMessage = $"Loading {Title} records...";
+        _ = RefreshCommand.ExecuteAsync(null);
     }
 }
