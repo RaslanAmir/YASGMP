@@ -84,9 +84,19 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var attachments = await _databaseService.GetAttachmentsFilteredAsync(null, null, null).ConfigureAwait(false);
-        var rows = attachments.Select(attachment => new AttachmentRowViewModel(attachment)).ToList();
+
+        var rows = new List<AttachmentRowViewModel>();
+        var records = new List<ModuleRecord>();
+
+        foreach (var attachment in attachments)
+        {
+            rows.Add(new AttachmentRowViewModel(attachment));
+            records.Add(ToRecord(attachment));
+        }
+
         ApplyAttachmentRows(rows);
-        return attachments.Select(ToRecord).ToList();
+
+        return records;
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
@@ -143,24 +153,34 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             _ => null
         };
 
-        var fields = new List<InspectorField>
-        {
-            new("Table", attachment.EntityType ?? "-"),
-            new("Record", attachment.EntityId?.ToString(CultureInfo.InvariantCulture) ?? "-"),
-            new("File Type", attachment.FileType ?? "-"),
-            new("Created", attachment.UploadedAt.ToString("g", CultureInfo.CurrentCulture)),
-            new("Status", attachment.Status ?? "-"),
-        };
-
         return new ModuleRecord(
             attachment.Id.ToString(CultureInfo.InvariantCulture),
             string.IsNullOrWhiteSpace(attachment.Name) ? attachment.FileName : attachment.Name,
             attachment.FileName,
             attachment.Status,
             attachment.Notes ?? attachment.Note,
-            fields,
+            CreateRecordInspectorFields(attachment),
             moduleKey,
             attachment.EntityId);
+    }
+
+    private static IReadOnlyList<InspectorField> CreateRecordInspectorFields(Attachment attachment)
+    {
+        var entity = string.IsNullOrWhiteSpace(attachment.EntityType)
+            ? "-"
+            : attachment.EntityType;
+
+        var linkedRecordId = attachment.EntityId?.ToString(CultureInfo.InvariantCulture) ?? "-";
+        var sha256 = string.IsNullOrWhiteSpace(attachment.Sha256) ? "-" : attachment.Sha256;
+        var status = string.IsNullOrWhiteSpace(attachment.Status) ? "-" : attachment.Status;
+
+        return new List<InspectorField>
+        {
+            new("Entity/Table", entity),
+            new("Linked Record Id", linkedRecordId),
+            new("SHA-256", sha256),
+            new("Status", status)
+        };
     }
 
     protected override Task OnRecordSelectedAsync(ModuleRecord? record)
