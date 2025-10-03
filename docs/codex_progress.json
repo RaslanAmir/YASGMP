@@ -230,6 +230,7 @@
     "2026-01-10: Debug smoke harness now stages an attachment upload, completes the signature-gated save, streams the file back via AttachmentService, and deletes the record while cleaning temp artifacts so attachments are included in the automation log; dotnet CLI remains unavailable so restore/build/smoke continue to be blocked.",
     "2026-01-11: Audit trail filters now trigger an auto-refresh when modified so the grid reloads immediately; dotnet CLI remains unavailable so restore/build/smoke stay blocked pending installation.",
     "2026-01-12: AuditModuleViewModel test double now surfaces refresh invocation counts and snapshots so unit tests cover filter-change auto refresh behavior and state resets; dotnet restore/build retries still fail with 'command not found' because the CLI is missing in the container.",
-    "2026-01-13: ApiAuditModuleViewModel now wires observable filter setters to a guarded refresh helper that clears status/error flags and triggers RefreshCommand, matching the Audit module's UX while dotnet restore remains blocked by the missing CLI."
+    "2026-01-13: ApiAuditModuleViewModel now wires observable filter setters to a guarded refresh helper that clears status/error flags and triggers RefreshCommand, matching the Audit module's UX while dotnet restore remains blocked by the missing CLI.",
+    "2026-01-14: API audit module unit tests now expose an awaitable refresh signal and invocation snapshots, covering each filter setter's auto-refresh path while dotnet restore/build remain blocked by the missing CLI."
   ]
 }

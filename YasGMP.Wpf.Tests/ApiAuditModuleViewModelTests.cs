@@ -74,6 +74,171 @@ public class ApiAuditModuleViewModelTests
     }
 
     [Fact]
+    public async Task FilterApiKey_WhenChanged_TriggersAutoRefresh()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestApiAuditModuleViewModel(
+            database,
+            auditService,
+            cfl,
+            shell,
+            navigation,
+            Array.Empty<ApiAuditEntryDto>());
+
+        await viewModel.InitializeAsync(null);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.FilterApiKey = "INT-002";
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading API Audit Trail records...", snapshot.StatusMessage);
+    }
+
+    [Fact]
+    public async Task FilterUser_WhenChanged_TriggersAutoRefresh()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestApiAuditModuleViewModel(
+            database,
+            auditService,
+            cfl,
+            shell,
+            navigation,
+            Array.Empty<ApiAuditEntryDto>());
+
+        await viewModel.InitializeAsync(null);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.FilterUser = "integration.bot";
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading API Audit Trail records...", snapshot.StatusMessage);
+    }
+
+    [Fact]
+    public async Task SelectedAction_WhenChanged_TriggersAutoRefresh()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestApiAuditModuleViewModel(
+            database,
+            auditService,
+            cfl,
+            shell,
+            navigation,
+            Array.Empty<ApiAuditEntryDto>());
+
+        await viewModel.InitializeAsync(null);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.SelectedAction = "POST /api/v1/assets";
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading API Audit Trail records...", snapshot.StatusMessage);
+    }
+
+    [Fact]
+    public async Task FilterFrom_WhenChanged_TriggersAutoRefresh()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestApiAuditModuleViewModel(
+            database,
+            auditService,
+            cfl,
+            shell,
+            navigation,
+            Array.Empty<ApiAuditEntryDto>());
+
+        await viewModel.InitializeAsync(null);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.FilterFrom = DateTime.Today.AddDays(-14);
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading API Audit Trail records...", snapshot.StatusMessage);
+    }
+
+    [Fact]
+    public async Task FilterTo_WhenChanged_TriggersAutoRefresh()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new TestApiAuditModuleViewModel(
+            database,
+            auditService,
+            cfl,
+            shell,
+            navigation,
+            Array.Empty<ApiAuditEntryDto>());
+
+        await viewModel.InitializeAsync(null);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.FilterTo = DateTime.Today.AddDays(-1);
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading API Audit Trail records...", snapshot.StatusMessage);
+    }
+
+    [Fact]
     public async Task RefreshAsync_NoEntries_SetsEmptyStatusMessageAndMaintainsAllOption()
     {
         var database = CreateDatabaseService();
@@ -224,7 +389,11 @@ public class ApiAuditModuleViewModelTests
 
     private sealed class TestApiAuditModuleViewModel : ApiAuditModuleViewModel
     {
+        public readonly record struct RefreshInvocationSnapshot(bool HasError, bool HasResults, string? StatusMessage);
+
         private readonly IReadOnlyList<ApiAuditEntryDto> _entries;
+        private readonly List<RefreshInvocationSnapshot> _refreshSnapshots = new();
+        private TaskCompletionSource<object?>? _refreshSignal;
 
         public TestApiAuditModuleViewModel(
             DatabaseService databaseService,
@@ -243,6 +412,15 @@ public class ApiAuditModuleViewModelTests
         public string? LastActionFilter { get; private set; }
         public DateTime LastFromFilter { get; private set; }
         public DateTime LastToFilter { get; private set; }
+        public int RefreshInvocationCount { get; private set; }
+        public IReadOnlyList<RefreshInvocationSnapshot> RefreshSnapshots => _refreshSnapshots;
+
+        public Task AwaitNextRefreshAsync()
+        {
+            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _refreshSignal = tcs;
+            return tcs.Task;
+        }
 
         protected override Task<IReadOnlyList<ApiAuditEntryDto>> QueryApiAuditsAsync(
             string apiKey,
@@ -257,6 +435,10 @@ public class ApiAuditModuleViewModelTests
             LastActionFilter = action;
             LastFromFilter = from;
             LastToFilter = to;
+            RefreshInvocationCount++;
+            _refreshSnapshots.Add(new RefreshInvocationSnapshot(HasError, HasResults, StatusMessage));
+            _refreshSignal?.TrySetResult(null);
+            _refreshSignal = null;
             return Task.FromResult(_entries);
         }
     }
