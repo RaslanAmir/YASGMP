@@ -223,6 +223,7 @@
     "2025-12-26: ModuleRegistry retagged Audit Log, Audit Dashboard, and API Audit modules under \"Quality & Compliance\" to align taxonomy while dotnet CLI access remains blocked.",
     "2025-12-27: Updated codex artifacts to explicitly note that Audit Log, Audit Dashboard, and API Audit modules now live under the \"Quality & Compliance\" category so documentation and ModuleRegistry stay synchronized; dotnet CLI availability still required for restore/build/smoke.",
     "2026-01-03: Attachments module now clears staged uploads on form mode changes, gates upload/download/delete commands by B1 semantics, enforces electronic signature capture before committing staged files with attachment audits, and Cancel discards temp uploads before refreshing the inspector/status.",
-    "2026-01-09: Attachments module unit coverage now exercises mode transitions, staged upload dedupe, save/cancel behavior, and download/delete command enablement; dotnet CLI remains unavailable so restore/build/smoke are still blocked."
+    "2026-01-09: Attachments module unit coverage now exercises mode transitions, staged upload dedupe, save/cancel behavior, and download/delete command enablement; dotnet CLI remains unavailable so restore/build/smoke are still blocked.",
+    "2026-01-10: Debug smoke harness now stages an attachment upload, completes the signature-gated save, streams the file back via AttachmentService, and deletes the record while cleaning temp artifacts so attachments are included in the automation log; dotnet CLI remains unavailable so restore/build/smoke continue to be blocked."
   ]
 }
