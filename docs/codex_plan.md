@@ -32,6 +32,7 @@
   - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity and resolves through DI with the shared DatabaseService; WPF Audit Log document view mirrors the dashboard patterns with toolbar buttons, filters, busy overlay, and status styling; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration. These audit-focused modules are now grouped under the "Quality & Compliance" category in the ModuleRegistry.)*
   - Documents/Attachments — [~] in-progress *(Attachments module now inherits ModuleDocumentViewModel, wires shared shell services, seeds design-time records, tracks AttachmentRows/StagedUploads/SelectedAttachment observables to drive the inspector payload, and now surfaces upload/download/delete toolbar commands with SHA-256 deduplication, streaming downloads, and status updates.)*
     - 2026-01-05: Attachments view now splits the layout into a records grid and inspector/editor pane that surfaces SelectedAttachment metadata alongside staged upload previews.
+    - 2026-01-06: Editor pane now exposes HasAttachmentWorkflow-gated upload, download, and delete buttons bound to SelectedAttachment so commands hide when the attachment service is unavailable.
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
 
