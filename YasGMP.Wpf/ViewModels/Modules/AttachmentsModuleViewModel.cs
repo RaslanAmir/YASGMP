@@ -17,6 +17,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -38,16 +39,16 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
-        _signatureDialogService = signatureDialogService ?? throw new ArgumentNullException(nameof(signatureDialogService));
-        _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+        _signatureDialog = signatureDialogService ?? throw new ArgumentNullException(nameof(signatureDialogService));
+        _audit = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _cflDialogService = cflDialogService ?? throw new ArgumentNullException(nameof(cflDialogService));
         _shellInteractionService = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
         _navigationService = navigation ?? throw new ArgumentNullException(nameof(navigation));
 
         HasAttachmentWorkflow = _attachmentService is not null
             && _filePicker is not null
-            && _signatureDialogService is not null
-            && _auditService is not null;
+            && _signatureDialog is not null
+            && _audit is not null;
 
         HasShellIntegration = _cflDialogService is not null
             && _shellInteractionService is not null
@@ -163,6 +164,18 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             .ToList();
     }
 
+    protected override string FormatLoadedStatus(int count)
+    {
+        if (!string.IsNullOrWhiteSpace(_pendingStatusMessage))
+        {
+            var message = _pendingStatusMessage;
+            _pendingStatusMessage = null;
+            return message!;
+        }
+
+        return base.FormatLoadedStatus(count);
+    }
+
     private static ModuleRecord ToRecord(Attachment attachment)
     {
         var moduleKey = attachment.EntityType?.ToLowerInvariant() switch
@@ -238,6 +251,268 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return Task.CompletedTask;
     }
 
+    protected override Task OnModeChangedAsync(FormMode mode)
+    {
+        DiscardStagedUploads();
+
+        if (mode != FormMode.View)
+        {
+            SelectedRecord = null;
+            SelectedAttachment = null;
+        }
+
+        IReadOnlyList<InspectorField> inspectorFields;
+        string inspectorTitle;
+
+        if (mode == FormMode.View && SelectedAttachment is not null)
+        {
+            inspectorTitle = SelectedAttachment.DisplayName;
+            inspectorFields = BuildInspectorFields(SelectedAttachment);
+        }
+        else
+        {
+            inspectorTitle = $"{mode} mode";
+            inspectorFields = new List<InspectorField>
+            {
+                new("Mode", mode.ToString()),
+                new("Staged Uploads", StagedUploads.Count.ToString(CultureInfo.CurrentCulture))
+            };
+        }
+
+        _shellInteractionService.UpdateInspector(new InspectorContext(Title, inspectorTitle, inspectorFields));
+
+        StatusMessage = mode switch
+        {
+            FormMode.Find => "Enter search text to find attachments.",
+            FormMode.Add => "Stage attachments, capture a signature, then save to commit.",
+            FormMode.Update => "Stage additional files or remove attachments, then save to commit.",
+            _ => FormatLoadedStatus(Records.Count)
+        };
+
+        UpdateAttachmentCommands();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task<bool> OnSaveAsync()
+    {
+        if (!HasAttachmentWorkflow)
+        {
+            StatusMessage = "Attachment workflow unavailable.";
+            return false;
+        }
+
+        var stagedItems = StagedUploads.ToList();
+        if (stagedItems.Count == 0)
+        {
+            StatusMessage = "No staged uploads to commit.";
+            return false;
+        }
+
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("attachments", 0))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            return false;
+        }
+
+        if (signatureResult.Signature is null)
+        {
+            StatusMessage = "Electronic signature was not captured.";
+            return false;
+        }
+
+        var successes = 0;
+        var failures = 0;
+        var notes = new List<string>();
+        var committedIds = new List<int>();
+
+        foreach (var staged in stagedItems)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(staged.TempPath) || !File.Exists(staged.TempPath))
+                {
+                    failures++;
+                    notes.Add($"Missing staged content for '{staged.FileName}'.");
+                    continue;
+                }
+
+                var entityType = string.IsNullOrWhiteSpace(staged.EntityType)
+                    ? "attachments"
+                    : staged.EntityType;
+
+                await using var uploadStream = new FileStream(
+                    staged.TempPath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    128 * 1024,
+                    useAsync: true);
+
+                var request = new AttachmentUploadRequest
+                {
+                    FileName = staged.FileName,
+                    ContentType = staged.ContentType,
+                    EntityType = entityType,
+                    EntityId = staged.EntityId,
+                    Notes = staged.Notes,
+                    Reason = $"wpf:{ModuleKey}:{Mode.ToString().ToLowerInvariant()}",
+                    SourceHost = Environment.MachineName,
+                    SourceIp = "ui:wpf"
+                };
+
+                var uploadResult = await _attachmentService
+                    .UploadAsync(uploadStream, request)
+                    .ConfigureAwait(false);
+
+                var uploadedById = uploadResult.Attachment.UploadedById;
+                if (uploadedById is null or 0)
+                {
+                    uploadedById = signatureResult.Signature.UserId;
+                }
+
+                var proxy = new AttachmentServiceUploadProxy(_attachmentService, uploadResult);
+                await _databaseService
+                    .AddAttachmentAsync(
+                        staged.TempPath,
+                        entityType,
+                        staged.EntityId,
+                        uploadedById ?? 0,
+                        "ui:wpf",
+                        Environment.MachineName,
+                        $"wpf:{ModuleKey}",
+                        request.Reason,
+                        proxy)
+                    .ConfigureAwait(false);
+
+                successes++;
+                committedIds.Add(uploadResult.Attachment.Id);
+                notes.Add($"Committed '{staged.FileName}' (#{uploadResult.Attachment.Id}).");
+
+                try
+                {
+                    var detailParts = new List<string>
+                    {
+                        $"file={staged.FileName}",
+                        $"entity={entityType}",
+                        $"entityId={staged.EntityId}",
+                        $"size={staged.FileSize}"
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(staged.Sha256))
+                    {
+                        detailParts.Add($"hash={staged.Sha256}");
+                    }
+
+                    detailParts.Add($"reason={signatureResult.ReasonDisplay ?? signatureResult.ReasonCode}");
+
+                    await _audit
+                        .LogEntityAuditAsync(
+                            "attachments",
+                            uploadResult.Attachment.Id,
+                            "UPLOAD",
+                            string.Join(", ", detailParts))
+                        .ConfigureAwait(false);
+                }
+                catch (Exception auditEx)
+                {
+                    notes.Add($"Audit logging failed for '{staged.FileName}': {auditEx.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                failures++;
+                notes.Add($"Failed '{staged.FileName}': {ex.Message}");
+            }
+            finally
+            {
+                StagedUploads.Remove(staged);
+                CleanupStagedUpload(staged);
+            }
+        }
+
+        if (successes == 0)
+        {
+            StatusMessage = failures > 0
+                ? $"Failed to commit staged uploads. {string.Join(" ", notes)}"
+                : "No staged uploads were committed.";
+            return false;
+        }
+
+        var latestId = committedIds.LastOrDefault();
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            "attachments",
+            latestId,
+            metadata: null,
+            fallbackSignatureHash: signatureResult.Signature.SignatureHash,
+            fallbackMethod: signatureResult.Signature.Method,
+            fallbackStatus: signatureResult.Signature.Status,
+            fallbackNote: signatureResult.Signature.Note,
+            signedAt: signatureResult.Signature.SignedAt,
+            fallbackDeviceInfo: signatureResult.Signature.DeviceInfo,
+            fallbackIpAddress: signatureResult.Signature.IpAddress,
+            fallbackSessionId: signatureResult.Signature.SessionId);
+
+        try
+        {
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            return false;
+        }
+
+        var summary = $"Committed {successes} attachment(s).";
+        if (failures > 0)
+        {
+            summary += $" {failures} failure(s).";
+        }
+
+        if (notes.Count > 0)
+        {
+            summary += " " + string.Join(" ", notes);
+        }
+
+        _pendingStatusMessage = summary;
+        StatusMessage = summary;
+        UpdateAttachmentCommands();
+        return true;
+    }
+
+    protected override void OnCancel()
+    {
+        var hadStagedUploads = StagedUploads.Count;
+        DiscardStagedUploads();
+        var refreshTask = RefreshAsync();
+
+        if (hadStagedUploads > 0)
+        {
+            var message = $"Discarded {hadStagedUploads} staged upload(s).";
+            _pendingStatusMessage = message;
+            refreshTask.ContinueWith(
+                _ => StatusMessage = message,
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.FromCurrentSynchronizationContext());
+        }
+    }
+
     private IReadOnlyList<InspectorField> BuildInspectorFields(AttachmentRowViewModel attachment)
     {
         var fields = new List<InspectorField>
@@ -303,15 +578,65 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
         SelectedAttachment = null;
 
-        if (clearStagedUploads && StagedUploads.Count > 0)
+        if (clearStagedUploads)
         {
-            StagedUploads.Clear();
+            DiscardStagedUploads();
         }
     }
 
     private void OnStagedUploadsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasStagedUploads));
+        if (StagedUploads.Count > 0)
+        {
+            MarkDirty();
+        }
+        else
+        {
+            ResetDirty();
+        }
+
+        UpdateAttachmentCommands();
+    }
+
+    private void DiscardStagedUploads()
+    {
+        if (StagedUploads.Count == 0)
+        {
+            return;
+        }
+
+        var staged = StagedUploads.ToList();
+        StagedUploads.Clear();
+
+        foreach (var upload in staged)
+        {
+            CleanupStagedUpload(upload);
+        }
+
+        UpdateAttachmentCommands();
+    }
+
+    private void CleanupStagedUpload(StagedAttachmentUploadViewModel? staged)
+    {
+        if (staged is null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(staged.TempDirectory))
+        {
+            TryDeleteTempDirectory(staged.TempDirectory);
+        }
+        else if (!string.IsNullOrWhiteSpace(staged.TempPath))
+        {
+            TryDeleteTempDirectory(Path.GetDirectoryName(staged.TempPath));
+        }
+
+        staged.TempDirectory = null;
+        staged.TempPath = null;
+        staged.Sha256 = null;
+        staged.FileSize = 0;
     }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -323,13 +648,13 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     }
 
     private bool CanUpload()
-        => !IsBusy && HasAttachmentWorkflow;
+        => !IsBusy && HasAttachmentWorkflow && Mode is FormMode.Add or FormMode.Update;
 
     private bool CanDownload()
-        => !IsBusy && SelectedAttachment is not null && HasAttachmentWorkflow;
+        => !IsBusy && SelectedAttachment is not null && HasAttachmentWorkflow && Mode is not FormMode.Add;
 
     private bool CanDelete()
-        => !IsBusy && SelectedAttachment is not null;
+        => !IsBusy && SelectedAttachment is not null && Mode is FormMode.Update;
 
     private async Task UploadAsync()
     {
@@ -339,13 +664,19 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             return;
         }
 
+        if (Mode is not (FormMode.Add or FormMode.Update))
+        {
+            StatusMessage = "Switch to Add or Update mode to stage attachments.";
+            return;
+        }
+
         var files = await _filePicker
             .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: "Select attachments to upload"))
             .ConfigureAwait(false);
 
         if (files is null || files.Count == 0)
         {
-            StatusMessage = "Attachment upload cancelled.";
+            StatusMessage = "Attachment staging cancelled.";
             return;
         }
 
@@ -354,7 +685,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             IsBusy = true;
             UpdateAttachmentCommands();
 
-            var uploaded = 0;
+            var stagedCount = 0;
             var duplicates = 0;
             var failed = 0;
             var notes = new List<string>();
@@ -362,7 +693,6 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             foreach (var file in files)
             {
                 var staged = CreateStagedUpload(file);
-                StagedUploads.Add(staged);
 
                 var tempDirectory = Path.Combine(Path.GetTempPath(), "YasGMP", "uploads", Guid.NewGuid().ToString("N"));
                 var tempPath = Path.Combine(tempDirectory, file.FileName);
@@ -386,12 +716,15 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                         }
 
                         sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-                        var hash = sha.Hash is null || sha.Hash.Length == 0
-                            ? string.Empty
-                            : Convert.ToHexString(sha.Hash);
+                        staged.FileSize = total;
+                        staged.TempDirectory = tempDirectory;
+                        staged.TempPath = tempPath;
 
-                        if (!string.IsNullOrWhiteSpace(hash))
+                        if (sha.Hash is { Length: > 0 })
                         {
+                            var hash = Convert.ToHexString(sha.Hash);
+                            staged.Sha256 = hash;
+
                             var existing = await _attachmentService
                                 .FindByHashAndSizeAsync(hash, total)
                                 .ConfigureAwait(false);
@@ -400,72 +733,33 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                             {
                                 duplicates++;
                                 notes.Add($"Skipped '{file.FileName}' (duplicate of #{existing.Id}).");
+                                CleanupStagedUpload(staged);
                                 continue;
                             }
-
-                            staged.Notes = hash;
                         }
 
                         await destination.FlushAsync().ConfigureAwait(false);
                     }
 
-                    await using var uploadStream = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read, 128 * 1024, useAsync: true);
-                    var entityType = string.IsNullOrWhiteSpace(staged.EntityType) ? "attachments" : staged.EntityType;
-                    var request = new AttachmentUploadRequest
-                    {
-                        FileName = file.FileName,
-                        ContentType = staged.ContentType,
-                        EntityType = entityType,
-                        EntityId = staged.EntityId,
-                        Notes = staged.Notes,
-                        Reason = $"wpf:{ModuleKey}:upload",
-                        SourceHost = Environment.MachineName,
-                        SourceIp = "ui:wpf"
-                    };
-
-                    var uploadResult = await _attachmentService
-                        .UploadAsync(uploadStream, request)
-                        .ConfigureAwait(false);
-
-                    var proxy = new AttachmentServiceUploadProxy(_attachmentService, uploadResult);
-                    await _databaseService
-                        .AddAttachmentAsync(
-                            tempPath,
-                            entityType,
-                            staged.EntityId,
-                            uploadResult.Attachment.UploadedById ?? 0,
-                            "ui:wpf",
-                            Environment.MachineName,
-                            $"wpf:{ModuleKey}",
-                            request.Reason,
-                            proxy)
-                        .ConfigureAwait(false);
-
-                    uploaded++;
-                    notes.Add($"Uploaded '{file.FileName}'.");
+                    StagedUploads.Add(staged);
+                    stagedCount++;
+                    notes.Add($"Staged '{file.FileName}'.");
                 }
                 catch (Exception ex)
                 {
                     failed++;
                     notes.Add($"Failed '{file.FileName}': {ex.Message}");
-                }
-                finally
-                {
-                    StagedUploads.Remove(staged);
-                    TryDeleteTempDirectory(Path.GetDirectoryName(tempPath));
+                    staged.TempDirectory = tempDirectory;
+                    staged.TempPath = tempPath;
+                    CleanupStagedUpload(staged);
                 }
             }
 
-            StatusMessage = BuildUploadStatus(uploaded, duplicates, failed, notes);
-
-            if (uploaded > 0)
-            {
-                await RefreshAsync().ConfigureAwait(false);
-            }
+            StatusMessage = BuildStagingStatus(stagedCount, duplicates, failed, notes);
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = $"Attachment staging failed: {ex.Message}";
         }
         finally
         {
@@ -588,11 +882,11 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         };
     }
 
-    private static string BuildUploadStatus(int uploaded, int duplicates, int failed, IReadOnlyList<string> notes)
+    private static string BuildStagingStatus(int staged, int duplicates, int failed, IReadOnlyList<string> notes)
     {
         var parts = new List<string>
         {
-            $"Uploaded {uploaded} file(s)"
+            $"Staged {staged} file(s)"
         };
 
         if (duplicates > 0)
@@ -610,6 +904,11 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         if (notes.Count > 0)
         {
             summary += " " + string.Join(" ", notes);
+        }
+
+        if (staged > 0)
+        {
+            summary += " Use Save to commit staged uploads.";
         }
 
         return summary;
@@ -702,11 +1001,12 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     private readonly DatabaseService _databaseService;
     private readonly IAttachmentService _attachmentService;
     private readonly IFilePicker _filePicker;
-    private readonly IElectronicSignatureDialogService _signatureDialogService;
-    private readonly AuditService _auditService;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly AuditService _audit;
     private readonly ICflDialogService _cflDialogService;
     private readonly IShellInteractionService _shellInteractionService;
     private readonly IModuleNavigationService _navigationService;
+    private string? _pendingStatusMessage;
 
     public sealed class AttachmentRowViewModel
     {
@@ -790,6 +1090,10 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         private string _entityType = string.Empty;
         private int _entityId;
         private string? _notes;
+        private string? _tempPath;
+        private string? _tempDirectory;
+        private long _fileSize;
+        private string? _sha256;
 
         public string FileName
         {
@@ -819,6 +1123,30 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         {
             get => _notes;
             set => SetProperty(ref _notes, value);
+        }
+
+        public string? TempPath
+        {
+            get => _tempPath;
+            set => SetProperty(ref _tempPath, value);
+        }
+
+        public string? TempDirectory
+        {
+            get => _tempDirectory;
+            set => SetProperty(ref _tempDirectory, value);
+        }
+
+        public long FileSize
+        {
+            get => _fileSize;
+            set => SetProperty(ref _fileSize, value);
+        }
+
+        public string? Sha256
+        {
+            get => _sha256;
+            set => SetProperty(ref _sha256, value);
         }
     }
 }
