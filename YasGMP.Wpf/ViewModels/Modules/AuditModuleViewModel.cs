@@ -210,7 +210,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         var queryFrom = earlier;
         var queryTo = later.Date.AddDays(1).AddTicks(-1);
 
-        return (queryFrom, queryTo, normalizedFrom, normalizedTo);
+        return (queryFrom, queryTo, earlier, later);
     }
 
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
