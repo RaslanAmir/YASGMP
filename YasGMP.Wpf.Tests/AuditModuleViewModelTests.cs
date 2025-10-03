@@ -77,6 +77,210 @@ public class AuditModuleViewModelTests
     }
 
     [Fact]
+    public async Task FilterUser_WhenChangedAfterInitialization_TriggersRefreshAndResetsState()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 1, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
+
+        await viewModel.InitializeAsync();
+        Assert.True(viewModel.IsInitialized);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+
+        viewModel.HasError = true;
+        viewModel.HasResults = true;
+        viewModel.StatusMessage = "stale";
+
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.FilterUser = "qa";
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading Audit Trail records...", snapshot.StatusMessage);
+        Assert.Equal("qa", viewModel.LastUserFilter);
+    }
+
+    [Fact]
+    public async Task FilterEntity_WhenChangedAfterInitialization_TriggersRefreshAndResetsState()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 7, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
+
+        await viewModel.InitializeAsync();
+        Assert.True(viewModel.IsInitialized);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+
+        viewModel.HasError = true;
+        viewModel.HasResults = true;
+        viewModel.StatusMessage = "stale";
+
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.FilterEntity = "work_orders";
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading Audit Trail records...", snapshot.StatusMessage);
+        Assert.Equal("work_orders", viewModel.LastEntityFilter);
+    }
+
+    [Fact]
+    public async Task SelectedAction_WhenChangedAfterInitialization_TriggersRefreshAndResetsState()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 8, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
+
+        await viewModel.InitializeAsync();
+        Assert.True(viewModel.IsInitialized);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+
+        viewModel.HasError = true;
+        viewModel.HasResults = true;
+        viewModel.StatusMessage = "stale";
+
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        viewModel.SelectedAction = "UPDATE";
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading Audit Trail records...", snapshot.StatusMessage);
+        Assert.Equal("UPDATE", viewModel.LastActionFilter);
+    }
+
+    [Fact]
+    public async Task FilterFrom_WhenChangedAfterInitialization_TriggersRefreshAndResetsState()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 9, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
+
+        await viewModel.InitializeAsync();
+        Assert.True(viewModel.IsInitialized);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+
+        viewModel.HasError = true;
+        viewModel.HasResults = true;
+        viewModel.StatusMessage = "stale";
+
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        var expectedFrom = new DateTime(2025, 1, 1);
+        viewModel.FilterFrom = expectedFrom;
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading Audit Trail records...", snapshot.StatusMessage);
+        Assert.Equal(expectedFrom, viewModel.FilterFrom);
+        Assert.Equal(expectedFrom, viewModel.LastFromFilter);
+    }
+
+    [Fact]
+    public async Task FilterTo_WhenChangedAfterInitialization_TriggersRefreshAndResetsState()
+    {
+        var database = CreateDatabaseService();
+        var auditService = new AuditService(database);
+        var cfl = new StubCflDialogService();
+        var shell = new StubShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+        var exportService = CreateExportService(database, auditService);
+
+        var audits = new[]
+        {
+            new AuditEntryDto { Id = 10, Entity = "systems", Action = "UPDATE", Timestamp = DateTime.UtcNow }
+        };
+
+        var viewModel = new TestAuditModuleViewModel(database, auditService, exportService, cfl, shell, navigation, audits);
+
+        await viewModel.InitializeAsync();
+        Assert.True(viewModel.IsInitialized);
+
+        var initialCount = viewModel.RefreshInvocationCount;
+
+        viewModel.HasError = true;
+        viewModel.HasResults = true;
+        viewModel.StatusMessage = "stale";
+
+        var refreshAwaiter = viewModel.AwaitNextRefreshAsync();
+
+        var expectedTo = new DateTime(2025, 1, 31);
+        viewModel.FilterTo = expectedTo;
+
+        await refreshAwaiter;
+
+        Assert.Equal(initialCount + 1, viewModel.RefreshInvocationCount);
+        var snapshot = viewModel.RefreshSnapshots.Last();
+        Assert.False(snapshot.HasError);
+        Assert.False(snapshot.HasResults);
+        Assert.Equal("Loading Audit Trail records...", snapshot.StatusMessage);
+        Assert.Equal(expectedTo, viewModel.FilterTo);
+        Assert.Equal(expectedTo.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
+    }
+
+    [Fact]
     public async Task InitializeAsync_NoAudits_SetsEmptyStatusMessage()
     {
         var database = CreateDatabaseService();
@@ -539,7 +743,11 @@ public class AuditModuleViewModelTests
 
     private sealed class TestAuditModuleViewModel : AuditModuleViewModel
     {
+        public readonly record struct RefreshInvocationSnapshot(bool HasError, bool HasResults, string? StatusMessage);
+
         private readonly IReadOnlyList<AuditEntryDto> _entries;
+        private readonly List<RefreshInvocationSnapshot> _refreshSnapshots = new();
+        private TaskCompletionSource<object?>? _refreshSignal;
 
         public TestAuditModuleViewModel(
             DatabaseService databaseService,
@@ -563,6 +771,15 @@ public class AuditModuleViewModelTests
         public string LastActionFilter { get; private set; } = string.Empty;
         public DateTime LastFromFilter { get; private set; }
         public DateTime LastToFilter { get; private set; }
+        public int RefreshInvocationCount { get; private set; }
+        public IReadOnlyList<RefreshInvocationSnapshot> RefreshSnapshots => _refreshSnapshots;
+
+        public Task AwaitNextRefreshAsync()
+        {
+            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _refreshSignal = tcs;
+            return tcs.Task;
+        }
 
         protected override Task<IReadOnlyList<AuditEntryDto>> QueryAuditsAsync(
             string user,
@@ -576,6 +793,10 @@ public class AuditModuleViewModelTests
             LastActionFilter = action;
             LastFromFilter = from;
             LastToFilter = to;
+            RefreshInvocationCount++;
+            _refreshSnapshots.Add(new RefreshInvocationSnapshot(HasError, HasResults, StatusMessage));
+            _refreshSignal?.TrySetResult(null);
+            _refreshSignal = null;
             return Task.FromResult(_entries);
         }
 
