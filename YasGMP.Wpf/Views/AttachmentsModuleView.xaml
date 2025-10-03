@@ -57,18 +57,53 @@
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
-            <Border Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="8,0,0,0"
-                    Padding="12"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
-                <Border.DataContext>
-                    <Binding Path="SelectedAttachment" />
-                </Border.DataContext>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
+            <Grid Grid.Row="1" Grid.Column="1" Margin="8,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasAttachmentWorkflow}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <StackPanel.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasAttachmentWorkflow}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Resources>
+                    <Button Content="Pick Files"
+                            Command="{Binding UploadCommand}"
+                            Margin="0,0,8,0" />
+                    <Button Content="Download"
+                            Command="{Binding DownloadCommand}"
+                            CommandParameter="{Binding SelectedAttachment}"
+                            Margin="0,0,8,0" />
+                    <Button Content="Delete"
+                            Command="{Binding DeleteCommand}"
+                            CommandParameter="{Binding SelectedAttachment}" />
+                </StackPanel>
+                <Border Grid.Row="1"
+                        Padding="12"
+                        BorderBrush="LightGray"
+                        BorderThickness="1"
+                        Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+                    <Border.DataContext>
+                        <Binding Path="SelectedAttachment" />
+                    </Border.DataContext>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
                         <TextBlock Text="Select an attachment to view details." FontStyle="Italic" Foreground="Gray">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
