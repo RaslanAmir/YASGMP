@@ -30,10 +30,10 @@
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
   - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
   - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity and resolves through DI with the shared DatabaseService; WPF Audit Log document view mirrors the dashboard patterns with toolbar buttons, filters, busy overlay, and status styling; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration. These audit-focused modules are now grouped under the "Quality & Compliance" category in the ModuleRegistry.)*
-  - Documents/Attachments — [~] in-progress *(Attachments module now inherits ModuleDocumentViewModel, wires shared shell services, seeds design-time records, tracks AttachmentRows/StagedUploads/SelectedAttachment observables to drive the inspector payload, and now surfaces upload/download/delete toolbar commands with SHA-256 deduplication, streaming downloads, and status updates.)*
-    - 2026-01-05: Attachments view now splits the layout into a records grid and inspector/editor pane that surfaces SelectedAttachment metadata alongside staged upload previews.
-    - 2026-01-06: Editor pane now exposes HasAttachmentWorkflow-gated upload, download, and delete buttons bound to SelectedAttachment so commands hide when the attachment service is unavailable.
-    - 2026-01-07: Attachments editor now shows a busy overlay tied to IsBusy, lists validation messages inline, and styles the status text to highlight validation errors while dotnet restore/build remain blocked by the missing CLI.
+  - Documents/Attachments — [x] done *(Attachments module now ships a finalized split inspector/editor workspace with staged upload queueing, signature-gated CRUD flow, and retention policy handling.)*
+    - 2026-01-05: Attachments view now splits the layout into a records grid and inspector/editor pane that surfaces SelectedAttachment metadata alongside staged upload previews and retention flags.
+    - 2026-01-06: Editor pane now drives staged uploads through the AttachmentService, requiring an electronic signature before committing changes and hiding commands when the workflow is unavailable.
+    - 2026-01-07: Attachments editor now enforces retention rules during save/delete, shows busy overlays tied to IsBusy, and surfaces validation/status messaging while dotnet restore/build remain blocked by the missing CLI.
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
 
