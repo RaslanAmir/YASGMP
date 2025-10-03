@@ -152,12 +152,35 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     [ObservableProperty]
     private bool _hasError;
 
+    partial void OnFilterUserChanged(string? value) => TriggerRefreshForFilterChange();
+
+    partial void OnFilterEntityChanged(string? value) => TriggerRefreshForFilterChange();
+
+    partial void OnSelectedActionChanged(string? value) => TriggerRefreshForFilterChange();
+
+    partial void OnFilterFromChanged(DateTime? value) => TriggerRefreshForFilterChange();
+
+    partial void OnFilterToChanged(DateTime? value) => TriggerRefreshForFilterChange();
+
     private readonly AuditService _auditService;
     private readonly ExportService _exportService;
     private readonly AsyncRelayCommand _exportToPdfCommand;
     private readonly AsyncRelayCommand _exportToExcelCommand;
     private IReadOnlyList<AuditEntryDto>? _lastAuditEntries;
     private string? _lastFilterDescription;
+
+    private void TriggerRefreshForFilterChange()
+    {
+        if (!IsInitialized || IsBusy)
+        {
+            return;
+        }
+
+        HasError = false;
+        HasResults = false;
+        StatusMessage = $"Loading {Title} records...";
+        _ = RefreshCommand.ExecuteAsync(null);
+    }
 
     protected virtual async Task<IReadOnlyList<AuditEntryDto>> QueryAuditsAsync(
         string user,

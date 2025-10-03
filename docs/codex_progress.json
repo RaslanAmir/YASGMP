@@ -39,7 +39,8 @@
       "2025-12-28: dotnet restore/build/run for WPF + MAUI targets retried after wiring new Quality & Compliance ribbon/backstage buttons; CLI is still missing so each command exits with 'command not found'.",
       "2025-12-31: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf, and yasgmp.csproj; CLI remains unavailable so every command exits with 'command not found'.",
       "2026-01-07: dotnet --info/restore/build retried for yasgmp.sln and YasGMP.Wpf; CLI remains unavailable in the container so each command exits with 'command not found'.",
-      "2026-01-08: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so each command exits with 'command not found'."
+      "2026-01-08: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so each command exits with 'command not found'.",
+      "2026-01-11: dotnet restore/build retried for yasgmp.sln and platform-specific targets; CLI remains unavailable in the container so each command fails with \"command not found\"."
     ]
   },
   "batches": [
@@ -102,7 +103,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: wire attachments busy overlay and validation display",
+  "lastCommitSummary": "fix: trigger audit refresh on filter changes",
   "notes": [
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-04: WPF host now resolves AttachmentsModuleViewModel via an explicit service provider factory so DatabaseService, attachment workflow, file picker, signature dialog, audit, CFL, shell interaction, and navigation services align with the current constructor order; dotnet restore/build remain blocked by the missing CLI.",
@@ -224,6 +225,7 @@
     "2025-12-27: Updated codex artifacts to explicitly note that Audit Log, Audit Dashboard, and API Audit modules now live under the \"Quality & Compliance\" category so documentation and ModuleRegistry stay synchronized; dotnet CLI availability still required for restore/build/smoke.",
     "2026-01-03: Attachments module now clears staged uploads on form mode changes, gates upload/download/delete commands by B1 semantics, enforces electronic signature capture before committing staged files with attachment audits, and Cancel discards temp uploads before refreshing the inspector/status.",
     "2026-01-09: Attachments module unit coverage now exercises mode transitions, staged upload dedupe, save/cancel behavior, and download/delete command enablement; dotnet CLI remains unavailable so restore/build/smoke are still blocked.",
-    "2026-01-10: Debug smoke harness now stages an attachment upload, completes the signature-gated save, streams the file back via AttachmentService, and deletes the record while cleaning temp artifacts so attachments are included in the automation log; dotnet CLI remains unavailable so restore/build/smoke continue to be blocked."
+    "2026-01-10: Debug smoke harness now stages an attachment upload, completes the signature-gated save, streams the file back via AttachmentService, and deletes the record while cleaning temp artifacts so attachments are included in the automation log; dotnet CLI remains unavailable so restore/build/smoke continue to be blocked.",
+    "2026-01-11: Audit trail filters now trigger an auto-refresh when modified so the grid reloads immediately; dotnet CLI remains unavailable so restore/build/smoke stay blocked pending installation."
   ]
 }
