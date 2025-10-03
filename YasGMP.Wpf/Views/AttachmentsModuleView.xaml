@@ -29,16 +29,21 @@
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
                 <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
+                      Grid.Column="0"
                       ItemsSource="{Binding RecordsView}"
                       SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
                       AutoGenerateColumns="False"
@@ -52,7 +57,212 @@
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <Border Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="8,0,0,0"
+                    Padding="12"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+                <Border.DataContext>
+                    <Binding Path="SelectedAttachment" />
+                </Border.DataContext>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Select an attachment to view details." FontStyle="Italic" Foreground="Gray">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <StackPanel Margin="0,0,0,16">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="Attachment Details" FontWeight="Bold" FontSize="16" Margin="0,0,0,12" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Display Name:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Text="{Binding DisplayName}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="File Name:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Text="{Binding FileName}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Status:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Text="{Binding Status}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Entity:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="3"
+                                         Grid.Column="1"
+                                         Text="{Binding EntityDisplayName}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="File Type:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="1"
+                                         Text="{Binding FileType}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="File Size:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="5"
+                                         Grid.Column="1"
+                                         Text="{Binding FileSizeDisplay}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="SHA-256:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="6"
+                                         Grid.Column="1"
+                                         Text="{Binding Sha256}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Notes:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="7"
+                                         Grid.Column="1"
+                                         Text="{Binding Notes}"
+                                         IsReadOnly="True"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         MinHeight="60"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="8" Grid.Column="0" Text="Retention Policy:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="8"
+                                         Grid.Column="1"
+                                         Text="{Binding RetentionPolicyName}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="9" Grid.Column="0" Text="Retain Until:" Margin="0,0,8,4" />
+                                <TextBox Grid.Row="9"
+                                         Grid.Column="1"
+                                         Text="{Binding RetainUntil}"
+                                         IsReadOnly="True"
+                                         Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="10" Grid.Column="0" Text="Retention Flags:" Margin="0,0,8,4" />
+                                <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Vertical" Margin="0,0,0,4">
+                                    <CheckBox Content="Legal Hold"
+                                              IsChecked="{Binding RetentionLegalHold}"
+                                              IsEnabled="False"
+                                              Margin="0,0,0,4" />
+                                    <CheckBox Content="Review Required"
+                                              IsChecked="{Binding RetentionReviewRequired}"
+                                              IsEnabled="False"
+                                              Margin="0,0,0,4" />
+                                    <TextBlock Text="Retention Notes" FontWeight="SemiBold" Margin="0,8,0,4" />
+                                    <TextBox Text="{Binding RetentionNotes}"
+                                             IsReadOnly="True"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             MinHeight="40" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                        <Separator />
+                        <TextBlock Text="Staged Uploads" FontWeight="Bold" FontSize="16" Margin="0,12,0,8" />
+                        <ItemsControl ItemsSource="{Binding DataContext.StagedUploads, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="Gainsboro" BorderThickness="1" Padding="8" Margin="0,0,0,8" CornerRadius="4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="File Name:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                            <TextBox Grid.Row="0"
+                                                     Grid.Column="1"
+                                                     Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Content Type:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                            <TextBox Grid.Row="1"
+                                                     Grid.Column="1"
+                                                     Text="{Binding ContentType, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Entity Type:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                            <TextBox Grid.Row="2"
+                                                     Grid.Column="1"
+                                                     Text="{Binding EntityType, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Entity ID:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                            <TextBox Grid.Row="3"
+                                                     Grid.Column="1"
+                                                     Text="{Binding EntityId, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes:" Margin="0,0,8,0" VerticalAlignment="Top" />
+                                            <TextBox Grid.Row="4"
+                                                     Grid.Column="1"
+                                                     Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                                     AcceptsReturn="True"
+                                                     TextWrapping="Wrap"
+                                                     MinHeight="40" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="No files staged for upload. Use Upload to add files before saving."
+                                   FontStyle="Italic"
+                                   Foreground="Gray"
+                                   Margin="0,8,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.HasStagedUploads, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <TextBlock Grid.Row="2"
+                       Grid.ColumnSpan="2"
+                       Text="{Binding StatusMessage}"
+                       FontStyle="Italic"
+                       Foreground="Gray"
+                       Margin="0,8,0,0" />
         </Grid>
     </DockPanel>
 </UserControl>
