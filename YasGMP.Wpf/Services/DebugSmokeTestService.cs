@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +32,7 @@ public sealed class DebugSmokeTestService
         DashboardModuleViewModel.ModuleKey,
         AssetsModuleViewModel.ModuleKey,
         ComponentsModuleViewModel.ModuleKey,
+        AttachmentsModuleViewModel.ModuleKey,
         ExternalServicersModuleViewModel.ModuleKey,
         WorkOrdersModuleViewModel.ModuleKey,
         AuditModuleViewModel.ModuleKey,
@@ -124,6 +127,7 @@ public sealed class DebugSmokeTestService
             await AddStepAsync("Module navigation", NavigateModulesAsync);
             await AddStepAsync("External servicers mode cycle", token => ExerciseFormModesAsync(ExternalServicersModuleViewModel.ModuleKey, token));
             await AddStepAsync("Add/Find cycle", token => ExerciseFormModesAsync(WorkOrdersModuleViewModel.ModuleKey, token));
+            await AddStepAsync("Attachments upload/download/delete", ExerciseAttachmentsWorkflowAsync);
             await AddStepAsync("Audit trail fetch", FetchAuditTrailAsync);
             await AddStepAsync("Digital signature verification", VerifyDigitalSignatureAsync);
 
@@ -238,6 +242,142 @@ public sealed class DebugSmokeTestService
         }
 
         return $"Signature {signature.Id} ({signature.TableName} #{signature.RecordId}) verified successfully.";
+    }
+
+    private async Task<string> ExerciseAttachmentsWorkflowAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var document = _moduleNavigation.OpenModule(AttachmentsModuleViewModel.ModuleKey);
+        _moduleNavigation.Activate(document);
+        await document.InitializeAsync(null).ConfigureAwait(false);
+
+        if (document is not AttachmentsModuleViewModel attachments)
+        {
+            return $"Resolved attachments module as {document.GetType().Name}; skipping workflow.";
+        }
+
+        await attachments.EnterAddModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+        var timestamp = DateTimeOffset.Now;
+        var fileName = $"smoke_{timestamp:yyyyMMdd_HHmmssfff}.txt";
+        var stageDirectory = Path.Combine(Path.GetTempPath(), "YasGMP", "smoke", "attachments", Guid.NewGuid().ToString("N"));
+        var downloadDirectory = Path.Combine(Path.GetTempPath(), "YasGMP", "smoke", "attachments", "downloads", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(stageDirectory);
+        Directory.CreateDirectory(downloadDirectory);
+
+        var stagedPath = Path.Combine(stageDirectory, fileName);
+        var stagedContent = Encoding.UTF8.GetBytes($"YasGMP smoke attachment {timestamp:O}\n");
+        await File.WriteAllBytesAsync(stagedPath, stagedContent, cancellationToken).ConfigureAwait(false);
+
+        var stagedUpload = new AttachmentsModuleViewModel.StagedAttachmentUploadViewModel
+        {
+            FileName = fileName,
+            ContentType = "text/plain",
+            EntityType = "attachments",
+            EntityId = 0,
+            Notes = "Smoke harness upload",
+            TempDirectory = stageDirectory,
+            TempPath = stagedPath,
+            FileSize = stagedContent.LongLength,
+            Sha256 = Convert.ToHexString(SHA256.HashData(stagedContent))
+        };
+
+        attachments.StagedUploads.Add(stagedUpload);
+
+        await attachments.SaveCommand.ExecuteAsync(null).ConfigureAwait(false);
+        var uploadStatus = attachments.StatusMessage;
+
+        var records = await _databaseService
+            .GetAttachmentsFilteredAsync(null, null, fileName, cancellationToken)
+            .ConfigureAwait(false);
+
+        var uploaded = records.FirstOrDefault(a => string.Equals(a.FileName, fileName, StringComparison.OrdinalIgnoreCase));
+        if (uploaded is null)
+        {
+            throw new InvalidOperationException($"Uploaded attachment '{fileName}' not found in database.");
+        }
+
+        var attachmentService = ResolveAttachmentService(attachments)
+            ?? throw new InvalidOperationException("Attachment service unavailable for download.");
+
+        var downloadPath = Path.Combine(downloadDirectory, fileName);
+        AttachmentStreamResult downloadResult;
+        await using (var destination = new FileStream(downloadPath, FileMode.Create, FileAccess.Write, FileShare.None, 128 * 1024, useAsync: true))
+        {
+            var request = new AttachmentReadRequest
+            {
+                Reason = "wpf:attachments:smoke",
+                SourceHost = Environment.MachineName,
+                SourceIp = "ui:wpf"
+            };
+
+            downloadResult = await attachmentService
+                .StreamContentAsync(uploaded.Id, destination, request, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        var downloadedBytes = downloadResult.BytesWritten;
+
+        await _databaseService.DeleteAttachmentAsync(uploaded.Id, cancellationToken).ConfigureAwait(false);
+        await attachments.RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+        TryDeleteFile(downloadPath);
+        TryDeleteDirectory(downloadDirectory);
+        TryDeleteDirectory(stageDirectory);
+
+        var messageBuilder = new StringBuilder();
+        if (!string.IsNullOrWhiteSpace(uploadStatus))
+        {
+            messageBuilder.Append(uploadStatus.Trim());
+        }
+
+        if (messageBuilder.Length > 0)
+        {
+            messageBuilder.Append(' ');
+        }
+
+        messageBuilder.Append($"Downloaded {downloadedBytes:N0} byte(s) and deleted attachment #{uploaded.Id}.");
+        messageBuilder.Append(" Temporary files cleaned.");
+
+        return messageBuilder.ToString();
+    }
+
+    private static IAttachmentService? ResolveAttachmentService(AttachmentsModuleViewModel viewModel)
+    {
+        var field = typeof(AttachmentsModuleViewModel)
+            .GetField("_attachmentService", BindingFlags.Instance | BindingFlags.NonPublic);
+        return field?.GetValue(viewModel) as IAttachmentService;
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // Ignore cleanup failures; temporary files will be removed later.
+        }
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive: true);
+            }
+        }
+        catch
+        {
+            // Ignore cleanup failures; temporary directories will be removed later.
+        }
     }
 
     private static async Task<DebugSmokeTestStep> ExecuteStepAsync(
