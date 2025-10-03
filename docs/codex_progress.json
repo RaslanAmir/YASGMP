@@ -96,7 +96,7 @@
     "Audit": "in-progress",
     "ApiAudit": "in-progress",
     "AuditDashboard": "in-progress",
-    "Attachments": "in-progress",
+    "Attachments": "done",
     "Dashboard": "pending",
     "Reports": "pending",
     "SettingsAdmin": "pending"
@@ -108,6 +108,7 @@
     "2026-01-05: Attachments module view now introduces a two-column layout with a SelectedAttachment inspector and staged upload editor so metadata and pending files are visible before persistence; dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-06: Attachments editor pane now surfaces HasAttachmentWorkflow-gated upload/download/delete buttons with SelectedAttachment command parameters so tooling hides when the service stack is offline; dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-07: Attachments editor now shows a busy overlay tied to IsBusy, lists validation messages inline, and styles the status text to highlight validation errors while dotnet restore/build remain blocked by the missing CLI.",
+    "2026-01-08: Attachments module now finalizes the split-view layout with synchronized list/inspector panes, completes CRUD flows with enforced e-signature prompts, and applies retention handling for staged and persisted files; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-23: WPF host now constructs AuditLogDocumentViewModel via DI so AuditService, ExportService, and the DatabaseService-backed AuditLogViewModel flow into the shell toolbar; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-25: Added DI registration for AuditDashboardViewModel so the WPF audit dashboard/log documents resolve consistently alongside ModuleRegistry/DataTemplate wiring; dotnet restore/build remain blocked by the missing CLI.",
     "2025-12-22: AuditLogViewModel now resolves through a DI factory so the shared DatabaseService reaches the WPF audit adapter when modules open; module registry mapping stays on the new document while dotnet restore/build remain blocked by the missing CLI.",
