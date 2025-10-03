@@ -598,8 +598,8 @@ public class AuditModuleViewModelTests
         var normalizedLater = later.Date;
         var normalizedEarlier = earlier.Date;
 
-        Assert.Equal(normalizedLater, viewModel.FilterFrom!.Value);
-        Assert.Equal(normalizedEarlier, viewModel.FilterTo!.Value);
+        Assert.Equal(normalizedEarlier, viewModel.FilterFrom!.Value);
+        Assert.Equal(normalizedLater, viewModel.FilterTo!.Value);
         Assert.Equal(normalizedEarlier, viewModel.LastFromFilter);
         Assert.Equal(normalizedLater.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
@@ -632,8 +632,8 @@ public class AuditModuleViewModelTests
         var normalizedLater = later.Date;
         var normalizedEvenEarlier = evenEarlier.Date;
 
-        Assert.Equal(normalizedLater, viewModel.FilterFrom!.Value);
-        Assert.Equal(normalizedEvenEarlier, viewModel.FilterTo!.Value);
+        Assert.Equal(normalizedEvenEarlier, viewModel.FilterFrom!.Value);
+        Assert.Equal(normalizedLater, viewModel.FilterTo!.Value);
         Assert.Equal(normalizedEvenEarlier, viewModel.LastFromFilter);
         Assert.Equal(normalizedLater.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);
@@ -657,8 +657,8 @@ public class AuditModuleViewModelTests
 
         await viewModel.RefreshAsync();
 
-        Assert.Equal(originalFrom, viewModel.FilterFrom!.Value);
-        Assert.Equal(earlierUpperBound, viewModel.FilterTo!.Value);
+        Assert.Equal(earlierUpperBound, viewModel.FilterFrom!.Value);
+        Assert.Equal(originalFrom, viewModel.FilterTo!.Value);
         Assert.Equal(earlierUpperBound, viewModel.LastFromFilter);
         Assert.Equal(originalFrom.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.True(viewModel.LastFromFilter <= viewModel.LastToFilter);

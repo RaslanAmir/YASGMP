@@ -40,7 +40,8 @@
       "2025-12-31: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf, and yasgmp.csproj; CLI remains unavailable so every command exits with 'command not found'.",
       "2026-01-07: dotnet --info/restore/build retried for yasgmp.sln and YasGMP.Wpf; CLI remains unavailable in the container so each command exits with 'command not found'.",
       "2026-01-08: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so each command exits with 'command not found'.",
-      "2026-01-11: dotnet restore/build retried for yasgmp.sln and platform-specific targets; CLI remains unavailable in the container so each command fails with \"command not found\"."
+      "2026-01-11: dotnet restore/build retried for yasgmp.sln and platform-specific targets; CLI remains unavailable in the container so each command fails with \"command not found\".",
+      "2026-01-12: dotnet restore/build/test attempted for yasgmp.sln, YasGMP.Wpf, and MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'."
     ]
   },
   "batches": [
