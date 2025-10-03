@@ -160,3 +160,4 @@
 - 2025-10-01: Incidents editor adds CFL linking for work orders/CAPA cases with tests covering the new mode transitions.
 - 2025-10-02: CAPA module now runs through ICapaCrudService with mode-aware editor, component lookups, and attachment uploads; signature/audit follow-ups remain planned under Batch B2.
 - 2025-10-03: Change Control module now reuses the new `IChangeControlCrudService` adapter with a mode-aware editor, CFL picker, and attachment workflow; e-signature/audit surfacing will arrive with Batch B2 once the SDK blocker lifts.
+- 2025-11-13: Updated WPF mapping to document the attachments split view, inspector/editor behaviors, CRUD/signature flow, and retention enforcement now live in the shell; `dotnet restore`/`dotnet build` retries still fail because the CLI is absent in this container.
