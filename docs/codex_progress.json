@@ -41,7 +41,8 @@
       "2026-01-07: dotnet --info/restore/build retried for yasgmp.sln and YasGMP.Wpf; CLI remains unavailable in the container so each command exits with 'command not found'.",
       "2026-01-08: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-01-11: dotnet restore/build retried for yasgmp.sln and platform-specific targets; CLI remains unavailable in the container so each command fails with \"command not found\".",
-      "2026-01-12: dotnet restore/build/test attempted for yasgmp.sln, YasGMP.Wpf, and MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'."
+      "2026-01-12: dotnet restore/build/test attempted for yasgmp.sln, YasGMP.Wpf, and MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'.",
+      "2026-01-13: dotnet restore retried for yasgmp.sln after API audit filter refresh updates; CLI remains unavailable so the command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -104,7 +105,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: trigger audit refresh on filter changes",
+  "lastCommitSummary": "fix: auto-refresh API audit filters",
   "notes": [
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-04: WPF host now resolves AttachmentsModuleViewModel via an explicit service provider factory so DatabaseService, attachment workflow, file picker, signature dialog, audit, CFL, shell interaction, and navigation services align with the current constructor order; dotnet restore/build remain blocked by the missing CLI.",
@@ -228,6 +229,7 @@
     "2026-01-09: Attachments module unit coverage now exercises mode transitions, staged upload dedupe, save/cancel behavior, and download/delete command enablement; dotnet CLI remains unavailable so restore/build/smoke are still blocked.",
     "2026-01-10: Debug smoke harness now stages an attachment upload, completes the signature-gated save, streams the file back via AttachmentService, and deletes the record while cleaning temp artifacts so attachments are included in the automation log; dotnet CLI remains unavailable so restore/build/smoke continue to be blocked.",
     "2026-01-11: Audit trail filters now trigger an auto-refresh when modified so the grid reloads immediately; dotnet CLI remains unavailable so restore/build/smoke stay blocked pending installation.",
-    "2026-01-12: AuditModuleViewModel test double now surfaces refresh invocation counts and snapshots so unit tests cover filter-change auto refresh behavior and state resets; dotnet restore/build retries still fail with 'command not found' because the CLI is missing in the container."
+    "2026-01-12: AuditModuleViewModel test double now surfaces refresh invocation counts and snapshots so unit tests cover filter-change auto refresh behavior and state resets; dotnet restore/build retries still fail with 'command not found' because the CLI is missing in the container.",
+    "2026-01-13: ApiAuditModuleViewModel now wires observable filter setters to a guarded refresh helper that clears status/error flags and triggers RefreshCommand, matching the Audit module's UX while dotnet restore remains blocked by the missing CLI."
   ]
 }
