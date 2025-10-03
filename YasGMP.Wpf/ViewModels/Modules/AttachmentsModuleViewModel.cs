@@ -4,12 +4,18 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
@@ -51,6 +57,15 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         StagedUploads = new ObservableCollection<StagedAttachmentUploadViewModel>();
         StagedUploads.CollectionChanged += OnStagedUploadsChanged;
 
+        UploadCommand = new AsyncRelayCommand(UploadAsync, CanUpload);
+        DownloadCommand = new AsyncRelayCommand(DownloadAsync, CanDownload);
+        DeleteCommand = new AsyncRelayCommand(DeleteAsync, CanDelete);
+        Toolbar.Add(new ModuleToolbarCommand("Upload", UploadCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Download", DownloadCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Delete", DeleteCommand));
+
+        PropertyChanged += OnPropertyChanged;
+
         if (IsInDesignMode())
         {
             Records.Clear();
@@ -80,6 +95,12 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
     [ObservableProperty]
     private AttachmentRowViewModel? _selectedAttachment;
+
+    public IAsyncRelayCommand UploadCommand { get; }
+
+    public IAsyncRelayCommand DownloadCommand { get; }
+
+    public IAsyncRelayCommand DeleteCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -291,6 +312,388 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     private void OnStagedUploadsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasStagedUploads));
+    }
+
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(IsBusy), StringComparison.Ordinal))
+        {
+            UpdateAttachmentCommands();
+        }
+    }
+
+    private bool CanUpload()
+        => !IsBusy && HasAttachmentWorkflow;
+
+    private bool CanDownload()
+        => !IsBusy && SelectedAttachment is not null && HasAttachmentWorkflow;
+
+    private bool CanDelete()
+        => !IsBusy && SelectedAttachment is not null;
+
+    private async Task UploadAsync()
+    {
+        if (!HasAttachmentWorkflow)
+        {
+            StatusMessage = "Attachment workflow unavailable.";
+            return;
+        }
+
+        var files = await _filePicker
+            .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: "Select attachments to upload"))
+            .ConfigureAwait(false);
+
+        if (files is null || files.Count == 0)
+        {
+            StatusMessage = "Attachment upload cancelled.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommands();
+
+            var uploaded = 0;
+            var duplicates = 0;
+            var failed = 0;
+            var notes = new List<string>();
+
+            foreach (var file in files)
+            {
+                var staged = CreateStagedUpload(file);
+                StagedUploads.Add(staged);
+
+                var tempDirectory = Path.Combine(Path.GetTempPath(), "YasGMP", "uploads", Guid.NewGuid().ToString("N"));
+                var tempPath = Path.Combine(tempDirectory, file.FileName);
+
+                try
+                {
+                    Directory.CreateDirectory(tempDirectory);
+
+                    await using (var source = await file.OpenReadAsync().ConfigureAwait(false))
+                    await using (var destination = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 128 * 1024, useAsync: true))
+                    using (var sha = SHA256.Create())
+                    {
+                        var buffer = new byte[128 * 1024];
+                        long total = 0;
+                        int read;
+                        while ((read = await source.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
+                        {
+                            await destination.WriteAsync(buffer.AsMemory(0, read)).ConfigureAwait(false);
+                            sha.TransformBlock(buffer, 0, read, null, 0);
+                            total += read;
+                        }
+
+                        sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                        var hash = sha.Hash is null || sha.Hash.Length == 0
+                            ? string.Empty
+                            : Convert.ToHexString(sha.Hash);
+
+                        if (!string.IsNullOrWhiteSpace(hash))
+                        {
+                            var existing = await _attachmentService
+                                .FindByHashAndSizeAsync(hash, total)
+                                .ConfigureAwait(false);
+
+                            if (existing is not null)
+                            {
+                                duplicates++;
+                                notes.Add($"Skipped '{file.FileName}' (duplicate of #{existing.Id}).");
+                                continue;
+                            }
+
+                            staged.Notes = hash;
+                        }
+
+                        await destination.FlushAsync().ConfigureAwait(false);
+                    }
+
+                    await using var uploadStream = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read, 128 * 1024, useAsync: true);
+                    var entityType = string.IsNullOrWhiteSpace(staged.EntityType) ? "attachments" : staged.EntityType;
+                    var request = new AttachmentUploadRequest
+                    {
+                        FileName = file.FileName,
+                        ContentType = staged.ContentType,
+                        EntityType = entityType,
+                        EntityId = staged.EntityId,
+                        Notes = staged.Notes,
+                        Reason = $"wpf:{ModuleKey}:upload",
+                        SourceHost = Environment.MachineName,
+                        SourceIp = "ui:wpf"
+                    };
+
+                    var uploadResult = await _attachmentService
+                        .UploadAsync(uploadStream, request)
+                        .ConfigureAwait(false);
+
+                    var proxy = new AttachmentServiceUploadProxy(_attachmentService, uploadResult);
+                    await _databaseService
+                        .AddAttachmentAsync(
+                            tempPath,
+                            entityType,
+                            staged.EntityId,
+                            uploadResult.Attachment.UploadedById ?? 0,
+                            "ui:wpf",
+                            Environment.MachineName,
+                            $"wpf:{ModuleKey}",
+                            request.Reason,
+                            proxy)
+                        .ConfigureAwait(false);
+
+                    uploaded++;
+                    notes.Add($"Uploaded '{file.FileName}'.");
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    notes.Add($"Failed '{file.FileName}': {ex.Message}");
+                }
+                finally
+                {
+                    StagedUploads.Remove(staged);
+                    TryDeleteTempDirectory(Path.GetDirectoryName(tempPath));
+                }
+            }
+
+            StatusMessage = BuildUploadStatus(uploaded, duplicates, failed, notes);
+
+            if (uploaded > 0)
+            {
+                await RefreshAsync().ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Attachment upload failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommands();
+        }
+    }
+
+    private async Task DownloadAsync()
+    {
+        if (SelectedAttachment is null)
+        {
+            StatusMessage = "Select an attachment to download.";
+            return;
+        }
+
+        if (!HasAttachmentWorkflow)
+        {
+            StatusMessage = "Attachment workflow unavailable.";
+            return;
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            FileName = SelectedAttachment.FileName,
+            Title = $"Save {SelectedAttachment.FileName}",
+            Filter = "All files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            StatusMessage = "Download cancelled.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommands();
+            StatusMessage = $"Downloading '{SelectedAttachment.FileName}'...";
+
+            await using var destination = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.None, 128 * 1024, useAsync: true);
+            var request = new AttachmentReadRequest
+            {
+                Reason = $"wpf:{ModuleKey}:download",
+                SourceHost = Environment.MachineName,
+                SourceIp = "ui:wpf"
+            };
+
+            var result = await _attachmentService
+                .StreamContentAsync(SelectedAttachment.Id, destination, request)
+                .ConfigureAwait(false);
+
+            var inspectorFields = BuildInspectorFields(SelectedAttachment);
+            _shellInteractionService.UpdateInspector(new InspectorContext(Title, SelectedAttachment.DisplayName, inspectorFields));
+
+            StatusMessage = $"Downloaded {FormatBytes(result.BytesWritten)} of {FormatBytes(result.TotalLength)} to '{dialog.FileName}'.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Download failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommands();
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (SelectedAttachment is null)
+        {
+            StatusMessage = "Select an attachment to delete.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommands();
+
+            await _databaseService
+                .DeleteAttachmentAsync(SelectedAttachment.Id)
+                .ConfigureAwait(false);
+
+            StatusMessage = $"Attachment '{SelectedAttachment.FileName}' deleted.";
+            await RefreshAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Delete failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommands();
+        }
+    }
+
+    private void UpdateAttachmentCommands()
+    {
+        UploadCommand.NotifyCanExecuteChanged();
+        DownloadCommand.NotifyCanExecuteChanged();
+        DeleteCommand.NotifyCanExecuteChanged();
+    }
+
+    private StagedAttachmentUploadViewModel CreateStagedUpload(PickedFile file)
+    {
+        var entityType = SelectedAttachment?.Model.EntityType;
+        var entityId = SelectedAttachment?.Model.EntityId ?? 0;
+
+        return new StagedAttachmentUploadViewModel
+        {
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            EntityType = string.IsNullOrWhiteSpace(entityType) ? "attachments" : entityType!,
+            EntityId = entityId,
+            Notes = SelectedAttachment?.Model.Notes
+        };
+    }
+
+    private static string BuildUploadStatus(int uploaded, int duplicates, int failed, IReadOnlyList<string> notes)
+    {
+        var parts = new List<string>
+        {
+            $"Uploaded {uploaded} file(s)"
+        };
+
+        if (duplicates > 0)
+        {
+            parts.Add($"skipped {duplicates} duplicate(s)");
+        }
+
+        if (failed > 0)
+        {
+            parts.Add($"{failed} failed");
+        }
+
+        var summary = string.Join(", ", parts) + ".";
+
+        if (notes.Count > 0)
+        {
+            summary += " " + string.Join(" ", notes);
+        }
+
+        return summary;
+    }
+
+    private static string FormatBytes(long value)
+    {
+        if (value <= 0)
+        {
+            return "0 B";
+        }
+
+        const double kilo = 1024d;
+        const double mega = kilo * 1024d;
+
+        if (value < kilo)
+        {
+            return value + " B";
+        }
+
+        if (value < mega)
+        {
+            return (value / kilo).ToString("F1", CultureInfo.CurrentCulture) + " KB";
+        }
+
+        return (value / mega).ToString("F1", CultureInfo.CurrentCulture) + " MB";
+    }
+
+    private static void TryDeleteTempDirectory(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive: true);
+            }
+        }
+        catch
+        {
+            // Ignore cleanup failures; temporary files will be removed by the OS later.
+        }
+    }
+
+    partial void OnSelectedAttachmentChanged(AttachmentRowViewModel? value)
+    {
+        UpdateAttachmentCommands();
+    }
+
+    private sealed class AttachmentServiceUploadProxy : IAttachmentService
+    {
+        private readonly IAttachmentService _inner;
+        private readonly AttachmentUploadResult _result;
+
+        public AttachmentServiceUploadProxy(IAttachmentService inner, AttachmentUploadResult result)
+        {
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+            _result = result ?? throw new ArgumentNullException(nameof(result));
+        }
+
+        public Task<AttachmentUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
+            => Task.FromResult(_result);
+
+        public Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default)
+            => _inner.FindByHashAsync(sha256, token);
+
+        public Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default)
+            => _inner.FindByHashAndSizeAsync(sha256, fileSize, token);
+
+        public Task<AttachmentStreamResult> StreamContentAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default)
+            => _inner.StreamContentAsync(attachmentId, destination, request, token);
+
+        public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
+            => _inner.GetLinksForEntityAsync(entityType, entityId, token);
+
+        public Task RemoveLinkAsync(int linkId, CancellationToken token = default)
+            => _inner.RemoveLinkAsync(linkId, token);
+
+        public Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
+            => _inner.RemoveLinkAsync(entityType, entityId, attachmentId, token);
     }
 
     private static bool IsInDesignMode()

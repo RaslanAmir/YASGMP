@@ -30,7 +30,7 @@
   - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
   - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
   - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity and resolves through DI with the shared DatabaseService; WPF Audit Log document view mirrors the dashboard patterns with toolbar buttons, filters, busy overlay, and status styling; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration. These audit-focused modules are now grouped under the "Quality & Compliance" category in the ModuleRegistry.)*
-  - Documents/Attachments — [~] in-progress *(Attachments module now inherits ModuleDocumentViewModel, wires shared shell services, seeds design-time records, and now tracks AttachmentRows/StagedUploads/SelectedAttachment observables to drive the inspector payload.)*
+  - Documents/Attachments — [~] in-progress *(Attachments module now inherits ModuleDocumentViewModel, wires shared shell services, seeds design-time records, tracks AttachmentRows/StagedUploads/SelectedAttachment observables to drive the inspector payload, and now surfaces upload/download/delete toolbar commands with SHA-256 deduplication, streaming downloads, and status updates.)*
   - Dashboard/Reports — [ ] todo
   - Settings/Admin — [ ] todo
 
@@ -42,6 +42,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2026-01-02: Attachments module toolbar now exposes async upload/download/delete commands with SHA-256 deduplication, proxy-backed persistence to avoid double uploads, streaming downloads via AttachmentService, and status messaging that reflects duplicate skips/failures while dotnet restore/build remain blocked by the missing CLI.
 - 2025-12-31: Attachments module now materializes ModuleRecord inspector fields directly from DatabaseService results (entity/table, linked record id, SHA-256, status) and mirrors the schema in design-time data; dotnet restore/build attempts still fail with `command not found` because the CLI remains unavailable in the container.
 - 2025-10-02: Added the AuditDashboardDocument WPF view with toolbar/filter parity, busy overlay, and shell DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.
 - 2025-12-05: Added WPF unit coverage exercising ValidationCrudServiceAdapter context propagation, updated the validation CRUD
