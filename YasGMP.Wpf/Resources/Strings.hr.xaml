@@ -91,4 +91,197 @@
     <sys:String x:Key="Dock.Inspector.Title">Inspektor</sys:String>
     <sys:String x:Key="Dock.Inspector.ModuleTitle">Modul</sys:String>
     <sys:String x:Key="Dock.Inspector.NoRecord">Nema odabranog zapisa</sys:String>
+
+    <!-- Module toolbar toggles/commands -->
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.Content">Traži</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.ToolTip">Prebaci u način traženja.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.AutomationName">Preklopnik načina Traži</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.AutomationId">Toolbar.Toggle.Find</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.Content">Dodaj</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.ToolTip">Prebaci u način dodavanja.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.AutomationName">Preklopnik načina Dodaj</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.AutomationId">Toolbar.Toggle.Add</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.View.Content">Pregled</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.ToolTip">Prebaci u način pregleda.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.AutomationName">Preklopnik načina Pregled</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.AutomationId">Toolbar.Toggle.View</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.Content">Ažuriraj</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.ToolTip">Prebaci u način ažuriranja.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.AutomationName">Preklopnik načina Ažuriraj</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.AutomationId">Toolbar.Toggle.Update</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Save.Content">Spremi</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Save.ToolTip">Spremi trenutačni zapis.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Save.AutomationName">Naredba spremanja zapisa</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Save.AutomationId">Toolbar.Command.Save</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.Content">Odustani</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.ToolTip">Poništi promjene.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.AutomationName">Naredba odustajanja</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.AutomationId">Toolbar.Command.Cancel</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.Content">Osvježi</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.ToolTip">Ponovno učitaj podatke iz izvora.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.AutomationName">Naredba osvježavanja podataka</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.AutomationId">Toolbar.Command.Refresh</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.Content">CFL</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.ToolTip">Otvori izbor iz liste.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationName">Naredba odabira iz liste</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationId">Toolbar.Button.CFL</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.ToolTip">Otvori povezani zapis.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationName">Navigacija zlatnom strelicom</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationId">Toolbar.Button.GoldenArrow</sys:String>
+
+    <sys:String x:Key="Module.Status.Ready">Spremno</sys:String>
+
+    <!-- Dashboard module -->
+    <sys:String x:Key="Dashboard.Toolbar.AutomationName">Alatna traka nadzorne ploče</sys:String>
+    <sys:String x:Key="Dashboard.Toolbar.AutomationId">Dashboard.Toolbar</sys:String>
+
+    <sys:String x:Key="Dashboard.Search.Label">Pretraži:</sys:String>
+    <sys:String x:Key="Dashboard.Search.ToolTip">Filtriraj događaje nadzorne ploče.</sys:String>
+    <sys:String x:Key="Dashboard.Search.AutomationName">Pretraživanje nadzorne ploče</sys:String>
+    <sys:String x:Key="Dashboard.Search.AutomationId">Dashboard.Search</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Code.Header">Šifra</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.ToolTip">Jedinstvena šifra događaja.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.AutomationName">Stupac Šifra</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.AutomationId">Dashboard.Grid.Column.Code</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Title.Header">Naziv</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.ToolTip">Naziv događaja prikazan u listi.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.AutomationName">Stupac Naziv</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.AutomationId">Dashboard.Grid.Column.Title</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Status.Header">Status</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.ToolTip">Trenutačni status zapisa.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.AutomationName">Stupac Status</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.AutomationId">Dashboard.Grid.Column.Status</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Description.Header">Opis</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.ToolTip">Detaljan opis događaja.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.AutomationName">Stupac Opis</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.AutomationId">Dashboard.Grid.Column.Description</sys:String>
+
+    <!-- Audit module toolbar extensions -->
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.Content">Primijeni filter</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.ToolTip">Primijeni odabrane filtre audita.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.AutomationName">Naredba primjene filtera audita</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.AutomationId">Audit.Toolbar.ApplyFilter</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.Content">Izvezi CSV</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.ToolTip">Izvezi rezultate audita u CSV.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.AutomationName">Naredba izvoza audita u CSV</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.AutomationId">Audit.Toolbar.ExportCsv</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.Content">Izvezi Excel</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.ToolTip">Izvezi rezultate audita u Excel.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.AutomationName">Naredba izvoza audita u Excel</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.AutomationId">Audit.Toolbar.ExportExcel</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.Content">Izvezi PDF</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.ToolTip">Izvezi rezultate audita u PDF.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.AutomationName">Naredba izvoza audita u PDF</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.AutomationId">Audit.Toolbar.ExportPdf</sys:String>
+
+    <!-- Attachments toolbar -->
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.Content">Prenesi</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.ToolTip">Prenesi novi prilog.</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.AutomationName">Naredba prijenosa priloga</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.AutomationId">Attachments.Toolbar.Upload</sys:String>
+
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.Content">Preuzmi</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.ToolTip">Preuzmi odabrani prilog.</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.AutomationName">Naredba preuzimanja priloga</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.AutomationId">Attachments.Toolbar.Download</sys:String>
+
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.Content">Izbriši</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.ToolTip">Izbriši odabrani prilog.</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.AutomationName">Naredba brisanja priloga</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.AutomationId">Attachments.Toolbar.Delete</sys:String>
+
+    <!-- Audit dashboard toolbar -->
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.Content">Primijeni filtre</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip">Primijeni filtre nadzorne ploče na prikaz audita.</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName">Naredba primjene filtera nadzorne ploče</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId">AuditDashboard.Toolbar.ApplyFilters</sys:String>
+
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.Content">Izvezi PDF</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.ToolTip">Izvezi sažetak nadzorne ploče u PDF.</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.AutomationName">Naredba izvoza nadzorne ploče u PDF</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.AutomationId">AuditDashboard.Toolbar.ExportPdf</sys:String>
+
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.Content">Izvezi Excel</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.ToolTip">Izvezi sažetak nadzorne ploče u Excel.</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.AutomationName">Naredba izvoza nadzorne ploče u Excel</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.AutomationId">AuditDashboard.Toolbar.ExportExcel</sys:String>
+
+    <!-- Module tree -->
+    <sys:String x:Key="ModuleTree.AutomationName">Navigacija stablom modula</sys:String>
+    <sys:String x:Key="ModuleTree.ToolTip">Pregledavaj module po kategoriji.</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Quality.Title">Kvaliteta</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.ToolTip">Moduli kvalitete i usklađenosti.</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.AutomationName">Kategorija Kvaliteta</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.AutomationId">ModuleTree.Category.Quality</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.Title">CAPA</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.ToolTip">Korektivne i preventivne radnje.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationName">Čvor CAPA</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationId">ModuleTree.Node.Quality.CAPA</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.Title">Auditi</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.ToolTip">Dnevnik audita i nadzorne ploče.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.AutomationName">Čvor Auditi</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.AutomationId">ModuleTree.Node.Quality.Audits</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.Title">Kontrola dokumenata</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.ToolTip">Tijekovi kontrole dokumenata.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.AutomationName">Čvor Kontrola dokumenata</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.AutomationId">ModuleTree.Node.Quality.DocumentControl</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Maintenance.Title">Održavanje</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Maintenance.ToolTip">Moduli održavanja i imovine.</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Maintenance.AutomationName">Kategorija Održavanje</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Maintenance.AutomationId">ModuleTree.Category.Maintenance</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.Title">Strojevi</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.ToolTip">Glavni podaci o opremi.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.AutomationName">Čvor Strojevi</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.AutomationId">ModuleTree.Node.Maintenance.Machines</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.Title">Preventivni planovi</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.ToolTip">Planovi preventivnog održavanja.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.AutomationName">Čvor Preventivni planovi</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.AutomationId">ModuleTree.Node.Maintenance.PreventivePlans</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.Title">Kalibracija</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.ToolTip">Rasporedi i povijest kalibracije.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationName">Čvor Kalibracija</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationId">ModuleTree.Node.Maintenance.Calibration</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Warehouse.Title">Skladište</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Warehouse.ToolTip">Moduli za skladište i dobavljače.</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Warehouse.AutomationName">Kategorija Skladište</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Warehouse.AutomationId">ModuleTree.Category.Warehouse</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.Title">Zalihe</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.ToolTip">Pregled zaliha i inventura.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationName">Čvor Zalihe</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationId">ModuleTree.Node.Warehouse.Inventory</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.Title">Dobavljači</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.ToolTip">Popis odobrenih dobavljača.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationName">Čvor Dobavljači</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationId">ModuleTree.Node.Warehouse.Suppliers</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.Title">Transakcije</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.ToolTip">Transakcije skladišta i knjiga.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationName">Čvor Transakcije</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationId">ModuleTree.Node.Warehouse.Transactions</sys:String>
 </ResourceDictionary>

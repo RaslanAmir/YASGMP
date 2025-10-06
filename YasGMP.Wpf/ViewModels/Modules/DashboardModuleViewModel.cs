@@ -18,8 +18,9 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Dashboard", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Dashboard", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

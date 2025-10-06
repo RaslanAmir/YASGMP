@@ -8,7 +8,9 @@
              d:DesignHeight="400"
              d:DesignWidth="600">
     <DockPanel>
-        <ToolBar DockPanel.Dock="Top">
+        <ToolBar DockPanel.Dock="Top"
+                 AutomationProperties.Name="{DynamicResource Dashboard.Toolbar.AutomationName}"
+                 AutomationProperties.AutomationId="{DynamicResource Dashboard.Toolbar.AutomationId}">
             <ItemsControl ItemsSource="{Binding Toolbar}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -20,13 +22,24 @@
                         <ToggleButton Content="{Binding Caption}"
                                       Command="{Binding Command}"
                                       IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0" />
+                                      Margin="0,0,4,0"
+                                      ToolTipService.ToolTip="{Binding ToolTip}"
+                                      AutomationProperties.Name="{Binding AutomationName}"
+                                      AutomationProperties.AutomationId="{Binding AutomationId}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}"
+                    Command="{Binding ShowCflCommand}"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                       Margin="8,0,0,0"
+                                       ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.GoldenArrow.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.GoldenArrow.AutomationName}"
+                                       AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.GoldenArrow.AutomationId}" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -35,8 +48,16 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Dashboard.Search.Label}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"
+                           AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
+                           AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}" />
+                <TextBox Width="220"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
+                         AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}"
+                         ToolTipService.ToolTip="{DynamicResource Dashboard.Search.ToolTip}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       ItemsSource="{Binding RecordsView}"
@@ -46,10 +67,66 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Binding="{Binding Code}" Width="120" Header="{DynamicResource Dashboard.Grid.Column.Code.Header}">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Code.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Code.AutomationName}" />
+                                <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.Grid.Column.Code.AutomationId}" />
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Code.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Code.AutomationName}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Title}" Width="2*" Header="{DynamicResource Dashboard.Grid.Column.Title.Header}">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Title.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Title.AutomationName}" />
+                                <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.Grid.Column.Title.AutomationId}" />
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Title.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Title.AutomationName}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Status}" Width="140" Header="{DynamicResource Dashboard.Grid.Column.Status.Header}">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Status.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Status.AutomationName}" />
+                                <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.Grid.Column.Status.AutomationId}" />
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Status.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Status.AutomationName}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Description}" Width="2*" Header="{DynamicResource Dashboard.Grid.Column.Description.Header}">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Description.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Description.AutomationName}" />
+                                <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.Grid.Column.Description.AutomationId}" />
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Description.ToolTip}" />
+                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Description.AutomationName}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />

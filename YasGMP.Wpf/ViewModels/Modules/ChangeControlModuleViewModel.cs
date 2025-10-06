@@ -40,8 +40,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Change Control", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Change Control", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _changeControlService = changeControlService ?? throw new ArgumentNullException(nameof(changeControlService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

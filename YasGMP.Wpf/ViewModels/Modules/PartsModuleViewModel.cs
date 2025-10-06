@@ -38,8 +38,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Parts & Stock", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Parts & Stock", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));

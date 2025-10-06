@@ -63,8 +63,9 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Suppliers", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));

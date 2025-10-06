@@ -19,10 +19,14 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     private readonly ICflDialogService _cflDialogService;
     private readonly IShellInteractionService _shellInteraction;
     private readonly IModuleNavigationService _moduleNavigation;
+    private readonly ILocalizationService _localization;
+    private readonly string _readyStatusKey = "Module.Status.Ready";
+    private string _currentReadyStatus = string.Empty;
 
     protected B1FormDocumentViewModel(
         string moduleKey,
         string title,
+        ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService moduleNavigation)
@@ -30,6 +34,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         ModuleKey = moduleKey ?? throw new ArgumentNullException(nameof(moduleKey));
         Title = title ?? throw new ArgumentNullException(nameof(title));
         ContentId = $"YasGmp.Shell.Module.{moduleKey}.{Guid.NewGuid():N}";
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _cflDialogService = cflDialogService;
         _shellInteraction = shellInteraction;
         _moduleNavigation = moduleNavigation;
@@ -53,14 +58,32 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
         Toolbar = new ObservableCollection<ModuleToolbarCommand>
         {
-            new("Find", EnterFindModeCommand),
-            new("Add", EnterAddModeCommand),
-            new("View", EnterViewModeCommand),
-            new("Update", EnterUpdateModeCommand),
-            new("Save", SaveCommand),
-            new("Cancel", CancelCommand),
-            new("Refresh", RefreshCommand)
+            new("Module.Toolbar.Toggle.Find.Content", EnterFindModeCommand, _localization,
+                "Module.Toolbar.Toggle.Find.ToolTip", "Module.Toolbar.Toggle.Find.AutomationName",
+                "Module.Toolbar.Toggle.Find.AutomationId", FormMode.Find),
+            new("Module.Toolbar.Toggle.Add.Content", EnterAddModeCommand, _localization,
+                "Module.Toolbar.Toggle.Add.ToolTip", "Module.Toolbar.Toggle.Add.AutomationName",
+                "Module.Toolbar.Toggle.Add.AutomationId", FormMode.Add),
+            new("Module.Toolbar.Toggle.View.Content", EnterViewModeCommand, _localization,
+                "Module.Toolbar.Toggle.View.ToolTip", "Module.Toolbar.Toggle.View.AutomationName",
+                "Module.Toolbar.Toggle.View.AutomationId", FormMode.View),
+            new("Module.Toolbar.Toggle.Update.Content", EnterUpdateModeCommand, _localization,
+                "Module.Toolbar.Toggle.Update.ToolTip", "Module.Toolbar.Toggle.Update.AutomationName",
+                "Module.Toolbar.Toggle.Update.AutomationId", FormMode.Update),
+            new("Module.Toolbar.Command.Save.Content", SaveCommand, _localization,
+                "Module.Toolbar.Command.Save.ToolTip", "Module.Toolbar.Command.Save.AutomationName",
+                "Module.Toolbar.Command.Save.AutomationId"),
+            new("Module.Toolbar.Command.Cancel.Content", CancelCommand, _localization,
+                "Module.Toolbar.Command.Cancel.ToolTip", "Module.Toolbar.Command.Cancel.AutomationName",
+                "Module.Toolbar.Command.Cancel.AutomationId"),
+            new("Module.Toolbar.Command.Refresh.Content", RefreshCommand, _localization,
+                "Module.Toolbar.Command.Refresh.ToolTip", "Module.Toolbar.Command.Refresh.AutomationName",
+                "Module.Toolbar.Command.Refresh.AutomationId")
         };
+
+        StatusMessage = _localization.GetString(_readyStatusKey);
+        _currentReadyStatus = StatusMessage;
+        _localization.LanguageChanged += OnLocalizationLanguageChanged;
     }
 
     /// <summary>Stable module key registered inside <see cref="IModuleRegistry"/>.</summary>
@@ -113,7 +136,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     private bool _isBusy;
 
     [ObservableProperty]
-    private string _statusMessage = "Ready";
+    private string _statusMessage = string.Empty;
 
     [ObservableProperty]
     private string? _searchText;
@@ -187,7 +210,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     {
         foreach (var button in Toolbar)
         {
-            button.IsChecked = string.Equals(button.Caption, value.ToString(), StringComparison.OrdinalIgnoreCase);
+            button.IsChecked = button.AssociatedMode is not null && button.AssociatedMode == value;
         }
 
         _shellInteraction.UpdateStatus($"{Title}: {value} mode");
@@ -211,6 +234,17 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     partial void OnStatusMessageChanged(string value)
     {
         _shellInteraction.UpdateStatus(value);
+    }
+
+    private void OnLocalizationLanguageChanged(object? sender, EventArgs e)
+    {
+        var ready = _localization.GetString(_readyStatusKey);
+        if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == _currentReadyStatus)
+        {
+            StatusMessage = ready;
+        }
+
+        _currentReadyStatus = ready;
     }
 
     partial void OnSearchTextChanged(string? value)

@@ -52,8 +52,9 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "External Servicers", cflDialogService, shellInteraction, navigation)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "External Servicers", localization, cflDialogService, shellInteraction, navigation)
     {
         _servicerService = servicerService ?? throw new ArgumentNullException(nameof(servicerService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

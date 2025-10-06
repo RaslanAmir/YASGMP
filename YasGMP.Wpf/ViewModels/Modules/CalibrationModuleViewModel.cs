@@ -43,8 +43,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Calibration", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Calibration", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _calibrationService = calibrationService ?? throw new ArgumentNullException(nameof(calibrationService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));

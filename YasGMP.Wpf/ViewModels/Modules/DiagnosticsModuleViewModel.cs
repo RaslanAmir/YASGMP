@@ -15,8 +15,9 @@ public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewMod
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Diagnostics", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Diagnostics", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

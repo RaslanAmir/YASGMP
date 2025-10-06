@@ -79,8 +79,9 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Incidents", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Incidents", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _incidentService = incidentService ?? throw new ArgumentNullException(nameof(incidentService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

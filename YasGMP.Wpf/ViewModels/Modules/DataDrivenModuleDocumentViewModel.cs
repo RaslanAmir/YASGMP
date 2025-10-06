@@ -14,11 +14,12 @@ public abstract class DataDrivenModuleDocumentViewModel : ModuleDocumentViewMode
         string key,
         string title,
         DatabaseService databaseService,
+        ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         AuditService? auditService = null)
-        : base(key, title, cflDialogService, shellInteraction, navigation)
+        : base(key, title, localization, cflDialogService, shellInteraction, navigation)
     {
         Database = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         Audit = auditService;

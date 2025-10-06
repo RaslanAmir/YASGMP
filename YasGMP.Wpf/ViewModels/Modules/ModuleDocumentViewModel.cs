@@ -11,10 +11,11 @@ public abstract class ModuleDocumentViewModel : B1FormDocumentViewModel
     protected ModuleDocumentViewModel(
         string moduleKey,
         string title,
+        ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(moduleKey, title, cflDialogService, shellInteraction, navigation)
+        : base(moduleKey, title, localization, cflDialogService, shellInteraction, navigation)
     {
     }
 

@@ -38,8 +38,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Warehouse", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Warehouse", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _warehouseService = warehouseService ?? throw new ArgumentNullException(nameof(warehouseService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));

@@ -39,7 +39,7 @@
     - 2026-01-05: Attachments view now splits the layout into a records grid and inspector/editor pane that surfaces SelectedAttachment metadata alongside staged upload previews and retention flags.
     - 2026-01-06: Editor pane now drives staged uploads through the AttachmentService, requiring an electronic signature before committing changes and hiding commands when the workflow is unavailable.
     - 2026-01-07: Attachments editor now enforces retention rules during save/delete, shows busy overlays tied to IsBusy, and surfaces validation/status messaging while dotnet restore/build remain blocked by the missing CLI.
-  - Dashboard/Reports — [ ] todo
+  - Dashboard/Reports — [~] in-progress *(dashboard cockpit now binds toolbar toggles, CFL/Golden Arrow commands, search label, and grid columns through the localization service with automation metadata for Accessibility Insights/FlaUI validation; module tree categories/nodes now surface localized captions/tooltips across EN↔HR switches.)*
   - Settings/Admin — [ ] todo
 
 - **Open Issues / Blockers**
@@ -51,6 +51,8 @@
 
 ## Notes
 - 2026-01-16: Added shared localization dictionaries for ribbon, backstage, and dock pane metadata with dynamic resources and automation identifiers so EN↔HR switches update headers, tooltips, and accessibility names; dotnet restore/build/smoke remain blocked by the missing CLI in the container.
+- 2026-01-17: Localized dashboard toolbar toggles/buttons, search, and data grid columns plus module tree categories/nodes via the shared localization service, adding automation ids/names for Accessibility Insights/FlaUI; dotnet restore/build/smoke remain blocked pending CLI availability.
+- 2026-01-18: Extended module tree templates so each node's header now binds tooltip and automation metadata directly from localization-aware view-model properties, keeping screen reader output aligned after language switches; `dotnet restore`/`dotnet build`/smoke remain blocked by the missing CLI.
 - 2026-01-11: Audit trail filters now trigger an automatic refresh so results stay aligned with user selections; another `dotnet restore` attempt (and implied builds/smoke) failed with **command not found** because the CLI remains unavailable in the container.
 - 2026-01-12: Audit module test double now exposes refresh invocation tracking so filter property changes can assert auto-refresh behavior and pre-refresh state resets in unit tests; `dotnet restore`/`dotnet build` retries still fail with **command not found** because the CLI is unavailable in the container.
 - 2026-01-13: API audit filter setters now invoke a shared refresh helper that mirrors the main Audit module's busy/initialization guards, resets state, and kicks the async refresh command; `dotnet restore` retried and still fails with **command not found** so builds/smoke remain blocked pending SDK installation.

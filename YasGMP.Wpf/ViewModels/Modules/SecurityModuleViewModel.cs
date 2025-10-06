@@ -36,8 +36,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Security", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Security", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
