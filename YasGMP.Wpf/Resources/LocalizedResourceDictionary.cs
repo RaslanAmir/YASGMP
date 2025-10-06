@@ -1,4 +1,6 @@
-using System;
+using System.Collections;
+using System.Globalization;
+using System.Resources;
 using System.Windows;
 
 namespace YasGMP.Wpf.Resources;
@@ -9,16 +11,26 @@ namespace YasGMP.Wpf.Resources;
 /// </summary>
 public class LocalizedResourceDictionary : ResourceDictionary
 {
-    public LocalizedResourceDictionary()
-    {
-        LocalizationManager.Register(this);
-    }
+    public LocalizedResourceDictionary() => LocalizationManager.Register(this);
 
-    internal void ApplySource(Uri source)
+    internal void UpdateResources(ResourceManager resourceManager, CultureInfo culture)
     {
-        if (!Equals(Source, source))
+        Clear();
+
+        var resourceSet = resourceManager.GetResourceSet(culture, true, true)
+                         ?? resourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
+
+        if (resourceSet is null)
         {
-            Source = source;
+            return;
+        }
+
+        foreach (DictionaryEntry entry in resourceSet)
+        {
+            if (entry.Key is string key)
+            {
+                this[key] = entry.Value ?? string.Empty;
+            }
         }
     }
 }
