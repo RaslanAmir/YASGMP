@@ -28,8 +28,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Toolbar.Button.Attach.Content}" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}"/>
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -48,7 +48,7 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
@@ -61,9 +61,9 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Warehouse" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Location" Binding="{Binding InspectorFields[0].Value}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Ribbon.Button.Warehouse.Header}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Module.Assets.Header.Location}" Binding="{Binding InspectorFields[0].Value}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="140" />
                 </DataGrid.Columns>
             </DataGrid>
             <Border Grid.Row="1"
@@ -74,7 +74,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Warehouse Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Module.Warehouse.Text.WarehouseDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="160" />
@@ -92,53 +92,53 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="Name" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Module.Assets.Text.Name}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Location" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Module.Assets.Header.Location}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Location, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Status" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
                                       Grid.Column="1"
                                       ItemsSource="{Binding StatusOptions}"
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Responsible" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Module.Warehouse.Text.Responsible}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="3"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Responsible, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="QR Code" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Module.Warehouse.Text.QRCode}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
                                      Text="{Binding Editor.QrCode, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Climate Mode" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Module.Warehouse.Text.ClimateMode}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.ClimateMode, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
-                                <CheckBox Content="Qualified"
+                                <CheckBox Content="{DynamicResource Module.Suppliers.Content.Qualified}"
                                           IsChecked="{Binding Editor.IsQualified, Mode=TwoWay}"
                                           IsEnabled="{Binding IsEditorEnabled}" />
-                                <TextBlock Text="Last Qualified" Margin="16,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Module.Warehouse.Text.LastQualified}" Margin="16,0,8,0" VerticalAlignment="Center" />
                                 <DatePicker SelectedDate="{Binding Editor.LastQualified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             IsEnabled="{Binding IsEditorEnabled}" />
                             </StackPanel>
 
-                            <TextBlock Text="Notes" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                            <TextBlock Text="{DynamicResource Module.Assets.Text.Notes}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Note, UpdateSourceTrigger=PropertyChanged}"
@@ -152,7 +152,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                        <TextBlock Text="•" Foreground="DarkRed" Margin="0,0,4,0" />
+                                        <TextBlock Text="{DynamicResource Module.Assets.Text.Value}" Foreground="DarkRed" Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding}" Foreground="DarkRed" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </DataTemplate>
@@ -161,12 +161,12 @@
 
                         <Border Background="#1FFFCCCC" Padding="8" Margin="0,12,0,0" CornerRadius="4" Visibility="{Binding HasStockAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="⚠" FontSize="16" Margin="0,0,8,0" />
-                                <TextBlock Text="Under-minimum stock detected for one or more items." FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource Module.Parts.Text.Value}" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="{DynamicResource Module.Warehouse.Text.UnderMinimumStockDetectedForOneOrMoreItems}" FontWeight="SemiBold" />
                             </StackPanel>
                         </Border>
 
-                        <GroupBox Header="Stock Snapshot" Margin="0,16,0,0">
+                        <GroupBox Header="{DynamicResource Module.Warehouse.Header.StockSnapshot}" Margin="0,16,0,0">
                             <DataGrid ItemsSource="{Binding StockSnapshot}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" HeadersVisibility="Column" MinHeight="160">
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
@@ -182,27 +182,27 @@
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Part" Binding="{Binding PartName}" Width="2*" />
-                                    <DataGridTextColumn Header="Code" Binding="{Binding PartCode}" Width="120" />
-                                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="70" />
-                                    <DataGridTextColumn Header="Reserved" Binding="{Binding Reserved}" Width="80" />
-                                    <DataGridTextColumn Header="Blocked" Binding="{Binding Blocked}" Width="80" />
-                                    <DataGridTextColumn Header="Min" Binding="{Binding MinThreshold}" Width="70" />
-                                    <DataGridTextColumn Header="Max" Binding="{Binding MaxThreshold}" Width="70" />
-                                    <DataGridTextColumn Header="Batch" Binding="{Binding BatchNumber}" Width="*" />
-                                    <DataGridTextColumn Header="Expiry" Binding="{Binding ExpiryDate, StringFormat=yyyy-MM-dd}" Width="120" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Parts.Header.Part}" Binding="{Binding PartName}" Width="2*" />
+                                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Code.Header}" Binding="{Binding PartCode}" Width="120" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Qty}" Binding="{Binding Quantity}" Width="70" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Reserved}" Binding="{Binding Reserved}" Width="80" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Blocked}" Binding="{Binding Blocked}" Width="80" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Min}" Binding="{Binding MinThreshold}" Width="70" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Max}" Binding="{Binding MaxThreshold}" Width="70" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Batch}" Binding="{Binding BatchNumber}" Width="*" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Expiry}" Binding="{Binding ExpiryDate, StringFormat=yyyy-MM-dd}" Width="120" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </GroupBox>
 
-                        <GroupBox Header="Recent Movements" Margin="0,16,0,0">
+                        <GroupBox Header="{DynamicResource Module.Warehouse.Header.RecentMovements}" Margin="0,16,0,0">
                             <DataGrid ItemsSource="{Binding RecentMovements}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" MinHeight="140">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="When" Binding="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm}" Width="160" />
-                                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="120" />
-                                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="70" />
-                                    <DataGridTextColumn Header="Document" Binding="{Binding RelatedDocument}" Width="*" />
-                                    <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.When}" Binding="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm}" Width="160" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Components.Text.Type}" Binding="{Binding Type}" Width="120" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Qty}" Binding="{Binding Quantity}" Width="70" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Document}" Binding="{Binding RelatedDocument}" Width="*" />
+                                    <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Note}" Binding="{Binding Note}" Width="2*" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </GroupBox>

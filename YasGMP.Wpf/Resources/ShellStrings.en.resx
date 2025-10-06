@@ -627,4 +627,967 @@
   <data name="ModuleTree.Node.Warehouse.Transactions.AutomationName" xml:space="preserve">
     <value>Transactions node</value>
   </data>
+  <data name="Dialog.Cfl.Content.OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog.Cfl.Title.ChooseFromList" xml:space="preserve">
+    <value>Choose From List</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Content.Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Text.CustomCode" xml:space="preserve">
+    <value>Custom code:</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Text.PasswordPIN" xml:space="preserve">
+    <value>Password/PIN:</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Text.ReEnterYourCredentialAndCaptureAGMPCompliantReasonBeforeApplyingTheSignature" xml:space="preserve">
+    <value>Re-enter your credential and capture a GMP-compliant reason before applying the signature.</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Text.ReasonCode" xml:space="preserve">
+    <value>Reason code:</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Text.ReasonNote" xml:space="preserve">
+    <value>Reason note:</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Text.User" xml:space="preserve">
+    <value>User:</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.Title.ElectronicSignature" xml:space="preserve">
+    <value>Electronic Signature</value>
+  </data>
+  <data name="Module.ApiAudit.Header.APIKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="Module.ApiAudit.Header.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Module.ApiAudit.Header.Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Module.ApiAudit.Header.IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="Module.ApiAudit.Header.Request" xml:space="preserve">
+    <value>Request</value>
+  </data>
+  <data name="Module.ApiAudit.Header.Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="Module.ApiAudit.Header.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Module.ApiAudit.Text.APIKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="Module.ApiAudit.Text.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Module.ApiAudit.Text.From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="Module.ApiAudit.Text.Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Module.ApiAudit.Text.To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Module.ApiAudit.Text.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Module.Assets.Content.CriticalAsset" xml:space="preserve">
+    <value>Critical asset</value>
+  </data>
+  <data name="Module.Assets.Header.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Module.Assets.Text.AssetDetails" xml:space="preserve">
+    <value>Asset Details</value>
+  </data>
+  <data name="Module.Assets.Text.InstallDate" xml:space="preserve">
+    <value>Install Date</value>
+  </data>
+  <data name="Module.Assets.Text.LifecyclePhase" xml:space="preserve">
+    <value>Lifecycle Phase</value>
+  </data>
+  <data name="Module.Assets.Text.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Module.Assets.Text.Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+  <data name="Module.Assets.Text.Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Module.Assets.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Assets.Text.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Module.Assets.Text.ProcurementDate" xml:space="preserve">
+    <value>Procurement Date</value>
+  </data>
+  <data name="Module.Assets.Text.SerialNo" xml:space="preserve">
+    <value>Serial No.</value>
+  </data>
+  <data name="Module.Assets.Text.URSDocument" xml:space="preserve">
+    <value>URS Document</value>
+  </data>
+  <data name="Module.Assets.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Assets.Text.WarrantyUntil" xml:space="preserve">
+    <value>Warranty Until</value>
+  </data>
+  <data name="Module.Attachments.Content.LegalHold" xml:space="preserve">
+    <value>Legal Hold</value>
+  </data>
+  <data name="Module.Attachments.Content.PickFiles" xml:space="preserve">
+    <value>Pick Files</value>
+  </data>
+  <data name="Module.Attachments.Content.ReviewRequired" xml:space="preserve">
+    <value>Review Required</value>
+  </data>
+  <data name="Module.Attachments.Text.AttachmentDetails" xml:space="preserve">
+    <value>Attachment Details</value>
+  </data>
+  <data name="Module.Attachments.Text.ContentType" xml:space="preserve">
+    <value>Content Type:</value>
+  </data>
+  <data name="Module.Attachments.Text.DisplayName" xml:space="preserve">
+    <value>Display Name:</value>
+  </data>
+  <data name="Module.Attachments.Text.Entity" xml:space="preserve">
+    <value>Entity:</value>
+  </data>
+  <data name="Module.Attachments.Text.EntityID" xml:space="preserve">
+    <value>Entity ID:</value>
+  </data>
+  <data name="Module.Attachments.Text.EntityType" xml:space="preserve">
+    <value>Entity Type:</value>
+  </data>
+  <data name="Module.Attachments.Text.FileName" xml:space="preserve">
+    <value>File Name:</value>
+  </data>
+  <data name="Module.Attachments.Text.FileName2" xml:space="preserve">
+    <value>File Name:</value>
+  </data>
+  <data name="Module.Attachments.Text.FileSize" xml:space="preserve">
+    <value>File Size:</value>
+  </data>
+  <data name="Module.Attachments.Text.FileType" xml:space="preserve">
+    <value>File Type:</value>
+  </data>
+  <data name="Module.Attachments.Text.NoFilesStagedForUploadUseUploadToAddFilesBeforeSaving" xml:space="preserve">
+    <value>No files staged for upload. Use Upload to add files before saving.</value>
+  </data>
+  <data name="Module.Attachments.Text.Notes" xml:space="preserve">
+    <value>Notes:</value>
+  </data>
+  <data name="Module.Attachments.Text.Notes2" xml:space="preserve">
+    <value>Notes:</value>
+  </data>
+  <data name="Module.Attachments.Text.Processing" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="Module.Attachments.Text.RetainUntil" xml:space="preserve">
+    <value>Retain Until:</value>
+  </data>
+  <data name="Module.Attachments.Text.RetentionFlags" xml:space="preserve">
+    <value>Retention Flags:</value>
+  </data>
+  <data name="Module.Attachments.Text.RetentionNotes" xml:space="preserve">
+    <value>Retention Notes</value>
+  </data>
+  <data name="Module.Attachments.Text.RetentionPolicy" xml:space="preserve">
+    <value>Retention Policy:</value>
+  </data>
+  <data name="Module.Attachments.Text.SHA256" xml:space="preserve">
+    <value>SHA-256:</value>
+  </data>
+  <data name="Module.Attachments.Text.SelectAnAttachmentToViewDetails" xml:space="preserve">
+    <value>Select an attachment to view details.</value>
+  </data>
+  <data name="Module.Attachments.Text.StagedUploads" xml:space="preserve">
+    <value>Staged Uploads</value>
+  </data>
+  <data name="Module.Attachments.Text.Status" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="Module.Attachments.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Audit.Header.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Module.Audit.Header.Device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Module.Audit.Header.DigitalSignature" xml:space="preserve">
+    <value>Digital Signature</value>
+  </data>
+  <data name="Module.Audit.Header.Entity" xml:space="preserve">
+    <value>Entity</value>
+  </data>
+  <data name="Module.Audit.Header.IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="Module.Audit.Header.Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Module.Audit.Header.SignatureHash" xml:space="preserve">
+    <value>Signature Hash</value>
+  </data>
+  <data name="Module.Audit.Header.Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="Module.Audit.Header.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Module.Audit.Text.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Module.Audit.Text.Entity" xml:space="preserve">
+    <value>Entity</value>
+  </data>
+  <data name="Module.Audit.Text.From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="Module.Audit.Text.Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Module.Audit.Text.To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Module.Audit.Text.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Module.Calibration.Text.CalibrationDate" xml:space="preserve">
+    <value>Calibration Date</value>
+  </data>
+  <data name="Module.Calibration.Text.CalibrationDetails" xml:space="preserve">
+    <value>Calibration Details</value>
+  </data>
+  <data name="Module.Calibration.Text.Certificate" xml:space="preserve">
+    <value>Certificate</value>
+  </data>
+  <data name="Module.Calibration.Text.Comments" xml:space="preserve">
+    <value>Comments</value>
+  </data>
+  <data name="Module.Calibration.Text.Component" xml:space="preserve">
+    <value>Component</value>
+  </data>
+  <data name="Module.Calibration.Text.NextDue" xml:space="preserve">
+    <value>Next Due</value>
+  </data>
+  <data name="Module.Calibration.Text.Result" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="Module.Calibration.Text.Supplier" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="Module.Capa.Header.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="Module.Capa.Text.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Module.Capa.Text.AssignedTo" xml:space="preserve">
+    <value>Assigned To</value>
+  </data>
+  <data name="Module.Capa.Text.CAPADetails" xml:space="preserve">
+    <value>CAPA Details</value>
+  </data>
+  <data name="Module.Capa.Text.Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Module.Capa.Text.Comments" xml:space="preserve">
+    <value>Comments</value>
+  </data>
+  <data name="Module.Capa.Text.Component" xml:space="preserve">
+    <value>Component</value>
+  </data>
+  <data name="Module.Capa.Text.CorrectiveAction" xml:space="preserve">
+    <value>Corrective Action</value>
+  </data>
+  <data name="Module.Capa.Text.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Module.Capa.Text.Opened" xml:space="preserve">
+    <value>Opened</value>
+  </data>
+  <data name="Module.Capa.Text.PreventiveAction" xml:space="preserve">
+    <value>Preventive Action</value>
+  </data>
+  <data name="Module.Capa.Text.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="Module.Capa.Text.Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Module.Capa.Text.RootCause" xml:space="preserve">
+    <value>Root Cause</value>
+  </data>
+  <data name="Module.ChangeControl.Header.Requested" xml:space="preserve">
+    <value>Requested</value>
+  </data>
+  <data name="Module.ChangeControl.Text.AssignedTo" xml:space="preserve">
+    <value>Assigned To</value>
+  </data>
+  <data name="Module.ChangeControl.Text.ChangeControlDetails" xml:space="preserve">
+    <value>Change Control Details</value>
+  </data>
+  <data name="Module.ChangeControl.Text.DateAssigned" xml:space="preserve">
+    <value>Date Assigned</value>
+  </data>
+  <data name="Module.ChangeControl.Text.DateRequested" xml:space="preserve">
+    <value>Date Requested</value>
+  </data>
+  <data name="Module.ChangeControl.Text.LastModified" xml:space="preserve">
+    <value>Last Modified</value>
+  </data>
+  <data name="Module.ChangeControl.Text.RequestedBy" xml:space="preserve">
+    <value>Requested By</value>
+  </data>
+  <data name="Module.Components.Header.Machine" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="Module.Components.Header.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Components.Text.Comments" xml:space="preserve">
+    <value>Comments</value>
+  </data>
+  <data name="Module.Components.Text.ComponentDetails" xml:space="preserve">
+    <value>Component Details</value>
+  </data>
+  <data name="Module.Components.Text.InstallDate" xml:space="preserve">
+    <value>Install Date</value>
+  </data>
+  <data name="Module.Components.Text.LifecycleState" xml:space="preserve">
+    <value>Lifecycle State</value>
+  </data>
+  <data name="Module.Components.Text.Machine" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="Module.Components.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Components.Text.SOPDocument" xml:space="preserve">
+    <value>SOP Document</value>
+  </data>
+  <data name="Module.Components.Text.SerialNumber" xml:space="preserve">
+    <value>Serial Number</value>
+  </data>
+  <data name="Module.Components.Text.Supplier" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="Module.Components.Text.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Components.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Components.Text.WarrantyUntil" xml:space="preserve">
+    <value>Warranty Until</value>
+  </data>
+  <data name="Module.Diagnostics.Header.Scope" xml:space="preserve">
+    <value>Scope</value>
+  </data>
+  <data name="Module.Diagnostics.Header.Summary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="Module.Diagnostics.Text.Filter" xml:space="preserve">
+    <value>Filter:</value>
+  </data>
+  <data name="Module.ExternalServicers.Header.Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Module.ExternalServicers.Header.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.ExternalServicers.Header.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Binding" xml:space="preserve">
+    <value>• {Binding}</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Certificates" xml:space="preserve">
+    <value>Certificates</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.ContactPerson" xml:space="preserve">
+    <value>Contact Person</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.CooperationEnd" xml:space="preserve">
+    <value>Cooperation End</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.CooperationStart" xml:space="preserve">
+    <value>Cooperation Start</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.DigitalSignature" xml:space="preserve">
+    <value>Digital Signature</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.ExternalServicerDetails" xml:space="preserve">
+    <value>External Servicer Details</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.ExtraNotes" xml:space="preserve">
+    <value>Extra Notes</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.ServiceType" xml:space="preserve">
+    <value>Service Type</value>
+  </data>
+  <data name="Module.ExternalServicers.Text.VATID" xml:space="preserve">
+    <value>VAT / ID</value>
+  </data>
+  <data name="Module.Incidents.Content.CriticalIncident" xml:space="preserve">
+    <value>Critical incident</value>
+  </data>
+  <data name="Module.Incidents.Header.Incident" xml:space="preserve">
+    <value>Incident</value>
+  </data>
+  <data name="Module.Incidents.Header.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="Module.Incidents.Header.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Incidents.Text.Anomaly" xml:space="preserve">
+    <value>Anomaly</value>
+  </data>
+  <data name="Module.Incidents.Text.AssignedTo" xml:space="preserve">
+    <value>Assigned To</value>
+  </data>
+  <data name="Module.Incidents.Text.CAPACase" xml:space="preserve">
+    <value>CAPA Case</value>
+  </data>
+  <data name="Module.Incidents.Text.Classification" xml:space="preserve">
+    <value>Classification</value>
+  </data>
+  <data name="Module.Incidents.Text.ClosureComment" xml:space="preserve">
+    <value>Closure Comment</value>
+  </data>
+  <data name="Module.Incidents.Text.Detected" xml:space="preserve">
+    <value>Detected</value>
+  </data>
+  <data name="Module.Incidents.Text.IncidentDetails" xml:space="preserve">
+    <value>Incident Details</value>
+  </data>
+  <data name="Module.Incidents.Text.Investigator" xml:space="preserve">
+    <value>Investigator</value>
+  </data>
+  <data name="Module.Incidents.Text.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Module.Incidents.Text.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="Module.Incidents.Text.Reported" xml:space="preserve">
+    <value>Reported</value>
+  </data>
+  <data name="Module.Incidents.Text.ReportedBy" xml:space="preserve">
+    <value>Reported By</value>
+  </data>
+  <data name="Module.Incidents.Text.RiskLevel" xml:space="preserve">
+    <value>Risk Level</value>
+  </data>
+  <data name="Module.Incidents.Text.RootCause" xml:space="preserve">
+    <value>Root Cause</value>
+  </data>
+  <data name="Module.Incidents.Text.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Incidents.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Incidents.Text.WorkOrder" xml:space="preserve">
+    <value>Work Order</value>
+  </data>
+  <data name="Module.Parts.Header.Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Module.Parts.Header.Stock" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="Module.Parts.Text.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Module.Parts.Text.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Module.Parts.Text.MinStock" xml:space="preserve">
+    <value>Min Stock</value>
+  </data>
+  <data name="Module.Parts.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Parts.Text.PartDetails" xml:space="preserve">
+    <value>Part Details</value>
+  </data>
+  <data name="Module.Parts.Text.Price" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="Module.Parts.Text.SKU" xml:space="preserve">
+    <value>SKU</value>
+  </data>
+  <data name="Module.Parts.Text.Stock" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="Module.Parts.Text.Supplier" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="Module.Parts.Text.Value" xml:space="preserve">
+    <value>⚠</value>
+  </data>
+  <data name="Module.Parts.Text.Value2" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Parts.Text.WarehouseSummary" xml:space="preserve">
+    <value>Warehouse Summary</value>
+  </data>
+  <data name="Module.Scheduling.Content.Acknowledge" xml:space="preserve">
+    <value>Acknowledge</value>
+  </data>
+  <data name="Module.Scheduling.Content.AlertOnFailure" xml:space="preserve">
+    <value>Alert On Failure</value>
+  </data>
+  <data name="Module.Scheduling.Content.ExecuteNow" xml:space="preserve">
+    <value>Execute Now</value>
+  </data>
+  <data name="Module.Scheduling.Content.IsCritical" xml:space="preserve">
+    <value>Is Critical</value>
+  </data>
+  <data name="Module.Scheduling.Content.RequiresAcknowledgment" xml:space="preserve">
+    <value>Requires Acknowledgment</value>
+  </data>
+  <data name="Module.Scheduling.Header.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Scheduling.Header.NextDue" xml:space="preserve">
+    <value>Next Due</value>
+  </data>
+  <data name="Module.Scheduling.Header.Recurrence" xml:space="preserve">
+    <value>Recurrence</value>
+  </data>
+  <data name="Module.Scheduling.Text.Binding" xml:space="preserve">
+    <value>•  {Binding}</value>
+  </data>
+  <data name="Module.Scheduling.Text.Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="Module.Scheduling.Text.CronExpression" xml:space="preserve">
+    <value>Cron Expression</value>
+  </data>
+  <data name="Module.Scheduling.Text.Device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Module.Scheduling.Text.EntityId" xml:space="preserve">
+    <value>Entity Id</value>
+  </data>
+  <data name="Module.Scheduling.Text.EntityType" xml:space="preserve">
+    <value>Entity Type</value>
+  </data>
+  <data name="Module.Scheduling.Text.EscalationNote" xml:space="preserve">
+    <value>Escalation Note</value>
+  </data>
+  <data name="Module.Scheduling.Text.ExtraParams" xml:space="preserve">
+    <value>Extra Params</value>
+  </data>
+  <data name="Module.Scheduling.Text.IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="Module.Scheduling.Text.JobType" xml:space="preserve">
+    <value>Job Type</value>
+  </data>
+  <data name="Module.Scheduling.Text.LastError" xml:space="preserve">
+    <value>Last Error</value>
+  </data>
+  <data name="Module.Scheduling.Text.LastExecuted" xml:space="preserve">
+    <value>Last Executed</value>
+  </data>
+  <data name="Module.Scheduling.Text.LastResult" xml:space="preserve">
+    <value>Last Result</value>
+  </data>
+  <data name="Module.Scheduling.Text.MaxRetries" xml:space="preserve">
+    <value>Max Retries</value>
+  </data>
+  <data name="Module.Scheduling.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Scheduling.Text.NextDue" xml:space="preserve">
+    <value>Next Due</value>
+  </data>
+  <data name="Module.Scheduling.Text.Recurrence" xml:space="preserve">
+    <value>Recurrence</value>
+  </data>
+  <data name="Module.Scheduling.Text.Retries" xml:space="preserve">
+    <value>Retries</value>
+  </data>
+  <data name="Module.Scheduling.Text.ScheduledJobDetails" xml:space="preserve">
+    <value>Scheduled Job Details</value>
+  </data>
+  <data name="Module.Scheduling.Text.Session" xml:space="preserve">
+    <value>Session</value>
+  </data>
+  <data name="Module.Security.Content.Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Module.Security.Content.Locked" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="Module.Security.Content.TwoFactor" xml:space="preserve">
+    <value>Two Factor</value>
+  </data>
+  <data name="Module.Security.Header.Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Module.Security.Header.Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Module.Security.Text.AssignedRoles" xml:space="preserve">
+    <value>Assigned Roles</value>
+  </data>
+  <data name="Module.Security.Text.ConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="Module.Security.Text.Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="Module.Security.Text.Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Module.Security.Text.FullName" xml:space="preserve">
+    <value>Full Name</value>
+  </data>
+  <data name="Module.Security.Text.NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="Module.Security.Text.Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Module.Security.Text.PrimaryRole" xml:space="preserve">
+    <value>Primary Role</value>
+  </data>
+  <data name="Module.Security.Text.UserDetails" xml:space="preserve">
+    <value>User Details</value>
+  </data>
+  <data name="Module.Security.Text.Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Module.Security.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Suppliers.Content.Qualified" xml:space="preserve">
+    <value>Qualified</value>
+  </data>
+  <data name="Module.Suppliers.Header.Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="Module.Suppliers.Header.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Suppliers.Header.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Suppliers.Text.Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Module.Suppliers.Text.City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="Module.Suppliers.Text.ContractFile" xml:space="preserve">
+    <value>Contract File</value>
+  </data>
+  <data name="Module.Suppliers.Text.CooperationEnd" xml:space="preserve">
+    <value>Cooperation End</value>
+  </data>
+  <data name="Module.Suppliers.Text.CooperationStart" xml:space="preserve">
+    <value>Cooperation Start</value>
+  </data>
+  <data name="Module.Suppliers.Text.Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="Module.Suppliers.Text.Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Module.Suppliers.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Suppliers.Text.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Module.Suppliers.Text.Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Module.Suppliers.Text.RegisteredAuthorities" xml:space="preserve">
+    <value>Registered Authorities</value>
+  </data>
+  <data name="Module.Suppliers.Text.RiskLevel" xml:space="preserve">
+    <value>Risk Level</value>
+  </data>
+  <data name="Module.Suppliers.Text.SupplierDetails" xml:space="preserve">
+    <value>Supplier Details</value>
+  </data>
+  <data name="Module.Suppliers.Text.SupplierType" xml:space="preserve">
+    <value>Supplier Type</value>
+  </data>
+  <data name="Module.Suppliers.Text.VATNumber" xml:space="preserve">
+    <value>VAT Number</value>
+  </data>
+  <data name="Module.Suppliers.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Suppliers.Text.Website" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="Module.Validations.Header.Target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="Module.Validations.Header.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Validations.Text.Binding" xml:space="preserve">
+    <value>• {Binding}</value>
+  </data>
+  <data name="Module.Validations.Text.Comments" xml:space="preserve">
+    <value>Comments</value>
+  </data>
+  <data name="Module.Validations.Text.Component" xml:space="preserve">
+    <value>Component</value>
+  </data>
+  <data name="Module.Validations.Text.Documentation" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Module.Validations.Text.EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Module.Validations.Text.Machine" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="Module.Validations.Text.NextDue" xml:space="preserve">
+    <value>Next Due</value>
+  </data>
+  <data name="Module.Validations.Text.ProtocolCode" xml:space="preserve">
+    <value>Protocol Code</value>
+  </data>
+  <data name="Module.Validations.Text.StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="Module.Validations.Text.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Validations.Text.ValidationDetails" xml:space="preserve">
+    <value>Validation Details</value>
+  </data>
+  <data name="Module.Warehouse.Content.Qualified" xml:space="preserve">
+    <value>Qualified</value>
+  </data>
+  <data name="Module.Warehouse.Header.Batch" xml:space="preserve">
+    <value>Batch</value>
+  </data>
+  <data name="Module.Warehouse.Header.Blocked" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+  <data name="Module.Warehouse.Header.Document" xml:space="preserve">
+    <value>Document</value>
+  </data>
+  <data name="Module.Warehouse.Header.Expiry" xml:space="preserve">
+    <value>Expiry</value>
+  </data>
+  <data name="Module.Warehouse.Header.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Module.Warehouse.Header.Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="Module.Warehouse.Header.Min" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="Module.Warehouse.Header.Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Module.Warehouse.Header.Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Module.Warehouse.Header.Qty" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="Module.Warehouse.Header.Qty2" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="Module.Warehouse.Header.RecentMovements" xml:space="preserve">
+    <value>Recent Movements</value>
+  </data>
+  <data name="Module.Warehouse.Header.Reserved" xml:space="preserve">
+    <value>Reserved</value>
+  </data>
+  <data name="Module.Warehouse.Header.StockSnapshot" xml:space="preserve">
+    <value>Stock Snapshot</value>
+  </data>
+  <data name="Module.Warehouse.Header.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Warehouse.Header.When" xml:space="preserve">
+    <value>When</value>
+  </data>
+  <data name="Module.Warehouse.Text.ClimateMode" xml:space="preserve">
+    <value>Climate Mode</value>
+  </data>
+  <data name="Module.Warehouse.Text.LastQualified" xml:space="preserve">
+    <value>Last Qualified</value>
+  </data>
+  <data name="Module.Warehouse.Text.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Module.Warehouse.Text.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Module.Warehouse.Text.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Module.Warehouse.Text.QRCode" xml:space="preserve">
+    <value>QR Code</value>
+  </data>
+  <data name="Module.Warehouse.Text.Responsible" xml:space="preserve">
+    <value>Responsible</value>
+  </data>
+  <data name="Module.Warehouse.Text.UnderMinimumStockDetectedForOneOrMoreItems" xml:space="preserve">
+    <value>Under-minimum stock detected for one or more items.</value>
+  </data>
+  <data name="Module.Warehouse.Text.Value" xml:space="preserve">
+    <value>•</value>
+  </data>
+  <data name="Module.Warehouse.Text.Value2" xml:space="preserve">
+    <value>⚠</value>
+  </data>
+  <data name="Module.Warehouse.Text.WarehouseDetails" xml:space="preserve">
+    <value>Warehouse Details</value>
+  </data>
+  <data name="Module.WorkOrders.Text.AssignedTo" xml:space="preserve">
+    <value>Assigned To</value>
+  </data>
+  <data name="Module.WorkOrders.Text.ComponentId" xml:space="preserve">
+    <value>Component Id</value>
+  </data>
+  <data name="Module.WorkOrders.Text.CreatedBy" xml:space="preserve">
+    <value>Created By</value>
+  </data>
+  <data name="Module.WorkOrders.Text.DateClosed" xml:space="preserve">
+    <value>Date Closed</value>
+  </data>
+  <data name="Module.WorkOrders.Text.DateOpen" xml:space="preserve">
+    <value>Date Open</value>
+  </data>
+  <data name="Module.WorkOrders.Text.DueDate" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="Module.WorkOrders.Text.MachineId" xml:space="preserve">
+    <value>Machine Id</value>
+  </data>
+  <data name="Module.WorkOrders.Text.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Module.WorkOrders.Text.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="Module.WorkOrders.Text.RequestedBy" xml:space="preserve">
+    <value>Requested By</value>
+  </data>
+  <data name="Module.WorkOrders.Text.Result" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="Module.WorkOrders.Text.TaskDescription" xml:space="preserve">
+    <value>Task Description</value>
+  </data>
+  <data name="Module.WorkOrders.Text.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.WorkOrders.Text.WorkOrderDetails" xml:space="preserve">
+    <value>Work Order Details</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XE81C" xml:space="preserve">
+    <value>&amp;#xE81C;</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XE81C2" xml:space="preserve">
+    <value>&amp;#xE81C;</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XE9D2" xml:space="preserve">
+    <value>&amp;#xE9D2;</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XE9D22" xml:space="preserve">
+    <value>&amp;#xE9D2;</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XEBC3" xml:space="preserve">
+    <value>&amp;#xEBC3;</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XEBC32" xml:space="preserve">
+    <value>&amp;#xEBC3;</value>
+  </data>
+  <data name="Shell.MainWindow.Title.YasGMPCockpit" xml:space="preserve">
+    <value>YasGMP Cockpit</value>
+  </data>
+  <data name="Module.Toolbar.Button.Attach.Content" xml:space="preserve">
+    <value>Attach</value>
+  </data>
+  <data name="Module.Toolbar.Button.Attach.ToolTip" xml:space="preserve">
+    <value>Attach supporting documents to the record.</value>
+  </data>
+  <data name="Module.Attachments.ToolTip.PickFiles" xml:space="preserve">
+    <value>Pick files to stage for upload before saving.</value>
+  </data>
+  <data name="Dialog.Cfl.ToolTip.OK" xml:space="preserve">
+    <value>Confirm the selection and close the dialog.</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.ToolTip.Confirm" xml:space="preserve">
+    <value>Apply the electronic signature with the entered credentials.</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.ToolTip.Cancel" xml:space="preserve">
+    <value>Cancel the signature workflow and close the dialog.</value>
+  </data>
+  <data name="Module.Scheduling.ToolTip.ExecuteNow" xml:space="preserve">
+    <value>Trigger the scheduled job immediately.</value>
+  </data>
+  <data name="Module.Scheduling.ToolTip.Acknowledge" xml:space="preserve">
+    <value>Mark the scheduled job as acknowledged.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Attach.AutomationName" xml:space="preserve">
+    <value>Attach supporting document command</value>
+  </data>
+  <data name="Dialog.Cfl.AutomationName.OK" xml:space="preserve">
+    <value>Confirm choose-from-list selection</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.AutomationName.Confirm" xml:space="preserve">
+    <value>Confirm electronic signature command</value>
+  </data>
+  <data name="Module.Attachments.AutomationName.PickFiles" xml:space="preserve">
+    <value>Pick files for attachment upload</value>
+  </data>
+  <data name="Module.Scheduling.AutomationName.ExecuteNow" xml:space="preserve">
+    <value>Execute scheduled job now command</value>
+  </data>
+  <data name="Module.Scheduling.AutomationName.Acknowledge" xml:space="preserve">
+    <value>Acknowledge scheduled job command</value>
+  </data>
+  <data name="Dialog.ElectronicSignature.ToolTip.Password" xml:space="preserve">
+    <value>Enter your YasGMP password or PIN.</value>
+  </data>
+  <data name="Module.ExternalServicers.ToolTip.DigitalSignature" xml:space="preserve">
+    <value>Digital signatures are captured via the e-signature workflow.</value>
+  </data>
 </root>

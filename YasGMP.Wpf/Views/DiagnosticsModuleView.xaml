@@ -25,7 +25,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+            <Button Content="{DynamicResource Module.Toolbar.Command.Refresh.Content}" Command="{Binding RefreshCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Refresh.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Refresh.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Refresh.AutomationId}"/>
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -40,7 +40,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{DynamicResource Module.Diagnostics.Text.Filter}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
@@ -51,10 +51,10 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Scope" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="140" />
-                    <DataGridTextColumn Header="Summary" Binding="{Binding Description}" Width="3*" />
+                    <DataGridTextColumn Header="{DynamicResource Module.Diagnostics.Header.Scope}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Code.Header}" Binding="{Binding Code}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Module.Diagnostics.Header.Summary}" Binding="{Binding Description}" Width="3*" />
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />

@@ -64,6 +64,7 @@
     <sys:String x:Key="Module.Toolbar.Command.Cancel.AutomationId">Toolbar.Command.Cancel</sys:String>
     <sys:String x:Key="Module.Toolbar.Command.Refresh.AutomationId">Toolbar.Command.Refresh</sys:String>
     <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationId">Toolbar.Button.CFL</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Attach.AutomationId">Toolbar.Button.Attach</sys:String>
     <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationId">Toolbar.Button.GoldenArrow</sys:String>
 
     <sys:String x:Key="Dashboard.Toolbar.AutomationId">Dashboard.Toolbar</sys:String>
@@ -100,4 +101,9 @@
     <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationId">ModuleTree.Node.Warehouse.Inventory</sys:String>
     <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationId">ModuleTree.Node.Warehouse.Suppliers</sys:String>
     <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationId">ModuleTree.Node.Warehouse.Transactions</sys:String>
+    <sys:String x:Key="Dialog.Cfl.Button.Ok.AutomationId">Dialog.Cfl.Button.Ok</sys:String>
+    <sys:String x:Key="Dialog.ElectronicSignature.Button.Confirm.AutomationId">Dialog.ElectronicSignature.Button.Confirm</sys:String>
+    <sys:String x:Key="Module.Attachments.Button.PickFiles.AutomationId">Attachments.Toolbar.PickFiles</sys:String>
+    <sys:String x:Key="Module.Scheduling.Button.ExecuteNow.AutomationId">Scheduling.Toolbar.ExecuteNow</sys:String>
+    <sys:String x:Key="Module.Scheduling.Button.Acknowledge.AutomationId">Scheduling.Toolbar.Acknowledge</sys:String>
 </ResourceDictionary>
