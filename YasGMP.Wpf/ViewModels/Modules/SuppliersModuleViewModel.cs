@@ -19,35 +19,12 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 {
     public const string ModuleKey = "Suppliers";
 
-    private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
-    {
-        "Active",
-        "Validated",
-        "Qualified",
-        "Suspended",
-        "Under Review",
-        "Pending Approval",
-        "CAPA",
-        "Expired",
-        "Delisted",
-        "Blacklisted",
-        "Probation"
-    });
-
-    private static readonly IReadOnlyList<string> DefaultRiskOptions = new ReadOnlyCollection<string>(new[]
-    {
-        "Low",
-        "Moderate",
-        "Elevated",
-        "High",
-        "Critical"
-    });
-
     private readonly ISupplierCrudService _supplierService;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ILocalizationService _localization;
     private Supplier? _loadedSupplier;
     private SupplierEditor? _snapshot;
     private bool _suppressDirtyNotifications;
@@ -65,17 +42,38 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Suppliers", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Suppliers"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = SupplierEditor.CreateEmpty();
-        StatusOptions = DefaultStatusOptions;
-        RiskOptions = DefaultRiskOptions;
+        StatusOptions = new ReadOnlyCollection<string>(new[]
+        {
+            _localization.GetString("Module.Suppliers.Status.Active"),
+            _localization.GetString("Module.Suppliers.Status.Validated"),
+            _localization.GetString("Module.Suppliers.Status.Qualified"),
+            _localization.GetString("Module.Suppliers.Status.Suspended"),
+            _localization.GetString("Module.Suppliers.Status.UnderReview"),
+            _localization.GetString("Module.Suppliers.Status.PendingApproval"),
+            _localization.GetString("Module.Suppliers.Status.Capa"),
+            _localization.GetString("Module.Suppliers.Status.Expired"),
+            _localization.GetString("Module.Suppliers.Status.Delisted"),
+            _localization.GetString("Module.Suppliers.Status.Blacklisted"),
+            _localization.GetString("Module.Suppliers.Status.Probation")
+        });
+        RiskOptions = new ReadOnlyCollection<string>(new[]
+        {
+            _localization.GetString("Module.Suppliers.Risk.Low"),
+            _localization.GetString("Module.Suppliers.Risk.Moderate"),
+            _localization.GetString("Module.Suppliers.Risk.Elevated"),
+            _localization.GetString("Module.Suppliers.Risk.High"),
+            _localization.GetString("Module.Suppliers.Risk.Critical")
+        });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
@@ -128,10 +126,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
                 Id = 1,
                 Name = "Contoso Calibration",
                 SupplierType = "Calibration",
-                Status = "active",
+                Status = StatusOptions[0],
                 Email = "support@contoso.example",
                 Phone = "+385 91 111 222",
-                RiskLevel = "Moderate",
+                RiskLevel = RiskOptions[1],
                 Country = "Croatia",
                 CooperationStart = DateTime.UtcNow.AddYears(-2),
                 CooperationEnd = DateTime.UtcNow.AddYears(1)
@@ -141,10 +139,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
                 Id = 2,
                 Name = "Globex Servicers",
                 SupplierType = "Maintenance",
-                Status = "suspended",
+                Status = StatusOptions[3],
                 Email = "hq@globex.example",
                 Phone = "+385 91 333 444",
-                RiskLevel = "High",
+                RiskLevel = RiskOptions[3],
                 Country = "Austria"
             }
         };

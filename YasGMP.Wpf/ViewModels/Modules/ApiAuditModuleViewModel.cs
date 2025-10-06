@@ -23,7 +23,7 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "API Audit Trail", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.ApiAuditTrail"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
 

@@ -240,6 +240,7 @@
     "2026-01-19: Golden Arrow button control now resolves tooltip/name/automation id via the localization service with dependency property keys so toolbar usage inherits localization + UIA updates; dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-21: Shell localization now loads from ResourceManager-backed ShellStrings resx files while automation ids stay in Strings.xaml; dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-20: Accessibility Insights for Windows tooling could not be executed inside the Linux container; scheduled a Windows-hosted rerun to capture locale-sensitive tooltip/name coverage for ribbon tabs, dock panes, and module document views.",
-    "2026-01-22: Localized MainWindow title, CFL/ElectronicSignature dialogs, and every module view grid/toolbar label via ShellStrings resx keys while wiring shared ToolTip/Automation metadata; dotnet restore/build remain blocked by the missing CLI."
+    "2026-01-22: Localized MainWindow title, CFL/ElectronicSignature dialogs, and every module view grid/toolbar label via ShellStrings resx keys while wiring shared ToolTip/Automation metadata; dotnet restore/build remain blocked by the missing CLI.",
+    "2026-01-23: Centralized module titles, status phrases, and combo-box option lists in ShellStrings with formatting helpers, updated B1FormDocumentViewModel plus derived modules to consume ILocalizationService, and refreshed unit tests with a deterministic localization stub while the dotnet CLI gap persists."
   ]
 }

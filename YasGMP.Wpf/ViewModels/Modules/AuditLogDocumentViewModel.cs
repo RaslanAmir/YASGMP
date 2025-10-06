@@ -28,7 +28,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Audit Trail", localization, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, localization.GetString("Module.Title.AuditTrail"), localization, cflDialogService, shellInteraction, navigation)
     {
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _ = auditService ?? throw new ArgumentNullException(nameof(auditService));

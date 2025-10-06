@@ -41,7 +41,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Work Orders", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.WorkOrders"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _workOrderService = workOrderService ?? throw new ArgumentNullException(nameof(workOrderService));

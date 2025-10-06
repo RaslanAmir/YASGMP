@@ -64,7 +64,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "CAPA", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Capa"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _capaService = capaService ?? throw new ArgumentNullException(nameof(capaService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));

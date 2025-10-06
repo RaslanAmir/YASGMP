@@ -24,6 +24,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ILocalizationService _localization;
     private Warehouse? _loadedWarehouse;
     private WarehouseEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -40,16 +41,23 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Warehouse", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Warehouse"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _warehouseService = warehouseService ?? throw new ArgumentNullException(nameof(warehouseService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = WarehouseEditor.CreateEmpty();
-        StatusOptions = new ReadOnlyCollection<string>(new[] { "qualified", "in-qualification", "maintenance", "inactive" });
+        StatusOptions = new ReadOnlyCollection<string>(new[]
+        {
+            _localization.GetString("Module.Warehouse.Status.Qualified"),
+            _localization.GetString("Module.Warehouse.Status.InQualification"),
+            _localization.GetString("Module.Warehouse.Status.Maintenance"),
+            _localization.GetString("Module.Warehouse.Status.Inactive")
+        });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
@@ -87,7 +95,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 Id = 1,
                 Name = "Main Warehouse",
                 Location = "Building B",
-                Status = "qualified",
+                Status = StatusOptions[0],
                 LegacyResponsibleName = "John Doe",
                 Note = "Primary GMP warehouse"
             },
@@ -96,7 +104,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 Id = 2,
                 Name = "Cold Storage",
                 Location = "Building C",
-                Status = "qualified",
+                Status = StatusOptions[0],
                 LegacyResponsibleName = "Jane Smith",
                 ClimateMode = "2-8°C"
             }
@@ -142,7 +150,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             SearchText = result.Selected.Label;
         }
 
-        StatusMessage = $"Filtered {Title} by \"{SearchText}\".";
+        StatusMessage = _localization.GetString("Module.Status.Filtered", Title, SearchText ?? string.Empty);
         return Task.CompletedTask;
     }
 

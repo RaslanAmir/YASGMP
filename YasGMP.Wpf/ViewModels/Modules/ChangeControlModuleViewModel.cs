@@ -42,7 +42,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Change Control", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.ChangeControl"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _changeControlService = changeControlService ?? throw new ArgumentNullException(nameof(changeControlService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

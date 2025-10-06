@@ -16,11 +16,21 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </summary>
 public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 {
+    private const string ReadyStatusKey = "Module.Status.Ready";
+    private const string LoadingStatusKey = "Module.Status.Loading";
+    private const string LoadedStatusKey = "Module.Status.Loaded";
+    private const string OfflineFallbackStatusKey = "Module.Status.OfflineFallback";
+    private const string NotInEditModeStatusKey = "Module.Status.NotInEditMode";
+    private const string ValidationIssuesStatusKey = "Module.Status.ValidationIssues";
+    private const string SaveSuccessStatusKey = "Module.Status.SaveSuccess";
+    private const string NoChangesStatusKey = "Module.Status.NoChanges";
+    private const string SaveFailureStatusKey = "Module.Status.SaveFailure";
+    private const string CancelledStatusKey = "Module.Status.Cancelled";
+
     private readonly ICflDialogService _cflDialogService;
     private readonly IShellInteractionService _shellInteraction;
     private readonly IModuleNavigationService _moduleNavigation;
     private readonly ILocalizationService _localization;
-    private readonly string _readyStatusKey = "Module.Status.Ready";
     private string _currentReadyStatus = string.Empty;
 
     protected B1FormDocumentViewModel(
@@ -81,7 +91,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
                 "Module.Toolbar.Command.Refresh.AutomationId")
         };
 
-        StatusMessage = _localization.GetString(_readyStatusKey);
+        StatusMessage = _localization.GetString(ReadyStatusKey);
         _currentReadyStatus = StatusMessage;
         _localization.LanguageChanged += OnLocalizationLanguageChanged;
     }
@@ -203,7 +213,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             count = 0;
         }
 
-        return $"Loaded {count} record(s).";
+        return _localization.GetString(LoadedStatusKey, count);
     }
 
     partial void OnModeChanged(FormMode value)
@@ -238,7 +248,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     private void OnLocalizationLanguageChanged(object? sender, EventArgs e)
     {
-        var ready = _localization.GetString(_readyStatusKey);
+        var ready = _localization.GetString(ReadyStatusKey);
         if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == _currentReadyStatus)
         {
             StatusMessage = ready;
@@ -300,7 +310,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         try
         {
             IsBusy = true;
-            StatusMessage = $"Loading {Title} records...";
+            StatusMessage = _localization.GetString(LoadingStatusKey, Title);
             var records = await LoadAsync(parameter).ConfigureAwait(false);
             ApplyRecords(records);
             StatusMessage = FormatLoadedStatus(Records.Count);
@@ -308,7 +318,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         catch (Exception ex)
         {
             ApplyRecords(CreateDesignTimeRecords());
-            StatusMessage = $"Offline data loaded because: {ex.Message}";
+            StatusMessage = _localization.GetString(OfflineFallbackStatusKey, ex.Message);
         }
         finally
         {
@@ -363,7 +373,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
         if (!IsInEditMode)
         {
-            StatusMessage = $"{Title} is not in Add/Update mode.";
+            StatusMessage = _localization.GetString(NotInEditModeStatusKey, Title);
             return false;
         }
 
@@ -374,7 +384,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             ApplyValidation(validation);
             if (validation.Count > 0)
             {
-                StatusMessage = $"{Title} has {validation.Count} validation issue(s).";
+                StatusMessage = _localization.GetString(ValidationIssuesStatusKey, Title, validation.Count);
                 return false;
             }
 
@@ -384,7 +394,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             {
                 if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
                 {
-                    StatusMessage = $"{Title} saved successfully.";
+                    StatusMessage = _localization.GetString(SaveSuccessStatusKey, Title);
                 }
 
                 ResetDirty();
@@ -395,7 +405,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             {
                 if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
                 {
-                    StatusMessage = $"No changes to save for {Title}.";
+                    StatusMessage = _localization.GetString(NoChangesStatusKey, Title);
                 }
             }
 
@@ -403,7 +413,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to save {Title}: {ex.Message}";
+            StatusMessage = _localization.GetString(SaveFailureStatusKey, Title, ex.Message);
             return false;
         }
         finally
@@ -427,7 +437,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         {
             Mode = FormMode.View;
         }
-        StatusMessage = $"{Title} changes cancelled.";
+        StatusMessage = _localization.GetString(CancelledStatusKey, Title);
     }
 
     private async Task ShowCflAsync()

@@ -24,6 +24,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ILocalizationService _localization;
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -40,21 +41,22 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Assets", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Assets"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         Editor = AssetEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
-            "active",
-            "maintenance",
-            "reserved",
-            "decommissioned",
-            "scrapped"
+            _localization.GetString("Module.Assets.Status.Active"),
+            _localization.GetString("Module.Assets.Status.Maintenance"),
+            _localization.GetString("Module.Assets.Status.Reserved"),
+            _localization.GetString("Module.Assets.Status.Decommissioned"),
+            _localization.GetString("Module.Assets.Status.Scrapped")
         });
 
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
@@ -89,7 +91,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 Id = 1001,
                 Name = "Autoclave",
                 Code = "AUTO-001",
-                Status = "active",
+                Status = StatusOptions[0],
                 Description = "Steam sterilizer",
                 Manufacturer = "Steris",
                 Location = "Building A",
@@ -100,7 +102,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 Id = 1002,
                 Name = "pH Meter",
                 Code = "LAB-PH-12",
-                Status = "maintenance",
+                Status = StatusOptions[1],
                 Description = "Metrohm pH meter",
                 Manufacturer = "Metrohm",
                 Location = "QC Lab",
@@ -143,27 +145,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             })
             .ToList();
 
-    {
-        var sample = new[]
-        {
-            new Machine
-            {
-                Id = 1001,
-                Name = "Autoclave",
-                Code = "AUTO-001",
-                Status = "active",
-                Description = "Steam sterilizer",
-                Manufacturer = "Steris",
-                Location = "Building A",
-                InstallDate = DateTime.UtcNow.AddYears(-3)
-            },
-            new Machine
-            {
-                Id = 1002,
-                Name = "pH Meter",
-public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
-
-
         return new CflRequest("Select Asset", items);
     }
 
@@ -178,7 +159,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         SearchText = search;
-        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
         return Task.CompletedTask;
     }
 

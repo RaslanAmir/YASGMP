@@ -23,10 +23,22 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Audit Trail", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.AuditTrail"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+
+        ActionOptions = new[]
+        {
+            _localization.GetString("Module.Audit.Action.All"),
+            _localization.GetString("Module.Audit.Action.Create"),
+            _localization.GetString("Module.Audit.Action.Update"),
+            _localization.GetString("Module.Audit.Action.Delete"),
+            _localization.GetString("Module.Audit.Action.Sign"),
+            _localization.GetString("Module.Audit.Action.Rollback"),
+            _localization.GetString("Module.Audit.Action.Export")
+        };
 
         _exportToPdfCommand = new AsyncRelayCommand(ExportToPdfAsync, CanExecuteExport);
         _exportToExcelCommand = new AsyncRelayCommand(ExportToExcelAsync, CanExecuteExport);
@@ -121,16 +133,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             })
         };
 
-    public IReadOnlyList<string> ActionOptions { get; } = new[]
-    {
-        "All",
-        "CREATE",
-        "UPDATE",
-        "DELETE",
-        "SIGN",
-        "ROLLBACK",
-        "EXPORT"
-    };
+    public IReadOnlyList<string> ActionOptions { get; }
 
     [ObservableProperty]
     private string? _filterUser;
@@ -164,6 +167,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     partial void OnFilterToChanged(DateTime? value) => TriggerRefreshForFilterChange();
 
     private readonly AuditService _auditService;
+    private readonly ILocalizationService _localization;
     private readonly ExportService _exportService;
     private readonly AsyncRelayCommand _exportToPdfCommand;
     private readonly AsyncRelayCommand _exportToExcelCommand;
@@ -179,7 +183,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
         HasError = false;
         HasResults = false;
-        StatusMessage = $"Loading {Title} records...";
+        StatusMessage = _localization.GetString("Module.Status.Loading", Title);
         _ = RefreshCommand.ExecuteAsync(null);
     }
 

@@ -42,7 +42,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Scheduled Jobs", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.ScheduledJobs"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _scheduledJobService = scheduledJobService ?? throw new ArgumentNullException(nameof(scheduledJobService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

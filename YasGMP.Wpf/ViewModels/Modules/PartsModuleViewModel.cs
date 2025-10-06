@@ -24,6 +24,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ILocalizationService _localization;
     private Part? _loadedPart;
     private PartEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -40,16 +41,22 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Parts & Stock", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.PartsStock"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = PartEditor.CreateEmpty();
-        StatusOptions = new ReadOnlyCollection<string>(new[] { "active", "inactive", "blocked" });
+        StatusOptions = new ReadOnlyCollection<string>(new[]
+        {
+            _localization.GetString("Module.Parts.Status.Active"),
+            _localization.GetString("Module.Parts.Status.Inactive"),
+            _localization.GetString("Module.Parts.Status.Blocked")
+        });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
@@ -85,7 +92,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 Id = 1,
                 Code = "PRT-001",
                 Name = "Sterile Tubing",
-                Status = "active",
+                Status = StatusOptions[0],
                 Description = "Silicone transfer tubing",
                 Location = "Main Warehouse",
                 Stock = 120,
@@ -97,7 +104,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 Id = 2,
                 Code = "FLT-010",
                 Name = "HEPA Filter",
-                Status = "inactive",
+                Status = StatusOptions[1],
                 Description = "Spare HEPA H14",
                 Location = "Cleanroom",
                 Stock = 10,

@@ -372,8 +372,302 @@
   <data name="Module.Toolbar.Button.GoldenArrow.AutomationName" xml:space="preserve">
     <value>Golden arrow navigation</value>
   </data>
+  <data name="Module.Title.Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Module.Title.ApiAuditTrail" xml:space="preserve">
+    <value>API Audit Trail</value>
+  </data>
+  <data name="Module.Title.Attachments" xml:space="preserve">
+    <value>Attachments</value>
+  </data>
+  <data name="Module.Title.AuditDashboard" xml:space="preserve">
+    <value>Audit Dashboard</value>
+  </data>
+  <data name="Module.Title.AuditTrail" xml:space="preserve">
+    <value>Audit Trail</value>
+  </data>
+  <data name="Module.Title.Assets" xml:space="preserve">
+    <value>Assets</value>
+  </data>
+  <data name="Module.Title.Capa" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="Module.Title.Calibration" xml:space="preserve">
+    <value>Calibration</value>
+  </data>
+  <data name="Module.Title.ChangeControl" xml:space="preserve">
+    <value>Change Control</value>
+  </data>
+  <data name="Module.Title.Components" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="Module.Title.Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Module.Title.Diagnostics" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="Module.Title.ExternalServicers" xml:space="preserve">
+    <value>External Servicers</value>
+  </data>
+  <data name="Module.Title.Incidents" xml:space="preserve">
+    <value>Incidents</value>
+  </data>
+  <data name="Module.Title.PartsStock" xml:space="preserve">
+    <value>Parts &amp; Stock</value>
+  </data>
+  <data name="Module.Title.ScheduledJobs" xml:space="preserve">
+    <value>Scheduled Jobs</value>
+  </data>
+  <data name="Module.Title.Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Module.Title.Suppliers" xml:space="preserve">
+    <value>Suppliers</value>
+  </data>
+  <data name="Module.Title.Validations" xml:space="preserve">
+    <value>Validations</value>
+  </data>
+  <data name="Module.Title.Warehouse" xml:space="preserve">
+    <value>Warehouse</value>
+  </data>
+  <data name="Module.Title.WorkOrders" xml:space="preserve">
+    <value>Work Orders</value>
+  </data>
+  <data name="Module.Assets.Status.Active" xml:space="preserve">
+    <value>active</value>
+  </data>
+  <data name="Module.Assets.Status.Decommissioned" xml:space="preserve">
+    <value>decommissioned</value>
+  </data>
+  <data name="Module.Assets.Status.Maintenance" xml:space="preserve">
+    <value>maintenance</value>
+  </data>
+  <data name="Module.Assets.Status.Reserved" xml:space="preserve">
+    <value>reserved</value>
+  </data>
+  <data name="Module.Assets.Status.Scrapped" xml:space="preserve">
+    <value>scrapped</value>
+  </data>
+  <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
+    <value>in-qualification</value>
+  </data>
+  <data name="Module.Warehouse.Status.Inactive" xml:space="preserve">
+    <value>inactive</value>
+  </data>
+  <data name="Module.Warehouse.Status.Maintenance" xml:space="preserve">
+    <value>maintenance</value>
+  </data>
+  <data name="Module.Warehouse.Status.Qualified" xml:space="preserve">
+    <value>qualified</value>
+  </data>
+  <data name="Module.Suppliers.Risk.High" xml:space="preserve">
+    <value>high</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Moderate" xml:space="preserve">
+    <value>moderate</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Elevated" xml:space="preserve">
+    <value>elevated</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Critical" xml:space="preserve">
+    <value>critical</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Low" xml:space="preserve">
+    <value>low</value>
+  </data>
+  <data name="Module.Suppliers.Status.Active" xml:space="preserve">
+    <value>active</value>
+  </data>
+  <data name="Module.Suppliers.Status.Inactive" xml:space="preserve">
+    <value>inactive</value>
+  </data>
+  <data name="Module.Suppliers.Status.Validated" xml:space="preserve">
+    <value>validated</value>
+  </data>
+  <data name="Module.Suppliers.Status.Qualified" xml:space="preserve">
+    <value>qualified</value>
+  </data>
+  <data name="Module.Suppliers.Status.Suspended" xml:space="preserve">
+    <value>suspended</value>
+  </data>
+  <data name="Module.Suppliers.Status.UnderReview" xml:space="preserve">
+    <value>under review</value>
+  </data>
+  <data name="Module.Suppliers.Status.PendingApproval" xml:space="preserve">
+    <value>pending approval</value>
+  </data>
+  <data name="Module.Suppliers.Status.Capa" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="Module.Suppliers.Status.Expired" xml:space="preserve">
+    <value>expired</value>
+  </data>
+  <data name="Module.Suppliers.Status.Delisted" xml:space="preserve">
+    <value>delisted</value>
+  </data>
+  <data name="Module.Suppliers.Status.Blacklisted" xml:space="preserve">
+    <value>blacklisted</value>
+  </data>
+  <data name="Module.Suppliers.Status.Probation" xml:space="preserve">
+    <value>probation</value>
+  </data>
+  <data name="Module.Suppliers.Status.OnHold" xml:space="preserve">
+    <value>on-hold</value>
+  </data>
+  <data name="Module.Incidents.Priority.Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Module.Incidents.Priority.Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="Module.Incidents.Priority.High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="Module.Incidents.Priority.Critical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+  <data name="Module.Incidents.Status.Reported" xml:space="preserve">
+    <value>REPORTED</value>
+  </data>
+  <data name="Module.Incidents.Status.Investigation" xml:space="preserve">
+    <value>INVESTIGATION</value>
+  </data>
+  <data name="Module.Incidents.Status.Classified" xml:space="preserve">
+    <value>CLASSIFIED</value>
+  </data>
+  <data name="Module.Incidents.Status.DeviationLinked" xml:space="preserve">
+    <value>DEVIATION_LINKED</value>
+  </data>
+  <data name="Module.Incidents.Status.CapaLinked" xml:space="preserve">
+    <value>CAPA_LINKED</value>
+  </data>
+  <data name="Module.Incidents.Status.Closed" xml:space="preserve">
+    <value>CLOSED</value>
+  </data>
+  <data name="Module.Incidents.Type.Deviation" xml:space="preserve">
+    <value>Deviation</value>
+  </data>
+  <data name="Module.Incidents.Type.Quality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="Module.Incidents.Type.Safety" xml:space="preserve">
+    <value>Safety</value>
+  </data>
+  <data name="Module.Incidents.Type.Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Module.Incidents.Type.It" xml:space="preserve">
+    <value>IT</value>
+  </data>
+  <data name="Module.Incidents.Type.Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Calibration" xml:space="preserve">
+    <value>Calibration</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Audit" xml:space="preserve">
+    <value>Audit</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.ItServices" xml:space="preserve">
+    <value>IT Services</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Laboratory" xml:space="preserve">
+    <value>Laboratory</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Qualification" xml:space="preserve">
+    <value>Qualification</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Validation" xml:space="preserve">
+    <value>Validation</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Logistics" xml:space="preserve">
+    <value>Logistics</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Active" xml:space="preserve">
+    <value>active</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Inactive" xml:space="preserve">
+    <value>inactive</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Expired" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.OnHold" xml:space="preserve">
+    <value>On Hold</value>
+  </data>
+  <data name="Module.Audit.Action.All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Module.Audit.Action.Create" xml:space="preserve">
+    <value>CREATE</value>
+  </data>
+  <data name="Module.Audit.Action.Update" xml:space="preserve">
+    <value>UPDATE</value>
+  </data>
+  <data name="Module.Audit.Action.Delete" xml:space="preserve">
+    <value>DELETE</value>
+  </data>
+  <data name="Module.Audit.Action.Sign" xml:space="preserve">
+    <value>SIGN</value>
+  </data>
+  <data name="Module.Audit.Action.Rollback" xml:space="preserve">
+    <value>ROLLBACK</value>
+  </data>
+  <data name="Module.Audit.Action.Export" xml:space="preserve">
+    <value>EXPORT</value>
+  </data>
+  <data name="Module.Parts.Status.Active" xml:space="preserve">
+    <value>active</value>
+  </data>
+  <data name="Module.Parts.Status.Blocked" xml:space="preserve">
+    <value>blocked</value>
+  </data>
+  <data name="Module.Parts.Status.Inactive" xml:space="preserve">
+    <value>inactive</value>
+  </data>
+  <data name="Module.Status.Cancelled" xml:space="preserve">
+    <value>{0} changes cancelled.</value>
+  </data>
+  <data name="Module.Status.Filtered" xml:space="preserve">
+    <value>Filtered {0} by "{1}".</value>
+  </data>
+  <data name="Module.Status.Loaded" xml:space="preserve">
+    <value>Loaded {0} record(s).</value>
+  </data>
+  <data name="Module.Status.Loading" xml:space="preserve">
+    <value>Loading {0} records...</value>
+  </data>
+  <data name="Module.Status.NoChanges" xml:space="preserve">
+    <value>No changes to save for {0}.</value>
+  </data>
+  <data name="Module.Status.NotInEditMode" xml:space="preserve">
+    <value>{0} is not in Add/Update mode.</value>
+  </data>
+  <data name="Module.Status.OfflineFallback" xml:space="preserve">
+    <value>Offline data loaded because: {0}</value>
+  </data>
   <data name="Module.Status.Ready" xml:space="preserve">
     <value>Ready</value>
+  </data>
+  <data name="Module.Status.SaveFailure" xml:space="preserve">
+    <value>Failed to save {0}: {1}</value>
+  </data>
+  <data name="Module.Status.SaveSuccess" xml:space="preserve">
+    <value>{0} saved successfully.</value>
+  </data>
+  <data name="Module.Status.ValidationIssues" xml:space="preserve">
+    <value>{0} has {1} validation issue(s).</value>
   </data>
   <data name="Dashboard.Toolbar.AutomationName" xml:space="preserve">
     <value>Dashboard module toolbar</value>
