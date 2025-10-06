@@ -25,6 +25,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ILocalizationService _localization;
 
     private const string WorkOrderCflPrefix = "WO:";
     private const string CapaCflPrefix = "CAPA:";
@@ -33,33 +34,11 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     private IncidentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
 
-    public ObservableCollection<string> StatusOptions { get; } = new(new[]
-    {
-        "REPORTED",
-        "INVESTIGATION",
-        "CLASSIFIED",
-        "DEVIATION_LINKED",
-        "CAPA_LINKED",
-        "CLOSED"
-    });
+    public ObservableCollection<string> StatusOptions { get; }
 
-    public ObservableCollection<string> PriorityOptions { get; } = new(new[]
-    {
-        "Low",
-        "Medium",
-        "High",
-        "Critical"
-    });
+    public ObservableCollection<string> PriorityOptions { get; }
 
-    public ObservableCollection<string> TypeOptions { get; } = new(new[]
-    {
-        "Deviation",
-        "Quality",
-        "Safety",
-        "Security",
-        "IT",
-        "Maintenance"
-    });
+    public ObservableCollection<string> TypeOptions { get; }
 
     [ObservableProperty]
     private IncidentEditor _editor;
@@ -81,15 +60,41 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Incidents", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Incidents"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _incidentService = incidentService ?? throw new ArgumentNullException(nameof(incidentService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = IncidentEditor.CreateEmpty();
+        StatusOptions = new ObservableCollection<string>(new[]
+        {
+            _localization.GetString("Module.Incidents.Status.Reported"),
+            _localization.GetString("Module.Incidents.Status.Investigation"),
+            _localization.GetString("Module.Incidents.Status.Classified"),
+            _localization.GetString("Module.Incidents.Status.DeviationLinked"),
+            _localization.GetString("Module.Incidents.Status.CapaLinked"),
+            _localization.GetString("Module.Incidents.Status.Closed")
+        });
+        PriorityOptions = new ObservableCollection<string>(new[]
+        {
+            _localization.GetString("Module.Incidents.Priority.Low"),
+            _localization.GetString("Module.Incidents.Priority.Medium"),
+            _localization.GetString("Module.Incidents.Priority.High"),
+            _localization.GetString("Module.Incidents.Priority.Critical")
+        });
+        TypeOptions = new ObservableCollection<string>(new[]
+        {
+            _localization.GetString("Module.Incidents.Type.Deviation"),
+            _localization.GetString("Module.Incidents.Type.Quality"),
+            _localization.GetString("Module.Incidents.Type.Safety"),
+            _localization.GetString("Module.Incidents.Type.Security"),
+            _localization.GetString("Module.Incidents.Type.It"),
+            _localization.GetString("Module.Incidents.Type.Maintenance")
+        });
         AttachEvidenceCommand = new AsyncRelayCommand(AttachEvidenceAsync, CanAttachEvidence);
     }
 
@@ -111,12 +116,12 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 "INC-2024-01",
                 "Deviation in filling line",
                 "INC-2024-01",
-                "INVESTIGATION",
+                StatusOptions[1],
                 "Operator reported pressure drop on filling line",
                 new[]
                 {
-                    new InspectorField("Type", "Deviation"),
-                    new InspectorField("Priority", "High"),
+                    new InspectorField("Type", TypeOptions[0]),
+                    new InspectorField("Priority", PriorityOptions[2]),
                     new InspectorField("Detected", DateTime.Now.AddHours(-4).ToString("g", CultureInfo.CurrentCulture)),
                     new InspectorField("Investigator", "QA Investigator"),
                     new InspectorField("Linked CAPA", "102")
@@ -127,12 +132,12 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 "INC-2024-02",
                 "Audit trail alert",
                 "INC-2024-02",
-                "REPORTED",
+                StatusOptions[0],
                 "Unexpected login attempts captured by monitoring",
                 new[]
                 {
-                    new InspectorField("Type", "Security"),
-                    new InspectorField("Priority", "Medium"),
+                    new InspectorField("Type", TypeOptions[3]),
+                    new InspectorField("Priority", PriorityOptions[1]),
                     new InspectorField("Detected", DateTime.Now.AddHours(-1).ToString("g", CultureInfo.CurrentCulture)),
                     new InspectorField("Linked Work Order", "75")
                 },

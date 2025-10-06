@@ -35,7 +35,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Attachments", localization, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, localization.GetString("Module.Title.Attachments"), localization, cflDialogService, shellInteraction, navigation)
     {
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));

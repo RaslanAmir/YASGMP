@@ -17,29 +17,10 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 {
     public const string ModuleKey = "ExternalServicers";
 
-    private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
-    {
-        "Active",
-        "Pending",
-        "Suspended",
-        "Expired",
-        "On Hold"
-    });
-
-    private static readonly IReadOnlyList<string> DefaultServiceTypeOptions = new ReadOnlyCollection<string>(new[]
-    {
-        "Calibration",
-        "Maintenance",
-        "Validation",
-        "Laboratory",
-        "Audit",
-        "IT Services",
-        "Logistics"
-    });
-
     private readonly IExternalServicerCrudService _servicerService;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ILocalizationService _localization;
 
     private ExternalServicer? _loadedServicer;
     private ExternalServicerEditor? _snapshot;
@@ -54,15 +35,33 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "External Servicers", localization, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, localization.GetString("Module.Title.ExternalServicers"), localization, cflDialogService, shellInteraction, navigation)
     {
         _servicerService = servicerService ?? throw new ArgumentNullException(nameof(servicerService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = ExternalServicerEditor.CreateEmpty();
-        StatusOptions = DefaultStatusOptions;
-        ServiceTypeOptions = DefaultServiceTypeOptions;
+        StatusOptions = new ReadOnlyCollection<string>(new[]
+        {
+            _localization.GetString("Module.ExternalServicers.Status.Active"),
+            _localization.GetString("Module.ExternalServicers.Status.Pending"),
+            _localization.GetString("Module.ExternalServicers.Status.Suspended"),
+            _localization.GetString("Module.ExternalServicers.Status.Expired"),
+            _localization.GetString("Module.ExternalServicers.Status.OnHold"),
+            _localization.GetString("Module.ExternalServicers.Status.Inactive")
+        });
+        ServiceTypeOptions = new ReadOnlyCollection<string>(new[]
+        {
+            _localization.GetString("Module.ExternalServicers.ServiceType.Calibration"),
+            _localization.GetString("Module.ExternalServicers.ServiceType.Maintenance"),
+            _localization.GetString("Module.ExternalServicers.ServiceType.Validation"),
+            _localization.GetString("Module.ExternalServicers.ServiceType.Laboratory"),
+            _localization.GetString("Module.ExternalServicers.ServiceType.Audit"),
+            _localization.GetString("Module.ExternalServicers.ServiceType.ItServices"),
+            _localization.GetString("Module.ExternalServicers.ServiceType.Logistics")
+        });
     }
 
     [ObservableProperty]
@@ -112,8 +111,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 Id = 1,
                 Name = "Contoso Calibration",
                 Code = "EXT-001",
-                Type = "Calibration",
-                Status = "active",
+                Type = ServiceTypeOptions[0],
+                Status = StatusOptions[0],
                 ContactPerson = "Ivana Horvat",
                 Email = "calibration@contoso.example",
                 Phone = "+385 91 111 222",
@@ -124,8 +123,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 Id = 2,
                 Name = "Globex Maintenance",
                 Code = "EXT-002",
-                Type = "Maintenance",
-                Status = "suspended",
+                Type = ServiceTypeOptions[1],
+                Status = StatusOptions[2],
                 ContactPerson = "Marko Barić",
                 Email = "support@globex.example",
                 Phone = "+385 91 555 666",

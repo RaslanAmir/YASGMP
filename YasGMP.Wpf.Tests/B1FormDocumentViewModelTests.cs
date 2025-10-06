@@ -13,10 +13,12 @@ public class B1FormDocumentViewModelTests
     public async Task SaveAsync_PreservesCancellationMessage()
     {
         const string cancellationMessage = "Save cancelled by integration";
+        var localization = new StubLocalizationService();
         var viewModel = new TestDocumentViewModel(
             new NullCflDialogService(),
             new PassiveShellInteractionService(),
             new PassiveModuleNavigationService(),
+            localization,
             cancellationMessage);
 
         viewModel.Mode = FormMode.Add;
@@ -44,8 +46,9 @@ public class B1FormDocumentViewModelTests
             ICflDialogService cflDialogService,
             IShellInteractionService shellInteraction,
             IModuleNavigationService moduleNavigation,
+            ILocalizationService localization,
             string cancellationMessage)
-            : base("Test", "Test", cflDialogService, shellInteraction, moduleNavigation)
+            : base("Test", "Test", localization, cflDialogService, shellInteraction, moduleNavigation)
         {
             _cancellationMessage = cancellationMessage;
         }
@@ -88,5 +91,37 @@ public class B1FormDocumentViewModelTests
 
         public ModuleDocumentViewModel OpenModule(string moduleKey, object? parameter = null)
             => throw new NotSupportedException();
+    }
+
+    private sealed class StubLocalizationService : ILocalizationService
+    {
+        public string CurrentLanguage => "en";
+
+        public event EventHandler? LanguageChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public string GetString(string key)
+            => key switch
+            {
+                "Module.Status.Ready" => "Ready",
+                "Module.Status.Loading" => "Loading {0} records...",
+                "Module.Status.Loaded" => "Loaded {0} record(s).",
+                "Module.Status.OfflineFallback" => "Offline data loaded because: {0}",
+                "Module.Status.NotInEditMode" => "{0} is not in Add/Update mode.",
+                "Module.Status.ValidationIssues" => "{0} has {1} validation issue(s).",
+                "Module.Status.SaveSuccess" => "{0} saved successfully.",
+                "Module.Status.NoChanges" => "No changes to save for {0}.",
+                "Module.Status.SaveFailure" => "Failed to save {0}: {1}",
+                "Module.Status.Cancelled" => "{0} changes cancelled.",
+                "Module.Status.Filtered" => "Filtered {0} by \"{1}\".",
+                _ => key
+            };
+
+        public void SetLanguage(string language)
+        {
+        }
     }
 }

@@ -45,7 +45,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Calibration", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Calibration"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _calibrationService = calibrationService ?? throw new ArgumentNullException(nameof(calibrationService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));

@@ -44,7 +44,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Validations", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Validations"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

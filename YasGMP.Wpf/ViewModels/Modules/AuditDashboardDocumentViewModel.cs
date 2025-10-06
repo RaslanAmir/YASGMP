@@ -33,7 +33,7 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         Func<AuditDashboardViewModel, Task<IReadOnlyList<AuditEntryDto>>>? loadOverride = null,
         Func<AuditDashboardViewModel, Task<string>>? exportPdfOverride = null,
         Func<AuditDashboardViewModel, Task<string>>? exportExcelOverride = null)
-        : base(ModuleKey, "Audit Dashboard", localization, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, localization.GetString("Module.Title.AuditDashboard"), localization, cflDialogService, shellInteraction, navigation)
     {
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));

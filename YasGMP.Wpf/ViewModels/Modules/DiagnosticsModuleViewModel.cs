@@ -17,7 +17,7 @@ public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewMod
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Diagnostics", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Diagnostics"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

@@ -56,7 +56,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization)
-        : base(ModuleKey, "Components", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, localization.GetString("Module.Title.Components"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));

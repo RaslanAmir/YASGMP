@@ -372,8 +372,305 @@
   <data name="Module.Toolbar.Button.GoldenArrow.AutomationName" xml:space="preserve">
     <value>Navigacija zlatnom strelicom</value>
   </data>
+  <data name="Module.Title.Administration" xml:space="preserve">
+    <value>Administracija</value>
+  </data>
+  <data name="Module.Title.ApiAuditTrail" xml:space="preserve">
+    <value>API revizijski trag</value>
+  </data>
+  <data name="Module.Title.Attachments" xml:space="preserve">
+    <value>Prilozi</value>
+  </data>
+  <data name="Module.Title.AuditDashboard" xml:space="preserve">
+    <value>Revizijska nadzorna ploča</value>
+  </data>
+  <data name="Module.Title.AuditTrail" xml:space="preserve">
+    <value>Revizijski trag</value>
+  </data>
+  <data name="Module.Title.Assets" xml:space="preserve">
+    <value>Imovina</value>
+  </data>
+  <data name="Module.Title.Capa" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="Module.Title.Calibration" xml:space="preserve">
+    <value>Kalibracija</value>
+  </data>
+  <data name="Module.Title.ChangeControl" xml:space="preserve">
+    <value>Kontrola promjena</value>
+  </data>
+  <data name="Module.Title.Components" xml:space="preserve">
+    <value>Komponente</value>
+  </data>
+  <data name="Module.Title.Dashboard" xml:space="preserve">
+    <value>Nadzorna ploča</value>
+  </data>
+  <data name="Module.Title.Diagnostics" xml:space="preserve">
+    <value>Dijagnostika</value>
+  </data>
+  <data name="Module.Title.ExternalServicers" xml:space="preserve">
+    <value>Vanjski serviseri</value>
+  </data>
+  <data name="Module.Title.Incidents" xml:space="preserve">
+    <value>Incidenti</value>
+  </data>
+  <data name="Module.Title.PartsStock" xml:space="preserve">
+    <value>Dijelovi i zalihe</value>
+  </data>
+  <data name="Module.Title.ScheduledJobs" xml:space="preserve">
+    <value>Planirani poslovi</value>
+  </data>
+  <data name="Module.Title.Security" xml:space="preserve">
+    <value>Sigurnost</value>
+  </data>
+  <data name="Module.Title.Suppliers" xml:space="preserve">
+    <value>Dobavljači</value>
+  </data>
+  <data name="Module.Title.Validations" xml:space="preserve">
+    <value>Validacije</value>
+  </data>
+  <data name="Module.Title.Warehouse" xml:space="preserve">
+    <value>Skladište</value>
+  </data>
+  <data name="Module.Title.WorkOrders" xml:space="preserve">
+    <value>Radni nalozi</value>
+  </data>
+  <data name="Module.Assets.Status.Active" xml:space="preserve">
+    <value>aktivan</value>
+  </data>
+  <data name="Module.Assets.Status.Decommissioned" xml:space="preserve">
+    <value>isključen</value>
+  </data>
+  <data name="Module.Assets.Status.Maintenance" xml:space="preserve">
+    <value>održavanje</value>
+  </data>
+  <data name="Module.Assets.Status.Reserved" xml:space="preserve">
+    <value>rezervirano</value>
+  </data>
+  <data name="Module.Assets.Status.Scrapped" xml:space="preserve">
+    <value>otpisan</value>
+  </data>
+  <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
+    <value>u kvalifikaciji</value>
+  </data>
+  <data name="Module.Warehouse.Status.Inactive" xml:space="preserve">
+    <value>neaktivan</value>
+  </data>
+  <data name="Module.Warehouse.Status.Maintenance" xml:space="preserve">
+    <value>održavanje</value>
+  </data>
+  <data name="Module.Warehouse.Status.Qualified" xml:space="preserve">
+    <value>kvalificiran</value>
+  </data>
+  <data name="Module.Suppliers.Risk.High" xml:space="preserve">
+    <value>visok</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Moderate" xml:space="preserve">
+    <value>umjeren</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Elevated" xml:space="preserve">
+    <value>povišen</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Critical" xml:space="preserve">
+    <value>kritičan</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Low" xml:space="preserve">
+    <value>nizak</value>
+  </data>
+  <data name="Module.Suppliers.Risk.Medium" xml:space="preserve">
+    <value>srednji</value>
+  </data>
+  <data name="Module.Suppliers.Status.Active" xml:space="preserve">
+    <value>aktivan</value>
+  </data>
+  <data name="Module.Suppliers.Status.Inactive" xml:space="preserve">
+    <value>neaktivan</value>
+  </data>
+  <data name="Module.Suppliers.Status.Validated" xml:space="preserve">
+    <value>validiran</value>
+  </data>
+  <data name="Module.Suppliers.Status.Qualified" xml:space="preserve">
+    <value>kvalificiran</value>
+  </data>
+  <data name="Module.Suppliers.Status.Suspended" xml:space="preserve">
+    <value>suspendiran</value>
+  </data>
+  <data name="Module.Suppliers.Status.UnderReview" xml:space="preserve">
+    <value>u pregledu</value>
+  </data>
+  <data name="Module.Suppliers.Status.PendingApproval" xml:space="preserve">
+    <value>čeka odobrenje</value>
+  </data>
+  <data name="Module.Suppliers.Status.Capa" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="Module.Suppliers.Status.Expired" xml:space="preserve">
+    <value>istekao</value>
+  </data>
+  <data name="Module.Suppliers.Status.Delisted" xml:space="preserve">
+    <value>uklonjen s popisa</value>
+  </data>
+  <data name="Module.Suppliers.Status.Blacklisted" xml:space="preserve">
+    <value>na crnoj listi</value>
+  </data>
+  <data name="Module.Suppliers.Status.Probation" xml:space="preserve">
+    <value>na probnom roku</value>
+  </data>
+  <data name="Module.Suppliers.Status.OnHold" xml:space="preserve">
+    <value>na čekanju</value>
+  </data>
+  <data name="Module.Incidents.Priority.Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Module.Incidents.Priority.Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="Module.Incidents.Priority.High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="Module.Incidents.Priority.Critical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+  <data name="Module.Incidents.Status.Reported" xml:space="preserve">
+    <value>REPORTED</value>
+  </data>
+  <data name="Module.Incidents.Status.Investigation" xml:space="preserve">
+    <value>INVESTIGATION</value>
+  </data>
+  <data name="Module.Incidents.Status.Classified" xml:space="preserve">
+    <value>CLASSIFIED</value>
+  </data>
+  <data name="Module.Incidents.Status.DeviationLinked" xml:space="preserve">
+    <value>DEVIATION_LINKED</value>
+  </data>
+  <data name="Module.Incidents.Status.CapaLinked" xml:space="preserve">
+    <value>CAPA_LINKED</value>
+  </data>
+  <data name="Module.Incidents.Status.Closed" xml:space="preserve">
+    <value>CLOSED</value>
+  </data>
+  <data name="Module.Incidents.Type.Deviation" xml:space="preserve">
+    <value>Deviation</value>
+  </data>
+  <data name="Module.Incidents.Type.Quality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="Module.Incidents.Type.Safety" xml:space="preserve">
+    <value>Safety</value>
+  </data>
+  <data name="Module.Incidents.Type.Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Module.Incidents.Type.It" xml:space="preserve">
+    <value>IT</value>
+  </data>
+  <data name="Module.Incidents.Type.Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Calibration" xml:space="preserve">
+    <value>kalibracija</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Audit" xml:space="preserve">
+    <value>revizija</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.ItServices" xml:space="preserve">
+    <value>IT usluge</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Laboratory" xml:space="preserve">
+    <value>laboratorij</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Maintenance" xml:space="preserve">
+    <value>održavanje</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Qualification" xml:space="preserve">
+    <value>kvalifikacija</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Validation" xml:space="preserve">
+    <value>validacija</value>
+  </data>
+  <data name="Module.ExternalServicers.ServiceType.Logistics" xml:space="preserve">
+    <value>logistika</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Active" xml:space="preserve">
+    <value>aktivan</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Inactive" xml:space="preserve">
+    <value>neaktivan</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Pending" xml:space="preserve">
+    <value>u tijeku</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Suspended" xml:space="preserve">
+    <value>suspendiran</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.Expired" xml:space="preserve">
+    <value>istekao</value>
+  </data>
+  <data name="Module.ExternalServicers.Status.OnHold" xml:space="preserve">
+    <value>na čekanju</value>
+  </data>
+  <data name="Module.Audit.Action.All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Module.Audit.Action.Create" xml:space="preserve">
+    <value>CREATE</value>
+  </data>
+  <data name="Module.Audit.Action.Update" xml:space="preserve">
+    <value>UPDATE</value>
+  </data>
+  <data name="Module.Audit.Action.Delete" xml:space="preserve">
+    <value>DELETE</value>
+  </data>
+  <data name="Module.Audit.Action.Sign" xml:space="preserve">
+    <value>SIGN</value>
+  </data>
+  <data name="Module.Audit.Action.Rollback" xml:space="preserve">
+    <value>ROLLBACK</value>
+  </data>
+  <data name="Module.Audit.Action.Export" xml:space="preserve">
+    <value>EXPORT</value>
+  </data>
+  <data name="Module.Parts.Status.Active" xml:space="preserve">
+    <value>aktivan</value>
+  </data>
+  <data name="Module.Parts.Status.Blocked" xml:space="preserve">
+    <value>blokiran</value>
+  </data>
+  <data name="Module.Parts.Status.Inactive" xml:space="preserve">
+    <value>neaktivan</value>
+  </data>
+  <data name="Module.Status.Cancelled" xml:space="preserve">
+    <value>Promjene za {0} su otkazane.</value>
+  </data>
+  <data name="Module.Status.Filtered" xml:space="preserve">
+    <value>Filtrirano {0} prema "{1}".</value>
+  </data>
+  <data name="Module.Status.Loaded" xml:space="preserve">
+    <value>Učitano {0} zapisa.</value>
+  </data>
+  <data name="Module.Status.Loading" xml:space="preserve">
+    <value>Učitavanje zapisa za {0}...</value>
+  </data>
+  <data name="Module.Status.NoChanges" xml:space="preserve">
+    <value>Nema promjena za spremanje za {0}.</value>
+  </data>
+  <data name="Module.Status.NotInEditMode" xml:space="preserve">
+    <value>{0} nije u načinu Dodaj/Ažuriraj.</value>
+  </data>
+  <data name="Module.Status.OfflineFallback" xml:space="preserve">
+    <value>Učitani su izvanmrežni podaci jer: {0}</value>
+  </data>
   <data name="Module.Status.Ready" xml:space="preserve">
     <value>Spremno</value>
+  </data>
+  <data name="Module.Status.SaveFailure" xml:space="preserve">
+    <value>Spremanje za {0} nije uspjelo: {1}</value>
+  </data>
+  <data name="Module.Status.SaveSuccess" xml:space="preserve">
+    <value>Spremanje {0} je uspjelo.</value>
+  </data>
+  <data name="Module.Status.ValidationIssues" xml:space="preserve">
+    <value>{0} ima {1} problema s validacijom.</value>
   </data>
   <data name="Dashboard.Toolbar.AutomationName" xml:space="preserve">
     <value>Alatna traka nadzorne ploče</value>
