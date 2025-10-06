@@ -1,0 +1,1 @@
+- [D-001] Decision: Confirm dotnet CLI absence blocks build/test execution; proceed with documentation-only maintenance until SDK installed | Impact: all projects | Date: 2025-10-06

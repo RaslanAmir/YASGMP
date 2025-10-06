@@ -1,0 +1,1 @@
+- Module Environment: blocked → blocked | Reasons: dotnet CLI still unavailable; static documentation refreshed | Issues closed: []

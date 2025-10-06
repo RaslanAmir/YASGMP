@@ -1,0 +1,16 @@
+- id: I-001
+  file: docs/codex_plan.md
+  module: Environment
+  context: Current Compile Status
+  type: BuildEnv
+  severity: "❌ High"
+  description: |
+    The execution environment lacks the dotnet CLI, preventing restore/build/test workflows for the WPF and MAUI projects. This blocks compliance validation, smoke automation, and .NET 9 targeting enforcement.
+  references:
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+  suggested_fix: |
+    Install the .NET 9 SDK (9.0.100) and Windows 10 SDK 19041+ on the host or container. Re-run dotnet --info, dotnet restore, and dotnet build for yasgmp.sln and YasGMP.Wpf once available.
+  status: open
+  resolved_in: null
+  tags: [buildenv, net9]
