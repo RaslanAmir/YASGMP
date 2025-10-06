@@ -53,3 +53,4 @@ namespace YasGMP.Models
         public virtual IotGateway? Gateway { get; set; }
     }
 }
+

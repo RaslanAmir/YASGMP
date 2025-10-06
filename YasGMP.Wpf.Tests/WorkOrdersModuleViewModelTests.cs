@@ -357,3 +357,4 @@ public class WorkOrdersModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

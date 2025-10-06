@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using YasGMP.Data;
+using YasGMP.Services;
 
 namespace YasGMP.AppCore.DependencyInjection
 {

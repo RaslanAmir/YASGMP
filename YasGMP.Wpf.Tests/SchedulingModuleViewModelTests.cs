@@ -153,3 +153,4 @@ public class SchedulingModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

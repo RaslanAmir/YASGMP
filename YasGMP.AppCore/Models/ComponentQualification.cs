@@ -64,3 +64,4 @@ namespace YasGMP.Models
         public virtual MachineComponent? Component { get; set; }
     }
 }
+

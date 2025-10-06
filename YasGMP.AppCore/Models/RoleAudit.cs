@@ -57,3 +57,4 @@ namespace YasGMP.Models
         public virtual Role? Role { get; set; }
     }
 }
+

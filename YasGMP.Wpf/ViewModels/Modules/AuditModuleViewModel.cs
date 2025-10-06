@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,9 +12,9 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
+public partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Audit";
+    public new const string ModuleKey = "Audit";
 
     public AuditModuleViewModel(
         DatabaseService databaseService,
@@ -29,6 +30,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
         _exportToPdfCommand = new AsyncRelayCommand(ExportToPdfAsync, CanExecuteExport);
         _exportToExcelCommand = new AsyncRelayCommand(ExportToExcelAsync, CanExecuteExport);
+        PropertyChanged += OnSelfPropertyChanged;
 
         FilterFrom = DateTime.Today.AddDays(-30);
         FilterTo = DateTime.Today;
@@ -220,7 +222,6 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
     partial void OnHasResultsChanged(bool value) => UpdateExportCommandStates();
 
-    partial void OnIsBusyChanged(bool value) => UpdateExportCommandStates();
 
     private ModuleRecord MapToRecord(AuditEntryDto entry)
     {
@@ -326,6 +327,14 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         }
     }
 
+    private void OnSelfPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(IsBusy), StringComparison.Ordinal))
+        {
+            UpdateExportCommandStates();
+        }
+    }
+
     private void UpdateExportCommandStates()
     {
         _exportToPdfCommand.NotifyCanExecuteChanged();
@@ -351,3 +360,9 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         return $"User: {userText}; Entity: {entityText}; Action: {actionText}; Range: {fromText} – {toText}";
     }
 }
+
+
+
+
+
+

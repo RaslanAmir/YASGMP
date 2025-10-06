@@ -36,26 +36,42 @@ namespace YasGMP.Services.Platform
 
         public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
         {
-            return await _dispatcher.InvokeAsync(async () =>
+            var tcs = new TaskCompletionSource<bool>();
+
+            await _dispatcher.InvokeAsync(async () =>
             {
                 var page = Application.Current?.MainPage;
                 if (page == null)
-                    return false;
+                {
+                    tcs.TrySetResult(false);
+                    return;
+                }
 
-                return await page.DisplayAlert(title, message, accept, cancel);
+                var result = await page.DisplayAlert(title, message, accept, cancel);
+                tcs.TrySetResult(result);
             }).ConfigureAwait(false);
+
+            return await tcs.Task.ConfigureAwait(false);
         }
 
-        public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
+        public async Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
         {
-            return _dispatcher.InvokeAsync(async () =>
+            var tcs = new TaskCompletionSource<string?>();
+
+            await _dispatcher.InvokeAsync(async () =>
             {
                 var page = Application.Current?.MainPage;
                 if (page == null)
-                    return null;
+                {
+                    tcs.TrySetResult(null);
+                    return;
+                }
 
-                return await page.DisplayActionSheet(title, cancel, destruction, buttons);
-            });
+                var result = await page.DisplayActionSheet(title, cancel, destruction, buttons);
+                tcs.TrySetResult(result);
+            }).ConfigureAwait(false);
+
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)

@@ -115,3 +115,4 @@ namespace YasGMP.Models
         public int ChangeVersion { get; set; } = 1;
     }
 }
+

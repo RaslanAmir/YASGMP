@@ -45,3 +45,4 @@ namespace YasGMP.Models
         public string? Details { get; set; }
     }
 }
+

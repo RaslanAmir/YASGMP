@@ -36,3 +36,4 @@ namespace YasGMP.Models
         public int? ApprovedByLegacyId { get; set; }
     }
 }
+

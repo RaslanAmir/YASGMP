@@ -182,3 +182,4 @@ namespace YasGMP.Models
         public string CreatedBy { get; set; } = string.Empty;
     }
 }
+

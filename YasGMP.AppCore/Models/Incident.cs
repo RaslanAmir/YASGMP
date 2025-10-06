@@ -138,3 +138,4 @@ namespace YasGMP.Models
         [NotMapped] public bool HasEvidence => Attachments?.Count > 0;
     }
 }
+

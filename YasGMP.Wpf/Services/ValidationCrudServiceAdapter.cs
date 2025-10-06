@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -115,3 +115,4 @@ public sealed class ValidationCrudServiceAdapter : IValidationCrudService
             IpAddress = context.Ip
         };
 }
+

@@ -13,3 +13,4 @@ namespace YasGMP.Models.Enums
         CAPA_LINK = 5
     }
 }
+

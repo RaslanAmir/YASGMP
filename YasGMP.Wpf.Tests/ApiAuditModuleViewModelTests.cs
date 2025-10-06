@@ -489,3 +489,4 @@ public class ApiAuditModuleViewModelTests
         public void Activate(ModuleDocumentViewModel document) { }
     }
 }
+

@@ -50,3 +50,4 @@ namespace YasGMP.Models
         public int? SensorTypeId { get; set; }
     }
 }
+

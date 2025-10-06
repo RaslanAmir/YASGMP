@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -363,11 +363,11 @@ ORDER BY p.name, p.id";
                 token: token);
 
         public static Task AddPartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
-            => db.AddSparePartAsync(part, actorUserId, ip, deviceInfo, token);
+            => db.AddSparePartAsync(part, actorUserId, ip, deviceInfo, signatureMetadata: null, token: token);
 
         // Back-compat wrappers for PartViewModel naming
         public static Task UpdatePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
-            => db.UpdateSparePartAsync(part, actorUserId, ip, deviceInfo, token);
+            => db.UpdateSparePartAsync(part, actorUserId, ip, deviceInfo, signatureMetadata: null, token: token);
 
         public static Task DeletePartAsync(this DatabaseService db, int id, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
             => db.DeleteSparePartAsync(id, actorUserId, ip, token);
@@ -452,4 +452,6 @@ ORDER BY p.name, p.id";
         }
     }
 }
+
+
 

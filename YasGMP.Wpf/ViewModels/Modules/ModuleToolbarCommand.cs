@@ -26,3 +26,6 @@ public partial class ModuleToolbarCommand : ObservableObject
     [ObservableProperty]
     private bool _isChecked;
 }
+
+
+

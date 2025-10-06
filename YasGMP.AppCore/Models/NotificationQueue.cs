@@ -60,3 +60,4 @@ namespace YasGMP.Models
         public virtual User? RecipientUser { get; set; }
     }
 }
+

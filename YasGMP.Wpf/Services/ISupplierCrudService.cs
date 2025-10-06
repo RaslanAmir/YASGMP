@@ -109,3 +109,4 @@ public static class SupplierCrudExtensions
             ? "active"
             : status.Trim().ToLower(CultureInfo.InvariantCulture);
 }
+

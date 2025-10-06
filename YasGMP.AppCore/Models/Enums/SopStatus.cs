@@ -54,3 +54,4 @@ namespace YasGMP.Models.Enums
         PendingAcknowledgement = 8
     }
 }
+

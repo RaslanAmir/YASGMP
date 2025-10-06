@@ -21,3 +21,4 @@ namespace YasGMP.Services.Interfaces
         string CurrentIpAddress { get; }
     }
 }
+

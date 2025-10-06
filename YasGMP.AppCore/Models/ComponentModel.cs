@@ -39,3 +39,4 @@ namespace YasGMP.Models
         public virtual ComponentType? ComponentType { get; set; }
     }
 }
+

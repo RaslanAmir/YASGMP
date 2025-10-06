@@ -29,3 +29,4 @@ namespace YasGMP.Models.Enums
         INVALIDATED = 7
     }
 }
+

@@ -50,3 +50,4 @@ namespace YasGMP.Models.Enums
         Archived = 99
     }
 }
+

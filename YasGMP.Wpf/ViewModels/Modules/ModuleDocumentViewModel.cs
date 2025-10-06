@@ -28,3 +28,6 @@ public abstract class ModuleDocumentViewModel : B1FormDocumentViewModel
     protected static IReadOnlyList<ModuleRecord> ToReadOnlyList(IEnumerable<ModuleRecord> source)
         => source is IReadOnlyList<ModuleRecord> list ? list : source.ToList();
 }
+
+
+

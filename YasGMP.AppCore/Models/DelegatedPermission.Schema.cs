@@ -39,3 +39,4 @@ namespace YasGMP.Models
         public string? DelegationCode { get; set; }
     }
 }
+

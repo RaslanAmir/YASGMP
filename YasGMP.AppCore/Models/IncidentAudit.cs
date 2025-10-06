@@ -74,3 +74,4 @@ namespace YasGMP.Models
         public string? InspectorNote { get; set; }
     }
 }
+

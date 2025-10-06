@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,12 +31,12 @@ namespace YasGMP.Services.Platform
 
             if (request.AllowMultiple)
             {
-                var results = await FilePicker.Default.PickMultipleAsync(options, cancellationToken).ConfigureAwait(false);
-                return results?.Select(ToPickedFile).ToList() ?? Array.Empty<PickedFile>();
+                var results = await FilePicker.Default.PickMultipleAsync(options).ConfigureAwait(false);
+                return results?.Select(ToPickedFile).ToList() ?? new List<PickedFile>();
             }
             else
             {
-                var result = await FilePicker.Default.PickAsync(options, cancellationToken).ConfigureAwait(false);
+                var result = await FilePicker.Default.PickAsync(options).ConfigureAwait(false);
                 if (result == null)
                     return Array.Empty<PickedFile>();
 
@@ -49,7 +50,7 @@ namespace YasGMP.Services.Platform
                 result.FileName,
                 result.ContentType ?? "application/octet-stream",
                 () => result.OpenReadAsync(),
-                result.FileInfo?.Length);
+                (result.FullPath != null && System.IO.File.Exists(result.FullPath) ? new System.IO.FileInfo(result.FullPath).Length : (long?)null));
         }
 
         private static FilePickerFileType? ConvertFileTypes(IReadOnlyDictionary<string, string[]> fileTypes)
@@ -71,3 +72,4 @@ namespace YasGMP.Services.Platform
         }
     }
 }
+

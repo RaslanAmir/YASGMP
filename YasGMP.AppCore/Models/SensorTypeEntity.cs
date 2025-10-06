@@ -51,3 +51,4 @@ namespace YasGMP.Models
         public virtual MeasurementUnit? DefaultUnit { get; set; }
     }
 }
+

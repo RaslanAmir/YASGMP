@@ -83,3 +83,4 @@ namespace YasGMP.Models.Enums
         VERIFICATION = Verification,
     }
 }
+

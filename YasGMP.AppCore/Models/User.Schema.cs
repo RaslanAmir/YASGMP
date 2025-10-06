@@ -59,3 +59,4 @@ namespace YasGMP.Models
         public string? LegacyAdminActivityCollection { get; set; }
     }
 }
+

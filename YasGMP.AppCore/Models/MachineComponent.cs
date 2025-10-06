@@ -319,3 +319,4 @@ namespace YasGMP.Models
             => $"Component: {Name} [{Code}] (Status: {Status}) – Machine#{MachineId}";
     }
 }
+

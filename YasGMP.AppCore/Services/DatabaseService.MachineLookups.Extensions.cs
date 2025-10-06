@@ -175,3 +175,4 @@ namespace YasGMP.Services
             => LookupInsertAsync(db, "machine_statuses", "`name` VARCHAR(100) NOT NULL", name, token);
     }
 }
+

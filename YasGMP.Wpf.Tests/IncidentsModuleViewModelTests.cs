@@ -228,3 +228,4 @@ public class IncidentsModuleViewModelTests
         return (Task)method.Invoke(viewModel, new object[] { result })!;
     }
 }
+

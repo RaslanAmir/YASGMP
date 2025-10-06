@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Scheduling";
+    public new const string ModuleKey = "Scheduling";
 
     private readonly IScheduledJobCrudService _scheduledJobService;
     private readonly IAuthContext _authContext;
@@ -776,3 +776,7 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         }
     }
 }
+
+
+
+

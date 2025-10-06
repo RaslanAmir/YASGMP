@@ -268,3 +268,4 @@ public sealed record AttachmentWorkflowUploadResult(
     /// <summary>Captured retention policy persisted for the attachment.</summary>
     public RetentionPolicy Retention => Upload.Retention;
 }
+

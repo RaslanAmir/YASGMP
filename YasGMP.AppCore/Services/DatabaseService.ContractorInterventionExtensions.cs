@@ -267,3 +267,4 @@ namespace YasGMP.Services
             => db.LogContractorInterventionAuditAsync(interventionId, userId, action, details, cancellationToken);
     }
 }
+

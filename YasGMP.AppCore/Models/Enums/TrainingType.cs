@@ -45,3 +45,4 @@ namespace YasGMP.Models.Enums
         Custom = 1000
     }
 }
+

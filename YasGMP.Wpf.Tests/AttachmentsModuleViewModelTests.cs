@@ -477,3 +477,4 @@ public class AttachmentsModuleViewModelTests
         public void UpdateStatus(string message) => StatusUpdates.Add(message);
     }
 }
+

@@ -17,7 +17,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Suppliers";
+    public new const string ModuleKey = "Suppliers";
 
     private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
     {
@@ -178,10 +178,6 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             return;
         }
 
-        if (saveResult.SignatureMetadata?.Id is { } signatureId)
-        {
-            adapterResult.DigitalSignatureId = signatureId;
-        }
 
         _loadedSupplier = supplier;
         LoadEditor(supplier);
@@ -710,3 +706,7 @@ public sealed partial class SupplierEditor : ObservableObject
         return supplier;
     }
 }
+
+
+
+

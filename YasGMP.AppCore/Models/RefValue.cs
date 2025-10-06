@@ -47,3 +47,4 @@ namespace YasGMP.Models
         public virtual RefDomain? Domain { get; set; }
     }
 }
+

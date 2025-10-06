@@ -55,3 +55,4 @@ namespace YasGMP.Models
         public virtual Machine? Machine { get; set; }
     }
 }
+

@@ -174,3 +174,4 @@ public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialo
             result.Signature.RecordId);
     }
 }
+

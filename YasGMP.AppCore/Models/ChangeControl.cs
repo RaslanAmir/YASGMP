@@ -86,3 +86,4 @@ namespace YasGMP.Models
         public string? DeviceInfo { get; set; }
     }
 }
+

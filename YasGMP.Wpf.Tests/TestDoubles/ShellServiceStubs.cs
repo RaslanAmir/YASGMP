@@ -23,3 +23,4 @@ public sealed class StubModuleNavigationService : IModuleNavigationService
     public ModuleDocumentViewModel OpenModule(string moduleKey, object? parameter = null)
         => throw new NotSupportedException();
 }
+

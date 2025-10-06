@@ -54,3 +54,4 @@ namespace YasGMP.Models.Enums
         SuperAdmin = 99
     }
 }
+

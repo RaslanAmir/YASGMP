@@ -81,7 +81,7 @@ namespace YasGMP.Services
             {
                 Id = contractor.Id,
                 Name = contractor.Name ?? string.Empty,
-                Code = contractor.Code,
+                Code = contractor.RegistrationNumber ?? contractor.CompanyName ?? string.Empty,
                 VatOrId = contractor.RegistrationNumber,
                 ContactPerson = contractor.ContactPerson,
                 Email = contractor.Email,
@@ -89,10 +89,12 @@ namespace YasGMP.Services
                 Address = contractor.Address,
                 Type = contractor.Type,
                 Status = contractor.Status,
-                Comment = contractor.Comment,
+                Comment = contractor.BlacklistReason ?? contractor.Note,
                 DigitalSignature = contractor.DigitalSignature,
                 ExtraNotes = contractor.Note
             };
 
     }
 }
+
+

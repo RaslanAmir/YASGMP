@@ -38,3 +38,4 @@ namespace YasGMP.Models.Enums
         Other = 1000
     }
 }
+

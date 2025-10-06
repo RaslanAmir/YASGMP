@@ -78,3 +78,4 @@ namespace YasGMP.Models
         public virtual RefValue? TypeRef { get; set; }
     }
 }
+

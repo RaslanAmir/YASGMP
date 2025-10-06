@@ -43,3 +43,4 @@ namespace YasGMP.Models
         public ICollection<ApiUsageLog> UsageLogEntries { get; set; } = new List<ApiUsageLog>();
     }
 }
+

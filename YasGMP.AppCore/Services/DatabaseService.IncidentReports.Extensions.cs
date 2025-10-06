@@ -174,3 +174,4 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY reported_a
     }
 }
 
+

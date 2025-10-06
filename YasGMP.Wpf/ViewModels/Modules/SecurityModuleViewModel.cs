@@ -16,7 +16,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Security";
+    public new const string ModuleKey = "Security";
 
     private readonly IUserCrudService _userService;
     private readonly IAuthContext _authContext;
@@ -688,3 +688,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         private bool _isSelected;
     }
 }
+
+
+
+

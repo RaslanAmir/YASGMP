@@ -17,3 +17,4 @@ namespace YasGMP.Models
         // This alias exists only for legacy compatibility.
     }
 }
+

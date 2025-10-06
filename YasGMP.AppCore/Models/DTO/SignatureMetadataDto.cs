@@ -1,6 +1,6 @@
 using System;
 
-namespace YasGMP.AppCore.Models.Signatures
+namespace YasGMP.Models.DTO
 {
     /// <summary>
     /// Canonical metadata captured whenever an electronic signature is taken.
@@ -32,3 +32,5 @@ namespace YasGMP.AppCore.Models.Signatures
         public string? IpAddress { get; set; }
     }
 }
+
+

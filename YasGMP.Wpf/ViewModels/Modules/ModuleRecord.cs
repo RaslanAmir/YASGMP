@@ -52,3 +52,6 @@ public sealed class ModuleRecord
     /// <summary>Optional payload forwarded to the related module when navigating.</summary>
     public object? RelatedParameter { get; }
 }
+
+
+

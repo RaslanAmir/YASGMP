@@ -142,27 +142,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             })
             .ToList();
 
-    {
-        var sample = new[]
-        {
-            new Machine
-            {
-                Id = 1001,
-                Name = "Autoclave",
-                Code = "AUTO-001",
-                Status = "active",
-                Description = "Steam sterilizer",
-                Manufacturer = "Steris",
-                Location = "Building A",
-                InstallDate = DateTime.UtcNow.AddYears(-3)
-            },
-            new Machine
-            {
-                Id = 1002,
-                Name = "pH Meter",
-public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
-
-
         return new CflRequest("Select Asset", items);
     }
 
@@ -766,3 +745,5 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
     }
 }
+
+

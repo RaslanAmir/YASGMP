@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YasGMP.Models
@@ -17,3 +17,4 @@ namespace YasGMP.Models
 
     }
 }
+

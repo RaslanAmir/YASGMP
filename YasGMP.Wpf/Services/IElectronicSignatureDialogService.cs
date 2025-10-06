@@ -41,3 +41,4 @@ public interface IElectronicSignatureDialogService
         ElectronicSignatureDialogResult result,
         CancellationToken cancellationToken = default);
 }
+

@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using Xunit;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
@@ -78,3 +78,4 @@ public sealed class SignaturePersistenceHelperTests
         Assert.Equal(0, dialogService.LogOnlyInvocationCount);
     }
 }
+

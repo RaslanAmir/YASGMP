@@ -58,3 +58,4 @@ namespace YasGMP.Models
         public virtual IotSensorData? SensorData { get; set; }
     }
 }
+

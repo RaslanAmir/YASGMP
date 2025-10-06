@@ -440,3 +440,4 @@ VALUES (@uid, @etype, @table, @module, @rid, @desc, @ip, @sev);";
         }
     }
 }
+

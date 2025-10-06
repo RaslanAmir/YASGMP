@@ -56,3 +56,4 @@ namespace YasGMP.Models
         public DateTime? UpdatedAt { get; set; }
     }
 }
+

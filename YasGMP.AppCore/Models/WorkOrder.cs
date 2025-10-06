@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,11 +6,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>WorkOrder</b> â€“ Ultra-robust GMP-compliant maintenance, calibration, and inspection entity.
+    /// <b>WorkOrder</b> – Ultra-robust GMP-compliant maintenance, calibration, and inspection entity.
     /// <para>
-    /// âś… All core and bonus fields for maximum compatibility and futureproofing<br/>
-    /// âś… Full forensic audit, rollback, AI/ML support, signatures, attachments, CAPA, incidents<br/>
-    /// âś… Compatible with all past/future UIs, reporting, and data migration needs
+    /// ✅ All core and bonus fields for maximum compatibility and futureproofing<br/>
+    /// ✅ Full forensic audit, rollback, AI/ML support, signatures, attachments, CAPA, incidents<br/>
+    /// ✅ Compatible with all past/future UIs, reporting, and data migration needs
     /// </para>
     /// </summary>
     [Table("work_orders")]
@@ -69,7 +69,7 @@ namespace YasGMP.Models
 
         /// <summary>Date due (planned close).</summary>
         [Column("due_date")]
-        [Display(Name = "Rok izvrĹˇenja")]
+        [Display(Name = "Rok izvršenja")]
         public DateTime? DueDate { get; set; }
 
         /// <summary>Date actually closed.</summary>
@@ -87,7 +87,7 @@ namespace YasGMP.Models
         /// <summary>ID of the user who requested the work order.</summary>
         [Required]
         [Column("requested_by_id")]
-        [Display(Name = "ZatraĹľio korisnik")]
+        [Display(Name = "Zatražio korisnik")]
         public int RequestedById { get; set; }
 
         /// <summary>Navigation to requesting user.</summary>
@@ -107,7 +107,7 @@ namespace YasGMP.Models
         /// <summary>ID of assigned technician.</summary>
         [Required]
         [Column("assigned_to_id")]
-        [Display(Name = "Dodijeljeno tehniÄŤaru")]
+        [Display(Name = "Dodijeljeno tehničaru")]
         public int AssignedToId { get; set; }
 
         /// <summary>Navigation to assigned user.</summary>
@@ -136,7 +136,7 @@ namespace YasGMP.Models
 
         // ========== CAPA & INCIDENT ==========
         [Column("capa_case_id")]
-        [Display(Name = "CAPA sluÄŤaj")]
+        [Display(Name = "CAPA slučaj")]
         public int? CapaCaseId { get; set; }
 
         [ForeignKey("CapaCaseId")]
@@ -184,17 +184,17 @@ namespace YasGMP.Models
 
         [StringLength(256)]
         [Column("device_info")]
-        [Display(Name = "ForenziÄŤki ureÄ‘aj/IP/session")]
+        [Display(Name = "Forenzički uređaj/IP/session")]
         public string DeviceInfo { get; set; } = string.Empty;
 
         [StringLength(45)]
         [Column("source_ip")]
-        [Display(Name = "ForenziÄŤki IP")]
+        [Display(Name = "Forenzički IP")]
         public string SourceIp { get; set; } = string.Empty;
 
         [StringLength(64)]
         [Column("session_id")]
-        [Display(Name = "ForenziÄŤki session")]
+        [Display(Name = "Forenzički session")]
         public string SessionId { get; set; } = string.Empty;
 
         [StringLength(512)]
@@ -248,7 +248,7 @@ namespace YasGMP.Models
 
         // ========== COPY/CLONE ==========
         /// <summary>
-        /// DeepCopy â€“ makes a full, isolated copy for dialog editing/rollback/audit/inspection.
+        /// DeepCopy – makes a full, isolated copy for dialog editing/rollback/audit/inspection.
         /// </summary>
         public WorkOrder DeepCopy()
         {
@@ -313,5 +313,6 @@ namespace YasGMP.Models
         public int PartsCount { get; set; }
     }
 }
+
 
 

@@ -1,8 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Maui.Storage;
 using YasGMP.Diagnostics.LogSinks;
 
 namespace YasGMP.Diagnostics
@@ -18,7 +17,7 @@ namespace YasGMP.Diagnostics
             _sinks = sinks?.ToList() ?? new List<ILogSink>();
         }
 
-        public string PrimaryLogDir => Path.Combine(FileSystem.AppDataDirectory, "logs");
+        public string PrimaryLogDir => DiagnosticsPathProvider.GetLogsDirectory();
         public string SecondaryLogDir => Path.Combine(AppContext.BaseDirectory, "logs");
 
         public bool FlushElasticBuffer()
@@ -34,4 +33,5 @@ namespace YasGMP.Diagnostics
         }
     }
 }
+
 

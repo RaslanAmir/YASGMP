@@ -31,3 +31,4 @@ namespace YasGMP.Models
         public string? DocumentLabel { get; set; }
     }
 }
+

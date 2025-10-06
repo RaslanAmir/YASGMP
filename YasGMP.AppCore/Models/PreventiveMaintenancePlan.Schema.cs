@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -36,3 +36,4 @@ namespace YasGMP.Models
             => values == null ? null : string.Join(',', values.Where(v => !string.IsNullOrWhiteSpace(v)));
     }
 }
+

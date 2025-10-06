@@ -65,3 +65,4 @@ namespace YasGMP.Models
         public virtual User? ReviewedByNavigation { get; set; }
     }
 }
+

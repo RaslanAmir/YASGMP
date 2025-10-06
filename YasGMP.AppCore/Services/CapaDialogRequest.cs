@@ -15,3 +15,4 @@ namespace YasGMP.Services
         public CapaCase? CapaCase { get; }
     }
 }
+

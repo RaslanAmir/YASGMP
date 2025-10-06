@@ -9,3 +9,4 @@ namespace YasGMP.Services
         public const string CalibrationEdit = "dialogs.calibration.edit";
     }
 }
+

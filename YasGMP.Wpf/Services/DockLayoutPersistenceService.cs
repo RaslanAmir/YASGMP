@@ -94,3 +94,4 @@ saved_at=UTC_TIMESTAMP();";
         public WindowGeometry Geometry => new(Left, Top, Width, Height);
     }
 }
+

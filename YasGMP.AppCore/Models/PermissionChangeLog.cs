@@ -85,3 +85,4 @@ namespace YasGMP.Models
         public virtual Permission? Permission { get; set; }
     }
 }
+

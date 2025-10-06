@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -120,3 +120,4 @@ namespace YasGMP.Models
         public virtual User? LastModifiedByUser { get; set; }
     }
 }
+

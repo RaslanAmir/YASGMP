@@ -26,3 +26,4 @@ namespace YasGMP.Wpf.Services
         public string SessionId { get; }
     }
 }
+

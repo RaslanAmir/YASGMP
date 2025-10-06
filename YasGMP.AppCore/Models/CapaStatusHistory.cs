@@ -114,3 +114,4 @@ namespace YasGMP.Models
         public bool IsDeleted { get; set; } = false;
     }
 }
+

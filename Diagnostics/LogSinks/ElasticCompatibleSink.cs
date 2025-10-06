@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics.LogSinks
 {
@@ -25,8 +24,7 @@ namespace YasGMP.Diagnostics.LogSinks
         {
             _url = cfg[DiagnosticsConstants.KeyElasticUrl];
             _index = cfg[DiagnosticsConstants.KeyElasticIndex];
-            var dir = Path.Combine(FileSystem.AppDataDirectory, "logs");
-            Directory.CreateDirectory(dir);
+            var dir = DiagnosticsPathProvider.GetLogsDirectory();
             _bufferPath = Path.Combine(dir, "elastic_buffer.ndjson");
             _authHeader = cfg["Diagnostics:Elastic:Authorization"];
             _authScheme = cfg["Diagnostics:Elastic:AuthScheme"]; // e.g., Bearer or ApiKey
@@ -124,3 +122,4 @@ namespace YasGMP.Diagnostics.LogSinks
         }
     }
 }
+

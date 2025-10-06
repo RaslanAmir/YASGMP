@@ -1,8 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Data.Sqlite;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics.LogSinks
 {
@@ -15,8 +14,7 @@ namespace YasGMP.Diagnostics.LogSinks
 
         public SQLiteLogSink()
         {
-            var dir = Path.Combine(FileSystem.AppDataDirectory, "logs");
-            Directory.CreateDirectory(dir);
+            var dir = DiagnosticsPathProvider.GetLogsDirectory();
             _dbPath = Path.Combine(dir, "diag.db");
             EnsureSchema();
         }
@@ -73,4 +71,5 @@ namespace YasGMP.Diagnostics.LogSinks
         }
     }
 }
+
 

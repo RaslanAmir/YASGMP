@@ -17,3 +17,4 @@ public interface IModuleNavigationService
 
     void Activate(ModuleDocumentViewModel document);
 }
+

@@ -67,3 +67,4 @@ namespace YasGMP.Models
         public string? ContractorCode { get; set; }
     }
 }
+

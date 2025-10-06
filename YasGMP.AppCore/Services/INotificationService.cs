@@ -16,3 +16,4 @@ namespace YasGMP.Services.Interfaces
         Task NotifyAsync(string message, string destination);
     }
 }
+

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
@@ -132,3 +132,4 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             IpAddress = context.Ip
         };
 }
+

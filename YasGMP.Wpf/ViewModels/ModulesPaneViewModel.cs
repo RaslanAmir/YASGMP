@@ -84,3 +84,4 @@ public partial class ModuleLinkViewModel : ObservableObject
 
     public RelayCommand<ModuleLinkViewModel> OpenCommand { get; }
 }
+

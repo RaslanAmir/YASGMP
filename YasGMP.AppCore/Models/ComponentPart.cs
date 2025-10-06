@@ -40,3 +40,4 @@ namespace YasGMP.Models
         public virtual Part? Part { get; set; }
     }
 }
+

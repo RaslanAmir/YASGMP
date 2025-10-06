@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -15,7 +15,7 @@ using QuestPDF.Infrastructure;
 using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
@@ -572,7 +572,7 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                 EntityType = "WorkOrder",
                 EntityId = request.WorkOrderId,
                 UploadedById = request.UserId,
-                DisplayName = $"WorkOrder #{request.WorkOrderId} ‚Äì potpis v{recordVersion}",
+                DisplayName = $"WorkOrder #{request.WorkOrderId} ñ potpis v{recordVersion}",
                 Notes = request.ReasonDescription,
                 Reason = $"workorder-signature:{request.ReasonCode}",
                 SourceIp = request.IpAddress,
@@ -729,17 +729,17 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
         {
             QuestPDF.Settings.License = LicenseType.Community;
             using var stream = new MemoryStream();
-            Document.Create(container =>
+            QuestPDF.Fluent.Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Margin(20);
                     page.Size(PageSizes.A4);
-                    page.Header().Text($"Radni nalog #{workOrder.Id} ‚Äì manifest potpisa").SemiBold().FontSize(16);
+                    page.Header().Text($"Radni nalog #{workOrder.Id} ñ manifest potpisa").SemiBold().FontSize(16);
                     page.Content().Column(col =>
                     {
                         col.Item().Text($"Potpisao: {request.SignerFullName ?? request.SignerUsername} (ID {signature.UserId})");
-                        col.Item().Text($"Korisniƒçko ime: {request.SignerUsername}");
+                        col.Item().Text($"KorisniËko ime: {request.SignerUsername}");
                         col.Item().Text($"Razlog (kod): {signature.ReasonCode}");
                         if (!string.IsNullOrWhiteSpace(request.ReasonDisplay))
                             col.Item().Text($"Razlog (opis): {request.ReasonDisplay}");
@@ -751,7 +751,7 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                             col.Item().Text($"Hash potpisa: {signature.SignatureHash}");
                         col.Item().Text($"Vrijeme potpisa: {signature.SignedAt:yyyy-MM-dd HH:mm:ss} {signature.ServerTimezone}");
                         col.Item().Text($"IP: {signature.IpAddress ?? "n/a"}");
-                        col.Item().Text($"Ureƒëaj: {signature.DeviceInfo ?? "n/a"}");
+                        col.Item().Text($"Ureaj: {signature.DeviceInfo ?? "n/a"}");
                         if (!string.IsNullOrWhiteSpace(signature.SessionId))
                             col.Item().Text($"Session ID: {signature.SessionId}");
                         col.Item().Text(string.IsNullOrWhiteSpace(request.MfaEvidence)
@@ -760,7 +760,7 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
 
                         col.Item().Element(e => e.PaddingVertical(6)).LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
 
-                        col.Item().Text("Sa≈æetak radnog naloga").SemiBold();
+                        col.Item().Text("Saûetak radnog naloga").SemiBold();
                         col.Item().Text($"Naslov: {workOrder.Title}");
                         col.Item().Text($"Status: {workOrder.Status}");
                         col.Item().Text($"Tip / Prioritet: {workOrder.Type} / {workOrder.Priority}");
@@ -982,3 +982,4 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
         #endregion
     }
 }
+

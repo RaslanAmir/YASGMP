@@ -276,7 +276,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
 
         var context = WarehouseCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
+            (_authContext.CurrentIpAddress ?? string.Empty),
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId,
             signatureResult);
@@ -484,7 +484,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 FileName = file.FileName,
                 ContentType = file.ContentType,
                 UploadedById = _authContext.CurrentUser?.Id,
-                SourceIp = _authContext.CurrentIpAddress,
+                SourceIp = (_authContext.CurrentIpAddress ?? string.Empty),
                 SourceHost = _authContext.CurrentDeviceInfo,
                 Reason = $"Warehouse attachment via WPF on {DateTime.UtcNow:O}"
             };
@@ -610,3 +610,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 }
+
+
+
+
+

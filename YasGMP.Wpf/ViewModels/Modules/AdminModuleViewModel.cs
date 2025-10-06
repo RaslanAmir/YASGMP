@@ -9,7 +9,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Admin";
+    public new const string ModuleKey = "Admin";
 
     public AdminModuleViewModel(
         DatabaseService databaseService,
@@ -55,17 +55,21 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
             new("Category", setting.Category ?? "-"),
             new("Value", setting.Value ?? string.Empty),
             new("Description", setting.Description ?? string.Empty),
-            new("Updated", setting.UpdatedAt?.ToString("g") ?? "-"),
+            new("Updated", setting.UpdatedAt.ToString("g")),
         };
 
         return new ModuleRecord(
             setting.Id.ToString(),
-            setting.Name ?? setting.Key ?? "Setting",
             setting.Key,
-            "Active",
+            setting.Key,
+            setting.Status ?? "active",
             setting.Description,
             fields,
             null,
             null);
     }
 }
+
+
+
+

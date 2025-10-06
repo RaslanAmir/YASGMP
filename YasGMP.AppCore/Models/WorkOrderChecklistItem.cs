@@ -49,3 +49,4 @@ namespace YasGMP.Models
         public virtual ChecklistItem? Item { get; set; }
     }
 }
+

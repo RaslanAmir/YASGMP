@@ -21,3 +21,4 @@ namespace YasGMP.Models
         public int? MigratedByLegacyId { get; set; }
     }
 }
+

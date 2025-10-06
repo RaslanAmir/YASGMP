@@ -18,3 +18,4 @@ namespace YasGMP.Models.Enums
         Drugo = 3
     }
 }
+

@@ -149,3 +149,4 @@ namespace YasGMP.Services.Interfaces
         bool IsPartial,
         AttachmentReadRequest? Request);
 }
+

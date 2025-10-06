@@ -172,3 +172,4 @@ ORDER BY nq.created_at DESC, nq.id DESC;";
         }
     }
 }
+

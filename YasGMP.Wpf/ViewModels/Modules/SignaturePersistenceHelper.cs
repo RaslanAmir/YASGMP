@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -137,3 +137,6 @@ internal static class SignaturePersistenceHelper
             .ConfigureAwait(false);
     }
 }
+
+
+

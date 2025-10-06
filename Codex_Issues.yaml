@@ -1,0 +1,65 @@
+﻿- id: I-2025-10-03-001
+  file: Diagnostics/CrashHandler.cs
+  module: Diagnostics
+  context: build
+  type: dependency
+  severity: critical
+  description: YasGMP.AppCore net9.0 previously pulled Microsoft.Maui.* diagnostics and legacy YasGMP.ViewModels, breaking MAUI/WPF builds when the assemblies were unavailable.
+  references:
+    - logs/20251003-dotnet-build-maui.txt
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Segregate MAUI-only diagnostics into conditional targets or provide platform-neutral services before re-running builds.
+  status: resolved
+  resolved_in: increment-20251003-02
+  tags:
+    - build
+    - cross-targeting
+    - diagnostics
+- id: I-2025-10-03-002
+  file: YasGMP.Wpf/MainWindow.xaml
+  module: WpfShell
+  context: build
+  type: markup
+  severity: critical
+  description: Fluent Ribbon upgrade removed `RibbonWindow.Ribbon`; the current XAML still binds the property causing .NET build failure (MC3072).
+  references:
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Update MainWindow to use the Fluent Ribbon 11 ribbon host pattern (e.g., `<fluent:RibbonWindow>` with `<fluent:Ribbon Title="...">`).
+  status: resolved
+  resolved_in: increment-20251003-03
+  tags:
+    - wpf
+    - ribbon
+    - build
+- id: I-2025-10-03-003
+  file: YasGMP.Wpf/Views/AttachmentsModuleView.xaml
+  module: Attachments
+  context: build
+  type: markup
+  severity: critical
+  description: AttachmentsModuleView has mismatched DockPanel/Grid tags which trigger MC3000 XAML parsing errors during WPF build.
+  references:
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Correct the DockPanel/Grid nesting (ensure DockPanel end tag matches start tag) so the view compiles.
+  status: resolved
+  resolved_in: increment-20251003-03
+  tags:
+    - wpf
+    - attachments
+    - build
+- id: I-2025-10-03-004
+  file: YasGMP.Wpf/ViewModels/Modules/AssetsModuleViewModel.cs
+  module: Assets
+  context: build
+  type: source
+  severity: critical
+  description: AssetsModuleViewModel.cs contains duplicated partial class definitions and stray sample data blocks, leading to syntax errors once WPF XAML compilation progresses past markup fixes.
+  references:
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Remove the duplicated class body, restore the intended method implementation, and ensure the file compiles under C# 12 (file-scoped namespace).
+  status: open
+  resolved_in: null
+  tags:
+    - wpf
+    - assets
+    - build

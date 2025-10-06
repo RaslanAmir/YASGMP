@@ -211,7 +211,7 @@ namespace YasGMP.Wpf
 
         private static string ResolveConnectionString(IConfiguration configuration)
         {
-            var conn = configuration.GetConnectionString("MySqlDb")
+            var conn = ConfigurationExtensionsCompat.GetConnectionString(configuration, "MySqlDb")
                        ?? configuration["ConnectionStrings:MySqlDb"]
                        ?? string.Empty;
 
@@ -224,3 +224,4 @@ namespace YasGMP.Wpf
         }
     }
 }
+

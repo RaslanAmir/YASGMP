@@ -132,3 +132,4 @@ namespace YasGMP.Models
         public bool IsActive => !ExpiresAt.HasValue || ExpiresAt.Value > DateTime.UtcNow;
     }
 }
+

@@ -20,3 +20,4 @@ namespace YasGMP.Services
     /// <summary>Represents a user-picked file.</summary>
     public sealed record PickedFile(string FileName, string ContentType, Func<Task<Stream>> OpenReadAsync, long? FileSize = null);
 }
+

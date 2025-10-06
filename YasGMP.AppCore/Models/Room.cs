@@ -43,3 +43,4 @@ namespace YasGMP.Models
         public virtual Building? Building { get; set; }
     }
 }
+

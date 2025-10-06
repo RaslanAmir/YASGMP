@@ -51,3 +51,4 @@ namespace YasGMP.Models
         public virtual SensorModel? SensorModel { get; set; }
     }
 }
+

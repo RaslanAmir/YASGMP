@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "ChangeControl";
+    public new const string ModuleKey = "ChangeControl";
 
     private readonly IChangeControlCrudService _changeControlService;
     private readonly IAuthContext _authContext;
@@ -162,7 +162,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return Task.CompletedTask;
     }
 
-    protected override async Task<IReadOnlyList<string>> ValidateAsync()
+    protected override Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
 
@@ -198,7 +198,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             errors.Add(ex.Message);
         }
 
-        return errors;
+        return Task.FromResult<IReadOnlyList<string>>(errors);
     }
 
     protected override async Task<bool> OnSaveAsync()
@@ -361,7 +361,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                     descriptionParts.Add(cc.DateRequested.Value.ToString("d", CultureInfo.CurrentCulture));
                 }
 
-                var description = descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null;
+                var description = descriptionParts.Count > 0 ? string.Join(" â€˘ ", descriptionParts) : null;
                 return new CflItem(cc.Id.ToString(CultureInfo.InvariantCulture), label, description);
             })
             .ToList();
@@ -627,3 +627,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         }
     }
 }
+
+
+
+

@@ -148,3 +148,4 @@ public class CapaModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

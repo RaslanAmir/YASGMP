@@ -203,3 +203,4 @@ public class ComponentsModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

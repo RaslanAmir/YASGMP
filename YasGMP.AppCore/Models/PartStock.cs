@@ -33,3 +33,4 @@ namespace YasGMP.Models
         public int MinimumQuantity { get; set; }
     }
 }
+

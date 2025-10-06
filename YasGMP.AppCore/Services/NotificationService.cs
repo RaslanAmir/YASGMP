@@ -52,7 +52,9 @@ namespace YasGMP.Services
                 throw new ArgumentException("SMS destination number must not be empty.", nameof(number));
             }
 
-            var configuration = AppConfigurationHelper.LoadMerged();
+            var configuration = DatabaseService.GlobalConfiguration;
+
+            string? FromConfig(string key) => configuration?[key];
 
             static string? Resolve(params string?[] candidates)
             {
@@ -68,21 +70,21 @@ namespace YasGMP.Services
             }
 
             var accountSid = Resolve(
-                configuration["Notifications:Sms:Twilio:AccountSid"],
-                configuration["Sms:Twilio:AccountSid"],
-                configuration["Twilio:AccountSid"],
+                FromConfig("Notifications:Sms:Twilio:AccountSid"),
+                FromConfig("Sms:Twilio:AccountSid"),
+                FromConfig("Twilio:AccountSid"),
                 Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID"));
 
             var authToken = Resolve(
-                configuration["Notifications:Sms:Twilio:AuthToken"],
-                configuration["Sms:Twilio:AuthToken"],
-                configuration["Twilio:AuthToken"],
+                FromConfig("Notifications:Sms:Twilio:AuthToken"),
+                FromConfig("Sms:Twilio:AuthToken"),
+                FromConfig("Twilio:AuthToken"),
                 Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN"));
 
             var fromNumber = Resolve(
-                configuration["Notifications:Sms:Twilio:From"],
-                configuration["Sms:Twilio:From"],
-                configuration["Twilio:From"],
+                FromConfig("Notifications:Sms:Twilio:From"),
+                FromConfig("Sms:Twilio:From"),
+                FromConfig("Twilio:From"),
                 Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER"));
 
             if (string.IsNullOrWhiteSpace(accountSid) || string.IsNullOrWhiteSpace(authToken) || string.IsNullOrWhiteSpace(fromNumber))
@@ -133,3 +135,5 @@ namespace YasGMP.Services
         }
     }
 }
+
+

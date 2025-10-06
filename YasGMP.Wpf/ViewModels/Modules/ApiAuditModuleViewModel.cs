@@ -11,9 +11,9 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentViewModel
+public partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "ApiAudit";
+    public new const string ModuleKey = "ApiAudit";
     private const int DefaultResultLimit = 500;
 
     public ApiAuditModuleViewModel(
@@ -163,14 +163,17 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
            || record.InspectorFields.Any(field =>
                field.Value?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
 
-    protected virtual Task<IReadOnlyList<ApiAuditEntryDto>> QueryApiAuditsAsync(
+    protected virtual async Task<IReadOnlyList<ApiAuditEntryDto>> QueryApiAuditsAsync(
         string apiKey,
         string user,
         string action,
         DateTime from,
         DateTime to,
         int limit)
-        => _auditService.GetApiAuditEntriesAsync(apiKey, user, action, from, to, limit);
+    {
+        var entries = await _auditService.GetApiAuditEntriesAsync(apiKey, user, action, from, to, limit).ConfigureAwait(false);
+        return entries;
+    }
 
     private ModuleRecord MapToRecord(ApiAuditEntryDto entry)
     {
@@ -286,3 +289,7 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         _ = RefreshCommand.ExecuteAsync(null);
     }
 }
+
+
+
+

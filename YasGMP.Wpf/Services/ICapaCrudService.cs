@@ -98,3 +98,4 @@ public readonly record struct CapaCrudContext(
         };
     }
 }
+

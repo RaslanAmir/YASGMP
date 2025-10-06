@@ -38,3 +38,4 @@ namespace YasGMP.Wpf.ViewModels
         public string FormattedValue => Value.ToString("N0");
     }
 }
+

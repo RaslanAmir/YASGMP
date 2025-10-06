@@ -167,3 +167,4 @@ public class ValidationsModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

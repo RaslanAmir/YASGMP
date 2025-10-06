@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
@@ -10,7 +10,6 @@
     <MicrosoftExtensionsVersion>9.0.3</MicrosoftExtensionsVersion>
     <AvalonDockVersion>4.72.1</AvalonDockVersion>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- Pin AvalonDock to the published 4.72.1 build to avoid MC3074 design-time warnings. -->
     <PackageReference Include="Dirkster.AvalonDock" Version="$(AvalonDockVersion)" />
@@ -24,15 +23,10 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="MySqlConnector" Version="2.4.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <Compile Include="..\Helpers\DigitalSignatureHelper.cs">
-      <Link>Shared\Helpers\DigitalSignatureHelper.cs</Link>
-    </Compile>
     <Compile Include="..\ViewModels\DigitalSignatureViewModel.cs">
       <Link>Shared\ViewModels\DigitalSignatureViewModel.cs</Link>
     </Compile>

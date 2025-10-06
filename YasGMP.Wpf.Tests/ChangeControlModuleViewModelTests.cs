@@ -163,3 +163,4 @@ public class ChangeControlModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

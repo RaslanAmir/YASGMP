@@ -30,3 +30,4 @@ namespace YasGMP.Models
         public IList<double> Data { get; set; } = new List<double>();
     }
 }
+

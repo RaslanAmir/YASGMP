@@ -283,3 +283,4 @@ ON DUPLICATE KEY UPDATE linked_at = CURRENT_TIMESTAMP, linked_by = @actor";
         }
     }
 }
+

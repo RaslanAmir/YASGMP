@@ -8,7 +8,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Diagnostics";
+    public new const string ModuleKey = "Diagnostics";
 
     public DiagnosticsModuleViewModel(
         DatabaseService databaseService,
@@ -60,3 +60,7 @@ public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewMod
                 null)
         };
 }
+
+
+
+

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
@@ -140,3 +140,4 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             IpAddress = context.Ip
         };
 }
+

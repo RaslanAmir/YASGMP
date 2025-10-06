@@ -22,8 +22,8 @@ namespace YasGMP.Wpf.Services
             _platform = platform ?? throw new ArgumentNullException(nameof(platform));
             _user = new Lazy<User?>(() => new User
             {
-                Id = _session.UserId,
-                Username = _session.Username
+                Id = _session.UserId ?? 0,
+                Username = _session.Username ?? string.Empty
             });
         }
 
@@ -37,3 +37,5 @@ namespace YasGMP.Wpf.Services
         public string CurrentIpAddress => _platform.GetLocalIpAddress();
     }
 }
+
+

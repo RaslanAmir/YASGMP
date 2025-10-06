@@ -35,3 +35,4 @@ public static class AttachmentStatusFormatter
         return $"Processed {processed} attachments ({newCount} new, {deduplicated} deduplicated).";
     }
 }
+

@@ -4,7 +4,7 @@
 - [x] Dotnet SDKs detected and recorded *(9.0.305 via `logs/20251003-dotnet-info.txt`; bootstrap transcript: `logs/bootstrap-dotnet9-transcript.txt`)**
 - [x] Solution restores *(`dotnet restore yasgmp.sln` completed; transcript: `logs/20251003-dotnet-restore.txt`)**
 - [x] MAUI builds *(`dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release` succeeds with MSB3277 analyzer warnings; see `logs/20251003-dotnet-build-maui.txt`)**
-- [x] WPF builds *(dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj succeeds; ModuleKey declarations normalized with `new` modifiers, async command stubs converted to synchronous return paths, and nullable warnings cleared ahead of smoke automation)*
+- [x] WPF builds *(dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj succeeds; project now targets Microsoft.NET.Sdk with <UseWPF>true</UseWPF>, AES-GCM tag size pinned, and doc/nullability cleanup in place while legacy signature warnings remain on AppCore services)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
@@ -176,6 +176,8 @@
 - 2025-11-13: Updated WPF mapping to document the attachments split view, inspector/editor behaviors, CRUD/signature flow, and retention enforcement now live in the shell; `dotnet restore`/`dotnet build` retries still fail because the CLI is absent in this container.
 
 - 2025-10-03: Linked Helpers/Diagnostics into AppCore to unblock namespace resolutions, installed .NET 9 SDK, and reran restore/build (logs under \\logs\\dotnet-restore.txt, \\logs\\dotnet-build-maui.txt, \\logs\\dotnet-build-wpf.txt); MAUI/WPF builds still blocked by outstanding AppCore compile errors (AttachmentService transaction accessors, spare parts signature overloads, ExternalContractor DTO surface, AppConfigurationHelper).
+
+
 
 
 

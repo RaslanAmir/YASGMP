@@ -17,3 +17,4 @@ namespace YasGMP.Services.Interfaces
         Task CreateAsync(IncidentAudit audit);
     }
 }
+

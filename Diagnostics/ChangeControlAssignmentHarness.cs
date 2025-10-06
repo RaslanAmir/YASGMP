@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -7,21 +7,25 @@ using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+#if YASGMP_APP_CORE_MAUI
 using YasGMP.ViewModels;
+#endif
 
 namespace YasGMP.Diagnostics
 {
     /// <summary>
-    /// Utility harness that exercises <see cref="ChangeControlViewModel.AssignChangeControlAsync"/> with
+    /// Utility harness that exercises the ChangeControl assignment workflow with
     /// stubbed database/authentication services. It is designed so QA can validate SQL emitted during
     /// assignment workflows without a full UI automation stack.
     /// </summary>
     public static class ChangeControlAssignmentHarness
     {
+#if YASGMP_APP_CORE_MAUI
         /// <summary>
         /// Runs the harness end-to-end: initial assignment followed by a reassignment. The harness captures
         /// executed SQL statements and audit metadata emitted via <c>system_event_log</c> insertions.
         /// </summary>
+        /// <returns>The populated <see cref="ChangeControlAssignmentHarnessResult"/>.</returns>
         public static async Task<ChangeControlAssignmentHarnessResult> RunAsync()
         {
             var executedSql = new List<string>();
@@ -78,7 +82,9 @@ namespace YasGMP.Diagnostics
             first.AssignedToId = auth.InitialAssigneeId;
             await vm.AssignChangeControlAsync().ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(vm.StatusMessage))
+            {
                 statusMessages.Add(vm.StatusMessage!);
+            }
 
             var second = vm.ChangeControls.FirstOrDefault();
             if (second != null)
@@ -87,7 +93,9 @@ namespace YasGMP.Diagnostics
                 vm.SelectedChangeControl = second;
                 await vm.AssignChangeControlAsync().ConfigureAwait(false);
                 if (!string.IsNullOrWhiteSpace(vm.StatusMessage))
+                {
                     statusMessages.Add(vm.StatusMessage!);
+                }
             }
 
             db.ResetTestOverrides();
@@ -128,12 +136,23 @@ namespace YasGMP.Diagnostics
 
             public User? CurrentUser { get; }
             public string CurrentSessionId { get; }
-            public string CurrentDeviceInfo { get; } = "Device=Harness;OS=Linux;App=Diagnostics";
+            public string CurrentDeviceInfo { get; } = "Device=Harness;OS=Windows;App=Diagnostics";
             public string CurrentIpAddress { get; } = "127.0.0.1";
 
             public int InitialAssigneeId => 2001;
             public int ReassignmentAssigneeId => 2002;
         }
+#else
+        /// <summary>
+        /// Throws because the MAUI-only harness is not available in the desktop diagnostics build.
+        /// </summary>
+        /// <returns>A task faulted with <see cref="NotSupportedException"/>.</returns>
+        public static Task<ChangeControlAssignmentHarnessResult> RunAsync()
+        {
+            return Task.FromException<ChangeControlAssignmentHarnessResult>(
+                new NotSupportedException("ChangeControlAssignmentHarness requires the MAUI diagnostics stack."));
+        }
+#endif
     }
 
     /// <summary>Minimal projection of an audit event captured by the harness.</summary>
@@ -165,10 +184,15 @@ namespace YasGMP.Diagnostics
         {
             var missing = new List<string>();
             if (!HasInitialAssignmentEvent)
+            {
                 missing.Add("CC_ASSIGN");
+            }
             if (!HasReassignmentEvent)
+            {
                 missing.Add("CC_REASSIGN");
+            }
             return missing;
         }
     }
 }
+

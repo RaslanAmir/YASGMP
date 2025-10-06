@@ -64,3 +64,4 @@ namespace YasGMP.Models.Enums
         Probation = 10
     }
 }
+

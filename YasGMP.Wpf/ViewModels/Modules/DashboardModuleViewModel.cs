@@ -11,7 +11,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Dashboard";
+    public new const string ModuleKey = "Dashboard";
 
     public DashboardModuleViewModel(
         DatabaseService databaseService,
@@ -80,3 +80,7 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
             evt.RelatedRecordId);
     }
 }
+
+
+
+

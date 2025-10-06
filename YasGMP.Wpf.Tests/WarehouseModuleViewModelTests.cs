@@ -193,3 +193,4 @@ public class WarehouseModuleViewModelTests
         return (Task)method.Invoke(viewModel, new object[] { id })!;
     }
 }
+

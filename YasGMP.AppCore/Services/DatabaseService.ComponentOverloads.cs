@@ -123,6 +123,7 @@ namespace YasGMP.Services
             string ip = "system",
             string? deviceInfo = null,
             string? sessionId = null,
+            bool logStandardEvent = true,
             CancellationToken token = default)
         {
             if (component is null) throw new ArgumentNullException(nameof(component));
@@ -174,18 +175,21 @@ namespace YasGMP.Services
                 ? (TryGet<int>(c, "Id") ?? 0)
                 : Convert.ToInt32(await ExecuteScalarAsync("SELECT LAST_INSERT_ID()", null, token).ConfigureAwait(false));
 
-            await LogSystemEventAsync(
-                userId: actorUserId,
-                eventType: update ? "COMP_UPDATE" : "COMP_CREATE",
-                tableName: "machine_components",
-                module: "MachineModule",
-                recordId: id,
-                description: update ? "Component updated" : "Component created",
-                ip: ip,
-                severity: "audit",
-                deviceInfo: deviceInfo,
-                sessionId: string.IsNullOrWhiteSpace(sessionId) ? null : sessionId
-            ).ConfigureAwait(false);
+            if (logStandardEvent)
+            {
+                await LogSystemEventAsync(
+                    userId: actorUserId,
+                    eventType: update ? "COMP_UPDATE" : "COMP_CREATE",
+                    tableName: "machine_components",
+                    module: "MachineModule",
+                    recordId: id,
+                    description: update ? "Component updated" : "Component created",
+                    ip: ip,
+                    severity: "audit",
+                    deviceInfo: deviceInfo,
+                    sessionId: string.IsNullOrWhiteSpace(sessionId) ? null : sessionId
+                ).ConfigureAwait(false);
+            }
 
             return id;
         }
@@ -212,6 +216,7 @@ namespace YasGMP.Services
                 ip,
                 resolvedDevice,
                 sessionId: null,
+                logStandardEvent: false,
                 token: token
             ).ConfigureAwait(false);
 
@@ -252,6 +257,7 @@ namespace YasGMP.Services
                 ip,
                 resolvedDevice,
                 sessionId,
+                logStandardEvent: false,
                 token
             ).ConfigureAwait(false);
 
@@ -403,4 +409,9 @@ namespace YasGMP.Services
         }
     }
 }
+
+
+
+
+
 

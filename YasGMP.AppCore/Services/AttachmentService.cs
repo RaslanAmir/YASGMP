@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using MySqlConnector;
 using YasGMP.Data;
 using YasGMP.Models;
@@ -725,6 +726,7 @@ namespace YasGMP.Services
 
         private sealed class AttachmentCryptoProvider
         {
+            private const int GcmTagSize = 16;
             private readonly AttachmentEncryptionOptions _options;
             private readonly byte[]? _key;
             private readonly int _chunkSize;
@@ -746,17 +748,17 @@ namespace YasGMP.Services
             {
                 if (!IsEncryptionEnabled || session.Cipher is null)
                 {
-                    var payload = plaintext.ToArray();
+                    var plainBytes = plaintext.ToArray();
                     session.RecordChunk(plaintext.Length);
-                    return new EncryptedChunk(payload);
+                    return new EncryptedChunk(plainBytes);
                 }
 
-                var payload = new byte[4 + 12 + plaintext.Length + 16];
+                var payload = new byte[4 + 12 + plaintext.Length + GcmTagSize];
                 BinaryPrimitives.WriteInt32LittleEndian(payload.AsSpan(0, 4), plaintext.Length);
                 var nonceSpan = payload.AsSpan(4, 12);
                 RandomNumberGenerator.Fill(nonceSpan);
                 var cipherSpan = payload.AsSpan(4 + 12, plaintext.Length);
-                var tagSpan = payload.AsSpan(4 + 12 + plaintext.Length, 16);
+                var tagSpan = payload.AsSpan(4 + 12 + plaintext.Length, GcmTagSize);
 
                 session.Cipher.Encrypt(nonceSpan, plaintext.Span, cipherSpan, tagSpan);
                 session.RecordChunk(plaintext.Length);
@@ -851,13 +853,13 @@ namespace YasGMP.Services
 
                 var headerBuffer = new byte[4];
                 var nonceBuffer = new byte[12];
-                var tagBuffer = new byte[16];
+                var tagBuffer = new byte[GcmTagSize];
                 var cipherBuffer = ArrayPool<byte>.Shared.Rent(_chunkSize);
                 var plainBuffer = ArrayPool<byte>.Shared.Rent(_chunkSize);
 
                 try
                 {
-                    using var aes = new AesGcm(_key!);
+                    using var aes = new AesGcm(_key!, GcmTagSize);
                     while (true)
                     {
                         int headerRead = await ReadAtLeastAsync(source, headerBuffer, token).ConfigureAwait(false);
@@ -991,7 +993,7 @@ namespace YasGMP.Services
 
                 public EncryptionSession(byte[]? key)
                 {
-                    Cipher = key is not null ? new AesGcm(key) : null;
+                    Cipher = key is not null ? new AesGcm(key, GcmTagSize) : null;
                 }
 
                 public AesGcm? Cipher { get; }
@@ -1072,3 +1074,9 @@ namespace YasGMP.Services
 
     }
 }
+
+
+
+
+
+

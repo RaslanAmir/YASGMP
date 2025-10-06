@@ -51,3 +51,4 @@ namespace YasGMP.Models
         public string DeviceInfo { get; set; } = string.Empty;        // CS8618 fix
     }
 }
+

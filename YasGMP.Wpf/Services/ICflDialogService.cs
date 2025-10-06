@@ -51,3 +51,4 @@ public sealed class CflResult
 
     public CflItem Selected { get; }
 }
+

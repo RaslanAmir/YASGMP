@@ -35,3 +35,4 @@ namespace YasGMP.Models
         public override string ToString() => Code is { Length: > 0 } ? $"{Code} - {Name}" : Name;
     }
 }
+

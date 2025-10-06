@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -332,3 +332,4 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
         }
     }
 }
+

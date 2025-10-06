@@ -9,3 +9,4 @@ public partial class ValidationsModuleView : UserControl
         InitializeComponent();
     }
 }
+

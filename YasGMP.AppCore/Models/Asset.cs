@@ -247,3 +247,4 @@ namespace YasGMP.Models
         public int? RiskRating { get => RiskScore; set => RiskScore = value; }
     }
 }
+

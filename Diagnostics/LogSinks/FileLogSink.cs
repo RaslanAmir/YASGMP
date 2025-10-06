@@ -1,8 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics.LogSinks
 {
@@ -26,8 +25,7 @@ namespace YasGMP.Diagnostics.LogSinks
                 var lines = string.Join(Environment.NewLine, batch.Select(e => e.ToJson())) + Environment.NewLine;
 
                 // Primary: AppDataDirectory
-                var dir1 = Path.Combine(FileSystem.AppDataDirectory, "logs");
-                Directory.CreateDirectory(dir1);
+                var dir1 = DiagnosticsPathProvider.GetLogsDirectory();
                 var file1 = Path.Combine(dir1, $"{DateTime.UtcNow:yyyy-MM-dd}_diag.log");
 
                 // Convenience duplicate: App base directory
@@ -72,3 +70,4 @@ namespace YasGMP.Diagnostics.LogSinks
         }
     }
 }
+

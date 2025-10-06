@@ -6,3 +6,4 @@ namespace YasGMP.Wpf.Tests.TestDoubles;
 public sealed class FakeElectronicSignatureDialogService : TestElectronicSignatureDialogService
 {
 }
+

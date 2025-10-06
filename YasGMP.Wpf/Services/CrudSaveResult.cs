@@ -1,4 +1,4 @@
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Wpf.Services;
 
@@ -33,3 +33,4 @@ public sealed record CrudSaveResult
     /// </summary>
     public SignatureMetadataDto? SignatureMetadata { get; }
 }
+

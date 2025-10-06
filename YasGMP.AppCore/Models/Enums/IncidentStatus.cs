@@ -12,3 +12,4 @@ namespace YasGMP.Models.Enums
         CLOSED = 6
     }
 }
+

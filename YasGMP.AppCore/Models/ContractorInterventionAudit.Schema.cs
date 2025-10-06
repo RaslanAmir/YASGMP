@@ -24,3 +24,4 @@ namespace YasGMP.Models
         public string? LegacyTimestamp { get; set; }
     }
 }
+

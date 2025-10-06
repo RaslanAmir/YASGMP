@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models.Enums;
 using YasGMP.Services.Interfaces;
 
@@ -97,6 +97,7 @@ namespace YasGMP.Services
                 update: false,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                device: signatureMetadata?.Device ?? "CalibrationService",
                 signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
@@ -119,6 +120,7 @@ namespace YasGMP.Services
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                device: signatureMetadata?.Device ?? "CalibrationService",
                 signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
@@ -159,6 +161,7 @@ namespace YasGMP.Services
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                device: signatureMetadata?.Device ?? "CalibrationService",
                 signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
@@ -181,6 +184,7 @@ namespace YasGMP.Services
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                device: signatureMetadata?.Device ?? "CalibrationService",
                 signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
@@ -217,6 +221,7 @@ namespace YasGMP.Services
                 update: true,
                 actorUserId: userId,
                 ip: $"User:{userId}",
+                device: signatureMetadata?.Device ?? "CalibrationService",
                 signatureMetadata: signatureMetadata,
                 token: CancellationToken.None
             );
@@ -376,4 +381,6 @@ namespace YasGMP.Services
         #endregion
     }
 }
+
+
 

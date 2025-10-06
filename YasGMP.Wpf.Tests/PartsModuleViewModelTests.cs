@@ -173,3 +173,4 @@ public class PartsModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

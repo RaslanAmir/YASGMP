@@ -32,3 +32,4 @@ namespace YasGMP.Wpf.ViewModels
         public string NextMaintenance { get; init; } = string.Empty;
     }
 }
+

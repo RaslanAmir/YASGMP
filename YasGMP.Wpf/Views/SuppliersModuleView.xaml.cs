@@ -9,3 +9,4 @@ public partial class SuppliersModuleView : UserControl
         InitializeComponent();
     }
 }
+

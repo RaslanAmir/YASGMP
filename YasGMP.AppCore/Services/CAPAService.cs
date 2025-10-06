@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
@@ -431,3 +431,4 @@ namespace YasGMP.Services
         #endregion
     }
 }
+

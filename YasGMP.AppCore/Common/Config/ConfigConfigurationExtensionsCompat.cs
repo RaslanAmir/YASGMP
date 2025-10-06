@@ -21,3 +21,4 @@ namespace Microsoft.Extensions.Configuration
             => configuration[$"ConnectionStrings:{name}"];
     }
 }
+

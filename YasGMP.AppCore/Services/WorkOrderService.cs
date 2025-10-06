@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models.Enums;
 
 namespace YasGMP.Services
@@ -66,6 +66,7 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="order">Model radnog naloga za spremanje.</param>
         /// <param name="userId">Korisnik koji izvodi radnju (za audit).</param>
+        /// <param name="signatureMetadata">Opcionalno elektroničko potpisivanje (hash/IP/uređaj/sesija).</param>
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="ArgumentNullException">Ako je <paramref name="order"/> <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">Ako validacija ne prođe.</exception>
@@ -96,6 +97,7 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="order">Model radnog naloga sa Ĺľeljenim izmjenama.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
+        /// <param name="signatureMetadata">Opcionalno elektroničko potpisivanje (hash/IP/uređaj/sesija).</param>
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="ArgumentNullException">Ako je <paramref name="order"/> <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">Ako validacija ne prođe.</exception>
@@ -125,6 +127,7 @@ namespace YasGMP.Services
         /// <param name="workOrderId">ID radnog naloga koji se zatvara.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
         /// <param name="resultNote">Zavrˇna napomena/rezultat.</param>
+        /// <param name="signatureMetadata">Opcionalno elektroničko potpisivanje (hash/IP/uređaj/sesija).</param>
         /// <returns>Asinhroni zadatak.</returns>
         /// <exception cref="InvalidOperationException">Ako nalog ne postoji ili je već zatvoren.</exception>
         public async Task CloseWorkOrderAsync(int workOrderId, int userId, string resultNote, SignatureMetadataDto? signatureMetadata = null)
@@ -157,6 +160,7 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="workOrderId">ID radnog naloga za brisanje.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
+        /// <param name="signatureMetadata">Opcionalno elektroničko potpisivanje (hash/IP/uređaj/sesija).</param>
         /// <returns>Asinhroni zadatak.</returns>
         public async Task DeleteAsync(int workOrderId, int userId)
         {
@@ -205,10 +209,11 @@ namespace YasGMP.Services
         #region === DIGITAL SIGNATURES ===
 
         /// <summary>
-        /// Generira jedinstveni digitalni potpis (SHA256 + GUID salt) za radni nalog.
+        /// Applies captured signature metadata to the work order, falling back to the legacy hash generator when necessary.
         /// </summary>
         /// <param name="order">Radni nalog.</param>
-        /// <returns>Base64 SHA-256 hash.</returns>
+        /// <param name="metadata">Detalji elektroničkog potpisa (hash/IP/uređaj/sesija).</param>
+        /// <param name="legacyFactory">Generator naslijeđenog hash zapisa kada metapodaci nisu dostupni.</param>
         private static void ApplySignatureMetadata(WorkOrder order, SignatureMetadataDto? metadata, Func<string> legacyFactory)
         {
             if (order == null) throw new ArgumentNullException(nameof(order));
@@ -295,3 +300,4 @@ namespace YasGMP.Services
         #endregion
     }
 }
+

@@ -98,3 +98,4 @@ namespace YasGMP.Models
         public double? AnomalyScore { get; set; }
     }
 }
+

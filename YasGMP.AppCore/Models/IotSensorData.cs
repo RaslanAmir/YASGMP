@@ -75,3 +75,4 @@ namespace YasGMP.Models
         public virtual MeasurementUnit? MeasurementUnit { get; set; }
     }
 }
+

@@ -41,3 +41,4 @@ public partial class CflDialogViewModel : ObservableObject
         ConfirmCommand.NotifyCanExecuteChanged();
     }
 }
+

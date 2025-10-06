@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -41,3 +41,4 @@ namespace YasGMP.Models
         public DateTime? UpdatedAt { get; set; }
     }
 }
+

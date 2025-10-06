@@ -1,4 +1,4 @@
-// ==============================================================================
+﻿// ==============================================================================
 // File: Services/DatabaseService.Incidents.Extensions.cs
 // Purpose: Minimal Incident CRUD used by IncidentService (schema tolerant)
 // ==============================================================================
@@ -112,7 +112,6 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ WHERE id=@id LIMIT 
             int I(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
             int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
             double? Dbl(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDouble(r[c]) : (double?)null;
-            bool B(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value && Convert.ToBoolean(r[c]);
             DateTime D(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : DateTime.UtcNow;
             DateTime? DN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
 
@@ -151,4 +150,6 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ WHERE id=@id LIMIT 
         }
     }
 }
+
+
 

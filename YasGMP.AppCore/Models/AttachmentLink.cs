@@ -39,3 +39,4 @@ namespace YasGMP.Models
         public virtual User? LinkedBy { get; set; }
     }
 }
+

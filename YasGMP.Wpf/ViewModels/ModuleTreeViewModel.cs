@@ -64,3 +64,4 @@ namespace YasGMP.Wpf.ViewModels
         }
     }
 }
+

@@ -235,12 +235,12 @@ namespace YasGMP.ViewModels
             {
                 await _dbService.InsertOrUpdateComponentAsync(
                     SelectedComponent,
-                    isUpdate: false,
+                    update: false,
                     _authService.CurrentUser?.Id ?? 1,
                     ip: _currentIpAddress ?? string.Empty,
                     deviceInfo: _currentDeviceInfo ?? string.Empty,
-                    sessionId: null,
-                    cancellationToken: default
+                    sessionId: _currentSessionId,
+                    token: default
                 ).ConfigureAwait(false);
 
                 StatusMessage = $"Component '{SelectedComponent.Name}' added.";
@@ -268,12 +268,12 @@ namespace YasGMP.ViewModels
             {
                 await _dbService.InsertOrUpdateComponentAsync(
                     SelectedComponent,
-                    isUpdate: true,
+                    update: true,
                     _authService.CurrentUser?.Id ?? 1,
                     ip: _currentIpAddress ?? string.Empty,
                     deviceInfo: _currentDeviceInfo ?? string.Empty,
-                    sessionId: null,
-                    cancellationToken: default
+                    sessionId: _currentSessionId,
+                    token: default
                 ).ConfigureAwait(false);
 
                 StatusMessage = $"Component '{SelectedComponent.Name}' updated.";
@@ -441,3 +441,4 @@ namespace YasGMP.ViewModels
         #endregion
     }
 }
+

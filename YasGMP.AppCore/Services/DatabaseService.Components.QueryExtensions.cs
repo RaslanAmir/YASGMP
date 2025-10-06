@@ -125,3 +125,4 @@ FROM machine_components WHERE machine_id IS NULL OR machine_id=0 ORDER BY name, 
         }
     }
 }
+

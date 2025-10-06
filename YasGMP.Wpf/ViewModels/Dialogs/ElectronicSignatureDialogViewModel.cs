@@ -209,3 +209,4 @@ public sealed record ElectronicSignatureDialogResult(
     string? ReasonDetail,
     string ReasonDisplay,
     DigitalSignature Signature);
+

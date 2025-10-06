@@ -109,3 +109,4 @@ public class ServiceRegistrationTests
         public void Activate(ModuleDocumentViewModel document) { }
     }
 }
+

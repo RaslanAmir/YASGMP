@@ -40,3 +40,4 @@ namespace YasGMP.Models
         public virtual NotificationTemplate? Template { get; set; }
     }
 }
+

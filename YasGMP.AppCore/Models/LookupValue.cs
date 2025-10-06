@@ -47,3 +47,4 @@ namespace YasGMP.Models
         public virtual LookupDomain? Domain { get; set; }
     }
 }
+

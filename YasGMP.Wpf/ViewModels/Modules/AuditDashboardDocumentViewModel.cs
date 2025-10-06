@@ -20,7 +20,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </summary>
 public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentViewModel
 {
-    public const string ModuleKey = "AuditDashboard";
+    public new const string ModuleKey = "AuditDashboard";
 
     public AuditDashboardDocumentViewModel(
         AuditService auditService,
@@ -364,3 +364,7 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         _exportExcelCommand.NotifyCanExecuteChanged();
     }
 }
+
+
+
+

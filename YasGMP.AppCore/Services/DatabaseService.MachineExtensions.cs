@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -154,3 +154,4 @@ namespace YasGMP.Services
             => db.LogSystemEventAsync(userId, $"MACHINE_{action}", "machines", "MachineModule", machineId == 0 ? null : machineId, note, ip, "audit", deviceInfo, sessionId, token: token);
     }
 }
+

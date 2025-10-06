@@ -23,7 +23,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 {
-    public const string ModuleKey = "Attachments";
+    public new const string ModuleKey = "Attachments";
 
     public AttachmentsModuleViewModel(
         DatabaseService databaseService,
@@ -998,14 +998,14 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     private static bool IsInDesignMode()
         => DesignerProperties.GetIsInDesignMode(new DependencyObject());
 
-    private readonly DatabaseService _databaseService;
-    private readonly IAttachmentService _attachmentService;
-    private readonly IFilePicker _filePicker;
-    private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly AuditService _audit;
-    private readonly ICflDialogService _cflDialogService;
-    private readonly IShellInteractionService _shellInteractionService;
-    private readonly IModuleNavigationService _navigationService;
+    private readonly DatabaseService _databaseService = null!;
+    private readonly IAttachmentService _attachmentService = null!;
+    private readonly IFilePicker _filePicker = null!;
+    private readonly IElectronicSignatureDialogService _signatureDialog = null!;
+    private readonly AuditService _audit = null!;
+    private readonly ICflDialogService _cflDialogService = null!;
+    private readonly IShellInteractionService _shellInteractionService = null!;
+    private readonly IModuleNavigationService _navigationService = null!;
     private string? _pendingStatusMessage;
 
     public sealed class AttachmentRowViewModel
@@ -1150,3 +1150,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         }
     }
 }
+
+
+
+

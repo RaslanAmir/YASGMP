@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using ComponentEntity = YasGMP.Models.Component;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
@@ -18,7 +19,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Capa";
+    public new const string ModuleKey = "Capa";
 
     private static readonly string[] DefaultStatuses =
     {
@@ -46,7 +47,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
 
-    private IReadOnlyList<Component> _components = Array.Empty<Component>();
+    private IReadOnlyList<ComponentEntity> _components = Array.Empty<ComponentEntity>();
     private CapaCase? _loadedCapa;
     private CapaEditor? _snapshot;
     private bool _suppressDirtyNotifications;
@@ -111,7 +112,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
-        var components = new List<Component>
+        var components = new List<ComponentEntity>
         {
             new()
             {
@@ -271,7 +272,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
         var context = CapaCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
+            (_authContext.CurrentIpAddress ?? string.Empty),
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId,
             signatureResult);
@@ -455,7 +456,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
                     EntityId = _loadedCapa.Id,
                     UploadedById = uploadedBy,
                     Reason = $"capa:{_loadedCapa.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
+                    SourceIp = (_authContext.CurrentIpAddress ?? string.Empty),
                     SourceHost = _authContext.CurrentDeviceInfo,
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
@@ -509,7 +510,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
     }
 
-    private void RefreshComponentOptions(IEnumerable<Component> components)
+    private void RefreshComponentOptions(IEnumerable<ComponentEntity> components)
     {
         ComponentOptions.Clear();
         foreach (var component in components
@@ -544,7 +545,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             new("Status", string.IsNullOrWhiteSpace(capa.Status) ? "-" : capa.Status),
             new("Opened", capa.DateOpen == default ? "-" : capa.DateOpen.ToString("d", CultureInfo.CurrentCulture)),
             new("Assigned To", capa.AssignedTo?.FullName ?? capa.AssignedTo?.Username ?? "-"),
-            new("Component", capa.ComponentId.ToString(CultureInfo.InvariantCulture))
+            new("ComponentEntity", capa.ComponentId.ToString(CultureInfo.InvariantCulture))
         };
 
         return new ModuleRecord(
@@ -753,3 +754,9 @@ public sealed partial class CapaEditor : ObservableObject
         return capa;
     }
 }
+
+
+
+
+
+

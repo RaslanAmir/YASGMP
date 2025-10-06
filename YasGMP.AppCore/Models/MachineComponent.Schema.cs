@@ -55,3 +55,4 @@ namespace YasGMP.Models
         public string? LegacyWorkOrdersCollection { get; set; }
     }
 }
+

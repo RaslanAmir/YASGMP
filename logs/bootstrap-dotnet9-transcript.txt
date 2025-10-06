@@ -1,0 +1,35 @@
+**********************
+PowerShell transcript start
+Start time: 20251003125946
+Username: yasenka\amir
+RunAs User: yasenka\amir
+Configuration Name: 
+Machine: Y-077 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -NoProfile -File logs\run-bootstrap.ps1
+Process ID: 7096
+PSVersion: 7.5.3
+PSEdition: Core
+GitCommitId: 7.5.3
+OS: Microsoft Windows 10.0.26100
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is logs\bootstrap-dotnet9-transcript.txt
+=== Checking dotnet SDK (expect 9.x) ===
+=== Verifying Windows SDK 10.0.19041+ present (Visual Studio Installer recommended) ===
+If missing, open VS Installer -> add .NET Desktop Development + Windows 10 SDK 10.0.19041+.
+=== Pinning SDK to 9.0 via global.json ===
+=== Ensuring nuget.org feed is enabled ===
+The name specified has already been added to the list of available package sources. Provide a unique name.
+=== Restore & build solution (MAUI + WPF) ===
+
+
+=== Seeding test fixture ===
+=== Done. You can now tell Codex to start Batch 0. ===
+**********************
+PowerShell transcript end
+End time: 20251003125958
+**********************

@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Maui.Controls;
 using YasGMP.Common;
 using YasGMP.Models.DTO;
@@ -19,7 +21,7 @@ namespace YasGMP.Views.Dialogs
         {
             InitializeComponent();
             UsernameEntry.Text = defaultUsername ?? string.Empty;
-            ReasonPicker.ItemsSource = WorkOrderSignatureReasonCodes.All;
+            ReasonPicker.ItemsSource = WorkOrderSignatureReasonCodes.All.ToList();
         }
 
         private void OnReasonChanged(object? sender, EventArgs e)

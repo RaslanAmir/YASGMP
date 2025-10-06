@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -16,14 +16,14 @@ using YasGMP.Services.Interfaces;
 namespace YasGMP.Services
 {
     /// <summary>
-    /// <b>AuditService</b> – Centralized GMP/21 CFR Part 11 compliant service for managing audit logs across all YasGMP modules.
+    /// <b>AuditService</b> â€“ Centralized GMP/21 CFR Part 11 compliant service for managing audit logs across all YasGMP modules.
     /// Tracks every user/system action with full forensic details: user, IP, device, timestamp, action, and context.
     /// </summary>
     public class AuditService
     {
         private readonly DatabaseService _dbService;
 
-        // ——— Cached environment info so we don’t recompute at every write ———
+        // â€”â€”â€” Cached environment info so we donâ€™t recompute at every write â€”â€”â€”
         private static string? _cachedLocalIpv4;
         private static string? _cachedLocalIpv6;
         private static string? _cachedMac;
@@ -46,7 +46,7 @@ namespace YasGMP.Services
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
         }
 
-        #region === 🔍 HELPER PROPERTIES: Current User & Device/Network Info ===
+        #region === đź”Ť HELPER PROPERTIES: Current User & Device/Network Info ===
 
         /// <summary>
         /// Gets the ID of the currently logged-in user, or 0 if none.
@@ -95,7 +95,7 @@ namespace YasGMP.Services
 
         #endregion
 
-        #region === 🗂️ SYSTEM EVENT LOG (canonical writers) ===
+        #region === đź—‚ď¸Ź SYSTEM EVENT LOG (canonical writers) ===
 
         /// <summary>
         /// Logs a system-wide event (e.g., login, logout, configuration changes).
@@ -152,7 +152,7 @@ namespace YasGMP.Services
 
         #endregion
 
-        #region === 📝 GENERIC ENTITY AUDIT ===
+        #region === đź“ť GENERIC ENTITY AUDIT ===
 
         /// <summary>
         /// Logs an audit entry for any entity (table). Also mirrors to system log for dashboards.
@@ -191,7 +191,7 @@ VALUES
 
         #endregion
 
-        #region === 🔧 CALIBRATION / EXPORT HELPERS ===
+        #region === đź”§ CALIBRATION / EXPORT HELPERS ===
 
         public Task LogCalibrationAuditAsync(int calibrationId, string action, string details)
             => LogEntityAuditAsync("calibrations", calibrationId, action, details);
@@ -229,7 +229,7 @@ VALUES
 
         #endregion
 
-        #region === 📊 DASHBOARD QUERIES ===
+        #region === đź“Š DASHBOARD QUERIES ===
 
         public async Task<List<AuditEntryDto>> GetFilteredAudits(string user, string entity, string action, DateTime from, DateTime to)
         {
@@ -330,7 +330,7 @@ VALUES
                 results.Add(new AuditEntryDto
                 {
                     Action = "ERROR",
-                    Note = "Greška kod dohvaćanja audita: " + ex.Message,
+                    Note = "GreĹˇka kod dohvaÄ‡anja audita: " + ex.Message,
                     Timestamp = DateTime.UtcNow
                 });
             }
@@ -414,7 +414,7 @@ VALUES
                 results.Add(new AuditEntryDto
                 {
                     Action = "ERROR",
-                    Note = "Greška kod dohvaćanja audita (fallback): " + ex.Message,
+                    Note = "GreĹˇka kod dohvaÄ‡anja audita (fallback): " + ex.Message,
                     Timestamp = DateTime.UtcNow
                 });
             }
@@ -424,7 +424,7 @@ VALUES
 
         #endregion
 
-        #region === 🌐 API AUDIT TRAIL ===
+        #region === đźŚ API AUDIT TRAIL ===
 
         /// <summary>
         /// Retrieves API audit entries joined with API key and user metadata.
@@ -450,7 +450,7 @@ VALUES
                 results.Add(new ApiAuditEntryDto
                 {
                     Action = "MISSING_TABLE",
-                    Details = "Tabela api_audit_log nije pronađena u bazi.",
+                    Details = "Tabela api_audit_log nije pronaÄ‘ena u bazi.",
                     Timestamp = DateTime.UtcNow
                 });
                 return results;
@@ -689,7 +689,7 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
                 results.Add(new ApiAuditEntryDto
                 {
                     Action = "ERROR",
-                    Details = "Greška kod dohvaćanja API audita: " + ex.Message,
+                    Details = "GreĹˇka kod dohvaÄ‡anja API audita: " + ex.Message,
                     Timestamp = DateTime.UtcNow
                 });
             }
@@ -773,7 +773,7 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
                     {
                         if (ua.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ua.Address))
                         {
-                            // cache Nic name/MAC/gateway/dns while we’re here
+                            // cache Nic name/MAC/gateway/dns while weâ€™re here
                             _cachedNicName ??= ni.Name;
                             _cachedMac ??= GetMac(ni);
                             _cachedGateway ??= ipProps.GatewayAddresses?.FirstOrDefault(g => g?.Address?.AddressFamily == AddressFamily.InterNetwork)?.Address?.ToString();
@@ -869,7 +869,7 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
                 string.IsNullOrEmpty(mac) ? null : $"MAC={mac}",
                 string.IsNullOrEmpty(gw)  ? null : $"GW={gw}",
                 string.IsNullOrEmpty(dns) ? null : $"DNS={Short(dns, 40)}"
-            }.Where(s => !string.IsNullOrWhiteSpace(s));
+            }.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToArray();
 
             // Join and hard-cap to 255 (DB column)
             var line = string.Join("; ", parts);
@@ -904,7 +904,7 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
                         }
                         catch
                         {
-                            // ignore; we’ll try again later
+                            // ignore; weâ€™ll try again later
                         }
                         finally
                         {
@@ -939,8 +939,11 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
         }
 
         private static string Short(string value, int max) => string.IsNullOrEmpty(value) ? value : (value.Length <= max ? value : value.Substring(0, max));
-        private static string Safe(Func<string> f) { try { return f() ?? string.Empty; } catch { return string.Empty; } }
+        private static string Safe(Func<string?> f) { try { return f() ?? string.Empty; } catch { return string.Empty; } }
 
         #endregion
     }
 }
+
+
+

@@ -220,3 +220,4 @@ namespace YasGMP.Models
         public override string ToString() => $"Validation {Code} ({Type}) – Status: {Status}, Signed by: {SignedByName}";
     }
 }
+

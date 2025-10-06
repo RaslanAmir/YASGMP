@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 
@@ -200,17 +200,7 @@ WHERE id=@id";
             };
 
             await _database.ExecuteNonQueryAsync(update, parameters).ConfigureAwait(false);
-            await _auditService.LogSystemEventAsync(
-                context.UserId,
-                "WAREHOUSE_SAVE",
-                "warehouses",
-                "WarehouseCrud",
-                warehouse.Id,
-                warehouse.DigitalSignature,
-                context.Ip,
-                "wpf",
-                context.DeviceInfo,
-                context.SessionId).ConfigureAwait(false);
+            await _auditService.LogSystemEventAsync("WAREHOUSE_SAVE", $"WarehouseCrud; sig={warehouse.DigitalSignature}", "warehouses", warehouse.Id).ConfigureAwait(false);
         }
 
         private static string ApplyContext(Warehouse warehouse, WarehouseCrudContext context)
@@ -249,3 +239,4 @@ WHERE id=@id";
                 : null;
     }
 }
+

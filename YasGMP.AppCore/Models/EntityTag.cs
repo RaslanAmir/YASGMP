@@ -38,3 +38,4 @@ namespace YasGMP.Models
         public virtual Tag? Tag { get; set; }
     }
 }
+

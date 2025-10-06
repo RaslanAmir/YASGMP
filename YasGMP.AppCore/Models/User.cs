@@ -240,3 +240,4 @@ namespace YasGMP.Models
             => $"{DisplayName} ({Role}, Active={Active}, Locked={IsLocked}, Deleted={IsDeleted})";
     }
 }
+

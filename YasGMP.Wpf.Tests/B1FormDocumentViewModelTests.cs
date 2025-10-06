@@ -90,3 +90,4 @@ public class B1FormDocumentViewModelTests
             => throw new NotSupportedException();
     }
 }
+

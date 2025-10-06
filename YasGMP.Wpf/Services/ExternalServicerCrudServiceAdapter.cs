@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -160,3 +160,4 @@ WHERE id=@id";
             IpAddress = context.Ip
         };
 }
+

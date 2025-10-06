@@ -38,14 +38,14 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         RecordsView = CollectionViewSource.GetDefaultView(Records);
         RecordsView.Filter = FilterRecord;
 
-        EnterFindModeCommand = new AsyncRelayCommand(SetFindModeAsync, () => CanEnterMode(FormMode.Find));
-        EnterAddModeCommand = new AsyncRelayCommand(SetAddModeAsync, () => CanEnterMode(FormMode.Add));
-        EnterViewModeCommand = new AsyncRelayCommand(SetViewModeAsync, () => CanEnterMode(FormMode.View));
-        EnterUpdateModeCommand = new AsyncRelayCommand(SetUpdateModeAsync, () => CanEnterMode(FormMode.Update));
-        SaveCommand = new AsyncRelayCommand(SaveAsync, CanSave);
+        EnterFindModeCommand = new AsyncRelayCommand(ct => SetFindModeAsync(), () => CanEnterMode(FormMode.Find));
+        EnterAddModeCommand = new AsyncRelayCommand(ct => SetAddModeAsync(), () => CanEnterMode(FormMode.Add));
+        EnterViewModeCommand = new AsyncRelayCommand(ct => SetViewModeAsync(), () => CanEnterMode(FormMode.View));
+        EnterUpdateModeCommand = new AsyncRelayCommand(ct => SetUpdateModeAsync(), () => CanEnterMode(FormMode.Update));
+        SaveCommand = new AsyncRelayCommand(ct => SaveAsync(), CanSave);
         CancelCommand = new RelayCommand(Cancel, () => !IsBusy && (IsInEditMode || Mode == FormMode.Find));
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => !IsBusy);
-        ShowCflCommand = new AsyncRelayCommand(ShowCflAsync, () => !IsBusy);
+        RefreshCommand = new AsyncRelayCommand(ct => RefreshAsync(), () => !IsBusy);
+        ShowCflCommand = new AsyncRelayCommand(ct => ShowCflAsync(), () => !IsBusy);
         GoldenArrowCommand = new RelayCommand(NavigateToRelated, () => SelectedRecord?.RelatedModuleKey is not null && !IsBusy);
 
         ValidationMessages = new ObservableCollection<string>();
@@ -498,3 +498,6 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         RefreshCommandStates();
     }
 }
+
+
+

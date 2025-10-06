@@ -189,3 +189,4 @@ namespace YasGMP.Models
         [Display(Name = "Opis događaja")] public string? Description { get; set; }
     }
 }
+

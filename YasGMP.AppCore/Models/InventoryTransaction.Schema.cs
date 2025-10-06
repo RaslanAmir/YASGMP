@@ -28,3 +28,4 @@ namespace YasGMP.Models
         public string? UserLabel { get; set; }
     }
 }
+

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using ComponentEntity = YasGMP.Models.Component;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
@@ -29,7 +29,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private Calibration? _loadedCalibration;
     private CalibrationEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
-    private IReadOnlyList<Component> _components = Array.Empty<Component>();
+    private IReadOnlyList<ComponentEntity> _components = Array.Empty<ComponentEntity>();
     private IReadOnlyList<Supplier> _suppliers = Array.Empty<Supplier>();
 
     public CalibrationModuleViewModel(
@@ -86,7 +86,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
-        _components = new List<Component>
+        _components = new List<ComponentEntity>
         {
             new() { Id = 201, Name = "Temperature Probe" },
             new() { Id = 202, Name = "Pressure Transducer" }
@@ -139,7 +139,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 var label = $"Calibration #{calibration.Id}";
                 var descriptionParts = new List<string>
                 {
-                    FindComponentName(calibration.ComponentId) ?? $"Component #{calibration.ComponentId}",
+                    FindComponentName(calibration.ComponentId) ?? $"ComponentEntity #{calibration.ComponentId}",
                     calibration.CalibrationDate.ToString("d", CultureInfo.CurrentCulture),
                     calibration.NextDue.ToString("d", CultureInfo.CurrentCulture)
                 };
@@ -404,7 +404,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         value.PropertyChanged += OnEditorPropertyChanged;
     }
 
-    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnEditorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (_suppressEditorDirtyNotifications)
         {
@@ -457,7 +457,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         UpdateAttachmentCommandState();
     }
 
-    private void RefreshComponentOptions(IEnumerable<Component> components)
+    private void RefreshComponentOptions(IEnumerable<ComponentEntity> components)
     {
         ComponentOptions.Clear();
         foreach (var component in components)
@@ -486,7 +486,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     {
         var fields = new List<InspectorField>
         {
-            new("Component", FindComponentName(calibration.ComponentId) ?? $"Component #{calibration.ComponentId}"),
+            new("ComponentEntity", FindComponentName(calibration.ComponentId) ?? $"ComponentEntity #{calibration.ComponentId}"),
             new("Supplier", FindSupplierName(calibration.SupplierId) ?? "-"),
             new("Calibrated", calibration.CalibrationDate.ToString("d", CultureInfo.CurrentCulture)),
             new("Next Due", calibration.NextDue.ToString("d", CultureInfo.CurrentCulture)),
@@ -698,3 +698,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         public override string ToString() => Name;
     }
 }
+
+
+
+
+

@@ -34,3 +34,4 @@ namespace YasGMP.Models
         public string? LegacyUserLabel { get; set; }
     }
 }
+

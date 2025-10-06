@@ -146,3 +146,4 @@ namespace YasGMP.Models.DTO
         public string? NewValue { get; set; }
     }
 }
+

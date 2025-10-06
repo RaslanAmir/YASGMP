@@ -107,3 +107,4 @@ namespace YasGMP.Models
         public string? PublicKey { get; set; }
     }
 }
+

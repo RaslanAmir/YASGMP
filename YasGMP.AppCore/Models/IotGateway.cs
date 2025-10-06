@@ -39,3 +39,4 @@ namespace YasGMP.Models
         public virtual Location? Location { get; set; }
     }
 }
+

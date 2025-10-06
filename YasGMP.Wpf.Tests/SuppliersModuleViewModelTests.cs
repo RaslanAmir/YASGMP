@@ -253,3 +253,4 @@ public class SuppliersModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

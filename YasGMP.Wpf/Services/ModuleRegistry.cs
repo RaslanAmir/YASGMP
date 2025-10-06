@@ -69,3 +69,4 @@ public sealed class ModuleRegistry : IModuleRegistry
 
     private sealed record ModuleRegistration(string Key, Type ViewModelType, ModuleMetadata Metadata);
 }
+

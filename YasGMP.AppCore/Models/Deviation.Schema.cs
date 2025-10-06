@@ -58,3 +58,4 @@ namespace YasGMP.Models
         public string? AuditTrailRaw { get; set; }
     }
 }
+

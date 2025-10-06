@@ -11,3 +11,4 @@ public partial class ShellStatusBarViewModel : ObservableObject
     [ObservableProperty]
     private string _activeModule = string.Empty;
 }
+

@@ -32,3 +32,4 @@ namespace YasGMP.Models.DTO
         public DateTime ActionAt { get; set; } = DateTime.UtcNow;
     }
 }
+

@@ -47,3 +47,4 @@ public partial class InspectorFieldViewModel : ObservableObject
     [ObservableProperty]
     private string _value;
 }
+

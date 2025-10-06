@@ -60,3 +60,4 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
+

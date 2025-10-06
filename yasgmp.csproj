@@ -2,7 +2,7 @@
   <!-- ====== GLOBAL PROPERTIES (Windows-only for fast compile) ====== -->
   <PropertyGroup>
     <!-- Windows-only target while debugging (fast, no mobile workloads) -->
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFrameworks>net8.0-windows10.0.19041.0;net9.0-windows10.0.19041.0</TargetFrameworks>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
@@ -80,6 +80,19 @@
     <None Include="YasGMP.Wpf\**\*.cs" />
     <MauiXaml Remove="YasGMP.Wpf\**\*.xaml" />
     <None Include="YasGMP.Wpf\**\*.xaml" />
+    <Compile Remove="YasGMP.AppCore\**\*.cs" />
+    <Compile Remove="Diagnostics\**\*.cs" />
+    <None Include="Diagnostics\**\*.cs" />
+    <Compile Remove="Helpers\AuditLogMapper.cs" />
+    <Compile Remove="Helpers\ComponentMapper.cs" />
+    <Compile Remove="Helpers\CsvExportHelper.cs" />
+    <Compile Remove="Helpers\DigitalSignatureHelper.cs" />
+    <Compile Remove="Helpers\ObjectMapper.cs" />
+    <Compile Remove="Helpers\PdfExporter.cs" />
+    <Compile Remove="Helpers\XlsxExporter.cs" />
+    <None Include="YasGMP.AppCore\**\*.cs" />
+    <Compile Remove="YasGMP.Wpf.Tests\**\*.cs" />
+    <None Include="YasGMP.Wpf.Tests\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -90,3 +103,4 @@
     <Exec Command="pwsh -NoProfile -File scripts/analyze_db_sync.ps1" />
   </Target>
 </Project>
+

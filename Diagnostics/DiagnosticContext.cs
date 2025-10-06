@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics
 {

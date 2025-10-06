@@ -43,3 +43,4 @@ namespace YasGMP.Data.Migrations
         }
     }
 }
+

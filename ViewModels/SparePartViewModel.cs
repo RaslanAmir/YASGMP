@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace YasGMP.ViewModels
         private readonly string _currentSessionId;
         private readonly string _currentDeviceInfo;
         private readonly string _currentIpAddress;
+        private bool _lowOnly;
 
         /// <summary>Initializes the view model.</summary>
         public SparePartViewModel(DatabaseService dbService, AuthService authService)

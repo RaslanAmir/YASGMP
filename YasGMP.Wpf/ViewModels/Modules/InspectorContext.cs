@@ -34,3 +34,6 @@ public sealed class InspectorField
 
     public string Value { get; }
 }
+
+
+

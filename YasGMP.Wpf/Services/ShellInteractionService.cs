@@ -64,3 +64,4 @@ public sealed class ShellInteractionService : IShellInteractionService, IModuleN
         _inspectorUpdater(context);
     }
 }
+

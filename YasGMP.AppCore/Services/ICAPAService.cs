@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 
 namespace YasGMP.Services.Interfaces
@@ -86,6 +86,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="verifierId">Verifier user ID.</param>
         /// <param name="effective">Is it effective?</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata applied during verification.</param>
         Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -94,6 +95,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User closing.</param>
         /// <param name="closureComment">Closure comments.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata captured at CAPA closure.</param>
         Task CloseCapaAsync(int capaId, int userId, string closureComment, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -139,3 +141,4 @@ namespace YasGMP.Services.Interfaces
         Task LogAudit(int capaId, int userId, CapaActionType action, string details);
     }
 }
+

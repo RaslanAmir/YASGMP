@@ -222,3 +222,4 @@ public class AssetsModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

@@ -22,3 +22,4 @@ namespace YasGMP.Services
         public IReadOnlyList<Supplier> Suppliers { get; }
     }
 }
+

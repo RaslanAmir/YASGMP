@@ -29,3 +29,4 @@ namespace YasGMP.Models
         public override string ToString() => string.IsNullOrWhiteSpace(Name) ? $"Location #{Id}" : Name;
     }
 }
+

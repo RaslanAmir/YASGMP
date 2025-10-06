@@ -22,3 +22,4 @@ namespace YasGMP.Wpf.Services
         public string ConnectionString { get; }
     }
 }
+

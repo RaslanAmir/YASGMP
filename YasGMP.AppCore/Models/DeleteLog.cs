@@ -81,3 +81,4 @@ namespace YasGMP.Models
         public virtual User? DeletedByNavigation { get; set; }
     }
 }
+

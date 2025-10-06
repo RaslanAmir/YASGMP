@@ -46,3 +46,4 @@ namespace YasGMP.Models
         public virtual MachineType? MachineType { get; set; }
     }
 }
+

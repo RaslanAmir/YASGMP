@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 
@@ -130,17 +130,7 @@ namespace YasGMP.Wpf.Services
                 context.SignatureMethod ?? "-",
                 context.SignatureStatus ?? "-",
                 string.IsNullOrWhiteSpace(context.SignatureNote) ? "-" : context.SignatureNote);
-            await _audit.LogSystemEventAsync(
-                context.UserId,
-                "PART_STAMP",
-                "parts",
-                "PartCrud",
-                part.Id,
-                details,
-                context.Ip,
-                "wpf",
-                context.DeviceInfo,
-                context.SessionId).ConfigureAwait(false);
+            await _audit.LogSystemEventAsync("PART_STAMP", details, "parts", part.Id).ConfigureAwait(false);
         }
 
         private static string ApplyContext(Part part, PartCrudContext context)
@@ -175,3 +165,4 @@ namespace YasGMP.Wpf.Services
             };
 }
 }
+

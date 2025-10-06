@@ -1,3 +1,4 @@
+﻿using AppFilePicker = YasGMP.Services.IFilePicker;
 // MauiProgram.cs
 using CommunityToolkit.Maui;                       // builder.UseMauiCommunityToolkit()
 using Microsoft.EntityFrameworkCore;
@@ -107,7 +108,7 @@ namespace YasGMP
             // Optional: register Syncfusion license if provided (prevents trial watermark)
             try
             {
-                // Priority: env var → appsettings.json (AppData/bin) → none
+                // Priority: env var â†’ appsettings.json (AppData/bin) â†’ none
                 var sfKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")
                            ?? Environment.GetEnvironmentVariable("YASGMP_SYNCFUSION_LICENSE")
                            ?? diagConfig["Syncfusion:LicenseKey"];
@@ -132,7 +133,7 @@ namespace YasGMP
 #endif
             }
 
-            // Resolve connection string (env → bin\AppSettings.json → AppData\AppSettings.json → fallback)
+            // Resolve connection string (env â†’ bin\AppSettings.json â†’ AppData\AppSettings.json â†’ fallback)
             string mysqlConnStr = ResolveMySqlConnString();
 
             builder.Services.AddYasGmpCoreServices(core =>
@@ -185,7 +186,7 @@ namespace YasGMP
                 services.AddSingleton<IPlatformService, MauiPlatformService>();
                 services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
                 services.AddSingleton<IDialogService, MauiDialogService>();
-                services.AddSingleton<IFilePicker, MauiFilePicker>();
+                services.AddSingleton<AppFilePicker, MauiFilePicker>();
                 services.AddSingleton<IUserSession, MauiUserSession>();
                 services.AddSingleton<AuditService>();
                 services.AddSingleton<AuthService>();
@@ -241,7 +242,7 @@ namespace YasGMP
                 services.AddSingleton<YasGMP.Diagnostics.SelfTestRunner>();
             });
 
-            // Global exception hooks → JSONL framework log (DEBUG)
+            // Global exception hooks â†’ JSONL framework log (DEBUG)
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 var ex = e.ExceptionObject as Exception;
@@ -505,3 +506,4 @@ namespace YasGMP
     }
 #endif
 }
+

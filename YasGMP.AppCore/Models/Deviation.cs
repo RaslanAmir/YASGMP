@@ -268,3 +268,4 @@ namespace YasGMP.Models
             => $"[{Code ?? ("DEV-" + Id)}] {Title} – Status: {Status}";
     }
 }
+
