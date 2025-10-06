@@ -27,7 +27,12 @@
             <Separator />
             <Button Content="CFL" Command="{Binding ShowCflCommand}" />
             <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <controls:GoldenArrowButton
+                Command="{Binding GoldenArrowCommand}"
+                Margin="8,0,0,0"
+                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
+                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
+                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
