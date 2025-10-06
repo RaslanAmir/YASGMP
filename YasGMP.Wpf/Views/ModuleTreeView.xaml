@@ -7,10 +7,24 @@
              d:DesignHeight="400"
              d:DesignWidth="260">
     <Grid>
-        <TreeView ItemsSource="{Binding Modules}" Margin="8">
+        <TreeView ItemsSource="{Binding Modules}"
+                  Margin="8"
+                  ToolTipService.ToolTip="{Binding ToolTip}"
+                  AutomationProperties.Name="{Binding AutomationName}"
+                  AutomationProperties.AutomationId="{Binding AutomationId}">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type vm:ModuleNodeViewModel}" ItemsSource="{Binding Children}" xmlns:vm="clr-namespace:YasGMP.Wpf.ViewModels">
-                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding Title}"
+                               ToolTipService.ToolTip="{Binding ToolTip}"
+                               AutomationProperties.Name="{Binding AutomationName}"
+                               AutomationProperties.AutomationId="{Binding AutomationId}" />
+                    <HierarchicalDataTemplate.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem">
+                            <Setter Property="AutomationProperties.Name" Value="{Binding AutomationName}" />
+                            <Setter Property="AutomationProperties.AutomationId" Value="{Binding AutomationId}" />
+                            <Setter Property="ToolTipService.ToolTip" Value="{Binding ToolTip}" />
+                        </Style>
+                    </HierarchicalDataTemplate.ItemContainerStyle>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>

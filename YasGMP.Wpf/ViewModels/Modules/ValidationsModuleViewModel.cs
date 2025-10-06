@@ -42,8 +42,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Validations", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Validations", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

@@ -16,8 +16,9 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Administration", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Administration", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
     }
 

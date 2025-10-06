@@ -62,8 +62,9 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "CAPA", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "CAPA", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _capaService = capaService ?? throw new ArgumentNullException(nameof(capaService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));

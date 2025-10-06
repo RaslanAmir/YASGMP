@@ -33,9 +33,11 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Attachments", cflDialogService, shellInteraction, navigation)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Attachments", localization, cflDialogService, shellInteraction, navigation)
     {
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
@@ -61,9 +63,27 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         UploadCommand = new AsyncRelayCommand(UploadAsync, CanUpload);
         DownloadCommand = new AsyncRelayCommand(DownloadAsync, CanDownload);
         DeleteCommand = new AsyncRelayCommand(DeleteAsync, CanDelete);
-        Toolbar.Add(new ModuleToolbarCommand("Upload", UploadCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Download", DownloadCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Delete", DeleteCommand));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Attachments.Toolbar.Command.Upload.Content",
+            UploadCommand,
+            _localization,
+            "Attachments.Toolbar.Command.Upload.ToolTip",
+            "Attachments.Toolbar.Command.Upload.AutomationName",
+            "Attachments.Toolbar.Command.Upload.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Attachments.Toolbar.Command.Download.Content",
+            DownloadCommand,
+            _localization,
+            "Attachments.Toolbar.Command.Download.ToolTip",
+            "Attachments.Toolbar.Command.Download.AutomationName",
+            "Attachments.Toolbar.Command.Download.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Attachments.Toolbar.Command.Delete.Content",
+            DeleteCommand,
+            _localization,
+            "Attachments.Toolbar.Command.Delete.ToolTip",
+            "Attachments.Toolbar.Command.Delete.AutomationName",
+            "Attachments.Toolbar.Command.Delete.AutomationId"));
 
         PropertyChanged += OnPropertyChanged;
 
@@ -998,6 +1018,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     private static bool IsInDesignMode()
         => DesignerProperties.GetIsInDesignMode(new DependencyObject());
 
+    private readonly ILocalizationService _localization;
     private readonly DatabaseService _databaseService;
     private readonly IAttachmentService _attachmentService;
     private readonly IFilePicker _filePicker;

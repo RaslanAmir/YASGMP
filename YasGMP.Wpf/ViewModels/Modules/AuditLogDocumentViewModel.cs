@@ -26,9 +26,11 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         AuditLogViewModel auditLogViewModel,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Audit Trail", cflDialogService, shellInteraction, navigation)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Audit Trail", localization, cflDialogService, shellInteraction, navigation)
     {
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _ = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _ = exportService ?? throw new ArgumentNullException(nameof(exportService));
         _auditLogViewModel = auditLogViewModel ?? throw new ArgumentNullException(nameof(auditLogViewModel));
@@ -44,22 +46,58 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 
         var refreshEntry = Toolbar
             .Select((command, index) => (Command: command, Index: index))
-            .FirstOrDefault(tuple => string.Equals(tuple.Command.Caption, "Refresh", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(tuple => string.Equals(tuple.Command.CaptionKey, "Module.Toolbar.Command.Refresh.Content", StringComparison.Ordinal));
 
         if (refreshEntry.Command is not null)
         {
             Toolbar.Remove(refreshEntry.Command);
-            Toolbar.Insert(refreshEntry.Index, new ModuleToolbarCommand("Refresh", _refreshCommand));
+            Toolbar.Insert(refreshEntry.Index, new ModuleToolbarCommand(
+                "Module.Toolbar.Command.Refresh.Content",
+                _refreshCommand,
+                _localization,
+                "Module.Toolbar.Command.Refresh.ToolTip",
+                "Module.Toolbar.Command.Refresh.AutomationName",
+                "Module.Toolbar.Command.Refresh.AutomationId"));
         }
         else
         {
-            Toolbar.Add(new ModuleToolbarCommand("Refresh", _refreshCommand));
+            Toolbar.Add(new ModuleToolbarCommand(
+                "Module.Toolbar.Command.Refresh.Content",
+                _refreshCommand,
+                _localization,
+                "Module.Toolbar.Command.Refresh.ToolTip",
+                "Module.Toolbar.Command.Refresh.AutomationName",
+                "Module.Toolbar.Command.Refresh.AutomationId"));
         }
 
-        Toolbar.Add(new ModuleToolbarCommand("Apply Filter", _applyFilterCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Export CSV", _exportCsvCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Export Excel", _exportXlsxCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Export PDF", _exportPdfCommand));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Audit.Toolbar.Command.ApplyFilter.Content",
+            _applyFilterCommand,
+            _localization,
+            "Audit.Toolbar.Command.ApplyFilter.ToolTip",
+            "Audit.Toolbar.Command.ApplyFilter.AutomationName",
+            "Audit.Toolbar.Command.ApplyFilter.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Audit.Toolbar.Command.ExportCsv.Content",
+            _exportCsvCommand,
+            _localization,
+            "Audit.Toolbar.Command.ExportCsv.ToolTip",
+            "Audit.Toolbar.Command.ExportCsv.AutomationName",
+            "Audit.Toolbar.Command.ExportCsv.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Audit.Toolbar.Command.ExportExcel.Content",
+            _exportXlsxCommand,
+            _localization,
+            "Audit.Toolbar.Command.ExportExcel.ToolTip",
+            "Audit.Toolbar.Command.ExportExcel.AutomationName",
+            "Audit.Toolbar.Command.ExportExcel.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "Audit.Toolbar.Command.ExportPdf.Content",
+            _exportPdfCommand,
+            _localization,
+            "Audit.Toolbar.Command.ExportPdf.ToolTip",
+            "Audit.Toolbar.Command.ExportPdf.AutomationName",
+            "Audit.Toolbar.Command.ExportPdf.AutomationId"));
 
         PropertyChanged += OnSelfPropertyChanged;
     }
@@ -161,6 +199,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
     [ObservableProperty]
     private bool _hasError;
 
+    private readonly ILocalizationService _localization;
     private readonly AuditLogViewModel _auditLogViewModel;
     private readonly AsyncRelayCommand _applyFilterCommand;
     private readonly AsyncRelayCommand _refreshCommand;

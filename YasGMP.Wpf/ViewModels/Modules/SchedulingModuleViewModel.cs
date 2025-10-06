@@ -40,8 +40,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Scheduled Jobs", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Scheduled Jobs", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _scheduledJobService = scheduledJobService ?? throw new ArgumentNullException(nameof(scheduledJobService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));

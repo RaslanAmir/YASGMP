@@ -39,8 +39,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "Work Orders", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "Work Orders", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _workOrderService = workOrderService ?? throw new ArgumentNullException(nameof(workOrderService));

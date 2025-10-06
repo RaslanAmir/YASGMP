@@ -21,8 +21,9 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation)
-        : base(ModuleKey, "API Audit Trail", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation,
+        ILocalizationService localization)
+        : base(ModuleKey, "API Audit Trail", databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
 

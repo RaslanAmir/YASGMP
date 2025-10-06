@@ -29,11 +29,13 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
+        ILocalizationService localization,
         Func<AuditDashboardViewModel, Task<IReadOnlyList<AuditEntryDto>>>? loadOverride = null,
         Func<AuditDashboardViewModel, Task<string>>? exportPdfOverride = null,
         Func<AuditDashboardViewModel, Task<string>>? exportExcelOverride = null)
-        : base(ModuleKey, "Audit Dashboard", cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Audit Dashboard", localization, cflDialogService, shellInteraction, navigation)
     {
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         _dashboardViewModel = dashboardViewModel ?? throw new ArgumentNullException(nameof(dashboardViewModel));
@@ -50,9 +52,27 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         _exportPdfCommand = new AsyncRelayCommand(ExecuteExportPdfAsync, CanExecuteExport);
         _exportExcelCommand = new AsyncRelayCommand(ExecuteExportExcelAsync, CanExecuteExport);
 
-        Toolbar.Add(new ModuleToolbarCommand("Apply Filters", _applyFilterCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Export PDF", _exportPdfCommand));
-        Toolbar.Add(new ModuleToolbarCommand("Export Excel", _exportExcelCommand));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "AuditDashboard.Toolbar.Command.ApplyFilters.Content",
+            _applyFilterCommand,
+            _localization,
+            "AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip",
+            "AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName",
+            "AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "AuditDashboard.Toolbar.Command.ExportPdf.Content",
+            _exportPdfCommand,
+            _localization,
+            "AuditDashboard.Toolbar.Command.ExportPdf.ToolTip",
+            "AuditDashboard.Toolbar.Command.ExportPdf.AutomationName",
+            "AuditDashboard.Toolbar.Command.ExportPdf.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand(
+            "AuditDashboard.Toolbar.Command.ExportExcel.Content",
+            _exportExcelCommand,
+            _localization,
+            "AuditDashboard.Toolbar.Command.ExportExcel.ToolTip",
+            "AuditDashboard.Toolbar.Command.ExportExcel.AutomationName",
+            "AuditDashboard.Toolbar.Command.ExportExcel.AutomationId"));
 
         PropertyChanged += OnPropertyChanged;
     }
@@ -156,6 +176,7 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
     [ObservableProperty]
     private bool _hasError;
 
+    private readonly ILocalizationService _localization;
     private readonly AuditService _auditService;
     private readonly ExportService _exportService;
     private readonly AuditDashboardViewModel _dashboardViewModel;

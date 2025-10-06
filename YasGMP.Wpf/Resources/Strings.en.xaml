@@ -91,4 +91,197 @@
     <sys:String x:Key="Dock.Inspector.Title">Inspector</sys:String>
     <sys:String x:Key="Dock.Inspector.ModuleTitle">Module</sys:String>
     <sys:String x:Key="Dock.Inspector.NoRecord">No record selected</sys:String>
+
+    <!-- Module toolbar toggles/commands -->
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.Content">Find</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.ToolTip">Switch to find mode.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.AutomationName">Find mode toggle</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.AutomationId">Toolbar.Toggle.Find</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.Content">Add</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.ToolTip">Switch to add mode.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.AutomationName">Add mode toggle</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.AutomationId">Toolbar.Toggle.Add</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.View.Content">View</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.ToolTip">Switch to view mode.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.AutomationName">View mode toggle</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.AutomationId">Toolbar.Toggle.View</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.Content">Update</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.ToolTip">Switch to update mode.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.AutomationName">Update mode toggle</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.AutomationId">Toolbar.Toggle.Update</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Save.Content">Save</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Save.ToolTip">Save the current record.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Save.AutomationName">Save record command</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Save.AutomationId">Toolbar.Command.Save</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.Content">Cancel</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.ToolTip">Cancel changes.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.AutomationName">Cancel edit command</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.AutomationId">Toolbar.Command.Cancel</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.Content">Refresh</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.ToolTip">Reload data from source.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.AutomationName">Refresh data command</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.AutomationId">Toolbar.Command.Refresh</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.Content">CFL</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.ToolTip">Open the choose-from-list picker.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationName">Choose-from-list command</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationId">Toolbar.Button.CFL</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.ToolTip">Open the related record.</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationName">Golden arrow navigation</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationId">Toolbar.Button.GoldenArrow</sys:String>
+
+    <sys:String x:Key="Module.Status.Ready">Ready</sys:String>
+
+    <!-- Dashboard module -->
+    <sys:String x:Key="Dashboard.Toolbar.AutomationName">Dashboard module toolbar</sys:String>
+    <sys:String x:Key="Dashboard.Toolbar.AutomationId">Dashboard.Toolbar</sys:String>
+
+    <sys:String x:Key="Dashboard.Search.Label">Search:</sys:String>
+    <sys:String x:Key="Dashboard.Search.ToolTip">Filter dashboard events.</sys:String>
+    <sys:String x:Key="Dashboard.Search.AutomationName">Dashboard search</sys:String>
+    <sys:String x:Key="Dashboard.Search.AutomationId">Dashboard.Search</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Code.Header">Code</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.ToolTip">Unique code for the dashboard event.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.AutomationName">Dashboard column Code</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.AutomationId">Dashboard.Grid.Column.Code</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Title.Header">Title</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.ToolTip">Event title shown in the dashboard list.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.AutomationName">Dashboard column Title</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.AutomationId">Dashboard.Grid.Column.Title</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Status.Header">Status</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.ToolTip">Current status of the record.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.AutomationName">Dashboard column Status</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.AutomationId">Dashboard.Grid.Column.Status</sys:String>
+
+    <sys:String x:Key="Dashboard.Grid.Column.Description.Header">Description</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.ToolTip">Detailed description of the event.</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.AutomationName">Dashboard column Description</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.AutomationId">Dashboard.Grid.Column.Description</sys:String>
+
+    <!-- Audit module toolbar extensions -->
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.Content">Apply Filter</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.ToolTip">Apply the selected audit filters.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.AutomationName">Apply audit filter command</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.AutomationId">Audit.Toolbar.ApplyFilter</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.Content">Export CSV</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.ToolTip">Export audit results to CSV.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.AutomationName">Export audit CSV command</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.AutomationId">Audit.Toolbar.ExportCsv</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.Content">Export Excel</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.ToolTip">Export audit results to Excel.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.AutomationName">Export audit Excel command</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.AutomationId">Audit.Toolbar.ExportExcel</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.Content">Export PDF</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.ToolTip">Export audit results to PDF.</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.AutomationName">Export audit PDF command</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.AutomationId">Audit.Toolbar.ExportPdf</sys:String>
+
+    <!-- Attachments toolbar -->
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.Content">Upload</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.ToolTip">Upload a new attachment.</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.AutomationName">Upload attachment command</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.AutomationId">Attachments.Toolbar.Upload</sys:String>
+
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.Content">Download</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.ToolTip">Download the selected attachment.</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.AutomationName">Download attachment command</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.AutomationId">Attachments.Toolbar.Download</sys:String>
+
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.Content">Delete</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.ToolTip">Delete the selected attachment.</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.AutomationName">Delete attachment command</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.AutomationId">Attachments.Toolbar.Delete</sys:String>
+
+    <!-- Audit dashboard toolbar -->
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.Content">Apply Filters</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip">Apply dashboard filters to the audit feed.</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName">Apply audit dashboard filters command</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId">AuditDashboard.Toolbar.ApplyFilters</sys:String>
+
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.Content">Export PDF</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.ToolTip">Export the dashboard summary to PDF.</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.AutomationName">Export audit dashboard PDF command</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.AutomationId">AuditDashboard.Toolbar.ExportPdf</sys:String>
+
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.Content">Export Excel</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.ToolTip">Export the dashboard summary to Excel.</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.AutomationName">Export audit dashboard Excel command</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.AutomationId">AuditDashboard.Toolbar.ExportExcel</sys:String>
+
+    <!-- Module tree -->
+    <sys:String x:Key="ModuleTree.AutomationName">Module tree navigation</sys:String>
+    <sys:String x:Key="ModuleTree.ToolTip">Browse modules by category.</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Quality.Title">Quality</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.ToolTip">Quality and compliance modules.</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.AutomationName">Quality category</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.AutomationId">ModuleTree.Category.Quality</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.Title">CAPA</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.ToolTip">Corrective and preventive actions.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationName">CAPA node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationId">ModuleTree.Node.Quality.CAPA</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.Title">Audits</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.ToolTip">Audit trail and dashboards.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.AutomationName">Audits node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.AutomationId">ModuleTree.Node.Quality.Audits</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.Title">Document Control</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.ToolTip">Document control workflows.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.AutomationName">Document control node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.AutomationId">ModuleTree.Node.Quality.DocumentControl</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Maintenance.Title">Maintenance</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Maintenance.ToolTip">Maintenance and asset modules.</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Maintenance.AutomationName">Maintenance category</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Maintenance.AutomationId">ModuleTree.Category.Maintenance</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.Title">Machines</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.ToolTip">Asset master data.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.AutomationName">Machines node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.AutomationId">ModuleTree.Node.Maintenance.Machines</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.Title">Preventive Plans</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.ToolTip">Preventive maintenance plans.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.AutomationName">Preventive plans node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.AutomationId">ModuleTree.Node.Maintenance.PreventivePlans</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.Title">Calibration</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.ToolTip">Calibration schedules and history.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationName">Calibration node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationId">ModuleTree.Node.Maintenance.Calibration</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Warehouse.Title">Warehouse</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Warehouse.ToolTip">Warehouse and supplier modules.</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Warehouse.AutomationName">Warehouse category</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Warehouse.AutomationId">ModuleTree.Category.Warehouse</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.Title">Inventory</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.ToolTip">Inventory visibility and counts.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationName">Inventory node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationId">ModuleTree.Node.Warehouse.Inventory</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.Title">Suppliers</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.ToolTip">Approved supplier list.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationName">Suppliers node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationId">ModuleTree.Node.Warehouse.Suppliers</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.Title">Transactions</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.ToolTip">Warehouse transactions and ledger.</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationName">Transactions node</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationId">ModuleTree.Node.Warehouse.Transactions</sys:String>
 </ResourceDictionary>
