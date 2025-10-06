@@ -16,6 +16,7 @@
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
+  - 2026-01-25: Documented B1FormDocumentViewModel command/state surface so derived modules inherit SAP B1 toolbar, audit, and busy-state guidance.
 - **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; the WPF dialog service now emits audit events on capture/persist while broader audit surfacing remains gated on SDK access)*
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**

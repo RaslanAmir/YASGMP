@@ -121,36 +121,120 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     [ObservableProperty]
     private bool _isDirty;
 
+    /// <summary>
+    /// Command that transitions the document into SAP B1 style Find mode so derived modules can query records without mutating data.
+    /// </summary>
+    /// <remarks>
+    /// Find mode keeps the editor read-only, allows re-entry even when already active, and does not trigger audit hooks until a record is loaded into View mode.
+    /// </remarks>
     public IAsyncRelayCommand EnterFindModeCommand { get; }
 
+    /// <summary>
+    /// Command that enters Add mode, enabling editor fields for new record entry following SAP B1 toolbar semantics.
+    /// </summary>
+    /// <remarks>
+    /// While Add mode is active the busy gate prevents parallel operations, <see cref="IsDirty"/> is expected to track edits, and audit status updates do not occur until a successful save returns to View mode.
+    /// </remarks>
     public IAsyncRelayCommand EnterAddModeCommand { get; }
 
+    /// <summary>
+    /// Command that returns the form to View mode for read-only inspection of the selected record.
+    /// </summary>
+    /// <remarks>
+    /// View mode resets edit state, clears validation errors, and is the mode in which status messages reflect the last persisted audit state.
+    /// </remarks>
     public IAsyncRelayCommand EnterViewModeCommand { get; }
 
+    /// <summary>
+    /// Command that switches the document into Update mode so the current record can be edited in-place.
+    /// </summary>
+    /// <remarks>
+    /// Update mode mirrors SAP B1 behaviour by reusing the selected record, gating execution while <see cref="IsBusy"/> is <c>true</c>, and deferring audit journal updates until <see cref="SaveCommand"/> completes.
+    /// </remarks>
     public IAsyncRelayCommand EnterUpdateModeCommand { get; }
 
+    /// <summary>
+    /// Command that persists Add/Update changes, drives validation, and propagates audit/status messages back to the shell.
+    /// </summary>
+    /// <remarks>
+    /// The save pipeline invokes <see cref="OnSaveAsync"/>, refreshes data, flips the mode back to View, and updates the status banner so derived modules can hook e-signature or audit logging during the transition.
+    /// </remarks>
     public IAsyncRelayCommand SaveCommand { get; }
 
+    /// <summary>
+    /// Command that abandons the current edit session, clears validation, and reverts toolbar state without touching persisted data.
+    /// </summary>
+    /// <remarks>
+    /// Cancel is disabled while <see cref="IsBusy"/> is <c>true</c>; when executed it raises <see cref="OnCancel"/>, resets audit messaging to a cancelled status, and returns the form to View mode if necessary.
+    /// </remarks>
     public IRelayCommand CancelCommand { get; }
 
+    /// <summary>
+    /// Command that reloads module records, updating the busy state and localized status text as SAP B1 toolbars do after a find or save.
+    /// </summary>
+    /// <remarks>
+    /// Refresh is blocked while <see cref="IsBusy"/> is <c>true</c> to ensure audit/status transitions remain ordered and derived modules can safely rehydrate their data sources.
+    /// </remarks>
     public IAsyncRelayCommand RefreshCommand { get; }
 
+    /// <summary>
+    /// Command that opens the Choose-From-List dialog, allowing derived modules to select related master data while respecting busy gating.
+    /// </summary>
+    /// <remarks>
+    /// The command is disabled while <see cref="IsBusy"/> is <c>true</c> so that audit prompts or status updates originating from the CFL do not overlap long-running operations.
+    /// </remarks>
     public IAsyncRelayCommand ShowCflCommand { get; }
 
+    /// <summary>
+    /// Command that triggers Golden Arrow navigation into the related module tied to <see cref="SelectedRecord"/>.
+    /// </summary>
+    /// <remarks>
+    /// Navigation is only available when a record exposes <see cref="ModuleRecord.RelatedModuleKey"/> and the view-model is not busy, ensuring audit chains reflect the originating record before transitioning.
+    /// </remarks>
     public IRelayCommand GoldenArrowCommand { get; }
 
+    /// <summary>
+    /// Current SAP B1 form mode that drives toolbar toggles, editor enablement, and audit lifecycle hooks.
+    /// </summary>
+    /// <remarks>
+    /// Changing the mode invokes <see cref="OnModeChangedAsync(FormMode)"/>, resets dirty state when leaving edit scenarios, and synchronizes status messages with the shell.
+    /// </remarks>
     [ObservableProperty]
     private FormMode _mode = FormMode.View;
 
+    /// <summary>
+    /// Indicates whether the view-model is performing an asynchronous operation, disabling toolbar commands until completion.
+    /// </summary>
+    /// <remarks>
+    /// Derived modules should check this flag before triggering long-running work so that audit/status updates maintain the same ordering expected in SAP B1.
+    /// </remarks>
     [ObservableProperty]
     private bool _isBusy;
 
+    /// <summary>
+    /// Localized status text surfaced in the shell status bar to reflect audit outcomes and busy states.
+    /// </summary>
+    /// <remarks>
+    /// Updates propagate to <see cref="IShellInteractionService"/> which mirrors SAP B1 behaviour by keeping the status bar synchronized with find/add/view/update transitions.
+    /// </remarks>
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
+    /// <summary>
+    /// Free-form text entered by the user to filter the records list while in Find or View mode.
+    /// </summary>
+    /// <remarks>
+    /// Changing this property refreshes <see cref="RecordsView"/> and lets derived modules extend search semantics via <see cref="MatchesSearch(ModuleRecord, string)"/>.
+    /// </remarks>
     [ObservableProperty]
     private string? _searchText;
 
+    /// <summary>
+    /// Record currently highlighted in the results grid, used for inspector details, Golden Arrow navigation, and update operations.
+    /// </summary>
+    /// <remarks>
+    /// Assigning a value updates the inspector, raises <see cref="OnRecordSelectedAsync(ModuleRecord?)"/>, and determines whether edit/audit commands operate on an existing entity or a placeholder.
+    /// </remarks>
     [ObservableProperty]
     private ModuleRecord? _selectedRecord;
 
