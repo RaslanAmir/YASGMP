@@ -237,6 +237,7 @@
     "2026-01-16: Added shared localization dictionaries for ribbon/backstage/dock headers with dynamic resources and automation identifiers so EN↔HR switches update metadata while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-17: Dashboard module toolbar, search, grid columns, and module tree nodes now bind through the localization service with automation ids/names for Accessibility Insights/FlaUI validation; dotnet restore/build/smoke remain blocked until the CLI is installed.",
     "2026-01-18: Module tree hierarchical templates now push tooltip and automation metadata onto each header element so screen readers and FlaUI receive localized values after language switches; dotnet restore/build/smoke still blocked by missing CLI.",
-    "2026-01-19: Golden Arrow button control now resolves tooltip/name/automation id via the localization service with dependency property keys so toolbar usage inherits localization + UIA updates; dotnet restore/build/smoke remain blocked by the missing CLI."
+    "2026-01-19: Golden Arrow button control now resolves tooltip/name/automation id via the localization service with dependency property keys so toolbar usage inherits localization + UIA updates; dotnet restore/build/smoke remain blocked by the missing CLI.",
+    "2026-01-20: Accessibility Insights for Windows tooling could not be executed inside the Linux container; scheduled a Windows-hosted rerun to capture locale-sensitive tooltip/name coverage for ribbon tabs, dock panes, and module document views."
   ]
 }
