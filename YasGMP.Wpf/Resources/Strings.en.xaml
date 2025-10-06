@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!-- Backstage tabs -->
+    <sys:String x:Key="Backstage.Tab.Layout.Header">Layout</sys:String>
+    <sys:String x:Key="Backstage.Tab.QualityCompliance.Header">Quality &amp; Compliance</sys:String>
+
+    <!-- Backstage buttons -->
+    <sys:String x:Key="Backstage.Button.SaveLayout.Header">Save Layout</sys:String>
+    <sys:String x:Key="Backstage.Button.SaveLayout.ToolTip">Persist the current dock layout to your profile.</sys:String>
+    <sys:String x:Key="Backstage.Button.ResetLayout.Header">Reset Layout</sys:String>
+    <sys:String x:Key="Backstage.Button.ResetLayout.ToolTip">Restore the default dock layout.</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditTrail.Header">Audit Trail</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditTrail.ToolTip">Open the immutable audit trail browser.</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditDashboard.Header">Audit Dashboard</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditDashboard.ToolTip">Launch the live audit dashboard with trend analytics.</sys:String>
+    <sys:String x:Key="Backstage.Button.ApiAuditTrail.Header">API Audit Trail</sys:String>
+    <sys:String x:Key="Backstage.Button.ApiAuditTrail.ToolTip">Review API key usage and forensic request payloads.</sys:String>
+
+    <!-- Ribbon tabs -->
+    <sys:String x:Key="Ribbon.Tab.Home.Header">Home</sys:String>
+    <sys:String x:Key="Ribbon.Tab.View.Header">View</sys:String>
+    <sys:String x:Key="Ribbon.Tab.Tools.Header">Tools</sys:String>
+
+    <!-- Ribbon groups -->
+    <sys:String x:Key="Ribbon.Group.Operations.Header">Operations</sys:String>
+    <sys:String x:Key="Ribbon.Group.Operations.ToolTip">Operations modules for maintenance and production support.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Quality.Header">Quality</sys:String>
+    <sys:String x:Key="Ribbon.Group.Quality.ToolTip">Quality workflows and compliance actions.</sys:String>
+    <sys:String x:Key="Ribbon.Group.QualityCompliance.Header">Quality &amp; Compliance</sys:String>
+    <sys:String x:Key="Ribbon.Group.QualityCompliance.ToolTip">Quality assurance dashboards and audit tooling.</sys:String>
+    <sys:String x:Key="Ribbon.Group.SupplyChain.Header">Supply Chain</sys:String>
+    <sys:String x:Key="Ribbon.Group.SupplyChain.ToolTip">Supplier and contractor management.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Administration.Header">Administration</sys:String>
+    <sys:String x:Key="Ribbon.Group.Administration.ToolTip">Administration and security configuration.</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsHome.Header">Diagnostics</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsHome.ToolTip">Diagnostics and telemetry tools.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Layout.Header">Layout</sys:String>
+    <sys:String x:Key="Ribbon.Group.Layout.ToolTip">Dock layout management commands.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Persistence.Header">Persistence</sys:String>
+    <sys:String x:Key="Ribbon.Group.Persistence.ToolTip">Workspace persistence utilities.</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsTools.Header">Diagnostics</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsTools.ToolTip">Developer diagnostics and smoke tests.</sys:String>
+
+    <!-- Ribbon buttons -->
+    <sys:String x:Key="Ribbon.Button.Dashboard.Header">Dashboard</sys:String>
+    <sys:String x:Key="Ribbon.Button.Dashboard.ToolTip">Open the operations dashboard and KPIs.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Assets.Header">Assets</sys:String>
+    <sys:String x:Key="Ribbon.Button.Assets.ToolTip">Manage machine assets and lifecycle data.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Components.Header">Components</sys:String>
+    <sys:String x:Key="Ribbon.Button.Components.ToolTip">View and maintain the component registry.</sys:String>
+    <sys:String x:Key="Ribbon.Button.WorkOrders.Header">Work Orders</sys:String>
+    <sys:String x:Key="Ribbon.Button.WorkOrders.ToolTip">Plan and execute maintenance work orders.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Calibration.Header">Calibration</sys:String>
+    <sys:String x:Key="Ribbon.Button.Calibration.ToolTip">Track calibration records and due dates.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Parts.Header">Parts</sys:String>
+    <sys:String x:Key="Ribbon.Button.Parts.ToolTip">Maintain spare parts inventory.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Warehouse.Header">Warehouse</sys:String>
+    <sys:String x:Key="Ribbon.Button.Warehouse.ToolTip">Access warehouse master data and stock levels.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Capa.Header">CAPA</sys:String>
+    <sys:String x:Key="Ribbon.Button.Capa.ToolTip">Manage corrective and preventive actions.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Incidents.Header">Incidents</sys:String>
+    <sys:String x:Key="Ribbon.Button.Incidents.ToolTip">Log and investigate quality incidents.</sys:String>
+    <sys:String x:Key="Ribbon.Button.ChangeControl.Header">Change Control</sys:String>
+    <sys:String x:Key="Ribbon.Button.ChangeControl.ToolTip">Control change requests and approvals.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Validations.Header">Validations</sys:String>
+    <sys:String x:Key="Ribbon.Button.Validations.ToolTip">Manage validation packages and requalification.</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditTrail.Header">Audit Trail</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditTrail.ToolTip">Open the immutable audit trail browser.</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditDashboard.Header">Audit Dashboard</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditDashboard.ToolTip">Launch the live audit dashboard with trend analytics.</sys:String>
+    <sys:String x:Key="Ribbon.Button.ApiAuditTrail.Header">API Audit Trail</sys:String>
+    <sys:String x:Key="Ribbon.Button.ApiAuditTrail.ToolTip">Review API key usage and forensic request payloads.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Suppliers.Header">Suppliers</sys:String>
+    <sys:String x:Key="Ribbon.Button.Suppliers.ToolTip">Manage approved suppliers.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Security.Header">Security</sys:String>
+    <sys:String x:Key="Ribbon.Button.Security.ToolTip">Administer users and roles.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Administration.Header">Administration</sys:String>
+    <sys:String x:Key="Ribbon.Button.Administration.ToolTip">Configure application settings.</sys:String>
+    <sys:String x:Key="Ribbon.Button.DiagnosticsHome.Header">Diagnostics</sys:String>
+    <sys:String x:Key="Ribbon.Button.DiagnosticsHome.ToolTip">Review diagnostics and telemetry.</sys:String>
+    <sys:String x:Key="Ribbon.Button.ResetLayout.Header">Reset Layout</sys:String>
+    <sys:String x:Key="Ribbon.Button.ResetLayout.ToolTip">Restore the default dock layout.</sys:String>
+    <sys:String x:Key="Ribbon.Button.SaveLayout.Header">Save Layout</sys:String>
+    <sys:String x:Key="Ribbon.Button.SaveLayout.ToolTip">Persist the current dock layout to your profile.</sys:String>
+    <sys:String x:Key="Ribbon.Button.RunSmokeTest.Header">Run Smoke Test</sys:String>
+    <sys:String x:Key="Ribbon.Button.RunSmokeTest.ToolTip">Execute the automated smoke test harness.</sys:String>
+
+    <!-- Dock panes -->
+    <sys:String x:Key="Dock.Modules.Title">Modules</sys:String>
+    <sys:String x:Key="Dock.Inspector.Title">Inspector</sys:String>
+    <sys:String x:Key="Dock.Inspector.ModuleTitle">Module</sys:String>
+    <sys:String x:Key="Dock.Inspector.NoRecord">No record selected</sys:String>
+</ResourceDictionary>

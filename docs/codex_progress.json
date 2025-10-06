@@ -233,6 +233,7 @@
     "2026-01-11: Audit trail filters now trigger an auto-refresh when modified so the grid reloads immediately; dotnet CLI remains unavailable so restore/build/smoke stay blocked pending installation.",
     "2026-01-12: AuditModuleViewModel test double now surfaces refresh invocation counts and snapshots so unit tests cover filter-change auto refresh behavior and state resets; dotnet restore/build retries still fail with 'command not found' because the CLI is missing in the container.",
     "2026-01-13: ApiAuditModuleViewModel now wires observable filter setters to a guarded refresh helper that clears status/error flags and triggers RefreshCommand, matching the Audit module's UX while dotnet restore remains blocked by the missing CLI.",
-    "2026-01-14: API audit module unit tests now expose an awaitable refresh signal and invocation snapshots, covering each filter setter's auto-refresh path while dotnet restore/build remain blocked by the missing CLI."
+    "2026-01-14: API audit module unit tests now expose an awaitable refresh signal and invocation snapshots, covering each filter setter's auto-refresh path while dotnet restore/build remain blocked by the missing CLI.",
+    "2026-01-16: Added shared localization dictionaries for ribbon/backstage/dock headers with dynamic resources and automation identifiers so EN↔HR switches update metadata while dotnet restore/build/smoke remain blocked by the missing CLI."
   ]
 }
