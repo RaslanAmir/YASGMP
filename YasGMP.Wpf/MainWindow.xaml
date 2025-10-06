@@ -23,20 +23,33 @@
             <fluent:Ribbon.Menu>
                 <fluent:Backstage x:Name="ShellBackstage">
                     <fluent:BackstageTabControl>
-                        <fluent:BackstageTabItem Header="Layout">
+                        <fluent:BackstageTabItem Header="{DynamicResource Backstage.Tab.Layout.Header}"
+                                                 AutomationProperties.Name="{DynamicResource Backstage.Tab.Layout.Header}"
+                                                 AutomationProperties.AutomationId="{DynamicResource Backstage.Tab.Layout.AutomationId}">
                             <StackPanel Margin="16">
-                                <fluent:Button Header="Save Layout"
+                                <fluent:Button Header="{DynamicResource Backstage.Button.SaveLayout.Header}"
+                                               ToolTipService.ToolTip="{DynamicResource Backstage.Button.SaveLayout.ToolTip}"
+                                               AutomationProperties.Name="{DynamicResource Backstage.Button.SaveLayout.Header}"
+                                               AutomationProperties.AutomationId="{DynamicResource Backstage.Button.SaveLayout.AutomationId}"
                                                Width="180"
                                                Margin="0,0,0,8"
                                                Command="{Binding WindowCommands.SaveLayoutCommand}" />
-                                <fluent:Button Header="Reset Layout"
+                                <fluent:Button Header="{DynamicResource Backstage.Button.ResetLayout.Header}"
+                                               ToolTipService.ToolTip="{DynamicResource Backstage.Button.ResetLayout.ToolTip}"
+                                               AutomationProperties.Name="{DynamicResource Backstage.Button.ResetLayout.Header}"
+                                               AutomationProperties.AutomationId="{DynamicResource Backstage.Button.ResetLayout.AutomationId}"
                                                Width="180"
                                                Command="{Binding WindowCommands.ResetLayoutCommand}" />
                             </StackPanel>
                         </fluent:BackstageTabItem>
-                        <fluent:BackstageTabItem Header="Quality &amp; Compliance">
+                        <fluent:BackstageTabItem Header="{DynamicResource Backstage.Tab.QualityCompliance.Header}"
+                                                 AutomationProperties.Name="{DynamicResource Backstage.Tab.QualityCompliance.Header}"
+                                                 AutomationProperties.AutomationId="{DynamicResource Backstage.Tab.QualityCompliance.AutomationId}">
                             <StackPanel Margin="16">
-                                <fluent:Button Header="Audit Trail"
+                                <fluent:Button Header="{DynamicResource Backstage.Button.AuditTrail.Header}"
+                                               ToolTipService.ToolTip="{DynamicResource Backstage.Button.AuditTrail.ToolTip}"
+                                               AutomationProperties.Name="{DynamicResource Backstage.Button.AuditTrail.Header}"
+                                               AutomationProperties.AutomationId="{DynamicResource Backstage.Button.AuditTrail.AutomationId}"
                                                Width="220"
                                                Margin="0,0,0,8"
                                                Command="{Binding WindowCommands.OpenAuditTrailCommand}">
@@ -45,11 +58,11 @@
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
-                                    <ToolTipService.ToolTip>
-                                        <ToolTip Content="Open the immutable audit trail browser." />
-                                    </ToolTipService.ToolTip>
                                 </fluent:Button>
-                                <fluent:Button Header="Audit Dashboard"
+                                <fluent:Button Header="{DynamicResource Backstage.Button.AuditDashboard.Header}"
+                                               ToolTipService.ToolTip="{DynamicResource Backstage.Button.AuditDashboard.ToolTip}"
+                                               AutomationProperties.Name="{DynamicResource Backstage.Button.AuditDashboard.Header}"
+                                               AutomationProperties.AutomationId="{DynamicResource Backstage.Button.AuditDashboard.AutomationId}"
                                                Width="220"
                                                Margin="0,0,0,8"
                                                Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
@@ -58,11 +71,11 @@
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
-                                    <ToolTipService.ToolTip>
-                                        <ToolTip Content="Launch the live audit dashboard with trend analytics." />
-                                    </ToolTipService.ToolTip>
                                 </fluent:Button>
-                                <fluent:Button Header="API Audit Trail"
+                                <fluent:Button Header="{DynamicResource Backstage.Button.ApiAuditTrail.Header}"
+                                               ToolTipService.ToolTip="{DynamicResource Backstage.Button.ApiAuditTrail.ToolTip}"
+                                               AutomationProperties.Name="{DynamicResource Backstage.Button.ApiAuditTrail.Header}"
+                                               AutomationProperties.AutomationId="{DynamicResource Backstage.Button.ApiAuditTrail.AutomationId}"
                                                Width="220"
                                                Command="{Binding WindowCommands.OpenApiAuditCommand}">
                                     <fluent:Button.LargeIcon>
@@ -70,9 +83,6 @@
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
-                                    <ToolTipService.ToolTip>
-                                        <ToolTip Content="Review API key usage and forensic request payloads." />
-                                    </ToolTipService.ToolTip>
                                 </fluent:Button>
                             </StackPanel>
                         </fluent:BackstageTabItem>
@@ -80,98 +90,185 @@
                 </fluent:Backstage>
             </fluent:Ribbon.Menu>
 
-            <fluent:RibbonTabItem Header="Home">
-                <fluent:RibbonGroupBox Header="Operations">
-                    <fluent:Button Header="Dashboard"
+            <fluent:RibbonTabItem Header="{DynamicResource Ribbon.Tab.Home.Header}"
+                                  AutomationProperties.Name="{DynamicResource Ribbon.Tab.Home.Header}"
+                                  AutomationProperties.AutomationId="{DynamicResource Ribbon.Tab.Home.AutomationId}">
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.Operations.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.Operations.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.Operations.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.Operations.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Dashboard.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Dashboard.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Dashboard.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Dashboard.AutomationId}"
                                    Command="{Binding WindowCommands.OpenDashboardCommand}" />
-                    <fluent:Button Header="Assets"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Assets.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Assets.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Assets.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Assets.AutomationId}"
                                    Command="{Binding WindowCommands.OpenAssetsCommand}" />
-                    <fluent:Button Header="Components"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Components.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Components.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Components.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Components.AutomationId}"
                                    Command="{Binding WindowCommands.OpenComponentsCommand}" />
-                    <fluent:Button Header="Work Orders"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.WorkOrders.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.WorkOrders.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.WorkOrders.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.WorkOrders.AutomationId}"
                                    Command="{Binding WindowCommands.OpenWorkOrdersCommand}" />
-                    <fluent:Button Header="Calibration"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Calibration.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Calibration.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Calibration.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Calibration.AutomationId}"
                                    Command="{Binding WindowCommands.OpenCalibrationCommand}" />
-                    <fluent:Button Header="Parts"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Parts.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Parts.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Parts.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Parts.AutomationId}"
                                    Command="{Binding WindowCommands.OpenPartsCommand}" />
-                    <fluent:Button Header="Warehouse"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Warehouse.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Warehouse.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Warehouse.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Warehouse.AutomationId}"
                                    Command="{Binding WindowCommands.OpenWarehouseCommand}" />
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Quality">
-                    <fluent:Button Header="CAPA"
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.Quality.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.Quality.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.Quality.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.Quality.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Capa.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Capa.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Capa.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Capa.AutomationId}"
                                    Command="{Binding WindowCommands.OpenCapaCommand}" />
-                    <fluent:Button Header="Incidents"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Incidents.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Incidents.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Incidents.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Incidents.AutomationId}"
                                    Command="{Binding WindowCommands.OpenIncidentsCommand}" />
-                    <fluent:Button Header="Change Control"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.ChangeControl.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.ChangeControl.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.ChangeControl.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.ChangeControl.AutomationId}"
                                    Command="{Binding WindowCommands.OpenChangeControlCommand}" />
-                    <fluent:Button Header="Validations"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Validations.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Validations.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Validations.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Validations.AutomationId}"
                                    Command="{Binding WindowCommands.OpenValidationsCommand}" />
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Quality &amp; Compliance">
-                    <fluent:Button Header="Audit Trail"
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.QualityCompliance.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.QualityCompliance.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.QualityCompliance.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.QualityCompliance.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.AuditTrail.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.AuditTrail.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.AuditTrail.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.AuditTrail.AutomationId}"
                                    Command="{Binding WindowCommands.OpenAuditTrailCommand}">
                         <fluent:Button.LargeIcon>
                             <TextBlock Text="&#xE81C;"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="20" />
                         </fluent:Button.LargeIcon>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="Open the immutable audit trail browser." />
-                        </ToolTipService.ToolTip>
                     </fluent:Button>
-                    <fluent:Button Header="Audit Dashboard"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.AuditDashboard.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.AuditDashboard.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.AuditDashboard.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.AuditDashboard.AutomationId}"
                                    Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
                         <fluent:Button.LargeIcon>
                             <TextBlock Text="&#xE9D2;"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="20" />
                         </fluent:Button.LargeIcon>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="Launch the live audit dashboard with trend analytics." />
-                        </ToolTipService.ToolTip>
                     </fluent:Button>
-                    <fluent:Button Header="API Audit Trail"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.ApiAuditTrail.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.ApiAuditTrail.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.ApiAuditTrail.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.ApiAuditTrail.AutomationId}"
                                    Command="{Binding WindowCommands.OpenApiAuditCommand}">
                         <fluent:Button.LargeIcon>
                             <TextBlock Text="&#xEBC3;"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="20" />
                         </fluent:Button.LargeIcon>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="Review API key usage and forensic request payloads." />
-                        </ToolTipService.ToolTip>
                     </fluent:Button>
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Supply Chain">
-                    <fluent:Button Header="Suppliers"
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.SupplyChain.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.SupplyChain.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.SupplyChain.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.SupplyChain.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Suppliers.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Suppliers.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Suppliers.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Suppliers.AutomationId}"
                                    Command="{Binding WindowCommands.OpenSuppliersCommand}" />
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Administration">
-                    <fluent:Button Header="Security"
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.Administration.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.Administration.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.Administration.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.Administration.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Security.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Security.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Security.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Security.AutomationId}"
                                    Command="{Binding WindowCommands.OpenSecurityCommand}" />
-                    <fluent:Button Header="Administration"
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.Administration.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Administration.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.Administration.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Administration.AutomationId}"
                                    Command="{Binding WindowCommands.OpenAdministrationCommand}" />
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Diagnostics">
-                    <fluent:Button Header="Diagnostics"
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.DiagnosticsHome.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.DiagnosticsHome.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.DiagnosticsHome.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.DiagnosticsHome.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.DiagnosticsHome.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.DiagnosticsHome.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.DiagnosticsHome.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.DiagnosticsHome.AutomationId}"
                                    Command="{Binding WindowCommands.OpenDiagnosticsCommand}" />
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
 
-            <fluent:RibbonTabItem Header="View">
-                <fluent:RibbonGroupBox Header="Layout">
-                    <fluent:Button Header="Reset Layout"
+            <fluent:RibbonTabItem Header="{DynamicResource Ribbon.Tab.View.Header}"
+                                  AutomationProperties.Name="{DynamicResource Ribbon.Tab.View.Header}"
+                                  AutomationProperties.AutomationId="{DynamicResource Ribbon.Tab.View.AutomationId}">
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.Layout.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.Layout.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.Layout.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.Layout.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.ResetLayout.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.ResetLayout.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.ResetLayout.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.ResetLayout.AutomationId}"
                                    Command="{Binding WindowCommands.ResetLayoutCommand}" />
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
 
-            <fluent:RibbonTabItem Header="Tools">
-                <fluent:RibbonGroupBox Header="Persistence">
-                    <fluent:Button Header="Save Layout"
+            <fluent:RibbonTabItem Header="{DynamicResource Ribbon.Tab.Tools.Header}"
+                                  AutomationProperties.Name="{DynamicResource Ribbon.Tab.Tools.Header}"
+                                  AutomationProperties.AutomationId="{DynamicResource Ribbon.Tab.Tools.AutomationId}">
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.Persistence.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.Persistence.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.Persistence.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.Persistence.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.SaveLayout.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.SaveLayout.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.SaveLayout.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.SaveLayout.AutomationId}"
                                    Command="{Binding WindowCommands.SaveLayoutCommand}" />
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Diagnostics">
-                    <fluent:Button Header="Run Smoke Test"
+                <fluent:RibbonGroupBox Header="{DynamicResource Ribbon.Group.DiagnosticsTools.Header}"
+                                       ToolTipService.ToolTip="{DynamicResource Ribbon.Group.DiagnosticsTools.ToolTip}"
+                                       AutomationProperties.Name="{DynamicResource Ribbon.Group.DiagnosticsTools.Header}"
+                                       AutomationProperties.AutomationId="{DynamicResource Ribbon.Group.DiagnosticsTools.AutomationId}">
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.RunSmokeTest.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.RunSmokeTest.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.RunSmokeTest.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.RunSmokeTest.AutomationId}"
                                    Command="{Binding RunSmokeTestCommand}" />
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
@@ -197,6 +294,8 @@
                     <Style TargetType="{x:Type adControls:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.Title}" />
                         <Setter Property="ContentId" Value="{Binding Model.ContentId}" />
+                        <Setter Property="AutomationProperties.Name" Value="{Binding Model.Title}" />
+                        <Setter Property="AutomationProperties.AutomationId" Value="{Binding Model.AutomationId}" />
                     </Style>
                 </ad:DockingManager.LayoutItemContainerStyle>
 
@@ -204,14 +303,14 @@
                     <adLayout:LayoutRoot>
                         <adLayout:LayoutPanel Orientation="Horizontal">
                             <adLayout:LayoutAnchorablePane DockWidth="280">
-                                <adLayout:LayoutAnchorable Title="Modules"
+                                <adLayout:LayoutAnchorable Title="{Binding ModulesPane.Title}"
                                                           ContentId="YasGmp.Shell.Modules"
                                                           Content="{Binding ModulesPane}" />
                             </adLayout:LayoutAnchorablePane>
                             <adLayout:LayoutPanel Orientation="Horizontal">
                                 <adLayout:LayoutDocumentPane />
                                 <adLayout:LayoutAnchorablePane DockWidth="320">
-                                    <adLayout:LayoutAnchorable Title="Inspector"
+                                    <adLayout:LayoutAnchorable Title="{Binding InspectorPane.Title}"
                                                               ContentId="YasGmp.Shell.Inspector"
                                                               Content="{Binding InspectorPane}" />
                                 </adLayout:LayoutAnchorablePane>

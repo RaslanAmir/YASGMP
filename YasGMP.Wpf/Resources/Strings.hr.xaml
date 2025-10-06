@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!-- Backstage tabs -->
+    <sys:String x:Key="Backstage.Tab.Layout.Header">Raspored</sys:String>
+    <sys:String x:Key="Backstage.Tab.QualityCompliance.Header">Kvaliteta i usklađenost</sys:String>
+
+    <!-- Backstage buttons -->
+    <sys:String x:Key="Backstage.Button.SaveLayout.Header">Spremi raspored</sys:String>
+    <sys:String x:Key="Backstage.Button.SaveLayout.ToolTip">Spremi trenutni raspored dokova u svoj profil.</sys:String>
+    <sys:String x:Key="Backstage.Button.ResetLayout.Header">Vrati raspored</sys:String>
+    <sys:String x:Key="Backstage.Button.ResetLayout.ToolTip">Vrati zadani raspored dokova.</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditTrail.Header">Dnevnik audita</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditTrail.ToolTip">Otvori preglednik neizmjenjivog dnevnika audita.</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditDashboard.Header">Nadzorna ploča audita</sys:String>
+    <sys:String x:Key="Backstage.Button.AuditDashboard.ToolTip">Pokreni nadzornu ploču audita s analitikom trendova.</sys:String>
+    <sys:String x:Key="Backstage.Button.ApiAuditTrail.Header">API dnevnik audita</sys:String>
+    <sys:String x:Key="Backstage.Button.ApiAuditTrail.ToolTip">Pregledaj korištenje API ključeva i forenzične zahtjeve.</sys:String>
+
+    <!-- Ribbon tabs -->
+    <sys:String x:Key="Ribbon.Tab.Home.Header">Početna</sys:String>
+    <sys:String x:Key="Ribbon.Tab.View.Header">Prikaz</sys:String>
+    <sys:String x:Key="Ribbon.Tab.Tools.Header">Alati</sys:String>
+
+    <!-- Ribbon groups -->
+    <sys:String x:Key="Ribbon.Group.Operations.Header">Operacije</sys:String>
+    <sys:String x:Key="Ribbon.Group.Operations.ToolTip">Moduli za održavanje i podršku proizvodnji.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Quality.Header">Kvaliteta</sys:String>
+    <sys:String x:Key="Ribbon.Group.Quality.ToolTip">Tijekovi kvalitete i aktivnosti usklađenosti.</sys:String>
+    <sys:String x:Key="Ribbon.Group.QualityCompliance.Header">Kvaliteta i usklađenost</sys:String>
+    <sys:String x:Key="Ribbon.Group.QualityCompliance.ToolTip">Nadzorne ploče kvalitete i alati za audit.</sys:String>
+    <sys:String x:Key="Ribbon.Group.SupplyChain.Header">Opskrbni lanac</sys:String>
+    <sys:String x:Key="Ribbon.Group.SupplyChain.ToolTip">Upravljanje dobavljačima i izvođačima.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Administration.Header">Administracija</sys:String>
+    <sys:String x:Key="Ribbon.Group.Administration.ToolTip">Administracija i konfiguracija sigurnosti.</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsHome.Header">Dijagnostika</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsHome.ToolTip">Alati za dijagnostiku i telemetriju.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Layout.Header">Raspored</sys:String>
+    <sys:String x:Key="Ribbon.Group.Layout.ToolTip">Naredbe za upravljanje rasporedom dokova.</sys:String>
+    <sys:String x:Key="Ribbon.Group.Persistence.Header">Spremanje</sys:String>
+    <sys:String x:Key="Ribbon.Group.Persistence.ToolTip">Alati za spremanje radnog prostora.</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsTools.Header">Dijagnostika</sys:String>
+    <sys:String x:Key="Ribbon.Group.DiagnosticsTools.ToolTip">Dijagnostika za razvoj i brzi testovi.</sys:String>
+
+    <!-- Ribbon buttons -->
+    <sys:String x:Key="Ribbon.Button.Dashboard.Header">Nadzorna ploča</sys:String>
+    <sys:String x:Key="Ribbon.Button.Dashboard.ToolTip">Otvori operativnu nadzornu ploču i KPI pokazatelje.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Assets.Header">Imovina</sys:String>
+    <sys:String x:Key="Ribbon.Button.Assets.ToolTip">Upravljaj imovinom strojeva i podacima životnog ciklusa.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Components.Header">Komponente</sys:String>
+    <sys:String x:Key="Ribbon.Button.Components.ToolTip">Pregledaj i održavaj registar komponenti.</sys:String>
+    <sys:String x:Key="Ribbon.Button.WorkOrders.Header">Radni nalozi</sys:String>
+    <sys:String x:Key="Ribbon.Button.WorkOrders.ToolTip">Planiraj i izvršavaj radne naloge održavanja.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Calibration.Header">Kalibracija</sys:String>
+    <sys:String x:Key="Ribbon.Button.Calibration.ToolTip">Prati zapise o kalibraciji i datume dospijeća.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Parts.Header">Dijelovi</sys:String>
+    <sys:String x:Key="Ribbon.Button.Parts.ToolTip">Održavaj zalihu rezervnih dijelova.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Warehouse.Header">Skladište</sys:String>
+    <sys:String x:Key="Ribbon.Button.Warehouse.ToolTip">Pristupi osnovnim podacima skladišta i zalihama.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Capa.Header">CAPA</sys:String>
+    <sys:String x:Key="Ribbon.Button.Capa.ToolTip">Upravljaj korektivnim i preventivnim radnjama.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Incidents.Header">Incidenti</sys:String>
+    <sys:String x:Key="Ribbon.Button.Incidents.ToolTip">Evidentiraj i istraži incidente kvalitete.</sys:String>
+    <sys:String x:Key="Ribbon.Button.ChangeControl.Header">Upravljanje promjenama</sys:String>
+    <sys:String x:Key="Ribbon.Button.ChangeControl.ToolTip">Upravljaj zahtjevima za promjene i odobrenjima.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Validations.Header">Validacije</sys:String>
+    <sys:String x:Key="Ribbon.Button.Validations.ToolTip">Upravljaj validacijskim paketima i rekvalifikacijom.</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditTrail.Header">Dnevnik audita</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditTrail.ToolTip">Otvori preglednik neizmjenjivog dnevnika audita.</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditDashboard.Header">Nadzorna ploča audita</sys:String>
+    <sys:String x:Key="Ribbon.Button.AuditDashboard.ToolTip">Pokreni nadzornu ploču audita s analitikom trendova.</sys:String>
+    <sys:String x:Key="Ribbon.Button.ApiAuditTrail.Header">API dnevnik audita</sys:String>
+    <sys:String x:Key="Ribbon.Button.ApiAuditTrail.ToolTip">Pregledaj korištenje API ključeva i forenzične zahtjeve.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Suppliers.Header">Dobavljači</sys:String>
+    <sys:String x:Key="Ribbon.Button.Suppliers.ToolTip">Upravljaj odobrenim dobavljačima.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Security.Header">Sigurnost</sys:String>
+    <sys:String x:Key="Ribbon.Button.Security.ToolTip">Administriraj korisnike i uloge.</sys:String>
+    <sys:String x:Key="Ribbon.Button.Administration.Header">Administracija</sys:String>
+    <sys:String x:Key="Ribbon.Button.Administration.ToolTip">Konfiguriraj postavke aplikacije.</sys:String>
+    <sys:String x:Key="Ribbon.Button.DiagnosticsHome.Header">Dijagnostika</sys:String>
+    <sys:String x:Key="Ribbon.Button.DiagnosticsHome.ToolTip">Pregledaj dijagnostiku i telemetriju.</sys:String>
+    <sys:String x:Key="Ribbon.Button.ResetLayout.Header">Vrati raspored</sys:String>
+    <sys:String x:Key="Ribbon.Button.ResetLayout.ToolTip">Vrati zadani raspored dokova.</sys:String>
+    <sys:String x:Key="Ribbon.Button.SaveLayout.Header">Spremi raspored</sys:String>
+    <sys:String x:Key="Ribbon.Button.SaveLayout.ToolTip">Spremi trenutni raspored dokova u svoj profil.</sys:String>
+    <sys:String x:Key="Ribbon.Button.RunSmokeTest.Header">Pokreni smoke test</sys:String>
+    <sys:String x:Key="Ribbon.Button.RunSmokeTest.ToolTip">Pokreni automatizirani smoke test.</sys:String>
+
+    <!-- Dock panes -->
+    <sys:String x:Key="Dock.Modules.Title">Moduli</sys:String>
+    <sys:String x:Key="Dock.Inspector.Title">Inspektor</sys:String>
+    <sys:String x:Key="Dock.Inspector.ModuleTitle">Modul</sys:String>
+    <sys:String x:Key="Dock.Inspector.NoRecord">Nema odabranog zapisa</sys:String>
+</ResourceDictionary>

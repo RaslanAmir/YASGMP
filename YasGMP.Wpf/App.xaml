@@ -6,80 +6,86 @@
              xmlns:shell="clr-namespace:YasGMP.Wpf.Shell"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type vm:ModulesPaneViewModel}">
-            <shell:ModulesPane />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:InspectorPaneViewModel}">
-            <shell:InspectorPane />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ShellStatusBarViewModel}">
-            <controls:ShellStatusBar />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:DashboardModuleViewModel}">
-            <views:DashboardModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AssetsModuleViewModel}">
-            <views:AssetsModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ComponentsModuleViewModel}">
-            <views:ComponentsModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:WarehouseModuleViewModel}">
-            <views:WarehouseModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:WorkOrdersModuleViewModel}">
-            <views:WorkOrdersModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:CalibrationModuleViewModel}">
-            <views:CalibrationModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:CapaModuleViewModel}">
-            <views:CapaModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:SchedulingModuleViewModel}">
-            <views:SchedulingModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:SecurityModuleViewModel}">
-            <views:SecurityModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:SuppliersModuleViewModel}">
-            <views:SuppliersModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ExternalServicersModuleViewModel}">
-            <views:ExternalServicersModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AdminModuleViewModel}">
-            <views:AdminModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AuditModuleViewModel}">
-            <views:AuditModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AuditDashboardDocumentViewModel}">
-            <views:AuditDashboardDocument />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AuditLogDocumentViewModel}">
-            <views:AuditLogDocument />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ApiAuditModuleViewModel}">
-            <views:ApiAuditModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AttachmentsModuleViewModel}">
-            <views:AttachmentsModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:PartsModuleViewModel}">
-            <views:PartsModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:IncidentsModuleViewModel}">
-            <views:IncidentsModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ChangeControlModuleViewModel}">
-            <views:ChangeControlModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ValidationsModuleViewModel}">
-            <views:ValidationsModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:DiagnosticsModuleViewModel}">
-            <views:DiagnosticsModuleView />
-        </DataTemplate>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Strings.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type vm:ModulesPaneViewModel}">
+                <shell:ModulesPane />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InspectorPaneViewModel}">
+                <shell:InspectorPane />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ShellStatusBarViewModel}">
+                <controls:ShellStatusBar />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DashboardModuleViewModel}">
+                <views:DashboardModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AssetsModuleViewModel}">
+                <views:AssetsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ComponentsModuleViewModel}">
+                <views:ComponentsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:WarehouseModuleViewModel}">
+                <views:WarehouseModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:WorkOrdersModuleViewModel}">
+                <views:WorkOrdersModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:CalibrationModuleViewModel}">
+                <views:CalibrationModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:CapaModuleViewModel}">
+                <views:CapaModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SchedulingModuleViewModel}">
+                <views:SchedulingModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SecurityModuleViewModel}">
+                <views:SecurityModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SuppliersModuleViewModel}">
+                <views:SuppliersModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ExternalServicersModuleViewModel}">
+                <views:ExternalServicersModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AdminModuleViewModel}">
+                <views:AdminModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AuditModuleViewModel}">
+                <views:AuditModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AuditDashboardDocumentViewModel}">
+                <views:AuditDashboardDocument />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AuditLogDocumentViewModel}">
+                <views:AuditLogDocument />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ApiAuditModuleViewModel}">
+                <views:ApiAuditModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AttachmentsModuleViewModel}">
+                <views:AttachmentsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PartsModuleViewModel}">
+                <views:PartsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:IncidentsModuleViewModel}">
+                <views:IncidentsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ChangeControlModuleViewModel}">
+                <views:ChangeControlModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ValidationsModuleViewModel}">
+                <views:ValidationsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DiagnosticsModuleViewModel}">
+                <views:DiagnosticsModuleView />
+            </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

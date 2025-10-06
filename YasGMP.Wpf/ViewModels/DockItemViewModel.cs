@@ -10,6 +10,7 @@ namespace YasGMP.Wpf.ViewModels
     {
         private string _title = string.Empty;
         private string _contentId = string.Empty;
+        private string _automationId = string.Empty;
 
         /// <summary>Gets or sets the tab/header title.</summary>
         public string Title
@@ -22,7 +23,20 @@ namespace YasGMP.Wpf.ViewModels
         public string ContentId
         {
             get => _contentId;
-            set => SetProperty(ref _contentId, value);
+            set
+            {
+                if (SetProperty(ref _contentId, value) && string.IsNullOrEmpty(AutomationId))
+                {
+                    AutomationId = value;
+                }
+            }
+        }
+
+        /// <summary>Automation identifier exposed to accessibility tooling.</summary>
+        public string AutomationId
+        {
+            get => _automationId;
+            set => SetProperty(ref _automationId, value);
         }
     }
 

@@ -50,6 +50,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2026-01-16: Added shared localization dictionaries for ribbon, backstage, and dock pane metadata with dynamic resources and automation identifiers so EN↔HR switches update headers, tooltips, and accessibility names; dotnet restore/build/smoke remain blocked by the missing CLI in the container.
 - 2026-01-11: Audit trail filters now trigger an automatic refresh so results stay aligned with user selections; another `dotnet restore` attempt (and implied builds/smoke) failed with **command not found** because the CLI remains unavailable in the container.
 - 2026-01-12: Audit module test double now exposes refresh invocation tracking so filter property changes can assert auto-refresh behavior and pre-refresh state resets in unit tests; `dotnet restore`/`dotnet build` retries still fail with **command not found** because the CLI is unavailable in the container.
 - 2026-01-13: API audit filter setters now invoke a shared refresh helper that mirrors the main Audit module's busy/initialization guards, resets state, and kicks the async refresh command; `dotnet restore` retried and still fails with **command not found** so builds/smoke remain blocked pending SDK installation.

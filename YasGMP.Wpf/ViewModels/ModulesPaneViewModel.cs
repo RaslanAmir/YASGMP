@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,11 +14,19 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
     private readonly IModuleRegistry _moduleRegistry;
     private readonly IModuleNavigationService _navigationService;
 
-    public ModulesPaneViewModel(IModuleRegistry moduleRegistry, IModuleNavigationService navigationService)
+    private readonly ILocalizationService _localization;
+
+    public ModulesPaneViewModel(
+        IModuleRegistry moduleRegistry,
+        IModuleNavigationService navigationService,
+        ILocalizationService localization)
     {
         _moduleRegistry = moduleRegistry;
         _navigationService = navigationService;
-        Title = "Modules";
+        _localization = localization;
+        Title = _localization.GetString("Dock.Modules.Title");
+        AutomationId = _localization.GetString("Dock.Modules.AutomationId");
+        _localization.LanguageChanged += OnLanguageChanged;
         ContentId = "YasGmp.Shell.Modules";
         Groups = new ObservableCollection<ModuleGroupViewModel>();
         OpenModuleCommand = new RelayCommand<ModuleLinkViewModel>(OpenModule);
@@ -54,6 +63,12 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
 
         var document = _navigationService.OpenModule(link.Metadata.Key);
         _navigationService.Activate(document);
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        Title = _localization.GetString("Dock.Modules.Title");
+        AutomationId = _localization.GetString("Dock.Modules.AutomationId");
     }
 }
 
