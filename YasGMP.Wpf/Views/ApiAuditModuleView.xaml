@@ -28,7 +28,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -45,24 +45,24 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,8">
                 <WrapPanel Margin="0,0,0,8" ItemHeight="60" ItemWidth="200">
                     <StackPanel Width="220" Margin="0,0,12,0">
-                        <TextBlock Text="API Key" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Module.ApiAudit.Header.APIKey}" FontWeight="SemiBold" />
                         <TextBox Text="{Binding FilterApiKey, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="User" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Module.ApiAudit.Header.User}" FontWeight="SemiBold" />
                         <TextBox Text="{Binding FilterUser, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="Action" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Module.ApiAudit.Header.Action}" FontWeight="SemiBold" />
                         <ComboBox ItemsSource="{Binding ActionOptions}"
                                   SelectedItem="{Binding SelectedAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="From" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Module.ApiAudit.Text.From}" FontWeight="SemiBold" />
                         <DatePicker SelectedDate="{Binding FilterFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="To" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Module.ApiAudit.Text.To}" FontWeight="SemiBold" />
                         <DatePicker SelectedDate="{Binding FilterTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
                     </StackPanel>
                 </WrapPanel>
@@ -73,13 +73,16 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Column="2"
-                            Content="Apply Filters"
+                            Content="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.Content}"
                             Command="{Binding RefreshCommand}"
                             Margin="12,0,0,0"
-                            Padding="12,4" />
+                            Padding="12,4" 
+                           ToolTipService.ToolTip="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip}"
+                           AutomationProperties.Name="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName}"
+                           AutomationProperties.AutomationId="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId}"/>
                 </Grid>
             </StackPanel>
             <Grid Grid.Row="1">
@@ -90,13 +93,13 @@
                           CanUserAddRows="False"
                           CanUserDeleteRows="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
-                        <DataGridTextColumn Header="API Key" Binding="{Binding Title}" Width="220" />
-                        <DataGridTextColumn Header="Action" Binding="{Binding Code}" Width="200" />
-                        <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[2].Value}" Width="200" />
-                        <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[3].Value}" Width="160" />
-                        <DataGridTextColumn Header="Request" Binding="{Binding InspectorFields[4].Value}" Width="2*" />
-                        <DataGridTextColumn Header="Details" Binding="{Binding Description}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.Timestamp}" Binding="{Binding InspectorFields[0].Value}" Width="160" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.APIKey}" Binding="{Binding Title}" Width="220" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.Action}" Binding="{Binding Code}" Width="200" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.User}" Binding="{Binding InspectorFields[2].Value}" Width="200" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.IPAddress}" Binding="{Binding InspectorFields[3].Value}" Width="160" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.Request}" Binding="{Binding InspectorFields[4].Value}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.Details}" Binding="{Binding Description}" Width="2*" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <Border Background="#80FFFFFF"
@@ -107,7 +110,7 @@
                                 Orientation="Vertical"
                                 Margin="24">
                         <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
-                        <TextBlock Text="Loading..."
+                        <TextBlock Text="{DynamicResource Module.ApiAudit.Text.Loading}"
                                    Margin="0,12,0,0"
                                    HorizontalAlignment="Center"
                                    Foreground="Gray"

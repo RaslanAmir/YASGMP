@@ -1,7 +1,7 @@
 <Window x:Class="YasGMP.Wpf.Views.Dialogs.ElectronicSignatureDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Electronic Signature"
+        Title="{DynamicResource Dialog.ElectronicSignature.Title.ElectronicSignature}"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         MinWidth="460"
@@ -28,24 +28,24 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
-                       Text="Re-enter your credential and capture a GMP-compliant reason before applying the signature."
+                       Text="{DynamicResource Dialog.ElectronicSignature.Text.ReEnterYourCredentialAndCaptureAGMPCompliantReasonBeforeApplyingTheSignature}"
                        TextWrapping="Wrap"
                        Margin="0,0,0,12"
                        FontWeight="SemiBold" />
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="User:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Dialog.ElectronicSignature.Text.User}" VerticalAlignment="Center" Margin="0,0,8,0" />
             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentUserDisplay}" FontWeight="SemiBold" />
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Password/PIN:" VerticalAlignment="Center" Margin="0,12,8,0" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Dialog.ElectronicSignature.Text.PasswordPIN}" VerticalAlignment="Center" Margin="0,12,8,0" />
             <PasswordBox x:Name="PasswordBox"
                          Grid.Row="2"
                          Grid.Column="1"
                          Margin="0,12,0,0"
                          PasswordChanged="OnPasswordChanged"
                          MinWidth="220"
-                         ToolTip="Enter your YasGMP password or PIN." />
+                         ToolTip="{DynamicResource Dialog.ElectronicSignature.ToolTip.Password}" />
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Reason code:" VerticalAlignment="Center" Margin="0,12,8,0" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Dialog.ElectronicSignature.Text.ReasonCode}" VerticalAlignment="Center" Margin="0,12,8,0" />
             <ComboBox Grid.Row="3"
                       Grid.Column="1"
                       Margin="0,12,0,0"
@@ -54,7 +54,7 @@
                       DisplayMemberPath="DisplayLabel"
                       MinWidth="280" />
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Custom code:" VerticalAlignment="Center" Margin="0,12,8,0"
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Dialog.ElectronicSignature.Text.CustomCode}" VerticalAlignment="Center" Margin="0,12,8,0"
                        Visibility="{Binding IsCustomReasonVisible, Converter={StaticResource BoolToVisibility}}" />
             <TextBox Grid.Row="4"
                      Grid.Column="1"
@@ -63,7 +63,7 @@
                      Visibility="{Binding IsCustomReasonVisible, Converter={StaticResource BoolToVisibility}}"
                      MinWidth="200" />
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Reason note:" VerticalAlignment="Top" Margin="0,12,8,0" />
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="{DynamicResource Dialog.ElectronicSignature.Text.ReasonNote}" VerticalAlignment="Top" Margin="0,12,8,0" />
             <TextBox Grid.Row="5"
                      Grid.Column="1"
                      Margin="0,12,0,0"
@@ -82,15 +82,21 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="0,20,0,0">
-                <Button Content="Confirm"
+                <Button Content="{DynamicResource Dialog.ElectronicSignature.Content.Confirm}"
                         Width="100"
                         Margin="0,0,12,0"
                         IsDefault="True"
-                        Command="{Binding ConfirmCommand}" />
-                <Button Content="Cancel"
+                        Command="{Binding ConfirmCommand}" 
+                       ToolTipService.ToolTip="{DynamicResource Dialog.ElectronicSignature.ToolTip.Confirm}"
+                       AutomationProperties.Name="{DynamicResource Dialog.ElectronicSignature.AutomationName.Confirm}"
+                       AutomationProperties.AutomationId="{DynamicResource Dialog.ElectronicSignature.Button.Confirm.AutomationId}"/>
+                <Button Content="{DynamicResource Module.Toolbar.Command.Cancel.Content}"
                         Width="100"
                         IsCancel="True"
-                        Command="{Binding CancelCommand}" />
+                        Command="{Binding CancelCommand}" 
+                       ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Cancel.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Cancel.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Cancel.AutomationId}"/>
             </StackPanel>
         </Grid>
     </Border>

@@ -25,8 +25,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Toolbar.Button.Attach.Content}" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}"/>
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -41,7 +41,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
             <Grid Grid.Row="1">
@@ -58,15 +58,15 @@
                           CanUserAddRows="False"
                           CanUserDeleteRows="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                        <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Code.Header}" Binding="{Binding Code}" Width="120" />
+                        <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Title.Header}" Binding="{Binding Title}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="140" />
+                        <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Description.Header}" Binding="{Binding Description}" Width="2*" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="Work Order Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Module.WorkOrders.Text.WorkOrderDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -85,77 +85,77 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Title" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Dashboard.Grid.Column.Title.Header}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.Title, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Status" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="0" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.Status, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Type" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Module.Components.Text.Type}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.Type, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Priority" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource Module.Capa.Header.Priority}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="1" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.Priority, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Machine Id" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Module.WorkOrders.Text.MachineId}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.MachineId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Component Id" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource Module.WorkOrders.Text.ComponentId}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="2" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.ComponentId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Requested By" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Module.ChangeControl.Text.RequestedBy}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="3" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.RequestedById, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Assigned To" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{DynamicResource Module.Capa.Text.AssignedTo}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="3" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.AssignedToId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Created By" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Module.WorkOrders.Text.CreatedBy}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="4" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.CreatedById, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="Date Open" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{DynamicResource Module.WorkOrders.Text.DateOpen}" Margin="8,0,0,4" />
                             <DatePicker Grid.Row="4" Grid.Column="1" Margin="8,0,0,12"
                                         SelectedDate="{Binding Editor.DateOpen, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Due Date" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="{DynamicResource Module.WorkOrders.Text.DueDate}" Margin="0,0,8,4" />
                             <DatePicker Grid.Row="5" Grid.Column="0" Margin="0,0,8,12"
                                         SelectedDate="{Binding Editor.DueDate, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="Date Closed" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{DynamicResource Module.WorkOrders.Text.DateClosed}" Margin="8,0,0,4" />
                             <DatePicker Grid.Row="5" Grid.Column="1" Margin="8,0,0,12"
                                         SelectedDate="{Binding Editor.DateClose, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="Result" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="6" Grid.Column="0" Text="{DynamicResource Module.Calibration.Text.Result}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      Text="{Binding Editor.Result, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Task Description" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="{DynamicResource Module.WorkOrders.Text.TaskDescription}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      Text="{Binding Editor.TaskDescription, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Description" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="8" Grid.Column="0" Text="{DynamicResource Dashboard.Grid.Column.Description.Header}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="True"
@@ -163,7 +163,7 @@
                                      Text="{Binding Editor.Description, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="9" Grid.Column="0" Text="Notes" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="9" Grid.Column="0" Text="{DynamicResource Module.Assets.Text.Notes}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="True"

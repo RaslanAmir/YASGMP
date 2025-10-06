@@ -28,14 +28,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
                 ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Attach.Content}" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}"/>
         </ToolBar>
 
         <Grid Margin="8">
@@ -52,7 +52,7 @@
             <DockPanel Grid.Row="0"
                        Grid.ColumnSpan="2"
                        Margin="0,0,0,8">
-                <TextBlock Text="Search:"
+                <TextBlock Text="{DynamicResource Dashboard.Search.Label}"
                            VerticalAlignment="Center"
                            Margin="0,0,8,0" />
                 <TextBox Width="220"
@@ -69,16 +69,16 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code"
+                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Code.Header}"
                                         Binding="{Binding Code}"
                                         Width="140" />
-                    <DataGridTextColumn Header="Type"
+                    <DataGridTextColumn Header="{DynamicResource Module.Components.Text.Type}"
                                         Binding="{Binding InspectorFields[0].Value}"
                                         Width="140" />
-                    <DataGridTextColumn Header="Status"
+                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}"
                                         Binding="{Binding Status}"
                                         Width="140" />
-                    <DataGridTextColumn Header="Target"
+                    <DataGridTextColumn Header="{DynamicResource Module.Validations.Header.Target}"
                                         Binding="{Binding InspectorFields[2].Value}"
                                         Width="*" />
                 </DataGrid.Columns>
@@ -92,7 +92,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Validation Details"
+                        <TextBlock Text="{DynamicResource Module.Validations.Text.ValidationDetails}"
                                    FontWeight="Bold"
                                    FontSize="14"
                                    Margin="0,0,0,12" />
@@ -116,7 +116,7 @@
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
-                                       Text="Protocol Code"
+                                       Text="{DynamicResource Module.Validations.Text.ProtocolCode}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
@@ -126,7 +126,7 @@
 
                             <TextBlock Grid.Row="1"
                                        Grid.Column="0"
-                                       Text="Type"
+                                       Text="{DynamicResource Module.Components.Text.Type}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="1"
@@ -137,7 +137,7 @@
 
                             <TextBlock Grid.Row="2"
                                        Grid.Column="0"
-                                       Text="Machine"
+                                       Text="{DynamicResource Module.Components.Header.Machine}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
@@ -150,7 +150,7 @@
 
                             <TextBlock Grid.Row="3"
                                        Grid.Column="0"
-                                       Text="Component"
+                                       Text="{DynamicResource Module.Calibration.Text.Component}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="3"
@@ -163,7 +163,7 @@
 
                             <TextBlock Grid.Row="4"
                                        Grid.Column="0"
-                                       Text="Start Date"
+                                       Text="{DynamicResource Module.Validations.Text.StartDate}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <DatePicker Grid.Row="4"
@@ -173,7 +173,7 @@
 
                             <TextBlock Grid.Row="5"
                                        Grid.Column="0"
-                                       Text="End Date"
+                                       Text="{DynamicResource Module.Validations.Text.EndDate}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <DatePicker Grid.Row="5"
@@ -183,7 +183,7 @@
 
                             <TextBlock Grid.Row="6"
                                        Grid.Column="0"
-                                       Text="Next Due"
+                                       Text="{DynamicResource Module.Calibration.Text.NextDue}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <DatePicker Grid.Row="6"
@@ -193,7 +193,7 @@
 
                             <TextBlock Grid.Row="7"
                                        Grid.Column="0"
-                                       Text="Status"
+                                       Text="{DynamicResource Dashboard.Grid.Column.Status.Header}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="7"
@@ -204,7 +204,7 @@
 
                             <TextBlock Grid.Row="8"
                                        Grid.Column="0"
-                                       Text="Documentation"
+                                       Text="{DynamicResource Module.Validations.Text.Documentation}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
@@ -213,7 +213,7 @@
                                      IsEnabled="{Binding IsEditorEnabled}" />
                         </Grid>
 
-                        <TextBlock Text="Comments"
+                        <TextBlock Text="{DynamicResource Module.Calibration.Text.Comments}"
                                    Margin="0,0,0,4" />
                         <TextBox Text="{Binding Editor.Comment, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"
@@ -231,7 +231,7 @@
                               Visibility="{Binding HasValidationErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="• {Binding}" Foreground="DarkRed" />
+                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Binding}" Foreground="DarkRed" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

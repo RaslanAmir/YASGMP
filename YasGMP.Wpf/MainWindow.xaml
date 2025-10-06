@@ -9,7 +9,7 @@
                      xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
                      xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
                      xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
-                     Title="YasGMP Cockpit"
+                     Title="{DynamicResource Shell.MainWindow.Title.YasGMPCockpit}"
                      Width="1280"
                      Height="800"
                      Loaded="OnLoaded"
@@ -54,7 +54,7 @@
                                                Margin="0,0,0,8"
                                                Command="{Binding WindowCommands.OpenAuditTrailCommand}">
                                     <fluent:Button.LargeIcon>
-                                        <TextBlock Text="&#xE81C;"
+                                        <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE81C}"
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
@@ -67,7 +67,7 @@
                                                Margin="0,0,0,8"
                                                Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
                                     <fluent:Button.LargeIcon>
-                                        <TextBlock Text="&#xE9D2;"
+                                        <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE9D2}"
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
@@ -79,7 +79,7 @@
                                                Width="220"
                                                Command="{Binding WindowCommands.OpenApiAuditCommand}">
                                     <fluent:Button.LargeIcon>
-                                        <TextBlock Text="&#xEBC3;"
+                                        <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XEBC3}"
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
@@ -168,7 +168,7 @@
                                    AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.AuditTrail.AutomationId}"
                                    Command="{Binding WindowCommands.OpenAuditTrailCommand}">
                         <fluent:Button.LargeIcon>
-                            <TextBlock Text="&#xE81C;"
+                            <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE81C2}"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="20" />
                         </fluent:Button.LargeIcon>
@@ -179,7 +179,7 @@
                                    AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.AuditDashboard.AutomationId}"
                                    Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
                         <fluent:Button.LargeIcon>
-                            <TextBlock Text="&#xE9D2;"
+                            <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE9D22}"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="20" />
                         </fluent:Button.LargeIcon>
@@ -190,7 +190,7 @@
                                    AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.ApiAuditTrail.AutomationId}"
                                    Command="{Binding WindowCommands.OpenApiAuditCommand}">
                         <fluent:Button.LargeIcon>
-                            <TextBlock Text="&#xEBC3;"
+                            <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XEBC32}"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="20" />
                         </fluent:Button.LargeIcon>

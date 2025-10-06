@@ -1,7 +1,7 @@
 <Window x:Class="YasGMP.Wpf.Dialogs.CflDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Choose From List"
+        Title="{DynamicResource Dialog.Cfl.Title.ChooseFromList}"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         MinWidth="420"
@@ -27,8 +27,8 @@
             </ListView.ItemTemplate>
         </ListView>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Margin="0,8,0,0">
-            <Button Content="OK" Width="80" Margin="0,0,8,0" IsDefault="True" Command="{Binding ConfirmCommand}" />
-            <Button Content="Cancel" Width="80" IsCancel="True" />
+            <Button Content="{DynamicResource Dialog.Cfl.Content.OK}" Width="80" Margin="0,0,8,0" IsDefault="True" Command="{Binding ConfirmCommand}" ToolTipService.ToolTip="{DynamicResource Dialog.Cfl.ToolTip.OK}" AutomationProperties.Name="{DynamicResource Dialog.Cfl.AutomationName.OK}" AutomationProperties.AutomationId="{DynamicResource Dialog.Cfl.Button.Ok.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Toolbar.Command.Cancel.Content}" Width="80" IsCancel="True" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Cancel.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Cancel.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Cancel.AutomationId}"/>
         </StackPanel>
     </DockPanel>
 </Window>

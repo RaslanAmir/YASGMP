@@ -9,8 +9,8 @@
              d:DesignWidth="600">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top"
-                 AutomationProperties.Name="{DynamicResource Dashboard.Toolbar.AutomationName}"
-                 AutomationProperties.AutomationId="{DynamicResource Dashboard.Toolbar.AutomationId}">
+                AutomationProperties.Name="{DynamicResource Dashboard.Toolbar.AutomationName}"
+                AutomationProperties.AutomationId="{DynamicResource Dashboard.Toolbar.AutomationId}">
             <ItemsControl ItemsSource="{Binding Toolbar}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -23,18 +23,18 @@
                                       Command="{Binding Command}"
                                       IsChecked="{Binding IsChecked}"
                                       Margin="0,0,4,0"
-                                      ToolTipService.ToolTip="{Binding ToolTip}"
-                                      AutomationProperties.Name="{Binding AutomationName}"
-                                      AutomationProperties.AutomationId="{Binding AutomationId}" />
+                                     ToolTipService.ToolTip="{Binding ToolTip}"
+                                     AutomationProperties.Name="{Binding AutomationName}"
+                                     AutomationProperties.AutomationId="{Binding AutomationId}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
             <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}"
                     Command="{Binding ShowCflCommand}"
-                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}"
-                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}"
-                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}" />
+                   ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}"
+                   AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}"
+                   AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}" />
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -52,13 +52,13 @@
                 <TextBlock Text="{DynamicResource Dashboard.Search.Label}"
                            VerticalAlignment="Center"
                            Margin="0,0,8,0"
-                           AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}" />
+                          AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
+                          AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}" />
                 <TextBox Width="220"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
-                         AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}"
-                         ToolTipService.ToolTip="{DynamicResource Dashboard.Search.ToolTip}" />
+                        AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
+                        AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}"
+                        ToolTipService.ToolTip="{DynamicResource Dashboard.Search.ToolTip}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       ItemsSource="{Binding RecordsView}"

@@ -25,14 +25,20 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
-            <Button Content="Execute Now"
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Toolbar.Button.Attach.Content}" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Scheduling.Content.ExecuteNow}"
                     Command="{Binding ExecuteJobCommand}"
-                    Margin="8,0,0,0" />
-            <Button Content="Acknowledge"
+                    Margin="8,0,0,0" 
+                   ToolTipService.ToolTip="{DynamicResource Module.Scheduling.ToolTip.ExecuteNow}"
+                   AutomationProperties.Name="{DynamicResource Module.Scheduling.AutomationName.ExecuteNow}"
+                   AutomationProperties.AutomationId="{DynamicResource Module.Scheduling.Button.ExecuteNow.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Scheduling.Content.Acknowledge}"
                     Command="{Binding AcknowledgeJobCommand}"
-                    Margin="8,0,0,0" />
+                    Margin="8,0,0,0" 
+                   ToolTipService.ToolTip="{DynamicResource Module.Scheduling.ToolTip.Acknowledge}"
+                   AutomationProperties.Name="{DynamicResource Module.Scheduling.AutomationName.Acknowledge}"
+                   AutomationProperties.AutomationId="{DynamicResource Module.Scheduling.Button.Acknowledge.AutomationId}"/>
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -49,7 +55,7 @@
             </Grid.RowDefinitions>
 
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
@@ -69,16 +75,16 @@
                           CanUserAddRows="False"
                           CanUserDeleteRows="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Binding="{Binding Title}" Width="2*" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
-                        <DataGridTextColumn Header="Recurrence" Binding="{Binding InspectorFields[1].Value}" Width="*" />
-                        <DataGridTextColumn Header="Next Due" Binding="{Binding InspectorFields[0].Value}" Width="*" />
+                        <DataGridTextColumn Header="{DynamicResource Module.Assets.Text.Name}" Binding="{Binding Title}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="120" />
+                        <DataGridTextColumn Header="{DynamicResource Module.Scheduling.Header.Recurrence}" Binding="{Binding InspectorFields[1].Value}" Width="*" />
+                        <DataGridTextColumn Header="{DynamicResource Module.Calibration.Text.NextDue}" Binding="{Binding InspectorFields[0].Value}" Width="*" />
                     </DataGrid.Columns>
                 </DataGrid>
 
                 <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="Scheduled Job Details"
+                        <TextBlock Text="{DynamicResource Module.Scheduling.Text.ScheduledJobDetails}"
                                    FontWeight="Bold"
                                    FontSize="14"
                                    Margin="0,0,0,12" />
@@ -102,113 +108,113 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Module.Assets.Text.Name}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Status" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="0" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.Status, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Job Type" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Module.Scheduling.Text.JobType}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.JobType, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Recurrence" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Header.Recurrence}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="1" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.RecurrencePattern, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Cron Expression" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Module.Scheduling.Text.CronExpression}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.CronExpression, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Next Due" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource Module.Calibration.Text.NextDue}" Margin="8,0,0,4" />
                             <DatePicker Grid.Row="2" Grid.Column="1" Margin="8,0,0,12"
                                         SelectedDate="{Binding Editor.NextDue, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Entity Type" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Module.Scheduling.Text.EntityType}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="3" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.EntityType, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Entity Id" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Text.EntityId}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="3" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.EntityId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Comment" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Module.ExternalServicers.Text.Comment}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      Text="{Binding Editor.Comment, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <CheckBox Grid.Row="5" Grid.Column="0" Margin="0,0,8,12"
-                                      Content="Is Critical"
+                                      Content="{DynamicResource Module.Scheduling.Content.IsCritical}"
                                       IsChecked="{Binding Editor.IsCritical}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
                             <CheckBox Grid.Row="5" Grid.Column="1" Margin="8,0,0,12"
-                                      Content="Requires Acknowledgment"
+                                      Content="{DynamicResource Module.Scheduling.Content.RequiresAcknowledgment}"
                                       IsChecked="{Binding Editor.NeedsAcknowledgment}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
                             <CheckBox Grid.Row="6" Grid.Column="0" Margin="0,0,8,12"
-                                      Content="Alert On Failure"
+                                      Content="{DynamicResource Module.Scheduling.Content.AlertOnFailure}"
                                       IsChecked="{Binding Editor.AlertOnFailure}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="Escalation Note" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Text.EscalationNote}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="6" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.EscalationNote, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Last Result" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="{DynamicResource Module.Scheduling.Text.LastResult}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="7" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.LastResult, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="1" Text="Last Error" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Text.LastError}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="7" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.LastError, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Last Executed" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="8" Grid.Column="0" Text="{DynamicResource Module.Scheduling.Text.LastExecuted}" Margin="0,0,8,4" />
                             <DatePicker Grid.Row="8" Grid.Column="0" Margin="0,0,8,12"
                                         SelectedDate="{Binding Editor.LastExecuted, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="8" Grid.Column="1" Text="Retries" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Text.Retries}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="8" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.Retries, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="9" Grid.Column="0" Text="Max Retries" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="9" Grid.Column="0" Text="{DynamicResource Module.Scheduling.Text.MaxRetries}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="9" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.MaxRetries, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="9" Grid.Column="1" Text="Extra Params" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="9" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Text.ExtraParams}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="9" Grid.Column="1" Margin="8,0,0,12"
                                      TextWrapping="Wrap"
                                      Text="{Binding Editor.ExtraParams, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="10" Grid.Column="0" Text="Device" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="10" Grid.Column="0" Text="{DynamicResource Module.Audit.Header.Device}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="10" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.DeviceInfo, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="10" Grid.Column="1" Text="Session" Margin="8,0,0,4" />
+                            <TextBlock Grid.Row="10" Grid.Column="1" Text="{DynamicResource Module.Scheduling.Text.Session}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="10" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.SessionId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Grid.Row="11" Grid.Column="0" Text="IP Address" Margin="0,0,8,4" />
+                            <TextBlock Grid.Row="11" Grid.Column="0" Text="{DynamicResource Module.ApiAudit.Header.IPAddress}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="11" Grid.Column="0" Margin="0,0,8,0"
                                      Text="{Binding Editor.IpAddress, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
@@ -218,7 +224,7 @@
                                       ItemsSource="{Binding ValidationMessages}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="•  {Binding}" Foreground="Tomato" />
+                                    <TextBlock Text="{DynamicResource Module.Scheduling.Text.Binding}" Foreground="Tomato" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
