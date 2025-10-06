@@ -54,6 +54,7 @@
 - 2026-01-17: Localized dashboard toolbar toggles/buttons, search, and data grid columns plus module tree categories/nodes via the shared localization service, adding automation ids/names for Accessibility Insights/FlaUI; dotnet restore/build/smoke remain blocked pending CLI availability.
 - 2026-01-18: Extended module tree templates so each node's header now binds tooltip and automation metadata directly from localization-aware view-model properties, keeping screen reader output aligned after language switches; `dotnet restore`/`dotnet build`/smoke remain blocked by the missing CLI.
 - 2026-01-19: Golden Arrow toolbar control now exposes localization-aware tooltip/name/id dependency properties backed by the localization service so UIA names follow language switches; dotnet restore/build/smoke remain blocked by the missing CLI so announcements verified via static analysis only.
+- 2026-01-21: Moved shell localization to ResourceManager-backed `ShellStrings` resx files while keeping automation ids in `Strings.xaml`; dotnet restore/build/smoke remain blocked by the missing CLI.
 
 ### Accessibility Verification — Locale-Sensitive Metadata
 - **Verification date:** 2026-01-20

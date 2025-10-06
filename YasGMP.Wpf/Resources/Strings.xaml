@@ -54,4 +54,50 @@
 
     <sys:String x:Key="Dock.Modules.AutomationId">Dock.Anchorable.Modules</sys:String>
     <sys:String x:Key="Dock.Inspector.AutomationId">Dock.Anchorable.Inspector</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Toggle.Find.AutomationId">Toolbar.Toggle.Find</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Add.AutomationId">Toolbar.Toggle.Add</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.View.AutomationId">Toolbar.Toggle.View</sys:String>
+    <sys:String x:Key="Module.Toolbar.Toggle.Update.AutomationId">Toolbar.Toggle.Update</sys:String>
+
+    <sys:String x:Key="Module.Toolbar.Command.Save.AutomationId">Toolbar.Command.Save</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Cancel.AutomationId">Toolbar.Command.Cancel</sys:String>
+    <sys:String x:Key="Module.Toolbar.Command.Refresh.AutomationId">Toolbar.Command.Refresh</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationId">Toolbar.Button.CFL</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationId">Toolbar.Button.GoldenArrow</sys:String>
+
+    <sys:String x:Key="Dashboard.Toolbar.AutomationId">Dashboard.Toolbar</sys:String>
+    <sys:String x:Key="Dashboard.Search.AutomationId">Dashboard.Search</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Code.AutomationId">Dashboard.Grid.Column.Code</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Title.AutomationId">Dashboard.Grid.Column.Title</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Status.AutomationId">Dashboard.Grid.Column.Status</sys:String>
+    <sys:String x:Key="Dashboard.Grid.Column.Description.AutomationId">Dashboard.Grid.Column.Description</sys:String>
+
+    <sys:String x:Key="Audit.Toolbar.Command.ApplyFilter.AutomationId">Audit.Toolbar.ApplyFilter</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportCsv.AutomationId">Audit.Toolbar.ExportCsv</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportExcel.AutomationId">Audit.Toolbar.ExportExcel</sys:String>
+    <sys:String x:Key="Audit.Toolbar.Command.ExportPdf.AutomationId">Audit.Toolbar.ExportPdf</sys:String>
+
+    <sys:String x:Key="Attachments.Toolbar.Command.Upload.AutomationId">Attachments.Toolbar.Upload</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Download.AutomationId">Attachments.Toolbar.Download</sys:String>
+    <sys:String x:Key="Attachments.Toolbar.Command.Delete.AutomationId">Attachments.Toolbar.Delete</sys:String>
+
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId">AuditDashboard.Toolbar.ApplyFilters</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.AutomationId">AuditDashboard.Toolbar.ExportPdf</sys:String>
+    <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.AutomationId">AuditDashboard.Toolbar.ExportExcel</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Quality.AutomationId">ModuleTree.Category.Quality</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationId">ModuleTree.Node.Quality.CAPA</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Audits.AutomationId">ModuleTree.Node.Quality.Audits</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.AutomationId">ModuleTree.Node.Quality.DocumentControl</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Maintenance.AutomationId">ModuleTree.Category.Maintenance</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.AutomationId">ModuleTree.Node.Maintenance.Machines</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.AutomationId">ModuleTree.Node.Maintenance.PreventivePlans</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationId">ModuleTree.Node.Maintenance.Calibration</sys:String>
+
+    <sys:String x:Key="ModuleTree.Category.Warehouse.AutomationId">ModuleTree.Category.Warehouse</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationId">ModuleTree.Node.Warehouse.Inventory</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationId">ModuleTree.Node.Warehouse.Suppliers</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationId">ModuleTree.Node.Warehouse.Transactions</sys:String>
 </ResourceDictionary>

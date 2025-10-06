@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Backstage.Tab.Layout.Header" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Backstage.Tab.QualityCompliance.Header" xml:space="preserve">
+    <value>Quality &amp; Compliance</value>
+  </data>
+  <data name="Backstage.Button.SaveLayout.Header" xml:space="preserve">
+    <value>Save Layout</value>
+  </data>
+  <data name="Backstage.Button.SaveLayout.ToolTip" xml:space="preserve">
+    <value>Persist the current dock layout to your profile.</value>
+  </data>
+  <data name="Backstage.Button.ResetLayout.Header" xml:space="preserve">
+    <value>Reset Layout</value>
+  </data>
+  <data name="Backstage.Button.ResetLayout.ToolTip" xml:space="preserve">
+    <value>Restore the default dock layout.</value>
+  </data>
+  <data name="Backstage.Button.AuditTrail.Header" xml:space="preserve">
+    <value>Audit Trail</value>
+  </data>
+  <data name="Backstage.Button.AuditTrail.ToolTip" xml:space="preserve">
+    <value>Open the immutable audit trail browser.</value>
+  </data>
+  <data name="Backstage.Button.AuditDashboard.Header" xml:space="preserve">
+    <value>Audit Dashboard</value>
+  </data>
+  <data name="Backstage.Button.AuditDashboard.ToolTip" xml:space="preserve">
+    <value>Launch the live audit dashboard with trend analytics.</value>
+  </data>
+  <data name="Backstage.Button.ApiAuditTrail.Header" xml:space="preserve">
+    <value>API Audit Trail</value>
+  </data>
+  <data name="Backstage.Button.ApiAuditTrail.ToolTip" xml:space="preserve">
+    <value>Review API key usage and forensic request payloads.</value>
+  </data>
+  <data name="Ribbon.Tab.Home.Header" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Ribbon.Tab.View.Header" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Ribbon.Tab.Tools.Header" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Ribbon.Group.Operations.Header" xml:space="preserve">
+    <value>Operations</value>
+  </data>
+  <data name="Ribbon.Group.Operations.ToolTip" xml:space="preserve">
+    <value>Operations modules for maintenance and production support.</value>
+  </data>
+  <data name="Ribbon.Group.Quality.Header" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="Ribbon.Group.Quality.ToolTip" xml:space="preserve">
+    <value>Quality workflows and compliance actions.</value>
+  </data>
+  <data name="Ribbon.Group.QualityCompliance.Header" xml:space="preserve">
+    <value>Quality &amp; Compliance</value>
+  </data>
+  <data name="Ribbon.Group.QualityCompliance.ToolTip" xml:space="preserve">
+    <value>Quality assurance dashboards and audit tooling.</value>
+  </data>
+  <data name="Ribbon.Group.SupplyChain.Header" xml:space="preserve">
+    <value>Supply Chain</value>
+  </data>
+  <data name="Ribbon.Group.SupplyChain.ToolTip" xml:space="preserve">
+    <value>Supplier and contractor management.</value>
+  </data>
+  <data name="Ribbon.Group.Administration.Header" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Ribbon.Group.Administration.ToolTip" xml:space="preserve">
+    <value>Administration and security configuration.</value>
+  </data>
+  <data name="Ribbon.Group.DiagnosticsHome.Header" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="Ribbon.Group.DiagnosticsHome.ToolTip" xml:space="preserve">
+    <value>Diagnostics and telemetry tools.</value>
+  </data>
+  <data name="Ribbon.Group.Layout.Header" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Ribbon.Group.Layout.ToolTip" xml:space="preserve">
+    <value>Dock layout management commands.</value>
+  </data>
+  <data name="Ribbon.Group.Persistence.Header" xml:space="preserve">
+    <value>Persistence</value>
+  </data>
+  <data name="Ribbon.Group.Persistence.ToolTip" xml:space="preserve">
+    <value>Workspace persistence utilities.</value>
+  </data>
+  <data name="Ribbon.Group.DiagnosticsTools.Header" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="Ribbon.Group.DiagnosticsTools.ToolTip" xml:space="preserve">
+    <value>Developer diagnostics and smoke tests.</value>
+  </data>
+  <data name="Ribbon.Button.Dashboard.Header" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Ribbon.Button.Dashboard.ToolTip" xml:space="preserve">
+    <value>Open the operations dashboard and KPIs.</value>
+  </data>
+  <data name="Ribbon.Button.Assets.Header" xml:space="preserve">
+    <value>Assets</value>
+  </data>
+  <data name="Ribbon.Button.Assets.ToolTip" xml:space="preserve">
+    <value>Manage machine assets and lifecycle data.</value>
+  </data>
+  <data name="Ribbon.Button.Components.Header" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="Ribbon.Button.Components.ToolTip" xml:space="preserve">
+    <value>View and maintain the component registry.</value>
+  </data>
+  <data name="Ribbon.Button.WorkOrders.Header" xml:space="preserve">
+    <value>Work Orders</value>
+  </data>
+  <data name="Ribbon.Button.WorkOrders.ToolTip" xml:space="preserve">
+    <value>Plan and execute maintenance work orders.</value>
+  </data>
+  <data name="Ribbon.Button.Calibration.Header" xml:space="preserve">
+    <value>Calibration</value>
+  </data>
+  <data name="Ribbon.Button.Calibration.ToolTip" xml:space="preserve">
+    <value>Track calibration records and due dates.</value>
+  </data>
+  <data name="Ribbon.Button.Parts.Header" xml:space="preserve">
+    <value>Parts</value>
+  </data>
+  <data name="Ribbon.Button.Parts.ToolTip" xml:space="preserve">
+    <value>Maintain spare parts inventory.</value>
+  </data>
+  <data name="Ribbon.Button.Warehouse.Header" xml:space="preserve">
+    <value>Warehouse</value>
+  </data>
+  <data name="Ribbon.Button.Warehouse.ToolTip" xml:space="preserve">
+    <value>Access warehouse master data and stock levels.</value>
+  </data>
+  <data name="Ribbon.Button.Capa.Header" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="Ribbon.Button.Capa.ToolTip" xml:space="preserve">
+    <value>Manage corrective and preventive actions.</value>
+  </data>
+  <data name="Ribbon.Button.Incidents.Header" xml:space="preserve">
+    <value>Incidents</value>
+  </data>
+  <data name="Ribbon.Button.Incidents.ToolTip" xml:space="preserve">
+    <value>Log and investigate quality incidents.</value>
+  </data>
+  <data name="Ribbon.Button.ChangeControl.Header" xml:space="preserve">
+    <value>Change Control</value>
+  </data>
+  <data name="Ribbon.Button.ChangeControl.ToolTip" xml:space="preserve">
+    <value>Control change requests and approvals.</value>
+  </data>
+  <data name="Ribbon.Button.Validations.Header" xml:space="preserve">
+    <value>Validations</value>
+  </data>
+  <data name="Ribbon.Button.Validations.ToolTip" xml:space="preserve">
+    <value>Manage validation packages and requalification.</value>
+  </data>
+  <data name="Ribbon.Button.AuditTrail.Header" xml:space="preserve">
+    <value>Audit Trail</value>
+  </data>
+  <data name="Ribbon.Button.AuditTrail.ToolTip" xml:space="preserve">
+    <value>Open the immutable audit trail browser.</value>
+  </data>
+  <data name="Ribbon.Button.AuditDashboard.Header" xml:space="preserve">
+    <value>Audit Dashboard</value>
+  </data>
+  <data name="Ribbon.Button.AuditDashboard.ToolTip" xml:space="preserve">
+    <value>Launch the live audit dashboard with trend analytics.</value>
+  </data>
+  <data name="Ribbon.Button.ApiAuditTrail.Header" xml:space="preserve">
+    <value>API Audit Trail</value>
+  </data>
+  <data name="Ribbon.Button.ApiAuditTrail.ToolTip" xml:space="preserve">
+    <value>Review API key usage and forensic request payloads.</value>
+  </data>
+  <data name="Ribbon.Button.Suppliers.Header" xml:space="preserve">
+    <value>Suppliers</value>
+  </data>
+  <data name="Ribbon.Button.Suppliers.ToolTip" xml:space="preserve">
+    <value>Manage approved suppliers.</value>
+  </data>
+  <data name="Ribbon.Button.Security.Header" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Ribbon.Button.Security.ToolTip" xml:space="preserve">
+    <value>Administer users and roles.</value>
+  </data>
+  <data name="Ribbon.Button.Administration.Header" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Ribbon.Button.Administration.ToolTip" xml:space="preserve">
+    <value>Configure application settings.</value>
+  </data>
+  <data name="Ribbon.Button.DiagnosticsHome.Header" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="Ribbon.Button.DiagnosticsHome.ToolTip" xml:space="preserve">
+    <value>Review diagnostics and telemetry.</value>
+  </data>
+  <data name="Ribbon.Button.ResetLayout.Header" xml:space="preserve">
+    <value>Reset Layout</value>
+  </data>
+  <data name="Ribbon.Button.ResetLayout.ToolTip" xml:space="preserve">
+    <value>Restore the default dock layout.</value>
+  </data>
+  <data name="Ribbon.Button.SaveLayout.Header" xml:space="preserve">
+    <value>Save Layout</value>
+  </data>
+  <data name="Ribbon.Button.SaveLayout.ToolTip" xml:space="preserve">
+    <value>Persist the current dock layout to your profile.</value>
+  </data>
+  <data name="Ribbon.Button.RunSmokeTest.Header" xml:space="preserve">
+    <value>Run Smoke Test</value>
+  </data>
+  <data name="Ribbon.Button.RunSmokeTest.ToolTip" xml:space="preserve">
+    <value>Execute the automated smoke test harness.</value>
+  </data>
+  <data name="Dock.Modules.Title" xml:space="preserve">
+    <value>Modules</value>
+  </data>
+  <data name="Dock.Inspector.Title" xml:space="preserve">
+    <value>Inspector</value>
+  </data>
+  <data name="Dock.Inspector.ModuleTitle" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="Dock.Inspector.NoRecord" xml:space="preserve">
+    <value>No record selected</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Find.Content" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Find.ToolTip" xml:space="preserve">
+    <value>Switch to find mode.</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Find.AutomationName" xml:space="preserve">
+    <value>Find mode toggle</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Add.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Add.ToolTip" xml:space="preserve">
+    <value>Switch to add mode.</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Add.AutomationName" xml:space="preserve">
+    <value>Add mode toggle</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.View.Content" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.View.ToolTip" xml:space="preserve">
+    <value>Switch to view mode.</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.View.AutomationName" xml:space="preserve">
+    <value>View mode toggle</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Update.Content" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Update.ToolTip" xml:space="preserve">
+    <value>Switch to update mode.</value>
+  </data>
+  <data name="Module.Toolbar.Toggle.Update.AutomationName" xml:space="preserve">
+    <value>Update mode toggle</value>
+  </data>
+  <data name="Module.Toolbar.Command.Save.Content" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Module.Toolbar.Command.Save.ToolTip" xml:space="preserve">
+    <value>Save the current record.</value>
+  </data>
+  <data name="Module.Toolbar.Command.Save.AutomationName" xml:space="preserve">
+    <value>Save record command</value>
+  </data>
+  <data name="Module.Toolbar.Command.Cancel.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Module.Toolbar.Command.Cancel.ToolTip" xml:space="preserve">
+    <value>Cancel changes.</value>
+  </data>
+  <data name="Module.Toolbar.Command.Cancel.AutomationName" xml:space="preserve">
+    <value>Cancel edit command</value>
+  </data>
+  <data name="Module.Toolbar.Command.Refresh.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Module.Toolbar.Command.Refresh.ToolTip" xml:space="preserve">
+    <value>Reload data from source.</value>
+  </data>
+  <data name="Module.Toolbar.Command.Refresh.AutomationName" xml:space="preserve">
+    <value>Refresh data command</value>
+  </data>
+  <data name="Module.Toolbar.Button.Cfl.Content" xml:space="preserve">
+    <value>CFL</value>
+  </data>
+  <data name="Module.Toolbar.Button.Cfl.ToolTip" xml:space="preserve">
+    <value>Open the choose-from-list picker.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Cfl.AutomationName" xml:space="preserve">
+    <value>Choose-from-list command</value>
+  </data>
+  <data name="Module.Toolbar.Button.GoldenArrow.ToolTip" xml:space="preserve">
+    <value>Open the related record.</value>
+  </data>
+  <data name="Module.Toolbar.Button.GoldenArrow.AutomationName" xml:space="preserve">
+    <value>Golden arrow navigation</value>
+  </data>
+  <data name="Module.Status.Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Dashboard.Toolbar.AutomationName" xml:space="preserve">
+    <value>Dashboard module toolbar</value>
+  </data>
+  <data name="Dashboard.Search.Label" xml:space="preserve">
+    <value>Search:</value>
+  </data>
+  <data name="Dashboard.Search.ToolTip" xml:space="preserve">
+    <value>Filter dashboard events.</value>
+  </data>
+  <data name="Dashboard.Search.AutomationName" xml:space="preserve">
+    <value>Dashboard search</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Code.Header" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Code.ToolTip" xml:space="preserve">
+    <value>Unique code for the dashboard event.</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Code.AutomationName" xml:space="preserve">
+    <value>Dashboard column Code</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Title.Header" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Title.ToolTip" xml:space="preserve">
+    <value>Event title shown in the dashboard list.</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Title.AutomationName" xml:space="preserve">
+    <value>Dashboard column Title</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Status.Header" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Status.ToolTip" xml:space="preserve">
+    <value>Current status of the record.</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Status.AutomationName" xml:space="preserve">
+    <value>Dashboard column Status</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Description.Header" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Description.ToolTip" xml:space="preserve">
+    <value>Detailed description of the event.</value>
+  </data>
+  <data name="Dashboard.Grid.Column.Description.AutomationName" xml:space="preserve">
+    <value>Dashboard column Description</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ApplyFilter.Content" xml:space="preserve">
+    <value>Apply Filter</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ApplyFilter.ToolTip" xml:space="preserve">
+    <value>Apply the selected audit filters.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ApplyFilter.AutomationName" xml:space="preserve">
+    <value>Apply audit filter command</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportCsv.Content" xml:space="preserve">
+    <value>Export CSV</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportCsv.ToolTip" xml:space="preserve">
+    <value>Export audit results to CSV.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportCsv.AutomationName" xml:space="preserve">
+    <value>Export audit CSV command</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportExcel.Content" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportExcel.ToolTip" xml:space="preserve">
+    <value>Export audit results to Excel.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportExcel.AutomationName" xml:space="preserve">
+    <value>Export audit Excel command</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportPdf.Content" xml:space="preserve">
+    <value>Export PDF</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportPdf.ToolTip" xml:space="preserve">
+    <value>Export audit results to PDF.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.ExportPdf.AutomationName" xml:space="preserve">
+    <value>Export audit PDF command</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Upload.Content" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Upload.ToolTip" xml:space="preserve">
+    <value>Upload a new attachment.</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Upload.AutomationName" xml:space="preserve">
+    <value>Upload attachment command</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Download.Content" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Download.ToolTip" xml:space="preserve">
+    <value>Download the selected attachment.</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Download.AutomationName" xml:space="preserve">
+    <value>Download attachment command</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Delete.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Delete.ToolTip" xml:space="preserve">
+    <value>Delete the selected attachment.</value>
+  </data>
+  <data name="Attachments.Toolbar.Command.Delete.AutomationName" xml:space="preserve">
+    <value>Delete attachment command</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ApplyFilters.Content" xml:space="preserve">
+    <value>Apply Filters</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip" xml:space="preserve">
+    <value>Apply dashboard filters to the audit feed.</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName" xml:space="preserve">
+    <value>Apply audit dashboard filters command</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ExportPdf.Content" xml:space="preserve">
+    <value>Export PDF</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ExportPdf.ToolTip" xml:space="preserve">
+    <value>Export the dashboard summary to PDF.</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ExportPdf.AutomationName" xml:space="preserve">
+    <value>Export audit dashboard PDF command</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ExportExcel.Content" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ExportExcel.ToolTip" xml:space="preserve">
+    <value>Export the dashboard summary to Excel.</value>
+  </data>
+  <data name="AuditDashboard.Toolbar.Command.ExportExcel.AutomationName" xml:space="preserve">
+    <value>Export audit dashboard Excel command</value>
+  </data>
+  <data name="ModuleTree.AutomationName" xml:space="preserve">
+    <value>Module tree navigation</value>
+  </data>
+  <data name="ModuleTree.ToolTip" xml:space="preserve">
+    <value>Browse modules by category.</value>
+  </data>
+  <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="ModuleTree.Category.Quality.ToolTip" xml:space="preserve">
+    <value>Quality and compliance modules.</value>
+  </data>
+  <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
+    <value>Quality category</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.ToolTip" xml:space="preserve">
+    <value>Corrective and preventive actions.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
+    <value>CAPA node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Audits.Title" xml:space="preserve">
+    <value>Audits</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Audits.ToolTip" xml:space="preserve">
+    <value>Audit trail and dashboards.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Audits.AutomationName" xml:space="preserve">
+    <value>Audits node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.Title" xml:space="preserve">
+    <value>Document Control</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.ToolTip" xml:space="preserve">
+    <value>Document control workflows.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.AutomationName" xml:space="preserve">
+    <value>Document control node</value>
+  </data>
+  <data name="ModuleTree.Category.Maintenance.Title" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="ModuleTree.Category.Maintenance.ToolTip" xml:space="preserve">
+    <value>Maintenance and asset modules.</value>
+  </data>
+  <data name="ModuleTree.Category.Maintenance.AutomationName" xml:space="preserve">
+    <value>Maintenance category</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Machines.Title" xml:space="preserve">
+    <value>Machines</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Machines.ToolTip" xml:space="preserve">
+    <value>Asset master data.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Machines.AutomationName" xml:space="preserve">
+    <value>Machines node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.PreventivePlans.Title" xml:space="preserve">
+    <value>Preventive Plans</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.PreventivePlans.ToolTip" xml:space="preserve">
+    <value>Preventive maintenance plans.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.PreventivePlans.AutomationName" xml:space="preserve">
+    <value>Preventive plans node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Calibration.Title" xml:space="preserve">
+    <value>Calibration</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Calibration.ToolTip" xml:space="preserve">
+    <value>Calibration schedules and history.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Calibration.AutomationName" xml:space="preserve">
+    <value>Calibration node</value>
+  </data>
+  <data name="ModuleTree.Category.Warehouse.Title" xml:space="preserve">
+    <value>Warehouse</value>
+  </data>
+  <data name="ModuleTree.Category.Warehouse.ToolTip" xml:space="preserve">
+    <value>Warehouse and supplier modules.</value>
+  </data>
+  <data name="ModuleTree.Category.Warehouse.AutomationName" xml:space="preserve">
+    <value>Warehouse category</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Inventory.Title" xml:space="preserve">
+    <value>Inventory</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Inventory.ToolTip" xml:space="preserve">
+    <value>Inventory visibility and counts.</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Inventory.AutomationName" xml:space="preserve">
+    <value>Inventory node</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Suppliers.Title" xml:space="preserve">
+    <value>Suppliers</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Suppliers.ToolTip" xml:space="preserve">
+    <value>Approved supplier list.</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Suppliers.AutomationName" xml:space="preserve">
+    <value>Suppliers node</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Transactions.Title" xml:space="preserve">
+    <value>Transactions</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Transactions.ToolTip" xml:space="preserve">
+    <value>Warehouse transactions and ledger.</value>
+  </data>
+  <data name="ModuleTree.Node.Warehouse.Transactions.AutomationName" xml:space="preserve">
+    <value>Transactions node</value>
+  </data>
+</root>

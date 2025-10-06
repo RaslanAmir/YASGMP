@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Windows;
+using System.Resources;
 
 namespace YasGMP.Wpf.Resources;
 
@@ -11,24 +11,25 @@ namespace YasGMP.Wpf.Resources;
 /// </summary>
 internal static class LocalizationManager
 {
-    private static readonly Dictionary<string, Uri> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
+    private const string DefaultLanguage = "en";
+
+    private static readonly Dictionary<string, CultureInfo> CultureMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["en"] = new Uri("pack://application:,,,/YasGMP.Wpf;component/Resources/Strings.en.xaml", UriKind.Absolute),
-        ["hr"] = new Uri("pack://application:,,,/YasGMP.Wpf;component/Resources/Strings.hr.xaml", UriKind.Absolute),
+        ["en"] = CultureInfo.GetCultureInfo("en-US"),
+        ["hr"] = CultureInfo.GetCultureInfo("hr-HR"),
     };
 
+    private static readonly ResourceManager ResourceManager = new("YasGMP.Wpf.Resources.ShellStrings", typeof(LocalizationManager).Assembly);
     private static readonly List<LocalizedResourceDictionary> Dictionaries = new();
-    private static string _currentLanguage = "en";
-    private static ResourceDictionary? _currentDictionary;
+
+    private static string _currentLanguage = DefaultLanguage;
+    private static CultureInfo _currentCulture = CultureMap[DefaultLanguage];
 
     public static event EventHandler? LanguageChanged;
 
     public static string CurrentLanguage => _currentLanguage;
 
-    static LocalizationManager()
-    {
-        ApplyCulture(_currentLanguage);
-    }
+    static LocalizationManager() => ApplyCulture(DefaultLanguage);
 
     public static void Register(LocalizedResourceDictionary dictionary)
     {
@@ -37,52 +38,42 @@ internal static class LocalizationManager
             Dictionaries.Add(dictionary);
         }
 
-        dictionary.ApplySource(GetResourceUri(_currentLanguage));
-        _currentDictionary = dictionary;
+        dictionary.UpdateResources(ResourceManager, _currentCulture);
     }
 
     public static void SetLanguage(string language)
     {
         var normalized = NormalizeLanguage(language);
-        if (string.Equals(_currentLanguage, normalized, StringComparison.OrdinalIgnoreCase) && _currentDictionary != null)
+        if (!string.Equals(_currentLanguage, normalized, StringComparison.OrdinalIgnoreCase))
         {
-            return;
+            _currentLanguage = normalized;
+            ApplyCulture(normalized);
+
+            foreach (var dictionary in Dictionaries.ToList())
+            {
+                dictionary.UpdateResources(ResourceManager, _currentCulture);
+            }
+
+            LanguageChanged?.Invoke(null, EventArgs.Empty);
         }
-
-        _currentLanguage = normalized;
-        ApplyCulture(normalized);
-
-        var source = GetResourceUri(normalized);
-        foreach (var dictionary in Dictionaries.ToList())
-        {
-            dictionary.ApplySource(source);
-            _currentDictionary = dictionary;
-        }
-
-        LanguageChanged?.Invoke(null, EventArgs.Empty);
     }
 
     public static string GetString(string key)
     {
-        if (_currentDictionary != null && _currentDictionary.Contains(key))
-        {
-            return Convert.ToString(_currentDictionary[key], CultureInfo.CurrentCulture) ?? key;
-        }
+        var value = ResourceManager.GetString(key, _currentCulture)
+                    ?? ResourceManager.GetString(key, CultureInfo.InvariantCulture);
 
-        var resource = new ResourceDictionary { Source = GetResourceUri(_currentLanguage) };
-        return resource.Contains(key)
-            ? Convert.ToString(resource[key], CultureInfo.CurrentCulture) ?? key
-            : key;
+        return string.IsNullOrEmpty(value) ? key : value;
     }
 
     private static void ApplyCulture(string language)
     {
-        var culture = language switch
+        if (!CultureMap.TryGetValue(language, out var culture))
         {
-            "hr" => CultureInfo.GetCultureInfo("hr-HR"),
-            _ => CultureInfo.GetCultureInfo("en-US"),
-        };
+            culture = CultureMap[DefaultLanguage];
+        }
 
+        _currentCulture = culture;
         CultureInfo.CurrentCulture = culture;
         CultureInfo.CurrentUICulture = culture;
     }
@@ -91,11 +82,24 @@ internal static class LocalizationManager
     {
         if (string.IsNullOrWhiteSpace(language))
         {
-            return "en";
+            return DefaultLanguage;
         }
 
-        return ResourceMap.ContainsKey(language) ? language : "en";
-    }
+        if (CultureMap.ContainsKey(language))
+        {
+            return language;
+        }
 
-    private static Uri GetResourceUri(string language) => ResourceMap[language];
+        var dashIndex = language.IndexOf('-');
+        if (dashIndex > 0)
+        {
+            var prefix = language[..dashIndex];
+            if (CultureMap.ContainsKey(prefix))
+            {
+                return prefix;
+            }
+        }
+
+        return DefaultLanguage;
+    }
 }
