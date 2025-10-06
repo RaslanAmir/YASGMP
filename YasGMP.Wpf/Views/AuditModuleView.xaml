@@ -38,7 +38,12 @@
             </ItemsControl>
             <Separator />
             <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <controls:GoldenArrowButton
+                Command="{Binding GoldenArrowCommand}"
+                Margin="8,0,0,0"
+                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
+                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
+                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
             <Separator />
             <Button Content="Export PDF"
                     Command="{Binding ExportToPdfCommand}"
