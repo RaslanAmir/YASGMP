@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -115,7 +115,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 MachineId = 100,
                 DateStart = DateTime.UtcNow.AddDays(-10),
                 DateEnd = DateTime.UtcNow.AddDays(-7),
-                Status = ValidationStatus.Completed.ToString(),
+                Status = ValidationStatus.Successful.ToString(),
                 NextDue = DateTime.UtcNow.AddMonths(12),
                 Comment = "Initial IQ for autoclave"
             },
@@ -157,7 +157,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 return new CflItem(
                     key,
                     $"{validation.Code} ({validation.Type})",
-                    string.Join(" • ", description.Where(static part => !string.IsNullOrWhiteSpace(part))));
+                    string.Join(" â€˘ ", description.Where(static part => !string.IsNullOrWhiteSpace(part))));
             })
             .ToList();
 
@@ -328,8 +328,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
         var context = ValidationCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentIpAddress ?? string.Empty,
+            _authContext.CurrentDeviceInfo ?? string.Empty,
             _authContext.CurrentSessionId,
             signatureResult);
 
@@ -638,8 +638,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                     EntityId = _loadedValidation.Id,
                     UploadedById = _authContext.CurrentUser?.Id,
                     Reason = $"validation:{_loadedValidation.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
-                    SourceHost = _authContext.CurrentDeviceInfo,
+                    SourceIp = _authContext.CurrentIpAddress ?? string.Empty,
+                    SourceHost = _authContext.CurrentDeviceInfo ?? string.Empty,
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
@@ -799,3 +799,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         public override string ToString() => Name;
     }
 }
+
+
+
+

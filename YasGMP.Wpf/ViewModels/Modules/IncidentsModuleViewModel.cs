@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    public const string ModuleKey = "Incidents";
+    public new const string ModuleKey = "Incidents";
 
     private readonly IIncidentCrudService _incidentService;
     private readonly IAuthContext _authContext;
@@ -245,7 +245,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             {
                 var label = string.IsNullOrWhiteSpace(wo.Title)
                     ? $"WO-{wo.Id:D5}"
-                    : $"WO-{wo.Id:D5} • {wo.Title}";
+                    : $"WO-{wo.Id:D5} â€˘ {wo.Title}";
 
                 var descriptionParts = new List<string>();
                 if (!string.IsNullOrWhiteSpace(wo.Type))
@@ -261,7 +261,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 items.Add(new CflItem(
                     $"{WorkOrderCflPrefix}{wo.Id}",
                     label,
-                    descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : string.Empty));
+                    descriptionParts.Count > 0 ? string.Join(" â€˘ ", descriptionParts) : string.Empty));
             }
 
             var capaCases = await Database.GetAllCapaCasesAsync().ConfigureAwait(false);
@@ -272,7 +272,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 var code = $"CAPA-{capa.Id:D5}";
                 var label = string.IsNullOrWhiteSpace(capa.Title)
                     ? code
-                    : $"{code} • {capa.Title}";
+                    : $"{code} â€˘ {capa.Title}";
 
                 var descriptionParts = new List<string>();
                 if (!string.IsNullOrWhiteSpace(capa.Status))
@@ -288,7 +288,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 items.Add(new CflItem(
                     $"{CapaCflPrefix}{capa.Id}",
                     label,
-                    descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : string.Empty));
+                    descriptionParts.Count > 0 ? string.Join(" â€˘ ", descriptionParts) : string.Empty));
             }
 
             if (items.Count == 0)
@@ -385,8 +385,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
         var context = IncidentCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentIpAddress ?? string.Empty,
+            _authContext.CurrentDeviceInfo ?? string.Empty,
             _authContext.CurrentSessionId,
             signatureResult);
 
@@ -520,8 +520,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                     EntityId = _loadedIncident.Id,
                     UploadedById = uploadedBy,
                     Reason = $"incident:{_loadedIncident.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
-                    SourceHost = _authContext.CurrentDeviceInfo,
+                    SourceIp = _authContext.CurrentIpAddress ?? string.Empty,
+                    SourceHost = _authContext.CurrentDeviceInfo ?? string.Empty,
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
@@ -838,3 +838,8 @@ public sealed partial class IncidentEditor : ObservableObject
         return incident;
     }
 }
+
+
+
+
+

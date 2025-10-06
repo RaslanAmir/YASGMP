@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
 
@@ -10,7 +10,7 @@ namespace YasGMP.Wpf.Services
 {
     /// <summary>
     /// Default <see cref="IUserCrudService"/> implementation that forwards calls to the shared
-    /// <see cref="UserService"/> and <see cref="IRBACService"/> infrastructure while keeping the WPF shell
+    /// <see cref="IUserService"/> and <see cref="IRBACService"/> infrastructure while keeping the WPF shell
     /// decoupled for unit testing.
     /// </summary>
     public sealed class UserCrudServiceAdapter : IUserCrudService
@@ -140,3 +140,4 @@ namespace YasGMP.Wpf.Services
             };
     }
 }
+

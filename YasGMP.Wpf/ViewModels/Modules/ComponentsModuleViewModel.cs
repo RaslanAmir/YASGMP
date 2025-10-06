@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YasGMP.Models;
 using YasGMP.Services;
+using ComponentEntity = YasGMP.Models.Component;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
@@ -40,7 +41,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
 
-    private Component? _loadedComponent;
+    private ComponentEntity? _loadedComponent;
     private ComponentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Machine> _machines = Array.Empty<Machine>();
@@ -110,7 +111,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         _machines = machines;
         RefreshMachineOptions(machines);
 
-        var sample = new List<Component>
+        var sample = new List<ComponentEntity>
         {
             new()
             {
@@ -174,14 +175,14 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 }
 
                 var description = descriptionParts.Count > 0
-                    ? string.Join(" • ", descriptionParts)
+                    ? string.Join(" â€˘ ", descriptionParts)
                     : null;
 
                 return new CflItem(key, label, description);
             })
             .ToList();
 
-        return new CflRequest("Select Component", items);
+        return new CflRequest("Select ComponentEntity", items);
     }
 
     protected override Task OnCflSelectionAsync(CflResult result)
@@ -323,12 +324,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
         var context = ComponentCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentIpAddress ?? string.Empty,
+            _authContext.CurrentDeviceInfo ?? string.Empty,
             _authContext.CurrentSessionId,
             signatureResult);
 
-        Component adapterResult;
+        ComponentEntity adapterResult;
         CrudSaveResult saveResult;
         try
         {
@@ -451,7 +452,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
     }
 
-    private void LoadEditor(Component component)
+    private void LoadEditor(ComponentEntity component)
     {
         _suppressEditorDirtyNotifications = true;
         Editor = ComponentEditor.FromComponent(component, _componentService.NormalizeStatus, ResolveMachineName);
@@ -525,7 +526,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         return $"Machine #{machine.Id}";
     }
 
-    private ModuleRecord ToRecord(Component component)
+    private ModuleRecord ToRecord(ComponentEntity component)
     {
         var inspector = new List<InspectorField>
         {
@@ -604,7 +605,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             };
 
         public static ComponentEditor FromComponent(
-            Component component,
+            ComponentEntity component,
             Func<string?, string> statusNormalizer,
             Func<int, string> machineNameResolver)
         {
@@ -629,9 +630,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             };
         }
 
-        public Component ToComponent(Component? existing)
+        public ComponentEntity ToComponent(ComponentEntity? existing)
         {
-            var component = existing is null ? new Component() : CloneComponent(existing);
+            var component = existing is null ? new ComponentEntity() : CloneComponent(existing);
             component.Id = Id;
             component.MachineId = MachineId;
             component.MachineName = MachineName;
@@ -668,9 +669,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 LifecycleState = LifecycleState
             };
 
-        private static Component CloneComponent(Component source)
+        private static ComponentEntity CloneComponent(ComponentEntity source)
         {
-            return new Component
+            return new ComponentEntity
             {
                 Id = source.Id,
                 MachineId = source.MachineId,
@@ -692,3 +693,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
     public sealed record MachineOption(int Id, string Name);
 }
+
+
+
+

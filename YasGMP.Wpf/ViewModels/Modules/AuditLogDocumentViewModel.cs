@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
@@ -18,7 +19,21 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </summary>
 public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 {
-    public const string ModuleKey = "Audit";
+    public new const string ModuleKey = "Audit";
+
+    private readonly AuditLogViewModel _auditLogViewModel;
+    private readonly AsyncRelayCommand _applyFilterCommand;
+    private readonly AsyncRelayCommand _refreshCommand;
+    private readonly AsyncRelayCommand _exportCsvCommand;
+    private readonly AsyncRelayCommand _exportXlsxCommand;
+    private readonly AsyncRelayCommand _exportPdfCommand;
+    private bool _suppressProjection;
+
+    [ObservableProperty]
+    private bool _hasResults;
+
+    [ObservableProperty]
+    private bool _hasError;
 
     public AuditLogDocumentViewModel(
         AuditService auditService,
@@ -36,11 +51,11 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         _auditLogViewModel.FilteredEvents.CollectionChanged += OnFilteredEventsChanged;
         _auditLogViewModel.PropertyChanged += OnAuditLogPropertyChanged;
 
-        _applyFilterCommand = new AsyncRelayCommand(ExecuteApplyFilterAsync, CanExecuteNonBusyCommand);
-        _refreshCommand = new AsyncRelayCommand(ExecuteRefreshAsync, CanExecuteNonBusyCommand);
-        _exportCsvCommand = new AsyncRelayCommand(() => ExecuteExportAsync(_auditLogViewModel.ExportCsvCommand, "CSV"), CanExecuteExport);
-        _exportXlsxCommand = new AsyncRelayCommand(() => ExecuteExportAsync(_auditLogViewModel.ExportXlsxCommand, "Excel"), CanExecuteExport);
-        _exportPdfCommand = new AsyncRelayCommand(() => ExecuteExportAsync(_auditLogViewModel.ExportPdfCommand, "PDF"), CanExecuteExport);
+        _applyFilterCommand = new AsyncRelayCommand(_ => ExecuteApplyFilterAsync(), CanExecuteNonBusyCommand);
+        _refreshCommand = new AsyncRelayCommand(_ => ExecuteRefreshAsync(), CanExecuteNonBusyCommand);
+        _exportCsvCommand = new AsyncRelayCommand(_ => ExecuteExportAsync(_auditLogViewModel.ExportCsvCommand, "CSV"), CanExecuteExport);
+        _exportXlsxCommand = new AsyncRelayCommand(_ => ExecuteExportAsync(_auditLogViewModel.ExportXlsxCommand, "Excel"), CanExecuteExport);
+        _exportPdfCommand = new AsyncRelayCommand(_ => ExecuteExportAsync(_auditLogViewModel.ExportPdfCommand, "PDF"), CanExecuteExport);
 
         var refreshEntry = Toolbar
             .Select((command, index) => (Command: command, Index: index))
@@ -128,52 +143,35 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
             MapToRecord(new SystemEvent
             {
                 Id = 2,
-                EventTime = now.AddMinutes(-42),
+                EventTime = now.AddMinutes(-4),
                 EventType = "UPDATE",
                 TableName = "work_orders",
                 RecordId = 1204,
-                UserId = 17,
-                Description = "Adjusted planned start",
-                DeviceInfo = "Win10 | MAINT-02",
-                SourceIp = "10.0.5.12"
+                UserId = 5,
+                Description = "Updated WO-1204 status from Planned to Released",
+                DeviceInfo = "Win11 | QA-WS01",
+                SourceIp = "192.168.10.5"
+            }),
+            MapToRecord(new SystemEvent
+            {
+                Id = 3,
+                EventTime = now.AddMinutes(-1),
+                EventType = "SIGN",
+                TableName = "calibration_runs",
+                RecordId = 88,
+                UserId = 7,
+                Description = "Calibration run 88 signed by jane",
+                DeviceInfo = "Win11 | QA-WS02",
+                SourceIp = "192.168.10.6"
             })
         };
     }
 
-    protected override string FormatLoadedStatus(int count)
-    {
-        if (!string.IsNullOrWhiteSpace(_auditLogViewModel.StatusMessage))
-        {
-            return _auditLogViewModel.StatusMessage!;
-        }
-
-        return count switch
-        {
-            <= 0 => "No audit events match the current filters.",
-            1 => "Loaded 1 audit event.",
-            _ => $"Loaded {count} audit events."
-        };
-    }
-
-    [ObservableProperty]
-    private bool _hasResults;
-
-    [ObservableProperty]
-    private bool _hasError;
-
-    private readonly AuditLogViewModel _auditLogViewModel;
-    private readonly AsyncRelayCommand _applyFilterCommand;
-    private readonly AsyncRelayCommand _refreshCommand;
-    private readonly AsyncRelayCommand _exportCsvCommand;
-    private readonly AsyncRelayCommand _exportXlsxCommand;
-    private readonly AsyncRelayCommand _exportPdfCommand;
-    private bool _suppressProjection;
-
-    private async Task ExecuteApplyFilterAsync()
+    private Task ExecuteApplyFilterAsync()
     {
         if (!CanExecuteNonBusyCommand())
         {
-            return;
+            return Task.CompletedTask;
         }
 
         try
@@ -194,6 +192,8 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
             IsBusy = false;
             UpdateCommandStates();
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task ExecuteRefreshAsync()
@@ -214,7 +214,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         }
     }
 
-    private async Task ExecuteExportAsync(System.Windows.Input.ICommand? mauiCommand, string formatLabel)
+    private async Task ExecuteExportAsync(System.Windows.Input.ICommand? sourceCommand, string formatLabel)
     {
         if (!CanExecuteExport())
         {
@@ -226,7 +226,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
             IsBusy = true;
             StatusMessage = $"Exporting audit log to {formatLabel}...";
 
-            switch (mauiCommand)
+            switch (sourceCommand)
             {
                 case IAsyncRelayCommand asyncRelay:
                     await asyncRelay.ExecuteAsync(null).ConfigureAwait(false);
@@ -235,7 +235,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
                     relay.Execute(null);
                     break;
                 default:
-                    mauiCommand?.Execute(null);
+                    sourceCommand?.Execute(null);
                     break;
             }
 
@@ -258,10 +258,13 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
     private bool CanExecuteNonBusyCommand() => !IsBusy;
 
     private bool CanExecuteExport()
-        => !IsBusy && (_auditLogViewModel.FilteredEvents?.Count ?? 0) > 0;
+        => CanExecuteNonBusyCommand() && _auditLogViewModel.FilteredEvents.Count > 0 && !_auditLogViewModel.IsBusy;
 
     private List<ModuleRecord> ProjectRecords()
         => _auditLogViewModel.FilteredEvents.Select(MapToRecord).ToList();
+
+    private static IReadOnlyList<ModuleRecord> ToReadOnlyList(List<ModuleRecord> records)
+        => records.AsReadOnly();
 
     private void ProjectRecordsFromEvents()
     {
@@ -271,15 +274,11 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         }
 
         var previousKey = SelectedRecord?.Key;
-        var snapshot = ProjectRecords();
-
         Records.Clear();
-        foreach (var record in snapshot)
+        foreach (var record in ProjectRecords())
         {
             Records.Add(record);
         }
-
-        RecordsView.Refresh();
 
         SelectedRecord = previousKey is not null
             ? Records.FirstOrDefault(r => string.Equals(r.Key, previousKey, StringComparison.Ordinal))
@@ -404,3 +403,5 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         base.RefreshCommand.NotifyCanExecuteChanged();
     }
 }
+
+

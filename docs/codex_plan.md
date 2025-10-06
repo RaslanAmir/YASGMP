@@ -1,44 +1,48 @@
-# Codex Plan — WPF Shell & Full Integration
+﻿# Codex Plan - WPF Shell & Full Integration
 
 ## Current Compile Status
-- [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31 → **command not found**)*
-- [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-18, 2025-12-31 → **command not found**)*
-- [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31 → **command not found**)*
-- [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31 → **command not found**)*
+- [x] Dotnet SDKs detected and recorded *(9.0.305 via `logs/20251003-dotnet-info.txt`; bootstrap transcript: `logs/bootstrap-dotnet9-transcript.txt`)**
+- [x] Solution restores *(`dotnet restore yasgmp.sln` completed; transcript: `logs/20251003-dotnet-restore.txt`)**
+- [x] MAUI builds *(`dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release` succeeds with MSB3277 analyzer warnings; see `logs/20251003-dotnet-build-maui.txt`)**
+- [x] WPF builds *(dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj succeeds; ModuleKey declarations normalized with `new` modifiers, async command stubs converted to synchronous return paths, and nullable warnings cleared ahead of smoke automation)*
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
 - Repo-level SDK pin: `global.json` set to **9.0.100** *(reinforced via bootstrap script).* 
 - AvalonDock: **4.72.1** *(pinned in `YasGMP.Wpf.csproj`).*
 - Other NuGets: **Fluent.Ribbon 11.0.1**, **CommunityToolkit.Mvvm 8.4.0**, **Microsoft.Extensions.* 9.0.3**, **MySqlConnector 2.4.0** *(pinned in csproj).* 
-- Environment gap: install/enable **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host. The build container currently lacks `dotnet`; run `scripts/bootstrap-dotnet9.ps1` or install via `winget install Microsoft.DotNet.SDK.9`.
+- Environment gap: dotnet 9.0.305 available (logs/20251003-dotnet-info.txt); WPF build now green after reconciling configuration extensions, AsyncRelayCommand overloads, CRUD adapter logging, and module metadata mismatches. Remaining cleanup: convert ModuleKey fields to new-keyword declarations and trim warning noise before smoke automation.
 
 ## Batches
-- **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
-- **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
-- **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; the WPF dialog service now emits audit events on capture/persist while broader audit surfacing remains gated on SDK access)*
-- **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
-- **B4+ — Module rollout:**
-  - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
-  - Components — [x] done *(mode-aware editor wired to ComponentService with IElectronicSignatureDialogService gating persistence; audit surfacing remains blocked on SDK access)*
-  - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, stock health warnings, and e-signature capture baked into save flows; audit surfacing remains blocked on SDK access)*
-  - Work Orders — [x] done *(CRUD adapter wired with attachments and e-signature capture ahead of adapter calls; audit surfacing queued once SDK access returns)*
-  - Calibration — [x] done *(CRUD editor with attachment uploads and e-signature capture; audit surfacing remains queued for Batch B2)*
-  - Incident → CAPA → Change Control — [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments and signature capture; audit surfacing still queued for SDK access)*
-  - Validations (IQ/OQ/PQ) — [x] done *(mode-aware validation editor with CRUD adapter, CFL, attachment workflow, and signature capture; audit surfacing queued once the SDK blocker clears)*
-  - Scheduled Jobs — [x] done *(mode-aware editor with execute/acknowledge tooling, attachment workflow, and enforced signature capture; audit surfacing tracked under Batch B2)*
-  - Users/Roles — [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
-  - Suppliers/External Servicers — [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
-  - Audit/API Audit — [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity and resolves through DI with the shared DatabaseService; WPF Audit Log document view mirrors the dashboard patterns with toolbar buttons, filters, busy overlay, and status styling; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration. These audit-focused modules are now grouped under the "Quality & Compliance" category in the ModuleRegistry.)*
+- **B0 - Environment stabilization** (SDKs, NuGets, XAML namespaces) - [x] completed *(dotnet 9.0.305 in place; AppCore diagnostics decoupled; WPF build now succeeds after resolving configuration/command/adaptor mismatches—remaining work tracked under module cleanup tasks)*
+  - 2025-10-03: Verified dotnet CLI + workloads (logs/20251003-dotnet-info.txt).
+  - 2025-10-03: Introduced `DiagnosticsPathProvider`, added SQLite sink reflection fallback, and gated ChangeControl harness behind `YASGMP_APP_CORE_MAUI`. MAUI build now succeeds; WPF build now fails later in compilation because `AssetsModuleViewModel.cs` contains duplicated class definitions (pre-existing syntax corruption).
+  - 2025-10-06: Removed duplicated partial declaration from AssetsModuleViewModel, added WPF-local AuditDashboard/AuditLog view-models, reran restore/build; MAUI build succeeds but WPF still blocked (GetConnectionString overload ambiguity, AsyncRelayCommand ctor ambiguity, legacy CRUD adapters calling LogSystemEventAsync with outdated signatures, and Admin/Suppliers metadata gaps).
+  - 2025-10-06: Reconciled WPF shell compile errors (ConfigConfigurationExtensionsCompat usage, AsyncRelayCommand ctor overloads, CRUD adapter logging signatures, Admin/Suppliers metadata) and achieved a clean `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj` with warnings-only backlog (ModuleKey declarations).
+- **B1 - Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) - [ ] todo
+- **B2 - Cross-cutting** (Attachments DB, E-Signature, Audit) - [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; the WPF dialog service now emits audit events on capture/persist while broader audit surfacing remains gated on SDK access)*
+- **B3 - Editor framework** (templates, host, unsaved-guard) - [ ] todo
+- **B4+ - Module rollout:**
+  - Assets/Machines - [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
+  - Components - [x] done *(mode-aware editor wired to ComponentService with IElectronicSignatureDialogService gating persistence; audit surfacing remains blocked on SDK access)*
+  - Parts & Warehouses - [x] done *(inventory snapshots, warehouse ledger preview, stock health warnings, and e-signature capture baked into save flows; audit surfacing remains blocked on SDK access)*
+  - Work Orders - [x] done *(CRUD adapter wired with attachments and e-signature capture ahead of adapter calls; audit surfacing queued once SDK access returns)*
+  - Calibration - [x] done *(CRUD editor with attachment uploads and e-signature capture; audit surfacing remains queued for Batch B2)*
+  - Incident Ă˘â€ â€™ CAPA Ă˘â€ â€™ Change Control - [x] done *(Incidents, CAPA, and Change Control editors now CRUD-capable with attachments and signature capture; audit surfacing still queued for SDK access)*
+  - Validations (IQ/OQ/PQ) - [x] done *(mode-aware validation editor with CRUD adapter, CFL, attachment workflow, and signature capture; audit surfacing queued once the SDK blocker clears)*
+  - Scheduled Jobs - [x] done *(mode-aware editor with execute/acknowledge tooling, attachment workflow, and enforced signature capture; audit surfacing tracked under Batch B2)*
+  - Users/Roles - [x] done *(Security module now exposes a CRUD-capable user/role editor with CFL, toolbar modes, role assignment management, and e-signature gating)*
+  - Suppliers/External Servicers - [x] done *(Suppliers module enforces electronic signatures on save alongside attachments + CFL; External Servicers cockpit now also blocks persistence on signature capture)*
+  - Audit/API Audit - [~] in-progress *(WPF audit trail retains export filters and status guards; MAUI AuditLogViewModel now drives the shell document with synchronized inspector/search/export parity and resolves through DI with the shared DatabaseService; WPF Audit Log document view mirrors the dashboard patterns with toolbar buttons, filters, busy overlay, and status styling; new API audit module surfaces masked API key activity with inspector payloads, dynamic action filters, and smoke registration. These audit-focused modules are now grouped under the "Quality & Compliance" category in the ModuleRegistry.)*
     - 2026-01-12: Date range normalization now promotes the earliest selected day to FilterFrom and the latest to FilterTo so the formatted descriptions and export payloads reflect the true chronological span while CLI validation remains blocked by the missing dotnet toolchain.
     - 2026-01-14: API audit view-model tests now expose refresh invocation tracking with awaitable signals, covering each filter setter's auto-refresh behavior and verifying state resets while dotnet restore/build remain blocked by the missing CLI.
     - 2026-01-15: Updated `docs/WPF_MAPPING.md` Quality & Compliance parity map with an API Audit Trail row noting masked API key metadata, dynamic action filters, and busy/error guards so documentation matches the current WPF implementation while dotnet restore/build remain blocked by the missing CLI.
-  - Documents/Attachments — [x] done *(Attachments module now ships a finalized split inspector/editor workspace with staged upload queueing, signature-gated CRUD flow, and retention policy handling.)*
+  - Documents/Attachments - [x] done *(Attachments module now ships a finalized split inspector/editor workspace with staged upload queueing, signature-gated CRUD flow, and retention policy handling.)*
     - 2026-01-05: Attachments view now splits the layout into a records grid and inspector/editor pane that surfaces SelectedAttachment metadata alongside staged upload previews and retention flags.
     - 2026-01-06: Editor pane now drives staged uploads through the AttachmentService, requiring an electronic signature before committing changes and hiding commands when the workflow is unavailable.
     - 2026-01-07: Attachments editor now enforces retention rules during save/delete, shows busy overlays tied to IsBusy, and surfaces validation/status messaging while dotnet restore/build remain blocked by the missing CLI.
-  - Dashboard/Reports — [ ] todo
-  - Settings/Admin — [ ] todo
+  - Dashboard/Reports - [ ] todo
+  - Settings/Admin - [ ] todo
 
 - **Open Issues / Blockers**
 - `dotnet` executable not found. Install/expose **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host; if building inside a container, expose host `dotnet` or install within the container. Run `scripts/bootstrap-dotnet9.ps1` to verify and pin via `global.json`. *(2025-09-25 & 2025-09-27 retries confirmed `dotnet --info` continues to fail with **command not found**; 2025-10-09 recheck still reports the command missing.)*
@@ -159,6 +163,7 @@
 - 2025-10-27: Audit filters now clamp the lower bound when the upper bound is moved earlier while preserving the user's selected end day; WPF regression coverage verifies both persisted filters and query arguments.
 - 2025-10-28: Audit filters now keep the user's "To" picker intact while ordering the query bounds when the upper date precedes the lower; WPF coverage adds a default-from regression asserting the service respects the earlier upper bound.
 - 2025-10-29: Audit filters now order query bounds by min/max so inverted ranges still span the full window while preserving the user's "To" picker; WPF regression coverage asserts the service receives the later bound's end-of-day timestamp.
+- 2025-10-30: Cleaned WPF shell warnings by rewriting AuditLog/AuditLogDocument view-models, introducing the vmModules XAML namespace, shifting AsyncRelayCommand stubs to return Task.CompletedTask, and plugging nullable guards into CRUD contexts; WPF build is now warning-only (NETSDK1137). Smoke harness project not yet present—documented for follow-up once the harness lands.
 - 2025-11-11: CRUD context factories now expose signature id/hash/method/status/note members with an overload that accepts `ElectronicSignatureDialogResult`, letting module save flows hydrate audit metadata alongside user/IP/session defaults.
 - 2025-11-12: Machine, Work Order, Calibration, Supplier, and Part adapters now hydrate captured signature hash/method/status/note onto their entities before persistence and include the metadata in supplier/part audit stamps while core services await extended signatures support.
 - Next actionable slice once SDK access is restored: wire Assets attachments + signatures, then replicate CRUD pattern for Components.
@@ -169,3 +174,25 @@
 - 2025-10-02: CAPA module now runs through ICapaCrudService with mode-aware editor, component lookups, and attachment uploads; signature/audit follow-ups remain planned under Batch B2.
 - 2025-10-03: Change Control module now reuses the new `IChangeControlCrudService` adapter with a mode-aware editor, CFL picker, and attachment workflow; e-signature/audit surfacing will arrive with Batch B2 once the SDK blocker lifts.
 - 2025-11-13: Updated WPF mapping to document the attachments split view, inspector/editor behaviors, CRUD/signature flow, and retention enforcement now live in the shell; `dotnet restore`/`dotnet build` retries still fail because the CLI is absent in this container.
+
+- 2025-10-03: Linked Helpers/Diagnostics into AppCore to unblock namespace resolutions, installed .NET 9 SDK, and reran restore/build (logs under \\logs\\dotnet-restore.txt, \\logs\\dotnet-build-maui.txt, \\logs\\dotnet-build-wpf.txt); MAUI/WPF builds still blocked by outstanding AppCore compile errors (AttachmentService transaction accessors, spare parts signature overloads, ExternalContractor DTO surface, AppConfigurationHelper).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

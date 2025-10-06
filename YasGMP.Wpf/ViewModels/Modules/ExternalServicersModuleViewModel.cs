@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,7 +15,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentViewModel
 {
-    public const string ModuleKey = "ExternalServicers";
+    public new const string ModuleKey = "ExternalServicers";
 
     private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
     {
@@ -125,7 +125,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 Code = "EXT-002",
                 Type = "Maintenance",
                 Status = "suspended",
-                ContactPerson = "Marko Barić",
+                ContactPerson = "Marko BariÄ‡",
                 Email = "support@globex.example",
                 Phone = "+385 91 555 666",
                 Comment = "Pending contract renewal"
@@ -134,12 +134,11 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 
         return sample.Select(ToRecord).ToList();
     }
-
-    protected override async Task OnActivatedAsync(object? parameter)
+    protected override Task OnActivatedAsync(object? parameter)
     {
         if (parameter is null)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         string key = parameter switch
@@ -151,7 +150,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 
         if (string.IsNullOrWhiteSpace(key))
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var match = Records.FirstOrDefault(r =>
@@ -163,6 +162,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         {
             SelectedRecord = match;
         }
+
+        return Task.CompletedTask;
     }
 
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
@@ -305,7 +306,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             }
             else if (Mode == FormMode.Update)
             {
-                servicer.Id = _loadedServicer.Id;
+                servicer.Id = _loadedServicer!.Id;
                 saveResult = await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
                 adapterResult = servicer;
             }
@@ -322,7 +323,6 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         _loadedServicer = servicer;
         _lastSavedServicerId = servicer.Id;
         LoadEditor(servicer);
-        UpdateAttachmentCommandState();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
@@ -396,7 +396,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 descriptionParts.Add(servicer.ContactPerson!);
             }
 
-            var description = descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null;
+            var description = descriptionParts.Count > 0 ? string.Join(" â€˘ ", descriptionParts) : null;
             return new CflItem(key, servicer.Name, description);
         }).ToList();
 
@@ -670,3 +670,11 @@ public sealed partial class ExternalServicerEditor : ObservableObject
             .ToList();
     }
 }
+
+
+
+
+
+
+
+

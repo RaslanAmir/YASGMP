@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -100,7 +100,7 @@ public sealed class DebugSmokeTestService
             var modules = _moduleRegistry.Modules;
             if (modules.Count > 0)
             {
-                logBuilder.AppendLine($"Registered modules: {modules.Count} – {string.Join(", ", modules.Select(m => m.Title))}");
+                logBuilder.AppendLine($"Registered modules: {modules.Count} â€“ {string.Join(", ", modules.Select(m => m.Title))}");
             }
             else
             {
@@ -114,7 +114,7 @@ public sealed class DebugSmokeTestService
             {
                 var step = await ExecuteStepAsync(name, action, cancellationToken);
                 steps.Add(step);
-                logBuilder.AppendLine($"[{(step.Succeeded ? "PASS" : "FAIL")}] {step.Name} ({step.Duration.TotalMilliseconds:N0} ms) – {step.Message}");
+                logBuilder.AppendLine($"[{(step.Succeeded ? "PASS" : "FAIL")}] {step.Name} ({step.Duration.TotalMilliseconds:N0} ms) â€“ {step.Message}");
                 if (step.Exception is not null)
                 {
                     logBuilder.AppendLine(step.Exception.ToString());
@@ -166,10 +166,10 @@ public sealed class DebugSmokeTestService
         var user = _authContext.CurrentUser;
         if (user is not null)
         {
-            return $"Authenticated as {user.Username} (#{user.Id}) – session {_authContext.CurrentSessionId}.";
+            return $"Authenticated as {user.Username} (#{user.Id}) â€“ session {_authContext.CurrentSessionId}.";
         }
 
-        return $"No hydrated user context – using {_userSession.Username} (#{_userSession.UserId}) for session {_authContext.CurrentSessionId}.";
+        return $"No hydrated user context â€“ using {_userSession.Username} (#{_userSession.UserId}) for session {_authContext.CurrentSessionId}.";
     }
 
     private async Task<string> NavigateModulesAsync(CancellationToken cancellationToken)
@@ -215,12 +215,12 @@ public sealed class DebugSmokeTestService
     {
         cancellationToken.ThrowIfCancellationRequested();
         var events = await _databaseService.GetRecentDashboardEventsAsync(10, cancellationToken);
-        var count = events?.Count ?? 0;
-        if (count == 0)
+        if (events is null || events.Count == 0)
         {
             return "No dashboard events returned.";
         }
 
+        var count = events.Count;
         var latest = events[0];
         return $"Fetched {count} event(s); latest {latest.EventType} at {latest.Timestamp:O}.";
     }
@@ -442,3 +442,7 @@ public sealed record DebugSmokeTestResult(bool WasRun, bool Passed, string Summa
 
 /// <summary>Represents a single step executed by the smoke harness.</summary>
 public sealed record DebugSmokeTestStep(string Name, bool Succeeded, string Message, TimeSpan Duration, Exception? Exception);
+
+
+
+
