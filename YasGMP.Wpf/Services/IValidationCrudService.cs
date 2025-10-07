@@ -7,9 +7,14 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter abstraction over <see cref="YasGMP.Services.ValidationService"/> so the WPF shell can
-/// coordinate validation CRUD flows without binding directly to infrastructure types during tests.
+/// Shared contract that directs validation CRUD through <see cref="YasGMP.Services.ValidationService"/> and the MAUI audit pipeline.
 /// </summary>
+/// <remarks>
+/// Module view models invoke these members on the UI thread, implementations forward work to the shared
+/// <see cref="YasGMP.Services.ValidationService"/> and <see cref="YasGMP.Services.AuditService"/>, and UI consumers marshal updates via
+/// <see cref="WpfUiDispatcher"/> after awaiting tasks. <see cref="CrudSaveResult"/> must return identifiers, signature context, and localization-ready
+/// status text so <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> can translate the values consistently with the MAUI shell.
+/// </remarks>
 public interface IValidationCrudService
 {
     Task<IReadOnlyList<Validation>> GetAllAsync();

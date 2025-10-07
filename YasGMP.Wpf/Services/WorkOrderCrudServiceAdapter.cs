@@ -7,8 +7,17 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter that bridges the WPF shell to the domain <see cref="WorkOrderService"/>.
+/// Bridges Work Order module view models in the WPF shell to the shared MAUI
+/// <see cref="YasGMP.Services.WorkOrderService"/> and related infrastructure.
 /// </summary>
+/// <remarks>
+/// The WPF module view models call this adapter, which then invokes
+/// <see cref="YasGMP.Services.WorkOrderService"/> and the shared <see cref="YasGMP.Services.AuditService"/>
+/// so the persisted data and audit trail match the MAUI implementation. Operations should be awaited off the
+/// dispatcher thread, with UI updates marshalled through <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/>
+/// returned by save operations must propagate identifiers, status text, and signature metadata which callers localize through
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before surfacing to operators.
+/// </remarks>
 public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
 {
     private readonly WorkOrderService _service;

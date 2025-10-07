@@ -10,9 +10,18 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter that allows the WPF shell to reuse the shared <see cref="SupplierService"/>
-/// while capturing the extra audit metadata required by desktop saves.
+/// Bridges supplier workflows in the WPF shell to the shared MAUI
+/// <see cref="YasGMP.Services.SupplierService"/> and supporting persistence services.
 /// </summary>
+/// <remarks>
+/// Supplier module view models issue CRUD commands through this adapter; requests are then forwarded to
+/// <see cref="YasGMP.Services.SupplierService"/> and <see cref="YasGMP.Services.DatabaseService"/> so both shells share the
+/// same persistence and audit story. Await operations off the UI thread and dispatch UI updates via
+/// <see cref="WpfUiDispatcher"/>. The returned <see cref="CrudSaveResult"/> contains identifiers, status, and signature data that
+/// callers must localize with <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before
+/// presenting to operators. Audit information is written through <see cref="YasGMP.Services.DatabaseServiceSuppliersExtensions.LogSupplierAuditAsync(YasGMP.Services.DatabaseService,int,string,int,string?,string,string,string?,System.Threading.CancellationToken)"/>,
+/// which feeds the shared <see cref="YasGMP.Services.AuditService"/> surfaced inside MAUI.
+/// </remarks>
 public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 {
     private readonly SupplierService _supplierService;

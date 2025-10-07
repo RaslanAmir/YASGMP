@@ -7,8 +7,16 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter that exposes <see cref="IncidentService"/> CRUD operations to the WPF shell.
+/// Bridges incident workflows from the WPF shell to the shared MAUI
+/// <see cref="YasGMP.Services.IncidentService"/> implementation.
 /// </summary>
+/// <remarks>
+/// Incident module view models call this adapter, which forwards the request to <see cref="YasGMP.Services.IncidentService"/>
+/// and the underlying <see cref="YasGMP.Services.AuditService"/> so persistence, localization, and audit logging match MAUI.
+/// Operations should be awaited off the dispatcher thread with UI updates marshalled via <see cref="WpfUiDispatcher"/>. The
+/// <see cref="CrudSaveResult"/> payload contains identifiers, status text, and signature metadata that callers localize using
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before rendering in the shell.
+/// </remarks>
 public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
 {
     private readonly IncidentService _service;

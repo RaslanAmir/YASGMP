@@ -8,9 +8,19 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Default <see cref="IComponentCrudService"/> implementation backed by the
-/// shared <see cref="ComponentService"/> from <c>YasGMP.AppCore</c>.
+/// Routes Component module interactions from the WPF shell into the shared MAUI
+/// <see cref="YasGMP.Services.ComponentService"/> implementation.
 /// </summary>
+/// <remarks>
+/// View models issue commands to this adapter, which forwards them to
+/// <see cref="YasGMP.Services.ComponentService"/> (and the associated <see cref="YasGMP.Services.AuditService"/>)
+/// so the same AppCore logic is exercised regardless of shell. Methods are awaited off the UI thread;
+/// callers are expected to marshal updates via <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/>
+/// payload contains identifiers, signature metadata, and status text that should be localized with
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before being shown in the ribbon.
+/// Audit entries emitted here surface within the MAUI experiences because the shared <see cref="YasGMP.Services.AuditService"/>
+/// is used to capture them.
+/// </remarks>
 public sealed class ComponentCrudServiceAdapter : IComponentCrudService
 {
     private readonly ComponentService _inner;

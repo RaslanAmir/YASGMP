@@ -52,6 +52,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2025-10-07: Refreshed CRUD service adapter/interface XML documentation to spell out WPF module → adapter → MAUI service flow, dispatcher marshalling, localization responsibilities, and shared audit plumbing; `dotnet restore`/`dotnet build`/smoke reruns still fail because the `dotnet` CLI is unavailable in this container.
 - 2026-01-28: Expanded CFL dialog service XML documentation so Golden Arrow callers understand dispatcher invocation, owner wiring, localization sourcing, and how to feed selections into the audit appenders while dotnet restore/build/smoke remain blocked by the missing CLI.
 - 2026-01-29: Expanded shell interaction/navigation service XML docs covering ribbon & Golden Arrow usage patterns, dispatcher marshalling, and how <code>IModuleRegistry</code> metadata drives inspector/audit wiring while dotnet restore/build/smoke remain blocked by the missing CLI.
 - 2026-01-30: Documented WPF electronic signature dialog interface/service XML remarks covering shell entry points, dispatcher requirements, localization hooks, and audit/cancellation parity guidance while dotnet restore/build/smoke remain blocked by the missing CLI.

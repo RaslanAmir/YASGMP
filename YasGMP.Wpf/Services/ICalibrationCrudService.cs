@@ -7,9 +7,16 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter-friendly abstraction over <see cref="YasGMP.Services.CalibrationService"/> so the
-/// WPF shell can execute CRUD operations without pulling in the full database runtime during tests.
+/// Shared CRUD contract used by both shells to persist calibrations through
+/// <see cref="YasGMP.Services.CalibrationService"/> and the MAUI audit infrastructure.
 /// </summary>
+/// <remarks>
+/// Module view models invoke this interface on the dispatcher thread, implementations relay work to the shared
+/// <see cref="YasGMP.Services.CalibrationService"/> and <see cref="YasGMP.Services.AuditService"/>, and UI consumers must marshal
+/// updates with <see cref="WpfUiDispatcher"/> once operations complete. The returned <see cref="CrudSaveResult"/> is expected to
+/// include identifiers, signature data, and localization-ready status/notes so MAUI and WPF present consistent audit history and
+/// can translate the text using <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/>.
+/// </remarks>
 public interface ICalibrationCrudService
 {
     Task<IReadOnlyList<Calibration>> GetAllAsync();

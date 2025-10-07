@@ -7,10 +7,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Abstraction over <see cref="YasGMP.Services.ComponentService"/> so the WPF
-/// shell can execute CRUD operations without pulling in the full database runtime
-/// during unit tests.
+/// Shared contract that allows the WPF shell and MAUI client to orchestrate Component
+/// persistence through <see cref="YasGMP.Services.ComponentService"/>.
 /// </summary>
+/// <remarks>
+/// Module view models call into this interface, the adapter forwards requests to the shared
+/// MAUI services (<see cref="YasGMP.Services.ComponentService"/> and <see cref="YasGMP.Services.AuditService"/>),
+/// and UI updates should be dispatched via <see cref="WpfUiDispatcher"/> after awaiting the returned tasks.
+/// Implementations must return a <see cref="CrudSaveResult"/> populated with identifiers, status text, and
+/// signature metadata so audit records remain in sync and localization can be applied via
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> prior to presentation.
+/// </remarks>
 public interface IComponentCrudService
 {
     Task<IReadOnlyList<Component>> GetAllAsync();

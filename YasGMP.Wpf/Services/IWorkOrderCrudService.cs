@@ -6,10 +6,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Abstraction over the <see cref="YasGMP.Services.WorkOrderService"/> so the WPF shell
-/// can execute CRUD operations in a testable manner without connecting to the full
-/// database runtime.
+/// Shared contract consumed by the WPF shell and MAUI host to orchestrate Work Order persistence
+/// through <see cref="YasGMP.Services.WorkOrderService"/> and the shared audit infrastructure.
 /// </summary>
+/// <remarks>
+/// Module view models call these members on the dispatcher thread, adapters forward the work to
+/// <see cref="YasGMP.Services.WorkOrderService"/> and <see cref="YasGMP.Services.AuditService"/>, and callers must
+/// marshal UI updates back through <see cref="WpfUiDispatcher"/> after awaiting the result. Implementations are responsible
+/// for returning a <see cref="CrudSaveResult"/> containing identifiers, signature context, and localization-ready status text
+/// so MAUI and WPF shells emit identical audit logs and can localize notes through
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/>.
+/// </remarks>
 public interface IWorkOrderCrudService
 {
     Task<WorkOrder?> TryGetByIdAsync(int id);

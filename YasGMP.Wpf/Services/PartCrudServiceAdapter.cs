@@ -11,9 +11,21 @@ using YasGMP.Services.Interfaces;
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Concrete adapter that routes CRUD requests from the WPF shell to the
-    /// shared <see cref="PartService"/> and <see cref="DatabaseService"/>.
+    /// Bridges the Parts module view models in the WPF shell to the shared MAUI
+    /// <see cref="YasGMP.Services.PartService"/> pipeline and related infrastructure.
     /// </summary>
+    /// <remarks>
+    /// Requests originate from module view models (for example the docked Parts editor),
+    /// travel through this adapter, and end at the shared <see cref="YasGMP.Services.PartService"/>
+    /// and <see cref="YasGMP.Services.DatabaseService"/> just as they do in the MAUI shell.
+    /// Callers should await the asynchronous operations off the UI thread and marshal UI updates
+    /// back to the dispatcher via <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/>
+    /// returned by create/update operations includes the persisted identifier together with status,
+    /// signature, and session metadata that must be localized with <see cref="LocalizationServiceExtensions"/>
+    /// (or an <see cref="ILocalizationService"/>) before presenting any status or note text.
+    /// Audit trails are recorded through the shared <see cref="YasGMP.Services.AuditService"/>, ensuring
+    /// WPF operations remain visible to the cross-platform MAUI auditing experiences.
+    /// </remarks>
     public sealed class PartCrudServiceAdapter : IPartCrudService
     {
         private readonly PartService _partService;

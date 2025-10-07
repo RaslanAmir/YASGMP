@@ -6,9 +6,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter-friendly abstraction for scheduled job persistence so the WPF shell can
-/// operate without binding directly to database-specific infrastructure.
+/// Shared contract that routes scheduled job CRUD/operations through <see cref="YasGMP.Services.DatabaseService"/>
+/// and the MAUI audit infrastructure.
 /// </summary>
+/// <remarks>
+/// Module view models invoke these members on the dispatcher thread; adapters execute the work against
+/// <see cref="YasGMP.Services.DatabaseService"/> so the MAUI app and WPF shell share persistence and audit history surfaced by
+/// <see cref="YasGMP.Services.AuditService"/>. Callers should marshal UI updates via <see cref="WpfUiDispatcher"/> after
+/// awaiting the returned tasks. Implementations must populate <see cref="CrudSaveResult"/> with identifiers, scheduling status,
+/// and signature context so the values can be localized with <see cref="LocalizationServiceExtensions"/> or
+/// <see cref="ILocalizationService"/> before operators see them.
+/// </remarks>
 public interface IScheduledJobCrudService
 {
     Task<ScheduledJob?> TryGetByIdAsync(int id);

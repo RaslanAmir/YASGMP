@@ -7,9 +7,16 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter abstraction over <see cref="YasGMP.Services.CAPAService"/> so the WPF shell
-/// can execute CAPA CRUD operations without binding directly to infrastructure types.
+/// Shared contract that lets the WPF shell and MAUI client drive CAPA workflows through
+/// <see cref="YasGMP.Services.CAPAService"/> while reusing the same audit pipeline.
 /// </summary>
+/// <remarks>
+/// Module view models call these members from the UI thread, adapters forward the work to the shared
+/// <see cref="YasGMP.Services.CAPAService"/> and <see cref="YasGMP.Services.AuditService"/> so persistence and auditing stay unified.
+/// Awaited results should be marshalled back via <see cref="WpfUiDispatcher"/>, and the <see cref="CrudSaveResult"/> must include
+/// identifiers, signature context, and localization-ready status/priority text so MAUI/WPF surfaces can translate them using
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before displaying to users.
+/// </remarks>
 public interface ICapaCrudService
 {
     Task<IReadOnlyList<CapaCase>> GetAllAsync();

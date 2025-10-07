@@ -7,9 +7,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Adapter abstraction that surfaces Parts CRUD operations to the WPF shell
-    /// without binding the UI to the concrete infrastructure implementation.
+    /// Shared contract that lets both the WPF shell and the MAUI host drive Parts
+    /// persistence through the <see cref="YasGMP.Services.PartService"/> pipeline.
     /// </summary>
+    /// <remarks>
+    /// Module view models invoke this interface on the UI thread, the adapter forwards the call to the
+    /// shared MAUI services (<see cref="YasGMP.Services.PartService"/> and <see cref="YasGMP.Services.AuditService"/>)
+    /// and callers must dispatch UI updates via <see cref="WpfUiDispatcher"/> once the awaited operation completes.
+    /// The resulting <see cref="CrudSaveResult"/> must carry the identifier, session, and signature metadata so
+    /// audit logs stay aligned across shells and any status or note text can be localized with
+    /// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before presentation.
+    /// </remarks>
     public interface IPartCrudService
     {
         Task<IReadOnlyList<Part>> GetAllAsync();
