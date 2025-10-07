@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -19,7 +19,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Coordinates incident intake and triage through the WPF shell using SAP B1 patterns.</summary>
 /// <remarks>
 /// Form Modes: Find filters incidents (including CFL jumps), Add seeds <see cref="IncidentEditor.CreateEmpty"/>, View keeps the editor read-only for investigation review, and Update enables edits, attachments, and link maintenance.
-/// Audit & Logging: Saves through <see cref="IIncidentCrudService"/> with enforced e-signatures and attachment uploads handled by the shared workflow service; audit persistence resides in those domain services.
+/// Audit &amp; Logging: Saves through <see cref="IIncidentCrudService"/> with enforced e-signatures and attachment uploads handled by the shared workflow service; audit persistence resides in those domain services.
 /// Localization: Uses inline status/priorities (`"REPORTED"`, `"CAPA_LINKED"`, etc.) and `StatusMessage` prompts (e.g. signature and attachment feedback) pending localisation keys.
 /// Navigation: ModuleKey `Incidents` aligns docking; incident records embed related module keys (CAPA, Work Orders) for Golden Arrow routing, and CFL prefixes (`"WO:"`, `"CAPA:"`) support targeted navigation.
 /// </remarks>

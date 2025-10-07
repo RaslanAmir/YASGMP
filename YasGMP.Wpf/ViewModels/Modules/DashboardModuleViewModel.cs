@@ -12,7 +12,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Projects dashboard event telemetry into the WPF shell with SAP B1 scaffolding.</summary>
 /// <remarks>
 /// Form Modes: Operates in Find/View to browse events; Add/Update are surfaced for consistency but the dashboard stream is read-only.
-/// Audit & Logging: Reads recent events from <see cref="DatabaseService.GetRecentDashboardEventsAsync"/> without adding new audit entries.
+/// Audit &amp; Logging: Reads recent events from <see cref="DatabaseService.GetRecentDashboardEventsAsync"/> without adding new audit entries.
 /// Localization: Uses inline strings like `"Dashboard"` and severity labels until a resource file supplies keys.
 /// Navigation: ModuleKey `Dashboard` registers the tab and allows Golden Arrow to route to `RelatedModule` targets surfaced in each `ModuleRecord`, with status strings updating the shell status bar during refresh.
 /// </remarks>

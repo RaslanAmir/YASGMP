@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -17,7 +17,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Projects the MAUI <see cref="AuditLogViewModel"/> into the WPF shell with SAP B1 tooling.</summary>
 /// <remarks>
 /// Form Modes: Operates in Find/View modes to query audit history; Add/Update remain present for parity but the log is immutable.
-/// Audit & Logging: Reads the consolidated audit log through the underlying MAUI view model and export services without generating new entries.
+/// Audit &amp; Logging: Reads the consolidated audit log through the underlying MAUI view model and export services without generating new entries.
 /// Localization: Uses inline button captions such as `"Apply Filter"`, `"Export CSV"`, and propagated status text; resource keys are pending.
 /// Navigation: ModuleKey `Audit` integrates with Golden Arrow routing when other modules reference audit trails, and status strings stay aligned with the shell's status bar.
 /// </remarks>

@@ -51,7 +51,7 @@ namespace YasGMP.Views
                 ?? throw new InvalidOperationException(
                     "Service provider unavailable. Ensure UsersPage and its ViewModels are registered in MauiProgram.");
 
-            UserVM    = services.GetRequiredService<UserViewModel>();
+            UserVM = services.GetRequiredService<UserViewModel>();
             RolePermVM = services.GetRequiredService<UserRolePermissionViewModel>();
 
             // Expose both VMs (and any helper props) through this page as the BindingContext.

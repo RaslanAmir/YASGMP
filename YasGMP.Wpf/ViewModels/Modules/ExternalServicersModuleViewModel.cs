@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,7 +16,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Maintains external servicer vendors within the WPF SAP B1 shell.</summary>
 /// <remarks>
 /// Form Modes: Find searches vendor roster, Add provisions <see cref="ExternalServicerEditor.CreateEmpty"/>, View locks the fields, and Update enables editing with status/service-type picklists.
-/// Audit & Logging: Persists through <see cref="IExternalServicerCrudService"/> while enforcing electronic signatures; vendor audit history remains in the service layer.
+/// Audit &amp; Logging: Persists through <see cref="IExternalServicerCrudService"/> while enforcing electronic signatures; vendor audit history remains in the service layer.
 /// Localization: Uses inline strings such as `"External Servicers"`, `"Attachment upload failed"`, and status prompts; localisation keys have not yet been plumbed.
 /// Navigation: ModuleKey `ExternalServicers` keeps shell docking aligned; CFL overrides feed Choose-From-List dialogs and Golden Arrow links from other modules back to vendor records, with status messages updating the ribbon.
 /// </remarks>

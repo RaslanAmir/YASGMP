@@ -20,7 +20,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Runs CAPA case management within the WPF shell using SAP B1 form semantics.</summary>
 /// <remarks>
 /// Form Modes: Find filters cases via CFL, Add provisions a new <see cref="CapaEditor"/> with default status/priority, View locks the editor, and Update enables collaborative editing alongside attachment uploads.
-/// Audit & Logging: Persists CAPA records through <see cref="ICapaCrudService"/> while enforcing e-signature capture and attachment retention; detailed audit hashes are written by downstream services.
+/// Audit &amp; Logging: Persists CAPA records through <see cref="ICapaCrudService"/> while enforcing e-signature capture and attachment retention; detailed audit hashes are written by downstream services.
 /// Localization: Emits inline captions such as `"CAPA"`, `"Attachment upload failed"`, and status prompts for workflows until resource keys (for status/priority labels) are introduced.
 /// Navigation: ModuleKey `Capa` anchors docking, `CreateCflRequestAsync` surfaces Choose-From-List navigation, and status messages broadcast to the shell so Golden Arrow hops from related modules resolve back to CAPA cases.
 /// </remarks>

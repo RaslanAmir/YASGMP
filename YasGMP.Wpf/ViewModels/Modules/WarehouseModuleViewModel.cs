@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Runs warehouse oversight in the WPF shell using SAP B1 workflows.</summary>
 /// <remarks>
 /// Form Modes: Find lists warehouses, Add seeds <see cref="WarehouseEditor.CreateEmpty"/>, View exposes ledger/stock snapshots in read-only mode, and Update unlocks editing with attachment capture and movement acknowledgements.
-/// Audit & Logging: Persists via <see cref="IWarehouseCrudService"/> with enforced e-signatures and delegates ledger/audit retention to the CRUD and attachment workflow services.
+/// Audit &amp; Logging: Persists via <see cref="IWarehouseCrudService"/> with enforced e-signatures and delegates ledger/audit retention to the CRUD and attachment workflow services.
 /// Localization: Inline literals such as `"Warehouse"`, status names (`"qualified"`, `"maintenance"`), and stock alert messages remain pending RESX wiring.
 /// Navigation: ModuleKey `Warehouse` keeps docking and Golden Arrow routing aligned; CFL pickers drive cross-navigation to specific warehouses and status updates broadcast ledger refresh states through the shell status bar.
 /// </remarks>

@@ -244,6 +244,10 @@
                   "2025-10-06: Introduced WPF-local AuditDashboardViewModel and AuditLogViewModel, normalized AssetsModuleViewModel partials, but WPF build highlights additional legacy issues (ConfigConfigurationExtensionsCompat ambiguity, AsyncRelayCommand overload choice, adapter logging signature mismatches).",
                   "2025-10-06: Reconciled WPF shell compile blockers (ConfigConfigurationExtensionsCompat usage, AsyncRelayCommand overloads, CRUD adapter logging, Admin/Suppliers metadata) and achieved a clean WPF build with only ModuleKey warning backlog.",
                   "2025-10-30: WPF shell warnings cleared by rewriting AuditLog view-models, normalizing ModuleKey declarations, adding vmModules DataTemplates, and tightening nullable safeguards; restore/build succeed (MAUI MSB3277, WPF NETSDK1137) and smoke harness project not yet available.",
-                  "2025-10-07: dotnet restore yasgmp.sln succeeded, but dotnet build hit Diagnostics\\\\ChangeControlAssignmentHarness.cs because the diagnostics harness still references the obsolete YasGMP.ViewModels namespace."
+                  "2025-10-07: dotnet restore yasgmp.sln succeeded, but dotnet build hit Diagnostics\\\\ChangeControlAssignmentHarness.cs because the diagnostics harness still references the obsolete YasGMP.ViewModels namespace.",
+                  "2025-10-07: Wrapped ChangeControlAssignmentHarness behind YASGMP_INCLUDE_CHANGE_CONTROL_HARNESS so default builds rely on the NotSupported stub; reran dotnet build yasgmp.sln and it now completes (warnings only).",
+                  "2025-10-07: Added YASGMP_INCLUDE_CHANGE_CONTROL_HARNESS to the net8 AppCore target and embedded a harness-local workflow that reproduces the MAUI assignment logic without referencing YasGMP.ViewModels; dotnet build yasgmp.sln now succeeds (warnings only) with the diagnostics harness enabled.",
+                  "2025-10-07: Escaped XML doc ampersands across module view-models and reformatted MAUI view initializers/comments (Suppliers, Users, Validation, WorkOrders) to retire CS157x/SA1025/SA1515 warnings and quiet the default build log.",
+                  "2025-10-07: Bumped AppCore to Microsoft.Extensions.DependencyInjection.Abstractions 9.0.3 (matching WPF's 9.0.x stack) so solution builds no longer log MSB3277 dependency conflicts."
               ]
 }

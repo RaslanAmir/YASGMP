@@ -18,14 +18,14 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Handles spare part inventory within the WPF shell using SAP B1 form semantics.</summary>
 /// <remarks>
 /// Form Modes: Find filters parts, Add seeds <see cref="PartEditor.CreateEmpty"/>, View keeps the editor read-only for stock review, and Update enables edits plus attachment uploads and supplier refreshes.
-/// Audit & Logging: Persists via <see cref="IPartCrudService"/> behind mandatory e-signatures; attachment retention and audit trails are delegated to the workflow and CRUD services.
-/// Localization: Inline strings such as `"Parts & Stock"`, `"Stock health calculated"`, and status prompts remain until resource keys become available.
+/// Audit &amp; Logging: Persists via <see cref="IPartCrudService"/> behind mandatory e-signatures; attachment retention and audit trails are delegated to the workflow and CRUD services.
+/// Localization: Inline strings such as `"Parts &amp; Stock"`, `"Stock health calculated"`, and status prompts remain until resource keys become available.
 /// Navigation: ModuleKey `Parts` anchors docking; CFL requests expose part pickers, and `ModuleRecord` entries carry supplier/warehouse identifiers so Golden Arrow navigation can pivot to related modules while status text updates the shell.
 /// </remarks>
 public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>Shell registration key that binds Parts & Stock into the docking layout.</summary>
-    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Parts & Stock" until `Modules_Parts_Title` is introduced.</remarks>
+    /// <summary>Shell registration key that binds Parts &amp; Stock into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Parts &amp; Stock" until `Modules_Parts_Title` is introduced.</remarks>
     public new const string ModuleKey = "Parts";
 
     private readonly IPartCrudService _partService;
@@ -37,7 +37,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     private PartEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
 
-    /// <summary>Initializes the Parts & Stock module view model with domain and shell services.</summary>
+    /// <summary>Initializes the Parts &amp; Stock module view model with domain and shell services.</summary>
     /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public PartsModuleViewModel(
         DatabaseService databaseService,
@@ -50,7 +50,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation)
-        : base(ModuleKey, "Parts & Stock", databaseService, cflDialogService, shellInteraction, navigation, auditService)
+        : base(ModuleKey, "Parts &amp; Stock", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
@@ -63,12 +63,12 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
-    /// <summary>Generated property exposing the editor for the Parts & Stock module.</summary>
+    /// <summary>Generated property exposing the editor for the Parts &amp; Stock module.</summary>
     /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Parts_Editor` resources are available.</remarks>
     [ObservableProperty]
     private PartEditor _editor;
 
-    /// <summary>Generated property exposing the is editor enabled for the Parts & Stock module.</summary>
+    /// <summary>Generated property exposing the is editor enabled for the Parts &amp; Stock module.</summary>
     /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Parts_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
@@ -79,15 +79,15 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     [ObservableProperty]
     private string _stockHealthMessage = string.Empty;
 
-    /// <summary>Collection presenting the status options for the Parts & Stock document host.</summary>
+    /// <summary>Collection presenting the status options for the Parts &amp; Stock document host.</summary>
     /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Parts_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
 
-    /// <summary>Command executing the attach document workflow for the Parts & Stock module.</summary>
+    /// <summary>Command executing the attach document workflow for the Parts &amp; Stock module.</summary>
     /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Parts_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
-    /// <summary>Loads Parts & Stock records from domain services.</summary>
+    /// <summary>Loads Parts &amp; Stock records from domain services.</summary>
     /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Parts_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -96,7 +96,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return parts.Select(ToRecord).ToList();
     }
 
-    /// <summary>Provides design-time sample data for the Parts & Stock designer experience.</summary>
+    /// <summary>Provides design-time sample data for the Parts &amp; Stock designer experience.</summary>
     /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
@@ -131,7 +131,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return sample.Select(ToRecord).ToList();
     }
 
-    /// <summary>Executes the on activated async routine for the Parts & Stock module.</summary>
+    /// <summary>Executes the on activated async routine for the Parts &amp; Stock module.</summary>
     /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override async Task OnActivatedAsync(object? parameter)
     {
@@ -173,7 +173,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return new CflRequest("Select Part", items);
     }
 
-    /// <summary>Applies CFL selections back into the Parts & Stock workspace.</summary>
+    /// <summary>Applies CFL selections back into the Parts &amp; Stock workspace.</summary>
     /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Parts". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Parts_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
@@ -192,7 +192,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return Task.CompletedTask;
     }
 
-    /// <summary>Loads editor payloads for the selected Parts & Stock record.</summary>
+    /// <summary>Loads editor payloads for the selected Parts &amp; Stock record.</summary>
     /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Parts". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Parts` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {

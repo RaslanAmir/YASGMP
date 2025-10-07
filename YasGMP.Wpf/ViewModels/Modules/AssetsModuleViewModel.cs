@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Coordinates asset master data management in the WPF shell with SAP B1 style tooling.</summary>
 /// <remarks>
 /// Form Modes: Find filters asset records via CFL search, Add seeds a fresh <see cref="AssetEditor"/> with normalized status, View keeps the editor read-only, and Update enables editing plus attachment workflows.
-/// Audit & Logging: Persists assets through <see cref="IMachineCrudService"/> with enforced e-signature capture and signature metadata persisted via <see cref="SignaturePersistenceHelper"/>; retention and audit hashing are delegated to the CRUD and attachment workflow services.
+/// Audit &amp; Logging: Persists assets through <see cref="IMachineCrudService"/> with enforced e-signature capture and signature metadata persisted via <see cref="SignaturePersistenceHelper"/>; retention and audit hashing are delegated to the CRUD and attachment workflow services.
 /// Localization: Currently emits inline strings such as `"Assets"`, `"Select Asset"`, `"Filtered {Title} by"` and attachment status prompts pending RESX resource keys.
 /// Navigation: ModuleKey `Assets` anchors shell docking, `CreateCflRequestAsync` and `OnCflSelectionAsync` power Choose-From-List / Golden Arrow routing, and `StatusMessage` updates inform the ribbon status bar during navigation and saves.
 /// </remarks>
@@ -85,7 +85,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     public IReadOnlyList<string> StatusOptions { get; }
 
     /// <summary>Command exposed on the ribbon to stage attachment uploads.</summary>
-    /// <remarks>Execution: Fired when Upload is tapped; delegates to <see cref="AttachDocumentAsync"/>. Form Mode: Enabled only when Add/Update and <see cref="HasAttachmentWorkflow"/> is true. Localization: Button label/tooltips use inline strings until `Ribbon_Assets_Attach` resources exist.</remarks>
+    /// <remarks>Execution: Fired when Upload is tapped; delegates to <see cref="AttachDocumentAsync"/>. Form Mode: Enabled only when Add/Update and the attachment workflow services are available. Localization: Button label/tooltips use inline strings until `Ribbon_Assets_Attach` resources exist.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
     /// <summary>Retrieves assets from the domain service for presentation.</summary>

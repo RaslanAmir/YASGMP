@@ -66,17 +66,17 @@ namespace YasGMP.Views
                     {
                         Suppliers.Add(new Supplier
                         {
-                            Id           = Convert.ToInt32(row["id"]),
-                            Name         = row["name"]?.ToString()          ?? string.Empty,
-                            VatNumber    = row["vat_number"]?.ToString()    ?? string.Empty,
-                            Address      = row["address"]?.ToString()       ?? string.Empty,
-                            City         = row["city"]?.ToString()          ?? string.Empty,
-                            Country      = row["country"]?.ToString()       ?? string.Empty,
-                            Email        = row["email"]?.ToString()         ?? string.Empty,
-                            Phone        = row["phone"]?.ToString()         ?? string.Empty,
-                            Website      = row["website"]?.ToString()       ?? string.Empty,
+                            Id = Convert.ToInt32(row["id"]),
+                            Name = row["name"]?.ToString() ?? string.Empty,
+                            VatNumber = row["vat_number"]?.ToString() ?? string.Empty,
+                            Address = row["address"]?.ToString() ?? string.Empty,
+                            City = row["city"]?.ToString() ?? string.Empty,
+                            Country = row["country"]?.ToString() ?? string.Empty,
+                            Email = row["email"]?.ToString() ?? string.Empty,
+                            Phone = row["phone"]?.ToString() ?? string.Empty,
+                            Website = row["website"]?.ToString() ?? string.Empty,
                             SupplierType = row["supplier_type"]?.ToString() ?? string.Empty,
-                            Notes        = row["notes"]?.ToString()         ?? string.Empty,
+                            Notes = row["notes"]?.ToString() ?? string.Empty,
                             ContractFile = row["contract_file"]?.ToString() ?? string.Empty
                         });
                     }
@@ -98,16 +98,16 @@ namespace YasGMP.Views
                                      VALUES (@name, @vat_number, @address, @city, @country, @email, @phone, @website, @supplier_type, @notes, @contract_file)";
                 var pars = new[]
                 {
-                    new MySqlParameter("@name",          s.Name ?? string.Empty),
-                    new MySqlParameter("@vat_number",    s.VatNumber ?? string.Empty),
-                    new MySqlParameter("@address",       s.Address ?? string.Empty),
-                    new MySqlParameter("@city",          s.City ?? string.Empty),
-                    new MySqlParameter("@country",       s.Country ?? string.Empty),
-                    new MySqlParameter("@email",         s.Email ?? string.Empty),
-                    new MySqlParameter("@phone",         s.Phone ?? string.Empty),
-                    new MySqlParameter("@website",       s.Website ?? string.Empty),
+                    new MySqlParameter("@name", s.Name ?? string.Empty),
+                    new MySqlParameter("@vat_number", s.VatNumber ?? string.Empty),
+                    new MySqlParameter("@address", s.Address ?? string.Empty),
+                    new MySqlParameter("@city", s.City ?? string.Empty),
+                    new MySqlParameter("@country", s.Country ?? string.Empty),
+                    new MySqlParameter("@email", s.Email ?? string.Empty),
+                    new MySqlParameter("@phone", s.Phone ?? string.Empty),
+                    new MySqlParameter("@website", s.Website ?? string.Empty),
                     new MySqlParameter("@supplier_type", s.SupplierType ?? string.Empty),
-                    new MySqlParameter("@notes",         s.Notes ?? string.Empty),
+                    new MySqlParameter("@notes", s.Notes ?? string.Empty),
                     new MySqlParameter("@contract_file", s.ContractFile ?? string.Empty)
                 };
 
@@ -134,17 +134,17 @@ namespace YasGMP.Views
 
             var s = new Supplier
             {
-                Id           = selected.Id,
-                Name         = selected.Name,
-                VatNumber    = selected.VatNumber,
-                Address      = selected.Address,
-                City         = selected.City,
-                Country      = selected.Country,
-                Email        = selected.Email,
-                Phone        = selected.Phone,
-                Website      = selected.Website,
+                Id = selected.Id,
+                Name = selected.Name,
+                VatNumber = selected.VatNumber,
+                Address = selected.Address,
+                City = selected.City,
+                Country = selected.Country,
+                Email = selected.Email,
+                Phone = selected.Phone,
+                Website = selected.Website,
                 SupplierType = selected.SupplierType,
-                Notes        = selected.Notes,
+                Notes = selected.Notes,
                 ContractFile = selected.ContractFile
             };
 
@@ -158,18 +158,18 @@ namespace YasGMP.Views
                                      WHERE id=@id";
                 var pars = new[]
                 {
-                    new MySqlParameter("@name",          s.Name ?? string.Empty),
-                    new MySqlParameter("@vat_number",    s.VatNumber ?? string.Empty),
-                    new MySqlParameter("@address",       s.Address ?? string.Empty),
-                    new MySqlParameter("@city",          s.City ?? string.Empty),
-                    new MySqlParameter("@country",       s.Country ?? string.Empty),
-                    new MySqlParameter("@email",         s.Email ?? string.Empty),
-                    new MySqlParameter("@phone",         s.Phone ?? string.Empty),
-                    new MySqlParameter("@website",       s.Website ?? string.Empty),
+                    new MySqlParameter("@name", s.Name ?? string.Empty),
+                    new MySqlParameter("@vat_number", s.VatNumber ?? string.Empty),
+                    new MySqlParameter("@address", s.Address ?? string.Empty),
+                    new MySqlParameter("@city", s.City ?? string.Empty),
+                    new MySqlParameter("@country", s.Country ?? string.Empty),
+                    new MySqlParameter("@email", s.Email ?? string.Empty),
+                    new MySqlParameter("@phone", s.Phone ?? string.Empty),
+                    new MySqlParameter("@website", s.Website ?? string.Empty),
                     new MySqlParameter("@supplier_type", s.SupplierType ?? string.Empty),
-                    new MySqlParameter("@notes",         s.Notes ?? string.Empty),
+                    new MySqlParameter("@notes", s.Notes ?? string.Empty),
                     new MySqlParameter("@contract_file", s.ContractFile ?? string.Empty),
-                    new MySqlParameter("@id",            s.Id)
+                    new MySqlParameter("@id", s.Id)
                 };
 
                 try

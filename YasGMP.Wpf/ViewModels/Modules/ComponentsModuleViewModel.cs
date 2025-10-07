@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Maintains component records linked to assets inside the WPF SAP B1 shell.</summary>
 /// <remarks>
 /// Form Modes: Find filters across linked machines, Add seeds a new <see cref="ComponentEditor"/>, View freezes the editor, and Update enables editing with machine selection lookups.
-/// Audit & Logging: Persists through <see cref="IComponentCrudService"/> with enforced electronic signatures; audit diffing lives in the shared service layer.
+/// Audit &amp; Logging: Persists through <see cref="IComponentCrudService"/> with enforced electronic signatures; audit diffing lives in the shared service layer.
 /// Localization: Uses inline literals such as `"Components"`, `"Unable to locate component #{id}."`, and status prompts; RESX keys are still TODO.
 /// Navigation: ModuleKey `Components` ties the module into docking and status updates, while CFL helpers route Golden Arrow navigation between assets and component records using machine-related module keys.
 /// </remarks>

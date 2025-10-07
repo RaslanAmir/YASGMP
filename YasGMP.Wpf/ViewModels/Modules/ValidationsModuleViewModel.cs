@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -19,7 +19,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Manages equipment/software validation packages in the WPF SAP B1 shell.</summary>
 /// <remarks>
 /// Form Modes: Find filters validations (with machine/component CFL pickers), Add seeds <see cref="ValidationEditor.CreateEmpty"/>, View keeps history read-only, and Update enables editing with attachment capture and status tracking.
-/// Audit & Logging: Persists via <see cref="IValidationCrudService"/> under enforced e-signatures, delegating audit hashing and attachment retention to shared services.
+/// Audit &amp; Logging: Persists via <see cref="IValidationCrudService"/> under enforced e-signatures, delegating audit hashing and attachment retention to shared services.
 /// Localization: Inline literals—for example `"Validations"`, `"Pending"`, and status messages for due dates—remain until localisation keys are supplied.
 /// Navigation: ModuleKey `Validations` anchors docking; overrides build CFL payloads and `ModuleRecord` entries embed machine/component identifiers for Golden Arrow navigation while status messages feed the shell.
 /// </remarks>

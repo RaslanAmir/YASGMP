@@ -18,7 +18,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Handles equipment calibration records with SAP B1 workflows inside the WPF shell.</summary>
 /// <remarks>
 /// Form Modes: Find filters calibrations via CFL, Add seeds <see cref="CalibrationEditor.CreateEmpty"/>, View locks the editor, and Update enables editing with attachment and supplier/component selectors.
-/// Audit & Logging: Delegates persistence to <see cref="ICalibrationCrudService"/> with required e-signatures and attachment handling; actual audit hashes are written by the underlying services rather than this view-model.
+/// Audit &amp; Logging: Delegates persistence to <see cref="ICalibrationCrudService"/> with required e-signatures and attachment handling; actual audit hashes are written by the underlying services rather than this view-model.
 /// Localization: Emits inline strings such as `"Calibration"`, `"Select Calibration"`, status prompts for due dates, and attachment notifications; resource keys are pending.
 /// Navigation: ModuleKey `Calibration` aligns docking, while overrides of `CreateCflRequestAsync` and related status strings drive Golden Arrow/CFL routing between components, suppliers, and calibration records.
 /// </remarks>

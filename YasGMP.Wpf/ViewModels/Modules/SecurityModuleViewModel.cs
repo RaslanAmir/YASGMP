@@ -17,7 +17,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Administers user and role metadata inside the WPF shell using SAP B1 flows.</summary>
 /// <remarks>
 /// Form Modes: Find performs user lookup via CFL, Add seeds <see cref="UserEditor.CreateEmpty"/>, View is read-only for account review, and Update unlocks editing (including password resets and role assignments).
-/// Audit & Logging: Saves flow through <see cref="IUserCrudService"/> with required e-signature capture; RBAC audit footprints are emitted by that service rather than this view-model.
+/// Audit &amp; Logging: Saves flow through <see cref="IUserCrudService"/> with required e-signature capture; RBAC audit footprints are emitted by that service rather than this view-model.
 /// Localization: Inline literals such as `"Security"`, `"Select User"`, role labels, and status prompts remain until the security resource file is wired in.
 /// Navigation: ModuleKey `Security` registers the module, and `ModuleRecord` entries expose user identifiers so Golden Arrow and CFL navigation from other modules (e.g. attachments) route back here while status strings keep the shell informed.
 /// </remarks>

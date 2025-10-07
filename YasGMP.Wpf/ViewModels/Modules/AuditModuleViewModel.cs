@@ -15,7 +15,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>Provides a WPF-first audit trail browser built on the SAP B1 module pattern.</summary>
 /// <remarks>
 /// Form Modes: Find filters audits by user/entity/action, View presents immutable results, and Add/Update are present for parity but no edits are allowed.
-/// Audit & Logging: Reads audit history through <see cref="AuditService"/> and supports exports via <see cref="ExportService"/>; this module never mutates data or creates new audit entries.
+/// Audit &amp; Logging: Reads audit history through <see cref="AuditService"/> and supports exports via <see cref="ExportService"/>; this module never mutates data or creates new audit entries.
 /// Localization: Relies on inline strings such as `"Audit Trail"`, `"All"`, filter prompts, and export status messages while waiting on corresponding resource keys.
 /// Navigation: Declares ModuleKey `Audit` so the dashboard, status bar, and Golden Arrow consumers can route to the audit browser; status messages (e.g. `"Loaded {count} audit entries."`) keep shell chrome synchronized.
 /// </remarks>
