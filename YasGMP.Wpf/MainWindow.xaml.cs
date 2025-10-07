@@ -14,6 +14,9 @@ namespace YasGMP.Wpf
     {
         private readonly MainWindowViewModel _viewModel;
         private readonly ShellLayoutController _layoutController;
+        /// <summary>
+        /// Initializes a new instance of the MainWindow class.
+        /// </summary>
 
         public MainWindow(MainWindowViewModel viewModel, ShellLayoutController layoutController)
         {

@@ -24,8 +24,14 @@ namespace YasGMP.Services.Logging
         private string _currentFile = string.Empty;
         private const long MaxBytes = 5L * 1024 * 1024; // 5 MB per segment
         private volatile bool _disposed;
+        /// <summary>
+        /// Gets or sets the current log file path.
+        /// </summary>
 
         public string CurrentLogFilePath => _currentFile;
+        /// <summary>
+        /// Initializes a new instance of the FileLogService class.
+        /// </summary>
 
         public FileLogService(Func<int?> getUserId, string? baseDir = null, string? sessionId = null)
         {
@@ -35,12 +41,21 @@ namespace YasGMP.Services.Logging
             Directory.CreateDirectory(_baseDir);
             _currentFile = ComputeLogPath();
         }
+        /// <summary>
+        /// Executes the info async operation.
+        /// </summary>
 
         public async Task InfoAsync(string source, string message, IDictionary<string, object>? context = null)
             => await WriteAsync("info", source, action: "Info", message, context);
+        /// <summary>
+        /// Executes the trace async operation.
+        /// </summary>
 
         public async Task TraceAsync(string source, string action, string details, IDictionary<string, object>? context = null)
             => await WriteAsync("trace", source, action, details, context);
+        /// <summary>
+        /// Executes the error async operation.
+        /// </summary>
 
         public async Task ErrorAsync(string source, Exception ex, string? message = null, IDictionary<string, object>? context = null)
         {
@@ -124,6 +139,9 @@ namespace YasGMP.Services.Logging
             }
             await Task.CompletedTask;
         }
+        /// <summary>
+        /// Executes the dispose operation.
+        /// </summary>
 
         public void Dispose()
         {

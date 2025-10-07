@@ -12,37 +12,40 @@ namespace YasGMP
         private static class Paths
         {
             // Home
-            public const string Dashboard      = "//root/home/dashboard";
+            private const string Dashboard      = "//root/home/dashboard";
 
             // Operations
-            public const string WorkOrders     = "//root/ops/workorders";
-            public const string Machines       = "//root/ops/machines";
-            public const string Parts          = "//root/ops/parts";
-            public const string Warehouses     = "//root/ops/warehouses";
-            public const string Suppliers      = "//root/ops/suppliers";
-            public const string Components     = "//root/ops/components";
-            public const string External       = "//root/ops/externalservicers";
-            public const string Ppm            = "//root/ops/ppm";
-            public const string Calibrations   = "//root/ops/calibrations";
+            private const string WorkOrders     = "//root/ops/workorders";
+            private const string Machines       = "//root/ops/machines";
+            private const string Parts          = "//root/ops/parts";
+            private const string Warehouses     = "//root/ops/warehouses";
+            private const string Suppliers      = "//root/ops/suppliers";
+            private const string Components     = "//root/ops/components";
+            private const string External       = "//root/ops/externalservicers";
+            private const string Ppm            = "//root/ops/ppm";
+            private const string Calibrations   = "//root/ops/calibrations";
 
             // Quality
-            public const string Capa           = "//root/quality/capa";
-            public const string Validation     = "//root/quality/validation";
-            public const string AuditDashboard = "//root/quality/auditdashboard";
-            public const string AuditLog       = "//root/quality/auditlog";
+            private const string Capa           = "//root/quality/capa";
+            private const string Validation     = "//root/quality/validation";
+            private const string AuditDashboard = "//root/quality/auditdashboard";
+            private const string AuditLog       = "//root/quality/auditlog";
 
             // Admin
-            public const string Users          = "//root/admin/users";
-            public const string Rbac           = "//root/admin/rbac";
-            public const string AdminPanel     = "//root/admin/adminpanel";
-            public const string Rollback       = "//root/admin/rollbackpreview";
+            private const string Users          = "//root/admin/users";
+            private const string Rbac           = "//root/admin/rbac";
+            private const string AdminPanel     = "//root/admin/adminpanel";
+            private const string Rollback       = "//root/admin/rollbackpreview";
 
             // Debug
-            public const string Debug          = "//root/debug/debug_dashboard";
-            public const string LogViewer      = "//root/debug/logviewer";
-            public const string Health         = "//root/debug/health";
+            private const string Debug          = "//root/debug/debug_dashboard";
+            private const string LogViewer      = "//root/debug/logviewer";
+            private const string Health         = "//root/debug/health";
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppShell"/> class and loads XAML-defined routes.
+        /// </summary>
         public AppShell()
         {
             InitializeComponent();

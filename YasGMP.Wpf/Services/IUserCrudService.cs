@@ -75,6 +75,9 @@ namespace YasGMP.Wpf.Services
     {
         private const string DefaultSignatureMethod = "password";
         private const string DefaultSignatureStatus = "valid";
+        /// <summary>
+        /// Executes the create operation.
+        /// </summary>
 
         public static UserCrudContext Create(int userId, string? ip, string? deviceInfo, string? sessionId)
             => new(
@@ -87,6 +90,9 @@ namespace YasGMP.Wpf.Services
                 DefaultSignatureMethod,
                 DefaultSignatureStatus,
                 null);
+        /// <summary>
+        /// Executes the create operation.
+        /// </summary>
 
         public static UserCrudContext Create(
             int userId,

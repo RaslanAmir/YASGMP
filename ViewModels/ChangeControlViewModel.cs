@@ -123,13 +123,34 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ===
+        /// <summary>
+        /// Gets or sets the load change controls command.
+        /// </summary>
 
         public ICommand LoadChangeControlsCommand { get; }
+        /// <summary>
+        /// Gets or sets the initiate change control command.
+        /// </summary>
         public ICommand InitiateChangeControlCommand { get; }
+        /// <summary>
+        /// Gets or sets the approve change control command.
+        /// </summary>
         public ICommand ApproveChangeControlCommand { get; }
+        /// <summary>
+        /// Gets or sets the assign change control command.
+        /// </summary>
         public ICommand AssignChangeControlCommand { get; }
+        /// <summary>
+        /// Gets or sets the implement change control command.
+        /// </summary>
         public ICommand ImplementChangeControlCommand { get; }
+        /// <summary>
+        /// Gets or sets the close change control command.
+        /// </summary>
         public ICommand CloseChangeControlCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

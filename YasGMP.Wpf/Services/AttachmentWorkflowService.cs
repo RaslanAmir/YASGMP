@@ -61,6 +61,9 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
     private readonly AuditService _auditService;
     private readonly IAttachmentWorkflowAudit _auditWorkflow;
     private readonly AttachmentEncryptionOptions _encryptionOptions;
+    /// <summary>
+    /// Initializes a new instance of the AttachmentWorkflowService class.
+    /// </summary>
 
     public AttachmentWorkflowService(
         IAttachmentService attachmentService,
@@ -75,12 +78,21 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
         _auditWorkflow = _auditService as IAttachmentWorkflowAudit
             ?? new AuditServiceAttachmentWorkflowAdapter(_auditService);
     }
+    /// <summary>
+    /// Executes the is encryption enabled operation.
+    /// </summary>
 
     public bool IsEncryptionEnabled => !string.IsNullOrWhiteSpace(_encryptionOptions.KeyMaterial);
+    /// <summary>
+    /// Executes the encryption key id operation.
+    /// </summary>
 
     public string EncryptionKeyId => string.IsNullOrWhiteSpace(_encryptionOptions.KeyId)
         ? "default"
         : _encryptionOptions.KeyId!;
+    /// <summary>
+    /// Executes the upload async operation.
+    /// </summary>
 
     public async Task<AttachmentWorkflowUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
     {
@@ -115,15 +127,24 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
 
         return new AttachmentWorkflowUploadResult(upload, prepared.Hash, prepared.Length, deduplicated, existing);
     }
+    /// <summary>
+    /// Executes the download async operation.
+    /// </summary>
 
     public Task<AttachmentStreamResult> DownloadAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default)
     {
         if (destination is null) throw new ArgumentNullException(nameof(destination));
         return _attachmentService.StreamContentAsync(attachmentId, destination, request, token);
     }
+    /// <summary>
+    /// Executes the get links for entity async operation.
+    /// </summary>
 
     public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
         => _attachmentService.GetLinksForEntityAsync(entityType, entityId, token);
+    /// <summary>
+    /// Executes the get attachment summaries async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<Attachment>> GetAttachmentSummariesAsync(string? entityFilter, string? typeFilter, string? searchTerm, CancellationToken token = default)
     {
@@ -132,15 +153,27 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
             .ConfigureAwait(false);
         return rows;
     }
+    /// <summary>
+    /// Executes the remove link async operation.
+    /// </summary>
 
     public Task RemoveLinkAsync(int linkId, CancellationToken token = default)
         => _attachmentService.RemoveLinkAsync(linkId, token);
+    /// <summary>
+    /// Executes the remove link async operation.
+    /// </summary>
 
     public Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
         => _attachmentService.RemoveLinkAsync(entityType, entityId, attachmentId, token);
+    /// <summary>
+    /// Executes the find by hash async operation.
+    /// </summary>
 
     public Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default)
         => _attachmentService.FindByHashAsync(sha256, token);
+    /// <summary>
+    /// Executes the find by hash and size async operation.
+    /// </summary>
 
     public Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default)
         => _attachmentService.FindByHashAndSizeAsync(sha256, fileSize, token);
@@ -202,6 +235,9 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
 
     private sealed class PreparedStream : IAsyncDisposable
     {
+        /// <summary>
+        /// Initializes a new instance of the PreparedStream class.
+        /// </summary>
         public PreparedStream(Stream stream, string hash, long length, Stream? owned)
         {
             Stream = stream;
@@ -209,11 +245,23 @@ public sealed class AttachmentWorkflowService : IAttachmentWorkflowService
             Length = length;
             _owned = owned;
         }
+        /// <summary>
+        /// Gets or sets the stream.
+        /// </summary>
 
         public Stream Stream { get; }
+        /// <summary>
+        /// Gets or sets the hash.
+        /// </summary>
         public string Hash { get; }
+        /// <summary>
+        /// Gets or sets the length.
+        /// </summary>
         public long Length { get; }
         private readonly Stream? _owned;
+        /// <summary>
+        /// Executes the dispose async operation.
+        /// </summary>
 
         public ValueTask DisposeAsync()
         {
@@ -234,11 +282,17 @@ public interface IAttachmentWorkflowAudit
 internal sealed class AuditServiceAttachmentWorkflowAdapter : IAttachmentWorkflowAudit
 {
     private readonly AuditService _auditService;
+    /// <summary>
+    /// Initializes a new instance of the AuditServiceAttachmentWorkflowAdapter class.
+    /// </summary>
 
     public AuditServiceAttachmentWorkflowAdapter(AuditService auditService)
     {
         _auditService = auditService;
     }
+    /// <summary>
+    /// Executes the log attachment upload async operation.
+    /// </summary>
 
     public Task LogAttachmentUploadAsync(int? actorUserId, string entityType, int entityId, string description, int attachmentId, CancellationToken token)
         => _auditService.LogSystemEventForUserAsync(actorUserId, "ATTACHMENT_UPLOAD", description, entityType, attachmentId);

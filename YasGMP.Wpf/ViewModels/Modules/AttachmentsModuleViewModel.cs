@@ -20,10 +20,19 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the attachments module view model value.
+/// </summary>
 
 public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Attachments";
+    /// <summary>
+    /// Initializes a new instance of the AttachmentsModuleViewModel class.
+    /// </summary>
 
     public AttachmentsModuleViewModel(
         DatabaseService databaseService,
@@ -103,23 +112,47 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             ResetAttachmentState(clearStagedUploads: true, clearAttachmentRows: true);
         }
     }
+    /// <summary>
+    /// Gets or sets the has attachment workflow.
+    /// </summary>
 
     public bool HasAttachmentWorkflow { get; }
+    /// <summary>
+    /// Gets or sets the has shell integration.
+    /// </summary>
 
     public bool HasShellIntegration { get; }
+    /// <summary>
+    /// Gets or sets the attachment rows.
+    /// </summary>
 
     public ObservableCollection<AttachmentRowViewModel> AttachmentRows { get; }
+    /// <summary>
+    /// Gets or sets the staged uploads.
+    /// </summary>
 
     public ObservableCollection<StagedAttachmentUploadViewModel> StagedUploads { get; }
+    /// <summary>
+    /// Gets or sets the has staged uploads.
+    /// </summary>
 
     public bool HasStagedUploads => StagedUploads.Count > 0;
 
     [ObservableProperty]
     private AttachmentRowViewModel? _selectedAttachment;
+    /// <summary>
+    /// Gets or sets the upload command.
+    /// </summary>
 
     public IAsyncRelayCommand UploadCommand { get; }
+    /// <summary>
+    /// Gets or sets the download command.
+    /// </summary>
 
     public IAsyncRelayCommand DownloadCommand { get; }
+    /// <summary>
+    /// Gets or sets the delete command.
+    /// </summary>
 
     public IAsyncRelayCommand DeleteCommand { get; }
 
@@ -986,30 +1019,54 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     {
         private readonly IAttachmentService _inner;
         private readonly AttachmentUploadResult _result;
+        /// <summary>
+        /// Initializes a new instance of the AttachmentServiceUploadProxy class.
+        /// </summary>
 
         public AttachmentServiceUploadProxy(IAttachmentService inner, AttachmentUploadResult result)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _result = result ?? throw new ArgumentNullException(nameof(result));
         }
+        /// <summary>
+        /// Executes the upload async operation.
+        /// </summary>
 
         public Task<AttachmentUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
             => Task.FromResult(_result);
+        /// <summary>
+        /// Executes the find by hash async operation.
+        /// </summary>
 
         public Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default)
             => _inner.FindByHashAsync(sha256, token);
+        /// <summary>
+        /// Executes the find by hash and size async operation.
+        /// </summary>
 
         public Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default)
             => _inner.FindByHashAndSizeAsync(sha256, fileSize, token);
+        /// <summary>
+        /// Executes the stream content async operation.
+        /// </summary>
 
         public Task<AttachmentStreamResult> StreamContentAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default)
             => _inner.StreamContentAsync(attachmentId, destination, request, token);
+        /// <summary>
+        /// Executes the get links for entity async operation.
+        /// </summary>
 
         public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
             => _inner.GetLinksForEntityAsync(entityType, entityId, token);
+        /// <summary>
+        /// Executes the remove link async operation.
+        /// </summary>
 
         public Task RemoveLinkAsync(int linkId, CancellationToken token = default)
             => _inner.RemoveLinkAsync(linkId, token);
+        /// <summary>
+        /// Executes the remove link async operation.
+        /// </summary>
 
         public Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
             => _inner.RemoveLinkAsync(entityType, entityId, attachmentId, token);
@@ -1028,23 +1085,47 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     private readonly IShellInteractionService _shellInteractionService;
     private readonly IModuleNavigationService _navigationService;
     private string? _pendingStatusMessage;
+    /// <summary>
+    /// Represents the Attachment Row View Model.
+    /// </summary>
 
     public sealed class AttachmentRowViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the AttachmentRowViewModel class.
+        /// </summary>
         public AttachmentRowViewModel(Attachment model)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
         }
+        /// <summary>
+        /// Gets or sets the model.
+        /// </summary>
 
         public Attachment Model { get; }
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
 
         public int Id => Model.Id;
+        /// <summary>
+        /// Executes the file name operation.
+        /// </summary>
 
         public string FileName => string.IsNullOrWhiteSpace(Model.FileName) ? "(unknown)" : Model.FileName;
+        /// <summary>
+        /// Executes the display name operation.
+        /// </summary>
 
         public string DisplayName => string.IsNullOrWhiteSpace(Model.Name) ? FileName : Model.Name;
+        /// <summary>
+        /// Gets or sets the status.
+        /// </summary>
 
         public string? Status => Model.Status;
+        /// <summary>
+        /// Represents the entity display name value.
+        /// </summary>
 
         public string EntityDisplayName
         {
@@ -1060,8 +1141,14 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                     : $"{Model.EntityType}/{Model.EntityId}";
             }
         }
+        /// <summary>
+        /// Gets or sets the file type.
+        /// </summary>
 
         public string? FileType => Model.FileType;
+        /// <summary>
+        /// Represents the file size display value.
+        /// </summary>
 
         public string FileSizeDisplay
         {
@@ -1086,23 +1173,50 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                 return (size / 1024d / 1024d).ToString("F1", CultureInfo.CurrentCulture) + " MB";
             }
         }
+        /// <summary>
+        /// Gets or sets the sha256.
+        /// </summary>
 
         public string? Sha256 => Model.Sha256;
+        /// <summary>
+        /// Executes the notes operation.
+        /// </summary>
 
         public string? Notes => string.IsNullOrWhiteSpace(Model.Notes) ? Model.Note : Model.Notes;
+        /// <summary>
+        /// Gets or sets the uploaded at.
+        /// </summary>
 
         public DateTime UploadedAt => Model.UploadedAt;
+        /// <summary>
+        /// Gets or sets the retention policy name.
+        /// </summary>
 
         public string? RetentionPolicyName => Model.RetentionPolicyName;
+        /// <summary>
+        /// Gets or sets the retain until.
+        /// </summary>
 
         public DateTime? RetainUntil => Model.RetainUntil;
+        /// <summary>
+        /// Gets or sets the retention legal hold.
+        /// </summary>
 
         public bool RetentionLegalHold => Model.RetentionLegalHold;
+        /// <summary>
+        /// Gets or sets the retention review required.
+        /// </summary>
 
         public bool RetentionReviewRequired => Model.RetentionReviewRequired;
+        /// <summary>
+        /// Gets or sets the retention notes.
+        /// </summary>
 
         public string? RetentionNotes => Model.RetentionNotes;
     }
+    /// <summary>
+    /// Represents the Staged Attachment Upload View Model.
+    /// </summary>
 
     public sealed class StagedAttachmentUploadViewModel : ObservableObject
     {
@@ -1115,54 +1229,81 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         private string? _tempDirectory;
         private long _fileSize;
         private string? _sha256;
+        /// <summary>
+        /// Represents the file name value.
+        /// </summary>
 
         public string FileName
         {
             get => _fileName;
             set => SetProperty(ref _fileName, value);
         }
+        /// <summary>
+        /// Represents the content type value.
+        /// </summary>
 
         public string? ContentType
         {
             get => _contentType;
             set => SetProperty(ref _contentType, value);
         }
+        /// <summary>
+        /// Represents the entity type value.
+        /// </summary>
 
         public string EntityType
         {
             get => _entityType;
             set => SetProperty(ref _entityType, value);
         }
+        /// <summary>
+        /// Represents the entity id value.
+        /// </summary>
 
         public int EntityId
         {
             get => _entityId;
             set => SetProperty(ref _entityId, value);
         }
+        /// <summary>
+        /// Represents the notes value.
+        /// </summary>
 
         public string? Notes
         {
             get => _notes;
             set => SetProperty(ref _notes, value);
         }
+        /// <summary>
+        /// Represents the temp path value.
+        /// </summary>
 
         public string? TempPath
         {
             get => _tempPath;
             set => SetProperty(ref _tempPath, value);
         }
+        /// <summary>
+        /// Represents the temp directory value.
+        /// </summary>
 
         public string? TempDirectory
         {
             get => _tempDirectory;
             set => SetProperty(ref _tempDirectory, value);
         }
+        /// <summary>
+        /// Represents the file size value.
+        /// </summary>
 
         public long FileSize
         {
             get => _fileSize;
             set => SetProperty(ref _fileSize, value);
         }
+        /// <summary>
+        /// Represents the sha256 value.
+        /// </summary>
 
         public string? Sha256
         {

@@ -12,8 +12,14 @@ namespace YasGMP.Views.Dialogs
     public partial class ReauthenticationDialog : ContentPage
     {
         private readonly TaskCompletionSource<ReauthenticationResult?> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
 
         public Task<ReauthenticationResult?> Result => _tcs.Task;
+        /// <summary>
+        /// Initializes a new instance of the ReauthenticationDialog class.
+        /// </summary>
 
         public ReauthenticationDialog(string? defaultUsername = null)
         {

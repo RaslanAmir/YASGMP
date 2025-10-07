@@ -76,6 +76,9 @@ namespace YasGMP.Wpf.Services
     {
         private const string DefaultSignatureMethod = "password";
         private const string DefaultSignatureStatus = "valid";
+        /// <summary>
+        /// Executes the create operation.
+        /// </summary>
 
         public static WarehouseCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
             => new(userId <= 0 ? 1 : userId,
@@ -87,6 +90,9 @@ namespace YasGMP.Wpf.Services
                    DefaultSignatureMethod,
                    DefaultSignatureStatus,
                    null);
+        /// <summary>
+        /// Executes the create operation.
+        /// </summary>
 
         public static WarehouseCrudContext Create(
             int userId,
@@ -115,6 +121,9 @@ namespace YasGMP.Wpf.Services
             };
         }
     }
+    /// <summary>
+    /// Represents the Warehouse Stock Snapshot record.
+    /// </summary>
 
     public sealed record WarehouseStockSnapshot(
         int WarehouseId,
@@ -130,10 +139,19 @@ namespace YasGMP.Wpf.Services
         string SerialNumber,
         DateTime? ExpiryDate)
     {
+        /// <summary>
+        /// Gets or sets the is below minimum.
+        /// </summary>
         public bool IsBelowMinimum => MinThreshold.HasValue && Quantity - Reserved - Blocked < MinThreshold.Value;
+        /// <summary>
+        /// Gets or sets the is above maximum.
+        /// </summary>
 
         public bool IsAboveMaximum => MaxThreshold.HasValue && Quantity > MaxThreshold.Value;
     }
+    /// <summary>
+    /// Represents the Inventory Movement Entry record.
+    /// </summary>
 
     public sealed record InventoryMovementEntry(
         int WarehouseId,

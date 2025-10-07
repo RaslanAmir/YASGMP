@@ -60,6 +60,9 @@ namespace YasGMP.Models
         [Column("supplier_id")]
         public int? SupplierId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the component.
+        /// </summary>
         [ForeignKey(nameof(ComponentId))]
         public virtual MachineComponent? Component { get; set; }
     }

@@ -15,6 +15,9 @@ namespace YasGMP.Services
     public class ExternalServicerService
     {
         private readonly DatabaseService _db;
+        /// <summary>
+        /// Initializes a new instance of the ExternalServicerService class.
+        /// </summary>
 
         public ExternalServicerService(DatabaseService db)
         {
@@ -36,6 +39,9 @@ namespace YasGMP.Services
         {
             return await _db.GetExternalServicerByIdAsync(id, token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task<int> CreateAsync(ExternalServicer servicer, int actorUserId, CancellationToken token = default)
         {
@@ -48,6 +54,9 @@ namespace YasGMP.Services
             await LogAsync(servicer.Id, "CREATE", actorUserId, servicer.Status, servicer.Type, token).ConfigureAwait(false);
             return servicer.Id;
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task UpdateAsync(ExternalServicer servicer, int actorUserId, CancellationToken token = default)
         {
@@ -59,6 +68,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateExternalServicerAsync(servicer, update: true, token).ConfigureAwait(false);
             await LogAsync(servicer.Id, "UPDATE", actorUserId, servicer.Status, servicer.Type, token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the delete async operation.
+        /// </summary>
 
         public async Task DeleteAsync(int id, int actorUserId, CancellationToken token = default)
         {

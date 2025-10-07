@@ -30,6 +30,9 @@ namespace YasGMP.Models
 
         /// <summary>ID korisnika koji je pokrenuo opoziv (FK).</summary>
         public int RecalledById { get; set; }
+        /// <summary>
+        /// Gets or sets the recalled by.
+        /// </summary>
         public User? RecalledBy { get; set; }
 
         /// <summary>Opis poduzetih akcija (trace, steps, digital, chain-of-custody, crosslink IDs, external communication).</summary>
@@ -45,6 +48,9 @@ namespace YasGMP.Models
 
         /// <summary>ID korisnika koji je zatvorio opoziv (FK, inspector, QA, admin).</summary>
         public int? ClosedById { get; set; }
+        /// <summary>
+        /// Gets or sets the closed by.
+        /// </summary>
         public User? ClosedBy { get; set; }
 
         /// <summary>Status opoziva (open, under review, closed, escalated, regulator notified, external, inspector audit).</summary>
@@ -75,12 +81,27 @@ namespace YasGMP.Models
 
         /// <summary>ID povezanog incidenta/CAPA/inspection ako postoji (traceability chain).</summary>
         public int? LinkedIncidentId { get; set; }
+        /// <summary>
+        /// Gets or sets the linked incident.
+        /// </summary>
         public Incident? LinkedIncident { get; set; }
+        /// <summary>
+        /// Gets or sets the linked capa id.
+        /// </summary>
 
         public int? LinkedCapaId { get; set; }
+        /// <summary>
+        /// Gets or sets the linked capa.
+        /// </summary>
         public CapaCase? LinkedCapa { get; set; }
+        /// <summary>
+        /// Gets or sets the linked inspection id.
+        /// </summary>
 
         public int? LinkedInspectionId { get; set; }
+        /// <summary>
+        /// Gets or sets the linked inspection.
+        /// </summary>
         public Inspection? LinkedInspection { get; set; }
 
         /// <summary>Vrijeme zadnje izmjene (audit).</summary>
@@ -88,6 +109,9 @@ namespace YasGMP.Models
 
         /// <summary>ID korisnika koji je zadnji izmijenio opoziv (audit FK).</summary>
         public int? LastModifiedById { get; set; }
+        /// <summary>
+        /// Gets or sets the last modified by.
+        /// </summary>
         public User? LastModifiedBy { get; set; }
 
         /// <summary>Free text note (inspector, auditor, system event, compliance note, explanation).</summary>

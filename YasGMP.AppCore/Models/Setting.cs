@@ -136,28 +136,52 @@ namespace YasGMP.Models
     /// </summary>
     public class SettingVersion
     {
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the setting id.
+        /// </summary>
         [Display(Name = "ID postavke")]
         public int SettingId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the setting.
+        /// </summary>
         [ForeignKey(nameof(SettingId))]
         public Setting Setting { get; set; } = null!;
 
+        /// <summary>
+        /// Gets or sets the value.
+        /// </summary>
         [StringLength(1024)]
         [Display(Name = "Vrijednost")]
         public string Value { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the changed at.
+        /// </summary>
         [Display(Name = "Vrijeme promjene")]
         public DateTime ChangedAt { get; set; } = DateTime.Now;
 
+        /// <summary>
+        /// Gets or sets the changed by id.
+        /// </summary>
         [Display(Name = "Korisnik")]
         public int? ChangedById { get; set; }
 
+        /// <summary>
+        /// Gets or sets the changed by.
+        /// </summary>
         [ForeignKey(nameof(ChangedById))]
         public User ChangedBy { get; set; } = null!;
 
+        /// <summary>
+        /// Gets or sets the note.
+        /// </summary>
         [StringLength(255)]
         [Display(Name = "Napomena")]
         public string Note { get; set; } = string.Empty;
@@ -168,27 +192,51 @@ namespace YasGMP.Models
     /// </summary>
     public class SettingAuditLog
     {
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the setting id.
+        /// </summary>
         [Display(Name = "ID postavke")]
         public int SettingId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the setting.
+        /// </summary>
         [ForeignKey(nameof(SettingId))]
         public Setting Setting { get; set; } = null!;
 
+        /// <summary>
+        /// Gets or sets the timestamp.
+        /// </summary>
         [Display(Name = "Vrijeme događaja")]
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
+        /// <summary>
+        /// Gets or sets the action.
+        /// </summary>
         [Display(Name = "Akcija")]
         public string Action { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user id.
+        /// </summary>
         [Display(Name = "Korisnik")]
         public int? UserId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user.
+        /// </summary>
         [ForeignKey(nameof(UserId))]
         public User User { get; set; } = null!;
 
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
         [StringLength(255)]
         [Display(Name = "Opis")]
         public string Description { get; set; } = string.Empty;

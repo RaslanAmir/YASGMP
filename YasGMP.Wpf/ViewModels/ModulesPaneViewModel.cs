@@ -15,6 +15,9 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
     private readonly IModuleNavigationService _navigationService;
 
     private readonly ILocalizationService _localization;
+    /// <summary>
+    /// Initializes a new instance of the ModulesPaneViewModel class.
+    /// </summary>
 
     public ModulesPaneViewModel(
         IModuleRegistry moduleRegistry,
@@ -75,13 +78,22 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
 /// <summary>Grouping of modules by category.</summary>
 public partial class ModuleGroupViewModel : ObservableObject
 {
+    /// <summary>
+    /// Initializes a new instance of the ModuleGroupViewModel class.
+    /// </summary>
     public ModuleGroupViewModel(string name)
     {
         Name = name;
         Modules = new ObservableCollection<ModuleLinkViewModel>();
     }
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
 
     public string Name { get; }
+    /// <summary>
+    /// Gets or sets the modules.
+    /// </summary>
 
     public ObservableCollection<ModuleLinkViewModel> Modules { get; }
 }
@@ -89,13 +101,22 @@ public partial class ModuleGroupViewModel : ObservableObject
 /// <summary>Represents a single module entry in the pane.</summary>
 public partial class ModuleLinkViewModel : ObservableObject
 {
+    /// <summary>
+    /// Initializes a new instance of the ModuleLinkViewModel class.
+    /// </summary>
     public ModuleLinkViewModel(ModuleMetadata metadata, RelayCommand<ModuleLinkViewModel> openCommand)
     {
         Metadata = metadata;
         OpenCommand = openCommand;
     }
+    /// <summary>
+    /// Gets or sets the metadata.
+    /// </summary>
 
     public ModuleMetadata Metadata { get; }
+    /// <summary>
+    /// Gets or sets the open command.
+    /// </summary>
 
     public RelayCommand<ModuleLinkViewModel> OpenCommand { get; }
 }

@@ -7,6 +7,9 @@ namespace YasGMP.Wpf.Services;
 /// </summary>
 public static class AttachmentStatusFormatter
 {
+    /// <summary>
+    /// Executes the format operation.
+    /// </summary>
     public static string Format(int processed, int deduplicated)
     {
         if (processed <= 0)

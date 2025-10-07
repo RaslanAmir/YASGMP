@@ -17,17 +17,26 @@ namespace YasGMP.Wpf.Services
         private MainWindowViewModel? _viewModel;
         private string? _defaultLayout;
         private const string LayoutKey = "YasGmp.Wpf.Shell";
+        /// <summary>
+        /// Initializes a new instance of the ShellLayoutController class.
+        /// </summary>
 
         public ShellLayoutController(DockLayoutPersistenceService persistence)
         {
             _persistence = persistence;
         }
+        /// <summary>
+        /// Executes the attach operation.
+        /// </summary>
 
         public void Attach(DockingManager dockManager, MainWindowViewModel viewModel)
         {
             _dockManager = dockManager ?? throw new ArgumentNullException(nameof(dockManager));
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         }
+        /// <summary>
+        /// Executes the capture default layout operation.
+        /// </summary>
 
         public void CaptureDefaultLayout()
         {
@@ -41,6 +50,9 @@ namespace YasGMP.Wpf.Services
             serializer.Serialize(writer);
             _defaultLayout = writer.ToString();
         }
+        /// <summary>
+        /// Executes the restore layout async operation.
+        /// </summary>
 
         public async Task RestoreLayoutAsync(Window window, CancellationToken token = default)
         {
@@ -67,6 +79,9 @@ namespace YasGMP.Wpf.Services
 
             ApplyGeometry(window, snapshot.Value.Geometry);
         }
+        /// <summary>
+        /// Executes the save layout async operation.
+        /// </summary>
 
         public async Task SaveLayoutAsync(Window window, CancellationToken token = default)
         {
@@ -86,6 +101,9 @@ namespace YasGMP.Wpf.Services
             var geometry = CaptureGeometry(window);
             await _persistence.SaveAsync(LayoutKey, layoutXml, geometry, token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the reset layout async operation.
+        /// </summary>
 
         public async Task ResetLayoutAsync(Window window, CancellationToken token = default)
         {

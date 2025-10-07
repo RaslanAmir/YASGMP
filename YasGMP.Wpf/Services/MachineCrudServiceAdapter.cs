@@ -22,14 +22,23 @@ namespace YasGMP.Wpf.Services
     public sealed class MachineCrudServiceAdapter : IMachineCrudService
     {
         private readonly MachineService _inner;
+        /// <summary>
+        /// Initializes a new instance of the MachineCrudServiceAdapter class.
+        /// </summary>
 
         public MachineCrudServiceAdapter(MachineService inner)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
         }
+        /// <summary>
+        /// Executes the get all async operation.
+        /// </summary>
 
         public async Task<IReadOnlyList<Machine>> GetAllAsync()
             => await _inner.GetAllAsync().ConfigureAwait(false);
+        /// <summary>
+        /// Executes the try get by id async operation.
+        /// </summary>
 
         public async Task<Machine?> TryGetByIdAsync(int id)
         {
@@ -42,6 +51,9 @@ namespace YasGMP.Wpf.Services
                 return null;
             }
         }
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Machine machine, MachineCrudContext context)
         {
@@ -57,6 +69,9 @@ namespace YasGMP.Wpf.Services
             machine.DigitalSignature = signature;
             return new CrudSaveResult(machine.Id, metadata);
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Machine machine, MachineCrudContext context)
         {
@@ -71,12 +86,18 @@ namespace YasGMP.Wpf.Services
             machine.DigitalSignature = signature;
             return new CrudSaveResult(machine.Id, metadata);
         }
+        /// <summary>
+        /// Executes the validate operation.
+        /// </summary>
 
         public void Validate(Machine machine)
         {
             if (machine is null) throw new ArgumentNullException(nameof(machine));
             _inner.ValidateMachine(machine);
         }
+        /// <summary>
+        /// Executes the normalize status operation.
+        /// </summary>
 
         public string NormalizeStatus(string? status) => MachineService.NormalizeStatus(status);
 

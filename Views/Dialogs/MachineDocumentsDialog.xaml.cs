@@ -22,14 +22,23 @@ namespace YasGMP.Views.Dialogs
     public partial class MachineDocumentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
         private readonly IAttachmentService _attachments;
         private readonly AuthService _auth;
         private readonly int _machineId;
+        /// <summary>
+        /// Gets or sets the documents.
+        /// </summary>
 
         public ObservableCollection<DocRow> Documents { get; } = new();
+        /// <summary>
+        /// Initializes a new instance of the MachineDocumentsDialog class.
+        /// </summary>
 
         public MachineDocumentsDialog(DatabaseService db, int machineId, IAttachmentService? attachmentService = null, AuthService? authService = null)
         {
@@ -128,21 +137,51 @@ namespace YasGMP.Views.Dialogs
             return status.Contains("integrity", StringComparison.OrdinalIgnoreCase)
                 || status.Contains("hash", StringComparison.OrdinalIgnoreCase);
         }
+        /// <summary>
+        /// Represents the Doc Row.
+        /// </summary>
 
         public sealed class DocRow
         {
             private readonly IAttachmentService _attachments;
             private readonly AuthService _auth;
             private readonly Func<Task> _onChanged;
+            /// <summary>
+            /// Gets or sets the link id.
+            /// </summary>
 
             public int LinkId { get; }
+            /// <summary>
+            /// Gets or sets the attachment id.
+            /// </summary>
             public int AttachmentId { get; }
+            /// <summary>
+            /// Gets or sets the file name.
+            /// </summary>
             public string FileName { get; }
+            /// <summary>
+            /// Gets or sets the size display.
+            /// </summary>
             public string SizeDisplay { get; }
+            /// <summary>
+            /// Gets or sets the retention summary.
+            /// </summary>
             public string RetentionSummary { get; }
+            /// <summary>
+            /// Gets or sets the has legal hold.
+            /// </summary>
             public bool HasLegalHold { get; }
+            /// <summary>
+            /// Gets or sets the open command.
+            /// </summary>
             public IAsyncRelayCommand OpenCommand { get; }
+            /// <summary>
+            /// Gets or sets the remove command.
+            /// </summary>
             public IAsyncRelayCommand RemoveCommand { get; }
+            /// <summary>
+            /// Initializes a new instance of the DocRow class.
+            /// </summary>
 
             public DocRow(IAttachmentService attachments, AuthService auth, AttachmentLinkWithAttachment row, Func<Task> onChanged)
             {

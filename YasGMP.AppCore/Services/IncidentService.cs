@@ -16,6 +16,9 @@ namespace YasGMP.Services
     {
         private readonly DatabaseService _db;
         private readonly IIncidentAuditService _audit;
+        /// <summary>
+        /// Initializes a new instance of the IncidentService class.
+        /// </summary>
 
         public IncidentService(DatabaseService databaseService, IIncidentAuditService auditService)
         {
@@ -24,6 +27,9 @@ namespace YasGMP.Services
         }
 
         #region CRUD
+        /// <summary>
+        /// Executes the get all async operation.
+        /// </summary>
 
         public Task<List<Incident>> GetAllAsync() => _db.GetAllIncidentsAsync();
 
@@ -47,6 +53,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateIncidentAsync(incident, update: false, actorUserId: userId);
             await LogAudit(incident.Id, userId, IncidentActionType.CREATE, $"Prijavljen incident: {incident.Title}");
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task UpdateAsync(Incident incident, int userId)
         {
@@ -56,6 +65,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateIncidentAsync(incident, update: true, actorUserId: userId);
             await LogAudit(incident.Id, userId, IncidentActionType.UPDATE, $"Ažuriran incident ID={incident.Id}");
         }
+        /// <summary>
+        /// Executes the delete async operation.
+        /// </summary>
 
         public async Task DeleteAsync(int incidentId, int userId)
         {
@@ -66,6 +78,9 @@ namespace YasGMP.Services
         #endregion
 
         #region Workflow
+        /// <summary>
+        /// Executes the start investigation async operation.
+        /// </summary>
 
         public async Task StartInvestigationAsync(int incidentId, int userId, string investigator)
         {
@@ -77,6 +92,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateIncidentAsync(inc, update: true, actorUserId: userId);
             await LogAudit(inc.Id, userId, IncidentActionType.INVESTIGATION_START, $"Pokrenuta istraga (Istražitelj: {investigator})");
         }
+        /// <summary>
+        /// Executes the classify async operation.
+        /// </summary>
 
         public async Task ClassifyAsync(int incidentId, int userId, string classification)
         {
@@ -88,6 +106,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateIncidentAsync(inc, update: true, actorUserId: userId);
             await LogAudit(inc.Id, userId, IncidentActionType.CLASSIFY, $"Klasificirano kao {classification}");
         }
+        /// <summary>
+        /// Executes the link deviation async operation.
+        /// </summary>
 
         public async Task LinkDeviationAsync(int incidentId, int deviationId, int userId)
         {
@@ -99,6 +120,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateIncidentAsync(inc, update: true, actorUserId: userId);
             await LogAudit(inc.Id, userId, IncidentActionType.DEVIATION_LINKED, $"Povezan s Deviation ID={deviationId}");
         }
+        /// <summary>
+        /// Executes the link capa async operation.
+        /// </summary>
 
         public async Task LinkCapaAsync(int incidentId, int capaId, int userId)
         {
@@ -110,6 +134,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdateIncidentAsync(inc, update: true, actorUserId: userId);
             await LogAudit(inc.Id, userId, IncidentActionType.CAPA_LINKED, $"Povezan s CAPA ID={capaId}");
         }
+        /// <summary>
+        /// Executes the close incident async operation.
+        /// </summary>
 
         public async Task CloseIncidentAsync(int incidentId, int userId, string closureComment)
         {

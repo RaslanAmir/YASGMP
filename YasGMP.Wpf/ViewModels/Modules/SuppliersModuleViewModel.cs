@@ -14,9 +14,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the suppliers module view model value.
+/// </summary>
 
 public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Suppliers";
 
     private readonly ISupplierCrudService _supplierService;
@@ -29,6 +35,9 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     private SupplierEditor? _snapshot;
     private bool _suppressDirtyNotifications;
     private int? _lastSavedSupplierId;
+    /// <summary>
+    /// Initializes a new instance of the SuppliersModuleViewModel class.
+    /// </summary>
 
     public SuppliersModuleViewModel(
         DatabaseService databaseService,
@@ -88,6 +97,9 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     [ObservableProperty]
     private IReadOnlyList<string> _riskOptions;
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -560,6 +572,9 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             supplier.PartsSupplied.Count > 0 ? supplier.PartsSupplied.First().Id : null);
     }
 }
+/// <summary>
+/// Represents the supplier editor value.
+/// </summary>
 
 public sealed partial class SupplierEditor : ObservableObject
 {
@@ -619,8 +634,14 @@ public sealed partial class SupplierEditor : ObservableObject
 
     [ObservableProperty]
     private string _digitalSignature = string.Empty;
+    /// <summary>
+    /// Executes the create empty operation.
+    /// </summary>
 
     public static SupplierEditor CreateEmpty() => new();
+    /// <summary>
+    /// Executes the create for new operation.
+    /// </summary>
 
     public static SupplierEditor CreateForNew()
         => new()
@@ -629,6 +650,9 @@ public sealed partial class SupplierEditor : ObservableObject
             RiskLevel = "Low",
             CooperationStart = DateTime.UtcNow.Date
         };
+    /// <summary>
+    /// Executes the from supplier operation.
+    /// </summary>
 
     public static SupplierEditor FromSupplier(Supplier supplier)
     {
@@ -657,6 +681,9 @@ public sealed partial class SupplierEditor : ObservableObject
             DigitalSignature = supplier.DigitalSignature ?? string.Empty
         };
     }
+    /// <summary>
+    /// Executes the clone operation.
+    /// </summary>
 
     public SupplierEditor Clone()
     {
@@ -683,6 +710,9 @@ public sealed partial class SupplierEditor : ObservableObject
             DigitalSignature = DigitalSignature
         };
     }
+    /// <summary>
+    /// Executes the to supplier operation.
+    /// </summary>
 
     public Supplier ToSupplier(Supplier? existing)
     {

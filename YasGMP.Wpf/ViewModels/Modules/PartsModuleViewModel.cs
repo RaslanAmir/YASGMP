@@ -14,9 +14,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the parts module view model value.
+/// </summary>
 
 public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "Parts";
 
     private readonly IPartCrudService _partService;
@@ -28,6 +34,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     private Part? _loadedPart;
     private PartEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the PartsModuleViewModel class.
+    /// </summary>
 
     public PartsModuleViewModel(
         DatabaseService databaseService,
@@ -71,8 +80,14 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
     [ObservableProperty]
     private string _stockHealthMessage = string.Empty;
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public IReadOnlyList<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -570,6 +585,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             SuppliersModuleViewModel.ModuleKey,
             part.DefaultSupplierId);
     }
+    /// <summary>
+    /// Represents the part editor value.
+    /// </summary>
 
     public sealed partial class PartEditor : ObservableObject
     {
@@ -620,13 +638,25 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
         [ObservableProperty]
         private bool _isWarehouseStockCritical;
+        /// <summary>
+        /// Gets or sets the is below minimum.
+        /// </summary>
 
         public bool IsBelowMinimum => MinStockAlert.HasValue && Stock.HasValue && Stock.Value < MinStockAlert.Value;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static PartEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static PartEditor CreateForNew(string normalizedStatus)
             => new() { Status = normalizedStatus };
+        /// <summary>
+        /// Executes the from part operation.
+        /// </summary>
 
         public static PartEditor FromPart(Part part, Func<string?, string> normalizer)
         {
@@ -650,6 +680,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 IsWarehouseStockCritical = part.IsWarehouseStockCritical
             };
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public PartEditor Clone()
             => new()
@@ -671,6 +704,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 WarehouseSummary = WarehouseSummary,
                 IsWarehouseStockCritical = IsWarehouseStockCritical
             };
+        /// <summary>
+        /// Executes the to part operation.
+        /// </summary>
 
         public Part ToPart(Part? existing)
         {

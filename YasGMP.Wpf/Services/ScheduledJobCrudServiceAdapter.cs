@@ -25,17 +25,26 @@ namespace YasGMP.Wpf.Services;
 public sealed class ScheduledJobCrudServiceAdapter : IScheduledJobCrudService
 {
     private readonly DatabaseService _database;
+    /// <summary>
+    /// Initializes a new instance of the ScheduledJobCrudServiceAdapter class.
+    /// </summary>
 
     public ScheduledJobCrudServiceAdapter(DatabaseService database)
     {
         _database = database ?? throw new ArgumentNullException(nameof(database));
     }
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<ScheduledJob?> TryGetByIdAsync(int id)
     {
         var jobs = await _database.GetAllScheduledJobsFullAsync().ConfigureAwait(false);
         return jobs.FirstOrDefault(j => j.Id == id);
     }
+    /// <summary>
+    /// Executes the create async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context)
     {
@@ -73,6 +82,9 @@ SELECT LAST_INSERT_ID();";
 
         return new CrudSaveResult(id, CreateMetadata(context, signature));
     }
+    /// <summary>
+    /// Executes the update async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context)
     {
@@ -122,6 +134,9 @@ WHERE id=@id";
 
         return new CrudSaveResult(job.Id, CreateMetadata(context, signature));
     }
+    /// <summary>
+    /// Executes the execute async operation.
+    /// </summary>
 
     public async Task ExecuteAsync(int jobId, ScheduledJobCrudContext context)
     {
@@ -147,6 +162,9 @@ WHERE id=@id";
         await _database.LogScheduledJobAuditAsync(new ScheduledJob { Id = jobId }, "EXECUTE", context.Ip, context.DeviceInfo, context.SessionId, $"user={context.UserId}")
             .ConfigureAwait(false);
     }
+    /// <summary>
+    /// Executes the acknowledge async operation.
+    /// </summary>
 
     public async Task AcknowledgeAsync(int jobId, ScheduledJobCrudContext context)
     {
@@ -170,6 +188,9 @@ WHERE id=@id";
         await _database.LogScheduledJobAuditAsync(new ScheduledJob { Id = jobId }, "ACK", context.Ip, context.DeviceInfo, context.SessionId, $"user={context.UserId}")
             .ConfigureAwait(false);
     }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(ScheduledJob job)
     {
@@ -198,6 +219,9 @@ WHERE id=@id";
             throw new InvalidOperationException("Recurrence pattern is required.");
         }
     }
+    /// <summary>
+    /// Executes the normalize status operation.
+    /// </summary>
 
     public string NormalizeStatus(string? status)
         => string.IsNullOrWhiteSpace(status)

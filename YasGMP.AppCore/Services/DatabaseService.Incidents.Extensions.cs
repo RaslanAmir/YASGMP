@@ -18,6 +18,9 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceIncidentsExtensions
     {
+        /// <summary>
+        /// Executes the get all incidents async operation.
+        /// </summary>
         public static async Task<List<Incident>> GetAllIncidentsAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT 
@@ -32,6 +35,9 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY id DESC";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
+        /// <summary>
+        /// Executes the get incident by id async operation.
+        /// </summary>
 
         public static async Task<Incident?> GetIncidentByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -45,6 +51,9 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ WHERE id=@id LIMIT 
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
         }
+        /// <summary>
+        /// Executes the insert or update incident async operation.
+        /// </summary>
 
         public static async Task<int> InsertOrUpdateIncidentAsync(this DatabaseService db, Incident inc, bool update, int actorUserId, CancellationToken token = default)
         {
@@ -99,6 +108,9 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ WHERE id=@id LIMIT 
             await db.LogSystemEventAsync(actorUserId, update ? "INCIDENT_UPDATE" : "INCIDENT_CREATE", "incidents", "IncidentModule", inc.Id, inc.Title, inc.SourceIp, "audit", null, null, token: token).ConfigureAwait(false);
             return inc.Id;
         }
+        /// <summary>
+        /// Executes the delete incident async operation.
+        /// </summary>
 
         public static async Task DeleteIncidentAsync(this DatabaseService db, int id, int actorUserId, CancellationToken token = default)
         {

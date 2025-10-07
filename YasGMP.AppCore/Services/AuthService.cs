@@ -237,12 +237,33 @@ namespace YasGMP.Services
         /// <summary>Verification forensic result.</summary>
         public sealed class VerifyInfo
         {
+            /// <summary>
+            /// Gets or sets the is match.
+            /// </summary>
             public bool IsMatch { get; set; }
+            /// <summary>
+            /// Gets or sets the stored.
+            /// </summary>
             public string Stored { get; set; } = "";
+            /// <summary>
+            /// Gets or sets the stored length.
+            /// </summary>
             public int StoredLength { get; set; }
+            /// <summary>
+            /// Gets or sets the stored shape.
+            /// </summary>
             public string StoredShape { get; set; } = "unknown";
+            /// <summary>
+            /// Gets or sets the needs rehash.
+            /// </summary>
             public bool NeedsRehash { get; set; }
+            /// <summary>
+            /// Gets or sets the rehash base64.
+            /// </summary>
             public string? RehashBase64 { get; set; }
+            /// <summary>
+            /// Gets or sets the note.
+            /// </summary>
             public string Note { get; set; } = "";
         }
 

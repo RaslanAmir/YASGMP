@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace YasGMP.Data.Migrations
 {
+    /// <summary>
+    /// Represents the Attachment Infrastructure.
+    /// </summary>
     public partial class AttachmentInfrastructure : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -21,6 +21,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private DocumentViewModel? _activeDocument;
+    /// <summary>
+    /// Initializes a new instance of the MainWindowViewModel class.
+    /// </summary>
 
     public MainWindowViewModel(
         IModuleRegistry moduleRegistry,

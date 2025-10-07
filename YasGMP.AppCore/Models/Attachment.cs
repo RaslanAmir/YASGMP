@@ -330,8 +330,14 @@ namespace YasGMP.Models
         /// </summary>
         /// <returns>A string representing the attachment details.</returns>
         public virtual ICollection<AttachmentLink> Links { get; set; } = new List<AttachmentLink>();
+        /// <summary>
+        /// Gets or sets the retention policies.
+        /// </summary>
 
         public virtual ICollection<RetentionPolicy> RetentionPolicies { get; set; } = new List<RetentionPolicy>();
+        /// <summary>
+        /// Executes the to string operation.
+        /// </summary>
 
         public override string ToString()
         {

@@ -209,18 +209,54 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
+        /// <summary>
+        /// Gets or sets the load documents command.
+        /// </summary>
 
         public ICommand LoadDocumentsCommand { get; }
+        /// <summary>
+        /// Gets or sets the initiate document command.
+        /// </summary>
         public ICommand InitiateDocumentCommand { get; }
+        /// <summary>
+        /// Gets or sets the revise document command.
+        /// </summary>
         public ICommand ReviseDocumentCommand { get; }
+        /// <summary>
+        /// Gets or sets the assign document command.
+        /// </summary>
         public ICommand AssignDocumentCommand { get; }
+        /// <summary>
+        /// Gets or sets the approve document command.
+        /// </summary>
         public ICommand ApproveDocumentCommand { get; }
+        /// <summary>
+        /// Gets or sets the publish document command.
+        /// </summary>
         public ICommand PublishDocumentCommand { get; }
+        /// <summary>
+        /// Gets or sets the expire document command.
+        /// </summary>
         public ICommand ExpireDocumentCommand { get; }
+        /// <summary>
+        /// Gets or sets the open change control picker command.
+        /// </summary>
         public ICommand OpenChangeControlPickerCommand { get; }
+        /// <summary>
+        /// Gets or sets the link change control command.
+        /// </summary>
         public ICommand LinkChangeControlCommand { get; }
+        /// <summary>
+        /// Gets or sets the cancel change control picker command.
+        /// </summary>
         public ICommand CancelChangeControlPickerCommand { get; }
+        /// <summary>
+        /// Gets or sets the export documents command.
+        /// </summary>
         public ICommand ExportDocumentsCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

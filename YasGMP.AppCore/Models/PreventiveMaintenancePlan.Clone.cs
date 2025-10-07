@@ -2,8 +2,14 @@ using System.Collections.Generic;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Represents the Preventive Maintenance Plan.
+    /// </summary>
     public partial class PreventiveMaintenancePlan
     {
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
         public PreventiveMaintenancePlan Clone()
         {
             var clone = new PreventiveMaintenancePlan

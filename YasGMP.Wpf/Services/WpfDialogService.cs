@@ -28,23 +28,35 @@ namespace YasGMP.Wpf.Services
     /// </remarks>
     public sealed class WpfDialogService : IDialogService
     {
+        /// <summary>
+        /// Executes the show alert async operation.
+        /// </summary>
         public Task ShowAlertAsync(string title, string message, string cancel)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
             return Task.CompletedTask;
         }
+        /// <summary>
+        /// Executes the show confirmation async operation.
+        /// </summary>
 
         public Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
         {
             var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
             return Task.FromResult(result == MessageBoxResult.Yes);
         }
+        /// <summary>
+        /// Executes the show action sheet async operation.
+        /// </summary>
 
         public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
         {
             // Not supported in the WPF shell; return null.
             return Task.FromResult<string?>(null);
         }
+        /// <summary>
+        /// Executes the show dialog async operation.
+        /// </summary>
 
         public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
         {

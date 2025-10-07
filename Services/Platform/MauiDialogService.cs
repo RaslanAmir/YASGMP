@@ -17,12 +17,18 @@ namespace YasGMP.Services.Platform
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IUiDispatcher _dispatcher;
+        /// <summary>
+        /// Initializes a new instance of the MauiDialogService class.
+        /// </summary>
 
         public MauiDialogService(IServiceProvider serviceProvider, IUiDispatcher dispatcher)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
+        /// <summary>
+        /// Executes the show alert async operation.
+        /// </summary>
 
         public Task ShowAlertAsync(string title, string message, string cancel)
         {
@@ -33,6 +39,9 @@ namespace YasGMP.Services.Platform
                     await page.DisplayAlert(title, message, cancel);
             });
         }
+        /// <summary>
+        /// Executes the show confirmation async operation.
+        /// </summary>
 
         public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
         {
@@ -45,6 +54,9 @@ namespace YasGMP.Services.Platform
                 return await page.DisplayAlert(title, message, accept, cancel);
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the show action sheet async operation.
+        /// </summary>
 
         public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
         {
@@ -57,6 +69,9 @@ namespace YasGMP.Services.Platform
                 return await page.DisplayActionSheet(title, cancel, destruction, buttons);
             });
         }
+        /// <summary>
+        /// Executes the show dialog async operation.
+        /// </summary>
 
         public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
         {

@@ -23,6 +23,9 @@ namespace YasGMP.Wpf.Services
     /// </remarks>
     public sealed class WpfFilePicker : IFilePicker
     {
+        /// <summary>
+        /// Executes the pick files async operation.
+        /// </summary>
         public Task<IReadOnlyList<PickedFile>> PickFilesAsync(FilePickerRequest request, CancellationToken cancellationToken = default)
         {
             request ??= new FilePickerRequest();

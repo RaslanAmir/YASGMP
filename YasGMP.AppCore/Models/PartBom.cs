@@ -33,9 +33,15 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the parent part.
+        /// </summary>
         [ForeignKey(nameof(ParentPartId))]
         public virtual Part? ParentPart { get; set; }
 
+        /// <summary>
+        /// Gets or sets the child part.
+        /// </summary>
         [ForeignKey(nameof(ChildPartId))]
         public virtual Part? ChildPart { get; set; }
     }

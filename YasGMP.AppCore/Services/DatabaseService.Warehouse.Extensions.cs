@@ -17,6 +17,9 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceWarehouseExtensions
     {
+        /// <summary>
+        /// Executes the get warehouses async operation.
+        /// </summary>
         public static async Task<List<Warehouse>> GetWarehousesAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"CREATE TABLE IF NOT EXISTS warehouses (
@@ -33,6 +36,9 @@ namespace YasGMP.Services
             }
             return list;
         }
+        /// <summary>
+        /// Executes the add warehouse async operation.
+        /// </summary>
 
         public static async Task<int> AddWarehouseAsync(this DatabaseService db, string name, string? location, CancellationToken token = default)
         {

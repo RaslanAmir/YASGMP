@@ -192,12 +192,21 @@ VALUES
         #endregion
 
         #region === 🔧 CALIBRATION / EXPORT HELPERS ===
+        /// <summary>
+        /// Executes the log calibration audit async operation.
+        /// </summary>
 
         public Task LogCalibrationAuditAsync(int calibrationId, string action, string details)
             => LogEntityAuditAsync("calibrations", calibrationId, action, details);
+        /// <summary>
+        /// Executes the log calibration audit async operation.
+        /// </summary>
 
         public Task LogCalibrationAuditAsync(string action, string details)
             => LogSystemEventAsync($"CALIBRATION_{action}", details);
+        /// <summary>
+        /// Executes the log export async operation.
+        /// </summary>
 
         public async Task LogExportAsync(string exportType, string filePath, string filterUsed = "")
         {
@@ -223,6 +232,9 @@ VALUES
             await LogSystemEventAsync("EXPORT",
                 $"type={exportType}; file={filePath}; filter={filterUsed}", "export", null).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the log calibration export async operation.
+        /// </summary>
 
         public Task LogCalibrationExportAsync(string exportType, string filePath, string filterUsed = "")
             => LogExportAsync(exportType, filePath, filterUsed);
@@ -230,6 +242,9 @@ VALUES
         #endregion
 
         #region === 📊 DASHBOARD QUERIES ===
+        /// <summary>
+        /// Executes the get filtered audits operation.
+        /// </summary>
 
         public async Task<List<AuditEntryDto>> GetFilteredAudits(string user, string entity, string action, DateTime from, DateTime to)
         {

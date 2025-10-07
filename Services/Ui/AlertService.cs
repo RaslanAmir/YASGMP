@@ -19,6 +19,9 @@ namespace YasGMP.Services.Ui
     /// </summary>
     public sealed class AlertService : IAlertService
     {
+        /// <summary>
+        /// Executes the alert async operation.
+        /// </summary>
         public async Task AlertAsync(string title, string message, string cancel = "OK")
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -30,6 +33,9 @@ namespace YasGMP.Services.Ui
                 }
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the confirm async operation.
+        /// </summary>
 
         public async Task<bool> ConfirmAsync(string title, string message, string accept = "OK", string cancel = "Cancel")
         {

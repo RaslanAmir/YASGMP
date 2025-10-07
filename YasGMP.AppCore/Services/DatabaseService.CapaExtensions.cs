@@ -48,6 +48,9 @@ namespace YasGMP.Services
             };
 
         // ---- CAPA AUDIT QUERIES ------------------------------------------------
+        /// <summary>
+        /// Executes the get capa audit by id async operation.
+        /// </summary>
 
         public static async Task<CapaAudit?> GetCapaAuditByIdAsync(
             this DatabaseService db,
@@ -66,6 +69,9 @@ namespace YasGMP.Services
             var table = await db.ExecuteSelectAsync(sql, parameters, cancellationToken).ConfigureAwait(false);
             return table.Rows.Count > 0 ? MapCapaAudit(table.Rows[0]) : null;
         }
+        /// <summary>
+        /// Executes the get capa audits by capa id async operation.
+        /// </summary>
 
         public static async Task<List<CapaAudit>> GetCapaAuditsByCapaIdAsync(
             this DatabaseService db,
@@ -84,6 +90,9 @@ namespace YasGMP.Services
             var table = await db.ExecuteSelectAsync(sql, parameters, cancellationToken).ConfigureAwait(false);
             return MapAudits(table);
         }
+        /// <summary>
+        /// Executes the get capa audits by user id async operation.
+        /// </summary>
 
         public static async Task<List<CapaAudit>> GetCapaAuditsByUserIdAsync(
             this DatabaseService db,
@@ -102,6 +111,9 @@ namespace YasGMP.Services
             var table = await db.ExecuteSelectAsync(sql, parameters, cancellationToken).ConfigureAwait(false);
             return MapAudits(table);
         }
+        /// <summary>
+        /// Executes the get capa audits by action async operation.
+        /// </summary>
 
         public static async Task<List<CapaAudit>> GetCapaAuditsByActionAsync(
             this DatabaseService db,
@@ -120,6 +132,9 @@ namespace YasGMP.Services
             var table = await db.ExecuteSelectAsync(sql, parameters, cancellationToken).ConfigureAwait(false);
             return MapAudits(table);
         }
+        /// <summary>
+        /// Executes the get capa audits by date range async operation.
+        /// </summary>
 
         public static async Task<List<CapaAudit>> GetCapaAuditsByDateRangeAsync(
             this DatabaseService db,

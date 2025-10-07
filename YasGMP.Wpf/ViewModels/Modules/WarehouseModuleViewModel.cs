@@ -14,9 +14,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the warehouse module view model value.
+/// </summary>
 
 public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "Warehouse";
 
     private readonly IWarehouseCrudService _warehouseService;
@@ -28,6 +34,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     private Warehouse? _loadedWarehouse;
     private WarehouseEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the WarehouseModuleViewModel class.
+    /// </summary>
 
     public WarehouseModuleViewModel(
         DatabaseService databaseService,
@@ -75,8 +84,14 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
 
     [ObservableProperty]
     private bool _hasStockAlerts;
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public IReadOnlyList<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -532,6 +547,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             null,
             warehouse.Id);
     }
+    /// <summary>
+    /// Represents the warehouse editor value.
+    /// </summary>
 
     public sealed partial class WarehouseEditor : ObservableObject
     {
@@ -564,11 +582,20 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
 
         [ObservableProperty]
         private DateTime? _lastQualified = DateTime.UtcNow.Date;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static WarehouseEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static WarehouseEditor CreateForNew(string normalizedStatus)
             => new() { Status = normalizedStatus, IsQualified = normalizedStatus == "qualified" };
+        /// <summary>
+        /// Executes the from warehouse operation.
+        /// </summary>
 
         public static WarehouseEditor FromWarehouse(Warehouse warehouse, Func<string?, string> normalizer)
         {
@@ -586,6 +613,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 LastQualified = warehouse.LastQualified
             };
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public WarehouseEditor Clone()
             => new()
@@ -601,6 +631,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
                 IsQualified = IsQualified,
                 LastQualified = LastQualified
             };
+        /// <summary>
+        /// Executes the to warehouse operation.
+        /// </summary>
 
         public Warehouse ToWarehouse(Warehouse? existing)
         {

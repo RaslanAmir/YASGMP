@@ -31,6 +31,9 @@ namespace YasGMP.Wpf.Services
         private readonly PartService _partService;
         private readonly DatabaseService _database;
         private readonly AuditService _audit;
+        /// <summary>
+        /// Initializes a new instance of the PartCrudServiceAdapter class.
+        /// </summary>
 
         public PartCrudServiceAdapter(PartService partService, DatabaseService database, AuditService auditService)
         {
@@ -38,12 +41,18 @@ namespace YasGMP.Wpf.Services
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _audit = auditService ?? throw new ArgumentNullException(nameof(auditService));
         }
+        /// <summary>
+        /// Executes the get all async operation.
+        /// </summary>
 
         public async Task<IReadOnlyList<Part>> GetAllAsync()
         {
             var parts = await _partService.GetAllAsync().ConfigureAwait(false);
             return parts.AsReadOnly();
         }
+        /// <summary>
+        /// Executes the try get by id async operation.
+        /// </summary>
 
         public async Task<Part?> TryGetByIdAsync(int id)
         {
@@ -56,6 +65,9 @@ namespace YasGMP.Wpf.Services
                 return null;
             }
         }
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Part part, PartCrudContext context)
         {
@@ -68,6 +80,9 @@ namespace YasGMP.Wpf.Services
             await StampAsync(part, context, signature).ConfigureAwait(false);
             return new CrudSaveResult(part.Id, metadata);
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Part part, PartCrudContext context)
         {
@@ -80,6 +95,9 @@ namespace YasGMP.Wpf.Services
             await StampAsync(part, context, signature).ConfigureAwait(false);
             return new CrudSaveResult(part.Id, metadata);
         }
+        /// <summary>
+        /// Executes the validate operation.
+        /// </summary>
 
         public void Validate(Part part)
         {
@@ -103,6 +121,9 @@ namespace YasGMP.Wpf.Services
                 throw new InvalidOperationException("Default supplier is required.");
             }
         }
+        /// <summary>
+        /// Executes the normalize status operation.
+        /// </summary>
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLower(CultureInfo.InvariantCulture);

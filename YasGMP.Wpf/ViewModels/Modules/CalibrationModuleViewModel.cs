@@ -14,9 +14,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the calibration module view model value.
+/// </summary>
 
 public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "Calibration";
 
     private readonly ICalibrationCrudService _calibrationService;
@@ -31,6 +37,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Component> _components = Array.Empty<Component>();
     private IReadOnlyList<Supplier> _suppliers = Array.Empty<Supplier>();
+    /// <summary>
+    /// Initializes a new instance of the CalibrationModuleViewModel class.
+    /// </summary>
 
     public CalibrationModuleViewModel(
         DatabaseService databaseService,
@@ -66,10 +75,19 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the component options.
+    /// </summary>
 
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
+    /// <summary>
+    /// Gets or sets the supplier options.
+    /// </summary>
 
     public ObservableCollection<SupplierOption> SupplierOptions { get; }
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -587,6 +605,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
+    /// <summary>
+    /// Represents the calibration editor value.
+    /// </summary>
 
     public sealed partial class CalibrationEditor : ObservableObject
     {
@@ -619,10 +640,19 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
         [ObservableProperty]
         private string _comment = string.Empty;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static CalibrationEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static CalibrationEditor CreateForNew() => new();
+        /// <summary>
+        /// Executes the from calibration operation.
+        /// </summary>
 
         public static CalibrationEditor FromCalibration(
             Calibration calibration,
@@ -643,6 +673,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 Comment = calibration.Comment ?? string.Empty
             };
         }
+        /// <summary>
+        /// Executes the to calibration operation.
+        /// </summary>
 
         public Calibration ToCalibration(Calibration? existing)
         {
@@ -657,6 +690,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             calibration.Comment = Comment;
             return calibration;
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public CalibrationEditor Clone()
             => new()
@@ -688,14 +724,26 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             };
         }
     }
+    /// <summary>
+    /// Executes the struct operation.
+    /// </summary>
 
     public readonly record struct ComponentOption(int Id, string Name)
     {
+        /// <summary>
+        /// Executes the to string operation.
+        /// </summary>
         public override string ToString() => Name;
     }
+    /// <summary>
+    /// Executes the struct operation.
+    /// </summary>
 
     public readonly record struct SupplierOption(int Id, string Name)
     {
+        /// <summary>
+        /// Executes the to string operation.
+        /// </summary>
         public override string ToString() => Name;
     }
 }

@@ -6,10 +6,19 @@ using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the Admin Module View Model.
+/// </summary>
 
 public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Admin";
+    /// <summary>
+    /// Initializes a new instance of the AdminModuleViewModel class.
+    /// </summary>
 
     public AdminModuleViewModel(
         DatabaseService databaseService,

@@ -229,6 +229,9 @@ namespace YasGMP.Helpers
         //  OPTIONAL: Example asymmetric signing placeholder (commented)
         // ---------------------------------------------------------------------
         /*
+        /// <summary>
+        /// Executes the generate asymmetric signature operation.
+        /// </summary>
         public static string GenerateAsymmetricSignature(string dataToSign, RSAParameters privateKey)
         {
             using var rsa = new RSACryptoServiceProvider();

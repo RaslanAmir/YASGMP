@@ -72,6 +72,9 @@ public readonly record struct ChangeControlCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static ChangeControlCrudContext Create(int userId, string? ip, string? device, string? sessionId)
         => new(
@@ -84,6 +87,9 @@ public readonly record struct ChangeControlCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static ChangeControlCrudContext Create(
         int userId,

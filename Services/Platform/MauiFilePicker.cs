@@ -12,6 +12,9 @@ namespace YasGMP.Services.Platform
     /// <summary>MAUI wrapper for the built-in <see cref="FilePicker"/>.</summary>
     public sealed class MauiFilePicker : IFilePicker
     {
+        /// <summary>
+        /// Executes the pick files async operation.
+        /// </summary>
         public async Task<IReadOnlyList<PickedFile>> PickFilesAsync(FilePickerRequest request, CancellationToken cancellationToken = default)
         {
             request ??= new FilePickerRequest();

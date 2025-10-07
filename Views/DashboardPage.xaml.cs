@@ -22,15 +22,39 @@ namespace YasGMP
     {
         private static class AppRoutes
         {
+            /// <summary>
+            /// Represents the machines value.
+            /// </summary>
             public const string Machines   = "//root/ops/machines";
+            /// <summary>
+            /// Represents the parts value.
+            /// </summary>
             public const string Parts      = "//root/ops/parts";
+            /// <summary>
+            /// Represents the work orders value.
+            /// </summary>
             public const string WorkOrders = "//root/ops/workorders";
+            /// <summary>
+            /// Represents the capa value.
+            /// </summary>
             public const string Capa       = "//root/quality/capa";
+            /// <summary>
+            /// Represents the validation value.
+            /// </summary>
             public const string Validation = "//root/quality/validation";
+            /// <summary>
+            /// Represents the admin panel value.
+            /// </summary>
             public const string AdminPanel = "//root/admin/adminpanel";
         }
+        /// <summary>
+        /// Gets or sets the current user.
+        /// </summary>
 
         public User? CurrentUser { get; private set; }
+        /// <summary>
+        /// Initializes a new instance of the DashboardPage class.
+        /// </summary>
 
         public DashboardPage()
         {
@@ -47,6 +71,9 @@ namespace YasGMP
                 AdjustMenuForRole(string.Empty);
             }
         }
+        /// <summary>
+        /// Initializes a new instance of the DashboardPage class.
+        /// </summary>
 
         public DashboardPage(User? user) : this()
         {

@@ -15,9 +15,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the incidents module view model value.
+/// </summary>
 
 public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Incidents";
 
     private readonly IIncidentCrudService _incidentService;
@@ -33,10 +39,19 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     private Incident? _loadedIncident;
     private IncidentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public ObservableCollection<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the priority options.
+    /// </summary>
 
     public ObservableCollection<string> PriorityOptions { get; }
+    /// <summary>
+    /// Gets or sets the type options.
+    /// </summary>
 
     public ObservableCollection<string> TypeOptions { get; }
 
@@ -45,8 +60,14 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the attach evidence command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachEvidenceCommand { get; }
+    /// <summary>
+    /// Initializes a new instance of the IncidentsModuleViewModel class.
+    /// </summary>
 
     public IncidentsModuleViewModel(
         DatabaseService databaseService,
@@ -653,6 +674,9 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             relatedParameter);
     }
 }
+/// <summary>
+/// Represents the incident editor value.
+/// </summary>
 
 public sealed partial class IncidentEditor : ObservableObject
 {
@@ -730,6 +754,9 @@ public sealed partial class IncidentEditor : ObservableObject
 
     [ObservableProperty]
     private double? _anomalyScore;
+    /// <summary>
+    /// Executes the create empty operation.
+    /// </summary>
 
     public static IncidentEditor CreateEmpty()
         => new()
@@ -737,6 +764,9 @@ public sealed partial class IncidentEditor : ObservableObject
             DetectedAt = DateTime.UtcNow,
             Status = "REPORTED"
         };
+    /// <summary>
+    /// Executes the create for new operation.
+    /// </summary>
 
     public static IncidentEditor CreateForNew(IAuthContext authContext)
     {
@@ -748,6 +778,9 @@ public sealed partial class IncidentEditor : ObservableObject
             Status = "REPORTED"
         };
     }
+    /// <summary>
+    /// Executes the from incident operation.
+    /// </summary>
 
     public static IncidentEditor FromIncident(Incident incident, Func<string?, string> normalizeStatus)
     {
@@ -780,6 +813,9 @@ public sealed partial class IncidentEditor : ObservableObject
             AnomalyScore = incident.AnomalyScore
         };
     }
+    /// <summary>
+    /// Executes the clone operation.
+    /// </summary>
 
     public IncidentEditor Clone()
         => new()
@@ -810,6 +846,9 @@ public sealed partial class IncidentEditor : ObservableObject
             RiskLevel = RiskLevel,
             AnomalyScore = AnomalyScore
         };
+    /// <summary>
+    /// Executes the to incident operation.
+    /// </summary>
 
     public Incident ToIncident(Incident? existing)
     {

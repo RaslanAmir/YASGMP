@@ -15,9 +15,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the scheduling module view model value.
+/// </summary>
 
 public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Scheduling";
 
     private readonly IScheduledJobCrudService _scheduledJobService;
@@ -29,6 +35,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
     private ScheduledJob? _loadedJob;
     private ScheduledJobEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the SchedulingModuleViewModel class.
+    /// </summary>
 
     public SchedulingModuleViewModel(
         DatabaseService databaseService,
@@ -62,10 +71,19 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+    /// <summary>
+    /// Gets or sets the execute job command.
+    /// </summary>
 
     public IAsyncRelayCommand ExecuteJobCommand { get; }
+    /// <summary>
+    /// Gets or sets the acknowledge job command.
+    /// </summary>
 
     public IAsyncRelayCommand AcknowledgeJobCommand { get; }
 
@@ -576,6 +594,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             relatedModule,
             job.EntityId);
     }
+    /// <summary>
+    /// Represents the scheduled job editor value.
+    /// </summary>
 
     public sealed partial class ScheduledJobEditor : ObservableObject
     {
@@ -656,8 +677,14 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
         [ObservableProperty]
         private string _ipAddress = string.Empty;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static ScheduledJobEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static ScheduledJobEditor CreateForNew(IAuthContext authContext)
         {
@@ -679,6 +706,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 IpAddress = authContext.CurrentIpAddress
             };
         }
+        /// <summary>
+        /// Executes the from entity operation.
+        /// </summary>
 
         public static ScheduledJobEditor FromEntity(ScheduledJob entity)
         {
@@ -712,6 +742,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 IpAddress = entity.IpAddress ?? string.Empty
             };
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public ScheduledJobEditor Clone()
             => new()
@@ -743,6 +776,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 SessionId = SessionId,
                 IpAddress = IpAddress
             };
+        /// <summary>
+        /// Executes the to entity operation.
+        /// </summary>
 
         public ScheduledJob ToEntity(ScheduledJob? existing)
         {

@@ -27,6 +27,9 @@ namespace YasGMP.Wpf.Services;
 /// </remarks>
 public sealed class CflDialogService : ICflDialogService
 {
+    /// <summary>
+    /// Executes the show async operation.
+    /// </summary>
     public Task<CflResult?> ShowAsync(CflRequest request)
     {
         var tcs = new TaskCompletionSource<CflResult?>();

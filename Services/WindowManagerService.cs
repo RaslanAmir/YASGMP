@@ -64,11 +64,29 @@ namespace YasGMP.Services
 
         private sealed class Geometry
         {
+            /// <summary>
+            /// Gets or sets the x.
+            /// </summary>
             public int? X { get; set; }
+            /// <summary>
+            /// Gets or sets the y.
+            /// </summary>
             public int? Y { get; set; }
+            /// <summary>
+            /// Gets or sets the width.
+            /// </summary>
             public int  Width { get; set; }
+            /// <summary>
+            /// Gets or sets the height.
+            /// </summary>
             public int  Height { get; set; }
+            /// <summary>
+            /// Gets or sets the saved at utc.
+            /// </summary>
             public DateTime SavedAtUtc { get; set; }
+            /// <summary>
+            /// Gets or sets the layout xml.
+            /// </summary>
             public string? LayoutXml { get; set; }
         }
 

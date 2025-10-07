@@ -362,6 +362,9 @@ namespace YasGMP.Services
                 capa.SessionId = metadata.Session!;
             }
         }
+        /// <summary>
+        /// Executes the generate digital signature operation.
+        /// </summary>
 
         public string GenerateDigitalSignature(CapaCase c)
         {

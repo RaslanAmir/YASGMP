@@ -7,15 +7,24 @@ using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics
 {
+    /// <summary>
+    /// Represents the Crash Handler.
+    /// </summary>
     public sealed class CrashHandler
     {
         private readonly ITrace _trace;
         private readonly DiagnosticContext _ctx;
+        /// <summary>
+        /// Initializes a new instance of the CrashHandler class.
+        /// </summary>
 
         public CrashHandler(ITrace trace, DiagnosticContext ctx)
         {
             _trace = trace; _ctx = ctx;
         }
+        /// <summary>
+        /// Executes the register global operation.
+        /// </summary>
 
         public void RegisterGlobal()
         {

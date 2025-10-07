@@ -10,11 +10,20 @@ using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the api audit module view model value.
+/// </summary>
 
 public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "ApiAudit";
     private const int DefaultResultLimit = 500;
+    /// <summary>
+    /// Initializes a new instance of the ApiAuditModuleViewModel class.
+    /// </summary>
 
     public ApiAuditModuleViewModel(
         DatabaseService databaseService,
@@ -35,6 +44,9 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         FilterTo = DateTime.Today;
         SelectedAction = _actionOptions.First();
     }
+    /// <summary>
+    /// Gets or sets the action options.
+    /// </summary>
 
     public ReadOnlyObservableCollection<string> ActionOptions { get; }
 

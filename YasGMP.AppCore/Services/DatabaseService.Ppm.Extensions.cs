@@ -18,6 +18,9 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServicePpmExtensions
     {
+        /// <summary>
+        /// Executes the get all ppm plans async operation.
+        /// </summary>
         public static async Task<List<PreventiveMaintenancePlan>> GetAllPpmPlansAsync(this DatabaseService db, CancellationToken token = default)
         {
             // Prefer the richer table when present
@@ -32,6 +35,9 @@ namespace YasGMP.Services
                 return MapList(dt);
             }
         }
+        /// <summary>
+        /// Executes the get ppm plan by id async operation.
+        /// </summary>
 
         public static async Task<PreventiveMaintenancePlan?> GetPpmPlanByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -46,6 +52,9 @@ namespace YasGMP.Services
                 return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
             }
         }
+        /// <summary>
+        /// Executes the insert or update ppm plan async operation.
+        /// </summary>
 
         public static async Task<int> InsertOrUpdatePpmPlanAsync(this DatabaseService db, PreventiveMaintenancePlan plan, bool update, CancellationToken token = default)
         {
@@ -100,6 +109,9 @@ namespace YasGMP.Services
 
             return plan.Id;
         }
+        /// <summary>
+        /// Executes the delete ppm plan async operation.
+        /// </summary>
 
         public static async Task DeletePpmPlanAsync(this DatabaseService db, int id, CancellationToken token = default)
         {

@@ -26,18 +26,30 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
 {
     private readonly ExternalServicerService _externalServicerService;
     private readonly DatabaseService _databaseService;
+    /// <summary>
+    /// Initializes a new instance of the ExternalServicerCrudServiceAdapter class.
+    /// </summary>
 
     public ExternalServicerCrudServiceAdapter(ExternalServicerService externalServicerService, DatabaseService databaseService)
     {
         _externalServicerService = externalServicerService ?? throw new ArgumentNullException(nameof(externalServicerService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
     }
+    /// <summary>
+    /// Executes the get all async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<ExternalServicer>> GetAllAsync()
         => await _externalServicerService.GetAllAsync().ConfigureAwait(false);
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<ExternalServicer?> TryGetByIdAsync(int id)
         => await _externalServicerService.TryGetByIdAsync(id).ConfigureAwait(false);
+    /// <summary>
+    /// Executes the create async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
     {
@@ -53,6 +65,9 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
         await StampAsync(servicer, context, "CREATE").ConfigureAwait(false);
         return new CrudSaveResult(servicer.Id, metadata);
     }
+    /// <summary>
+    /// Executes the update async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
     {
@@ -68,11 +83,17 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
         await StampAsync(servicer, context, "UPDATE").ConfigureAwait(false);
         return new CrudSaveResult(servicer.Id, metadata);
     }
+    /// <summary>
+    /// Executes the delete async operation.
+    /// </summary>
 
     public async Task DeleteAsync(int id, ExternalServicerCrudContext context)
     {
         await _externalServicerService.DeleteAsync(id, context.UserId).ConfigureAwait(false);
     }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(ExternalServicer servicer)
     {
@@ -97,6 +118,9 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
             throw new InvalidOperationException("Cooperation end cannot precede its start date.");
         }
     }
+    /// <summary>
+    /// Executes the normalize status operation.
+    /// </summary>
 
     public string NormalizeStatus(string? status) => ExternalServicerCrudExtensions.NormalizeStatusDefault(status);
 

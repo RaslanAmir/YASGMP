@@ -34,34 +34,58 @@ namespace YasGMP.Views.Dialogs
 
         private bool _suppressDueDateSync;
         private bool _suppressCloseDateSync;
+        /// <summary>
+        /// Gets or sets the work order.
+        /// </summary>
 
         public WorkOrder WorkOrder { get; }
+        /// <summary>
+        /// Executes the tcs operation.
+        /// </summary>
         public TaskCompletionSource<bool> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private List<(string name, int id)> _machines = new();
         private List<(string name, int id)> _components = new();
         private List<(string name, int id)> _users = new();
+        /// <summary>
+        /// Represents the due date picker value property value.
+        /// </summary>
 
         public static readonly BindableProperty DueDatePickerValueProperty =
             BindableProperty.Create(nameof(DueDatePickerValue), typeof(DateTime), typeof(WorkOrderEditDialog), DateTime.Today,
                 BindingMode.TwoWay, propertyChanged: OnDueDatePickerValueChanged);
+        /// <summary>
+        /// Represents the date close picker value property value.
+        /// </summary>
 
         public static readonly BindableProperty DateClosePickerValueProperty =
             BindableProperty.Create(nameof(DateClosePickerValue), typeof(DateTime), typeof(WorkOrderEditDialog), DateTime.Today,
                 BindingMode.TwoWay, propertyChanged: OnDateClosePickerValueChanged);
+        /// <summary>
+        /// Represents the due date picker value value.
+        /// </summary>
 
         public DateTime DueDatePickerValue
         {
             get => (DateTime)GetValue(DueDatePickerValueProperty);
             set => SetValue(DueDatePickerValueProperty, value);
         }
+        /// <summary>
+        /// Represents the date close picker value value.
+        /// </summary>
 
         public DateTime DateClosePickerValue
         {
             get => (DateTime)GetValue(DateClosePickerValueProperty);
             set => SetValue(DateClosePickerValueProperty, value);
         }
+        /// <summary>
+        /// Initializes a new instance of the WorkOrderEditDialog class.
+        /// </summary>
 
         public WorkOrderEditDialog(
             WorkOrder wo,

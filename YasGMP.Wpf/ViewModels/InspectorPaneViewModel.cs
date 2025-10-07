@@ -12,6 +12,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     private readonly ILocalizationService _localization;
     private string _modulePlaceholder;
     private string _recordPlaceholder;
+    /// <summary>
+    /// Initializes a new instance of the InspectorPaneViewModel class.
+    /// </summary>
 
     public InspectorPaneViewModel(ILocalizationService localization)
     {
@@ -32,8 +35,14 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
     [ObservableProperty]
     private string _recordTitle = "No record selected";
+    /// <summary>
+    /// Gets or sets the fields.
+    /// </summary>
 
     public ObservableCollection<InspectorFieldViewModel> Fields { get; }
+    /// <summary>
+    /// Executes the update operation.
+    /// </summary>
 
     public void Update(InspectorContext context)
     {
@@ -66,14 +75,23 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         }
     }
 }
+/// <summary>
+/// Represents the Inspector Field View Model.
+/// </summary>
 
 public partial class InspectorFieldViewModel : ObservableObject
 {
+    /// <summary>
+    /// Initializes a new instance of the InspectorFieldViewModel class.
+    /// </summary>
     public InspectorFieldViewModel(string label, string value)
     {
         Label = label;
         Value = value;
     }
+    /// <summary>
+    /// Gets or sets the label.
+    /// </summary>
 
     public string Label { get; }
 

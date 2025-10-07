@@ -4,6 +4,9 @@ using YasGMP.Services;
 
 namespace YasGMP.Helpers
 {
+    /// <summary>
+    /// Represents the export format prompt value.
+    /// </summary>
     public static class ExportFormatPrompt
     {
         /// <summary>

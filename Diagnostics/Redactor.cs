@@ -4,12 +4,18 @@ using System.Linq;
 
 namespace YasGMP.Diagnostics
 {
+    /// <summary>
+    /// Represents the redactor value.
+    /// </summary>
     public static class Redactor
     {
         private static readonly string[] SecretKeys = new[]
         {
             "password","pwd","pass","token","apikey","api_key","secret","connectionstring","user_id","username","email"
         };
+        /// <summary>
+        /// Executes the object operation.
+        /// </summary>
 
         public static IDictionary<string, object?>? Redact(IDictionary<string, object?>? data, bool enabled)
         {
@@ -32,6 +38,9 @@ namespace YasGMP.Diagnostics
             }
             return copy;
         }
+        /// <summary>
+        /// Executes the redact conn string operation.
+        /// </summary>
 
         public static string RedactConnString(string conn)
         {

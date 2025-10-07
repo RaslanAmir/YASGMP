@@ -42,9 +42,15 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the work order.
+        /// </summary>
         [ForeignKey(nameof(WorkOrderId))]
         public virtual WorkOrder? WorkOrder { get; set; }
 
+        /// <summary>
+        /// Gets or sets the item.
+        /// </summary>
         [ForeignKey(nameof(ItemId))]
         public virtual ChecklistItem? Item { get; set; }
     }

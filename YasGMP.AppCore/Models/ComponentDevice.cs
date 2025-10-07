@@ -41,12 +41,21 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the component.
+        /// </summary>
         [ForeignKey(nameof(ComponentId))]
         public virtual MachineComponent? Component { get; set; }
 
+        /// <summary>
+        /// Gets or sets the device.
+        /// </summary>
         [ForeignKey(nameof(DeviceId))]
         public virtual IotDevice? Device { get; set; }
 
+        /// <summary>
+        /// Gets or sets the sensor model.
+        /// </summary>
         [ForeignKey(nameof(SensorModelId))]
         public virtual SensorModel? SensorModel { get; set; }
     }

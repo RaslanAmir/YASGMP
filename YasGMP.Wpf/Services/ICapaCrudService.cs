@@ -73,6 +73,9 @@ public readonly record struct CapaCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static CapaCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -85,6 +88,9 @@ public readonly record struct CapaCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static CapaCrudContext Create(
         int userId,

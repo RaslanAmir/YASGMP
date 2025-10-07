@@ -26,18 +26,27 @@ namespace YasGMP.Wpf.Services
     {
         private readonly DatabaseService _database;
         private readonly AuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the WarehouseCrudServiceAdapter class.
+        /// </summary>
 
         public WarehouseCrudServiceAdapter(DatabaseService database, AuditService auditService)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         }
+        /// <summary>
+        /// Executes the get all async operation.
+        /// </summary>
 
         public async Task<IReadOnlyList<Warehouse>> GetAllAsync()
         {
             var warehouses = await _database.GetWarehousesAsync().ConfigureAwait(false);
             return warehouses.AsReadOnly();
         }
+        /// <summary>
+        /// Executes the try get by id async operation.
+        /// </summary>
 
         public async Task<Warehouse?> TryGetByIdAsync(int id)
         {
@@ -52,6 +61,9 @@ namespace YasGMP.Wpf.Services
 
             return null;
         }
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
@@ -61,6 +73,9 @@ namespace YasGMP.Wpf.Services
             await UpdateWarehouseDetailsAsync(warehouse, context).ConfigureAwait(false);
             return new CrudSaveResult(id, CreateMetadata(context, signature));
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
@@ -68,6 +83,9 @@ namespace YasGMP.Wpf.Services
             await UpdateWarehouseDetailsAsync(warehouse, context).ConfigureAwait(false);
             return new CrudSaveResult(warehouse.Id, CreateMetadata(context, signature));
         }
+        /// <summary>
+        /// Executes the validate operation.
+        /// </summary>
 
         public void Validate(Warehouse warehouse)
         {
@@ -86,9 +104,15 @@ namespace YasGMP.Wpf.Services
                 throw new InvalidOperationException("Warehouse location is required.");
             }
         }
+        /// <summary>
+        /// Executes the normalize status operation.
+        /// </summary>
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "qualified" : status.Trim().ToLower(CultureInfo.InvariantCulture);
+        /// <summary>
+        /// Executes the get stock snapshot async operation.
+        /// </summary>
 
         public async Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId)
         {
@@ -131,6 +155,9 @@ ORDER BY part_name, part_code";
 
             return results;
         }
+        /// <summary>
+        /// Executes the get recent movements async operation.
+        /// </summary>
 
         public async Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10)
         {

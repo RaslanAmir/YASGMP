@@ -10,6 +10,9 @@ namespace YasGMP.Views
     /// </summary>
     public partial class LoginPage : ContentPage
     {
+        /// <summary>
+        /// Initializes a new instance of the LoginPage class.
+        /// </summary>
         public LoginPage()
         {
             InitializeComponent();

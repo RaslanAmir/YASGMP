@@ -10,6 +10,9 @@ namespace YasGMP.Models
     /// </summary>
     public partial class QualityEvent
     {
+        /// <summary>
+        /// Represents the event type raw value.
+        /// </summary>
         [Column("event_type")]
         [MaxLength(50)]
         public string? EventTypeRaw
@@ -18,6 +21,9 @@ namespace YasGMP.Models
             set => EventType = QualityEventSchemaMapper.StringToEventType(value);
         }
 
+        /// <summary>
+        /// Represents the status raw value.
+        /// </summary>
         [Column("status")]
         [MaxLength(50)]
         public string? StatusRaw
@@ -26,28 +32,52 @@ namespace YasGMP.Models
             set => Status = QualityEventSchemaMapper.StringToStatus(value);
         }
 
+        /// <summary>
+        /// Gets or sets the created at.
+        /// </summary>
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the updated at.
+        /// </summary>
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type id.
+        /// </summary>
         [Column("type_id")]
         public int? TypeId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the status id.
+        /// </summary>
         [Column("status_id")]
         public int? StatusId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the legacy related machine.
+        /// </summary>
         [Column("related_machine")]
         public int? LegacyRelatedMachine { get; set; }
 
+        /// <summary>
+        /// Gets or sets the legacy related component.
+        /// </summary>
         [Column("related_component")]
         public int? LegacyRelatedComponent { get; set; }
 
+        /// <summary>
+        /// Gets or sets the created by name.
+        /// </summary>
         [Column("created_by")]
         [MaxLength(255)]
         public string? CreatedByName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last modified by name.
+        /// </summary>
         [Column("last_modified_by")]
         [MaxLength(255)]
         public string? LastModifiedByName { get; set; }
@@ -55,6 +85,9 @@ namespace YasGMP.Models
 
     internal static class QualityEventSchemaMapper
     {
+        /// <summary>
+        /// Executes the event type to string operation.
+        /// </summary>
         public static string EventTypeToString(QualityEventType value)
             => value switch
             {
@@ -68,6 +101,9 @@ namespace YasGMP.Models
                 QualityEventType.Other => "other",
                 _ => "other"
             };
+        /// <summary>
+        /// Executes the string to event type operation.
+        /// </summary>
 
         public static QualityEventType StringToEventType(string? value)
             => value?.ToLowerInvariant() switch
@@ -82,6 +118,9 @@ namespace YasGMP.Models
                 "other" => QualityEventType.Other,
                 _ => QualityEventType.Other
             };
+        /// <summary>
+        /// Executes the status to string operation.
+        /// </summary>
 
         public static string StatusToString(QualityEventStatus value)
             => value switch
@@ -91,6 +130,9 @@ namespace YasGMP.Models
                 QualityEventStatus.UnderReview => "under_review",
                 _ => "open"
             };
+        /// <summary>
+        /// Executes the string to status operation.
+        /// </summary>
 
         public static QualityEventStatus StringToStatus(string? value)
             => value?.ToLowerInvariant() switch

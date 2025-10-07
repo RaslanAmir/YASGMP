@@ -26,176 +26,689 @@ namespace YasGMP.Data
         }
 
 		// === DbSet-ovi za sve entitete ===
+        /// <summary>
+        /// Gets or sets the admin activity logs.
+        /// </summary>
         public DbSet<AdminActivityLog> AdminActivityLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the api audit logs.
+        /// </summary>
         public DbSet<ApiAuditLog> ApiAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the api keys.
+        /// </summary>
         public DbSet<ApiKey> ApiKeys { get; set; }
+        /// <summary>
+        /// Gets or sets the api usage logs.
+        /// </summary>
         public DbSet<ApiUsageLog> ApiUsageLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the assets.
+        /// </summary>
         public DbSet<Asset> Assets { get; set; }
+        /// <summary>
+        /// Gets or sets the attachments.
+        /// </summary>
         public DbSet<Attachment> Attachments { get; set; }
+        /// <summary>
+        /// Gets or sets the attachment links.
+        /// </summary>
         public DbSet<AttachmentLink> AttachmentLinks { get; set; }
+        /// <summary>
+        /// Gets or sets the retention policies.
+        /// </summary>
         public DbSet<RetentionPolicy> RetentionPolicies { get; set; }
+        /// <summary>
+        /// Gets or sets the attachment audit logs.
+        /// </summary>
         public DbSet<AttachmentAuditLog> AttachmentAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the lkp statuses.
+        /// </summary>
         public DbSet<LkpStatus> LkpStatuses { get; set; }
+        /// <summary>
+        /// Gets or sets the lkp work order types.
+        /// </summary>
         public DbSet<LkpWorkOrderType> LkpWorkOrderTypes { get; set; }
+        /// <summary>
+        /// Gets or sets the lkp machine types.
+        /// </summary>
         public DbSet<LkpMachineType> LkpMachineTypes { get; set; }
+        /// <summary>
+        /// Gets or sets the audit logs.
+        /// </summary>
         public DbSet<AuditLog> AuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the audit log entries.
+        /// </summary>
         public DbSet<AuditLogEntry> AuditLogEntries { get; set; }
+        /// <summary>
+        /// Gets or sets the backup histories.
+        /// </summary>
         public DbSet<BackupHistory> BackupHistories { get; set; }
+        /// <summary>
+        /// Gets or sets the buildings.
+        /// </summary>
         public DbSet<Building> Buildings { get; set; }
+        /// <summary>
+        /// Gets or sets the calibrations.
+        /// </summary>
         public DbSet<Calibration> Calibrations { get; set; }
+        /// <summary>
+        /// Gets or sets the calibration audits.
+        /// </summary>
         public DbSet<CalibrationAudit> CalibrationAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the calibration audit logs.
+        /// </summary>
         public DbSet<CalibrationAuditLog> CalibrationAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the calibration export logs.
+        /// </summary>
         public DbSet<CalibrationExportLog> CalibrationExportLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the calibration sensors.
+        /// </summary>
         public DbSet<CalibrationSensor> CalibrationSensors { get; set; }
+        /// <summary>
+        /// Gets or sets the capa actions.
+        /// </summary>
         public DbSet<CapaAction> CapaActions { get; set; }
+        /// <summary>
+        /// Gets or sets the capa action logs.
+        /// </summary>
         public DbSet<CapaActionLog> CapaActionLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the capa cases.
+        /// </summary>
         public DbSet<CapaCase> CapaCases { get; set; }
+        /// <summary>
+        /// Gets or sets the capa status histories.
+        /// </summary>
         public DbSet<CapaStatusHistory> CapaStatusHistories { get; set; }
+        /// <summary>
+        /// Gets or sets the change controls.
+        /// </summary>
         public DbSet<ChangeControl> ChangeControls { get; set; }
+        /// <summary>
+        /// Gets or sets the checklist items.
+        /// </summary>
         public DbSet<ChecklistItem> ChecklistItems { get; set; }
+        /// <summary>
+        /// Gets or sets the checklist templates.
+        /// </summary>
         public DbSet<ChecklistTemplate> ChecklistTemplates { get; set; }
+        /// <summary>
+        /// Gets or sets the comments.
+        /// </summary>
         public DbSet<Comment> Comments { get; set; }
+        /// <summary>
+        /// Gets or sets the components.
+        /// </summary>
         public DbSet<Component> Components { get; set; }
+        /// <summary>
+        /// Gets or sets the component devices.
+        /// </summary>
         public DbSet<ComponentDevice> ComponentDevices { get; set; }
+        /// <summary>
+        /// Gets or sets the component models.
+        /// </summary>
         public DbSet<ComponentModel> ComponentModels { get; set; }
+        /// <summary>
+        /// Gets or sets the component parts.
+        /// </summary>
         public DbSet<ComponentPart> ComponentParts { get; set; }
+        /// <summary>
+        /// Gets or sets the component qualifications.
+        /// </summary>
         public DbSet<ComponentQualification> ComponentQualifications { get; set; }
+        /// <summary>
+        /// Gets or sets the component types.
+        /// </summary>
         public DbSet<ComponentType> ComponentTypes { get; set; }
+        /// <summary>
+        /// Gets or sets the config change logs.
+        /// </summary>
         public DbSet<ConfigChangeLog> ConfigChangeLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the contractor interventions.
+        /// </summary>
         public DbSet<ContractorIntervention> ContractorInterventions { get; set; }
+        /// <summary>
+        /// Gets or sets the contractor intervention audits.
+        /// </summary>
         public DbSet<ContractorInterventionAudit> ContractorInterventionAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the dashboards.
+        /// </summary>
         public DbSet<Dashboard> Dashboards { get; set; }
+        /// <summary>
+        /// Gets or sets the delegated permissions.
+        /// </summary>
         public DbSet<DelegatedPermission> DelegatedPermissions { get; set; }
+        /// <summary>
+        /// Gets or sets the delete logs.
+        /// </summary>
         public DbSet<DeleteLog> DeleteLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the departments.
+        /// </summary>
         public DbSet<Department> Departments { get; set; }
+        /// <summary>
+        /// Gets or sets the deviations.
+        /// </summary>
         public DbSet<Deviation> Deviations { get; set; }
+        /// <summary>
+        /// Gets or sets the deviation audits.
+        /// </summary>
         public DbSet<DeviationAudit> DeviationAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the digital signatures.
+        /// </summary>
         public DbSet<DigitalSignature> DigitalSignatures { get; set; }
+        /// <summary>
+        /// Gets or sets the document audit events.
+        /// </summary>
         public DbSet<DocumentAuditEvent> DocumentAuditEvents { get; set; }
+        /// <summary>
+        /// Gets or sets the document controls.
+        /// </summary>
         public DbSet<DocumentControl> DocumentControls { get; set; }
+        /// <summary>
+        /// Gets or sets the document versions.
+        /// </summary>
         public DbSet<DocumentVersion> DocumentVersions { get; set; }
+        /// <summary>
+        /// Gets or sets the entity audit logs.
+        /// </summary>
         public DbSet<EntityAuditLog> EntityAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the entity tags.
+        /// </summary>
         public DbSet<EntityTag> EntityTags { get; set; }
+        /// <summary>
+        /// Gets or sets the export audit logs.
+        /// </summary>
         public DbSet<ExportAuditLog> ExportAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the export print logs.
+        /// </summary>
         public DbSet<ExportPrintLog> ExportPrintLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the external contractors.
+        /// </summary>
         public DbSet<ExternalContractor> ExternalContractors { get; set; }
+        /// <summary>
+        /// Gets or sets the failure modes.
+        /// </summary>
         public DbSet<FailureMode> FailureModes { get; set; }
+        /// <summary>
+        /// Gets or sets the forensic user change logs.
+        /// </summary>
         public DbSet<ForensicUserChangeLog> ForensicUserChangeLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the incidents.
+        /// </summary>
         public DbSet<Incident> Incidents { get; set; }
+        /// <summary>
+        /// Gets or sets the incident actions.
+        /// </summary>
         public DbSet<IncidentAction> IncidentActions { get; set; }
+        /// <summary>
+        /// Gets or sets the incident audits.
+        /// </summary>
         public DbSet<IncidentAudit> IncidentAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the incident logs.
+        /// </summary>
         public DbSet<IncidentLog> IncidentLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the incident reports.
+        /// </summary>
         public DbSet<IncidentReport> IncidentReports { get; set; }
+        /// <summary>
+        /// Gets or sets the inspections.
+        /// </summary>
         public DbSet<Inspection> Inspections { get; set; }
+        /// <summary>
+        /// Gets or sets the integration logs.
+        /// </summary>
         public DbSet<IntegrationLog> IntegrationLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the inventory transactions.
+        /// </summary>
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        /// <summary>
+        /// Gets or sets the inventory locations.
+        /// </summary>
         public DbSet<InventoryLocation> InventoryLocations { get; set; }
+        /// <summary>
+        /// Gets or sets the iot anomaly logs.
+        /// </summary>
         public DbSet<IotAnomalyLog> IotAnomalyLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the iot devices.
+        /// </summary>
         public DbSet<IotDevice> IotDevices { get; set; }
+        /// <summary>
+        /// Gets or sets the iot event audits.
+        /// </summary>
         public DbSet<IotEventAudit> IotEventAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the iot gateways.
+        /// </summary>
         public DbSet<IotGateway> IotGateways { get; set; }
+        /// <summary>
+        /// Gets or sets the iot sensor datas.
+        /// </summary>
         public DbSet<IotSensorData> IotSensorDatas { get; set; }
+        /// <summary>
+        /// Gets or sets the irregularities logs.
+        /// </summary>
         public DbSet<IrregularitiesLog> IrregularitiesLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the job titles.
+        /// </summary>
         public DbSet<JobTitle> JobTitles { get; set; }
+        /// <summary>
+        /// Gets or sets the kpi widgets.
+        /// </summary>
         public DbSet<KpiWidget> KpiWidgets { get; set; }
+        /// <summary>
+        /// Gets or sets the locations.
+        /// </summary>
         public DbSet<YasGMP.Models.Location> Locations { get; set; }
+        /// <summary>
+        /// Gets or sets the log entries.
+        /// </summary>
         public DbSet<LogEntry> LogEntries { get; set; }
+        /// <summary>
+        /// Gets or sets the login attempt logs.
+        /// </summary>
         public DbSet<LoginAttemptLog> LoginAttemptLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the lookup domains.
+        /// </summary>
         public DbSet<LookupDomain> LookupDomains { get; set; }
+        /// <summary>
+        /// Gets or sets the lookup values.
+        /// </summary>
         public DbSet<LookupValue> LookupValues { get; set; }
+        /// <summary>
+        /// Gets or sets the machines.
+        /// </summary>
         public DbSet<Machine> Machines { get; set; }
+        /// <summary>
+        /// Gets or sets the machine components.
+        /// </summary>
         public DbSet<MachineComponent> MachineComponents { get; set; }
+        /// <summary>
+        /// Gets or sets the machine lifecycle events.
+        /// </summary>
         public DbSet<MachineLifecycleEvent> MachineLifecycleEvents { get; set; }
+        /// <summary>
+        /// Gets or sets the machine models.
+        /// </summary>
         public DbSet<MachineModel> MachineModels { get; set; }
+        /// <summary>
+        /// Gets or sets the machine statuses.
+        /// </summary>
         public DbSet<MachineStatus> MachineStatuses { get; set; }
+        /// <summary>
+        /// Gets or sets the machine types.
+        /// </summary>
         public DbSet<MachineType> MachineTypes { get; set; }
+        /// <summary>
+        /// Gets or sets the maintenance execution logs.
+        /// </summary>
         public DbSet<MaintenanceExecutionLog> MaintenanceExecutionLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the manufacturers.
+        /// </summary>
         public DbSet<Manufacturer> Manufacturers { get; set; }
+        /// <summary>
+        /// Gets or sets the measurement units.
+        /// </summary>
         public DbSet<MeasurementUnit> MeasurementUnits { get; set; }
+        /// <summary>
+        /// Gets or sets the mobile device logs.
+        /// </summary>
         public DbSet<MobileDeviceLog> MobileDeviceLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the notifications.
+        /// </summary>
         public DbSet<Notification> Notifications { get; set; }
+        /// <summary>
+        /// Gets or sets the notification channel events.
+        /// </summary>
         public DbSet<NotificationChannelEvent> NotificationChannelEvents { get; set; }
+        /// <summary>
+        /// Gets or sets the notification logs.
+        /// </summary>
         public DbSet<NotificationLog> NotificationLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the notification queues.
+        /// </summary>
         public DbSet<NotificationQueue> NotificationQueues { get; set; }
+        /// <summary>
+        /// Gets or sets the notification templates.
+        /// </summary>
         public DbSet<NotificationTemplate> NotificationTemplates { get; set; }
+        /// <summary>
+        /// Gets or sets the parts.
+        /// </summary>
         public DbSet<Part> Parts { get; set; }
+        /// <summary>
+        /// Gets or sets the part boms.
+        /// </summary>
         public DbSet<PartBom> PartBoms { get; set; }
+        /// <summary>
+        /// Gets or sets the part change logs.
+        /// </summary>
         public DbSet<PartChangeLog> PartChangeLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the part supplier prices.
+        /// </summary>
         public DbSet<PartSupplierPrice> PartSupplierPrices { get; set; }
+        /// <summary>
+        /// Gets or sets the part usages.
+        /// </summary>
         public DbSet<PartUsage> PartUsages { get; set; }
+        /// <summary>
+        /// Gets or sets the part usage audit logs.
+        /// </summary>
         public DbSet<PartUsageAuditLog> PartUsageAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the part stocks.
+        /// </summary>
         public DbSet<PartStock> PartStocks { get; set; }
+        /// <summary>
+        /// Gets or sets the permissions.
+        /// </summary>
         public DbSet<Permission> Permissions { get; set; }
+        /// <summary>
+        /// Gets or sets the permission change logs.
+        /// </summary>
         public DbSet<PermissionChangeLog> PermissionChangeLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the permission requests.
+        /// </summary>
         public DbSet<PermissionRequest> PermissionRequests { get; set; }
+        /// <summary>
+        /// Gets or sets the photos.
+        /// </summary>
         public DbSet<Photo> Photos { get; set; }
+        /// <summary>
+        /// Gets or sets the ppm plans.
+        /// </summary>
         public DbSet<PpmPlan> PpmPlans { get; set; }
+        /// <summary>
+        /// Gets or sets the preventive maintenance plans.
+        /// </summary>
         public DbSet<PreventiveMaintenancePlan> PreventiveMaintenancePlans { get; set; }
+        /// <summary>
+        /// Gets or sets the product recall logs.
+        /// </summary>
         public DbSet<ProductRecallLog> ProductRecallLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the qualifications.
+        /// </summary>
         public DbSet<Qualification> Qualifications { get; set; }
+        /// <summary>
+        /// Gets or sets the qualification audit logs.
+        /// </summary>
         public DbSet<QualificationAuditLog> QualificationAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the quality events.
+        /// </summary>
         public DbSet<QualityEvent> QualityEvents { get; set; }
+        /// <summary>
+        /// Gets or sets the ref domains.
+        /// </summary>
         public DbSet<RefDomain> RefDomains { get; set; }
+        /// <summary>
+        /// Gets or sets the ref values.
+        /// </summary>
         public DbSet<RefValue> RefValues { get; set; }
+        /// <summary>
+        /// Gets or sets the reports.
+        /// </summary>
         public DbSet<Report> Reports { get; set; }
+        /// <summary>
+        /// Gets or sets the report schedules.
+        /// </summary>
         public DbSet<ReportSchedule> ReportSchedules { get; set; }
+        /// <summary>
+        /// Gets or sets the requalification schedules.
+        /// </summary>
         public DbSet<RequalificationSchedule> RequalificationSchedules { get; set; }
+        /// <summary>
+        /// Gets or sets the responsible parties.
+        /// </summary>
         public DbSet<ResponsibleParty> ResponsibleParties { get; set; }
+        /// <summary>
+        /// Gets or sets the risk assessments.
+        /// </summary>
         public DbSet<RiskAssessment> RiskAssessments { get; set; }
+        /// <summary>
+        /// Gets or sets the risk assessment audit logs.
+        /// </summary>
         public DbSet<RiskAssessmentAuditLog> RiskAssessmentAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the roles.
+        /// </summary>
         public DbSet<Role> Roles { get; set; }
+        /// <summary>
+        /// Gets or sets the role audits.
+        /// </summary>
         public DbSet<RoleAudit> RoleAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the role permissions.
+        /// </summary>
         public DbSet<RolePermission> RolePermissions { get; set; }
+        /// <summary>
+        /// Gets or sets the rooms.
+        /// </summary>
         public DbSet<Room> Rooms { get; set; }
+        /// <summary>
+        /// Gets or sets the scheduled jobs.
+        /// </summary>
         public DbSet<ScheduledJob> ScheduledJobs { get; set; }
+        /// <summary>
+        /// Gets or sets the scheduled job audit logs.
+        /// </summary>
         public DbSet<ScheduledJobAuditLog> ScheduledJobAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the schema migration logs.
+        /// </summary>
         public DbSet<SchemaMigrationLog> SchemaMigrationLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the sensitive data access logs.
+        /// </summary>
         public DbSet<SensitiveDataAccessLog> SensitiveDataAccessLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the sensor data logs.
+        /// </summary>
         public DbSet<SensorDataLog> SensorDataLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the sensor models.
+        /// </summary>
         public DbSet<SensorModel> SensorModels { get; set; }
+        /// <summary>
+        /// Gets or sets the sensor types.
+        /// </summary>
         public DbSet<SensorTypeEntity> SensorTypes { get; set; }
+        /// <summary>
+        /// Gets or sets the session logs.
+        /// </summary>
         public DbSet<SessionLog> SessionLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the settings.
+        /// </summary>
         public DbSet<Setting> Settings { get; set; }
+        /// <summary>
+        /// Gets or sets the setting audit logs.
+        /// </summary>
         public DbSet<SettingAuditLog> SettingAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the setting versions.
+        /// </summary>
         public DbSet<SettingVersion> SettingVersions { get; set; }
+        /// <summary>
+        /// Gets or sets the sites.
+        /// </summary>
         public DbSet<Site> Sites { get; set; }
+        /// <summary>
+        /// Gets or sets the sop documents.
+        /// </summary>
         public DbSet<SopDocument> SopDocuments { get; set; }
+        /// <summary>
+        /// Gets or sets the sop document logs.
+        /// </summary>
         public DbSet<SopDocumentLog> SopDocumentLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the sql query audit logs.
+        /// </summary>
         public DbSet<SqlQueryAuditLog> SqlQueryAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the stock change logs.
+        /// </summary>
         public DbSet<StockChangeLog> StockChangeLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the stock levels.
+        /// </summary>
         public DbSet<StockLevel> StockLevels { get; set; }
+        /// <summary>
+        /// Gets or sets the suppliers.
+        /// </summary>
         public DbSet<Supplier> Suppliers { get; set; }
+        /// <summary>
+        /// Gets or sets the supplier audits.
+        /// </summary>
         public DbSet<SupplierAudit> SupplierAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the supplier risk audits.
+        /// </summary>
         public DbSet<SupplierRiskAudit> SupplierRiskAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the system event logs.
+        /// </summary>
         public DbSet<SystemEventLog> SystemEventLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the system parameters.
+        /// </summary>
         public DbSet<SystemParameter> SystemParameters { get; set; }
+        /// <summary>
+        /// Gets or sets the tags.
+        /// </summary>
         public DbSet<Tag> Tags { get; set; }
+        /// <summary>
+        /// Gets or sets the tenants.
+        /// </summary>
         public DbSet<Tenant> Tenants { get; set; }
+        /// <summary>
+        /// Gets or sets the training audit logs.
+        /// </summary>
         public DbSet<TrainingAuditLog> TrainingAuditLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the training logs.
+        /// </summary>
         public DbSet<TrainingLog> TrainingLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the training records.
+        /// </summary>
         public DbSet<TrainingRecord> TrainingRecords { get; set; }
+        /// <summary>
+        /// Gets or sets the users.
+        /// </summary>
         public DbSet<User> Users { get; set; }
+        /// <summary>
+        /// Gets or sets the user activity logs.
+        /// </summary>
         public DbSet<UserActivityLog> UserActivityLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the user audits.
+        /// </summary>
         public DbSet<UserAudit> UserAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the user esignatures.
+        /// </summary>
         public DbSet<UserEsignature> UserEsignatures { get; set; }
+        /// <summary>
+        /// Gets or sets the user login logs.
+        /// </summary>
         public DbSet<UserLoginLog> UserLoginLogs { get; set; }
+        /// <summary>
+        /// Gets or sets the user permissions.
+        /// </summary>
         public DbSet<UserPermission> UserPermissions { get; set; }
+        /// <summary>
+        /// Gets or sets the user permission overrides.
+        /// </summary>
         public DbSet<UserPermissionOverride> UserPermissionOverrides { get; set; }
+        /// <summary>
+        /// Gets or sets the user role assignments.
+        /// </summary>
         public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
+        /// <summary>
+        /// Gets or sets the user role histories.
+        /// </summary>
         public DbSet<UserRoleHistory> UserRoleHistories { get; set; }
+        /// <summary>
+        /// Gets or sets the user role mappings.
+        /// </summary>
         public DbSet<UserRoleMapping> UserRoleMappings { get; set; }
+        /// <summary>
+        /// Gets or sets the user subscriptions.
+        /// </summary>
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
+        /// <summary>
+        /// Gets or sets the user trainings.
+        /// </summary>
         public DbSet<UserTraining> UserTrainings { get; set; }
+        /// <summary>
+        /// Gets or sets the user window layouts.
+        /// </summary>
         public DbSet<UserWindowLayout> UserWindowLayouts { get; set; }
+        /// <summary>
+        /// Gets or sets the warehouses.
+        /// </summary>
         public DbSet<Warehouse> Warehouses { get; set; }
+        /// <summary>
+        /// Gets or sets the warehouse stocks.
+        /// </summary>
         public DbSet<WarehouseStock> WarehouseStocks { get; set; }
+        /// <summary>
+        /// Gets or sets the work orders.
+        /// </summary>
         public DbSet<WorkOrder> WorkOrders { get; set; }
+        /// <summary>
+        /// Gets or sets the work order attachments.
+        /// </summary>
         public DbSet<WorkOrderAttachment> WorkOrderAttachments { get; set; }
+        /// <summary>
+        /// Gets or sets the work order audits.
+        /// </summary>
         public DbSet<WorkOrderAudit> WorkOrderAudits { get; set; }
+        /// <summary>
+        /// Gets or sets the work order checklist items.
+        /// </summary>
         public DbSet<WorkOrderChecklistItem> WorkOrderChecklistItems { get; set; }
+        /// <summary>
+        /// Gets or sets the work order comments.
+        /// </summary>
         public DbSet<WorkOrderComment> WorkOrderComments { get; set; }
+        /// <summary>
+        /// Gets or sets the work order parts.
+        /// </summary>
         public DbSet<WorkOrderPart> WorkOrderParts { get; set; }
+        /// <summary>
+        /// Gets or sets the work order signatures.
+        /// </summary>
         public DbSet<WorkOrderSignature> WorkOrderSignatures { get; set; }
+        /// <summary>
+        /// Gets or sets the work order status logs.
+        /// </summary>
         public DbSet<WorkOrderStatusLog> WorkOrderStatusLogs { get; set; }
 
         /// <summary>

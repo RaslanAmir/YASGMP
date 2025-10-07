@@ -20,6 +20,9 @@ namespace YasGMP.Models
         /// </summary>
         [Required]
         public int ComponentId { get; set; }
+        /// <summary>
+        /// Gets or sets the component.
+        /// </summary>
         public Component? Component { get; set; }
 
         /// <summary>
@@ -44,6 +47,9 @@ namespace YasGMP.Models
         /// FK – ID odgovorne osobe (User).
         /// </summary>
         public int? ResponsibleUserId { get; set; }
+        /// <summary>
+        /// Gets or sets the responsible user.
+        /// </summary>
         public User? ResponsibleUser { get; set; }
 
         /// <summary>
@@ -79,6 +85,9 @@ namespace YasGMP.Models
         /// ID korisnika koji je zadnji mijenjao podatke (audit).
         /// </summary>
         public int LastModifiedById { get; set; }
+        /// <summary>
+        /// Gets or sets the last modified by.
+        /// </summary>
         public User? LastModifiedBy { get; set; }
 
         /// <summary>
@@ -115,6 +124,9 @@ namespace YasGMP.Models
         /// </summary>
         public double? AnomalyScore { get; set; }
 
+        /// <summary>
+        /// Gets or sets the analytics json.
+        /// </summary>
         [MaxLength(2048)]
         public string? AnalyticsJson { get; set; }
 
@@ -123,6 +135,9 @@ namespace YasGMP.Models
         /// </summary>
         public int? RelatedCaseId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the related case type.
+        /// </summary>
         [MaxLength(40)]
         public string? RelatedCaseType { get; set; }
 

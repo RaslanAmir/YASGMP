@@ -149,16 +149,46 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ===
+        /// <summary>
+        /// Gets or sets the load capa cases command.
+        /// </summary>
 
         public IAsyncRelayCommand LoadCapaCasesCommand { get; }
+        /// <summary>
+        /// Gets or sets the add capa case command.
+        /// </summary>
         public IAsyncRelayCommand AddCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the update capa case command.
+        /// </summary>
         public IAsyncRelayCommand UpdateCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the delete capa case command.
+        /// </summary>
         public IAsyncRelayCommand DeleteCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the rollback capa case command.
+        /// </summary>
         public IAsyncRelayCommand RollbackCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the export capa cases command.
+        /// </summary>
         public IAsyncRelayCommand ExportCapaCasesCommand { get; }
+        /// <summary>
+        /// Gets or sets the escalate capa case command.
+        /// </summary>
         public IAsyncRelayCommand EscalateCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the approve capa case command.
+        /// </summary>
         public IAsyncRelayCommand ApproveCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the reject capa case command.
+        /// </summary>
         public IAsyncRelayCommand RejectCapaCaseCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand            FilterChangedCommand { get; }
 
         #endregion

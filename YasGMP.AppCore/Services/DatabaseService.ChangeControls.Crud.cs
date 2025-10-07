@@ -12,9 +12,15 @@ using MySqlConnector;
 using YasGMP.Models;
 
 namespace YasGMP.Services;
+/// <summary>
+/// Represents the database service change controls crud extensions value.
+/// </summary>
 
 public static class DatabaseServiceChangeControlsCrudExtensions
 {
+    /// <summary>
+    /// Executes the get all change controls async operation.
+    /// </summary>
     public static async Task<List<ChangeControl>> GetAllChangeControlsAsync(
         this DatabaseService db,
         CancellationToken token = default)
@@ -36,6 +42,9 @@ ORDER BY id DESC";
 
         return list;
     }
+    /// <summary>
+    /// Executes the get change control by id async operation.
+    /// </summary>
 
     public static async Task<ChangeControl?> GetChangeControlByIdAsync(
         this DatabaseService db,
@@ -56,6 +65,9 @@ LIMIT 1";
 
         return table.Rows.Count == 0 ? null : Map(table.Rows[0]);
     }
+    /// <summary>
+    /// Executes the insert change control async operation.
+    /// </summary>
 
     public static async Task<int> InsertChangeControlAsync(
         this DatabaseService db,
@@ -102,6 +114,9 @@ VALUES
 
         return changeControl.Id;
     }
+    /// <summary>
+    /// Executes the update change control async operation.
+    /// </summary>
 
     public static async Task UpdateChangeControlAsync(
         this DatabaseService db,

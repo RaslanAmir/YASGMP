@@ -19,6 +19,9 @@ namespace YasGMP.Services
     public static class DatabaseServiceExternalServicersExtensions
     {
         // UI prefers ExternalContractor. Keep DB mapping tolerant and expose both shapes when needed.
+        /// <summary>
+        /// Executes the get all external servicers async operation.
+        /// </summary>
         public static async Task<List<ExternalContractor>> GetAllExternalServicersAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT
@@ -30,6 +33,9 @@ FROM external_contractors ORDER BY name, id";
             foreach (DataRow r in dt.Rows) list.Add(MapToContractor(r));
             return list;
         }
+        /// <summary>
+        /// Executes the get external servicer by id async operation.
+        /// </summary>
 
         public static async Task<ExternalServicer?> GetExternalServicerByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -46,12 +52,18 @@ FROM external_contractors WHERE id=@id LIMIT 1";
 
             return MapToServicer(dt.Rows[0]);
         }
+        /// <summary>
+        /// Executes the get external contractor by id async operation.
+        /// </summary>
 
         public static async Task<ExternalContractor?> GetExternalContractorByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
             var servicer = await db.GetExternalServicerByIdAsync(id, token).ConfigureAwait(false);
             return servicer != null ? ToContractor(servicer) : null;
         }
+        /// <summary>
+        /// Executes the insert or update external servicer async operation.
+        /// </summary>
 
         public static async Task<int> InsertOrUpdateExternalServicerAsync(this DatabaseService db, ExternalServicer ext, bool update, CancellationToken token = default)
         {
@@ -94,21 +106,39 @@ FROM external_contractors WHERE id=@id LIMIT 1";
         }
 
         // Overload for UI alias type ExternalContractor
+        /// <summary>
+        /// Executes the insert or update external servicer async operation.
+        /// </summary>
         public static Task<int> InsertOrUpdateExternalServicerAsync(this DatabaseService db, ExternalContractor ext, bool update, CancellationToken token = default)
             => db.InsertOrUpdateExternalServicerAsync(ToServicer(ext), update, token);
 
         // Back-compat wrappers for ExternalContractorViewModel naming
+        /// <summary>
+        /// Executes the get all external contractors async operation.
+        /// </summary>
         public static Task<List<ExternalContractor>> GetAllExternalContractorsAsync(this DatabaseService db, CancellationToken token = default)
             => db.GetAllExternalServicersAsync(token);
+        /// <summary>
+        /// Executes the add external contractor async operation.
+        /// </summary>
 
         public static Task<int> AddExternalContractorAsync(this DatabaseService db, ExternalContractor contractor, CancellationToken token = default)
             => db.InsertOrUpdateExternalServicerAsync(contractor, update: false, token);
+        /// <summary>
+        /// Executes the update external contractor async operation.
+        /// </summary>
 
         public static Task<int> UpdateExternalContractorAsync(this DatabaseService db, ExternalContractor contractor, CancellationToken token = default)
             => db.InsertOrUpdateExternalServicerAsync(contractor, update: true, token);
+        /// <summary>
+        /// Executes the delete external contractor async operation.
+        /// </summary>
 
         public static Task DeleteExternalContractorAsync(this DatabaseService db, int id, CancellationToken token = default)
             => db.DeleteExternalServicerAsync(id, token);
+        /// <summary>
+        /// Executes the delete external servicer async operation.
+        /// </summary>
 
         public static Task DeleteExternalServicerAsync(this DatabaseService db, int id, CancellationToken token = default)
             => db.ExecuteNonQueryAsync("DELETE FROM external_contractors WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token);

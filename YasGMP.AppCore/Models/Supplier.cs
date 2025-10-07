@@ -12,6 +12,9 @@ namespace YasGMP.Models
     [Table("suppliers")]
     public partial class Supplier
     {
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
         [Key]
         [Column("id")]
         public int Id { get; set; }
@@ -26,25 +29,43 @@ namespace YasGMP.Models
         [Column("vat_number")]
         public string VatNumber { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the address.
+        /// </summary>
         [Column("address")]
         public string Address { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the city.
+        /// </summary>
         [MaxLength(80)]
         [Column("city")]
         public string City { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the country.
+        /// </summary>
         [MaxLength(80)]
         [Column("country")]
         public string Country { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the email.
+        /// </summary>
         [MaxLength(100)]
         [Column("email")]
         public string Email { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the phone.
+        /// </summary>
         [StringLength(50)]
         [Column("phone")]
         public string Phone { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the website.
+        /// </summary>
         [StringLength(200)]
         [Column("website")]
         public string Website { get; set; } = string.Empty;
@@ -63,6 +84,9 @@ namespace YasGMP.Models
         [Column("contract_file")]
         public string ContractFile { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the documents.
+        /// </summary>
         [NotMapped]
         public List<string> Documents { get; set; } = new();
 
@@ -84,64 +108,121 @@ namespace YasGMP.Models
         [NotMapped]
         public string GmpComment { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the digital signature id.
+        /// </summary>
         [Column("digital_signature_id")]
         public int? DigitalSignatureId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the digital signature.
+        /// </summary>
         [MaxLength(128)]
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the entry hash.
+        /// </summary>
         [Column("entry_hash")]
         [MaxLength(128)]
         public string EntryHash { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the last modified.
+        /// </summary>
         [Column("last_modified")]
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
+        /// <summary>
+        /// Gets or sets the last modified by id.
+        /// </summary>
         [Column("last_modified_by_id")]
         public int? LastModifiedById { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last modified by.
+        /// </summary>
         [ForeignKey(nameof(LastModifiedById))]
         public virtual User? LastModifiedBy { get; set; }
 
+        /// <summary>
+        /// Gets or sets the source ip.
+        /// </summary>
         [MaxLength(45)]
         [Column("source_ip")]
         public string SourceIp { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the is qualified.
+        /// </summary>
         [Column("is_qualified")]
         public bool IsQualified { get; set; } = false;
 
+        /// <summary>
+        /// Gets or sets the last qualification check.
+        /// </summary>
         [Column("last_qualification_check")]
         public DateTime? LastQualificationCheck { get; set; }
 
+        /// <summary>
+        /// Gets or sets the external certification id.
+        /// </summary>
         [MaxLength(100)]
         [Column("external_certification_id")]
         public string ExternalCertificationId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the audit history.
+        /// </summary>
         [NotMapped]
         public List<Inspection> AuditHistory { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the capa cases.
+        /// </summary>
         [NotMapped]
         public List<CapaCase> CapaCases { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the parts supplied.
+        /// </summary>
         [NotMapped]
         public List<Part> PartsSupplied { get; set; } = new();
 
+        /// <summary>
+        /// Gets or sets the registered authorities.
+        /// </summary>
         [MaxLength(255)]
         [Column("registered_authorities")]
         public string RegisteredAuthorities { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the risk level.
+        /// </summary>
         [MaxLength(40)]
         [Column("risk_level")]
         public string RiskLevel { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the anomaly score.
+        /// </summary>
         [Column("anomaly_score")]
         public double? AnomalyScore { get; set; }
 
+        /// <summary>
+        /// Gets or sets the session id.
+        /// </summary>
         [MaxLength(80)]
         [Column("session_id")]
         public string SessionId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the is ai flagged.
+        /// </summary>
         [Column("is_ai_flagged")]
         public bool IsAiFlagged { get; set; }
+        /// <summary>
+        /// Executes the to string operation.
+        /// </summary>
 
         public override string ToString()
             => $"[{Name}] ({SupplierType}) – {Status} – {Country} – GMP: {IsQualified}";

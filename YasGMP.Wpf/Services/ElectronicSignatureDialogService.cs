@@ -44,6 +44,9 @@ public sealed class ElectronicSignatureDialogService : IElectronicSignatureDialo
     private readonly IAuthContext _authContext;
     private readonly AuditService _auditService;
     private readonly Func<ElectronicSignatureDialogViewModel, bool?> _showDialog;
+    /// <summary>
+    /// Initializes a new instance of the ElectronicSignatureDialogService class.
+    /// </summary>
 
     public ElectronicSignatureDialogService(
         IUiDispatcher uiDispatcher,

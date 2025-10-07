@@ -18,7 +18,13 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </summary>
 public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Audit";
+    /// <summary>
+    /// Initializes a new instance of the AuditLogDocumentViewModel class.
+    /// </summary>
 
     public AuditLogDocumentViewModel(
         AuditService auditService,
@@ -101,18 +107,39 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 
         PropertyChanged += OnSelfPropertyChanged;
     }
+    /// <summary>
+    /// Gets or sets the audit log.
+    /// </summary>
 
     public AuditLogViewModel AuditLog => _auditLogViewModel;
+    /// <summary>
+    /// Gets or sets the apply filter command.
+    /// </summary>
 
     public IAsyncRelayCommand ApplyFilterCommand => _applyFilterCommand;
+    /// <summary>
+    /// Gets or sets the refresh command.
+    /// </summary>
 
     public new IAsyncRelayCommand RefreshCommand => _refreshCommand;
+    /// <summary>
+    /// Gets or sets the export csv command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportCsvCommand => _exportCsvCommand;
+    /// <summary>
+    /// Gets or sets the export xlsx command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportXlsxCommand => _exportXlsxCommand;
+    /// <summary>
+    /// Gets or sets the export pdf command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportPdfCommand => _exportPdfCommand;
+    /// <summary>
+    /// Executes the initialize async operation.
+    /// </summary>
 
     public new async Task InitializeAsync(object? parameter = null)
     {

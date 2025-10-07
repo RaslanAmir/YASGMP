@@ -10,13 +10,22 @@ namespace YasGMP.Diagnostics.LogSinks
     {
         private readonly DiagnosticContext _ctx;
         private readonly object _sync = new();
+        /// <summary>
+        /// Initializes a new instance of the FileLogSink class.
+        /// </summary>
 
         public FileLogSink(DiagnosticContext ctx)
         {
             _ctx = ctx;
         }
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
 
         public string Name => "file";
+        /// <summary>
+        /// Executes the write batch operation.
+        /// </summary>
 
         public void WriteBatch(IReadOnlyList<DiagnosticEvent> batch)
         {

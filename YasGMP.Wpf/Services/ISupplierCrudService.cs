@@ -72,6 +72,9 @@ public readonly record struct SupplierCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static SupplierCrudContext Create(int userId, string? ip, string? deviceInfo, string? sessionId)
         => new(
@@ -84,6 +87,9 @@ public readonly record struct SupplierCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static SupplierCrudContext Create(
         int userId,

@@ -75,6 +75,9 @@ public readonly record struct ExternalServicerCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static ExternalServicerCrudContext Create(int userId, string? ip, string? deviceInfo, string? sessionId)
         => new(
@@ -87,6 +90,9 @@ public readonly record struct ExternalServicerCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
+    /// <summary>
+    /// Executes the create operation.
+    /// </summary>
 
     public static ExternalServicerCrudContext Create(
         int userId,
