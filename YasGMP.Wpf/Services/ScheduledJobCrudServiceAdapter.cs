@@ -11,8 +11,17 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter that bridges the WPF shell to <see cref="DatabaseService"/> for scheduled jobs.
+/// Connects the WPF Scheduled Job module to the shared database-backed MAUI services exposed through
+/// <see cref="YasGMP.Services.DatabaseService"/>.
 /// </summary>
+/// <remarks>
+/// Module view models invoke this adapter which executes the same SQL routines as the MAUI app via
+/// <see cref="YasGMP.Services.DatabaseService"/> and surfaces audit metadata that ultimately feeds
+/// <see cref="YasGMP.Services.AuditService"/>. Calls should be awaited off the UI thread with UI updates marshalled via
+/// <see cref="WpfUiDispatcher"/>. <see cref="CrudSaveResult"/> values carry identifiers, scheduling status, and signature data;
+/// callers are responsible for localizing the status/comment text using <see cref="LocalizationServiceExtensions"/> or
+/// <see cref="ILocalizationService"/> before displaying it to operators.
+/// </remarks>
 public sealed class ScheduledJobCrudServiceAdapter : IScheduledJobCrudService
 {
     private readonly DatabaseService _database;

@@ -10,9 +10,18 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter that allows the WPF shell to reuse the shared external servicer services while capturing
-/// the extra audit metadata required by desktop saves.
+/// Bridges the External Servicer module in the WPF shell with the shared MAUI
+/// <see cref="YasGMP.Services.ExternalServicerService"/> and persistence stack.
 /// </summary>
+/// <remarks>
+/// Module view models call into this adapter before delegating to <see cref="YasGMP.Services.ExternalServicerService"/> and
+/// <see cref="YasGMP.Services.DatabaseService"/>, mirroring the MAUI call flow while allowing the WPF shell to stamp
+/// additional metadata. Methods are awaited away from the UI thread; callers should marshal UI updates using
+/// <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> conveys identifiers, status text, and signature context that
+/// must be localized with <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before display.
+/// Audit details are persisted via <see cref="YasGMP.Services.DatabaseServiceSuppliersExtensions.LogSupplierAuditAsync(YasGMP.Services.DatabaseService,int,string,int,string?,string,string,string?,System.Threading.CancellationToken)"/>,
+/// ensuring the shared <see cref="YasGMP.Services.AuditService"/> surfaces the same events inside the MAUI experience.
+/// </remarks>
 public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudService
 {
     private readonly ExternalServicerService _externalServicerService;

@@ -7,6 +7,18 @@ using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
+/// <summary>
+/// Coordinates Change Control module requests from the WPF shell with the shared MAUI
+/// <see cref="YasGMP.Services.ChangeControlService"/> and associated services.
+/// </summary>
+/// <remarks>
+/// Change Control view models call into this adapter, which forwards operations to
+/// <see cref="YasGMP.Services.ChangeControlService"/> and leverages the shared <see cref="YasGMP.Services.AuditService"/>
+/// so audit logs stay unified between WPF and MAUI. Because calls are awaited off the dispatcher thread, callers should marshal
+/// UI updates with <see cref="WpfUiDispatcher"/>. The resulting <see cref="CrudSaveResult"/> carries identifiers and signature
+/// metadata; status or note strings should be localized using <see cref="LocalizationServiceExtensions"/> or
+/// <see cref="ILocalizationService"/> before being shown in the shell.
+/// </remarks>
 public sealed class ChangeControlCrudServiceAdapter : IChangeControlCrudService
 {
     private readonly ChangeControlService _service;

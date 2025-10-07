@@ -12,9 +12,16 @@ using YasGMP.Services.Interfaces;
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Adapter that exposes warehouse CRUD operations to the WPF shell while
-    /// delegating to the shared database service for persistence.
+    /// Connects WPF warehouse view models to the shared MAUI persistence stack provided by
+    /// <see cref="YasGMP.Services.DatabaseService"/> and <see cref="YasGMP.Services.AuditService"/>.
     /// </summary>
+    /// <remarks>
+    /// Warehouse module view models call into this adapter, which relays operations to the same database routines and audit
+    /// pipeline used by MAUI so ledgers stay in sync across shells. Asynchronous calls should execute off the dispatcher thread,
+    /// with UI updates marshalled via <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> payload carries identifiers,
+    /// status text, and signature metadata that callers localize using <see cref="LocalizationServiceExtensions"/> or
+    /// <see cref="ILocalizationService"/> before surfacing to users.
+    /// </remarks>
     public sealed class WarehouseCrudServiceAdapter : IWarehouseCrudService
     {
         private readonly DatabaseService _database;

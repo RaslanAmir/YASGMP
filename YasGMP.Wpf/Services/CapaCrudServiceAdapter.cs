@@ -8,8 +8,16 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter that exposes <see cref="CAPAService"/> CRUD workflows to the WPF shell.
+/// Exposes CAPA module workflows in the WPF shell by forwarding them to the shared MAUI
+/// <see cref="YasGMP.Services.CAPAService"/> implementation.
 /// </summary>
+/// <remarks>
+/// CAPA view models invoke this adapter, which uses <see cref="YasGMP.Services.CAPAService"/> and
+/// the cross-platform <see cref="YasGMP.Services.AuditService"/> to keep persistence and logging in sync with the MAUI app.
+/// Await operations off the UI thread and dispatch UI updates through <see cref="WpfUiDispatcher"/>. The
+/// <see cref="CrudSaveResult"/> returned by create/update calls conveys identifiers, signature metadata, and status text that
+/// callers localize with <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> prior to presentation.
+/// </remarks>
 public sealed class CapaCrudServiceAdapter : ICapaCrudService
 {
     private readonly CAPAService _service;

@@ -8,9 +8,17 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Default <see cref="ICalibrationCrudService"/> implementation backed by the shared
-/// <see cref="CalibrationService"/>.
+/// Connects the WPF calibration module view models to the shared MAUI
+/// <see cref="YasGMP.Services.CalibrationService"/> pipeline.
 /// </summary>
+/// <remarks>
+/// The docked calibration editors call into this adapter, which forwards work to
+/// <see cref="YasGMP.Services.CalibrationService"/> and the cross-shell <see cref="YasGMP.Services.AuditService"/>
+/// so MAUI and WPF share identical persistence and auditing. Operations should be awaited off the UI thread,
+/// then marshalled back with <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> payload provides identifiers,
+/// signature context, and status/note values that callers localize via <see cref="LocalizationServiceExtensions"/>
+/// or <see cref="ILocalizationService"/> before surfacing them to the operator.
+/// </remarks>
 public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
 {
     private readonly CalibrationService _inner;

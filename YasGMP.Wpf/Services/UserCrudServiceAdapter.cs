@@ -9,10 +9,16 @@ using YasGMP.Services.Interfaces;
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Default <see cref="IUserCrudService"/> implementation that forwards calls to the shared
-    /// <see cref="UserService"/> and <see cref="IRBACService"/> infrastructure while keeping the WPF shell
-    /// decoupled for unit testing.
+    /// Routes WPF user-management workflows through the shared MAUI services
+    /// <see cref="YasGMP.Services.Interfaces.IUserService"/> and <see cref="YasGMP.Services.Interfaces.IRBACService"/>.
     /// </summary>
+    /// <remarks>
+    /// Module view models dispatch CRUD/role operations to this adapter, which forwards them to the shared user and RBAC
+    /// services so behavior matches the MAUI shell (including downstream auditing via <see cref="YasGMP.Services.AuditService"/>).
+    /// Await calls off the dispatcher thread and use <see cref="WpfUiDispatcher"/> for UI updates. Returned
+    /// <see cref="CrudSaveResult"/> instances must include identifiers, signature context, and localization-ready status/notes
+    /// for processing via <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before surfacing.
+    /// </remarks>
     public sealed class UserCrudServiceAdapter : IUserCrudService
     {
         private readonly IUserService _userService;

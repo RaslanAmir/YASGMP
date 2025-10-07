@@ -8,9 +8,16 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter-friendly abstraction exposing supplier CRUD to the WPF shell without
-/// binding directly to <see cref="YasGMP.Services.SupplierService"/>.
+/// Shared contract that drives supplier CRUD through <see cref="YasGMP.Services.SupplierService"/> and the MAUI audit stack.
 /// </summary>
+/// <remarks>
+/// Module view models call into this interface on the dispatcher thread; adapters forward the work to
+/// <see cref="YasGMP.Services.SupplierService"/> and <see cref="YasGMP.Services.DatabaseService"/> so MAUI and WPF persist and
+/// audit suppliers the same way. Await the asynchronous operations off the UI thread and dispatch UI updates via
+/// <see cref="WpfUiDispatcher"/>. <see cref="CrudSaveResult"/> instances must carry identifiers, status text, and signature metadata
+/// so localization can be applied through <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before
+/// the UI presents the values, and so <see cref="YasGMP.Services.AuditService"/> exposes complete context.
+/// </remarks>
 public interface ISupplierCrudService
 {
     Task<IReadOnlyList<Supplier>> GetAllAsync();

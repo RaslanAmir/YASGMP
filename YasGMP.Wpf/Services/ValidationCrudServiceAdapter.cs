@@ -8,9 +8,16 @@ using YasGMP.Services;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Default <see cref="IValidationCrudService"/> implementation backed by the shared
-/// <see cref="ValidationService"/>.
+/// Forwards validation module requests from the WPF shell into the shared MAUI
+/// <see cref="YasGMP.Services.ValidationService"/> implementation.
 /// </summary>
+/// <remarks>
+/// Validation view models invoke this adapter, which delegates to <see cref="YasGMP.Services.ValidationService"/> and the
+/// shared <see cref="YasGMP.Services.AuditService"/> so persistence and audit behavior mirrors the MAUI experience. Await the
+/// asynchronous operations away from the UI thread and marshal UI updates through <see cref="WpfUiDispatcher"/>. The
+/// <see cref="CrudSaveResult"/> payload carries identifiers, status text, and signature metadata that require localization via
+/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before they are surfaced in the shell.
+/// </remarks>
 public sealed class ValidationCrudServiceAdapter : IValidationCrudService
 {
     private readonly ValidationService _inner;

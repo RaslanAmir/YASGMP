@@ -6,6 +6,18 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
+/// <summary>
+/// Shared contract used by the WPF shell and MAUI host to manage Change Control records through
+/// <see cref="YasGMP.Services.ChangeControlService"/> while sharing audit plumbing.
+/// </summary>
+/// <remarks>
+/// Module view models call these members synchronously on the dispatcher thread. Implementations relay the request to the
+/// shared <see cref="YasGMP.Services.ChangeControlService"/> and <see cref="YasGMP.Services.AuditService"/> so both shells
+/// persist and log identical metadata. Callers should dispatch UI updates via <see cref="WpfUiDispatcher"/> after awaiting the
+/// asynchronous operations. Returned <see cref="CrudSaveResult"/> values must include identifiers, signature data, and
+/// localization-ready status text for consumption with <see cref="LocalizationServiceExtensions"/> or
+/// <see cref="ILocalizationService"/>.
+/// </remarks>
 public interface IChangeControlCrudService
 {
     Task<IReadOnlyList<ChangeControl>> GetAllAsync();

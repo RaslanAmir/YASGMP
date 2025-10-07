@@ -8,8 +8,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Adapter-friendly abstraction exposing external servicer CRUD operations to the WPF shell.
+/// Shared CRUD contract that both WPF and MAUI use to reach <see cref="YasGMP.Services.ExternalServicerService"/>
+/// and its audit/persistence pipeline.
 /// </summary>
+/// <remarks>
+/// WPF module view models invoke these members on the dispatcher thread, adapters forward calls to the shared
+/// <see cref="YasGMP.Services.ExternalServicerService"/> and <see cref="YasGMP.Services.DatabaseService"/> (which in turn feed
+/// <see cref="YasGMP.Services.AuditService"/>). Awaited operations should marshal UI updates with <see cref="WpfUiDispatcher"/>.
+/// Implementations must populate <see cref="CrudSaveResult"/> with identifiers, signature metadata, and localization-ready
+/// status/note text so either shell can translate them using <see cref="LocalizationServiceExtensions"/> or
+/// <see cref="ILocalizationService"/> before presentation.
+/// </remarks>
 public interface IExternalServicerCrudService
 {
     Task<IReadOnlyList<ExternalServicer>> GetAllAsync();

@@ -7,9 +7,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Adapter-friendly abstraction around <see cref="YasGMP.Services.MachineService"/>
-    /// so the WPF shell can be unit-tested without the full database infrastructure.
+    /// Shared CRUD contract that lets both shells execute Machine workflows through
+    /// <see cref="YasGMP.Services.MachineService"/> with consistent auditing.
     /// </summary>
+    /// <remarks>
+    /// WPF module view models call these members on the UI thread; adapters pass the work to
+    /// <see cref="YasGMP.Services.MachineService"/> and <see cref="YasGMP.Services.AuditService"/>, then callers dispatch UI
+    /// updates via <see cref="WpfUiDispatcher"/> after awaiting the tasks. Implementations must populate
+    /// <see cref="CrudSaveResult"/> with identifiers, signature context, and localization-ready status text so both MAUI and WPF
+    /// can translate them using <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> and maintain a
+    /// unified audit history.
+    /// </remarks>
     public interface IMachineCrudService
     {
         Task<IReadOnlyList<Machine>> GetAllAsync();

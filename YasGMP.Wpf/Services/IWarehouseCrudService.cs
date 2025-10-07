@@ -7,8 +7,17 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Abstraction around warehouse CRUD for the WPF shell.
+    /// Shared contract for routing warehouse CRUD/ledger operations through
+    /// <see cref="YasGMP.Services.DatabaseService"/> and the shared MAUI audit services.
     /// </summary>
+    /// <remarks>
+    /// Module view models call into this interface on the dispatcher thread; adapters forward the work to
+    /// <see cref="YasGMP.Services.DatabaseService"/> and <see cref="YasGMP.Services.AuditService"/> so warehouse persistence,
+    /// stock snapshots, and audit logs remain unified across MAUI and WPF. After awaiting, callers should marshal UI updates via
+    /// <see cref="WpfUiDispatcher"/>. Returned <see cref="CrudSaveResult"/> values carry identifiers, signature context, and
+    /// localization-ready status strings so <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/>
+    /// can translate them before presentation.
+    /// </remarks>
     public interface IWarehouseCrudService
     {
         Task<IReadOnlyList<Warehouse>> GetAllAsync();

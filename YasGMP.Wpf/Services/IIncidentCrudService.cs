@@ -6,9 +6,15 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Abstraction over <see cref="YasGMP.Services.IncidentService"/> so the WPF shell can
-/// run CRUD logic without binding directly to the infrastructure layer.
+/// Shared contract that routes incident CRUD operations through <see cref="YasGMP.Services.IncidentService"/> and the shared MAUI audit stack.
 /// </summary>
+/// <remarks>
+/// Module view models call these members on the dispatcher thread, adapters forward the work to the shared
+/// <see cref="YasGMP.Services.IncidentService"/> and <see cref="YasGMP.Services.AuditService"/>, and callers marshal UI updates with
+/// <see cref="WpfUiDispatcher"/> after awaiting the asynchronous work. Implementations must return <see cref="CrudSaveResult"/> values populated with identifiers,
+/// signature context, and localization-ready status text so <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> can translate
+/// them consistently with the MAUI shell.
+/// </remarks>
 public interface IIncidentCrudService
 {
     Task<Incident?> TryGetByIdAsync(int id);
