@@ -50,6 +50,7 @@
       "2025-10-07: dotnet restore yasgmp.sln retried for CRUD adapter documentation; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-02-02: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf.csproj, and MAUI net8.0-windows10.0.19041.0; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-02-05: dotnet restore yasgmp.sln retried after Shell layout reset adjustments; CLI remains unavailable so the command exits with 'command not found'.",
+      "2026-02-06: dotnet --info and dotnet restore yasgmp.sln retried while adding layout persistence tests; CLI still missing so both commands exit with 'command not found'.",
       "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
     ]
   },
@@ -125,6 +126,7 @@
   },
   "lastCommitSummary": "docs: expand CRUD adapter XML guidance",
   "notes": [
+    "2026-02-06: Added regression tests for DatabaseService layout helpers, DockLayoutPersistenceService forwarding, and ShellLayoutController reset sequencing so SQL payloads stay covered while dotnet tooling remains unavailable.",
     "2026-02-03: DatabaseService now exposes layout persistence helpers so the WPF shell can store per-user dock/ribbon arrangements even though dotnet restore/build remain blocked by the missing CLI.",
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
     "2026-02-01: WPF dialog, file picker, platform, and dispatcher services now document MAUI parity limits, localization responsibilities, and migration guidance; dotnet restore/build/smoke still blocked without the CLI.",
