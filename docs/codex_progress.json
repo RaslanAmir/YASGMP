@@ -38,6 +38,7 @@
       "2025-12-23: dotnet restore/build retried for yasgmp.sln and YasGMP.Wpf; CLI remains unavailable so commands exit with 'command not found'.",
       "2025-12-24: dotnet restore yasgmp.sln and dotnet build (YasGMP.Wpf.csproj, yasgmp.csproj net9.0-windows10.0.19041.0) retried; CLI still missing so each command exits with 'command not found'.",
       "2025-12-26: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
+      "2026-02-04: DockLayoutPersistenceService now routes load/save/reset through DatabaseService layout helpers; validation still limited to static analysis until the dotnet CLI is available.",
       "2025-12-28: dotnet restore/build/run for WPF + MAUI targets retried after wiring new Quality & Compliance ribbon/backstage buttons; CLI is still missing so each command exits with 'command not found'.",
       "2025-12-31: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf, and yasgmp.csproj; CLI remains unavailable so every command exits with 'command not found'.",
       "2026-01-07: dotnet --info/restore/build retried for yasgmp.sln and YasGMP.Wpf; CLI remains unavailable in the container so each command exits with 'command not found'.",
