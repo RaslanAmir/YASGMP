@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -37,8 +38,15 @@ public interface ICalibrationCrudService
 }
 
 /// <summary>
-/// Context metadata captured when persisting calibrations to support downstream audit logging.
+/// Context metadata captured when persisting calibrations to support downstream audit logging. Each value flows into
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines replay the
+/// accepted signature manifest.
 /// </summary>
+/// <remarks>
+/// Adapters project this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside calibration records, and MAUI experiences should propagate the
+/// same payload when presenting or synchronizing calibrations so shared audit history remains aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current auth context.</param>
 /// <param name="DeviceInfo">Machine fingerprint/hostname.</param>

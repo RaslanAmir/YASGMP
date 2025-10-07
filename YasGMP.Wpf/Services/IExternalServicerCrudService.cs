@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -43,8 +44,15 @@ public interface IExternalServicerCrudService
 }
 
 /// <summary>
-/// Metadata captured when persisting external servicer edits to feed audit/trace data.
+/// Metadata captured when persisting external servicer edits to feed audit/trace data. Each value feeds
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance pipelines
+/// can replay the accepted signature manifest.
 /// </summary>
+/// <remarks>
+/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside external servicers, and MAUI experiences should propagate the
+/// same payload when presenting or synchronizing records to keep audit history consistent across platforms.
+/// </remarks>
 /// <param name="UserId">Authenticated operator identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Device or workstation fingerprint.</param>

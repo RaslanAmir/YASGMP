@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -40,8 +41,15 @@ namespace YasGMP.Wpf.Services
     }
 
     /// <summary>
-    /// Metadata required when persisting parts for audit purposes.
+    /// Metadata required when persisting parts for audit purposes. Each value flows into
+    /// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines retain the
+    /// accepted signature manifest.
     /// </summary>
+    /// <remarks>
+    /// Adapters hydrate <see cref="SignatureMetadataDto"/> from this record before returning <see cref="CrudSaveResult"/>.
+    /// WPF shell consumers must persist and surface the DTO beside part records, and MAUI experiences should propagate the
+    /// same payload when presenting or synchronizing parts so shared audit history remains aligned.
+    /// </remarks>
     /// <param name="UserId">Authenticated operator identifier.</param>
     /// <param name="Ip">Source IP captured by the auth context.</param>
     /// <param name="DeviceInfo">Device fingerprint or hostname.</param>

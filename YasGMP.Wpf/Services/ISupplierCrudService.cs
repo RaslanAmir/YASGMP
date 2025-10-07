@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -40,8 +41,15 @@ public interface ISupplierCrudService
 }
 
 /// <summary>
-/// Metadata captured when persisting supplier edits to feed audit/trace data.
+/// Metadata captured when persisting supplier edits to feed audit/trace data. The captured values are projected into
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance
+/// pipelines replay the approved signature manifest.
 /// </summary>
+/// <remarks>
+/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must store and surface the DTO beside supplier records, and MAUI experiences should propagate the
+/// same payload when presenting or synchronizing suppliers to keep the shared audit history aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated operator identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Device or workstation fingerprint.</param>

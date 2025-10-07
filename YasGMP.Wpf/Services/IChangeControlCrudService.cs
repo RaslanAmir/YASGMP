@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -39,7 +40,16 @@ public interface IChangeControlCrudService
     string NormalizeStatus(string? status);
 }
 
-/// <summary>Context metadata propagated when persisting change control edits.</summary>
+/// <summary>
+/// Context metadata propagated when persisting change control edits. The captured values flow into
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance
+/// pipelines replay the accepted signature manifest.
+/// </summary>
+/// <remarks>
+/// Adapters project this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside change control records, and MAUI experiences should reuse
+/// the same payload when presenting or synchronizing the record to keep shared audit history aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="IpAddress">Source IP recorded for auditing.</param>
 /// <param name="DeviceInfo">Originating device fingerprint.</param>

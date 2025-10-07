@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -40,8 +41,15 @@ namespace YasGMP.Wpf.Services
     }
 
     /// <summary>
-    /// Ambient metadata required for audit logging when persisting machines.
+    /// Ambient metadata required for audit logging when persisting machines. Each value feeds
+    /// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines retain the
+    /// accepted signature manifest.
     /// </summary>
+    /// <remarks>
+    /// Adapters shape this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
+    /// WPF shell consumers must persist and surface the DTO beside machine records, and MAUI experiences should propagate the
+    /// same payload when presenting or synchronizing equipment so the shared audit history stays aligned.
+    /// </remarks>
     /// <param name="UserId">Authenticated user identifier.</param>
     /// <param name="Ip">Source IP captured by the auth context.</param>
     /// <param name="DeviceInfo">Device fingerprint (Workstation name, etc.).</param>

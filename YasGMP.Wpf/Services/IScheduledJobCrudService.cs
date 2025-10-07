@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -41,8 +42,15 @@ public interface IScheduledJobCrudService
 }
 
 /// <summary>
-/// Ambient metadata required for auditing scheduled job operations.
+/// Ambient metadata required for auditing scheduled job operations. Each value feeds
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines receive the
+/// accepted signature manifest.
 /// </summary>
+/// <remarks>
+/// Adapters shape this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO alongside scheduled jobs, and MAUI screens should propagate the same
+/// payload when presenting or synchronizing records so the shared audit history remains aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="UserName">Display/user name captured for audit manifest.</param>
 /// <param name="Ip">Source IP address.</param>

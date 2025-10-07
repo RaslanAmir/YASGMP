@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -35,8 +36,16 @@ public interface IIncidentCrudService
 }
 
 /// <summary>
-/// Captures the authenticated context required when persisting incident changes.
+/// Captures the authenticated context required when persisting incident changes. Each value flows into
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance
+/// pipelines receive the accepted signature manifest.
 /// </summary>
+/// <remarks>
+/// Adapters materialize <see cref="SignatureMetadataDto"/> from this context before returning
+/// <see cref="CrudSaveResult"/>. Consumers in the WPF shell must persist the DTO alongside incident records and
+/// surface the signature manifest in inspection panes, while MAUI screens should propagate the same payload when
+/// displaying or synchronizing the record to keep the shared audit history aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP address recorded for audit trails.</param>
 /// <param name="DeviceInfo">Client device identifier.</param>
