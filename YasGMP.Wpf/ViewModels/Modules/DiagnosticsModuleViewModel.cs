@@ -15,8 +15,12 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </remarks>
 public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>Shell registration key that binds Diagnostics into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Diagnostics" until `Modules_Diagnostics_Title` is introduced.</remarks>
     public new const string ModuleKey = "Diagnostics";
 
+    /// <summary>Initializes the Diagnostics module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public DiagnosticsModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -27,6 +31,8 @@ public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewMod
     {
     }
 
+    /// <summary>Loads Diagnostics records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Diagnostics_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         // TODO: Replace with live diagnostics snapshot once logging/health adapters are wired for WPF.
@@ -34,6 +40,8 @@ public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewMod
         return CreateDesignTimeRecords();
     }
 
+    /// <summary>Provides design-time sample data for the Diagnostics designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
         => new List<ModuleRecord>
         {

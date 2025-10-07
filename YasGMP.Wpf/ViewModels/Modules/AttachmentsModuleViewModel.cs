@@ -30,8 +30,12 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </remarks>
 public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 {
+    /// <summary>Shell registration key that binds Attachments into the docking catalog.</summary>
+    /// <remarks>Execution: Resolved during module composition so ribbon tabs and layout persistence can route to this view. Form Mode: Applies to all modes as a neutral identifier. Localization: Currently paired with the inline caption literal "Attachments" until `Modules_Attachments_Title` exists.</remarks>
     public new const string ModuleKey = "Attachments";
 
+    /// <summary>Initializes the attachments surface with persistence, signature, and navigation services.</summary>
+    /// <remarks>Execution: Invoked at module activation when the shell resolves dependencies. Form Mode: Ensures Find/View primes lists while Add/Update wire staging plus e-signature prompts. Localization: Uses inline labels such as "Attachments" and "Upload" pending resource bindings.</remarks>
     public AttachmentsModuleViewModel(
         DatabaseService databaseService,
         IAttachmentService attachmentService,
@@ -91,25 +95,45 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         }
     }
 
+    /// <summary>Indicates whether upload/download/signature services were provided by the container.</summary>
+    /// <remarks>Execution: Evaluated during construction and read whenever commands toggle availability. Form Mode: Checked during Add/Update when attachments become editable; ignored during Find/View. Localization: Drives inline status text ("Staged uploads pending signature") until formal resources land.</remarks>
     public bool HasAttachmentWorkflow { get; }
 
+    /// <summary>Signals that CFL dialogs and shell navigation hooks are available.</summary>
+    /// <remarks>Execution: Computed in the constructor before the shell wires Golden Arrow routing. Form Mode: Enables link-outs from Find/View as well as Add/Update inspectors. Localization: Supports inline shell status messages pending `Shell_Status_Attachments_*` resources.</remarks>
     public bool HasShellIntegration { get; }
 
+    /// <summary>Rows presented in the attachments grid backing the document host.</summary>
+    /// <remarks>Execution: Populated after `LoadAsync` completes or design-time seed flows. Form Mode: Always visible; only Add/Update enable per-row editing affordances. Localization: Column headers remain inline until grid resources are published.</remarks>
     public ObservableCollection<AttachmentRowViewModel> AttachmentRows { get; }
 
+    /// <summary>Pending upload sessions created during Add/Update flows.</summary>
+    /// <remarks>Execution: Mutated by staging commands as users pick files. Form Mode: Only Add/Update push items into the collection; Find/View observe read-only. Localization: Status prompts and badges use literals pending RESX entries.</remarks>
     public ObservableCollection<StagedAttachmentUploadViewModel> StagedUploads { get; }
 
+    /// <summary>Gets a value indicating whether staged uploads exist for signature capture.</summary>
+    /// <remarks>Execution: Evaluated on collection change events to update ribbon buttons. Form Mode: Relevant solely to Add/Update transactions. Localization: Tied to inline badge strings until shared resources arrive.</remarks>
     public bool HasStagedUploads => StagedUploads.Count > 0;
 
+    /// <summary>Attachment row currently highlighted in the inspector viewport.</summary>
+    /// <remarks>Execution: Setter fires on grid selection change events. Form Mode: Read-only in Find/View; editable metadata appears in Add/Update. Localization: Inspector labels rely on inline literals pending attachments resource dictionary.</remarks>
     [ObservableProperty]
     private AttachmentRowViewModel? _selectedAttachment;
 
+    /// <summary>Command surfaced on the ribbon for staging file uploads.</summary>
+    /// <remarks>Execution: Invoked asynchronously when the user taps Upload. Form Mode: Enabled exclusively in Add/Update once `HasAttachmentWorkflow` is true. Localization: Tooltip and label use inline literals pending `Ribbon_Attachments_Upload`.</remarks>
     public IAsyncRelayCommand UploadCommand { get; }
 
+    /// <summary>Command that streams the selected attachment to a local file.</summary>
+    /// <remarks>Execution: Runs when the ribbon Download action is triggered. Form Mode: Available in View/Find for read-only access; Add/Update also permitted. Localization: Uses inline caption "Download" pending ribbon resource keys.</remarks>
     public IAsyncRelayCommand DownloadCommand { get; }
 
+    /// <summary>Command responsible for unregistering an attachment link.</summary>
+    /// <remarks>Execution: Fired from the ribbon Delete action after confirmation. Form Mode: Restricted to Update mode with proper signature gating; Find/View disable this command. Localization: Inline text "Delete" currently shown until resources exist.</remarks>
     public IAsyncRelayCommand DeleteCommand { get; }
 
+    /// <summary>Loads the attachment catalog from the persistence layer.</summary>
+    /// <remarks>Execution: Called by the base class when the module enters Find mode or refreshes. Form Mode: Supplies records for Find/View while Add/Update reuse the same backing list. Localization: Relays status messages using inline strings pending `Status_Attachments_Loaded`.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var attachments = await _databaseService.GetAttachmentsFilteredAsync(null, null, null).ConfigureAwait(false);
@@ -128,6 +152,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return records;
     }
 
+    /// <summary>Provides design-time attachments for Blend and preview tooling.</summary>
+    /// <remarks>Execution: Invoked only by the design-time branch in the constructor. Form Mode: Mimics Find mode to preview list rendering. Localization: Returns sample data with inline strings for previews.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var rows = new List<AttachmentRowViewModel>
@@ -171,6 +197,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             .ToList();
     }
 
+    /// <summary>Formats the status message after records are loaded.</summary>
+    /// <remarks>Execution: Called by the base module scaffolding after `LoadAsync`. Form Mode: Applies to Find/View to inform ribbon state; Add/Update reuse the last status. Localization: Uses inline fallback strings until shared resource keys are wired.</remarks>
     protected override string FormatLoadedStatus(int count)
     {
         if (!string.IsNullOrWhiteSpace(_pendingStatusMessage))
@@ -224,6 +252,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         };
     }
 
+    /// <summary>Loads editor payloads for the selected Attachments record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Attachments". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Attachments` resources are available.</remarks>
     protected override Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -258,6 +288,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return Task.CompletedTask;
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         DiscardStagedUploads();
@@ -300,6 +332,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return Task.CompletedTask;
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (!HasAttachmentWorkflow)
@@ -502,6 +536,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         var hadStagedUploads = StagedUploads.Count;

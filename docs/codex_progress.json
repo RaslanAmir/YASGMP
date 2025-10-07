@@ -243,6 +243,7 @@
                   "2025-10-06: Removed duplicated partial declaration from AssetsModuleViewModel, reran restore/build (MAUI ok, WPF blocked by ApiAudit/Audit sealed overrides + missing AuditDashboardViewModel + Calibration Component ambiguity), smoke harness still pending compile fix.",
                   "2025-10-06: Introduced WPF-local AuditDashboardViewModel and AuditLogViewModel, normalized AssetsModuleViewModel partials, but WPF build highlights additional legacy issues (ConfigConfigurationExtensionsCompat ambiguity, AsyncRelayCommand overload choice, adapter logging signature mismatches).",
                   "2025-10-06: Reconciled WPF shell compile blockers (ConfigConfigurationExtensionsCompat usage, AsyncRelayCommand overloads, CRUD adapter logging, Admin/Suppliers metadata) and achieved a clean WPF build with only ModuleKey warning backlog.",
-                  "2025-10-30: WPF shell warnings cleared by rewriting AuditLog view-models, normalizing ModuleKey declarations, adding vmModules DataTemplates, and tightening nullable safeguards; restore/build succeed (MAUI MSB3277, WPF NETSDK1137) and smoke harness project not yet available."
+                  "2025-10-30: WPF shell warnings cleared by rewriting AuditLog view-models, normalizing ModuleKey declarations, adding vmModules DataTemplates, and tightening nullable safeguards; restore/build succeed (MAUI MSB3277, WPF NETSDK1137) and smoke harness project not yet available.",
+                  "2025-10-07: dotnet restore yasgmp.sln succeeded, but dotnet build hit Diagnostics\\\\ChangeControlAssignmentHarness.cs because the diagnostics harness still references the obsolete YasGMP.ViewModels namespace."
               ]
 }

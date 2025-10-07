@@ -25,6 +25,8 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </remarks>
 public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>Shell registration key that binds Change Control into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Change Control" until `Modules_ChangeControl_Title` is introduced.</remarks>
     public new const string ModuleKey = "ChangeControl";
 
     private readonly IChangeControlCrudService _changeControlService;
@@ -37,6 +39,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     private ChangeControlEditor? _snapshot;
     private bool _suppressDirtyNotifications;
 
+    /// <summary>Initializes the Change Control module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public ChangeControlModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -64,13 +68,21 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     [ObservableProperty]
     private ChangeControlEditor _editor = null!;
 
+    /// <summary>Generated property exposing the is editor enabled for the Change Control module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ChangeControl_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
+    /// <summary>Collection presenting the status options for the Change Control document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_ChangeControl_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
 
+    /// <summary>Command executing the attach document workflow for the Change Control module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_ChangeControl_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
+    /// <summary>Loads Change Control records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_ChangeControl_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var changeControls = await _changeControlService.GetAllAsync().ConfigureAwait(false);
@@ -82,6 +94,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return changeControls.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Change Control designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var now = DateTime.Now;
@@ -110,6 +124,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return demo.Select(ToRecord).ToList();
     }
 
+    /// <summary>Loads editor payloads for the selected Change Control record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "ChangeControl". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_ChangeControl` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -142,6 +158,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         LoadEditor(entity);
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -169,6 +187,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -208,6 +228,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return Task.FromResult<IReadOnlyList<string>>(errors);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var entity = Editor.ToEntity(_loadedEntity ?? new ChangeControl());
@@ -323,6 +345,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -345,6 +369,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "ChangeControl". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_ChangeControl` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var changeControls = await _changeControlService.GetAllAsync().ConfigureAwait(false);
@@ -376,6 +402,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return new CflRequest("Select Change Control", items);
     }
 
+    /// <summary>Applies CFL selections back into the Change Control workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "ChangeControl". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_ChangeControl_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -394,6 +422,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return Task.CompletedTask;
     }
 
+    /// <summary>Executes the matches search routine for the Change Control module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
         if (base.MatchesSearch(record, searchText))

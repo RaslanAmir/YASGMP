@@ -24,6 +24,8 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </remarks>
 public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>Shell registration key for binding assets into the docked workspace.</summary>
+    /// <remarks>Execution: Consumed during module catalog initialization so the shell can route to this view. Form Mode: Neutral identifier applied across Find/Add/View/Update. Localization: Currently coupled to the inline caption "Assets" awaiting `Modules_Assets_Title`.</remarks>
     public new const string ModuleKey = "Assets";
 
     private readonly IMachineCrudService _machineService;
@@ -35,6 +37,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
 
+    /// <summary>Constructs the assets surface with CRUD, audit, attachment, and navigation services.</summary>
+    /// <remarks>Execution: Invoked when the host resolves the module on shell start or when Golden Arrow requests activation. Form Mode: Seeds Find/View data immediately; Add/Update wiring occurs as mode changes flow through. Localization: Inline strings such as "Assets" and "Select Asset" remain until RESX resources are wired.</remarks>
     public AssetsModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -66,26 +70,34 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
-    /// <summary>Editor payload bound to the form fields.</summary>
+    /// <summary>Editor payload bound to the form controls for the current asset.</summary>
+    /// <remarks>Execution: Updated during record selection and commit cycles. Form Mode: Editable during Add/Update, read-only snapshot in Find/View. Localization: Field headers currently use inline labels pending `AssetsEditor_*` resources.</remarks>
     [ObservableProperty]
     private AssetEditor _editor;
 
-    /// <summary>Indicates whether form controls are writable (Add/Update modes).</summary>
+    /// <summary>Flag indicating whether form controls accept user edits.</summary>
+    /// <remarks>Execution: Toggled by <see cref="OnModeChangedAsync(FormMode)"/> as modes shift. Form Mode: True for Add/Update, false for Find/View. Localization: Bound to inline `IsEnabled` captions and tooltips until resources arrive.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
-    /// <summary>Canonical status options rendered in the combo-box.</summary>
+    /// <summary>Canonical status options rendered in the status combo box.</summary>
+    /// <remarks>Execution: Initialized during construction and reused across mode transitions. Form Mode: Options are selectable when Add/Update unlock fields; read-only otherwise. Localization: Uses inline lowercase status text pending resource mappings.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
 
-    /// <summary>Command exposed to the toolbar for uploading attachments.</summary>
+    /// <summary>Command exposed on the ribbon to stage attachment uploads.</summary>
+    /// <remarks>Execution: Fired when Upload is tapped; delegates to <see cref="AttachDocumentAsync"/>. Form Mode: Enabled only when Add/Update and <see cref="HasAttachmentWorkflow"/> is true. Localization: Button label/tooltips use inline strings until `Ribbon_Assets_Attach` resources exist.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
+    /// <summary>Retrieves assets from the domain service for presentation.</summary>
+    /// <remarks>Execution: Triggered by Find mode refreshes and shell reloads. Form Mode: Feeds Find/View lists; Add/Update reuse cached records. Localization: Status messaging uses inline phrases like "Filtered Assets" pending resource keys.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
         return machines.Select(ToRecord).ToList();
     }
 
+    /// <summary>Supplies design-time asset data for Blend previews.</summary>
+    /// <remarks>Execution: Runs only in design contexts when `IsInDesignMode` is true. Form Mode: Emulates Find mode for tooling. Localization: Samples retain inline strings for preview clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var sample = new[]
@@ -117,6 +129,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Builds the Choose-From-List payload for asset navigation.</summary>
+    /// <remarks>Execution: Invoked when the shell launches a CFL dialog or Golden Arrow, routing back through <see cref="ModuleKey"/> `"Assets"`. Form Mode: Aligns with Find mode search; available in all modes for navigation. Localization: Dialog title `"Select Asset"` and description tokens remain inline until `CFL_Assets_Select` resources are defined.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
@@ -152,6 +166,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return new CflRequest("Select Asset", items);
     }
 
+    /// <summary>Applies the selected CFL result back to the asset list and inspector.</summary>
+    /// <remarks>Execution: Runs immediately after a user confirms a CFL choice or Golden Arrow jump, updating shell routing for `ModuleKey` `"Assets"` via `StatusMessage`. Form Mode: Navigates records without altering edit mode; ensures Update is not interrupted. Localization: Writes status text like `"Filtered Assets"` pending ribbon resource strings.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var search = result.Selected.Label;
@@ -167,6 +183,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return Task.CompletedTask;
     }
 
+    /// <summary>Loads or clears the editor based on selected module record.</summary>
+    /// <remarks>Execution: Fired when the document host changes selection or the shell routes via Golden Arrow for `ModuleKey` `"Assets"`. Form Mode: Respects Add/Update guardrails to avoid clobbering unsaved edits. Localization: Uses inline error/status strings until `Status_Assets_*` resources exist.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -199,6 +217,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Adjusts editor state and attachment tooling when the form mode changes.</summary>
+    /// <remarks>Execution: Raised by the base form state machine whenever commands such as Add, Find, or Update fire. Form Mode: Enables editing only for Add/Update while snapshotting View states. Localization: Emits inline status messages (e.g., "Assets ready for update") until corresponding resources exist.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -222,6 +242,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return Task.CompletedTask;
     }
 
+    /// <summary>Checks the current editor content for business rule compliance.</summary>
+    /// <remarks>Execution: Invoked just before save/OK execution. Form Mode: Evaluated during Add/Update flows; bypassed during Find/View. Localization: Validation errors bubble up as inline strings pending resource coverage.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -243,6 +265,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Writes the current asset to the database and triggers e-signature capture.</summary>
+    /// <remarks>Execution: Called after validation passes when OK/Update is committed. Form Mode: Only Add/Update reach this method. Localization: Success/failure strings use inline values such as `"Saved asset"` pending resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var machine = Editor.ToMachine(_loadedMachine);
@@ -381,6 +405,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return true;
     }
 
+    /// <summary>Restores the editor from the snapshot when the user cancels an edit.</summary>
+    /// <remarks>Execution: Runs when Cancel is invoked mid Add/Update cycle. Form Mode: Specific to Add/Update, with no effect in Find/View. Localization: Uses inline status text like `"Changes discarded"` until an assets resource entry is added.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -422,6 +448,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         value.PropertyChanged += OnEditorPropertyChanged;
     }
 
+    /// <summary>Catches editor property updates to maintain dirty tracking and command state.</summary>
+    /// <remarks>Execution: Triggered whenever a generated observable property setter raises change notifications. Form Mode: Relevant during Add/Update; suppressed otherwise via `_suppressEditorDirtyNotifications`. Localization: Downstream status updates remain inline until resources map them.</remarks>
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);

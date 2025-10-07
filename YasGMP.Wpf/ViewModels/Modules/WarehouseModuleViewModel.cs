@@ -24,6 +24,8 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </remarks>
 public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>Shell registration key that binds Warehouse into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Warehouse" until `Modules_Warehouse_Title` is introduced.</remarks>
     public new const string ModuleKey = "Warehouse";
 
     private readonly IWarehouseCrudService _warehouseService;
@@ -35,6 +37,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     private WarehouseEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
 
+    /// <summary>Initializes the Warehouse module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public WarehouseModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -59,9 +63,13 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
     }
 
+    /// <summary>Generated property exposing the editor for the Warehouse module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Warehouse_Editor` resources are available.</remarks>
     [ObservableProperty]
     private WarehouseEditor _editor;
 
+    /// <summary>Generated property exposing the is editor enabled for the Warehouse module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Warehouse_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
@@ -71,19 +79,29 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     [ObservableProperty]
     private ObservableCollection<InventoryMovementEntry> _recentMovements = new();
 
+    /// <summary>Generated property exposing the has stock alerts for the Warehouse module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Warehouse_HasStockAlerts` resources are available.</remarks>
     [ObservableProperty]
     private bool _hasStockAlerts;
 
+    /// <summary>Collection presenting the status options for the Warehouse document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Warehouse_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
 
+    /// <summary>Command executing the attach document workflow for the Warehouse module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Warehouse_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
+    /// <summary>Loads Warehouse records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Warehouse_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var warehouses = await _warehouseService.GetAllAsync().ConfigureAwait(false);
         return warehouses.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Warehouse designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var sample = new[]
@@ -111,6 +129,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Warehouse". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Warehouse` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var warehouses = await _warehouseService.GetAllAsync().ConfigureAwait(false);
@@ -135,6 +155,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         return new CflRequest("Select Warehouse", items);
     }
 
+    /// <summary>Applies CFL selections back into the Warehouse workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Warehouse". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Warehouse_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -152,6 +174,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         return Task.CompletedTask;
     }
 
+    /// <summary>Loads editor payloads for the selected Warehouse record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Warehouse". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Warehouse` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -186,6 +210,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -217,6 +243,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var warehouse = Editor.ToWarehouse(_loadedWarehouse);
@@ -237,6 +265,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         return await Task.FromResult(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var warehouse = Editor.ToWarehouse(_loadedWarehouse);
@@ -347,6 +377,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -368,6 +400,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Observes property changes to maintain dirty state and command availability.</summary>
+    /// <remarks>Execution: Raised whenever generated observable setters fire. Form Mode: Primarily impacts Add/Update as Find/View remain read-only. Localization: Downstream notifications still rely on inline strings.</remarks>
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);

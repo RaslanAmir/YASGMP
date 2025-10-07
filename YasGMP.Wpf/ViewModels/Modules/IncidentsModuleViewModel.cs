@@ -25,6 +25,8 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </remarks>
 public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>Shell registration key that binds Incidents into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Incidents" until `Modules_Incidents_Title` is introduced.</remarks>
     public new const string ModuleKey = "Incidents";
 
     private readonly IIncidentCrudService _incidentService;
@@ -40,6 +42,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     private IncidentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
 
+    /// <summary>Executes the new routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public ObservableCollection<string> StatusOptions { get; } = new(new[]
     {
         "REPORTED",
@@ -50,6 +54,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         "CLOSED"
     });
 
+    /// <summary>Executes the new routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public ObservableCollection<string> PriorityOptions { get; } = new(new[]
     {
         "Low",
@@ -58,6 +64,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         "Critical"
     });
 
+    /// <summary>Executes the new routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public ObservableCollection<string> TypeOptions { get; } = new(new[]
     {
         "Deviation",
@@ -68,14 +76,22 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         "Maintenance"
     });
 
+    /// <summary>Generated property exposing the editor for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_Editor` resources are available.</remarks>
     [ObservableProperty]
     private IncidentEditor _editor;
 
+    /// <summary>Generated property exposing the is editor enabled for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
+    /// <summary>Command executing the attach evidence workflow for the Incidents module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Incidents_AttachEvidence` resources are authored.</remarks>
     public IAsyncRelayCommand AttachEvidenceCommand { get; }
 
+    /// <summary>Initializes the Incidents module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public IncidentsModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -99,6 +115,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         AttachEvidenceCommand = new AsyncRelayCommand(AttachEvidenceAsync, CanAttachEvidence);
     }
 
+    /// <summary>Loads Incidents records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Incidents_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var incidents = await Database.GetAllIncidentsAsync().ConfigureAwait(false);
@@ -110,6 +128,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         return incidents.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Incidents designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
         => new List<ModuleRecord>
         {
@@ -146,6 +166,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                 75)
         };
 
+    /// <summary>Loads editor payloads for the selected Incidents record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Incidents". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Incidents` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -179,6 +201,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -212,6 +236,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -233,6 +259,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Incidents". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Incidents` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         if (!IsInEditMode)
@@ -313,6 +341,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 
+    /// <summary>Applies CFL selections back into the Incidents workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Incidents". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Incidents_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         if (!IsInEditMode)
@@ -348,6 +378,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         return Task.CompletedTask;
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var incident = Editor.ToIncident(_loadedIncident);
@@ -461,6 +493,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -480,6 +514,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 
+    /// <summary>Executes the matches search routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
         if (base.MatchesSearch(record, searchText))
@@ -657,6 +693,8 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
 public sealed partial class IncidentEditor : ObservableObject
 {
+    /// <summary>Generated property exposing the id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_Id` resources are available.</remarks>
     [ObservableProperty]
     private int _id;
 
@@ -666,72 +704,114 @@ public sealed partial class IncidentEditor : ObservableObject
     [ObservableProperty]
     private string _description = string.Empty;
 
+    /// <summary>Generated property exposing the type for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_Type` resources are available.</remarks>
     [ObservableProperty]
     private string? _type;
 
+    /// <summary>Generated property exposing the priority for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_Priority` resources are available.</remarks>
     [ObservableProperty]
     private string? _priority;
 
     [ObservableProperty]
     private DateTime _detectedAt = DateTime.UtcNow;
 
+    /// <summary>Generated property exposing the reported at for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_ReportedAt` resources are available.</remarks>
     [ObservableProperty]
     private DateTime? _reportedAt;
 
+    /// <summary>Generated property exposing the reported by id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_ReportedById` resources are available.</remarks>
     [ObservableProperty]
     private int? _reportedById;
 
+    /// <summary>Generated property exposing the assigned to id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_AssignedToId` resources are available.</remarks>
     [ObservableProperty]
     private int? _assignedToId;
 
+    /// <summary>Generated property exposing the work order id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_WorkOrderId` resources are available.</remarks>
     [ObservableProperty]
     private int? _workOrderId;
 
+    /// <summary>Generated property exposing the capa case id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_CapaCaseId` resources are available.</remarks>
     [ObservableProperty]
     private int? _capaCaseId;
 
     [ObservableProperty]
     private string _status = "REPORTED";
 
+    /// <summary>Generated property exposing the root cause for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_RootCause` resources are available.</remarks>
     [ObservableProperty]
     private string? _rootCause;
 
+    /// <summary>Generated property exposing the closed at for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_ClosedAt` resources are available.</remarks>
     [ObservableProperty]
     private DateTime? _closedAt;
 
+    /// <summary>Generated property exposing the closed by id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_ClosedById` resources are available.</remarks>
     [ObservableProperty]
     private int? _closedById;
 
+    /// <summary>Generated property exposing the assigned investigator for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_AssignedInvestigator` resources are available.</remarks>
     [ObservableProperty]
     private string? _assignedInvestigator;
 
+    /// <summary>Generated property exposing the classification for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_Classification` resources are available.</remarks>
     [ObservableProperty]
     private string? _classification;
 
+    /// <summary>Generated property exposing the linked deviation id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_LinkedDeviationId` resources are available.</remarks>
     [ObservableProperty]
     private int? _linkedDeviationId;
 
+    /// <summary>Generated property exposing the linked capa id for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_LinkedCapaId` resources are available.</remarks>
     [ObservableProperty]
     private int? _linkedCapaId;
 
+    /// <summary>Generated property exposing the closure comment for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_ClosureComment` resources are available.</remarks>
     [ObservableProperty]
     private string? _closureComment;
 
+    /// <summary>Generated property exposing the source ip for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_SourceIp` resources are available.</remarks>
     [ObservableProperty]
     private string? _sourceIp;
 
+    /// <summary>Generated property exposing the notes for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_Notes` resources are available.</remarks>
     [ObservableProperty]
     private string? _notes;
 
+    /// <summary>Generated property exposing the is critical for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_IsCritical` resources are available.</remarks>
     [ObservableProperty]
     private bool _isCritical;
 
+    /// <summary>Generated property exposing the risk level for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_RiskLevel` resources are available.</remarks>
     [ObservableProperty]
     private int _riskLevel;
 
+    /// <summary>Generated property exposing the anomaly score for the Incidents module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Incidents_AnomalyScore` resources are available.</remarks>
     [ObservableProperty]
     private double? _anomalyScore;
 
+    /// <summary>Executes the create empty routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static IncidentEditor CreateEmpty()
         => new()
         {
@@ -739,6 +819,8 @@ public sealed partial class IncidentEditor : ObservableObject
             Status = "REPORTED"
         };
 
+    /// <summary>Executes the create for new routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static IncidentEditor CreateForNew(IAuthContext authContext)
     {
         return new IncidentEditor
@@ -750,6 +832,8 @@ public sealed partial class IncidentEditor : ObservableObject
         };
     }
 
+    /// <summary>Executes the from incident routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static IncidentEditor FromIncident(Incident incident, Func<string?, string> normalizeStatus)
     {
         return new IncidentEditor
@@ -782,6 +866,8 @@ public sealed partial class IncidentEditor : ObservableObject
         };
     }
 
+    /// <summary>Executes the clone routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public IncidentEditor Clone()
         => new()
         {
@@ -812,6 +898,8 @@ public sealed partial class IncidentEditor : ObservableObject
             AnomalyScore = AnomalyScore
         };
 
+    /// <summary>Executes the to incident routine for the Incidents module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public Incident ToIncident(Incident? existing)
     {
         var incident = existing is null ? new Incident() : new Incident { Id = existing.Id };
