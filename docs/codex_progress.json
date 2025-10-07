@@ -244,6 +244,7 @@
     "2026-01-22: Localized MainWindow title, CFL/ElectronicSignature dialogs, and every module view grid/toolbar label via ShellStrings resx keys while wiring shared ToolTip/Automation metadata; dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-23: Centralized module titles, status phrases, and combo-box option lists in ShellStrings with formatting helpers, updated B1FormDocumentViewModel plus derived modules to consume ILocalizationService, and refreshed unit tests with a deterministic localization stub while the dotnet CLI gap persists.",
     "2026-01-24: Added LocalizationService regression tests that drive EN↔HR switches across ribbon/toolbars and module tree view-models, plus documented the operator language toggle workflow while dotnet restore/build/smoke remain blocked by the missing CLI.",
-    "2026-01-25: Added XML documentation to B1FormDocumentViewModel toolbar commands so audit/status semantics stay clear for downstream modules while dotnet CLI availability continues to block restore/build/smoke validation."
+    "2026-01-25: Added XML documentation to B1FormDocumentViewModel toolbar commands so audit/status semantics stay clear for downstream modules while dotnet CLI availability continues to block restore/build/smoke validation.",
+    "2026-01-26: Documented ModuleRecord key/status/inspector metadata so Golden Arrow navigation and SAP B1 form-mode visuals stay aligned while dotnet restore/build/smoke remain blocked by the missing CLI."
   ]
 }

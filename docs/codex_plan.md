@@ -58,6 +58,7 @@
 - 2026-01-19: Golden Arrow toolbar control now exposes localization-aware tooltip/name/id dependency properties backed by the localization service so UIA names follow language switches; dotnet restore/build/smoke remain blocked by the missing CLI so announcements verified via static analysis only.
 - 2026-01-21: Moved shell localization to ResourceManager-backed `ShellStrings` resx files while keeping automation ids in `Strings.xaml`; dotnet restore/build/smoke remain blocked by the missing CLI.
 - 2026-01-22: Refreshed ModuleToolbarCommand documentation to capture localization-driven caption/tooltip/automation metadata and SAP B1 mode mapping; dotnet restore/build/smoke remain blocked by the missing CLI.
+- 2026-01-26: Expanded ModuleRecord XML docs to spell out SAP B1 form-mode, Golden Arrow, and inspector semantics for navigation payloads while dotnet restore/build/smoke stay blocked by the missing CLI.
 
 ### Accessibility Verification — Locale-Sensitive Metadata
 - **Verification date:** 2026-01-20
