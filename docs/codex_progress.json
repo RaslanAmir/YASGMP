@@ -109,6 +109,7 @@
   "lastCommitSummary": "fix: auto-refresh API audit filters",
   "notes": [
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",
+    "2026-01-22: ModuleToolbarCommand XML documentation now captures localization-driven captions/tooltips/automation metadata, SAP B1 form mode enablement, and Golden Arrow identifiers while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-04: WPF host now resolves AttachmentsModuleViewModel via an explicit service provider factory so DatabaseService, attachment workflow, file picker, signature dialog, audit, CFL, shell interaction, and navigation services align with the current constructor order; dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-05: Attachments module view now introduces a two-column layout with a SelectedAttachment inspector and staged upload editor so metadata and pending files are visible before persistence; dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-06: Attachments editor pane now surfaces HasAttachmentWorkflow-gated upload/download/delete buttons with SelectedAttachment command parameters so tooling hides when the service stack is offline; dotnet restore/build remain blocked by the missing CLI.",
