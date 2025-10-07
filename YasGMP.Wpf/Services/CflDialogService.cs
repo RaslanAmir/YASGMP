@@ -4,6 +4,27 @@ using YasGMP.Wpf.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
+/// <summary>
+/// Default CFL dialog implementation that marshals requests onto the WPF dispatcher and presents the
+/// modal picker with the shell's primary window as owner.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Instances assume requests may arrive from background threads and therefore wrap dialog creation
+/// in <see cref="Application.Current"/>'s dispatcher. The first available shell window is used as the
+/// dialog owner so focus and modality align with Golden Arrow navigation expectations.
+/// </para>
+/// <para>
+/// The service forwards the localized title and rows supplied via <see cref="CflRequest"/>; callers
+/// are responsible for sourcing those values from the shared resource dictionaries to satisfy the
+/// shell's localization requirements.
+/// </para>
+/// <para>
+/// Confirmed and cancelled outcomes are pushed back through the returned <see cref="Task"/> so audit
+/// aware consumers can write the resulting <see cref="CflResult"/> (or a null cancellation marker)
+/// into their audit appenders alongside form mode transitions.
+/// </para>
+/// </remarks>
 public sealed class CflDialogService : ICflDialogService
 {
     public Task<CflResult?> ShowAsync(CflRequest request)
