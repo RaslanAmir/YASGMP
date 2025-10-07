@@ -2,6 +2,7 @@
 
 ## Current Compile Status
 - [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31 → **command not found**)*
+  - 2025-10-07T11:06Z: Current container session again reports `bash: command not found: dotnet`; document cadence remains static-analysis only until SDK is provisioned.
 - [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-18, 2025-12-31, 2026-01-30, 2026-02-02 → **command not found**)*
 - [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31, 2026-01-30, 2026-02-02 → **command not found**)*
 - [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31, 2026-01-30, 2026-02-02 → **command not found**)*
@@ -15,6 +16,7 @@
 
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
+  - 2025-10-07: Reconfirmed CLI absence this run; planning next increment around static analysis, documentation refresh, and schema review until installation is possible.
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
   - 2026-01-25: Documented B1FormDocumentViewModel command/state surface so derived modules inherit SAP B1 toolbar, audit, and busy-state guidance.
 - **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; the WPF dialog service now emits audit events on capture/persist while broader audit surfacing remains gated on SDK access)*
