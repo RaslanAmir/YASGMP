@@ -268,6 +268,7 @@
     "2026-01-25: Added XML documentation to B1FormDocumentViewModel toolbar commands so audit/status semantics stay clear for downstream modules while dotnet CLI availability continues to block restore/build/smoke validation.",
     "2026-01-26: Documented ModuleRecord key/status/inspector metadata so Golden Arrow navigation and SAP B1 form-mode visuals stay aligned while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-27: ModuleRegistry XML documentation now maps module keys/titles/categories to Modules pane population, localization resource lookups, Golden Arrow automation ids, and SAP B1 toolbar/form-mode consumption while dotnet restore/build/smoke remain blocked by the missing CLI.",
-    "2026-01-30: Updated e-signature service/interface documentation to outline shell entry points, dispatcher requirements, localization expectations, audit logging parity, and cancellation guidance so MAUI/WPF consumers stay synchronized while dotnet CLI access remains unavailable."
+    "2026-01-30: Updated e-signature service/interface documentation to outline shell entry points, dispatcher requirements, localization expectations, audit logging parity, and cancellation guidance so MAUI/WPF consumers stay synchronized while dotnet CLI access remains unavailable.",
+    "2026-02-07: Shell status bar now binds company, environment, database, server, user, and UTC clock fields via revived DatabaseOptions parsing, configuration helpers, and a dispatcher timer while dotnet restore/build/smoke remain blocked by the missing CLI."
   ]
 }
