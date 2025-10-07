@@ -6,8 +6,16 @@ using YasGMP.Wpf.Services;
 namespace YasGMP.Wpf.ViewModels.Modules;
 
 /// <summary>
-/// Represents a toolbar command in the SAP B1 style command strip.
+/// Provides a localized toolbar command whose caption, tooltip, automation name, and automation ID
+/// bindings are refreshed whenever <see cref="ILocalizationService.LanguageChanged"/> fires so that the
+/// shell ribbon and FlaUI smoke tests observe the updated values without additional wiring.
 /// </summary>
+/// <remarks>
+/// SAP Business One form-mode toggles drive toolbar enablement, and <see cref="AssociatedMode"/> maps to
+/// those semantics by indicating when the command should be active in the docked ribbon. The same
+/// metadata feeds Golden Arrow navigation where automation identifiers are generated from the supplied
+/// localization keys so that UIA clients can discover the buttons deterministically.
+/// </remarks>
 public partial class ModuleToolbarCommand : ObservableObject
 {
     private readonly ILocalizationService? _localization;
@@ -24,6 +32,13 @@ public partial class ModuleToolbarCommand : ObservableObject
 
     public string? AutomationIdKey => _automationIdKey;
 
+    /// <param name="captionKey">Localization resource key that resolves to the ribbon caption and serves as the fallback automation text.</param>
+    /// <param name="command">Executable that integrates with the ribbon button and SAP B1 style enablement logic.</param>
+    /// <param name="localization">Localization service responsible for translating resource keys and raising <see cref="ILocalizationService.LanguageChanged"/>.</param>
+    /// <param name="toolTipKey">Optional localization key used for the accessibility tooltip consumed by the ribbon hover behavior.</param>
+    /// <param name="automationNameKey">Optional localization key that produces the screen-reader friendly automation name consumed by FlaUI.</param>
+    /// <param name="automationIdKey">Optional localization key used to derive deterministic Golden Arrow automation identifiers.</param>
+    /// <param name="associatedMode">SAP B1 form mode the command participates in, guiding enable/disable toggles across the toolbar.</param>
     public ModuleToolbarCommand(
         string captionKey,
         ICommand command,
