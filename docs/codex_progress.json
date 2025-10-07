@@ -49,6 +49,7 @@
       "2026-01-28: dotnet restore yasgmp.sln retried; CLI remains unavailable in the container so the command exits with 'command not found'.",
       "2025-10-07: dotnet restore yasgmp.sln retried for CRUD adapter documentation; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-02-02: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf.csproj, and MAUI net8.0-windows10.0.19041.0; CLI remains unavailable so each command exits with 'command not found'.",
+      "2026-02-05: dotnet restore yasgmp.sln retried after Shell layout reset adjustments; CLI remains unavailable so the command exits with 'command not found'.",
       "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
     ]
   },
@@ -64,7 +65,10 @@
     {
       "id": "B1",
       "name": "Shell foundation",
-      "status": "pending"
+      "status": "pending",
+      "notes": [
+        "2026-02-05: Shell layout reset now clears persisted database snapshot via DockLayoutPersistenceService.ResetAsync before saving defaults; awaiting dotnet CLI to validate via build/smoke."
+      ]
     },
     {
       "id": "B2",

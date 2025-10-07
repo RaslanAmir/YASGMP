@@ -126,6 +126,8 @@ namespace YasGMP.Wpf.Services
             {
                 _viewModel.StatusText = "Layout reset to default";
             }
+
+            await _persistence.ResetAsync(LayoutKey, token).ConfigureAwait(false);
             await SaveLayoutAsync(window, token).ConfigureAwait(false);
         }
 
