@@ -8,6 +8,7 @@ using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.ViewModels;
+using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
@@ -37,6 +38,7 @@ namespace YasGMP.Wpf
                     services.AddSingleton(ctx.Configuration);
 
                     var connectionString = ResolveConnectionString(ctx.Configuration);
+                    var databaseOptions = DatabaseOptions.FromConnectionString(connectionString);
 
                     services.AddYasGmpCoreServices(core =>
                     {
@@ -44,6 +46,8 @@ namespace YasGMP.Wpf
                         core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
 
                         var svc = core.Services;
+                        svc.AddSingleton(databaseOptions);
+                        svc.AddSingleton(TimeProvider.System);
                         svc.AddSingleton<AuditService>();
                         svc.AddSingleton<ExportService>();
                         svc.AddSingleton<IUserSession, UserSession>();
