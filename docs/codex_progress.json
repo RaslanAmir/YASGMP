@@ -76,7 +76,8 @@
         "ValidationService now keeps adapter-supplied validation signature hashes intact on create/update and only regenerates when explicitly forced (e.g., MarkExecuted), with new unit coverage confirming the stored hash matches the adapter payload.",
         "WPF ValidationCrudServiceAdapter test now asserts signature hash/IP/session context persist alongside CrudSaveResult metadata, and validation CRUD fakes retain those fields for downstream assertions while CLI validation stays blocked.",
         "Test signature dialog now records capture results and persist calls, CRUD fakes expose configurable signature id providers, and module regression tests assert adapter-assigned ids skip redundant persistence while CLI validation remains blocked.",
-        "2026-01-28: CFL dialog service XML docs now instruct modules on dispatcher usage, localization sourcing, and audit appenders so Golden Arrow flows capture selections even while CLI access is blocked."
+        "2026-01-28: CFL dialog service XML docs now instruct modules on dispatcher usage, localization sourcing, and audit appenders so Golden Arrow flows capture selections even while CLI access is blocked.",
+        "2026-01-29: Shell interaction/navigation service XML documentation now outlines ribbon/Golden Arrow usage, dispatcher marshalling expectations, and cross-references IModuleRegistry metadata so audit and inspector updates stay aligned while CLI access remains blocked."
       ]
     },
     {
