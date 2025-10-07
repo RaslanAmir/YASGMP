@@ -77,7 +77,8 @@
         "WPF ValidationCrudServiceAdapter test now asserts signature hash/IP/session context persist alongside CrudSaveResult metadata, and validation CRUD fakes retain those fields for downstream assertions while CLI validation stays blocked.",
         "Test signature dialog now records capture results and persist calls, CRUD fakes expose configurable signature id providers, and module regression tests assert adapter-assigned ids skip redundant persistence while CLI validation remains blocked.",
         "2026-01-28: CFL dialog service XML docs now instruct modules on dispatcher usage, localization sourcing, and audit appenders so Golden Arrow flows capture selections even while CLI access is blocked.",
-        "2026-01-29: Shell interaction/navigation service XML documentation now outlines ribbon/Golden Arrow usage, dispatcher marshalling expectations, and cross-references IModuleRegistry metadata so audit and inspector updates stay aligned while CLI access remains blocked."
+        "2026-01-29: Shell interaction/navigation service XML documentation now outlines ribbon/Golden Arrow usage, dispatcher marshalling expectations, and cross-references IModuleRegistry metadata so audit and inspector updates stay aligned while CLI access remains blocked.",
+        "2026-01-30: Electronic signature dialog service/interface XML documentation now details dispatcher usage, localization hooks, audit de-duplication, and cancellation guidance so WPF stays aligned with MAUI while CLI access remains blocked."
       ]
     },
     {
@@ -249,6 +250,7 @@
     "2026-01-24: Added LocalizationService regression tests that drive EN\u2194HR switches across ribbon/toolbars and module tree view-models, plus documented the operator language toggle workflow while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-25: Added XML documentation to B1FormDocumentViewModel toolbar commands so audit/status semantics stay clear for downstream modules while dotnet CLI availability continues to block restore/build/smoke validation.",
     "2026-01-26: Documented ModuleRecord key/status/inspector metadata so Golden Arrow navigation and SAP B1 form-mode visuals stay aligned while dotnet restore/build/smoke remain blocked by the missing CLI.",
-    "2026-01-27: ModuleRegistry XML documentation now maps module keys/titles/categories to Modules pane population, localization resource lookups, Golden Arrow automation ids, and SAP B1 toolbar/form-mode consumption while dotnet restore/build/smoke remain blocked by the missing CLI."
+    "2026-01-27: ModuleRegistry XML documentation now maps module keys/titles/categories to Modules pane population, localization resource lookups, Golden Arrow automation ids, and SAP B1 toolbar/form-mode consumption while dotnet restore/build/smoke remain blocked by the missing CLI.",
+    "2026-01-30: Updated e-signature service/interface documentation to outline shell entry points, dispatcher requirements, localization expectations, audit logging parity, and cancellation guidance so MAUI/WPF consumers stay synchronized while dotnet CLI access remains unavailable."
   ]
 }
