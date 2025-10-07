@@ -5,9 +5,9 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <!-- Keep docs as warnings initially to avoid blocking builds -->
+    <!-- Enforce XML documentation completeness across the solution -->
     <NoWarn>$(NoWarn)</NoWarn>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
   </PropertyGroup>
 
   <!-- Centralised warning suppression for noisy analyzers during test runs -->
