@@ -55,6 +55,7 @@
 
 ## Notes
 - 2026-02-03: Added DatabaseService layout persistence extensions so WPF shell sessions can round-trip ribbon/dock arrangements even while .NET tooling remains unavailable in the container; tests remain blocked pending SDK installation.
+- 2026-02-04: WPF DockLayoutPersistenceService now delegates load/save/reset to the shared DatabaseService layout helpers so both shells share the persistence path while dotnet restore/build remain blocked by the missing CLI.
 - 2025-10-07: Refreshed CRUD service adapter/interface XML documentation to spell out WPF module → adapter → MAUI service flow, dispatcher marshalling, localization responsibilities, and shared audit plumbing; `dotnet restore`/`dotnet build`/smoke reruns still fail because the `dotnet` CLI is unavailable in this container.
 - 2025-10-07: Re-enabled CS1591 warnings by removing the repo-wide suppression, added XML documentation across AppCore data models and MAUI shell session properties, and recorded the continued `dotnet restore`/`dotnet build` failures due to the missing CLI.
 - 2025-10-07: Elevated documentation enforcement by promoting CS1591 to a warnings-as-errors rule in `Directory.Build.props`; attempted `dotnet build` still fails with `command not found` until the .NET CLI is installed.

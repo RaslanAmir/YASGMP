@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MySqlConnector;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
@@ -9,16 +8,14 @@ namespace YasGMP.Wpf.Services
     /// <summary>Persists and restores AvalonDock layouts using the shared user_window_layouts table.</summary>
     public sealed class DockLayoutPersistenceService
     {
-        private readonly string _connectionString;
+        private readonly DatabaseService _database;
         private readonly IUserSession _session;
         /// <summary>
         /// Initializes a new instance of the DockLayoutPersistenceService class.
         /// </summary>
-
-        public DockLayoutPersistenceService(DatabaseOptions options, IUserSession session)
+        public DockLayoutPersistenceService(DatabaseService database, IUserSession session)
         {
-            if (options is null) throw new ArgumentNullException(nameof(options));
-            _connectionString = options.ConnectionString;
+            _database = database ?? throw new ArgumentNullException(nameof(database));
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
         /// <summary>
@@ -27,36 +24,22 @@ namespace YasGMP.Wpf.Services
 
         public async Task<LayoutSnapshot?> LoadAsync(string layoutKey, CancellationToken token = default)
         {
-            const string sql = @"
-SELECT layout_xml, pos_x, pos_y, width, height
-FROM user_window_layouts
-WHERE user_id=@u AND page_type=@p
-LIMIT 1;";
+            var snapshot = await _database
+                .GetUserWindowLayoutAsync(GetUserId(), layoutKey, token)
+                .ConfigureAwait(false);
 
-            var parameters = new[]
-            {
-                new MySqlParameter("@u", _session.UserId),
-                new MySqlParameter("@p", layoutKey)
-            };
-
-            await using var conn = CreateConnection();
-            await conn.OpenAsync(token).ConfigureAwait(false);
-            await using var cmd = new MySqlCommand(sql, conn);
-            cmd.Parameters.AddRange(parameters);
-
-            await using var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false);
-            if (!await reader.ReadAsync(token).ConfigureAwait(false))
+            if (snapshot is null)
             {
                 return null;
             }
 
-            string layoutXml = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-            double? posX = reader.IsDBNull(1) ? null : reader.GetDouble(1);
-            double? posY = reader.IsDBNull(2) ? null : reader.GetDouble(2);
-            double? width = reader.IsDBNull(3) ? null : reader.GetDouble(3);
-            double? height = reader.IsDBNull(4) ? null : reader.GetDouble(4);
-
-            return new LayoutSnapshot(layoutXml, posX, posY, width, height);
+            var geometry = snapshot.Geometry;
+            return new LayoutSnapshot(
+                snapshot.LayoutXml ?? string.Empty,
+                geometry.Left,
+                geometry.Top,
+                geometry.Width,
+                geometry.Height);
         }
         /// <summary>
         /// Executes the save async operation.
@@ -64,36 +47,29 @@ LIMIT 1;";
 
         public async Task SaveAsync(string layoutKey, string layoutXml, WindowGeometry geometry, CancellationToken token = default)
         {
-            const string sql = @"
-INSERT INTO user_window_layouts (user_id, page_type, layout_xml, pos_x, pos_y, width, height, saved_at)
-VALUES (@u,@p,@layout,@x,@y,@w,@h,UTC_TIMESTAMP())
-ON DUPLICATE KEY UPDATE
-layout_xml=VALUES(layout_xml),
-pos_x=VALUES(pos_x),
-pos_y=VALUES(pos_y),
-width=VALUES(width),
-height=VALUES(height),
-saved_at=UTC_TIMESTAMP();";
+            var layoutGeometry = new DatabaseServiceLayoutsExtensions.UserWindowLayoutGeometry(
+                geometry.Left,
+                geometry.Top,
+                geometry.Width,
+                geometry.Height);
 
-            var parameters = new[]
-            {
-                new MySqlParameter("@u", _session.UserId),
-                new MySqlParameter("@p", layoutKey),
-                new MySqlParameter("@layout", layoutXml),
-                new MySqlParameter("@x", geometry.Left.HasValue ? geometry.Left.Value : (object)DBNull.Value),
-                new MySqlParameter("@y", geometry.Top.HasValue ? geometry.Top.Value : (object)DBNull.Value),
-                new MySqlParameter("@w", geometry.Width.HasValue ? geometry.Width.Value : (object)DBNull.Value),
-                new MySqlParameter("@h", geometry.Height.HasValue ? geometry.Height.Value : (object)DBNull.Value)
-            };
-
-            await using var conn = CreateConnection();
-            await conn.OpenAsync(token).ConfigureAwait(false);
-            await using var cmd = new MySqlCommand(sql, conn);
-            cmd.Parameters.AddRange(parameters);
-            await cmd.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+            await _database
+                .SaveUserWindowLayoutAsync(GetUserId(), layoutKey, layoutXml, layoutGeometry, token)
+                .ConfigureAwait(false);
         }
 
-        private MySqlConnection CreateConnection() => new(_connectionString);
+        /// <summary>
+        /// Deletes the persisted layout for the current user.
+        /// </summary>
+        public Task ResetAsync(string layoutKey, CancellationToken token = default)
+        {
+            return _database.DeleteUserWindowLayoutAsync(GetUserId(), layoutKey, token);
+        }
+
+        private int GetUserId()
+        {
+            return _session.UserId ?? throw new InvalidOperationException("Current session does not have a user id.");
+        }
     }
     /// <summary>
     /// Executes the struct operation.

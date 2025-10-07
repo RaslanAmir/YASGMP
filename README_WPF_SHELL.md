@@ -36,14 +36,14 @@ Visual Studio and MSBuild follow the same steps: open `yasgmp.sln`, set **YasGMP
 - **Dirkster.AvalonDock** and **Dirkster.AvalonDock.Themes.VS2013** – provide the docking layout manager and Visual Studio themed chrome for document/anchorable panes.
 - **CommunityToolkit.Mvvm** – supplies `ObservableObject`, commands, and source generators used across view-models.
 - **Microsoft.Extensions.Configuration.*** (`Binder`, `Json`), **DependencyInjection**, and **Hosting** – compose the generic host, configuration pipeline, and DI container used to bootstrap the shell.
-- **MySqlConnector** – lightweight MySQL client used by `DockLayoutPersistenceService` to load and save layouts.
+- **YasGMP.AppCore DatabaseService** – shared database abstraction that exposes layout persistence extensions consumed by `DockLayoutPersistenceService`.
 
 ## Layout persistence lifecycle
 
 Layout state flows through two services:
 
 1. **`ShellLayoutController`** bridges AvalonDock with persistence. It captures the default layout once the window is loaded, restores any serialized layout (invoking `MainWindowViewModel.PrepareForLayoutImport` first), and reapplies saved window bounds.【F:YasGMP.Wpf/MainWindow.xaml.cs†L18-L50】【F:YasGMP.Wpf/Services/ShellLayoutController.cs†L21-L175】
-2. **`DockLayoutPersistenceService`** interacts with the shared `user_window_layouts` table. It serializes the AvalonDock XML plus window geometry per user (`IUserSession`) and layout key (`YasGmp.Wpf.Shell`). On save it upserts `layout_xml`, `pos_x`, `pos_y`, `width`, `height`, and `saved_at`; on load it returns a `LayoutSnapshot` used to hydrate the UI.【F:YasGMP.Wpf/Services/DockLayoutPersistenceService.cs†L10-L100】【F:YasGMP.Wpf/Services/ShellLayoutController.cs†L18-L175】【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
+2. **`DockLayoutPersistenceService`** interacts with the shared `user_window_layouts` table through `DatabaseServiceLayoutsExtensions`. It serializes the AvalonDock XML plus window geometry per user (`IUserSession`) and layout key (`YasGmp.Wpf.Shell`). On save it upserts `layout_xml`, `pos_x`, `pos_y`, `width`, `height`, and `saved_at`; on load it returns a `LayoutSnapshot` used to hydrate the UI; `ResetAsync` now calls the shared delete helper to clear the persisted layout.【F:YasGMP.Wpf/Services/DockLayoutPersistenceService.cs†L10-L100】【F:YasGMP.Wpf/Services/ShellLayoutController.cs†L18-L175】【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
 
 During startup the shell attaches the controller, initializes workspace tabs, captures the default layout, and attempts to restore any previously persisted state. Layouts are saved when the window closes or when the user invokes **Window → Save Layout**, and reset either through **Window → Reset Layout** or programmatically via `ResetLayoutAsync`, which also persists the fresh default snapshot.【F:YasGMP.Wpf/MainWindow.xaml†L16-L68】【F:YasGMP.Wpf/MainWindow.xaml.cs†L18-L50】【F:YasGMP.Wpf/Services/ShellLayoutController.cs†L32-L112】【F:YasGMP.Wpf/ViewModels/WindowMenuViewModel.cs†L12-L43】
 
