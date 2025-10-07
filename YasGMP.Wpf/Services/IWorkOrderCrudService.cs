@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -35,9 +36,15 @@ public interface IWorkOrderCrudService
 }
 
 /// <summary>
-/// Context metadata captured when persisting work-order edits so audit trails receive
-/// consistent identifiers.
+/// Context metadata captured when persisting work-order edits so audit trails receive consistent identifiers. Each value feeds
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> to preserve the accepted signature
+/// manifest for compliance pipelines.
 /// </summary>
+/// <remarks>
+/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside work orders, and MAUI experiences should propagate the same
+/// payload when presenting or synchronizing records to keep shared audit history aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Machine fingerprint or hostname.</param>

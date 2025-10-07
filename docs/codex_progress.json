@@ -45,7 +45,8 @@
       "2026-01-12: dotnet restore/build/test attempted for yasgmp.sln, YasGMP.Wpf, and MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'.",
       "2026-01-13: dotnet restore retried for yasgmp.sln after API audit filter refresh updates; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-01-28: dotnet restore yasgmp.sln retried; CLI remains unavailable in the container so the command exits with 'command not found'.",
-      "2025-10-07: dotnet restore yasgmp.sln retried for CRUD adapter documentation; CLI remains unavailable so the command exits with 'command not found'."
+      "2025-10-07: dotnet restore yasgmp.sln retried for CRUD adapter documentation; CLI remains unavailable so the command exits with 'command not found'.",
+      "2026-02-02: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf.csproj, and MAUI net8.0-windows10.0.19041.0; CLI remains unavailable so each command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -80,7 +81,8 @@
         "2026-01-28: CFL dialog service XML docs now instruct modules on dispatcher usage, localization sourcing, and audit appenders so Golden Arrow flows capture selections even while CLI access is blocked.",
         "2026-01-29: Shell interaction/navigation service XML documentation now outlines ribbon/Golden Arrow usage, dispatcher marshalling expectations, and cross-references IModuleRegistry metadata so audit and inspector updates stay aligned while CLI access remains blocked.",
         "2026-01-30: Electronic signature dialog service/interface XML documentation now details dispatcher usage, localization hooks, audit de-duplication, and cancellation guidance so WPF stays aligned with MAUI while CLI access remains blocked.",
-        "2025-10-07: CRUD service adapters/interfaces now document WPF module to MAUI service call flow, dispatcher marshalling, localization, and audit expectations; dotnet CLI remains missing so validation is limited to static analysis."
+        "2025-10-07: CRUD service adapters/interfaces now document WPF module to MAUI service call flow, dispatcher marshalling, localization, and audit expectations; dotnet CLI remains missing so validation is limited to static analysis.",
+        "2026-02-02: CRUD context XML comments now cross-link CrudSaveResult.SignatureMetadata and SignatureMetadataDto with WPF/MAUI compliance guidance while dotnet CLI access remains unavailable."
       ]
     },
     {

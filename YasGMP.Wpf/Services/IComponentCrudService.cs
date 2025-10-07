@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -42,9 +43,15 @@ public interface IComponentCrudService
 }
 
 /// <summary>
-/// Context metadata captured when persisting component edits so audit trails
-/// and downstream services receive consistent identifiers.
+/// Context metadata captured when persisting component edits so audit trails and downstream services receive consistent
+/// identifiers. Each value is forwarded into <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/>
+/// to preserve the accepted signature manifest for compliance pipelines.
 /// </summary>
+/// <remarks>
+/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this record before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside component records, and MAUI experiences should propagate the
+/// same payload when presenting or synchronizing components so shared audit history stays aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Machine fingerprint or hostname.</param>

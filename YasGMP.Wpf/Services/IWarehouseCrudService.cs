@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -44,8 +45,15 @@ namespace YasGMP.Wpf.Services
     }
 
     /// <summary>
-    /// Ambient metadata propagated with warehouse saves for auditing.
+    /// Ambient metadata propagated with warehouse saves for auditing. Each value flows into
+    /// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> to preserve the accepted signature
+    /// manifest for compliance pipelines.
     /// </summary>
+    /// <remarks>
+    /// Adapters hydrate <see cref="SignatureMetadataDto"/> from this record before returning <see cref="CrudSaveResult"/>.
+    /// WPF shell consumers must persist and surface the DTO beside warehouse records, and MAUI experiences should propagate the
+    /// same payload when presenting or synchronizing warehouses to keep the shared audit history aligned.
+    /// </remarks>
     /// <param name="UserId">Authenticated user id.</param>
     /// <param name="Ip">Source IP address.</param>
     /// <param name="DeviceInfo">Device or workstation info.</param>

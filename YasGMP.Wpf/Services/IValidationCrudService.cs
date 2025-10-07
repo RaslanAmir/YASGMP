@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -35,8 +36,15 @@ public interface IValidationCrudService
 }
 
 /// <summary>
-/// Context metadata captured during validation persistence operations.
+/// Context metadata captured during validation persistence operations. Each value flows into
+/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines replay the
+/// accepted signature manifest.
 /// </summary>
+/// <remarks>
+/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside validation records, and MAUI experiences should propagate the
+/// same payload when presenting or synchronizing validations to keep shared audit history aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current auth context.</param>
 /// <param name="DeviceInfo">Machine fingerprint/hostname.</param>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -41,8 +42,15 @@ public interface ICapaCrudService
 }
 
 /// <summary>
-/// Captures authenticated metadata that must flow alongside CAPA saves.
+/// Captures authenticated metadata that must flow alongside CAPA saves. Each value feeds
+/// <see cref="CrudSaveResult.SignatureMetadata"/> through <see cref="SignatureMetadataDto"/> to preserve the accepted signature
+/// manifest for compliance pipelines.
 /// </summary>
+/// <remarks>
+/// Adapters project this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
+/// WPF shell consumers must persist and surface the DTO beside CAPA records, and MAUI experiences should propagate the same
+/// payload when presenting or synchronizing cases so shared audit history remains aligned.
+/// </remarks>
 /// <param name="UserId">Authenticated operator identifier.</param>
 /// <param name="Ip">Source IP recorded for audit.</param>
 /// <param name="DeviceInfo">Client device fingerprint.</param>
