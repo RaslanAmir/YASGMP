@@ -47,7 +47,8 @@
       "2026-01-13: dotnet restore retried for yasgmp.sln after API audit filter refresh updates; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-01-28: dotnet restore yasgmp.sln retried; CLI remains unavailable in the container so the command exits with 'command not found'.",
       "2025-10-07: dotnet restore yasgmp.sln retried for CRUD adapter documentation; CLI remains unavailable so the command exits with 'command not found'.",
-      "2026-02-02: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf.csproj, and MAUI net8.0-windows10.0.19041.0; CLI remains unavailable so each command exits with 'command not found'."
+      "2026-02-02: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf.csproj, and MAUI net8.0-windows10.0.19041.0; CLI remains unavailable so each command exits with 'command not found'.",
+      "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
     ]
   },
   "batches": [
