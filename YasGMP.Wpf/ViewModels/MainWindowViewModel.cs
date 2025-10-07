@@ -4,6 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using YasGMP.Services;
+using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
 
@@ -17,6 +21,10 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IModuleRegistry _moduleRegistry;
     private readonly ShellInteractionService _shellInteraction;
     private readonly DebugSmokeTestService _smokeTestService;
+    private readonly IConfiguration _configuration;
+    private readonly DatabaseOptions _databaseOptions;
+    private readonly IHostEnvironment _hostEnvironment;
+    private readonly IUserSession _userSession;
     private string _statusText = "Ready";
 
     [ObservableProperty]
@@ -31,11 +39,19 @@ public partial class MainWindowViewModel : ObservableObject
         InspectorPaneViewModel inspectorPane,
         ShellStatusBarViewModel statusBar,
         ShellInteractionService shellInteraction,
-        DebugSmokeTestService smokeTestService)
+        DebugSmokeTestService smokeTestService,
+        IConfiguration configuration,
+        DatabaseOptions databaseOptions,
+        IHostEnvironment hostEnvironment,
+        IUserSession userSession)
     {
         _moduleRegistry = moduleRegistry;
         _shellInteraction = shellInteraction;
         _smokeTestService = smokeTestService;
+        _configuration = configuration;
+        _databaseOptions = databaseOptions;
+        _hostEnvironment = hostEnvironment;
+        _userSession = userSession;
         ModulesPane = modulesPane;
         InspectorPane = inspectorPane;
         StatusBar = statusBar;
@@ -44,6 +60,7 @@ public partial class MainWindowViewModel : ObservableObject
         RunSmokeTestCommand = new AsyncRelayCommand(RunSmokeTestAsync, () => _smokeTestService.IsEnabled);
 
         _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update);
+        RefreshShellContext();
         StatusBar.StatusText = _statusText;
     }
 
@@ -131,6 +148,17 @@ public partial class MainWindowViewModel : ObservableObject
         StatusText = "Layout reset to default";
     }
 
+    /// <summary>Re-evaluates and pushes connection/session metadata into the status bar.</summary>
+    public void RefreshShellContext()
+    {
+        StatusBar.UpdateMetadata(
+            ResolveCompany(),
+            ResolveEnvironment(),
+            _databaseOptions.Server,
+            _databaseOptions.Database,
+            ResolveUser());
+    }
+
     private ModuleDocumentViewModel OpenModuleInternal(string moduleKey, object? parameter)
     {
         var existing = Documents.OfType<ModuleDocumentViewModel>()
@@ -207,5 +235,34 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         return null;
+    }
+
+    private string ResolveCompany()
+    {
+        var company = _configuration["Shell:Company"]
+                       ?? _configuration["Company"]
+                       ?? _configuration["AppTitle"]
+                       ?? string.Empty;
+
+        return string.IsNullOrWhiteSpace(company) ? "YasGMP" : company;
+    }
+
+    private string ResolveEnvironment()
+    {
+        var environment = _configuration["Shell:Environment"]
+                          ?? _configuration["Environment"]
+                          ?? _hostEnvironment.EnvironmentName
+                          ?? string.Empty;
+
+        return string.IsNullOrWhiteSpace(environment) ? "Production" : environment;
+    }
+
+    private string ResolveUser()
+    {
+        return !string.IsNullOrWhiteSpace(_userSession.FullName)
+            ? _userSession.FullName!
+            : !string.IsNullOrWhiteSpace(_userSession.Username)
+                ? _userSession.Username!
+                : "Offline";
     }
 }
