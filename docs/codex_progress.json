@@ -43,7 +43,8 @@
       "2026-01-08: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-01-11: dotnet restore/build retried for yasgmp.sln and platform-specific targets; CLI remains unavailable in the container so each command fails with \"command not found\".",
       "2026-01-12: dotnet restore/build/test attempted for yasgmp.sln, YasGMP.Wpf, and MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'.",
-      "2026-01-13: dotnet restore retried for yasgmp.sln after API audit filter refresh updates; CLI remains unavailable so the command exits with 'command not found'."
+      "2026-01-13: dotnet restore retried for yasgmp.sln after API audit filter refresh updates; CLI remains unavailable so the command exits with 'command not found'.",
+      "2026-01-28: dotnet restore yasgmp.sln retried; CLI remains unavailable in the container so the command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -74,7 +75,8 @@
         "Module save flows now rehydrate adapter-provided signature ids/hashes before optional persistence, skipping redundant dialog writes when a signature already exists while preserving current UX messaging.",
         "ValidationService now keeps adapter-supplied validation signature hashes intact on create/update and only regenerates when explicitly forced (e.g., MarkExecuted), with new unit coverage confirming the stored hash matches the adapter payload.",
         "WPF ValidationCrudServiceAdapter test now asserts signature hash/IP/session context persist alongside CrudSaveResult metadata, and validation CRUD fakes retain those fields for downstream assertions while CLI validation stays blocked.",
-        "Test signature dialog now records capture results and persist calls, CRUD fakes expose configurable signature id providers, and module regression tests assert adapter-assigned ids skip redundant persistence while CLI validation remains blocked."
+        "Test signature dialog now records capture results and persist calls, CRUD fakes expose configurable signature id providers, and module regression tests assert adapter-assigned ids skip redundant persistence while CLI validation remains blocked.",
+        "2026-01-28: CFL dialog service XML docs now instruct modules on dispatcher usage, localization sourcing, and audit appenders so Golden Arrow flows capture selections even while CLI access is blocked."
       ]
     },
     {
@@ -243,7 +245,7 @@
     "2026-01-20: Accessibility Insights for Windows tooling could not be executed inside the Linux container; scheduled a Windows-hosted rerun to capture locale-sensitive tooltip/name coverage for ribbon tabs, dock panes, and module document views.",
     "2026-01-22: Localized MainWindow title, CFL/ElectronicSignature dialogs, and every module view grid/toolbar label via ShellStrings resx keys while wiring shared ToolTip/Automation metadata; dotnet restore/build remain blocked by the missing CLI.",
     "2026-01-23: Centralized module titles, status phrases, and combo-box option lists in ShellStrings with formatting helpers, updated B1FormDocumentViewModel plus derived modules to consume ILocalizationService, and refreshed unit tests with a deterministic localization stub while the dotnet CLI gap persists.",
-    "2026-01-24: Added LocalizationService regression tests that drive EN↔HR switches across ribbon/toolbars and module tree view-models, plus documented the operator language toggle workflow while dotnet restore/build/smoke remain blocked by the missing CLI.",
+    "2026-01-24: Added LocalizationService regression tests that drive EN\u2194HR switches across ribbon/toolbars and module tree view-models, plus documented the operator language toggle workflow while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-25: Added XML documentation to B1FormDocumentViewModel toolbar commands so audit/status semantics stay clear for downstream modules while dotnet CLI availability continues to block restore/build/smoke validation.",
     "2026-01-26: Documented ModuleRecord key/status/inspector metadata so Golden Arrow navigation and SAP B1 form-mode visuals stay aligned while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-27: ModuleRegistry XML documentation now maps module keys/titles/categories to Modules pane population, localization resource lookups, Golden Arrow automation ids, and SAP B1 toolbar/form-mode consumption while dotnet restore/build/smoke remain blocked by the missing CLI."
