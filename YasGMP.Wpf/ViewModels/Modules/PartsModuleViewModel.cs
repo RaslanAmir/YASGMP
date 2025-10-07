@@ -15,6 +15,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Handles spare part inventory within the WPF shell using SAP B1 form semantics.</summary>
+/// <remarks>
+/// Form Modes: Find filters parts, Add seeds <see cref="PartEditor.CreateEmpty"/>, View keeps the editor read-only for stock review, and Update enables edits plus attachment uploads and supplier refreshes.
+/// Audit & Logging: Persists via <see cref="IPartCrudService"/> behind mandatory e-signatures; attachment retention and audit trails are delegated to the workflow and CRUD services.
+/// Localization: Inline strings such as `"Parts & Stock"`, `"Stock health calculated"`, and status prompts remain until resource keys become available.
+/// Navigation: ModuleKey `Parts` anchors docking; CFL requests expose part pickers, and `ModuleRecord` entries carry supplier/warehouse identifiers so Golden Arrow navigation can pivot to related modules while status text updates the shell.
+/// </remarks>
 public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "Parts";

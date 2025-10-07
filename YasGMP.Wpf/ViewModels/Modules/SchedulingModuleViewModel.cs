@@ -16,6 +16,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Controls scheduled job definitions within the WPF shell using SAP B1 semantics.</summary>
+/// <remarks>
+/// Form Modes: Find surfaces job listings, Add seeds <see cref="ScheduledJobEditor.CreateEmpty"/>, View allows read-only runtime operations, and Update unlocks editing, attachment capture, and acknowledgment flows.
+/// Audit & Logging: Persists jobs through <see cref="IScheduledJobCrudService"/> with signature enforcement, logs execution/acknowledgement outcomes through domain services, and defers retention to the attachment workflow.
+/// Localization: Inline strings such as `"Scheduled Jobs"`, `"Execute job failed"`, and status prompts remain until module-specific resource keys land.
+/// Navigation: ModuleKey `Scheduling` registers the module; `ModuleRecord` entries include related module keys (e.g. Work Orders, Calibration) so Golden Arrow jumps locate targets, while status messages keep the shell informed about execution and attachment results.
+/// </remarks>
 public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "Scheduling";

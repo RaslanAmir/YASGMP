@@ -7,6 +7,13 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Surfaces administration settings in the WPF shell using the shared SAP B1 document pattern.</summary>
+/// <remarks>
+/// Form Modes: Supports Find/View for configuration search; Add/Update toggles exist for parity but persist actions are currently read-only.
+/// Audit & Logging: This module does not call into <see cref="AuditService"/> directly and instead defers to database-level history for any change tracking.
+/// Localization: Consumes inline strings such as `"Administration"` and inspector labels (e.g. `"Category"`, `"Value"`); no resource keys are wired yet.
+/// Navigation: Registers ModuleKey `Admin` with the shell so status strings populate the status bar and Golden Arrow or CFL navigation can route back to the settings list when other modules reference the key.
+/// </remarks>
 public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "Admin";

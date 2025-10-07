@@ -6,6 +6,13 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Provides a diagnostics placeholder module in the WPF shell using SAP B1 scaffolding.</summary>
+/// <remarks>
+/// Form Modes: Currently uses Find/View for static diagnostics stubs; Add/Update are present for parity pending live instrumentation.
+/// Audit & Logging: Emits no audit calls yet—once telemetry is wired the module will surface read-only health data fetched from shared services.
+/// Localization: Inline strings such as `"Diagnostics"`, `"Healthy"`, and inspector labels remain until RESX keys are created.
+/// Navigation: ModuleKey `Diagnostics` allows Golden Arrow jumps (e.g. to `Audit`) using the related module values supplied in design-time records, while status updates keep the shell informed during refresh.
+/// </remarks>
 public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "Diagnostics";

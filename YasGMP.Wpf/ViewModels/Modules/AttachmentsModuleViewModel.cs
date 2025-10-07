@@ -21,6 +21,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Manages database-backed attachments and their signatures within the WPF shell.</summary>
+/// <remarks>
+/// Form Modes: Find lists attachments with filtering, Add and Update enable staging uploads plus metadata edits, and View locks the grid for read-only inspection.
+/// Audit & Logging: Commits staged uploads only after capturing an electronic signature and records an entity-level audit entry per file via <see cref="AuditService.LogEntityAuditAsync"/>.
+/// Localization: Uses inline strings for captions and status text (e.g. `"Attachments"`, `"Upload"`, `"Staged uploads pending signature"`); resource keys will replace these literals once available.
+/// Navigation: ModuleKey `Attachments` registers the document with the shell; `ModuleRecord` entries populate related module keys so Golden Arrow launches entity-specific editors while status messages keep the ribbon informed.
+/// </remarks>
 public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 {
     public new const string ModuleKey = "Attachments";

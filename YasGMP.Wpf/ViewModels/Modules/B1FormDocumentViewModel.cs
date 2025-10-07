@@ -12,8 +12,14 @@ using YasGMP.Wpf.Services;
 namespace YasGMP.Wpf.ViewModels.Modules;
 
 /// <summary>
-/// Base document view-model that reproduces SAP Business One toolbar behaviour.
+/// Base document view-model that reproduces SAP Business One toolbar behaviour while coordinating shell navigation.
 /// </summary>
+/// <remarks>
+/// Form Modes: Implements SAP B1 Find/Add/View/Update flows, wiring `Mode`, `IsInEditMode`, and toolbar command enablement so derived modules inherit canonical behaviour.
+/// Audit & Logging: Surfaces `StatusMessage`, `ValidationMessages`, and `IsBusy` toggles that downstream modules use to raise audit/audit-trail notifications after saves; the base itself defers actual writes to the injected services.
+/// Localization: Currently emits inline toolbar captions (`"Find"`, `"Add"`, `"View"`, `"Update"`, `"Save"`, `"Cancel"`, `"Refresh"`) until RESX keys are plumbed; derived titles feed in localised module headers.
+/// Navigation: Captures the provided `ModuleKey` for registration with `IModuleNavigationService`, drives Golden Arrow routing via `GoldenArrowCommand`, and channels Choose-From-List dialogs through `ICflDialogService` while updating shell chrome status strings.
+/// </remarks>
 public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 {
     private readonly ICflDialogService _cflDialogService;

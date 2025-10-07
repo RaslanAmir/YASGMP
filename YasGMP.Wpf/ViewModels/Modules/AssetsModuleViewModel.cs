@@ -15,6 +15,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Coordinates asset master data management in the WPF shell with SAP B1 style tooling.</summary>
+/// <remarks>
+/// Form Modes: Find filters asset records via CFL search, Add seeds a fresh <see cref="AssetEditor"/> with normalized status, View keeps the editor read-only, and Update enables editing plus attachment workflows.
+/// Audit & Logging: Persists assets through <see cref="IMachineCrudService"/> with enforced e-signature capture and signature metadata persisted via <see cref="SignaturePersistenceHelper"/>; retention and audit hashing are delegated to the CRUD and attachment workflow services.
+/// Localization: Currently emits inline strings such as `"Assets"`, `"Select Asset"`, `"Filtered {Title} by"` and attachment status prompts pending RESX resource keys.
+/// Navigation: ModuleKey `Assets` anchors shell docking, `CreateCflRequestAsync` and `OnCflSelectionAsync` power Choose-From-List / Golden Arrow routing, and `StatusMessage` updates inform the ribbon status bar during navigation and saves.
+/// </remarks>
 public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "Assets";

@@ -16,6 +16,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Hosts change-control workflows inside the WPF shell with SAP B1 tooling.</summary>
+/// <remarks>
+/// Form Modes: Find filters change requests, Add seeds <see cref="ChangeControlEditor.CreateEmpty"/>, View keeps records read-only, and Update unlocks editing plus attachment/e-signature flows.
+/// Audit & Logging: Defers persistence (and corresponding audit hashing) to <see cref="IChangeControlCrudService"/> with mandatory electronic signatures before save and file retention via the attachment workflow.
+/// Localization: Currently relies on inline labels (`"Change Control"`, status prompts, error/status messages) pending resource keys.
+/// Navigation: ModuleKey `ChangeControl` registers the document, `CreateCflRequestAsync` powers CFL pickers, and status strings keep the shell status bar and Golden Arrow navigation aligned with change request transitions.
+/// </remarks>
 public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "ChangeControl";

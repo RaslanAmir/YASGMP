@@ -11,6 +11,13 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Exposes API audit trail records within the WPF shell using the shared SAP B1 document workflow.</summary>
+/// <remarks>
+/// Form Modes: Leverages Find to filter by API key/user/action, View to inspect entries, and keeps Add/Update available for parity even though the module is read-only.
+/// Audit & Logging: Operates exclusively in read-only mode by querying <see cref="AuditService"/>; no additional audit writes are produced from this view.
+/// Localization: Uses inline captions such as `"API Audit Trail"`, `"All"`, and loaded-status strings until the `Modules_ApiAudit_*` resource keys are introduced.
+/// Navigation: Publishes ModuleKey `ApiAudit` so the shell can dock the document, reuse status-bar messages (e.g. `"Loading API Audit Trail records..."`), and route Golden Arrow jumps when other modules surface related audit entries.
+/// </remarks>
 public partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "ApiAudit";

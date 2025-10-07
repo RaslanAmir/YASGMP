@@ -14,6 +14,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Runs work-order workflows in the WPF shell with SAP B1 style navigation.</summary>
+/// <remarks>
+/// Form Modes: Find filters the backlog (including CFL search), Add seeds <see cref="WorkOrderEditor.CreateEmpty"/>, View freezes the editor for read-only review, and Update enables editing, attachment uploads, and execution metadata entry.
+/// Audit & Logging: Persists via <see cref="IWorkOrderCrudService"/> under mandatory e-signatures and logs `CREATE`/`UPDATE` events through <see cref="AuditService"/> using <see cref="DataDrivenModuleDocumentViewModel.LogAuditAsync"/>.
+/// Localization: Relies on inline strings such as `"Work Orders"`, status prompts for signature capture, and attachment feedback; resource keys are pending.
+/// Navigation: ModuleKey `WorkOrders` anchors docking, while CFL overrides and related module keys link to assets/calibration records so Golden Arrow navigation and status messages stay synchronized across the shell.
+/// </remarks>
 public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "WorkOrders";

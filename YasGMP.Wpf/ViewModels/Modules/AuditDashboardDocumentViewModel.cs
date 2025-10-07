@@ -15,9 +15,13 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-/// <summary>
-/// WPF shell adapter that projects the MAUI audit dashboard onto the B1 form host.
-/// </summary>
+/// <summary>Projects the MAUI audit dashboard into the WPF shell while keeping SAP B1 semantics.</summary>
+/// <remarks>
+/// Form Modes: Primarily operates in Find/View modes—filter application mimics Find, while Add/Update remain disabled because the dashboard is read-only.
+/// Audit & Logging: Reads from <see cref="AuditService"/> and exports via <see cref="ExportService"/>; no additional audit entries are emitted by this adapter.
+/// Localization: Uses inline toolbar captions (`"Apply Filters"`, `"Export PDF"`, `"Export Excel"`) and status messages mirroring the MAUI view model; resource keys are yet to be mapped.
+/// Navigation: Publishes ModuleKey `AuditDashboard`, forwards status messages from the underlying dashboard to the shell, and maps Golden Arrow navigation through projected <see cref="ModuleRecord"/> links.
+/// </remarks>
 public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentViewModel
 {
     public new const string ModuleKey = "AuditDashboard";

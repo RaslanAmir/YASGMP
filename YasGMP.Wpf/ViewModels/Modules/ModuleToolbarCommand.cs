@@ -3,9 +3,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-/// <summary>
-/// Represents a toolbar command in the SAP B1 style command strip.
-/// </summary>
+/// <summary>Represents a SAP Business One style toolbar command bound to a module document.</summary>
+/// <remarks>
+/// Form Modes: Hosts the canonical Find/Add/View/Update/Save/Cancel/Refresh entries whose checked state mirrors the active form mode.
+/// Audit & Logging: Enables modules to gate command execution (for example, requiring attachments or signatures before `Save`) so audit trails remain intact.
+/// Localization: Caption strings are currently inline (e.g. `"Find"`, `"Add"`); future RESX keys should flow through the constructor.
+/// Navigation: Instances live inside each module's toolbar collection and inherit context from the owning module `ModuleKey`, keeping shell navigation cues and Golden Arrow routing in sync with button state.
+/// </remarks>
 public partial class ModuleToolbarCommand : ObservableObject
 {
     public ModuleToolbarCommand(string caption, ICommand command)

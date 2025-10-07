@@ -15,6 +15,13 @@ using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
+/// <summary>Manages supplier qualification data inside the WPF shell with SAP B1 conventions.</summary>
+/// <remarks>
+/// Form Modes: Find filters suppliers, Add seeds <see cref="SupplierEditor.CreateEmpty"/>, View keeps the record immutable for review, and Update enables edits, risk/status updates, and attachment capture.
+/// Audit & Logging: Persists through <see cref="ISupplierCrudService"/> with enforced e-signature capture and attachment retention; audit history is produced by the backend service.
+/// Localization: Inline strings such as `"Suppliers"`, `"Active"`, `"Blacklisted"`, and workflow status prompts will be replaced by localisation keys in a later pass.
+/// Navigation: ModuleKey `Suppliers` anchors docking and Golden Arrow routing (e.g. from parts or incidents), while `StatusMessage` updates share supplier save/search outcomes with the shell status bar.
+/// </remarks>
 public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     public new const string ModuleKey = "Suppliers";
