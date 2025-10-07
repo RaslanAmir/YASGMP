@@ -1887,4 +1887,130 @@
   <data name="Module.ExternalServicers.ToolTip.DigitalSignature" xml:space="preserve">
     <value>Digital signatures are captured via the e-signature workflow.</value>
   </data>
+  <data name="Shell.StatusBar.Container.ToolTip" xml:space="preserve">
+    <value>Prikazuje YasGMP metapodatke veze i sesije.</value>
+  </data>
+  <data name="Shell.StatusBar.Container.AutomationName" xml:space="preserve">
+    <value>Statusna traka ljuske</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Label" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Label.ToolTip" xml:space="preserve">
+    <value>Opisuje trenutačno stanje ljuske.</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka statusa</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje trenutačnu statusnu poruku ljuske.</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost statusa</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Label" xml:space="preserve">
+    <value>Aktivni modul:</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Label.ToolTip" xml:space="preserve">
+    <value>Označava koji modul je trenutačno u fokusu.</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka aktivnog modula</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje naziv aktivnog modula.</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost aktivnog modula</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Label" xml:space="preserve">
+    <value>Tvrtka:</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Label.ToolTip" xml:space="preserve">
+    <value>Prikazuje povezani kontekst tvrtke.</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka tvrtke</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje povezanu tvrtku.</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost tvrtke</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Label" xml:space="preserve">
+    <value>Okruženje:</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Label.ToolTip" xml:space="preserve">
+    <value>Prikazuje trenutačno radno okruženje.</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka okruženja</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje aktivno radno okruženje.</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost okruženja</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Label" xml:space="preserve">
+    <value>Poslužitelj:</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Label.ToolTip" xml:space="preserve">
+    <value>Identificira poslužitelja baze podataka.</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka poslužitelja</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje povezani poslužitelj baze podataka.</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost poslužitelja</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Label" xml:space="preserve">
+    <value>Baza podataka:</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Label.ToolTip" xml:space="preserve">
+    <value>Identificira korištenu bazu podataka.</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka baze podataka</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje naziv povezane baze podataka.</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost baze podataka</value>
+  </data>
+  <data name="Shell.StatusBar.User.Label" xml:space="preserve">
+    <value>Korisnik:</value>
+  </data>
+  <data name="Shell.StatusBar.User.Label.ToolTip" xml:space="preserve">
+    <value>Identificira prijavljenog korisnika.</value>
+  </data>
+  <data name="Shell.StatusBar.User.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka korisnika</value>
+  </data>
+  <data name="Shell.StatusBar.User.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje prijavljenog korisnika.</value>
+  </data>
+  <data name="Shell.StatusBar.User.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost korisnika</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Label" xml:space="preserve">
+    <value>UTC vrijeme:</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Label.ToolTip" xml:space="preserve">
+    <value>Prikazuje koordinirano univerzalno vrijeme.</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Label.AutomationName" xml:space="preserve">
+    <value>Oznaka UTC vremena</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Value.ToolTip" xml:space="preserve">
+    <value>Prikazuje trenutačno koordinirano univerzalno vrijeme.</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost UTC vremena</value>
+  </data>
 </root>

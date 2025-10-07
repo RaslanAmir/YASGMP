@@ -1884,4 +1884,130 @@
   <data name="Module.ExternalServicers.ToolTip.DigitalSignature" xml:space="preserve">
     <value>Digital signatures are captured via the e-signature workflow.</value>
   </data>
+  <data name="Shell.StatusBar.Container.ToolTip" xml:space="preserve">
+    <value>Displays YasGMP connection and session metadata.</value>
+  </data>
+  <data name="Shell.StatusBar.Container.AutomationName" xml:space="preserve">
+    <value>Shell status bar</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Label" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Label.ToolTip" xml:space="preserve">
+    <value>Describes the current shell operation status.</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Label.AutomationName" xml:space="preserve">
+    <value>Status label</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Value.ToolTip" xml:space="preserve">
+    <value>Displays the current shell status message.</value>
+  </data>
+  <data name="Shell.StatusBar.Status.Value.AutomationName" xml:space="preserve">
+    <value>Status value</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Label" xml:space="preserve">
+    <value>Active module:</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Label.ToolTip" xml:space="preserve">
+    <value>Indicates which module currently has focus.</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Label.AutomationName" xml:space="preserve">
+    <value>Active module label</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Value.ToolTip" xml:space="preserve">
+    <value>Displays the name of the active module.</value>
+  </data>
+  <data name="Shell.StatusBar.ActiveModule.Value.AutomationName" xml:space="preserve">
+    <value>Active module value</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Label" xml:space="preserve">
+    <value>Company:</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Label.ToolTip" xml:space="preserve">
+    <value>Shows the connected company context.</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Label.AutomationName" xml:space="preserve">
+    <value>Company label</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Value.ToolTip" xml:space="preserve">
+    <value>Displays the connected company.</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Value.AutomationName" xml:space="preserve">
+    <value>Company value</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Label" xml:space="preserve">
+    <value>Environment:</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Label.ToolTip" xml:space="preserve">
+    <value>Shows the current runtime environment.</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Label.AutomationName" xml:space="preserve">
+    <value>Environment label</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Value.ToolTip" xml:space="preserve">
+    <value>Displays the active runtime environment.</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Value.AutomationName" xml:space="preserve">
+    <value>Environment value</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Label" xml:space="preserve">
+    <value>Server:</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Label.ToolTip" xml:space="preserve">
+    <value>Identifies the database server host.</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Label.AutomationName" xml:space="preserve">
+    <value>Server label</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Value.ToolTip" xml:space="preserve">
+    <value>Displays the connected database server.</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Value.AutomationName" xml:space="preserve">
+    <value>Server value</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Label" xml:space="preserve">
+    <value>Database:</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Label.ToolTip" xml:space="preserve">
+    <value>Identifies the database name in use.</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Label.AutomationName" xml:space="preserve">
+    <value>Database label</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Value.ToolTip" xml:space="preserve">
+    <value>Displays the connected database name.</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Value.AutomationName" xml:space="preserve">
+    <value>Database value</value>
+  </data>
+  <data name="Shell.StatusBar.User.Label" xml:space="preserve">
+    <value>User:</value>
+  </data>
+  <data name="Shell.StatusBar.User.Label.ToolTip" xml:space="preserve">
+    <value>Identifies the authenticated user.</value>
+  </data>
+  <data name="Shell.StatusBar.User.Label.AutomationName" xml:space="preserve">
+    <value>User label</value>
+  </data>
+  <data name="Shell.StatusBar.User.Value.ToolTip" xml:space="preserve">
+    <value>Displays the authenticated user.</value>
+  </data>
+  <data name="Shell.StatusBar.User.Value.AutomationName" xml:space="preserve">
+    <value>User value</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Label" xml:space="preserve">
+    <value>UTC time:</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Label.ToolTip" xml:space="preserve">
+    <value>Shows the coordinated universal time.</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Label.AutomationName" xml:space="preserve">
+    <value>UTC time label</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Value.ToolTip" xml:space="preserve">
+    <value>Displays the current coordinated universal time.</value>
+  </data>
+  <data name="Shell.StatusBar.UtcTime.Value.AutomationName" xml:space="preserve">
+    <value>UTC time value</value>
+  </data>
 </root>
