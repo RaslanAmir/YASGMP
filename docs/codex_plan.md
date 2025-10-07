@@ -54,6 +54,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2026-02-05: Shell layout reset now clears the persisted snapshot via DockLayoutPersistenceService.ResetAsync before saving the default layout so the database state stays aligned with the restored UI; dotnet CLI remains unavailable for restore/build validation in this container.
 - 2026-02-03: Added DatabaseService layout persistence extensions so WPF shell sessions can round-trip ribbon/dock arrangements even while .NET tooling remains unavailable in the container; tests remain blocked pending SDK installation.
 - 2026-02-04: WPF DockLayoutPersistenceService now delegates load/save/reset to the shared DatabaseService layout helpers so both shells share the persistence path while dotnet restore/build remain blocked by the missing CLI.
 - 2025-10-07: Refreshed CRUD service adapter/interface XML documentation to spell out WPF module → adapter → MAUI service flow, dispatcher marshalling, localization responsibilities, and shared audit plumbing; `dotnet restore`/`dotnet build`/smoke reruns still fail because the `dotnet` CLI is unavailable in this container.
