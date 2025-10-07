@@ -81,6 +81,7 @@
         "Audit logging now includes signature id/hash metadata with graceful fallbacks and unit coverage for both modern and legacy schemas.",
         "DataDrivenModuleDocumentViewModel exposes a shared AuditService hook and Work Orders now logs CREATE/UPDATE audit entries with signature, user, IP, device, and session context immediately after successful persistence.",
         "WPF test harness now uses a RecordingAuditService spy so Work Orders save and attachment flows assert audit payloads with signer context while the dotnet CLI remains unavailable.",
+        "2025-10-07: Removed the unused DatabaseOptions singleton and now rely on the shared DatabaseService registration so DockLayoutPersistenceService keeps using the same instance for layout persistence while dotnet tooling remains unavailable.",
         "2025-10-07: Directory.Build.props now promotes CS1591 to warnings-as-errors so missing XML docs fail the build once the dotnet CLI is available; the latest `dotnet build` attempt still exits with 'command not found'.",
         "Module save flows now rehydrate adapter-provided signature ids/hashes before optional persistence, skipping redundant dialog writes when a signature already exists while preserving current UX messaging.",
         "ValidationService now keeps adapter-supplied validation signature hashes intact on create/update and only regenerates when explicitly forced (e.g., MarkExecuted), with new unit coverage confirming the stored hash matches the adapter payload.",

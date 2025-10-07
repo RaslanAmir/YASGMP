@@ -37,7 +37,6 @@ namespace YasGMP.Wpf
                     services.AddSingleton(ctx.Configuration);
 
                     var connectionString = ResolveConnectionString(ctx.Configuration);
-                    services.AddSingleton(new DatabaseOptions(connectionString));
 
                     services.AddYasGmpCoreServices(core =>
                     {
