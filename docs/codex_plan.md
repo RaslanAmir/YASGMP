@@ -53,6 +53,7 @@
 
 ## Notes
 - 2026-01-28: Expanded CFL dialog service XML documentation so Golden Arrow callers understand dispatcher invocation, owner wiring, localization sourcing, and how to feed selections into the audit appenders while dotnet restore/build/smoke remain blocked by the missing CLI.
+- 2026-01-29: Expanded shell interaction/navigation service XML docs covering ribbon & Golden Arrow usage patterns, dispatcher marshalling, and how <code>IModuleRegistry</code> metadata drives inspector/audit wiring while dotnet restore/build/smoke remain blocked by the missing CLI.
 - 2026-01-16: Added shared localization dictionaries for ribbon, backstage, and dock pane metadata with dynamic resources and automation identifiers so EN↔HR switches update headers, tooltips, and accessibility names; dotnet restore/build/smoke remain blocked by the missing CLI in the container.
 - 2026-01-17: Localized dashboard toolbar toggles/buttons, search, and data grid columns plus module tree categories/nodes via the shared localization service, adding automation ids/names for Accessibility Insights/FlaUI; dotnet restore/build/smoke remain blocked pending CLI availability.
 - 2026-01-18: Extended module tree templates so each node's header now binds tooltip and automation metadata directly from localization-aware view-model properties, keeping screen reader output aligned after language switches; `dotnet restore`/`dotnet build`/smoke remain blocked by the missing CLI.
