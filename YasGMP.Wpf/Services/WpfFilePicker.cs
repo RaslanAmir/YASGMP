@@ -7,7 +7,20 @@ using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
 {
-    /// <summary>WPF implementation of <see cref="IFilePicker"/> using <see cref="OpenFileDialog"/>.</summary>
+    /// <summary>
+    /// Wraps the WPF <see cref="OpenFileDialog"/> so MAUI <see cref="IFilePicker"/> consumers keep
+    /// baseline file-open parity when running inside the desktop shell.
+    /// </summary>
+    /// <remarks>
+    /// <para><strong>Feature parity:</strong> mirrors MAUI's multi-select behaviour and file type
+    /// filtering, but does not implement folder picking or save dialogs yet. Consumers must branch or
+    /// provide alternative UX for those workflows.</para>
+    /// <para><strong>Known gaps:</strong> MIME types cannot be inferred from Windows filters and default
+    /// to <c>application/octet-stream</c>. Folder prompts, file writing, and drag/drop will require
+    /// future shell services.</para>
+    /// <para><strong>Localization:</strong> callers own dialog titles and filter captions; they should be
+    /// sourced from the shared localization dictionaries so WPF and MAUI stay aligned.</para>
+    /// </remarks>
     public sealed class WpfFilePicker : IFilePicker
     {
         public Task<IReadOnlyList<PickedFile>> PickFilesAsync(FilePickerRequest request, CancellationToken cancellationToken = default)
