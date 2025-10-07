@@ -11,6 +11,7 @@
       "2025-09-27: dotnet --info/dotnet restore/dotnet build all continue to fail with 'command not found'.",
       "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
       "2025-10-06: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
+      "2025-10-07: dotnet restore/build retried for yasgmp.sln and platform targets; CLI remains unavailable so every command exits with 'command not found'.",
       "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked.",
       "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container.",
       "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container.",

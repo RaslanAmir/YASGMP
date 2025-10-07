@@ -53,6 +53,9 @@ namespace YasGMP.Models
         [Column("details")]
         public string? Details { get; set; }
 
+        /// <summary>
+        /// Gets or sets the role.
+        /// </summary>
         [ForeignKey(nameof(RoleId))]
         public virtual Role? Role { get; set; }
     }

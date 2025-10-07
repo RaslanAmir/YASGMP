@@ -5,10 +5,19 @@ using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the Diagnostics Module View Model.
+/// </summary>
 
 public sealed class DiagnosticsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Diagnostics";
+    /// <summary>
+    /// Initializes a new instance of the DiagnosticsModuleViewModel class.
+    /// </summary>
 
     public DiagnosticsModuleViewModel(
         DatabaseService databaseService,

@@ -131,6 +131,9 @@ namespace YasGMP.Services
         }
 
         // Overload matching MachineViewModel invocation order (rows, actorUserId, ip, device, session)
+        /// <summary>
+        /// Executes the export machines from view async operation.
+        /// </summary>
         public static Task<string> ExportMachinesFromViewAsync(
             this DatabaseService db,
             IEnumerable<Machine> rows,
@@ -140,6 +143,9 @@ namespace YasGMP.Services
             string? sessionId,
             CancellationToken token = default)
             => db.ExportMachinesFromViewAsync(rows, ip, deviceInfo, sessionId, format: "zip", actorUserId: actorUserId, token: token);
+        /// <summary>
+        /// Executes the log machine audit async operation.
+        /// </summary>
 
         public static Task LogMachineAuditAsync(
             this DatabaseService db,

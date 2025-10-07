@@ -9,6 +9,9 @@ namespace YasGMP.Wpf.ViewModels
     public partial class ModuleTreeViewModel : AnchorableViewModel
     {
         private readonly ILocalizationService _localization;
+        /// <summary>
+        /// Initializes a new instance of the ModuleTreeViewModel class.
+        /// </summary>
 
         public ModuleTreeViewModel(ILocalizationService localization)
         {
@@ -63,6 +66,9 @@ namespace YasGMP.Wpf.ViewModels
         private readonly string? _toolTipKey;
         private readonly string? _automationNameKey;
         private readonly string? _automationIdKey;
+        /// <summary>
+        /// Initializes a new instance of the ModuleNodeViewModel class.
+        /// </summary>
 
         public ModuleNodeViewModel(
             ILocalizationService localization,
@@ -92,8 +98,14 @@ namespace YasGMP.Wpf.ViewModels
 
         [ObservableProperty]
         private string? _automationId;
+        /// <summary>
+        /// Gets or sets the children.
+        /// </summary>
 
         public ObservableCollection<ModuleNodeViewModel> Children { get; }
+        /// <summary>
+        /// Executes the refresh localization operation.
+        /// </summary>
 
         public void RefreshLocalization()
         {
@@ -102,6 +114,9 @@ namespace YasGMP.Wpf.ViewModels
             AutomationName = _localization.GetString(_automationNameKey ?? _titleKey);
             AutomationId = _automationIdKey is null ? AutomationName : _localization.GetString(_automationIdKey);
         }
+        /// <summary>
+        /// Executes the create default tree operation.
+        /// </summary>
 
         public static ObservableCollection<ModuleNodeViewModel> CreateDefaultTree(ILocalizationService localization)
         {

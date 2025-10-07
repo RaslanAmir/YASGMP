@@ -13,6 +13,9 @@ using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// Represents the database service audit query extensions value.
+    /// </summary>
     public static class DatabaseServiceAuditQueryExtensions
     {
         /// <summary>

@@ -20,6 +20,9 @@ namespace YasGMP.Wpf.Services;
 /// </summary>
 public sealed class DebugSmokeTestService
 {
+    /// <summary>
+    /// Represents the environment toggle name value.
+    /// </summary>
     public const string EnvironmentToggleName = "YASGMP_SMOKE";
 
     private static readonly string[] EnabledTokens =
@@ -47,6 +50,9 @@ public sealed class DebugSmokeTestService
     private readonly IModuleRegistry _moduleRegistry;
 
     private int _isRunning;
+    /// <summary>
+    /// Initializes a new instance of the DebugSmokeTestService class.
+    /// </summary>
 
     public DebugSmokeTestService(
         IUserSession userSession,
@@ -433,8 +439,14 @@ public sealed class DebugSmokeTestService
 /// <summary>Result payload returned by <see cref="DebugSmokeTestService"/>.</summary>
 public sealed record DebugSmokeTestResult(bool WasRun, bool Passed, string Summary, string? LogPath, IReadOnlyList<DebugSmokeTestStep> Steps)
 {
+    /// <summary>
+    /// Executes the skipped operation.
+    /// </summary>
     public static DebugSmokeTestResult Skipped(string summary)
         => new(false, false, summary, null, Array.Empty<DebugSmokeTestStep>());
+    /// <summary>
+    /// Executes the completed operation.
+    /// </summary>
 
     public static DebugSmokeTestResult Completed(bool passed, string summary, string? logPath, IReadOnlyList<DebugSmokeTestStep> steps)
         => new(true, passed, summary, logPath, steps);

@@ -5,6 +5,9 @@ using MySqlConnector;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// Represents the database service value.
+    /// </summary>
     public sealed partial class DatabaseService
     {
         /// <summary>

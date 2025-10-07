@@ -51,6 +51,9 @@ namespace YasGMP.Models
 
         /// <summary>Korisnik koji je dodao/upload-ao prilog (FK na User).</summary>
         public int UploadedById { get; set; }
+        /// <summary>
+        /// Gets or sets the uploaded by.
+        /// </summary>
         public User? UploadedBy { get; set; }
 
         /// <summary>Vrijeme uploada (audit, inspekcija).</summary>
@@ -61,6 +64,9 @@ namespace YasGMP.Models
 
         /// <summary>ID korisnika koji je odobrio (FK).</summary>
         public int? ApprovedById { get; set; }
+        /// <summary>
+        /// Gets or sets the approved by.
+        /// </summary>
         public User? ApprovedBy { get; set; }
 
         /// <summary>Datum/vrijeme odobravanja (audit).</summary>
@@ -100,6 +106,9 @@ namespace YasGMP.Models
 
         /// <summary>ID korisnika koji je zadnji mijenjao attachment.</summary>
         public int? LastModifiedById { get; set; }
+        /// <summary>
+        /// Gets or sets the last modified by.
+        /// </summary>
         public User? LastModifiedBy { get; set; }
 
         // =========== COMPUTED PROPERTIES & HELPERS ===========

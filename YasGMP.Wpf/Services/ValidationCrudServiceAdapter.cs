@@ -21,14 +21,23 @@ namespace YasGMP.Wpf.Services;
 public sealed class ValidationCrudServiceAdapter : IValidationCrudService
 {
     private readonly ValidationService _inner;
+    /// <summary>
+    /// Initializes a new instance of the ValidationCrudServiceAdapter class.
+    /// </summary>
 
     public ValidationCrudServiceAdapter(ValidationService inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }
+    /// <summary>
+    /// Executes the get all async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<Validation>> GetAllAsync()
         => await _inner.GetAllAsync().ConfigureAwait(false);
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<Validation?> TryGetByIdAsync(int id)
     {
@@ -41,6 +50,9 @@ public sealed class ValidationCrudServiceAdapter : IValidationCrudService
             return null;
         }
     }
+    /// <summary>
+    /// Executes the create async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(Validation validation, ValidationCrudContext context)
     {
@@ -53,6 +65,9 @@ public sealed class ValidationCrudServiceAdapter : IValidationCrudService
         await _inner.CreateAsync(validation, context.UserId).ConfigureAwait(false);
         return new CrudSaveResult(validation.Id, CreateMetadata(context, signature));
     }
+    /// <summary>
+    /// Executes the update async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(Validation validation, ValidationCrudContext context)
     {
@@ -65,6 +80,9 @@ public sealed class ValidationCrudServiceAdapter : IValidationCrudService
         await _inner.UpdateAsync(validation, context.UserId).ConfigureAwait(false);
         return new CrudSaveResult(validation.Id, CreateMetadata(context, signature));
     }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(Validation validation)
     {

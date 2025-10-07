@@ -13,9 +13,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the work orders module view model value.
+/// </summary>
 
 public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "WorkOrders";
 
     private readonly AuditService _auditService;
@@ -28,6 +34,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private WorkOrder? _loadedEntity;
     private WorkOrderEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the WorkOrdersModuleViewModel class.
+    /// </summary>
 
     public WorkOrdersModuleViewModel(
         DatabaseService databaseService,
@@ -58,6 +67,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -569,6 +581,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             AssetsModuleViewModel.ModuleKey,
             workOrder.MachineId);
     }
+    /// <summary>
+    /// Represents the work order editor value.
+    /// </summary>
 
     public sealed partial class WorkOrderEditor : ObservableObject
     {
@@ -622,8 +637,14 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         [ObservableProperty]
         private string _notes = string.Empty;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static WorkOrderEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static WorkOrderEditor CreateForNew(IAuthContext authContext)
         {
@@ -641,6 +662,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 AssignedToId = userId
             };
         }
+        /// <summary>
+        /// Executes the from entity operation.
+        /// </summary>
 
         public static WorkOrderEditor FromEntity(WorkOrder entity)
         {
@@ -665,6 +689,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 Notes = entity.Notes
             };
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public WorkOrderEditor Clone()
             => new()
@@ -687,6 +714,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 Result = Result,
                 Notes = Notes
             };
+        /// <summary>
+        /// Executes the to entity operation.
+        /// </summary>
 
         public WorkOrder ToEntity(WorkOrder? existing)
         {

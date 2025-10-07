@@ -45,7 +45,13 @@ namespace YasGMP.Services
 
         /// <summary>Global fallbacks for components created outside DI.</summary>
         public static DiagnosticContext? GlobalDiagnosticContext { get; set; }
+        /// <summary>
+        /// Gets or sets the global trace.
+        /// </summary>
         public static ITrace? GlobalTrace { get; set; }
+        /// <summary>
+        /// Gets or sets the global configuration.
+        /// </summary>
         public static IConfiguration? GlobalConfiguration { get; set; }
 
         private string? TryGetShadowConnFromConfig()

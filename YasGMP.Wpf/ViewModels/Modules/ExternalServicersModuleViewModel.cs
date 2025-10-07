@@ -12,9 +12,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the external servicers module view model value.
+/// </summary>
 
 public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "ExternalServicers";
 
     private readonly IExternalServicerCrudService _servicerService;
@@ -26,6 +32,9 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
     private ExternalServicerEditor? _snapshot;
     private bool _suppressDirtyNotifications;
     private int? _lastSavedServicerId;
+    /// <summary>
+    /// Initializes a new instance of the ExternalServicersModuleViewModel class.
+    /// </summary>
 
     public ExternalServicersModuleViewModel(
         IExternalServicerCrudService servicerService,
@@ -505,6 +514,9 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             relatedParameter);
     }
 }
+/// <summary>
+/// Represents the external servicer editor value.
+/// </summary>
 
 public sealed partial class ExternalServicerEditor : ObservableObject
 {
@@ -555,8 +567,14 @@ public sealed partial class ExternalServicerEditor : ObservableObject
 
     [ObservableProperty]
     private string _certificateFiles = string.Empty;
+    /// <summary>
+    /// Executes the create empty operation.
+    /// </summary>
 
     public static ExternalServicerEditor CreateEmpty() => new();
+    /// <summary>
+    /// Executes the create for new operation.
+    /// </summary>
 
     public static ExternalServicerEditor CreateForNew()
         => new()
@@ -564,6 +582,9 @@ public sealed partial class ExternalServicerEditor : ObservableObject
             Status = "Active",
             CooperationStart = DateTime.UtcNow.Date
         };
+    /// <summary>
+    /// Executes the from servicer operation.
+    /// </summary>
 
     public static ExternalServicerEditor FromServicer(ExternalServicer servicer)
         => new()
@@ -589,6 +610,9 @@ public sealed partial class ExternalServicerEditor : ObservableObject
                 ? string.Empty
                 : string.Join(Environment.NewLine, servicer.CertificateFiles)
         };
+    /// <summary>
+    /// Executes the clone operation.
+    /// </summary>
 
     public ExternalServicerEditor Clone()
         => new()
@@ -610,6 +634,9 @@ public sealed partial class ExternalServicerEditor : ObservableObject
             DigitalSignature = DigitalSignature,
             CertificateFiles = CertificateFiles
         };
+    /// <summary>
+    /// Executes the to servicer operation.
+    /// </summary>
 
     public ExternalServicer ToServicer(ExternalServicer? existing)
     {

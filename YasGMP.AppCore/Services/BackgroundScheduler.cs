@@ -24,6 +24,9 @@ namespace YasGMP.Services
         private readonly Timer _timer;
         private bool _running;
         private readonly AttachmentRetentionEnforcer _retention;
+        /// <summary>
+        /// Initializes a new instance of the BackgroundScheduler class.
+        /// </summary>
 
         public BackgroundScheduler(DatabaseService db)
         {
@@ -217,6 +220,9 @@ namespace YasGMP.Services
         private static int ToInt(DataRow r, string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
         private static int? ToIntN(DataRow r, string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
         private static DateTime? ToDateN(DataRow r, string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
+        /// <summary>
+        /// Executes the dispose operation.
+        /// </summary>
 
         public void Dispose()
         {

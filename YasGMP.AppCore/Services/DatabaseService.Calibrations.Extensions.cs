@@ -19,6 +19,9 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceCalibrationsExtensions
     {
+        /// <summary>
+        /// Executes the get all calibrations async operation.
+        /// </summary>
         public static async Task<List<Calibration>> GetAllCalibrationsAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sqlPreferred = @"SELECT
@@ -50,6 +53,9 @@ ORDER BY calibration_date DESC, id DESC";
             foreach (DataRow r in dt.Rows) list.Add(Parse(r));
             return list;
         }
+        /// <summary>
+        /// Executes the get calibration by id async operation.
+        /// </summary>
 
         public static async Task<Calibration?> GetCalibrationByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -78,6 +84,9 @@ FROM calibrations WHERE id=@id LIMIT 1";
             }
             return dt.Rows.Count == 1 ? Parse(dt.Rows[0]) : null;
         }
+        /// <summary>
+        /// Executes the get calibrations for component async operation.
+        /// </summary>
 
         public static async Task<List<Calibration>> GetCalibrationsForComponentAsync(this DatabaseService db, int componentId, CancellationToken token = default)
         {
@@ -108,6 +117,9 @@ FROM calibrations WHERE component_id=@cid ORDER BY calibration_date DESC, id DES
             foreach (DataRow r in dt.Rows) list.Add(Parse(r));
             return list;
         }
+        /// <summary>
+        /// Executes the get calibrations by supplier async operation.
+        /// </summary>
 
         public static async Task<List<Calibration>> GetCalibrationsBySupplierAsync(this DatabaseService db, int supplierId, CancellationToken token = default)
         {
@@ -138,6 +150,9 @@ FROM calibrations WHERE supplier_id=@sid ORDER BY calibration_date DESC, id DESC
             foreach (DataRow r in dt.Rows) list.Add(Parse(r));
             return list;
         }
+        /// <summary>
+        /// Executes the get calibrations by date range async operation.
+        /// </summary>
 
         public static async Task<List<Calibration>> GetCalibrationsByDateRangeAsync(this DatabaseService db, DateTime from, DateTime to, CancellationToken token = default)
         {
@@ -169,6 +184,9 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
             foreach (DataRow r in dt.Rows) list.Add(Parse(r));
             return list;
         }
+        /// <summary>
+        /// Executes the insert or update calibration async operation.
+        /// </summary>
 
         public static async Task<int> InsertOrUpdateCalibrationAsync(this DatabaseService db, Calibration c, bool update, int actorUserId, string ip, string device, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
@@ -282,8 +300,14 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
         }
 
         // Overload without device parameter (back-compat with callers)
+        /// <summary>
+        /// Executes the insert or update calibration async operation.
+        /// </summary>
         public static Task<int> InsertOrUpdateCalibrationAsync(this DatabaseService db, Calibration c, bool update, int actorUserId, string ip, CancellationToken token = default)
             => db.InsertOrUpdateCalibrationAsync(c, update, actorUserId, ip, device: string.Empty, signatureMetadata: null, token);
+        /// <summary>
+        /// Executes the delete calibration async operation.
+        /// </summary>
 
         public static async Task DeleteCalibrationAsync(this DatabaseService db, int id, int actorUserId, string ip, string device, CancellationToken token = default)
         {
@@ -292,6 +316,9 @@ FROM calibrations WHERE calibration_date BETWEEN @f AND @t ORDER BY calibration_
         }
 
         // Overload without device (back-compat)
+        /// <summary>
+        /// Executes the delete calibration async operation.
+        /// </summary>
         public static Task DeleteCalibrationAsync(this DatabaseService db, int id, int actorUserId, string ip, CancellationToken token = default)
             => db.DeleteCalibrationAsync(id, actorUserId, ip, device: string.Empty, token);
 

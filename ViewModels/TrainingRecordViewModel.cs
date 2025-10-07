@@ -132,14 +132,38 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
+        /// <summary>
+        /// Gets or sets the load training records command.
+        /// </summary>
 
         public ICommand LoadTrainingRecordsCommand { get; }
+        /// <summary>
+        /// Gets or sets the initiate training record command.
+        /// </summary>
         public ICommand InitiateTrainingRecordCommand { get; }
+        /// <summary>
+        /// Gets or sets the assign training record command.
+        /// </summary>
         public ICommand AssignTrainingRecordCommand { get; }
+        /// <summary>
+        /// Gets or sets the approve training record command.
+        /// </summary>
         public ICommand ApproveTrainingRecordCommand { get; }
+        /// <summary>
+        /// Gets or sets the complete training record command.
+        /// </summary>
         public ICommand CompleteTrainingRecordCommand { get; }
+        /// <summary>
+        /// Gets or sets the close training record command.
+        /// </summary>
         public ICommand CloseTrainingRecordCommand { get; }
+        /// <summary>
+        /// Gets or sets the export training records command.
+        /// </summary>
         public ICommand ExportTrainingRecordsCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

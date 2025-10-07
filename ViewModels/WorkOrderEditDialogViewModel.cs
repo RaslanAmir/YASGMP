@@ -52,59 +52,89 @@ namespace YasGMP.ViewModels
         public ObservableCollection<Incident> Incidents { get; set; } = new();
 
         // Bound editable fields (null-safe)
+        /// <summary>
+        /// Represents the type value.
+        /// </summary>
         public string Type
         {
             get => WorkOrder.Type ?? string.Empty;
             set { WorkOrder.Type = value ?? string.Empty; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the priority value.
+        /// </summary>
 
         public string Priority
         {
             get => WorkOrder.Priority ?? string.Empty;
             set { WorkOrder.Priority = value ?? string.Empty; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the status value.
+        /// </summary>
 
         public string Status
         {
             get => WorkOrder.Status ?? string.Empty;
             set { WorkOrder.Status = value ?? string.Empty; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the selected machine value.
+        /// </summary>
 
         public Machine? SelectedMachine
         {
             get => Machines?.FirstOrDefault(m => m.Id == WorkOrder.MachineId);
             set { WorkOrder.MachineId = value?.Id ?? 0; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the selected user value.
+        /// </summary>
 
         public User? SelectedUser
         {
             get => Users?.FirstOrDefault(u => u.Id == WorkOrder.AssignedToId);
             set { WorkOrder.AssignedToId = value?.Id ?? 0; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the selected capa case value.
+        /// </summary>
 
         public CapaCase? SelectedCapaCase
         {
             get => CapaCases?.FirstOrDefault(c => c.Id == WorkOrder.CapaCaseId);
             set { WorkOrder.CapaCaseId = value?.Id ?? 0; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the selected incident value.
+        /// </summary>
 
         public Incident? SelectedIncident
         {
             get => Incidents?.FirstOrDefault(i => i.Id == WorkOrder.IncidentId);
             set { WorkOrder.IncidentId = value?.Id ?? 0; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the task description value.
+        /// </summary>
 
         public string TaskDescription
         {
             get => WorkOrder.TaskDescription ?? string.Empty;
             set { WorkOrder.TaskDescription = value ?? string.Empty; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the date open value.
+        /// </summary>
 
         public DateTime DateOpen
         {
             get => WorkOrder.DateOpen;
             set { WorkOrder.DateOpen = value; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the date close value.
+        /// </summary>
 
         public DateTime? DateClose
         {
@@ -114,6 +144,9 @@ namespace YasGMP.ViewModels
 
         /// <summary>Audit note — required by GMP for every edit.</summary>
         private string _auditNote = string.Empty;
+        /// <summary>
+        /// Represents the audit note value.
+        /// </summary>
         public string AuditNote
         {
             get => _auditNote;
@@ -122,7 +155,13 @@ namespace YasGMP.ViewModels
 
         /// <summary>Forensics / digital signature display (readonly, auto-filled).</summary>
         public string? DigitalSignature => WorkOrder.DigitalSignature;
+        /// <summary>
+        /// Gets or sets the device info.
+        /// </summary>
         public string? DeviceInfo => WorkOrder.DeviceInfo;
+        /// <summary>
+        /// Gets or sets the ip address.
+        /// </summary>
         public string? IpAddress => WorkOrder.SourceIp;
 
         /// <summary>Dialog title, context-sensitive.</summary>
@@ -131,12 +170,30 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Advanced Collections ===
+        /// <summary>
+        /// Gets or sets the photos.
+        /// </summary>
 
         public ObservableCollection<Photo> Photos { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the used parts.
+        /// </summary>
         public ObservableCollection<WorkOrderPart> UsedParts { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the comments.
+        /// </summary>
         public ObservableCollection<WorkOrderComment> Comments { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the status timeline.
+        /// </summary>
         public ObservableCollection<WorkOrderStatusLog> StatusTimeline { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the signatures.
+        /// </summary>
         public ObservableCollection<WorkOrderSignature> Signatures { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the audit trail.
+        /// </summary>
         public ObservableCollection<WorkOrderAudit> AuditTrail { get; set; } = new();
 
         #endregion
@@ -144,18 +201,33 @@ namespace YasGMP.ViewModels
         #region === State ===
 
         private bool _isBusy;
+        /// <summary>
+        /// Gets or sets the is busy.
+        /// </summary>
         public bool IsBusy { get => _isBusy; set { _isBusy = value; OnPropertyChanged(); } }
 
         private string? _statusMessage = null;
+        /// <summary>
+        /// Gets or sets the status message.
+        /// </summary>
         public string? StatusMessage { get => _statusMessage; set { _statusMessage = value; OnPropertyChanged(); } }
+        /// <summary>
+        /// Executes the has error operation.
+        /// </summary>
 
         public bool HasError => !string.IsNullOrWhiteSpace(StatusMessage);
 
         #endregion
 
         #region === Commands ===
+        /// <summary>
+        /// Gets or sets the save command.
+        /// </summary>
 
         public ICommand SaveCommand { get; }
+        /// <summary>
+        /// Gets or sets the cancel command.
+        /// </summary>
         public ICommand CancelCommand { get; }
 
         #endregion
@@ -276,6 +348,9 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === INotifyPropertyChanged ===
+        /// <summary>
+        /// Occurs when property changed event handler is raised.
+        /// </summary>
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

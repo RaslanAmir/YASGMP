@@ -23,12 +23,24 @@ public partial class ModuleToolbarCommand : ObservableObject
     private readonly string? _toolTipKey;
     private readonly string? _automationNameKey;
     private readonly string? _automationIdKey;
+    /// <summary>
+    /// Gets or sets the caption key.
+    /// </summary>
 
     public string CaptionKey => _captionKey;
+    /// <summary>
+    /// Gets or sets the tool tip key.
+    /// </summary>
 
     public string? ToolTipKey => _toolTipKey;
+    /// <summary>
+    /// Gets or sets the automation name key.
+    /// </summary>
 
     public string? AutomationNameKey => _automationNameKey;
+    /// <summary>
+    /// Gets or sets the automation id key.
+    /// </summary>
 
     public string? AutomationIdKey => _automationIdKey;
 

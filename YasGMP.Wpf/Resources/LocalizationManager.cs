@@ -24,12 +24,21 @@ internal static class LocalizationManager
 
     private static string _currentLanguage = DefaultLanguage;
     private static CultureInfo _currentCulture = CultureMap[DefaultLanguage];
+    /// <summary>
+    /// Occurs when event handler is raised.
+    /// </summary>
 
     public static event EventHandler? LanguageChanged;
+    /// <summary>
+    /// Gets or sets the current language.
+    /// </summary>
 
     public static string CurrentLanguage => _currentLanguage;
 
     static LocalizationManager() => ApplyCulture(DefaultLanguage);
+    /// <summary>
+    /// Executes the register operation.
+    /// </summary>
 
     public static void Register(LocalizedResourceDictionary dictionary)
     {
@@ -40,6 +49,9 @@ internal static class LocalizationManager
 
         dictionary.UpdateResources(ResourceManager, _currentCulture);
     }
+    /// <summary>
+    /// Executes the set language operation.
+    /// </summary>
 
     public static void SetLanguage(string language)
     {
@@ -57,6 +69,9 @@ internal static class LocalizationManager
             LanguageChanged?.Invoke(null, EventArgs.Empty);
         }
     }
+    /// <summary>
+    /// Executes the get string operation.
+    /// </summary>
 
     public static string GetString(string key)
     {

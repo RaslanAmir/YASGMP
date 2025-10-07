@@ -21,11 +21,17 @@ namespace YasGMP.Wpf.Services;
 public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
 {
     private readonly WorkOrderService _service;
+    /// <summary>
+    /// Initializes a new instance of the WorkOrderCrudServiceAdapter class.
+    /// </summary>
 
     public WorkOrderCrudServiceAdapter(WorkOrderService service)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<WorkOrder?> TryGetByIdAsync(int id)
     {
@@ -38,6 +44,9 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             return null;
         }
     }
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
@@ -56,6 +65,9 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             workOrder.DigitalSignature = signature;
             return new CrudSaveResult(workOrder.Id, metadata);
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
@@ -74,6 +86,9 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             workOrder.DigitalSignature = signature;
             return new CrudSaveResult(workOrder.Id, metadata);
         }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(WorkOrder workOrder)
     {

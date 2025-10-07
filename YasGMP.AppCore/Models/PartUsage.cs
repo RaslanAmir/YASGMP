@@ -27,6 +27,9 @@ namespace YasGMP.Models
         /// </summary>
         [Display(Name = "Radni nalog")]
         public int? WorkOrderId { get; set; }
+        /// <summary>
+        /// Gets or sets the work order.
+        /// </summary>
         [ForeignKey(nameof(WorkOrderId))]
         public WorkOrder? WorkOrder { get; set; }
 
@@ -35,6 +38,9 @@ namespace YasGMP.Models
         /// </summary>
         [Display(Name = "Stroj / Komponenta")]
         public int? MachineComponentId { get; set; }
+        /// <summary>
+        /// Gets or sets the machine component.
+        /// </summary>
         [ForeignKey(nameof(MachineComponentId))]
         public MachineComponent? MachineComponent { get; set; }
 
@@ -43,6 +49,9 @@ namespace YasGMP.Models
         /// </summary>
         [Display(Name = "Dio / Rezervni dio")]
         public int PartId { get; set; }
+        /// <summary>
+        /// Gets or sets the part.
+        /// </summary>
         [ForeignKey(nameof(PartId))]
         public Part? Part { get; set; }
 
@@ -89,6 +98,9 @@ namespace YasGMP.Models
         /// </summary>
         [Display(Name = "Dobavljač")]
         public int? SupplierId { get; set; }
+        /// <summary>
+        /// Gets or sets the supplier.
+        /// </summary>
         [ForeignKey(nameof(SupplierId))]
         public Supplier? Supplier { get; set; }
 
@@ -97,6 +109,9 @@ namespace YasGMP.Models
         /// </summary>
         [Display(Name = "Izdao korisnik")]
         public int? IssuedById { get; set; }
+        /// <summary>
+        /// Gets or sets the issued by.
+        /// </summary>
         [ForeignKey(nameof(IssuedById))]
         public User? IssuedBy { get; set; }
 
@@ -138,25 +153,49 @@ namespace YasGMP.Models
     /// </summary>
     public class PartUsageAuditLog
     {
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the part usage id.
+        /// </summary>
         [Display(Name = "ID upotrebe dijela")]
         public int PartUsageId { get; set; }
+        /// <summary>
+        /// Gets or sets the part usage.
+        /// </summary>
         [ForeignKey(nameof(PartUsageId))]
         public PartUsage? PartUsage { get; set; }
 
+        /// <summary>
+        /// Gets or sets the timestamp.
+        /// </summary>
         [Display(Name = "Vrijeme događaja")]
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
+        /// <summary>
+        /// Gets or sets the action.
+        /// </summary>
         [Display(Name = "Akcija")]
         public string? Action { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user id.
+        /// </summary>
         [Display(Name = "Korisnik")]
         public int? UserId { get; set; }
+        /// <summary>
+        /// Gets or sets the user.
+        /// </summary>
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
 
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
         [StringLength(255)]
         [Display(Name = "Opis")]
         public string? Description { get; set; }

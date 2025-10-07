@@ -11,9 +11,18 @@ namespace YasGMP.Views.Dialogs
     public partial class ComponentEditDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
         public Task<bool> Result => _tcs.Task;
+        /// <summary>
+        /// Gets or sets the component.
+        /// </summary>
 
         public MachineComponent Component { get; }
+        /// <summary>
+        /// Initializes a new instance of the ComponentEditDialog class.
+        /// </summary>
 
         public ComponentEditDialog(MachineComponent component)
         {

@@ -11,6 +11,9 @@ namespace YasGMP.Models
     /// </summary>
     public partial class Warehouse
     {
+        /// <summary>
+        /// Represents the compliance docs raw value.
+        /// </summary>
         [Column("compliance_docs")]
         public string? ComplianceDocsRaw
         {

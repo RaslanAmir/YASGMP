@@ -68,6 +68,9 @@ namespace YasGMP.Models
         [Column("details")]
         public string? Details { get; set; }
 
+        /// <summary>
+        /// Gets or sets the changed by navigation.
+        /// </summary>
         [ForeignKey(nameof(ChangedBy))]
         public virtual User? ChangedByNavigation { get; set; }
     }

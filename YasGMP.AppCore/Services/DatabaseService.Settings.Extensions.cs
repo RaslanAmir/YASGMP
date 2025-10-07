@@ -16,6 +16,9 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceSettingsExtensions
     {
+        /// <summary>
+        /// Executes the get all settings full async operation.
+        /// </summary>
         public static async Task<List<Setting>> GetAllSettingsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             try
@@ -117,6 +120,9 @@ ORDER BY param_name;";
                 return list;
             }
         }
+        /// <summary>
+        /// Executes the upsert setting async operation.
+        /// </summary>
 
         public static async Task<int> UpsertSettingAsync(this DatabaseService db, Setting setting, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -183,19 +189,31 @@ ORDER BY param_name;";
         }
 
         // Overload with explicit 'update' flag for ViewModel named-arg compatibility
+        /// <summary>
+        /// Executes the upsert setting async operation.
+        /// </summary>
         public static Task<int> UpsertSettingAsync(this DatabaseService db, Setting setting, bool update, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.UpsertSettingAsync(setting, actorUserId, ip, device, sessionId, token);
+        /// <summary>
+        /// Executes the delete setting async operation.
+        /// </summary>
         public static async Task DeleteSettingAsync(this DatabaseService db, int settingId, int actorUserId, string ip, string device, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("DELETE FROM settings /* ANALYZER_IGNORE: legacy table */ WHERE id=@id", new[] { new MySqlParameter("@id", settingId) }, token).ConfigureAwait(false); }
             catch (MySqlException ex) when (ex.Number == 1146) { /* no-op for system_parameters; not keyed by id */ }
             await db.LogSystemEventAsync(actorUserId, "SETTING_DELETE", "settings", "SettingsModule", settingId, null, ip, "audit", device, null, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the rollback setting async operation.
+        /// </summary>
 
         public static Task RollbackSettingAsync(this DatabaseService db, int settingId, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SETTING_ROLLBACK", "settings", "SettingsModule", settingId, null, ip, "audit", device, sessionId, token: token);
 
         // Name-keyed mapping helpers for system_parameters compatibility
+        /// <summary>
+        /// Executes the upsert setting by key async operation.
+        /// </summary>
         public static async Task<int> UpsertSettingByKeyAsync(this DatabaseService db, string key, string value, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("Key required", nameof(key));
@@ -220,6 +238,9 @@ ORDER BY param_name;";
                 return 0;
             }
         }
+        /// <summary>
+        /// Executes the delete setting by key async operation.
+        /// </summary>
 
         public static async Task DeleteSettingByKeyAsync(this DatabaseService db, string key, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -234,6 +255,9 @@ ORDER BY param_name;";
             }
             await db.LogSystemEventAsync(actorUserId, "SETTING_DELETE", "settings", "SettingsModule", null, key, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the rollback setting by key async operation.
+        /// </summary>
 
         public static async Task RollbackSettingByKeyAsync(this DatabaseService db, string key, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -249,9 +273,15 @@ ORDER BY param_name;";
             }
             await db.LogSystemEventAsync(actorUserId, "SETTING_ROLLBACK", "settings", "SettingsModule", null, key, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the export settings async operation.
+        /// </summary>
 
         public static Task ExportSettingsAsync(this DatabaseService db, List<Setting> items, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.ExportSettingsAsync(items, format: "csv", actorUserId, ip, device, sessionId, token);
+        /// <summary>
+        /// Executes the export settings async operation.
+        /// </summary>
 
         public static Task ExportSettingsAsync(this DatabaseService db, List<Setting> items, string format, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -293,6 +323,9 @@ ORDER BY param_name;";
             }
             return db.LogSystemEventAsync(actorUserId, "SETTING_EXPORT", "settings", "SettingsModule", null, $"format={format}; count={items?.Count ?? 0}; file={path}", ip, "info", device, sessionId, token: token);
         }
+        /// <summary>
+        /// Executes the log setting audit async operation.
+        /// </summary>
 
         public static Task LogSettingAuditAsync(this DatabaseService db, Setting? setting, string action, string ip, string device, string? sessionId, string? details, CancellationToken token = default)
             => db.LogSystemEventAsync(0, $"SETTING_{action}", "settings", "SettingsModule", setting?.Id, details ?? setting?.Value, ip, "audit", device, sessionId, token: token);

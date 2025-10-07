@@ -14,6 +14,9 @@ namespace YasGMP.Views.Dialogs
     public partial class StockChangeDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
@@ -23,8 +26,14 @@ namespace YasGMP.Views.Dialogs
         private readonly string _ip;
         private readonly string _device;
         private readonly string? _sessionId;
+        /// <summary>
+        /// Gets or sets the warehouses.
+        /// </summary>
 
         public ObservableCollection<Warehouse> Warehouses { get; } = new();
+        /// <summary>
+        /// Initializes a new instance of the StockChangeDialog class.
+        /// </summary>
 
         public StockChangeDialog(DatabaseService db, Part part, bool increase, int? actorUserId, string ip, string device, string? sessionId)
         {

@@ -5,8 +5,14 @@ using System.Reflection;
 
 namespace YasGMP.Diagnostics
 {
+    /// <summary>
+    /// Represents the health report value.
+    /// </summary>
     public static class HealthReport
     {
+        /// <summary>
+        /// Executes the object operation.
+        /// </summary>
         public static Dictionary<string, object?> BuildBasic()
         {
             var p = Process.GetCurrentProcess();

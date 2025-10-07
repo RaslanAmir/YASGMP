@@ -60,12 +60,24 @@ public sealed class ModuleMetadata
         Category = category;
         Description = description ?? string.Empty;
     }
+    /// <summary>
+    /// Gets or sets the key.
+    /// </summary>
 
     public string Key { get; }
+    /// <summary>
+    /// Gets or sets the title.
+    /// </summary>
 
     public string Title { get; }
+    /// <summary>
+    /// Gets or sets the category.
+    /// </summary>
 
     public string Category { get; }
+    /// <summary>
+    /// Gets or sets the description.
+    /// </summary>
 
     public string Description { get; }
 }
@@ -93,6 +105,9 @@ public sealed class ModuleRegistry : IModuleRegistry
     {
         _services = services;
     }
+    /// <summary>
+    /// Represents the modules value.
+    /// </summary>
 
     public IReadOnlyList<ModuleMetadata> Modules
         => _registrations.Values

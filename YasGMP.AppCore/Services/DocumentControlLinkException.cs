@@ -7,9 +7,15 @@ namespace YasGMP.Services
     /// </summary>
     public sealed class DocumentControlLinkException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the DocumentControlLinkException class.
+        /// </summary>
         public DocumentControlLinkException(string message) : base(message)
         {
         }
+        /// <summary>
+        /// Initializes a new instance of the DocumentControlLinkException class.
+        /// </summary>
 
         public DocumentControlLinkException(string message, Exception innerException) : base(message, innerException)
         {

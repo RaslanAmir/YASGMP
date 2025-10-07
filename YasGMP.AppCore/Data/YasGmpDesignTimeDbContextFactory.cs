@@ -10,6 +10,9 @@ namespace YasGMP.Data
     /// </summary>
     public sealed class YasGmpDesignTimeDbContextFactory : IDesignTimeDbContextFactory<YasGmpDbContext>
     {
+        /// <summary>
+        /// Executes the create db context operation.
+        /// </summary>
         public YasGmpDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<YasGmpDbContext>();

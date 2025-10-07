@@ -150,13 +150,34 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
+        /// <summary>
+        /// Gets or sets the load spare parts command.
+        /// </summary>
 
         public ICommand LoadSparePartsCommand { get; }
+        /// <summary>
+        /// Gets or sets the add spare part command.
+        /// </summary>
         public ICommand AddSparePartCommand { get; }
+        /// <summary>
+        /// Gets or sets the update spare part command.
+        /// </summary>
         public ICommand UpdateSparePartCommand { get; }
+        /// <summary>
+        /// Gets or sets the delete spare part command.
+        /// </summary>
         public ICommand DeleteSparePartCommand { get; }
+        /// <summary>
+        /// Gets or sets the rollback spare part command.
+        /// </summary>
         public ICommand RollbackSparePartCommand { get; }
+        /// <summary>
+        /// Gets or sets the export spare parts command.
+        /// </summary>
         public ICommand ExportSparePartsCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

@@ -10,10 +10,19 @@ using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the audit module view model value.
+/// </summary>
 
 public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Audit";
+    /// <summary>
+    /// Initializes a new instance of the AuditModuleViewModel class.
+    /// </summary>
 
     public AuditModuleViewModel(
         DatabaseService databaseService,
@@ -47,8 +56,14 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         FilterTo = DateTime.Today;
         SelectedAction = ActionOptions[0];
     }
+    /// <summary>
+    /// Gets or sets the export to pdf command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportToPdfCommand => _exportToPdfCommand;
+    /// <summary>
+    /// Gets or sets the export to excel command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportToExcelCommand => _exportToExcelCommand;
 
@@ -132,6 +147,9 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
                 Status = "audit"
             })
         };
+    /// <summary>
+    /// Gets or sets the action options.
+    /// </summary>
 
     public IReadOnlyList<string> ActionOptions { get; }
 

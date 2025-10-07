@@ -21,14 +21,23 @@ namespace YasGMP.Wpf.Services;
 public sealed class CapaCrudServiceAdapter : ICapaCrudService
 {
     private readonly CAPAService _service;
+    /// <summary>
+    /// Initializes a new instance of the CapaCrudServiceAdapter class.
+    /// </summary>
 
     public CapaCrudServiceAdapter(CAPAService service)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
+    /// <summary>
+    /// Executes the get all async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<CapaCase>> GetAllAsync()
         => await _service.GetAllAsync().ConfigureAwait(false);
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<CapaCase?> TryGetByIdAsync(int id)
     {
@@ -41,6 +50,9 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
             return null;
         }
     }
+    /// <summary>
+    /// Executes the create async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(CapaCase capa, CapaCrudContext context)
     {
@@ -54,6 +66,9 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         await _service.CreateAsync(capa, context.UserId, metadata).ConfigureAwait(false);
         return new CrudSaveResult(capa.Id, metadata);
     }
+    /// <summary>
+    /// Executes the update async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(CapaCase capa, CapaCrudContext context)
     {
@@ -67,6 +82,9 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
         await _service.UpdateAsync(capa, context.UserId, metadata).ConfigureAwait(false);
         return new CrudSaveResult(capa.Id, metadata);
     }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(CapaCase capa)
     {
@@ -77,11 +95,17 @@ public sealed class CapaCrudServiceAdapter : ICapaCrudService
 
         _service.ValidateCapa(capa);
     }
+    /// <summary>
+    /// Executes the normalize status operation.
+    /// </summary>
 
     public string NormalizeStatus(string? status)
         => string.IsNullOrWhiteSpace(status)
             ? "OPEN"
             : status.Trim().ToUpperInvariant();
+    /// <summary>
+    /// Executes the normalize priority operation.
+    /// </summary>
 
     public string NormalizePriority(string? priority)
         => string.IsNullOrWhiteSpace(priority)

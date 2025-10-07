@@ -15,9 +15,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the capa module view model value.
+/// </summary>
 
 public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Capa";
 
     private static readonly string[] DefaultStatuses =
@@ -50,6 +56,9 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     private CapaCase? _loadedCapa;
     private CapaEditor? _snapshot;
     private bool _suppressDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the CapaModuleViewModel class.
+    /// </summary>
 
     public CapaModuleViewModel(
         DatabaseService databaseService,
@@ -86,12 +95,24 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the component options.
+    /// </summary>
 
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public IReadOnlyList<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the priority options.
+    /// </summary>
 
     public IReadOnlyList<string> PriorityOptions { get; }
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -600,11 +621,20 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
     }
 }
+/// <summary>
+/// Executes the struct operation.
+/// </summary>
 
 public readonly record struct ComponentOption(int Id, string Name)
 {
+    /// <summary>
+    /// Executes the to string operation.
+    /// </summary>
     public override string ToString() => Name;
 }
+/// <summary>
+/// Represents the capa editor value.
+/// </summary>
 
 public sealed partial class CapaEditor : ObservableObject
 {
@@ -661,8 +691,14 @@ public sealed partial class CapaEditor : ObservableObject
 
     [ObservableProperty]
     private string _digitalSignature = string.Empty;
+    /// <summary>
+    /// Executes the create empty operation.
+    /// </summary>
 
     public static CapaEditor CreateEmpty() => new();
+    /// <summary>
+    /// Executes the create for new operation.
+    /// </summary>
 
     public static CapaEditor CreateForNew(IAuthContext authContext)
     {
@@ -674,6 +710,9 @@ public sealed partial class CapaEditor : ObservableObject
             Priority = "Medium"
         };
     }
+    /// <summary>
+    /// Executes the from capa operation.
+    /// </summary>
 
     public static CapaEditor FromCapa(
         CapaCase capa,
@@ -703,6 +742,9 @@ public sealed partial class CapaEditor : ObservableObject
             DigitalSignature = capa.DigitalSignature
         };
     }
+    /// <summary>
+    /// Executes the clone operation.
+    /// </summary>
 
     public CapaEditor Clone()
         => new()
@@ -726,6 +768,9 @@ public sealed partial class CapaEditor : ObservableObject
             Comments = Comments,
             DigitalSignature = DigitalSignature
         };
+    /// <summary>
+    /// Executes the to capa case operation.
+    /// </summary>
 
     public CapaCase ToCapaCase(CapaCase? existing)
     {

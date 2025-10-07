@@ -22,6 +22,9 @@ namespace YasGMP.Services
         private readonly ISupplierAuditService _audit;
 
         #region Constructors
+        /// <summary>
+        /// Initializes a new instance of the SupplierService class.
+        /// </summary>
 
         public SupplierService(DatabaseService databaseService, ISupplierAuditService auditService)
         {
@@ -32,10 +35,19 @@ namespace YasGMP.Services
         #endregion
 
         #region CRUD Operations
+        /// <summary>
+        /// Executes the get all async operation.
+        /// </summary>
 
         public Task<List<Supplier>> GetAllAsync() => _db.GetAllSuppliersAsync();
+        /// <summary>
+        /// Executes the get by id async operation.
+        /// </summary>
 
         public Task<Supplier?> GetByIdAsync(int id) => _db.GetSupplierByIdAsync(id);
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task CreateAsync(Supplier supplier, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
@@ -57,6 +69,9 @@ namespace YasGMP.Services
                 SupplierActionType.CREATE,
                 $"Created new supplier: {supplier.Name}");
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task UpdateAsync(Supplier supplier, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
@@ -78,6 +93,9 @@ namespace YasGMP.Services
                 SupplierActionType.UPDATE,
                 $"Updated supplier ID={supplier.Id}");
         }
+        /// <summary>
+        /// Executes the delete async operation.
+        /// </summary>
 
         public async Task DeleteAsync(int supplierId, int userId)
         {
@@ -237,6 +255,9 @@ namespace YasGMP.Services
         #endregion
 
         #region Future Extensibility Hooks
+        /// <summary>
+        /// Executes the trigger requalification async operation.
+        /// </summary>
 
         public async Task TriggerRequalificationAsync(int supplierId)
         {
@@ -246,6 +267,9 @@ namespace YasGMP.Services
                 SupplierActionType.REQUALIFICATION,
                 $"Triggered re-qualification for supplier ID={supplierId}");
         }
+        /// <summary>
+        /// Executes the link to capa async operation.
+        /// </summary>
 
         public async Task LinkToCapaAsync(int supplierId, int capaId)
         {

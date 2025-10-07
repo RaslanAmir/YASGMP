@@ -59,14 +59,23 @@ namespace YasGMP.Models
 
         // === CONTACT / IDENTITY ===
 
+        /// <summary>
+        /// Gets or sets the email.
+        /// </summary>
         [MaxLength(100), EmailAddress]
         [Column("email")]
         public string Email { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the phone.
+        /// </summary>
         [MaxLength(40)]
         [Column("phone")]
         public string Phone { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the digital signature.
+        /// </summary>
         [MaxLength(128)]
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
@@ -86,132 +95,258 @@ namespace YasGMP.Models
         [Column("session_id")]
         public string SessionId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the department id.
+        /// </summary>
         [Column("department_id")]
         public int? DepartmentId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the department name.
+        /// </summary>
         [MaxLength(80)]
         [Column("department_name")]
         public string DepartmentName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the is two factor enabled.
+        /// </summary>
         [Column("is_two_factor_enabled")]
         public bool IsTwoFactorEnabled { get; set; } = false;
 
         // === SECURITY / ACCESS CONTROL ===
 
+        /// <summary>
+        /// Gets or sets the last login.
+        /// </summary>
         [Column("last_login")]
         public DateTime? LastLogin { get; set; }
 
+        /// <summary>
+        /// Gets or sets the is locked.
+        /// </summary>
         [Column("is_locked")]
         public bool IsLocked { get; set; } = false;
 
+        /// <summary>
+        /// Gets or sets the failed login attempts.
+        /// </summary>
         [Column("failed_login_attempts")]
         public int FailedLoginAttempts { get; set; } = 0;
 
+        /// <summary>
+        /// Gets or sets the last failed login.
+        /// </summary>
         [Column("last_failed_login")]
         public DateTime? LastFailedLogin { get; set; }
 
+        /// <summary>
+        /// Gets or sets the password reset required.
+        /// </summary>
         [Column("password_reset_required")]
         public bool PasswordResetRequired { get; set; } = false;
 
         // === EXTERNAL IDENTITY / FEDERATION ===
 
+        /// <summary>
+        /// Gets or sets the external provider id.
+        /// </summary>
         [StringLength(255)]
         [Column("external_provider_id")]
         public string ExternalProviderId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the external provider type.
+        /// </summary>
         [StringLength(40)]
         [Column("external_provider_type")]
         public string ExternalProviderType { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the federated unique id.
+        /// </summary>
         [StringLength(255)]
         [Column("federated_unique_id")]
         public string FederatedUniqueId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the preferred culture.
+        /// </summary>
         [StringLength(16)]
         [Column("preferred_culture")]
         public string PreferredCulture { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the last change signature.
+        /// </summary>
         [StringLength(256)]
         [Column("last_change_signature")]
         public string LastChangeSignature { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the global federated id.
+        /// </summary>
         [StringLength(255)]
         [Column("global_federated_id")]
         public string GlobalFederatedId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the public key.
+        /// </summary>
         [Column("public_key", TypeName = "LONGTEXT")]
         public string PublicKey { get; set; } = string.Empty;
 
         // === ACCOUNT & AUDIT INFO ===
 
+        /// <summary>
+        /// Gets or sets the created at.
+        /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        /// <summary>
+        /// Gets or sets the last modified.
+        /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         [Column("last_modified")]
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
+        /// <summary>
+        /// Gets or sets the last modified by id.
+        /// </summary>
         [Column("last_modified_by_id")]
         public int? LastModifiedById { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last modified by.
+        /// </summary>
         [ForeignKey("LastModifiedById")]
         public virtual User? LastModifiedBy { get; set; }
 
+        /// <summary>
+        /// Gets or sets the change version.
+        /// </summary>
         [Column("change_version")]
         public int ChangeVersion { get; set; } = 1;
 
+        /// <summary>
+        /// Gets or sets the is deleted.
+        /// </summary>
         [Column("is_deleted")]
         public bool IsDeleted { get; set; } = false;
 
+        /// <summary>
+        /// Gets or sets the deleted at.
+        /// </summary>
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
         // === COMPLIANCE, PRIVACY, ANOMALY ===
 
+        /// <summary>
+        /// Gets or sets the privacy consent version.
+        /// </summary>
         [MaxLength(20)]
         [Column("privacy_consent_version")]
         public string PrivacyConsentVersion { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the privacy consent date.
+        /// </summary>
         [Column("privacy_consent_date")]
         public DateTime? PrivacyConsentDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the custom attributes.
+        /// </summary>
         [Column("custom_attributes")]
         public string CustomAttributes { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the security anomaly score.
+        /// </summary>
         [Column("security_anomaly_score")]
         public double? SecurityAnomalyScore { get; set; }
 
         // === FLAGS & SYSTEM ===
 
+        /// <summary>
+        /// Gets or sets the is system account.
+        /// </summary>
         [Column("is_system_account")]
         public bool IsSystemAccount { get; set; } = false;
 
+        /// <summary>
+        /// Executes the is super admin operation.
+        /// </summary>
         [NotMapped]
         public bool IsSuperAdmin => (Role?.ToLowerInvariant() == "superadmin");
 
+        /// <summary>
+        /// Executes the is admin operation.
+        /// </summary>
         [NotMapped]
         public bool IsAdmin => !string.IsNullOrEmpty(Role) &&
                                (Role.ToLowerInvariant().Contains("admin") || Role.ToLowerInvariant().Contains("superadmin"));
 
+        /// <summary>
+        /// Gets or sets the notification channel.
+        /// </summary>
         [MaxLength(24)]
         [Column("notification_channel")]
         public string NotificationChannel { get; set; } = string.Empty;
 
         // === RELATIONSHIPS / NAVIGATION PROPERTIES ===
+        /// <summary>
+        /// Gets or sets the roles.
+        /// </summary>
 
         public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+        /// <summary>
+        /// Gets or sets the permissions.
+        /// </summary>
         public virtual ICollection<Permission> Permissions { get; set; } = new List<Permission>();
+        /// <summary>
+        /// Gets or sets the user permissions.
+        /// </summary>
         public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
+        /// <summary>
+        /// Gets or sets the delegated permissions.
+        /// </summary>
         public virtual ICollection<DelegatedPermission> DelegatedPermissions { get; set; } = new List<DelegatedPermission>();
+        /// <summary>
+        /// Gets or sets the audit logs.
+        /// </summary>
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+        /// <summary>
+        /// Gets or sets the digital signatures.
+        /// </summary>
         public virtual ICollection<DigitalSignature> DigitalSignatures { get; set; } = new List<DigitalSignature>();
+        /// <summary>
+        /// Gets or sets the session logs.
+        /// </summary>
         public virtual ICollection<SessionLog> SessionLogs { get; set; } = new List<SessionLog>();
+        /// <summary>
+        /// Gets or sets the created work orders.
+        /// </summary>
         public virtual ICollection<WorkOrder> CreatedWorkOrders { get; set; } = new List<WorkOrder>();
+        /// <summary>
+        /// Gets or sets the assigned work orders.
+        /// </summary>
         public virtual ICollection<WorkOrder> AssignedWorkOrders { get; set; } = new List<WorkOrder>();
+        /// <summary>
+        /// Gets or sets the uploaded photos.
+        /// </summary>
         [InverseProperty(nameof(Photo.Uploader))]
         public virtual ICollection<Photo> UploadedPhotos { get; set; } = new List<Photo>();
+        /// <summary>
+        /// Gets or sets the uploaded attachments.
+        /// </summary>
         public virtual ICollection<Attachment> UploadedAttachments { get; set; } = new List<Attachment>();
+        /// <summary>
+        /// Gets or sets the admin activity logs.
+        /// </summary>
         public virtual ICollection<AdminActivityLog> AdminActivityLogs { get; set; } = new List<AdminActivityLog>();
 
         // === UTILITY / COMPATIBILITY ===

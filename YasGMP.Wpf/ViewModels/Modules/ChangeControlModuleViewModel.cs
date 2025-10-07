@@ -15,9 +15,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the change control module view model value.
+/// </summary>
 
 public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "ChangeControl";
 
     private readonly IChangeControlCrudService _changeControlService;
@@ -29,6 +35,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     private ChangeControl? _loadedEntity;
     private ChangeControlEditor? _snapshot;
     private bool _suppressDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the ChangeControlModuleViewModel class.
+    /// </summary>
 
     public ChangeControlModuleViewModel(
         DatabaseService databaseService,
@@ -60,8 +69,14 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public IReadOnlyList<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -518,6 +533,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
+    /// <summary>
+    /// Represents the change control editor value.
+    /// </summary>
 
     public sealed partial class ChangeControlEditor : ObservableObject
     {
@@ -559,8 +577,14 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
         [ObservableProperty]
         private DateTime? _updatedAt;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static ChangeControlEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static ChangeControlEditor CreateForNew(IAuthContext auth)
             => new()
@@ -571,6 +595,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 RequestedById = auth.CurrentUser?.Id,
                 DateRequested = DateTime.UtcNow
             };
+        /// <summary>
+        /// Executes the from entity operation.
+        /// </summary>
 
         public static ChangeControlEditor FromEntity(ChangeControl entity)
             => new()
@@ -589,6 +616,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 CreatedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt
             };
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public ChangeControlEditor Clone()
             => new()
@@ -607,6 +637,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt
             };
+        /// <summary>
+        /// Executes the to entity operation.
+        /// </summary>
 
         public ChangeControl ToEntity(ChangeControl? destination = null)
         {

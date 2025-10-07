@@ -207,9 +207,15 @@ namespace YasGMP.Services
         #endregion
 
         #region Future hooks
+        /// <summary>
+        /// Executes the predict validation failure risk async operation.
+        /// </summary>
 
         public Task<double> PredictValidationFailureRiskAsync(int validationId) =>
             Task.FromResult(new Random().NextDouble());
+        /// <summary>
+        /// Executes the get io t sensor data async operation.
+        /// </summary>
 
         public Task<string> GetIoTSensorDataAsync(int validationId) =>
             Task.FromResult("IoT Data: Device Calibration OK");

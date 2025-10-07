@@ -20,6 +20,9 @@ namespace YasGMP.Diagnostics.LogSinks
         private readonly string? _authScheme;
         private readonly Dictionary<string, string> _extraHeaders = new();
         private readonly System.Threading.Timer _flushTimer;
+        /// <summary>
+        /// Initializes a new instance of the ElasticCompatibleSink class.
+        /// </summary>
 
         public ElasticCompatibleSink(IConfiguration cfg)
         {
@@ -45,8 +48,14 @@ namespace YasGMP.Diagnostics.LogSinks
             }
             _flushTimer = new System.Threading.Timer(_ => TryFlushBuffer(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30));
         }
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
 
         public string Name => "elastic";
+        /// <summary>
+        /// Executes the write batch operation.
+        /// </summary>
 
         public void WriteBatch(IReadOnlyList<DiagnosticEvent> batch)
         {
@@ -112,10 +121,16 @@ namespace YasGMP.Diagnostics.LogSinks
         }
 
         // Exposed for DiagnosticsHub button
+        /// <summary>
+        /// Executes the flush buffer now operation.
+        /// </summary>
         public void FlushBufferNow()
         {
             TryFlushBuffer();
         }
+        /// <summary>
+        /// Executes the dispose operation.
+        /// </summary>
 
         public void Dispose()
         {

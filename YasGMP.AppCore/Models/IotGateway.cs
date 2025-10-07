@@ -35,6 +35,9 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the location.
+        /// </summary>
         [ForeignKey(nameof(LocationId))]
         public virtual Location? Location { get; set; }
     }

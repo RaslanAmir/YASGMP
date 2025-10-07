@@ -25,8 +25,14 @@ namespace YasGMP.Wpf.Services
     public sealed class WpfUiDispatcher : IUiDispatcher
     {
         private static Dispatcher CurrentDispatcher => Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+        /// <summary>
+        /// Executes the is dispatch required operation.
+        /// </summary>
 
         public bool IsDispatchRequired => !CurrentDispatcher.CheckAccess();
+        /// <summary>
+        /// Executes the invoke async operation.
+        /// </summary>
 
         public Task InvokeAsync(Action action)
         {
@@ -38,6 +44,9 @@ namespace YasGMP.Wpf.Services
 
             return CurrentDispatcher.InvokeAsync(action).Task;
         }
+        /// <summary>
+        /// Executes the invoke async operation.
+        /// </summary>
 
         public Task<T> InvokeAsync<T>(Func<T> func)
         {
@@ -46,6 +55,9 @@ namespace YasGMP.Wpf.Services
 
             return CurrentDispatcher.InvokeAsync(func).Task;
         }
+        /// <summary>
+        /// Executes the invoke async operation.
+        /// </summary>
 
         public async Task InvokeAsync(Func<Task> asyncAction)
         {
@@ -57,6 +69,9 @@ namespace YasGMP.Wpf.Services
 
             await CurrentDispatcher.InvokeAsync(asyncAction).Task.Unwrap().ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the begin invoke operation.
+        /// </summary>
 
         public void BeginInvoke(Action action)
         {

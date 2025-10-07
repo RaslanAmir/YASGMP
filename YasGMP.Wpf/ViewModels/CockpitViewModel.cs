@@ -7,6 +7,9 @@ namespace YasGMP.Wpf.ViewModels
     /// <summary>Simple cockpit summary displayed in the bottom anchorable.</summary>
     public partial class CockpitViewModel : AnchorableViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the CockpitViewModel class.
+        /// </summary>
         public CockpitViewModel()
         {
             Title = "Cockpit";
@@ -26,8 +29,14 @@ namespace YasGMP.Wpf.ViewModels
                 "Two deviations awaiting QA approval"
             };
         }
+        /// <summary>
+        /// Gets or sets the metrics.
+        /// </summary>
 
         public ObservableCollection<CockpitMetric> Metrics { get; }
+        /// <summary>
+        /// Gets or sets the notices.
+        /// </summary>
 
         public ObservableCollection<string> Notices { get; }
     }
@@ -35,6 +44,9 @@ namespace YasGMP.Wpf.ViewModels
     /// <summary>Represents a key KPI displayed in the cockpit.</summary>
     public record CockpitMetric(string Label, int Value, string AccentHex)
     {
+        /// <summary>
+        /// Executes the formatted value operation.
+        /// </summary>
         public string FormattedValue => Value.ToString("N0");
     }
 }

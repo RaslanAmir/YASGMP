@@ -147,12 +147,18 @@ namespace YasGMP.ViewModels
             get => _priorityFilter;
             set { _priorityFilter = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
+        /// <summary>
+        /// Represents the photos min value.
+        /// </summary>
 
         public int? PhotosMin
         {
             get => _photosMin;
             set { _photosMin = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
+        /// <summary>
+        /// Represents the parts min value.
+        /// </summary>
 
         public int? PartsMin
         {
@@ -161,29 +167,44 @@ namespace YasGMP.ViewModels
         }
 
         // New filters: ID and date ranges
+        /// <summary>
+        /// Represents the id filter value.
+        /// </summary>
         public int? IdFilter
         {
             get => _idFilter;
             set { _idFilter = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
+        /// <summary>
+        /// Represents the open from value.
+        /// </summary>
 
         public DateTime? OpenFrom
         {
             get => _openFrom;
             set { _openFrom = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
+        /// <summary>
+        /// Represents the open to value.
+        /// </summary>
 
         public DateTime? OpenTo
         {
             get => _openTo;
             set { _openTo = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
+        /// <summary>
+        /// Represents the close from value.
+        /// </summary>
 
         public DateTime? CloseFrom
         {
             get => _closeFrom;
             set { _closeFrom = value; OnPropertyChanged(); FilterWorkOrders(); }
         }
+        /// <summary>
+        /// Represents the close to value.
+        /// </summary>
 
         public DateTime? CloseTo
         {
@@ -231,17 +252,50 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ===
+        /// <summary>
+        /// Gets or sets the load work orders command.
+        /// </summary>
 
         public ICommand LoadWorkOrdersCommand { get; }
+        /// <summary>
+        /// Gets or sets the add work order command.
+        /// </summary>
         public ICommand AddWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the update work order command.
+        /// </summary>
         public ICommand UpdateWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the delete work order command.
+        /// </summary>
         public ICommand DeleteWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the rollback work order command.
+        /// </summary>
         public ICommand RollbackWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the export work orders command.
+        /// </summary>
         public ICommand ExportWorkOrdersCommand { get; }
+        /// <summary>
+        /// Gets or sets the approve work order command.
+        /// </summary>
         public ICommand ApproveWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the close work order command.
+        /// </summary>
         public ICommand CloseWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the escalate work order command.
+        /// </summary>
         public ICommand EscalateWorkOrderCommand { get; }
+        /// <summary>
+        /// Gets or sets the add comment command.
+        /// </summary>
         public ICommand AddCommentCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

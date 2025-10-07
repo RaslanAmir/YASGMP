@@ -22,15 +22,36 @@ namespace YasGMP.ViewModels
 
         private MachineComponent? _selectedComponent;
         private Supplier? _selectedSupplier;
+        /// <summary>
+        /// Gets or sets the calibration.
+        /// </summary>
 
         public Calibration Calibration { get; }
+        /// <summary>
+        /// Gets or sets the components.
+        /// </summary>
         public List<MachineComponent> Components { get; }
+        /// <summary>
+        /// Gets or sets the suppliers.
+        /// </summary>
         public List<Supplier> Suppliers { get; }
+        /// <summary>
+        /// Gets or sets the save command.
+        /// </summary>
 
         public ICommand SaveCommand { get; }
+        /// <summary>
+        /// Gets or sets the cancel command.
+        /// </summary>
         public ICommand CancelCommand { get; }
+        /// <summary>
+        /// Occurs when action is raised.
+        /// </summary>
 
         public event Action<bool, Calibration?>? DialogResult;
+        /// <summary>
+        /// Initializes a new instance of the CalibrationEditDialogViewModel class.
+        /// </summary>
 
         public CalibrationEditDialogViewModel()
             : this(
@@ -42,6 +63,9 @@ namespace YasGMP.ViewModels
                   ServiceLocator.GetRequiredService<IPlatformService>())
         {
         }
+        /// <summary>
+        /// Initializes a new instance of the CalibrationEditDialogViewModel class.
+        /// </summary>
 
         public CalibrationEditDialogViewModel(
             Calibration calibration,
@@ -56,6 +80,9 @@ namespace YasGMP.ViewModels
                   ServiceLocator.GetRequiredService<IPlatformService>())
         {
         }
+        /// <summary>
+        /// Initializes a new instance of the CalibrationEditDialogViewModel class.
+        /// </summary>
 
         public CalibrationEditDialogViewModel(
             Calibration calibration,
@@ -81,6 +108,9 @@ namespace YasGMP.ViewModels
             SaveCommand = new AsyncDelegateCommand(OnSaveAsync);
             CancelCommand = new DelegateCommand(OnCancel);
         }
+        /// <summary>
+        /// Represents the selected component value.
+        /// </summary>
 
         public MachineComponent? SelectedComponent
         {
@@ -95,6 +125,9 @@ namespace YasGMP.ViewModels
                 }
             }
         }
+        /// <summary>
+        /// Represents the selected supplier value.
+        /// </summary>
 
         public Supplier? SelectedSupplier
         {
@@ -109,6 +142,9 @@ namespace YasGMP.ViewModels
                 }
             }
         }
+        /// <summary>
+        /// Occurs when property changed event handler is raised.
+        /// </summary>
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

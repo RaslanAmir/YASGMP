@@ -4,8 +4,14 @@ using System.Linq;
 
 namespace YasGMP.Models
 {
+    /// <summary>
+    /// Represents the Incident Log.
+    /// </summary>
     public partial class IncidentLog
     {
+        /// <summary>
+        /// Represents the attachments value.
+        /// </summary>
         [NotMapped]
         public List<string> Attachments
         {

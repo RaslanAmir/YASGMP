@@ -8,10 +8,19 @@ using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the Dashboard Module View Model.
+/// </summary>
 
 public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Dashboard";
+    /// <summary>
+    /// Initializes a new instance of the DashboardModuleViewModel class.
+    /// </summary>
 
     public DashboardModuleViewModel(
         DatabaseService databaseService,

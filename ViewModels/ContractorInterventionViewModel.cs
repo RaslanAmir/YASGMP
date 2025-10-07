@@ -133,13 +133,34 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
+        /// <summary>
+        /// Gets or sets the load interventions command.
+        /// </summary>
 
         public ICommand LoadInterventionsCommand { get; }
+        /// <summary>
+        /// Gets or sets the add intervention command.
+        /// </summary>
         public ICommand AddInterventionCommand { get; }
+        /// <summary>
+        /// Gets or sets the update intervention command.
+        /// </summary>
         public ICommand UpdateInterventionCommand { get; }
+        /// <summary>
+        /// Gets or sets the delete intervention command.
+        /// </summary>
         public ICommand DeleteInterventionCommand { get; }
+        /// <summary>
+        /// Gets or sets the rollback intervention command.
+        /// </summary>
         public ICommand RollbackInterventionCommand { get; }
+        /// <summary>
+        /// Gets or sets the export interventions command.
+        /// </summary>
         public ICommand ExportInterventionsCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

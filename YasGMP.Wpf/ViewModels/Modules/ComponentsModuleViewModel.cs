@@ -13,9 +13,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the components module view model value.
+/// </summary>
 
 public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "Components";
 
     private static readonly string[] DefaultStatuses =
@@ -44,6 +50,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     private ComponentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Machine> _machines = Array.Empty<Machine>();
+    /// <summary>
+    /// Initializes a new instance of the ComponentsModuleViewModel class.
+    /// </summary>
 
     public ComponentsModuleViewModel(
         DatabaseService databaseService,
@@ -74,10 +83,19 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the machine options.
+    /// </summary>
 
     public ObservableCollection<MachineOption> MachineOptions { get; }
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public IReadOnlyList<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the type options.
+    /// </summary>
 
     public IReadOnlyList<string> TypeOptions { get; }
 
@@ -549,6 +567,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             AssetsModuleViewModel.ModuleKey,
             component.MachineId);
     }
+    /// <summary>
+    /// Represents the component editor value.
+    /// </summary>
 
     public sealed partial class ComponentEditor : ObservableObject
     {
@@ -593,8 +614,14 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
         [ObservableProperty]
         private string _lifecycleState = string.Empty;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static ComponentEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static ComponentEditor CreateForNew(string normalizedStatus, int machineId, string machineName)
             => new()
@@ -603,6 +630,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 MachineId = machineId,
                 MachineName = machineName
             };
+        /// <summary>
+        /// Executes the from component operation.
+        /// </summary>
 
         public static ComponentEditor FromComponent(
             Component component,
@@ -629,6 +659,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 LifecycleState = component.LifecycleState ?? string.Empty
             };
         }
+        /// <summary>
+        /// Executes the to component operation.
+        /// </summary>
 
         public Component ToComponent(Component? existing)
         {
@@ -649,6 +682,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             component.LifecycleState = LifecycleState;
             return component;
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public ComponentEditor Clone()
             => new()
@@ -690,6 +726,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             };
         }
     }
+    /// <summary>
+    /// Represents the Machine Option record.
+    /// </summary>
 
     public sealed record MachineOption(int Id, string Name);
 }

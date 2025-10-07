@@ -14,9 +14,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the assets module view model value.
+/// </summary>
 
 public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "Assets";
 
     private readonly IMachineCrudService _machineService;
@@ -28,6 +34,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    /// <summary>
+    /// Initializes a new instance of the AssetsModuleViewModel class.
+    /// </summary>
 
     public AssetsModuleViewModel(
         DatabaseService databaseService,
@@ -551,6 +560,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             WorkOrdersModuleViewModel.ModuleKey,
             machine.Id);
     }
+    /// <summary>
+    /// Represents the asset editor value.
+    /// </summary>
 
     public sealed partial class AssetEditor : SignatureAwareEditor
     {
@@ -601,6 +613,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         [ObservableProperty]
         private string _notes = string.Empty;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static AssetEditor CreateEmpty() => new()
         {
@@ -617,6 +632,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             SessionId = string.Empty,
             DeviceInfo = string.Empty
         };
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static AssetEditor CreateForNew(string normalizedStatus)
             => new()
@@ -635,6 +653,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 SessionId = string.Empty,
                 DeviceInfo = string.Empty
             };
+        /// <summary>
+        /// Executes the from machine operation.
+        /// </summary>
 
         public static AssetEditor FromMachine(Machine machine, Func<string?, string> normalizer)
         {
@@ -665,6 +686,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 SignerUserName = machine.LastModifiedBy?.FullName ?? string.Empty
             };
         }
+        /// <summary>
+        /// Executes the to machine operation.
+        /// </summary>
 
         public Machine ToMachine(Machine? existing)
         {
@@ -690,6 +714,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             machine.LastModifiedById = LastModifiedById ?? machine.LastModifiedById;
             return machine;
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public AssetEditor Clone()
             => new()

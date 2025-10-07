@@ -130,47 +130,77 @@ namespace YasGMP.Services
         }
 
         // ---------- machine_types ----------
+        /// <summary>
+        /// Executes the get machine types async operation.
+        /// </summary>
         public static async Task<List<MachineType>> GetMachineTypesAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await LookupSelectAsync(db, "machine_types", "`name` VARCHAR(256) NOT NULL", token);
             return MapList(dt, r => new MachineType { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
+        /// <summary>
+        /// Executes the add machine type async operation.
+        /// </summary>
         public static Task<int> AddMachineTypeAsync(this DatabaseService db, string name, CancellationToken token = default)
             => LookupInsertAsync(db, "machine_types", "`name` VARCHAR(256) NOT NULL", name, token);
 
         // ---------- manufacturers ----------
+        /// <summary>
+        /// Executes the get manufacturers async operation.
+        /// </summary>
         public static async Task<List<Manufacturer>> GetManufacturersAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await LookupSelectAsync(db, "manufacturers", "`name` VARCHAR(256) NOT NULL", token);
             return MapList(dt, r => new Manufacturer { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
+        /// <summary>
+        /// Executes the add manufacturer async operation.
+        /// </summary>
         public static Task<int> AddManufacturerAsync(this DatabaseService db, string name, CancellationToken token = default)
             => LookupInsertAsync(db, "manufacturers", "`name` VARCHAR(256) NOT NULL", name, token);
 
         // ---------- locations ----------
+        /// <summary>
+        /// Executes the get locations async operation.
+        /// </summary>
         public static async Task<List<LocationModel>> GetLocationsAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await LookupSelectAsync(db, "locations", "`name` VARCHAR(256) NOT NULL", token);
             return MapList(dt, r => new LocationModel { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
+        /// <summary>
+        /// Executes the add location async operation.
+        /// </summary>
         public static Task<int> AddLocationAsync(this DatabaseService db, string name, CancellationToken token = default)
             => LookupInsertAsync(db, "locations", "`name` VARCHAR(256) NOT NULL", name, token);
 
         // ---------- responsible_parties ----------
+        /// <summary>
+        /// Executes the get responsible parties async operation.
+        /// </summary>
         public static async Task<List<ResponsibleParty>> GetResponsiblePartiesAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await LookupSelectAsync(db, "responsible_parties", "`name` VARCHAR(256) NOT NULL", token);
             return MapList(dt, r => new ResponsibleParty { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
+        /// <summary>
+        /// Executes the add responsible party async operation.
+        /// </summary>
         public static Task<int> AddResponsiblePartyAsync(this DatabaseService db, string name, CancellationToken token = default)
             => LookupInsertAsync(db, "responsible_parties", "`name` VARCHAR(256) NOT NULL", name, token);
 
         // ---------- machine_statuses ----------
+        /// <summary>
+        /// Executes the get machine statuses async operation.
+        /// </summary>
         public static async Task<List<MachineStatusModel>> GetMachineStatusesAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await LookupSelectAsync(db, "machine_statuses", "`name` VARCHAR(100) NOT NULL", token);
             return MapList(dt, r => new MachineStatusModel { Id = Convert.ToInt32(r["id"]), Name = r["name"]?.ToString() ?? string.Empty });
         }
+        /// <summary>
+        /// Executes the add machine status async operation.
+        /// </summary>
         public static Task<int> AddMachineStatusAsync(this DatabaseService db, string name, CancellationToken token = default)
             => LookupInsertAsync(db, "machine_statuses", "`name` VARCHAR(100) NOT NULL", name, token);
     }

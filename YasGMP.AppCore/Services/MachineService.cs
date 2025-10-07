@@ -200,9 +200,15 @@ namespace YasGMP.Services
         #endregion
 
         #region === EXTENSIBILITY HOOKS =======================================================
+        /// <summary>
+        /// Executes the link to ppm plan async operation.
+        /// </summary>
 
         public async Task LinkToPpmPlanAsync(int machineId, int ppmPlanId)
             => await _audit.LogSystemEventAsync("MACHINE_PPM_LINK", $"🔗 Povezan PPM Plan ID={ppmPlanId} sa strojem ID={machineId}");
+        /// <summary>
+        /// Executes the trigger initial calibration async operation.
+        /// </summary>
 
         public async Task TriggerInitialCalibrationAsync(int machineId)
             => await _audit.LogSystemEventAsync("MACHINE_CALIBRATION_TRIGGER", $"📌 Automatski trigger kalibracije za stroj ID={machineId}");

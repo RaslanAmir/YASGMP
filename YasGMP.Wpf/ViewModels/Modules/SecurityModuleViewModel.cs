@@ -13,9 +13,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the security module view model value.
+/// </summary>
 
 public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "Security";
 
     private readonly IUserCrudService _userService;
@@ -27,6 +33,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
     private UserEditor? _snapshot;
     private bool _suppressEditorDirty;
     private bool _suppressRoleDirty;
+    /// <summary>
+    /// Initializes a new instance of the SecurityModuleViewModel class.
+    /// </summary>
 
     public SecurityModuleViewModel(
         DatabaseService databaseService,
@@ -52,6 +61,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the role options.
+    /// </summary>
 
     public ReadOnlyObservableCollection<RoleOption> RoleOptions { get; }
 
@@ -573,6 +585,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             value.PropertyChanged += OnEditorPropertyChanged;
         }
     }
+    /// <summary>
+    /// Represents the user editor value.
+    /// </summary>
 
     public sealed partial class UserEditor : ObservableObject
     {
@@ -614,10 +629,19 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
         [ObservableProperty]
         private int[] _roleIds = Array.Empty<int>();
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static UserEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static UserEditor CreateForNew() => new() { Active = true, IsLocked = false, IsTwoFactorEnabled = false };
+        /// <summary>
+        /// Executes the from user operation.
+        /// </summary>
 
         public static UserEditor FromUser(User user)
         {
@@ -636,6 +660,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
                 RoleIds = user.RoleIds?.ToArray() ?? Array.Empty<int>()
             };
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public UserEditor Clone()
         {
@@ -654,6 +681,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
                 RoleIds = RoleIds.ToArray()
             };
         }
+        /// <summary>
+        /// Executes the apply to operation.
+        /// </summary>
 
         public void ApplyTo(User target)
         {
@@ -669,19 +699,34 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             target.IsTwoFactorEnabled = IsTwoFactorEnabled;
         }
     }
+    /// <summary>
+    /// Represents the role option value.
+    /// </summary>
 
     public sealed partial class RoleOption : ObservableObject
     {
+        /// <summary>
+        /// Initializes a new instance of the RoleOption class.
+        /// </summary>
         public RoleOption(int roleId, string name, string? description)
         {
             RoleId = roleId;
             Name = name;
             Description = description ?? string.Empty;
         }
+        /// <summary>
+        /// Gets or sets the role id.
+        /// </summary>
 
         public int RoleId { get; }
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
 
         public string Name { get; }
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
 
         public string Description { get; }
 

@@ -54,6 +54,9 @@ namespace YasGMP.Models
         [Display(Name = "Stroj/oprema")]
         public int? MachineId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the machine.
+        /// </summary>
         [ForeignKey(nameof(MachineId))]
         public Machine? Machine { get; set; }
 
@@ -61,6 +64,9 @@ namespace YasGMP.Models
         [Display(Name = "Komponenta")]
         public int? ComponentId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the component.
+        /// </summary>
         [ForeignKey(nameof(ComponentId))]
         public MachineComponent? Component { get; set; }
 
@@ -68,6 +74,9 @@ namespace YasGMP.Models
         [Display(Name = "Dobavljač")]
         public int? SupplierId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the supplier.
+        /// </summary>
         [ForeignKey(nameof(SupplierId))]
         public Supplier? Supplier { get; set; }
 
@@ -75,6 +84,9 @@ namespace YasGMP.Models
         [Display(Name = "Izvršio korisnik")]
         public int? QualifiedById { get; set; }
 
+        /// <summary>
+        /// Gets or sets the qualified by.
+        /// </summary>
         [ForeignKey(nameof(QualifiedById))]
         public User? QualifiedBy { get; set; }
 
@@ -82,6 +94,9 @@ namespace YasGMP.Models
         [Display(Name = "Odobrio korisnik")]
         public int? ApprovedById { get; set; }
 
+        /// <summary>
+        /// Gets or sets the approved by.
+        /// </summary>
         [ForeignKey(nameof(ApprovedById))]
         public User? ApprovedBy { get; set; }
 
@@ -172,18 +187,39 @@ namespace YasGMP.Models
     /// </summary>
     public class QualificationAuditLog
     {
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
         [Key] public int Id { get; set; }
 
+        /// <summary>
+        /// Executes the qualification operation.
+        /// </summary>
         [Display(Name = "ID kvalifikacije")] public int QualificationId { get; set; }
 
+        /// <summary>
+        /// Executes the timestamp operation.
+        /// </summary>
         [ForeignKey(nameof(QualificationId))] public Qualification? Qualification { get; set; }
 
+        /// <summary>
+        /// Executes the action operation.
+        /// </summary>
         [Display(Name = "Vrijeme događaja")] public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
+        /// <summary>
+        /// Executes the user id operation.
+        /// </summary>
         [Display(Name = "Akcija")] public string? Action { get; set; }
 
+        /// <summary>
+        /// Executes the user operation.
+        /// </summary>
         [Display(Name = "Korisnik")] public int? UserId { get; set; }
 
+        /// <summary>
+        /// Executes the description operation.
+        /// </summary>
         [ForeignKey(nameof(UserId))] public User? User { get; set; }
 
         [Display(Name = "Opis događaja")] public string? Description { get; set; }

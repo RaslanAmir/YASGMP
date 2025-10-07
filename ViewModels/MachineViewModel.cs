@@ -153,13 +153,34 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ==================================================================
+        /// <summary>
+        /// Gets or sets the load machines command.
+        /// </summary>
 
         public ICommand LoadMachinesCommand { get; }
+        /// <summary>
+        /// Gets or sets the add machine command.
+        /// </summary>
         public ICommand AddMachineCommand { get; }
+        /// <summary>
+        /// Gets or sets the update machine command.
+        /// </summary>
         public ICommand UpdateMachineCommand { get; }
+        /// <summary>
+        /// Gets or sets the delete machine command.
+        /// </summary>
         public ICommand DeleteMachineCommand { get; }
+        /// <summary>
+        /// Gets or sets the rollback machine command.
+        /// </summary>
         public ICommand RollbackMachineCommand { get; }
+        /// <summary>
+        /// Gets or sets the export machines command.
+        /// </summary>
         public ICommand ExportMachinesCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

@@ -12,6 +12,9 @@ using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// Represents the database service change controls extensions value.
+    /// </summary>
     public static class DatabaseServiceChangeControlsExtensions
     {
         /// <summary>

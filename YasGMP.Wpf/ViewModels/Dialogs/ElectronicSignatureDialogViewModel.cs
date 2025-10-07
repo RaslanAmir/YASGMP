@@ -18,6 +18,9 @@ namespace YasGMP.Wpf.ViewModels.Dialogs;
 public sealed partial class ElectronicSignatureDialogViewModel : ObservableObject
 {
     private readonly IAuthContext _authContext;
+    /// <summary>
+    /// Initializes a new instance of the ElectronicSignatureDialogViewModel class.
+    /// </summary>
 
     public ElectronicSignatureDialogViewModel(
         IAuthContext authContext,

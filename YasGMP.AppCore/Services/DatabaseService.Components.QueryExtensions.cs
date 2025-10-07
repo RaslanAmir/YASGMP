@@ -13,6 +13,9 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    /// <summary>
+    /// Represents the database service components query extensions value.
+    /// </summary>
     public static class DatabaseServiceComponentsQueryExtensions
     {
         /// <summary>Returns all machine components.</summary>

@@ -132,13 +132,34 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
+        /// <summary>
+        /// Gets or sets the load users command.
+        /// </summary>
 
         public ICommand LoadUsersCommand { get; }
+        /// <summary>
+        /// Gets or sets the add user command.
+        /// </summary>
         public ICommand AddUserCommand { get; }
+        /// <summary>
+        /// Gets or sets the update user command.
+        /// </summary>
         public ICommand UpdateUserCommand { get; }
+        /// <summary>
+        /// Gets or sets the delete user command.
+        /// </summary>
         public ICommand DeleteUserCommand { get; }
+        /// <summary>
+        /// Gets or sets the rollback user command.
+        /// </summary>
         public ICommand RollbackUserCommand { get; }
+        /// <summary>
+        /// Gets or sets the export users command.
+        /// </summary>
         public ICommand ExportUsersCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

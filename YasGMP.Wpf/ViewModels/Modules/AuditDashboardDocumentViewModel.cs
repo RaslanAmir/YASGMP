@@ -20,7 +20,13 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// </summary>
 public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public const string ModuleKey = "AuditDashboard";
+    /// <summary>
+    /// Initializes a new instance of the AuditDashboardDocumentViewModel class.
+    /// </summary>
 
     public AuditDashboardDocumentViewModel(
         AuditService auditService,
@@ -76,14 +82,29 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
 
         PropertyChanged += OnPropertyChanged;
     }
+    /// <summary>
+    /// Gets or sets the apply filter command.
+    /// </summary>
 
     public IAsyncRelayCommand ApplyFilterCommand => _applyFilterCommand;
+    /// <summary>
+    /// Gets or sets the export pdf command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportPdfCommand => _exportPdfCommand;
+    /// <summary>
+    /// Gets or sets the export excel command.
+    /// </summary>
 
     public IAsyncRelayCommand ExportExcelCommand => _exportExcelCommand;
+    /// <summary>
+    /// Gets or sets the dashboard.
+    /// </summary>
 
     public AuditDashboardViewModel Dashboard => _dashboardViewModel;
+    /// <summary>
+    /// Executes the initialize async operation.
+    /// </summary>
 
     public new async Task InitializeAsync(object? parameter = null)
     {

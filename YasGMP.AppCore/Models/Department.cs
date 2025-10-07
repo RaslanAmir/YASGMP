@@ -35,6 +35,9 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the manager.
+        /// </summary>
         [ForeignKey(nameof(ManagerId))]
         public virtual User? Manager { get; set; }
     }

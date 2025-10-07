@@ -17,6 +17,9 @@ namespace YasGMP.Views.Debug
         private readonly DiagnosticContext _ctx;
         private readonly SelfTestRunner _tests;
         private readonly DiagnosticsHub _hub;
+        /// <summary>
+        /// Initializes a new instance of the DebugDashboardPage class.
+        /// </summary>
 
         public DebugDashboardPage()
         {

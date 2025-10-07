@@ -15,9 +15,15 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
+/// <summary>
+/// Represents the validations module view model value.
+/// </summary>
 
 public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
+    /// <summary>
+    /// Represents the module key value.
+    /// </summary>
     public new const string ModuleKey = "Validations";
 
     private readonly IValidationCrudService _validationService;
@@ -31,6 +37,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Machine> _machines = Array.Empty<Machine>();
     private IReadOnlyList<MachineComponent> _components = Array.Empty<MachineComponent>();
+    /// <summary>
+    /// Initializes a new instance of the ValidationsModuleViewModel class.
+    /// </summary>
 
     public ValidationsModuleViewModel(
         DatabaseService databaseService,
@@ -66,14 +75,29 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Gets or sets the machine options.
+    /// </summary>
 
     public ObservableCollection<MachineOption> MachineOptions { get; }
+    /// <summary>
+    /// Gets or sets the component options.
+    /// </summary>
 
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
+    /// <summary>
+    /// Gets or sets the status options.
+    /// </summary>
 
     public ObservableCollection<string> StatusOptions { get; }
+    /// <summary>
+    /// Gets or sets the type options.
+    /// </summary>
 
     public ObservableCollection<string> TypeOptions { get; }
+    /// <summary>
+    /// Gets or sets the attach document command.
+    /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
@@ -667,6 +691,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
+    /// <summary>
+    /// Represents the validation editor value.
+    /// </summary>
 
     public sealed partial class ValidationEditor : ObservableObject
     {
@@ -708,10 +735,19 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
         [ObservableProperty]
         private string _comment = string.Empty;
+        /// <summary>
+        /// Executes the create empty operation.
+        /// </summary>
 
         public static ValidationEditor CreateEmpty() => new();
+        /// <summary>
+        /// Executes the create for new operation.
+        /// </summary>
 
         public static ValidationEditor CreateForNew() => new();
+        /// <summary>
+        /// Executes the from validation operation.
+        /// </summary>
 
         public static ValidationEditor FromValidation(
             Validation validation,
@@ -735,6 +771,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 Comment = validation.Comment ?? string.Empty
             };
         }
+        /// <summary>
+        /// Executes the to validation operation.
+        /// </summary>
 
         public Validation ToValidation(Validation? existing)
         {
@@ -752,6 +791,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             validation.Comment = Comment ?? string.Empty;
             return validation;
         }
+        /// <summary>
+        /// Executes the clone operation.
+        /// </summary>
 
         public ValidationEditor Clone()
             => new()
@@ -789,14 +831,26 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             };
         }
     }
+    /// <summary>
+    /// Executes the struct operation.
+    /// </summary>
 
     public readonly record struct MachineOption(int Id, string Name)
     {
+        /// <summary>
+        /// Executes the to string operation.
+        /// </summary>
         public override string ToString() => Name;
     }
+    /// <summary>
+    /// Executes the struct operation.
+    /// </summary>
 
     public readonly record struct ComponentOption(int Id, string Name)
     {
+        /// <summary>
+        /// Executes the to string operation.
+        /// </summary>
         public override string ToString() => Name;
     }
 }

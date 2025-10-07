@@ -63,6 +63,9 @@ namespace YasGMP.Services
         }
 
         // ---------- Core operations ----------
+        /// <summary>
+        /// Executes the receive stock async operation.
+        /// </summary>
 
         public static async Task ReceiveStockAsync(
             this DatabaseService db,
@@ -113,6 +116,9 @@ VALUES (@p,@w,'in',@q,@u,@doc,@note)";
 
             await db.LogSystemEventAsync(performedById, "STOCK_IN", "stock_levels", "Inventory", partId, $"w={warehouseId}; qty={quantity}; doc={doc}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the issue stock async operation.
+        /// </summary>
 
         public static async Task IssueStockAsync(
             this DatabaseService db,
@@ -158,6 +164,9 @@ VALUES (@p,@w,'out',@q,@u,@doc,@note)";
 
             await db.LogSystemEventAsync(performedById, "STOCK_OUT", "stock_levels", "Inventory", partId, $"w={warehouseId}; qty={quantity}; doc={doc}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the adjust stock async operation.
+        /// </summary>
 
         public static async Task AdjustStockAsync(
             this DatabaseService db,
@@ -203,6 +212,9 @@ VALUES (@p,@w,'adjust',@q,@u,NULL,@note)";
 
             await db.LogSystemEventAsync(performedById, "STOCK_ADJUST", "stock_levels", "Inventory", partId, $"w={warehouseId}; delta={delta}; reason={reason}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the get stock async operation.
+        /// </summary>
 
         public static async Task<int> GetStockAsync(this DatabaseService db, int partId, int warehouseId, CancellationToken token = default)
         {
@@ -212,6 +224,9 @@ VALUES (@p,@w,'adjust',@q,@u,NULL,@note)";
             if (dt.Rows.Count == 0) return 0;
             return Convert.ToInt32(dt.Rows[0]["quantity"]);
         }
+        /// <summary>
+        /// Executes the get stock by warehouse async operation.
+        /// </summary>
 
         public static async Task<Dictionary<int,int>> GetStockByWarehouseAsync(this DatabaseService db, int partId, CancellationToken token = default)
         {
@@ -223,6 +238,9 @@ VALUES (@p,@w,'adjust',@q,@u,NULL,@note)";
                 dict[Convert.ToInt32(r["warehouse_id"])] = Convert.ToInt32(r["quantity"]);
             return dict;
         }
+        /// <summary>
+        /// Executes the task operation.
+        /// </summary>
 
         public static async Task<List<(int warehouseId, string warehouseName, int quantity, int? min, int? max)>> GetStockLevelsForPartAsync(
             this DatabaseService db,
@@ -248,6 +266,9 @@ ORDER BY wname, sl.warehouse_id";
             }
             return list;
         }
+        /// <summary>
+        /// Executes the get inventory movement preview async operation.
+        /// </summary>
 
         public static async Task<System.Data.DataTable> GetInventoryMovementPreviewAsync(
             this DatabaseService db,
@@ -305,6 +326,9 @@ ORDER BY wname, sl.warehouse_id";
 
             return await db.ExecuteSelectAsync(sql.ToString(), parameters, token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the update stock thresholds async operation.
+        /// </summary>
 
         public static Task UpdateStockThresholdsAsync(
             this DatabaseService db,
@@ -324,6 +348,9 @@ ORDER BY wname, sl.warehouse_id";
                     new MySqlParameter("@w", warehouseId)
                 }, token);
         }
+        /// <summary>
+        /// Executes the get inventory transactions for part async operation.
+        /// </summary>
 
         public static async Task<System.Data.DataTable> GetInventoryTransactionsForPartAsync(
             this DatabaseService db,

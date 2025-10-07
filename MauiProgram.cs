@@ -374,7 +374,7 @@ namespace YasGMP
 
     internal static class AppConfigurationHelper
     {
-        public static Microsoft.Extensions.Configuration.IConfiguration LoadMerged()
+        internal static Microsoft.Extensions.Configuration.IConfiguration LoadMerged()
         {
             var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
             try
@@ -395,7 +395,7 @@ namespace YasGMP
 
     internal static class DiagnosticsSinksFactory
     {
-        public static System.Collections.Generic.IEnumerable<YasGMP.Diagnostics.ILogSink> CreateSinks(
+        internal static System.Collections.Generic.IEnumerable<YasGMP.Diagnostics.ILogSink> CreateSinks(
             Microsoft.Extensions.Configuration.IConfiguration cfg,
             YasGMP.Diagnostics.DiagnosticContext ctx)
         {
@@ -422,8 +422,16 @@ namespace YasGMP
     {
         private readonly object _sync = new();
 
+        /// <summary>
+        /// Creates a logger that mirrors framework diagnostics to AppData JSON logs.
+        /// </summary>
+        /// <param name="categoryName">The logging category requested by the framework.</param>
+        /// <returns>A logger instance that writes to the AppData log directory.</returns>
         public ILogger CreateLogger(string categoryName) => new AppDataFileLogger(categoryName, _sync);
 
+        /// <summary>
+        /// Releases resources held by the provider. No-op because only static state is used.
+        /// </summary>
         public void Dispose() { }
 
         internal static void WriteFrameworkLine(string category, string level, string message)
@@ -455,12 +463,18 @@ namespace YasGMP
     {
         private sealed class NullScope : IDisposable
         {
+            /// <summary>Singleton scope instance used when logging does not require additional state.</summary>
             public static readonly NullScope Instance = new();
+
+            /// <summary>Disposes the scope instance (no-op).</summary>
             public void Dispose() { }
         }
 
         private readonly string _category;
         private readonly object _sync;
+        /// <summary>
+        /// Initializes a new instance of the AppDataFileLogger class.
+        /// </summary>
 
         public AppDataFileLogger(string category, object sync)
         {
@@ -468,6 +482,11 @@ namespace YasGMP
             _sync = sync;
         }
 
+        /// <summary>
+        /// Indicates whether logging is enabled for the specified <paramref name="logLevel"/>. Always true for AppData logging.
+        /// </summary>
+        /// <param name="logLevel">The level being queried.</param>
+        /// <returns>Always <see langword="true"/>.</returns>
         public bool IsEnabled(LogLevel logLevel) => true;
 
         IDisposable ILogger.BeginScope<TState>(TState state) => NullScope.Instance;

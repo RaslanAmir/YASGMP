@@ -19,6 +19,9 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceCapaCasesExtensions
     {
+        /// <summary>
+        /// Executes the get all capa cases async operation.
+        /// </summary>
         public static async Task<List<CapaCase>> GetAllCapaCasesAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT 
@@ -32,6 +35,9 @@ FROM capa_cases ORDER BY id DESC";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
+        /// <summary>
+        /// Executes the get capa case by id async operation.
+        /// </summary>
 
         public static async Task<CapaCase?> GetCapaCaseByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -44,6 +50,9 @@ FROM capa_cases WHERE id=@id LIMIT 1";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
         }
+        /// <summary>
+        /// Executes the add capa case async operation.
+        /// </summary>
 
         public static async Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, string signature, string ip, string deviceInfo, string sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -75,6 +84,9 @@ FROM capa_cases WHERE id=@id LIMIT 1";
             await db.LogSystemEventAsync(actorUserId, "CAPA_CREATE", "capa_cases", "CAPA", c.Id, c.Title, ip, "audit", deviceInfo, sessionId, token: token).ConfigureAwait(false);
             return c.Id;
         }
+        /// <summary>
+        /// Executes the add capa case async operation.
+        /// </summary>
 
         public static async Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -99,13 +111,22 @@ FROM capa_cases WHERE id=@id LIMIT 1";
 
             return id;
         }
+        /// <summary>
+        /// Executes the add capa case async operation.
+        /// </summary>
 
         public static Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.AddCapaCaseAsync(c, signatureMetadata, ip, deviceInfo, sessionId, actorUserId: 0, token);
 
         // Overload without actor parameter (VM convenience)
+        /// <summary>
+        /// Executes the add capa case async operation.
+        /// </summary>
         public static Task<int> AddCapaCaseAsync(this DatabaseService db, CapaCase c, string signature, string ip, string deviceInfo, string sessionId, CancellationToken token = default)
             => db.AddCapaCaseAsync(c, signature, ip, deviceInfo, sessionId, actorUserId: 0, token);
+        /// <summary>
+        /// Executes the update capa case async operation.
+        /// </summary>
 
         public static async Task UpdateCapaCaseAsync(this DatabaseService db, CapaCase c, string signature, string ip, string deviceInfo, string sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -134,6 +155,9 @@ FROM capa_cases WHERE id=@id LIMIT 1";
 
             await db.LogSystemEventAsync(actorUserId, "CAPA_UPDATE", "capa_cases", "CAPA", c.Id, c.Title, ip, "audit", deviceInfo, sessionId, token: token).ConfigureAwait(false);
         }
+        /// <summary>
+        /// Executes the update capa case async operation.
+        /// </summary>
 
         public static async Task UpdateCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -156,6 +180,9 @@ FROM capa_cases WHERE id=@id LIMIT 1";
                 await PersistSignatureMetadataAsync(db, signatureMetadata, "capa_cases", c.Id, actorUserId, effectiveDevice, effectiveIp, effectiveSession, token).ConfigureAwait(false);
             }
         }
+        /// <summary>
+        /// Executes the update capa case async operation.
+        /// </summary>
 
         public static Task UpdateCapaCaseAsync(this DatabaseService db, CapaCase c, SignatureMetadataDto? signatureMetadata, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.UpdateCapaCaseAsync(c, signatureMetadata, ip, deviceInfo, sessionId, actorUserId: 0, token);
@@ -198,15 +225,27 @@ FROM capa_cases WHERE id=@id LIMIT 1";
         }
 
         // Overload without actor parameter (VM convenience)
+        /// <summary>
+        /// Executes the update capa case async operation.
+        /// </summary>
         public static Task UpdateCapaCaseAsync(this DatabaseService db, CapaCase c, string signature, string ip, string deviceInfo, string sessionId, CancellationToken token = default)
             => db.UpdateCapaCaseAsync(c, signature, ip, deviceInfo, sessionId, actorUserId: 0, token);
 
         // Additional helpers expected by CapaCaseViewModel
+        /// <summary>
+        /// Executes the log capa case audit async operation.
+        /// </summary>
         public static Task LogCapaCaseAuditAsync(this DatabaseService db, int capaId, string action, int actorUserId, string ip, string deviceInfo, string? sessionId, string? details, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, $"CAPA_{action}", "capa_cases", "CAPA", capaId, details, ip, "audit", deviceInfo, sessionId, token: token);
+        /// <summary>
+        /// Executes the rollback capa case async operation.
+        /// </summary>
 
         public static Task RollbackCapaCaseAsync(this DatabaseService db, int capaId, string ip, string deviceInfo, string? sessionId, int actorUserId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "CAPA_ROLLBACK", "capa_cases", "CAPA", capaId, null, ip, "audit", deviceInfo, sessionId, token: token);
+        /// <summary>
+        /// Executes the export capa cases async operation.
+        /// </summary>
 
         public static Task ExportCapaCasesAsync(this DatabaseService db, System.Collections.Generic.List<CapaCase> items, string ip, string deviceInfo, string? sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -224,10 +263,16 @@ FROM capa_cases WHERE id=@id LIMIT 1";
         }
 
         // Convenience overload (no audit context)
+        /// <summary>
+        /// Executes the export capa cases async operation.
+        /// </summary>
         public static Task ExportCapaCasesAsync(this DatabaseService db, System.Collections.Generic.List<CapaCase> items, string format, CancellationToken token = default)
             => db.ExportCapaCasesAsync(items, format, actorUserId: 0, ip: string.Empty, deviceInfo: string.Empty, sessionId: null, token: token);
 
         // Primary overload with explicit format and audit context
+        /// <summary>
+        /// Executes the export capa cases async operation.
+        /// </summary>
         public static Task ExportCapaCasesAsync(this DatabaseService db, System.Collections.Generic.List<CapaCase> items, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             string? path = null;
@@ -273,19 +318,34 @@ FROM capa_cases WHERE id=@id LIMIT 1";
         }
 
         // Back-compat overloads expected by ViewModel
+        /// <summary>
+        /// Executes the rollback capa case async operation.
+        /// </summary>
         public static Task RollbackCapaCaseAsync(this DatabaseService db, int capaId, string signature, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
             => db.RollbackCapaCaseAsync(capaId, ip, deviceInfo, sessionId: null, actorUserId: actorUserId, token: token);
 
         // (Removed legacy duplicate overload)
+        /// <summary>
+        /// Executes the escalate capa case async operation.
+        /// </summary>
 
         public static Task EscalateCapaCaseAsync(this DatabaseService db, int capaId, int actorUserId, string ip, string deviceInfo, string? sessionId, string? reason = null, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "CAPA_ESCALATE", "capa_cases", "CAPA", capaId, reason, ip, "warn", deviceInfo, sessionId, token: token);
+        /// <summary>
+        /// Executes the approve capa case async operation.
+        /// </summary>
 
         public static Task ApproveCapaCaseAsync(this DatabaseService db, int capaId, int actorUserId, string ip, string deviceInfo, string? sessionId, string? note = null, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "CAPA_APPROVE", "capa_cases", "CAPA", capaId, note, ip, "audit", deviceInfo, sessionId, token: token);
+        /// <summary>
+        /// Executes the reject capa case async operation.
+        /// </summary>
 
         public static Task RejectCapaCaseAsync(this DatabaseService db, int capaId, int actorUserId, string ip, string deviceInfo, string signatureHash, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "CAPA_REJECT", "capa_cases", "CAPA", capaId, $"sig={signatureHash}", ip, "audit", deviceInfo, null, token: token);
+        /// <summary>
+        /// Executes the delete capa case async operation.
+        /// </summary>
 
         public static async Task DeleteCapaCaseAsync(this DatabaseService db, int id, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
         {

@@ -22,17 +22,29 @@ namespace YasGMP.Wpf.Services;
 public sealed class ChangeControlCrudServiceAdapter : IChangeControlCrudService
 {
     private readonly ChangeControlService _service;
+    /// <summary>
+    /// Initializes a new instance of the ChangeControlCrudServiceAdapter class.
+    /// </summary>
 
     public ChangeControlCrudServiceAdapter(ChangeControlService service)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
+    /// <summary>
+    /// Executes the get all async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<ChangeControl>> GetAllAsync()
         => await _service.GetAllAsync().ConfigureAwait(false);
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<ChangeControl?> TryGetByIdAsync(int id)
         => await _service.TryGetByIdAsync(id).ConfigureAwait(false);
+    /// <summary>
+    /// Executes the create async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
     {
@@ -55,6 +67,9 @@ public sealed class ChangeControlCrudServiceAdapter : IChangeControlCrudService
         changeControl.Id = id;
         return new CrudSaveResult(id, metadata);
     }
+    /// <summary>
+    /// Executes the update async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
     {
@@ -76,6 +91,9 @@ public sealed class ChangeControlCrudServiceAdapter : IChangeControlCrudService
             .ConfigureAwait(false);
         return new CrudSaveResult(changeControl.Id, metadata);
     }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(ChangeControl changeControl)
     {
@@ -86,6 +104,9 @@ public sealed class ChangeControlCrudServiceAdapter : IChangeControlCrudService
 
         _service.Validate(changeControl);
     }
+    /// <summary>
+    /// Executes the normalize status operation.
+    /// </summary>
 
     public string NormalizeStatus(string? status) => _service.NormalizeStatus(status);
 

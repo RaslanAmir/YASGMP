@@ -76,6 +76,9 @@ namespace YasGMP.Services
         #endregion
 
         #region === STOCK MANAGEMENT ===
+        /// <summary>
+        /// Executes the increase stock async operation.
+        /// </summary>
 
         public async Task IncreaseStockAsync(int partId, int amount, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
@@ -86,6 +89,9 @@ namespace YasGMP.Services
             await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
             await _audit.LogSystemEventAsync("PART_STOCK_INCREASE", $"Povećana zaliha za dio ID={part.Id} za {amount}, nova zaliha={part.Stock}");
         }
+        /// <summary>
+        /// Executes the decrease stock async operation.
+        /// </summary>
 
         public async Task DecreaseStockAsync(int partId, int amount, int userId, SignatureMetadataDto? signatureMetadata = null)
         {

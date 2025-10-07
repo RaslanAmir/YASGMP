@@ -45,6 +45,9 @@ namespace YasGMP.ViewModels
         #region === Header / System info ===
 
         private string _headerSubtitle = string.Empty;
+        /// <summary>
+        /// Represents the header subtitle value.
+        /// </summary>
         public string HeaderSubtitle
         {
             get => _headerSubtitle;
@@ -52,6 +55,9 @@ namespace YasGMP.ViewModels
         }
 
         private string _appVersion = string.Empty;
+        /// <summary>
+        /// Represents the app version value.
+        /// </summary>
         public string AppVersion
         {
             get => _appVersion;
@@ -59,6 +65,9 @@ namespace YasGMP.ViewModels
         }
 
         private string _osVersion = Environment.OSVersion.ToString();
+        /// <summary>
+        /// Represents the os version value.
+        /// </summary>
         public string OsVersion
         {
             get => _osVersion;
@@ -66,6 +75,9 @@ namespace YasGMP.ViewModels
         }
 
         private string _hostName = Environment.MachineName;
+        /// <summary>
+        /// Represents the host name value.
+        /// </summary>
         public string HostName
         {
             get => _hostName;
@@ -73,6 +85,9 @@ namespace YasGMP.ViewModels
         }
 
         private string _userName = Environment.UserName;
+        /// <summary>
+        /// Represents the user name value.
+        /// </summary>
         public string UserName
         {
             get => _userName;
@@ -80,6 +95,9 @@ namespace YasGMP.ViewModels
         }
 
         private string _localIp = "127.0.0.1";
+        /// <summary>
+        /// Represents the local ip value.
+        /// </summary>
         public string LocalIp
         {
             get => _localIp;
@@ -125,10 +143,16 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Users ===
+        /// <summary>
+        /// Gets or sets the users.
+        /// </summary>
 
         public ObservableCollection<User> Users { get; } = new();
 
         private string _userFilter = string.Empty;
+        /// <summary>
+        /// Represents the user filter value.
+        /// </summary>
         public string UserFilter
         {
             get => _userFilter;
@@ -136,6 +160,9 @@ namespace YasGMP.ViewModels
         }
 
         private User? _selectedUser;
+        /// <summary>
+        /// Represents the selected user value.
+        /// </summary>
         public User? SelectedUser
         {
             get => _selectedUser;
@@ -156,10 +183,16 @@ namespace YasGMP.ViewModels
                 }
             }
         }
+        /// <summary>
+        /// Gets or sets the has selected user.
+        /// </summary>
 
         public bool HasSelectedUser => SelectedUser != null;
 
         private string _editUsername = string.Empty;
+        /// <summary>
+        /// Represents the edit username value.
+        /// </summary>
         public string EditUsername
         {
             get => _editUsername;
@@ -167,6 +200,9 @@ namespace YasGMP.ViewModels
         }
 
         private string _editRole = string.Empty;
+        /// <summary>
+        /// Represents the edit role value.
+        /// </summary>
         public string EditRole
         {
             get => _editRole;
@@ -174,12 +210,18 @@ namespace YasGMP.ViewModels
         }
 
         private string _editPassword = string.Empty;
+        /// <summary>
+        /// Represents the edit password value.
+        /// </summary>
         public string EditPassword
         {
             get => _editPassword;
             set => SetProperty(ref _editPassword, value);
         }
 
+        /// <summary>
+        /// Executes the load users async operation.
+        /// </summary>
         [RelayCommand]
         public async Task LoadUsersAsync()
         {
@@ -208,6 +250,9 @@ namespace YasGMP.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes the save user async operation.
+        /// </summary>
         [RelayCommand]
         public async Task SaveUserAsync()
         {
@@ -255,6 +300,9 @@ namespace YasGMP.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes the lock selected async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task LockSelectedAsync()
         {
@@ -264,6 +312,9 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the unlock selected async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task UnlockSelectedAsync()
         {
@@ -274,6 +325,9 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the reset password async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task ResetPasswordAsync()
         {
@@ -298,6 +352,9 @@ namespace YasGMP.ViewModels
             await _audit.LogEntityAuditAsync("users", SelectedUser.Id, "RESET_PASSWORD_UI", "Resetirana lozinka kroz Admin UI").ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the deactivate user async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task DeactivateUserAsync(User? user)
         {
@@ -309,6 +366,9 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the delete user async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task DeleteUserAsync(User? user)
         {
@@ -325,6 +385,9 @@ namespace YasGMP.ViewModels
             await LoadUsersAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the enable2 fa async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task Enable2FaAsync()
         {
@@ -333,6 +396,9 @@ namespace YasGMP.ViewModels
             await _audit.LogEntityAuditAsync("users", SelectedUser.Id, "ENABLE_2FA_UI", "Omogućen 2FA kroz Admin UI").ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the disable2 fa async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task Disable2FaAsync()
         {
@@ -341,6 +407,9 @@ namespace YasGMP.ViewModels
             await _audit.LogEntityAuditAsync("users", SelectedUser.Id, "DISABLE_2FA_UI", "Onemogućen 2FA kroz Admin UI").ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the edit user async operation.
+        /// </summary>
         [RelayCommand]
         public async Task EditUserAsync(User? user)
         {
@@ -354,6 +423,9 @@ namespace YasGMP.ViewModels
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Executes the export users async operation.
+        /// </summary>
         [RelayCommand]
         public async Task ExportUsersAsync()
         {
@@ -365,10 +437,16 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === RBAC · Roles / Permissions / Assignments ===
+        /// <summary>
+        /// Gets or sets the roles.
+        /// </summary>
 
         public ObservableCollection<Role> Roles { get; } = new();
 
         private string _roleFilter = string.Empty;
+        /// <summary>
+        /// Represents the role filter value.
+        /// </summary>
         public string RoleFilter
         {
             get => _roleFilter;
@@ -376,6 +454,9 @@ namespace YasGMP.ViewModels
         }
 
         private Role? _selectedRole;
+        /// <summary>
+        /// Represents the selected role value.
+        /// </summary>
         public Role? SelectedRole
         {
             get => _selectedRole;
@@ -415,11 +496,20 @@ namespace YasGMP.ViewModels
         }
 
         private List<Permission> _allPermissions = new();
+        /// <summary>
+        /// Gets or sets the available permissions.
+        /// </summary>
 
         public ObservableCollection<Permission> AvailablePermissions { get; } = new();
+        /// <summary>
+        /// Gets or sets the role permissions.
+        /// </summary>
         public ObservableCollection<Permission> RolePermissions { get; } = new();
 
         private string _permissionFilter = string.Empty;
+        /// <summary>
+        /// Represents the permission filter value.
+        /// </summary>
         public string PermissionFilter
         {
             get => _permissionFilter;
@@ -433,6 +523,9 @@ namespace YasGMP.ViewModels
         }
 
         private Permission? _selectedAvailablePermission;
+        /// <summary>
+        /// Represents the selected available permission value.
+        /// </summary>
         public Permission? SelectedAvailablePermission
         {
             get => _selectedAvailablePermission;
@@ -440,16 +533,28 @@ namespace YasGMP.ViewModels
         }
 
         private Permission? _selectedRolePermission;
+        /// <summary>
+        /// Represents the selected role permission value.
+        /// </summary>
         public Permission? SelectedRolePermission
         {
             get => _selectedRolePermission;
             set => SetProperty(ref _selectedRolePermission, value);
         }
+        /// <summary>
+        /// Gets or sets the assigned roles for user.
+        /// </summary>
 
         public ObservableCollection<Role> AssignedRolesForUser { get; } = new();
+        /// <summary>
+        /// Gets or sets the available roles for user.
+        /// </summary>
         public ObservableCollection<Role> AvailableRolesForUser { get; } = new();
 
         private Role? _selectedAvailableRoleForUser;
+        /// <summary>
+        /// Represents the selected available role for user value.
+        /// </summary>
         public Role? SelectedAvailableRoleForUser
         {
             get => _selectedAvailableRoleForUser;
@@ -457,11 +562,17 @@ namespace YasGMP.ViewModels
         }
 
         private Role? _selectedAssignedRoleForUser;
+        /// <summary>
+        /// Represents the selected assigned role for user value.
+        /// </summary>
         public Role? SelectedAssignedRoleForUser
         {
             get => _selectedAssignedRoleForUser;
             set => SetProperty(ref _selectedAssignedRoleForUser, value);
         }
+        /// <summary>
+        /// Gets or sets the selected user permissions.
+        /// </summary>
 
         public ObservableCollection<string> SelectedUserPermissions { get; } = new();
 
@@ -472,6 +583,9 @@ namespace YasGMP.ViewModels
             _ = LoadSelectedUserPermissionsAsync();
         }
 
+        /// <summary>
+        /// Executes the load roles async operation.
+        /// </summary>
         [RelayCommand]
         public async Task LoadRolesAsync()
         {
@@ -547,6 +661,9 @@ namespace YasGMP.ViewModels
             });
         }
 
+        /// <summary>
+        /// Executes the new role async operation.
+        /// </summary>
         [RelayCommand]
         public async Task NewRoleAsync()
         {
@@ -557,6 +674,9 @@ namespace YasGMP.ViewModels
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Executes the save role async operation.
+        /// </summary>
         [RelayCommand]
         public async Task SaveRoleAsync()
         {
@@ -601,6 +721,9 @@ namespace YasGMP.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes the delete role async operation.
+        /// </summary>
         [RelayCommand]
         public async Task DeleteRoleAsync(Role? role)
         {
@@ -617,6 +740,9 @@ namespace YasGMP.ViewModels
             await LoadRolesAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the add permission to role async operation.
+        /// </summary>
         [RelayCommand]
         public async Task AddPermissionToRoleAsync(Permission? p)
         {
@@ -627,6 +753,9 @@ namespace YasGMP.ViewModels
             await RefreshRolePermissionListsAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the remove permission from role async operation.
+        /// </summary>
         [RelayCommand]
         public async Task RemovePermissionFromRoleAsync(Permission? p)
         {
@@ -637,6 +766,9 @@ namespace YasGMP.ViewModels
             await RefreshRolePermissionListsAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the assign role to user async operation.
+        /// </summary>
         [RelayCommand]
         public async Task AssignRoleToUserAsync(Role? r)
         {
@@ -647,6 +779,9 @@ namespace YasGMP.ViewModels
             await RefreshUserRoleListsAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the remove role from user async operation.
+        /// </summary>
         [RelayCommand]
         public async Task RemoveRoleFromUserAsync(Role? r)
         {
@@ -657,6 +792,9 @@ namespace YasGMP.ViewModels
             await RefreshUserRoleListsAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the load selected user permissions async operation.
+        /// </summary>
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         public async Task LoadSelectedUserPermissionsAsync()
         {
@@ -684,12 +822,18 @@ namespace YasGMP.ViewModels
         #region === Diagnostics / Tools ===
 
         private string _dbTestResult = string.Empty;
+        /// <summary>
+        /// Represents the db test result value.
+        /// </summary>
         public string DbTestResult
         {
             get => _dbTestResult;
             set => SetProperty(ref _dbTestResult, value);
         }
 
+        /// <summary>
+        /// Executes the test db async operation.
+        /// </summary>
         [RelayCommand]
         public async Task TestDbAsync()
         {
@@ -704,6 +848,9 @@ namespace YasGMP.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes the force audit snapshot async operation.
+        /// </summary>
         [RelayCommand]
         public async Task ForceAuditSnapshotAsync()
         {
@@ -711,6 +858,9 @@ namespace YasGMP.ViewModels
             await Services.SafeNavigator.ShowAlertAsync("Tool", "Audit snapshot recorded.", "OK").ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the record system note async operation.
+        /// </summary>
         [RelayCommand]
         public async Task RecordSystemNoteAsync()
         {
@@ -718,6 +868,9 @@ namespace YasGMP.ViewModels
             await Services.SafeNavigator.ShowAlertAsync("Note", "System note recorded.", "OK").ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the refresh all async operation.
+        /// </summary>
         [RelayCommand]
         public async Task RefreshAllAsync()
         {
@@ -727,6 +880,9 @@ namespace YasGMP.ViewModels
             if (HasSelectedUser) await LoadSelectedUserPermissionsAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the open audit async operation.
+        /// </summary>
         [RelayCommand]
         public async Task OpenAuditAsync()
         {

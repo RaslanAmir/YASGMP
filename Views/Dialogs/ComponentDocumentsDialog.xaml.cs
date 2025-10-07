@@ -17,13 +17,22 @@ namespace YasGMP.Views.Dialogs
     public partial class ComponentDocumentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
         private readonly IAttachmentService _attachments;
         private readonly int _componentId;
+        /// <summary>
+        /// Gets or sets the documents.
+        /// </summary>
 
         public ObservableCollection<DocRow> Documents { get; } = new();
+        /// <summary>
+        /// Initializes a new instance of the ComponentDocumentsDialog class.
+        /// </summary>
 
         public ComponentDocumentsDialog(DatabaseService db, int componentId, IAttachmentService? attachmentService = null)
         {
@@ -94,16 +103,37 @@ namespace YasGMP.Views.Dialogs
             _tcs.TrySetResult(true);
             await Navigation.PopModalAsync();
         }
+        /// <summary>
+        /// Represents the Doc Row.
+        /// </summary>
 
         public sealed class DocRow
         {
             private readonly IAttachmentService _attachments;
+            /// <summary>
+            /// Gets or sets the link id.
+            /// </summary>
             public int LinkId { get; }
+            /// <summary>
+            /// Gets or sets the attachment id.
+            /// </summary>
             public int AttachmentId { get; }
+            /// <summary>
+            /// Gets or sets the file name.
+            /// </summary>
             public string FileName { get; }
+            /// <summary>
+            /// Gets or sets the open command.
+            /// </summary>
             public Command OpenCommand { get; }
+            /// <summary>
+            /// Gets or sets the remove command.
+            /// </summary>
             public Command RemoveCommand { get; }
             private readonly Func<Task> _onChanged;
+            /// <summary>
+            /// Initializes a new instance of the DocRow class.
+            /// </summary>
 
             public DocRow(IAttachmentService attachments, AttachmentLinkWithAttachment row, Func<Task> onChanged)
             {

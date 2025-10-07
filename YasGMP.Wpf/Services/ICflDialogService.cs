@@ -43,13 +43,22 @@ public interface ICflDialogService
 /// </remarks>
 public sealed class CflRequest
 {
+    /// <summary>
+    /// Initializes a new instance of the CflRequest class.
+    /// </summary>
     public CflRequest(string title, IReadOnlyList<CflItem> items)
     {
         Title = title;
         Items = items;
     }
+    /// <summary>
+    /// Gets or sets the title.
+    /// </summary>
 
     public string Title { get; }
+    /// <summary>
+    /// Gets or sets the items.
+    /// </summary>
 
     public IReadOnlyList<CflItem> Items { get; }
 }
@@ -66,16 +75,28 @@ public sealed class CflRequest
 /// </remarks>
 public sealed class CflItem
 {
+    /// <summary>
+    /// Initializes a new instance of the CflItem class.
+    /// </summary>
     public CflItem(string key, string label, string? description = null)
     {
         Key = key;
         Label = label;
         Description = description ?? string.Empty;
     }
+    /// <summary>
+    /// Gets or sets the key.
+    /// </summary>
 
     public string Key { get; }
+    /// <summary>
+    /// Gets or sets the label.
+    /// </summary>
 
     public string Label { get; }
+    /// <summary>
+    /// Gets or sets the description.
+    /// </summary>
 
     public string Description { get; }
 }
@@ -91,10 +112,16 @@ public sealed class CflItem
 /// </remarks>
 public sealed class CflResult
 {
+    /// <summary>
+    /// Initializes a new instance of the CflResult class.
+    /// </summary>
     public CflResult(CflItem selected)
     {
         Selected = selected;
     }
+    /// <summary>
+    /// Gets or sets the selected.
+    /// </summary>
 
     public CflItem Selected { get; }
 }

@@ -26,20 +26,32 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 {
     private readonly SupplierService _supplierService;
     private readonly DatabaseService _databaseService;
+    /// <summary>
+    /// Initializes a new instance of the SupplierCrudServiceAdapter class.
+    /// </summary>
 
     public SupplierCrudServiceAdapter(SupplierService supplierService, DatabaseService databaseService)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
     }
+    /// <summary>
+    /// Executes the get all async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<Supplier>> GetAllAsync()
     {
         var suppliers = await _supplierService.GetAllAsync().ConfigureAwait(false);
         return suppliers.AsReadOnly();
     }
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public Task<Supplier?> TryGetByIdAsync(int id) => _supplierService.GetByIdAsync(id);
+    /// <summary>
+    /// Executes the create async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(Supplier supplier, SupplierCrudContext context)
     {
@@ -57,6 +69,9 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
         await StampAsync(supplier, context, "CREATE", signature).ConfigureAwait(false);
         return new CrudSaveResult(supplier.Id, metadata);
     }
+    /// <summary>
+    /// Executes the update async operation.
+    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(Supplier supplier, SupplierCrudContext context)
     {
@@ -74,6 +89,9 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
         await StampAsync(supplier, context, "UPDATE", signature).ConfigureAwait(false);
         return new CrudSaveResult(supplier.Id, metadata);
     }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(Supplier supplier)
     {
@@ -103,6 +121,9 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
             throw new InvalidOperationException("Contract end cannot precede its start date.");
         }
     }
+    /// <summary>
+    /// Executes the normalize status operation.
+    /// </summary>
 
     public string NormalizeStatus(string? status) => SupplierCrudExtensions.NormalizeStatusDefault(status);
 

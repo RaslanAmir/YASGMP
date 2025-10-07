@@ -8,6 +8,9 @@ namespace YasGMP.Wpf.Services
     /// </summary>
     public sealed class DatabaseOptions
     {
+        /// <summary>
+        /// Initializes a new instance of the DatabaseOptions class.
+        /// </summary>
         public DatabaseOptions(string connectionString)
         {
             if (string.IsNullOrWhiteSpace(connectionString))

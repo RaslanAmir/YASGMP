@@ -66,70 +66,127 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Properties ===
+        /// <summary>
+        /// Represents the cap as value.
+        /// </summary>
 
         public ObservableCollection<CAPA> CAPAs
         {
             get => _capas;
             set { _capas = value ?? new(); OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the filtered cap as value.
+        /// </summary>
 
         public ObservableCollection<CAPA> FilteredCAPAs
         {
             get => _filteredCapas;
             set { _filteredCapas = value ?? new(); OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the selected capa value.
+        /// </summary>
 
         public CAPA? SelectedCAPA
         {
             get => _selectedCAPA;
             set { _selectedCAPA = value; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the search term value.
+        /// </summary>
 
         public string? SearchTerm
         {
             get => _searchTerm;
             set { _searchTerm = value; OnPropertyChanged(); FilterCAPAs(); }
         }
+        /// <summary>
+        /// Represents the status filter value.
+        /// </summary>
 
         public string? StatusFilter
         {
             get => _statusFilter;
             set { _statusFilter = value; OnPropertyChanged(); FilterCAPAs(); }
         }
+        /// <summary>
+        /// Represents the type filter value.
+        /// </summary>
 
         public string? TypeFilter
         {
             get => _typeFilter;
             set { _typeFilter = value; OnPropertyChanged(); FilterCAPAs(); }
         }
+        /// <summary>
+        /// Represents the is busy value.
+        /// </summary>
 
         public bool IsBusy
         {
             get => _isBusy;
             set { _isBusy = value; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Represents the status message value.
+        /// </summary>
 
         public string? StatusMessage
         {
             get => _statusMessage;
             set { _statusMessage = value; OnPropertyChanged(); }
         }
+        /// <summary>
+        /// Gets or sets the available statuses.
+        /// </summary>
 
         public string[] AvailableStatuses => new[] { "initiated", "in_progress", "pending_approval", "escalated", "effectiveness_check", "closed", "rejected" };
+        /// <summary>
+        /// Gets or sets the available types.
+        /// </summary>
         public string[] AvailableTypes => new[] { "corrective", "preventive", "supplier", "internal", "external" };
 
         #endregion
 
         #region === Commands ===
+        /// <summary>
+        /// Gets or sets the load cap as command.
+        /// </summary>
 
         public ICommand LoadCAPAsCommand { get; }
+        /// <summary>
+        /// Gets or sets the initiate capa command.
+        /// </summary>
         public ICommand InitiateCAPACommand { get; }
+        /// <summary>
+        /// Gets or sets the approve capa command.
+        /// </summary>
         public ICommand ApproveCAPACommand { get; }
+        /// <summary>
+        /// Gets or sets the assign capa command.
+        /// </summary>
         public ICommand AssignCAPACommand { get; }
+        /// <summary>
+        /// Gets or sets the update capa command.
+        /// </summary>
         public ICommand UpdateCAPACommand { get; }
+        /// <summary>
+        /// Gets or sets the escalate capa command.
+        /// </summary>
         public ICommand EscalateCAPACommand { get; }
+        /// <summary>
+        /// Gets or sets the close capa command.
+        /// </summary>
         public ICommand CloseCAPACommand { get; }
+        /// <summary>
+        /// Gets or sets the export cap as command.
+        /// </summary>
         public ICommand ExportCAPAsCommand { get; }
+        /// <summary>
+        /// Gets or sets the filter changed command.
+        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

@@ -114,6 +114,9 @@ namespace YasGMP.Diagnostics
 
         private sealed class HarnessAuthContext : IAuthContext
         {
+            /// <summary>
+            /// Initializes a new instance of the HarnessAuthContext class.
+            /// </summary>
             public HarnessAuthContext()
             {
                 CurrentUser = new User
@@ -125,13 +128,31 @@ namespace YasGMP.Diagnostics
                 };
                 CurrentSessionId = Guid.NewGuid().ToString();
             }
+            /// <summary>
+            /// Gets or sets the current user.
+            /// </summary>
 
             public User? CurrentUser { get; }
+            /// <summary>
+            /// Gets or sets the current session id.
+            /// </summary>
             public string CurrentSessionId { get; }
+            /// <summary>
+            /// Gets or sets the current device info.
+            /// </summary>
             public string CurrentDeviceInfo { get; } = "Device=Harness;OS=Linux;App=Diagnostics";
+            /// <summary>
+            /// Gets or sets the current ip address.
+            /// </summary>
             public string CurrentIpAddress { get; } = "127.0.0.1";
+            /// <summary>
+            /// Gets or sets the initial assignee id.
+            /// </summary>
 
             public int InitialAssigneeId => 2001;
+            /// <summary>
+            /// Gets or sets the reassignment assignee id.
+            /// </summary>
             public int ReassignmentAssigneeId => 2002;
         }
     }

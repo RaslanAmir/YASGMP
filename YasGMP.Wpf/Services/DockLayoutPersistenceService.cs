@@ -11,6 +11,9 @@ namespace YasGMP.Wpf.Services
     {
         private readonly string _connectionString;
         private readonly IUserSession _session;
+        /// <summary>
+        /// Initializes a new instance of the DockLayoutPersistenceService class.
+        /// </summary>
 
         public DockLayoutPersistenceService(DatabaseOptions options, IUserSession session)
         {
@@ -18,6 +21,9 @@ namespace YasGMP.Wpf.Services
             _connectionString = options.ConnectionString;
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
+        /// <summary>
+        /// Executes the load async operation.
+        /// </summary>
 
         public async Task<LayoutSnapshot?> LoadAsync(string layoutKey, CancellationToken token = default)
         {
@@ -52,6 +58,9 @@ LIMIT 1;";
 
             return new LayoutSnapshot(layoutXml, posX, posY, width, height);
         }
+        /// <summary>
+        /// Executes the save async operation.
+        /// </summary>
 
         public async Task SaveAsync(string layoutKey, string layoutXml, WindowGeometry geometry, CancellationToken token = default)
         {
@@ -86,11 +95,20 @@ saved_at=UTC_TIMESTAMP();";
 
         private MySqlConnection CreateConnection() => new(_connectionString);
     }
+    /// <summary>
+    /// Executes the struct operation.
+    /// </summary>
 
     public readonly record struct WindowGeometry(double? Left, double? Top, double? Width, double? Height);
+    /// <summary>
+    /// Executes the struct operation.
+    /// </summary>
 
     public readonly record struct LayoutSnapshot(string LayoutXml, double? Left, double? Top, double? Width, double? Height)
     {
+        /// <summary>
+        /// Executes the geometry operation.
+        /// </summary>
         public WindowGeometry Geometry => new(Left, Top, Width, Height);
     }
 }

@@ -15,12 +15,21 @@ namespace YasGMP.Views.Dialogs
     public partial class MachineComponentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
+        /// <summary>
+        /// Gets or sets the result.
+        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
         private readonly int _machineId;
+        /// <summary>
+        /// Gets or sets the components.
+        /// </summary>
 
         public ObservableCollection<ComponentRow> Components { get; } = new();
+        /// <summary>
+        /// Initializes a new instance of the MachineComponentsDialog class.
+        /// </summary>
 
         public MachineComponentsDialog(DatabaseService db, int machineId)
         {
@@ -166,21 +175,51 @@ namespace YasGMP.Views.Dialogs
             _tcs.TrySetResult(true);
             await Navigation.PopModalAsync();
         }
+        /// <summary>
+        /// Represents the Component Row.
+        /// </summary>
 
         public sealed class ComponentRow
         {
             private readonly DatabaseService _db;
             private readonly MachineComponent _mc;
             private readonly Func<Task> _onChanged;
+            /// <summary>
+            /// Executes the name operation.
+            /// </summary>
 
             public string Name => string.IsNullOrWhiteSpace(_mc?.Name) ? _mc?.Code ?? string.Empty : _mc!.Name;
+            /// <summary>
+            /// Gets or sets the calibrate command.
+            /// </summary>
             public Command CalibrateCommand { get; }
+            /// <summary>
+            /// Gets or sets the calibrate command2.
+            /// </summary>
             public Command CalibrateCommand2 { get; }
+            /// <summary>
+            /// Gets or sets the edit command.
+            /// </summary>
             public Command EditCommand { get; }
+            /// <summary>
+            /// Gets or sets the remove command.
+            /// </summary>
             public Command RemoveCommand { get; }
+            /// <summary>
+            /// Gets or sets the remove or detach command.
+            /// </summary>
             public Command RemoveOrDetachCommand { get; }
+            /// <summary>
+            /// Gets or sets the docs command.
+            /// </summary>
             public Command DocsCommand { get; }
+            /// <summary>
+            /// Gets or sets the docs count.
+            /// </summary>
             public int DocsCount { get; private set; }
+            /// <summary>
+            /// Initializes a new instance of the ComponentRow class.
+            /// </summary>
 
             public ComponentRow(DatabaseService db, MachineComponent mc, Func<Task> onChanged, int docsCount)
             {

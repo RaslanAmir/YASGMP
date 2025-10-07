@@ -22,14 +22,23 @@ namespace YasGMP.Wpf.Services;
 public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
 {
     private readonly CalibrationService _inner;
+    /// <summary>
+    /// Initializes a new instance of the CalibrationCrudServiceAdapter class.
+    /// </summary>
 
     public CalibrationCrudServiceAdapter(CalibrationService inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }
+    /// <summary>
+    /// Executes the get all async operation.
+    /// </summary>
 
     public async Task<IReadOnlyList<Calibration>> GetAllAsync()
         => await _inner.GetAllAsync().ConfigureAwait(false);
+    /// <summary>
+    /// Executes the try get by id async operation.
+    /// </summary>
 
     public async Task<Calibration?> TryGetByIdAsync(int id)
     {
@@ -42,6 +51,9 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             return null;
         }
     }
+        /// <summary>
+        /// Executes the create async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Calibration calibration, CalibrationCrudContext context)
         {
@@ -56,6 +68,9 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             calibration.DigitalSignature = signature;
             return new CrudSaveResult(calibration.Id, metadata);
         }
+        /// <summary>
+        /// Executes the update async operation.
+        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Calibration calibration, CalibrationCrudContext context)
         {
@@ -70,6 +85,9 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             calibration.DigitalSignature = signature;
             return new CrudSaveResult(calibration.Id, metadata);
         }
+    /// <summary>
+    /// Executes the validate operation.
+    /// </summary>
 
     public void Validate(Calibration calibration)
     {

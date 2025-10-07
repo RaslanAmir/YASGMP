@@ -11,6 +11,9 @@ namespace YasGMP.Wpf.Resources;
 /// </summary>
 public class LocalizedResourceDictionary : ResourceDictionary
 {
+    /// <summary>
+    /// Initializes a new instance of the LocalizedResourceDictionary class.
+    /// </summary>
     public LocalizedResourceDictionary() => LocalizationManager.Register(this);
 
     internal void UpdateResources(ResourceManager resourceManager, CultureInfo culture)
