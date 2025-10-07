@@ -106,4 +106,22 @@
     <sys:String x:Key="Module.Attachments.Button.PickFiles.AutomationId">Attachments.Toolbar.PickFiles</sys:String>
     <sys:String x:Key="Module.Scheduling.Button.ExecuteNow.AutomationId">Scheduling.Toolbar.ExecuteNow</sys:String>
     <sys:String x:Key="Module.Scheduling.Button.Acknowledge.AutomationId">Scheduling.Toolbar.Acknowledge</sys:String>
+
+    <sys:String x:Key="Shell.StatusBar.Container.AutomationId">StatusBar.Container</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Status.Label.AutomationId">StatusBar.Status.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Status.Value.AutomationId">StatusBar.Status.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.ActiveModule.Label.AutomationId">StatusBar.ActiveModule.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.ActiveModule.Value.AutomationId">StatusBar.ActiveModule.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Company.Label.AutomationId">StatusBar.Company.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Company.Value.AutomationId">StatusBar.Company.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Environment.Label.AutomationId">StatusBar.Environment.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Environment.Value.AutomationId">StatusBar.Environment.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Server.Label.AutomationId">StatusBar.Server.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Server.Value.AutomationId">StatusBar.Server.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Database.Label.AutomationId">StatusBar.Database.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.Database.Value.AutomationId">StatusBar.Database.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.User.Label.AutomationId">StatusBar.User.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.User.Value.AutomationId">StatusBar.User.Value</sys:String>
+    <sys:String x:Key="Shell.StatusBar.UtcTime.Label.AutomationId">StatusBar.UtcTime.Label</sys:String>
+    <sys:String x:Key="Shell.StatusBar.UtcTime.Value.AutomationId">StatusBar.UtcTime.Value</sys:String>
 </ResourceDictionary>

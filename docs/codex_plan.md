@@ -54,6 +54,7 @@
   - 2025-09-24: Batch 0 rerun inside container confirmed `.NET 9` CLI is still missing; all `dotnet` commands fail immediately. Remains a prerequisite before module CRUD refactors can progress.
 
 ## Notes
+- 2026-02-08: Shell status bar layout now localizes labels/tooltips/automation metadata for company, environment, server, database, user, and UTC timestamp fields, surfacing the bindings through the redesigned control while dotnet restore/build/smoke remain blocked by the missing CLI.
 - 2026-02-07: Shell status bar now resolves company, environment, database, server, user, and UTC clock metadata via revived DatabaseOptions + configuration bindings and a dispatcher-driven timer while dotnet restore/build/smoke remain blocked by the missing CLI.
 - 2026-02-06: Added layout persistence regression tests covering DatabaseService helpers, DockLayoutPersistenceService forwarding, and ShellLayoutController reset ordering so SQL payloads and reset/save sequencing stay exercised even while the dotnet CLI is unavailable in this container.
 - 2026-02-05: Shell layout reset now clears the persisted snapshot via DockLayoutPersistenceService.ResetAsync before saving the default layout so the database state stays aligned with the restored UI; dotnet CLI remains unavailable for restore/build validation in this container.
