@@ -51,6 +51,7 @@
       "2026-02-02: dotnet restore/build retried for yasgmp.sln, YasGMP.Wpf.csproj, and MAUI net8.0-windows10.0.19041.0; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-02-05: dotnet restore yasgmp.sln retried after Shell layout reset adjustments; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-02-06: dotnet --info and dotnet restore yasgmp.sln retried while adding layout persistence tests; CLI still missing so both commands exit with 'command not found'.",
+      "2026-02-09: dotnet --version/restore/build retried for yasgmp.sln, YasGMP.Wpf, and MAUI targets; CLI remains unavailable so each command exits with 'command not found'.",
       "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
     ]
   },
@@ -69,7 +70,8 @@
       "status": "pending",
       "notes": [
         "2026-02-05: Shell layout reset now clears persisted database snapshot via DockLayoutPersistenceService.ResetAsync before saving defaults; awaiting dotnet CLI to validate via build/smoke.",
-        "2026-02-08: Status bar control now renders company/environment/server/database/user/UTC metadata with localized captions, tooltips, and automation names bound to the view-model while dotnet CLI access remains blocked."
+        "2026-02-08: Status bar control now renders company/environment/server/database/user/UTC metadata with localized captions, tooltips, and automation names bound to the view-model while dotnet CLI access remains blocked.",
+        "2026-02-09: MainWindowViewModel now applies session/configuration metadata to the status bar via injected IUserSession/DatabaseOptions and new WPF tests cover EN↔HR localization/tooltips while dotnet CLI remains unavailable."
       ]
     },
     {
@@ -271,6 +273,7 @@
     "2026-01-26: Documented ModuleRecord key/status/inspector metadata so Golden Arrow navigation and SAP B1 form-mode visuals stay aligned while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-27: ModuleRegistry XML documentation now maps module keys/titles/categories to Modules pane population, localization resource lookups, Golden Arrow automation ids, and SAP B1 toolbar/form-mode consumption while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-01-30: Updated e-signature service/interface documentation to outline shell entry points, dispatcher requirements, localization expectations, audit logging parity, and cancellation guidance so MAUI/WPF consumers stay synchronized while dotnet CLI access remains unavailable.",
-    "2026-02-07: Shell status bar now binds company, environment, database, server, user, and UTC clock fields via revived DatabaseOptions parsing, configuration helpers, and a dispatcher timer while dotnet restore/build/smoke remain blocked by the missing CLI."
+    "2026-02-07: Shell status bar now binds company, environment, database, server, user, and UTC clock fields via revived DatabaseOptions parsing, configuration helpers, and a dispatcher timer while dotnet restore/build/smoke remain blocked by the missing CLI.",
+    "2026-02-09: MainWindowViewModel now resolves session/configuration metadata via IUserSession and DatabaseOptions, pushes it into ShellStatusBarViewModel, and WPF tests assert EN/HR localized captions/tooltips while dotnet CLI access remains blocked."
   ]
 }

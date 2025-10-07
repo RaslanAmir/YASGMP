@@ -1,20 +1,12 @@
 using System;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using YasGMP.Services;
-using YasGMP.Wpf.Configuration;
 
 namespace YasGMP.Wpf.ViewModels;
 
 /// <summary>Status bar view-model displayed along the bottom edge of the shell.</summary>
 public partial class ShellStatusBarViewModel : ObservableObject
 {
-    private readonly IUserSession _userSession;
-    private readonly DatabaseOptions _databaseOptions;
-    private readonly IConfiguration _configuration;
-    private readonly IHostEnvironment _hostEnvironment;
     private readonly TimeProvider _timeProvider;
     private readonly DispatcherTimer _utcTimer;
 
@@ -22,23 +14,10 @@ public partial class ShellStatusBarViewModel : ObservableObject
     /// Initializes a new instance of the <see cref="ShellStatusBarViewModel"/> class.
     /// </summary>
     public ShellStatusBarViewModel(
-        IUserSession userSession,
-        DatabaseOptions databaseOptions,
-        IConfiguration configuration,
-        IHostEnvironment hostEnvironment,
         TimeProvider timeProvider)
     {
-        _userSession = userSession;
-        _databaseOptions = databaseOptions;
-        _configuration = configuration;
-        _hostEnvironment = hostEnvironment;
         _timeProvider = timeProvider;
 
-        Company = ResolveCompany();
-        Environment = ResolveEnvironment();
-        Server = string.IsNullOrWhiteSpace(_databaseOptions.Server) ? "<unknown>" : _databaseOptions.Server;
-        Database = string.IsNullOrWhiteSpace(_databaseOptions.Database) ? "<unknown>" : _databaseOptions.Database;
-        User = ResolveUser();
         UtcTime = FormatUtc(_timeProvider.GetUtcNow());
 
         _utcTimer = new DispatcherTimer
@@ -79,29 +58,38 @@ public partial class ShellStatusBarViewModel : ObservableObject
     [ObservableProperty]
     private string _activeModule = string.Empty;
 
-    private string ResolveCompany()
+    /// <summary>
+    /// Applies shell metadata resolved by the hosting view-model or service.
+    /// </summary>
+    /// <param name="company">Connected company name.</param>
+    /// <param name="environment">Runtime environment descriptor.</param>
+    /// <param name="server">Database server host.</param>
+    /// <param name="database">Database catalog name.</param>
+    /// <param name="user">Authenticated user display name.</param>
+    public void UpdateMetadata(string? company, string? environment, string? server, string? database, string? user)
     {
-        return _configuration["Shell:Company"]
-               ?? _configuration["Company"]
-               ?? _configuration["AppTitle"]
-               ?? "YasGMP";
-    }
-
-    private string ResolveEnvironment()
-    {
-        return _configuration["Shell:Environment"]
-               ?? _configuration["Environment"]
-               ?? _hostEnvironment.EnvironmentName
-               ?? "Production";
-    }
-
-    private string ResolveUser()
-    {
-        return _userSession.FullName
-               ?? _userSession.Username
-               ?? "Offline";
+        Company = NormalizeCompany(company);
+        Environment = NormalizeEnvironment(environment);
+        Server = NormalizeServer(server);
+        Database = NormalizeDatabase(database);
+        User = NormalizeUser(user);
     }
 
     private static string FormatUtc(DateTimeOffset timestamp)
         => timestamp.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+    private static string NormalizeCompany(string? company)
+        => string.IsNullOrWhiteSpace(company) ? "YasGMP" : company;
+
+    private static string NormalizeEnvironment(string? environment)
+        => string.IsNullOrWhiteSpace(environment) ? "Production" : environment;
+
+    private static string NormalizeServer(string? server)
+        => string.IsNullOrWhiteSpace(server) ? "<unknown>" : server;
+
+    private static string NormalizeDatabase(string? database)
+        => string.IsNullOrWhiteSpace(database) ? "<unknown>" : database;
+
+    private static string NormalizeUser(string? user)
+        => string.IsNullOrWhiteSpace(user) ? "Offline" : user;
 }
