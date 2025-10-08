@@ -19,6 +19,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     private string _moduleAutomationNameTemplate = string.Empty;
     private string _moduleAutomationIdTemplate = string.Empty;
     private string _moduleAutomationTooltipTemplate = string.Empty;
+    private string _moduleAutomationNameDefault = string.Empty;
+    private string _moduleAutomationIdDefault = string.Empty;
+    private string _moduleAutomationTooltipDefault = string.Empty;
     private string _recordAutomationNameTemplate = string.Empty;
     private string _recordAutomationIdTemplate = string.Empty;
     private string _recordAutomationTooltipTemplate = string.Empty;
@@ -76,7 +79,12 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     {
         _currentModuleContextValue = string.IsNullOrWhiteSpace(context.ModuleTitle) ? null : context.ModuleTitle;
         _currentRecordContextValue = string.IsNullOrWhiteSpace(context.RecordTitle) ? null : context.RecordTitle;
-        ApplyCurrentFormatting();
+
+        var moduleHasContext = !string.IsNullOrWhiteSpace(_currentModuleContextValue);
+        var moduleText = moduleHasContext ? _currentModuleContextValue! : _modulePlaceholder;
+        var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue!;
+
+        ApplyFormatting(moduleHasContext, moduleText, recordText);
         Fields.Clear();
         foreach (var field in context.Fields)
         {
@@ -87,6 +95,12 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         LoadLocalizationResources();
+        ModuleAutomationName = _moduleAutomationNameDefault;
+        ModuleAutomationId = _moduleAutomationIdDefault;
+        ModuleAutomationTooltip = _moduleAutomationTooltipDefault;
+        RecordAutomationName = FormatString(_recordAutomationNameTemplate, _recordPlaceholder);
+        RecordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(_recordPlaceholder));
+        RecordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, _recordPlaceholder);
         ApplyCurrentFormatting();
     }
 
@@ -98,6 +112,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         _moduleTemplate = _localization.GetString("Dock.Inspector.ModuleTitle.Template");
         _recordPlaceholder = _localization.GetString("Dock.Inspector.NoRecord");
         _recordTemplate = _localization.GetString("Dock.Inspector.RecordTitle.Template");
+        _moduleAutomationNameDefault = _localization.GetString("Dock.Inspector.Module.AutomationName");
+        _moduleAutomationIdDefault = _localization.GetString("Dock.Inspector.Module.AutomationId");
+        _moduleAutomationTooltipDefault = _localization.GetString("Dock.Inspector.Module.ToolTip");
         _moduleAutomationNameTemplate = _localization.GetString("Dock.Inspector.Module.AutomationName.Template");
         _moduleAutomationIdTemplate = _localization.GetString("Dock.Inspector.Module.AutomationId.Template");
         _moduleAutomationTooltipTemplate = _localization.GetString("Dock.Inspector.Module.ToolTip.Template");
@@ -108,14 +125,31 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
     private void ApplyCurrentFormatting()
     {
-        var moduleText = string.IsNullOrWhiteSpace(_currentModuleContextValue) ? _modulePlaceholder : _currentModuleContextValue;
-        var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue;
+        var moduleHasContext = !string.IsNullOrWhiteSpace(_currentModuleContextValue);
+        var moduleText = moduleHasContext ? _currentModuleContextValue! : _modulePlaceholder;
+        var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue!;
 
+        ApplyFormatting(moduleHasContext, moduleText, recordText);
+    }
+
+    private void ApplyFormatting(bool moduleHasContext, string moduleText, string recordText)
+    {
         ModuleTitle = FormatString(_moduleTemplate, moduleText);
         RecordTitle = FormatString(_recordTemplate, recordText);
-        ModuleAutomationName = FormatString(_moduleAutomationNameTemplate, moduleText);
-        ModuleAutomationId = FormatString(_moduleAutomationIdTemplate, NormalizeAutomationToken(moduleText));
-        ModuleAutomationTooltip = FormatString(_moduleAutomationTooltipTemplate, moduleText);
+
+        if (moduleHasContext)
+        {
+            ModuleAutomationName = FormatString(_moduleAutomationNameTemplate, moduleText);
+            ModuleAutomationId = FormatString(_moduleAutomationIdTemplate, NormalizeAutomationToken(moduleText));
+            ModuleAutomationTooltip = FormatString(_moduleAutomationTooltipTemplate, moduleText);
+        }
+        else
+        {
+            ModuleAutomationName = _moduleAutomationNameDefault;
+            ModuleAutomationId = _moduleAutomationIdDefault;
+            ModuleAutomationTooltip = _moduleAutomationTooltipDefault;
+        }
+
         RecordAutomationName = FormatString(_recordAutomationNameTemplate, recordText);
         RecordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(recordText));
         RecordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, recordText);
