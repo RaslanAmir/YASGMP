@@ -10,6 +10,7 @@ The YasGMP WPF shell hosts the desktop docking workspace used to surface cockpit
   - `Shell:UserId` – numeric user identifier (defaults to `1`).【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
   - `Shell:Username` – display name used when persisting layouts (defaults to `"wpf-shell"`).【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
   - `ConnectionStrings:MySqlDb` / `MySqlDb` – MySQL connection string consumed during host bootstrapping. When absent the app falls back to the hard-coded development string defined in `App.xaml.cs`.【F:YasGMP.Wpf/App.xaml.cs†L23-L55】
+- **UI automation surface:** FlaUI smoke tests require an interactive desktop. On GitHub-hosted runners (`windows-latest`) the job starts with an unlocked desktop, but self-hosted agents must enable auto-logon for the service account, disable screen savers/lock (`powercfg /change standby-timeout-ac 0` and `rundll32 user32.dll,LockWorkStation /disable` policies), and ensure the `UIAutomationCore` components are present so FlaUI can drive the WPF window.
 
 ## Building and running the shell
 
@@ -28,6 +29,16 @@ dotnet publish YasGMP.Wpf -c Release -r win-x64
 ```
 
 Visual Studio and MSBuild follow the same steps: open `yasgmp.sln`, set **YasGMP.Wpf** as the startup project, and use **Build → Build Solution** (or `msbuild YasGMP.Wpf/YasGMP.Wpf.csproj /t:Build`).【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L1-L28】
+
+## Continuous integration
+
+The `WPF Smoke Tests` GitHub Actions workflow (`.github/workflows/wpf-tests.yml`) provisions the .NET 9 SDK when available, falls back to .NET 8 when necessary, and executes:
+
+1. `dotnet restore yasgmp.sln`
+2. `dotnet build yasgmp.sln -c Release --no-restore`
+3. `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release --no-build`
+
+Smoke logs are uploaded as build artifacts (`wpf-smoke-test-results`) so failures include the FlaUI trace and TRX output. Set the `YASGMP_SMOKE` environment variable to `0` only when a diagnostic build requires skipping UI automation; the workflow enforces `1` by default to guarantee end-to-end coverage.
 
 ## Key dependencies
 
