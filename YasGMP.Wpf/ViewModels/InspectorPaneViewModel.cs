@@ -230,7 +230,7 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
             moduleText,
             recordText);
 
-        return new InspectorFieldViewModel(
+        var fieldViewModel = new InspectorFieldViewModel(
             label,
             value,
             automationNameTemplate,
@@ -239,6 +239,22 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
             automation.AutomationName,
             automation.AutomationId,
             automation.AutomationTooltip);
+
+        fieldViewModel.ConfigureAutomationRecalculation(newValue =>
+        {
+            var automationUpdate = BuildFieldAutomation(
+                automationNameTemplate,
+                automationIdTemplate,
+                automationTooltipTemplate,
+                label,
+                newValue ?? string.Empty,
+                moduleText,
+                recordText);
+
+            return automationUpdate;
+        });
+
+        return fieldViewModel;
     }
 
     private (string AutomationName, string AutomationId, string AutomationTooltip) BuildFieldAutomation(
@@ -302,6 +318,7 @@ public partial class InspectorFieldViewModel : ObservableObject
     private readonly string _automationNameTemplate;
     private readonly string _automationIdTemplate;
     private readonly string _automationTooltipTemplate;
+    private Func<string, (string AutomationName, string AutomationId, string AutomationTooltip)>? _automationRecalculation;
 
     /// <summary>
     /// Initializes a new instance of the InspectorFieldViewModel class.
@@ -349,4 +366,22 @@ public partial class InspectorFieldViewModel : ObservableObject
     internal string AutomationIdTemplate => _automationIdTemplate;
 
     internal string AutomationTooltipTemplate => _automationTooltipTemplate;
+
+    internal void ConfigureAutomationRecalculation(Func<string, (string AutomationName, string AutomationId, string AutomationTooltip)> recalculation)
+    {
+        _automationRecalculation = recalculation ?? throw new ArgumentNullException(nameof(recalculation));
+    }
+
+    partial void OnValueChanged(string value)
+    {
+        if (_automationRecalculation is null)
+        {
+            return;
+        }
+
+        var automation = _automationRecalculation.Invoke(value ?? string.Empty);
+        AutomationName = automation.AutomationName;
+        AutomationId = automation.AutomationId;
+        AutomationTooltip = automation.AutomationTooltip;
+    }
 }
