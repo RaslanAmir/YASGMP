@@ -327,6 +327,15 @@
   <data name="Dock.Inspector.Record.ToolTip.Template" xml:space="preserve">
     <value>Displays the currently selected record: {0}</value>
   </data>
+  <data name="Dock.Inspector.Field.AutomationName.Template" xml:space="preserve">
+    <value>{0} — {1} ({2})</value>
+  </data>
+  <data name="Dock.Inspector.Field.AutomationTooltip.Template" xml:space="preserve">
+    <value>{0} for {1} in {2}.</value>
+  </data>
+  <data name="Dock.Inspector.Field.RecordFallback" xml:space="preserve">
+    <value>Record</value>
+  </data>
   <data name="Module.Toolbar.Toggle.Find.Content" xml:space="preserve">
     <value>Find</value>
   </data>
