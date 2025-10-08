@@ -10,18 +10,18 @@
         <ItemsControl ItemsSource="{Binding Groups}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Expander Header="{Binding Name}"
+                    <Expander Header="{Binding Header}"
                               Margin="0,0,0,8"
                               IsExpanded="True">
                         <ItemsControl ItemsSource="{Binding Modules}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Content="{Binding Metadata.Title}"
+                                    <Button Content="{Binding Title}"
                                             Command="{Binding OpenCommand}"
                                             CommandParameter="{Binding}"
                                             Margin="12,4,0,4"
                                             HorizontalContentAlignment="Left"
-                                            ToolTip="{Binding Metadata.Description}" />
+                                            ToolTip="{Binding ToolTip}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
