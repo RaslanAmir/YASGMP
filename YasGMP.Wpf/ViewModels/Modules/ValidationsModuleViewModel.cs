@@ -562,13 +562,18 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     private ModuleRecord ToRecord(Validation validation)
     {
         var targetName = FindMachineName(validation.MachineId) ?? FindComponentName(validation.ComponentId) ?? "Unassigned";
+        var recordKey = validation.Id.ToString(CultureInfo.InvariantCulture);
+        var recordTitle = $"{validation.Code} ({validation.Type})";
+
+        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
+
         var fields = new List<InspectorField>
         {
-            new("Type", validation.Type),
-            new("Status", string.IsNullOrWhiteSpace(validation.Status) ? "-" : validation.Status),
-            new("Target", targetName),
-            new("Start", validation.DateStart?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
-            new("Next Due", validation.NextDue?.ToString("d", CultureInfo.CurrentCulture) ?? "-")
+            Field("Type", validation.Type),
+            Field("Status", string.IsNullOrWhiteSpace(validation.Status) ? "-" : validation.Status),
+            Field("Target", targetName),
+            Field("Start", validation.DateStart?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
+            Field("Next Due", validation.NextDue?.ToString("d", CultureInfo.CurrentCulture) ?? "-")
         };
 
         var relatedKey = validation.ComponentId.HasValue
@@ -579,8 +584,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         var relatedParameter = validation.ComponentId ?? validation.MachineId as object;
 
         return new ModuleRecord(
-            validation.Id.ToString(CultureInfo.InvariantCulture),
-            $"{validation.Code} ({validation.Type})",
+            recordKey,
+            recordTitle,
             validation.Code,
             validation.Status,
             validation.Comment,

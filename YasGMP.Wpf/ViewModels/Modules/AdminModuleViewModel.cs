@@ -43,34 +43,47 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
             new("CFG-001", "Default Locale", "locale", "Active", "System default locale",
                 new[]
                 {
-                    new InspectorField("Value", "hr-HR"),
-                    new InspectorField("Category", "System"),
-                    new InspectorField("Updated", System.DateTime.Now.AddDays(-2).ToString("g"))
+                    CreateInspectorField("CFG-001", "Default Locale", "Value", "hr-HR"),
+                    CreateInspectorField("CFG-001", "Default Locale", "Category", "System"),
+                    CreateInspectorField(
+                        "CFG-001",
+                        "Default Locale",
+                        "Updated",
+                        System.DateTime.Now.AddDays(-2).ToString("g"))
                 },
                 null, null),
             new("CFG-002", "Maintenance Window", "maintenance_window", "Active", "Weekly downtime",
                 new[]
                 {
-                    new InspectorField("Value", "Sundays 02:00-03:00"),
-                    new InspectorField("Category", "System"),
-                    new InspectorField("Updated", System.DateTime.Now.AddDays(-10).ToString("g"))
+                    CreateInspectorField("CFG-002", "Maintenance Window", "Value", "Sundays 02:00-03:00"),
+                    CreateInspectorField("CFG-002", "Maintenance Window", "Category", "System"),
+                    CreateInspectorField(
+                        "CFG-002",
+                        "Maintenance Window",
+                        "Updated",
+                        System.DateTime.Now.AddDays(-10).ToString("g"))
                 },
                 null, null)
         };
 
-    private static ModuleRecord ToRecord(Setting setting)
+    private ModuleRecord ToRecord(Setting setting)
     {
+        var recordKey = setting.Id.ToString();
+        var recordTitle = setting.Name ?? setting.Key ?? "Setting";
+
+        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
+
         var fields = new List<InspectorField>
         {
-            new("Category", setting.Category ?? "-"),
-            new("Value", setting.Value ?? string.Empty),
-            new("Description", setting.Description ?? string.Empty),
-            new("Updated", setting.UpdatedAt?.ToString("g") ?? "-"),
+            Field("Category", setting.Category ?? "-"),
+            Field("Value", setting.Value ?? string.Empty),
+            Field("Description", setting.Description ?? string.Empty),
+            Field("Updated", setting.UpdatedAt?.ToString("g") ?? "-"),
         };
 
         return new ModuleRecord(
-            setting.Id.ToString(),
-            setting.Name ?? setting.Key ?? "Setting",
+            recordKey,
+            recordTitle,
             setting.Key,
             "Active",
             setting.Description,

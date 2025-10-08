@@ -527,19 +527,24 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
 
-    private static ModuleRecord ToRecord(Warehouse warehouse)
+    private ModuleRecord ToRecord(Warehouse warehouse)
     {
+        var recordKey = warehouse.Id.ToString(CultureInfo.InvariantCulture);
+        var recordTitle = warehouse.Name;
+
+        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
+
         var fields = new List<InspectorField>
         {
-            new("Location", warehouse.Location ?? "-"),
-            new("Responsible", warehouse.LegacyResponsibleName ?? "-"),
-            new("Status", warehouse.Status ?? "-"),
-            new("Qualified", warehouse.IsQualified ? "Yes" : "No")
+            Field("Location", warehouse.Location ?? "-"),
+            Field("Responsible", warehouse.LegacyResponsibleName ?? "-"),
+            Field("Status", warehouse.Status ?? "-"),
+            Field("Qualified", warehouse.IsQualified ? "Yes" : "No")
         };
 
         return new ModuleRecord(
-            warehouse.Id.ToString(CultureInfo.InvariantCulture),
-            warehouse.Name,
+            recordKey,
+            recordTitle,
             warehouse.Name,
             warehouse.Status,
             warehouse.Note,

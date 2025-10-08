@@ -351,12 +351,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         GoldenArrowCommand.NotifyCanExecuteChanged();
         if (value is null)
         {
-            _shellInteraction.UpdateInspector(new InspectorContext(Title, "No record selected", Array.Empty<InspectorField>()));
+            _shellInteraction.UpdateInspector(new InspectorContext(ModuleKey, Title, null, "No record selected", Array.Empty<InspectorField>()));
             _ = OnRecordSelectedAsync(null);
             return;
         }
 
-        _shellInteraction.UpdateInspector(new InspectorContext(Title, value.Title, value.InspectorFields));
+        _shellInteraction.UpdateInspector(new InspectorContext(ModuleKey, Title, value.Key, value.Title, value.InspectorFields));
         _ = OnRecordSelectedAsync(value);
     }
 
@@ -625,4 +625,15 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         OnPropertyChanged(nameof(HasValidationErrors));
         RefreshCommandStates();
     }
+
+    /// <summary>
+    /// Creates an <see cref="InspectorField"/> using the module context and supplied record metadata.
+    /// </summary>
+    /// <param name="recordKey">Stable key that identifies the record.</param>
+    /// <param name="recordTitle">Display title associated with the record.</param>
+    /// <param name="label">Inspector label.</param>
+    /// <param name="value">Inspector value.</param>
+    /// <returns>A populated <see cref="InspectorField"/> scoped to the module.</returns>
+    protected InspectorField CreateInspectorField(string? recordKey, string? recordTitle, string label, string? value)
+        => InspectorField.Create(ModuleKey, Title, recordKey, recordTitle, label, value);
 }

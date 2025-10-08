@@ -74,6 +74,15 @@ public class AuditModuleViewModelTests
         Assert.Equal(viewModel.FilterFrom!.Value, viewModel.LastFromFilter);
         var expectedTo = viewModel.FilterTo!.Value.Date.AddDays(1).AddTicks(-1);
         Assert.Equal(expectedTo, viewModel.LastToFilter);
+
+        viewModel.SelectedRecord = record;
+        Assert.NotNull(shell.LastContext);
+        var inspectorContext = shell.LastContext!;
+        Assert.Equal(AuditModuleViewModel.ModuleKey, inspectorContext.ModuleKey);
+        var timestampField = Assert.Single(inspectorContext.Fields.Where(f => f.Label == "Timestamp"));
+        Assert.Equal("Dock.Inspector.Audit.42.Timestamp", timestampField.AutomationId);
+        Assert.Contains("Timestamp", timestampField.AutomationName, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Timestamp", timestampField.AutomationTooltip, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

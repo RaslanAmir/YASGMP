@@ -71,6 +71,15 @@ public class ApiAuditModuleViewModelTests
         Assert.Equal(timestamp.Date.AddDays(1).AddTicks(-1), viewModel.LastToFilter);
         Assert.Contains("POST /api/v1/assets", viewModel.ActionOptions);
         Assert.Equal("All", viewModel.ActionOptions.First());
+
+        viewModel.SelectedRecord = record;
+        Assert.NotNull(shell.LastContext);
+        var inspectorContext = shell.LastContext!;
+        Assert.Equal(ApiAuditModuleViewModel.ModuleKey, inspectorContext.ModuleKey);
+        var timestampField = Assert.Single(inspectorContext.Fields.Where(f => f.Label == "Timestamp"));
+        Assert.Equal("Dock.Inspector.ApiAudit.5.Timestamp", timestampField.AutomationId);
+        Assert.Contains("Timestamp", timestampField.AutomationName, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Timestamp", timestampField.AutomationTooltip, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -476,9 +485,11 @@ public class ApiAuditModuleViewModelTests
 
     private sealed class StubShellInteractionService : IShellInteractionService
     {
+        public InspectorContext? LastContext { get; private set; }
+
         public void UpdateStatus(string message) { }
 
-        public void UpdateInspector(InspectorContext context) { }
+        public void UpdateInspector(InspectorContext context) => LastContext = context;
     }
 
     private sealed class StubModuleNavigationService : IModuleNavigationService
