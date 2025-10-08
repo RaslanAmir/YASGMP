@@ -87,20 +87,48 @@
     <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportPdf.AutomationId">AuditDashboard.Toolbar.ExportPdf</sys:String>
     <sys:String x:Key="AuditDashboard.Toolbar.Command.ExportExcel.AutomationId">AuditDashboard.Toolbar.ExportExcel</sys:String>
 
-    <sys:String x:Key="ModuleTree.Category.Quality.AutomationId">ModuleTree.Category.Quality</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationId">ModuleTree.Node.Quality.CAPA</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Quality.Audits.AutomationId">ModuleTree.Node.Quality.Audits</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Quality.DocumentControl.AutomationId">ModuleTree.Node.Quality.DocumentControl</sys:String>
-
+    <!-- Module tree categories -->
+    <sys:String x:Key="ModuleTree.Category.Cockpit.AutomationId">ModuleTree.Category.Cockpit</sys:String>
     <sys:String x:Key="ModuleTree.Category.Maintenance.AutomationId">ModuleTree.Category.Maintenance</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Maintenance.Machines.AutomationId">ModuleTree.Node.Maintenance.Machines</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Maintenance.PreventivePlans.AutomationId">ModuleTree.Node.Maintenance.PreventivePlans</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationId">ModuleTree.Node.Maintenance.Calibration</sys:String>
-
+    <sys:String x:Key="ModuleTree.Category.Supply Chain.AutomationId">ModuleTree.Category.SupplyChain</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality.AutomationId">ModuleTree.Category.Quality</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Planning.AutomationId">ModuleTree.Category.Planning</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Administration.AutomationId">ModuleTree.Category.Administration</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Quality &amp; Compliance.AutomationId">ModuleTree.Category.QualityCompliance</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Diagnostics.AutomationId">ModuleTree.Category.Diagnostics</sys:String>
+    <sys:String x:Key="ModuleTree.Category.Documents.AutomationId">ModuleTree.Category.Documents</sys:String>
     <sys:String x:Key="ModuleTree.Category.Warehouse.AutomationId">ModuleTree.Category.Warehouse</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Warehouse.Inventory.AutomationId">ModuleTree.Node.Warehouse.Inventory</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Warehouse.Suppliers.AutomationId">ModuleTree.Node.Warehouse.Suppliers</sys:String>
-    <sys:String x:Key="ModuleTree.Node.Warehouse.Transactions.AutomationId">ModuleTree.Node.Warehouse.Transactions</sys:String>
+
+    <!-- Module tree nodes -->
+    <sys:String x:Key="ModuleTree.Node.Cockpit.Dashboard.AutomationId">ModuleTree.Node.Cockpit.Dashboard</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Assets.AutomationId">ModuleTree.Node.Maintenance.Assets</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Components.AutomationId">ModuleTree.Node.Maintenance.Components</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Warehouse.AutomationId">ModuleTree.Node.Maintenance.Warehouse</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.WorkOrders.AutomationId">ModuleTree.Node.Maintenance.WorkOrders</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Calibration.AutomationId">ModuleTree.Node.Maintenance.Calibration</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Maintenance.Parts.AutomationId">ModuleTree.Node.Maintenance.Parts</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Supply Chain.Suppliers.AutomationId">ModuleTree.Node.SupplyChain.Suppliers</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Supply Chain.ExternalServicers.AutomationId">ModuleTree.Node.SupplyChain.ExternalServicers</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationId">ModuleTree.Node.Quality.CAPA</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Incidents.AutomationId">ModuleTree.Node.Quality.Incidents</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.ChangeControl.AutomationId">ModuleTree.Node.Quality.ChangeControl</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Validations.AutomationId">ModuleTree.Node.Quality.Validations</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Planning.Scheduling.AutomationId">ModuleTree.Node.Planning.Scheduling</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Administration.Security.AutomationId">ModuleTree.Node.Administration.Security</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Administration.Admin.AutomationId">ModuleTree.Node.Administration.Admin</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Quality &amp; Compliance.Audit.AutomationId">ModuleTree.Node.QualityCompliance.AuditTrail</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality &amp; Compliance.AuditDashboard.AutomationId">ModuleTree.Node.QualityCompliance.AuditDashboard</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality &amp; Compliance.ApiAudit.AutomationId">ModuleTree.Node.QualityCompliance.ApiAuditTrail</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Diagnostics.Diagnostics.AutomationId">ModuleTree.Node.Diagnostics.Diagnostics</sys:String>
+
+    <sys:String x:Key="ModuleTree.Node.Documents.Attachments.AutomationId">ModuleTree.Node.Documents.Attachments</sys:String>
     <sys:String x:Key="Dialog.Cfl.Button.Ok.AutomationId">Dialog.Cfl.Button.Ok</sys:String>
     <sys:String x:Key="Dialog.ElectronicSignature.Button.Confirm.AutomationId">Dialog.ElectronicSignature.Button.Confirm</sys:String>
     <sys:String x:Key="Module.Attachments.Button.PickFiles.AutomationId">Attachments.Toolbar.PickFiles</sys:String>
