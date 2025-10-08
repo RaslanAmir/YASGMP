@@ -106,6 +106,30 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     {
         LoadLocalizationResources();
         ApplyCurrentFormatting();
+
+        if (Fields.Count == 0)
+        {
+            return;
+        }
+
+        var moduleText = string.IsNullOrWhiteSpace(_currentModuleContextValue) ? _modulePlaceholder : _currentModuleContextValue!;
+        var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue!;
+
+        foreach (var field in Fields)
+        {
+            var automation = BuildFieldAutomation(
+                field.AutomationNameTemplate,
+                field.AutomationIdTemplate,
+                field.AutomationTooltipTemplate,
+                field.Label,
+                field.Value ?? string.Empty,
+                moduleText,
+                recordText);
+
+            field.AutomationName = automation.AutomationName;
+            field.AutomationId = automation.AutomationId;
+            field.AutomationTooltip = automation.AutomationTooltip;
+        }
     }
 
     private void LoadLocalizationResources()
@@ -187,6 +211,45 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         var label = field.Label ?? string.Empty;
         var value = field.Value ?? string.Empty;
 
+        var automationNameTemplate = string.IsNullOrWhiteSpace(field.AutomationName)
+            ? "{0} — {2} ({1})"
+            : field.AutomationName;
+        var automationIdTemplate = string.IsNullOrWhiteSpace(field.AutomationId)
+            ? "Dock.Inspector.{4}.{5}.{6}"
+            : field.AutomationId;
+        var automationTooltipTemplate = string.IsNullOrWhiteSpace(field.AutomationTooltip)
+            ? "{2} for {1} in {0}."
+            : field.AutomationTooltip;
+
+        var automation = BuildFieldAutomation(
+            automationNameTemplate,
+            automationIdTemplate,
+            automationTooltipTemplate,
+            label,
+            value,
+            moduleText,
+            recordText);
+
+        return new InspectorFieldViewModel(
+            label,
+            value,
+            automationNameTemplate,
+            automationIdTemplate,
+            automationTooltipTemplate,
+            automation.AutomationName,
+            automation.AutomationId,
+            automation.AutomationTooltip);
+    }
+
+    private (string AutomationName, string AutomationId, string AutomationTooltip) BuildFieldAutomation(
+        string automationNameTemplate,
+        string automationIdTemplate,
+        string automationTooltipTemplate,
+        string label,
+        string value,
+        string moduleText,
+        string recordText)
+    {
         var moduleToken = NormalizeAutomationToken(moduleText);
         var recordToken = NormalizeAutomationToken(recordText);
         var labelToken = NormalizeAutomationToken(label);
@@ -202,21 +265,11 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
             labelToken,
         };
 
-        var automationNameTemplate = string.IsNullOrWhiteSpace(field.AutomationName)
-            ? "{0} — {2} ({1})"
-            : field.AutomationName;
-        var automationIdTemplate = string.IsNullOrWhiteSpace(field.AutomationId)
-            ? "Dock.Inspector.{4}.{5}.{6}"
-            : field.AutomationId;
-        var automationTooltipTemplate = string.IsNullOrWhiteSpace(field.AutomationTooltip)
-            ? "{2} for {1} in {0}."
-            : field.AutomationTooltip;
-
         var automationName = FormatString(automationNameTemplate, formatArgs);
         var automationId = FormatString(automationIdTemplate, formatArgs);
         var automationTooltip = FormatString(automationTooltipTemplate, formatArgs);
 
-        return new InspectorFieldViewModel(label, value, automationName, automationId, automationTooltip);
+        return (automationName, automationId, automationTooltip);
     }
 
     private static string FormatString(string template, params object[] values)
@@ -246,18 +299,28 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
 public partial class InspectorFieldViewModel : ObservableObject
 {
+    private readonly string _automationNameTemplate;
+    private readonly string _automationIdTemplate;
+    private readonly string _automationTooltipTemplate;
+
     /// <summary>
     /// Initializes a new instance of the InspectorFieldViewModel class.
     /// </summary>
     public InspectorFieldViewModel(
         string label,
         string value,
+        string automationNameTemplate,
+        string automationIdTemplate,
+        string automationTooltipTemplate,
         string automationName,
         string automationId,
         string automationTooltip)
     {
         Label = label;
         Value = value;
+        _automationNameTemplate = automationNameTemplate ?? string.Empty;
+        _automationIdTemplate = automationIdTemplate ?? string.Empty;
+        _automationTooltipTemplate = automationTooltipTemplate ?? string.Empty;
         AutomationName = automationName;
         AutomationId = automationId;
         AutomationTooltip = automationTooltip;
@@ -280,4 +343,10 @@ public partial class InspectorFieldViewModel : ObservableObject
 
     [ObservableProperty]
     private string _automationTooltip = string.Empty;
+
+    internal string AutomationNameTemplate => _automationNameTemplate;
+
+    internal string AutomationIdTemplate => _automationIdTemplate;
+
+    internal string AutomationTooltipTemplate => _automationTooltipTemplate;
 }
