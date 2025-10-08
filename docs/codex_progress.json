@@ -53,6 +53,7 @@
       "2026-02-06: dotnet --info and dotnet restore yasgmp.sln retried while adding layout persistence tests; CLI still missing so both commands exit with 'command not found'.",
       "2026-02-09: dotnet --version/restore/build retried for yasgmp.sln, YasGMP.Wpf, and MAUI targets; CLI remains unavailable so each command exits with 'command not found'.",
       "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
+      "2026-02-10: dotnet restore yasgmp.sln plus dotnet build for YasGMP.Wpf.csproj and yasgmp.csproj -f net8.0-windows10.0.19041.0 retried; CLI still missing so every command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -71,7 +72,8 @@
       "notes": [
         "2026-02-05: Shell layout reset now clears persisted database snapshot via DockLayoutPersistenceService.ResetAsync before saving defaults; awaiting dotnet CLI to validate via build/smoke.",
         "2026-02-08: Status bar control now renders company/environment/server/database/user/UTC metadata with localized captions, tooltips, and automation names bound to the view-model while dotnet CLI access remains blocked.",
-        "2026-02-09: MainWindowViewModel now applies session/configuration metadata to the status bar via injected IUserSession/DatabaseOptions and new WPF tests cover EN↔HR localization/tooltips while dotnet CLI remains unavailable."
+        "2026-02-09: MainWindowViewModel now applies session/configuration metadata to the status bar via injected IUserSession/DatabaseOptions and new WPF tests cover EN↔HR localization/tooltips while dotnet CLI remains unavailable.",
+        "2026-02-10: Modules pane groups and links now surface localized headers, tooltips, automation names, and automation ids through ILocalizationService subscriptions so culture switches update dynamically; build/smoke pending SDK install."
       ]
     },
     {
