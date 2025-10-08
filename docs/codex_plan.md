@@ -21,6 +21,7 @@
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
   - 2026-01-25: Documented B1FormDocumentViewModel command/state surface so derived modules inherit SAP B1 toolbar, audit, and busy-state guidance.
   - 2026-02-10: Modules pane groups/links now source localized headers, tooltips, automation names/ids through ILocalizationService subscriptions so culture switches update without rebuilding the tree; awaiting SDK install to validate via build/smoke.
+  - 2026-02-11: ModulesPane XAML now binds group expanders and module buttons to the localized headers/tooltips/automation metadata exposed by their view-models so accessibility/name/id updates propagate directly through the UI tree.
 - **B2 — Cross-cutting** (Attachments DB, E-Signature, Audit) — [~] in-progress *(e-sign capture now spans Assets, Components, Warehouses, Incidents, CAPA, Change Control, Validations, Scheduled Jobs, Suppliers, External Servicers, Users, and Work Orders; WPF adapters and AppCore services propagate optional signature metadata through to the database, falling back to the legacy hash generator only when metadata is missing; the WPF dialog service now emits audit events on capture/persist while broader audit surfacing remains gated on SDK access)*
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**

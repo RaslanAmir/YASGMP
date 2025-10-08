@@ -11,6 +11,9 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Expander Header="{Binding Header}"
+                              ToolTip="{Binding ToolTip}"
+                              AutomationProperties.Name="{Binding AutomationName}"
+                              AutomationProperties.AutomationId="{Binding AutomationId}"
                               Margin="0,0,0,8"
                               IsExpanded="True">
                         <ItemsControl ItemsSource="{Binding Modules}">
@@ -21,7 +24,9 @@
                                             CommandParameter="{Binding}"
                                             Margin="12,4,0,4"
                                             HorizontalContentAlignment="Left"
-                                            ToolTip="{Binding ToolTip}" />
+                                            ToolTip="{Binding ToolTip}"
+                                            AutomationProperties.Name="{Binding AutomationName}"
+                                            AutomationProperties.AutomationId="{Binding AutomationId}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
