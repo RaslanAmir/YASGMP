@@ -294,6 +294,7 @@
         "2026-02-18: InspectorFieldViewModel now accepts an automation recomputation delegate from the pane so automation name/id/tooltip metadata refresh automatically on value changes; dotnet restore/build retries still fail with 'command not found' while the CLI remains unavailable.",
         "2026-02-19: AutomationIdSanitizer centralizes module/record/field token normalization so identifiers remain lowercase, trimmed, and separator-stable with predictable defaults; dotnet restore/build retries continue to fail with 'command not found' because the CLI is still missing.",
         "2026-02-20: Inspector test doubles now reuse AutomationIdSanitizer for module/record/field tokens so WPF unit data aligns with production automation identifiers; dotnet restore/build retries still fail with 'command not found' while the CLI is absent.",
-        "2026-02-21: Added AutomationIdSanitizer and InspectorField regression tests covering null/empty, localized, and punctuation-heavy inputs while asserting sanitized inspector automation ids; dotnet restore/build/test/smoke attempts continue to return 'command not found' without the CLI."
+        "2026-02-21: Added AutomationIdSanitizer and InspectorField regression tests covering null/empty, localized, and punctuation-heavy inputs while asserting sanitized inspector automation ids; dotnet restore/build/test/smoke attempts continue to return 'command not found' without the CLI.",
+        "2026-02-23: Inspector pane XAML now binds inspector field row containers to localized automation name/id/tooltip metadata so accessibility tools can read the context; dotnet restore and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj retried but still fail with 'command not found' because the CLI remains unavailable."
   ]
 }
