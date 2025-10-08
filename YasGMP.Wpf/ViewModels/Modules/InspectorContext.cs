@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using YasGMP.Wpf.Resources;
 using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
@@ -137,13 +138,15 @@ public sealed class InspectorField
         var labelToken = AutomationIdSanitizer.Normalize(label, "field");
 
         var displayModule = string.IsNullOrWhiteSpace(moduleTitle) ? moduleKey : moduleTitle;
+        var recordFallback = GetTemplate("Dock.Inspector.Field.RecordFallback", "Record");
         var displayRecord = string.IsNullOrWhiteSpace(recordTitle)
-            ? (string.IsNullOrWhiteSpace(recordKey) ? "Record" : recordKey)
+            ? (string.IsNullOrWhiteSpace(recordKey) ? recordFallback : recordKey)
             : recordTitle;
 
+        var automationNameTemplate = GetTemplate("Dock.Inspector.Field.AutomationName.Template", "{0} — {1} ({2})");
         var automationName = string.Format(
             CultureInfo.CurrentCulture,
-            "{0} — {1} ({2})",
+            automationNameTemplate,
             displayModule,
             label,
             displayRecord);
@@ -155,14 +158,23 @@ public sealed class InspectorField
             recordToken,
             labelToken);
 
+        var automationTooltipTemplate = GetTemplate("Dock.Inspector.Field.AutomationTooltip.Template", "{0} for {1} in {2}.");
         var automationTooltip = string.Format(
             CultureInfo.CurrentCulture,
-            "{0} for {1} in {2}.",
+            automationTooltipTemplate,
             label,
             displayRecord,
             displayModule);
 
         return new InspectorField(label, value, automationName, automationId, automationTooltip);
+    }
+
+    private static string GetTemplate(string key, string fallback)
+    {
+        var localized = LocalizationManager.GetString(key);
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? fallback
+            : localized;
     }
 
 }
