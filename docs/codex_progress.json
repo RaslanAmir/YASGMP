@@ -55,7 +55,8 @@
       "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
       "2026-02-10: dotnet restore yasgmp.sln plus dotnet build for YasGMP.Wpf.csproj and yasgmp.csproj -f net8.0-windows10.0.19041.0 retried; CLI still missing so every command exits with 'command not found'.",
       "2026-02-16: dotnet restore yasgmp.sln retried while adding inspector automation metadata; CLI remains unavailable so the command exits with 'command not found'.",
-      "2026-02-18: dotnet restore yasgmp.sln retried following inspector field automation delegate updates; CLI remains unavailable so the command exits with 'command not found'."
+      "2026-02-18: dotnet restore yasgmp.sln retried following inspector field automation delegate updates; CLI remains unavailable so the command exits with 'command not found'.",
+      "2026-02-19: dotnet restore yasgmp.sln retried after introducing AutomationIdSanitizer; CLI remains unavailable so the command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -287,6 +288,7 @@
     "2026-02-13: InspectorPaneViewModel now exposes localized module header automation name/id/tooltip properties with language-change refresh while dotnet restore/build/smoke stay blocked by the missing CLI.",
     "2026-02-15: InspectorPaneViewModel update now recomputes module automation name/id/tooltip with localized templates and default fallbacks for empty context, and refreshes cached metadata when the language changes; dotnet restore/build/smoke remain blocked by the missing CLI.",
         "2026-02-17: InspectorPaneViewModel language-change handler now reapplies the field automation helper to existing rows with localized placeholders when context is empty and raises property change notifications so refreshed metadata reaches accessibility tooling; dotnet restore/build retries still fail with 'command not found' because the CLI is unavailable in the container.",
-        "2026-02-18: InspectorFieldViewModel now accepts an automation recomputation delegate from the pane so automation name/id/tooltip metadata refresh automatically on value changes; dotnet restore/build retries still fail with 'command not found' while the CLI remains unavailable."
+        "2026-02-18: InspectorFieldViewModel now accepts an automation recomputation delegate from the pane so automation name/id/tooltip metadata refresh automatically on value changes; dotnet restore/build retries still fail with 'command not found' while the CLI remains unavailable.",
+        "2026-02-19: AutomationIdSanitizer centralizes module/record/field token normalization so identifiers remain lowercase, trimmed, and separator-stable with predictable defaults; dotnet restore/build retries continue to fail with 'command not found' because the CLI is still missing."
   ]
 }

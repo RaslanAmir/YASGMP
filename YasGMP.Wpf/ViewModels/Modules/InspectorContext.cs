@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
+using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
@@ -132,9 +132,9 @@ public sealed class InspectorField
         string label,
         string? value)
     {
-        var moduleToken = NormalizeAutomationToken(moduleKey, "Module");
-        var recordToken = NormalizeAutomationToken(recordKey, "Record");
-        var labelToken = NormalizeAutomationToken(label, "Field");
+        var moduleToken = AutomationIdSanitizer.Normalize(moduleKey, "module");
+        var recordToken = AutomationIdSanitizer.Normalize(recordKey, "record");
+        var labelToken = AutomationIdSanitizer.Normalize(label, "field");
 
         var displayModule = string.IsNullOrWhiteSpace(moduleTitle) ? moduleKey : moduleTitle;
         var displayRecord = string.IsNullOrWhiteSpace(recordTitle)
@@ -165,14 +165,4 @@ public sealed class InspectorField
         return new InspectorField(label, value, automationName, automationId, automationTooltip);
     }
 
-    private static string NormalizeAutomationToken(string? value, string fallback)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return fallback;
-        }
-
-        var normalized = new string(value.Where(char.IsLetterOrDigit).ToArray());
-        return string.IsNullOrWhiteSpace(normalized) ? fallback : normalized;
-    }
 }
