@@ -285,6 +285,12 @@
   <data name="Dock.Modules.Title" xml:space="preserve">
     <value>Modules</value>
   </data>
+  <data name="Dock.Modules.AutomationName" xml:space="preserve">
+    <value>Modules pane navigation</value>
+  </data>
+  <data name="Dock.Modules.ToolTip" xml:space="preserve">
+    <value>Browse and open available modules.</value>
+  </data>
   <data name="Dock.Inspector.Title" xml:space="preserve">
     <value>Inspector</value>
   </data>

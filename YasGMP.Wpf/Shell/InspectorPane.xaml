@@ -15,14 +15,16 @@
                            Foreground="#F9F9F9"
                            AutomationProperties.Name="{Binding ModuleAutomationName}"
                            AutomationProperties.AutomationId="{Binding ModuleAutomationId}"
-                           ToolTip="{Binding ModuleAutomationTooltip}" />
+                           ToolTip="{Binding ModuleAutomationTooltip}"
+                           AutomationProperties.HelpText="{Binding ModuleAutomationTooltip}" />
                 <TextBlock Text="{Binding RecordTitle}"
                            FontSize="12"
                            Foreground="#CCCCCC"
                            Margin="0,4,0,12"
                            AutomationProperties.Name="{Binding RecordAutomationName}"
                            AutomationProperties.AutomationId="{Binding RecordAutomationId}"
-                           ToolTip="{Binding RecordAutomationTooltip}" />
+                           ToolTip="{Binding RecordAutomationTooltip}"
+                           AutomationProperties.HelpText="{Binding RecordAutomationTooltip}" />
             </StackPanel>
             <ItemsControl ItemsSource="{Binding Fields}">
                 <ItemsControl.ItemTemplate>
@@ -30,7 +32,8 @@
                         <Grid Margin="0,2"
                               AutomationProperties.Name="{Binding AutomationName}"
                               AutomationProperties.AutomationId="{Binding AutomationId}"
-                              ToolTip="{Binding AutomationTooltip}">
+                              ToolTip="{Binding AutomationTooltip}"
+                              AutomationProperties.HelpText="{Binding AutomationTooltip}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="180" />
                                 <ColumnDefinition Width="*" />
