@@ -52,9 +52,11 @@ public partial class ShellStatusBarViewModel : ObservableObject
     [ObservableProperty]
     private string _utcTime = string.Empty;
 
+    /// <summary>Gets or sets the current shell status message presented to the operator.</summary>
     [ObservableProperty]
     private string _statusText = "Ready";
 
+    /// <summary>Gets or sets the label for the module currently in focus.</summary>
     [ObservableProperty]
     private string _activeModule = string.Empty;
 
