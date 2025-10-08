@@ -206,7 +206,7 @@ public class DockLayoutPersistenceServiceTests
             var service = new DockLayoutPersistenceService(database, session, auth);
 
             var exception = await Assert.ThrowsAsync<DataException>(() =>
-                service.SaveAsync("Shell", "<layout />", null, CancellationToken.None)).ConfigureAwait(false);
+                service.SaveAsync("Shell", "<layout />", default(WindowGeometry), CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Same(expected, exception);
             Assert.Equal(1, attempts);
