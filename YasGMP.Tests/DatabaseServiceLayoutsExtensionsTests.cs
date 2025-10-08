@@ -77,6 +77,27 @@ public class DatabaseServiceLayoutsExtensionsTests
     }
 
     [Fact]
+    public async Task GetUserWindowLayoutAsync_PropagatesDatabaseFailures()
+    {
+        var db = new DatabaseService(ConnectionString);
+        var expected = new DataException("select fail");
+
+        db.ExecuteSelectOverride = (_, _, _) => Task.FromException<DataTable>(expected);
+
+        try
+        {
+            var exception = await Assert.ThrowsAsync<DataException>(() =>
+                db.GetUserWindowLayoutAsync(1, "Shell")).ConfigureAwait(false);
+
+            Assert.Same(expected, exception);
+        }
+        finally
+        {
+            db.ResetTestOverrides();
+        }
+    }
+
+    [Fact]
     public async Task SaveUserWindowLayoutAsync_EmitsExpectedSql_AndParameters()
     {
         var db = new DatabaseService(ConnectionString);
@@ -145,6 +166,27 @@ public class DatabaseServiceLayoutsExtensionsTests
     }
 
     [Fact]
+    public async Task SaveUserWindowLayoutAsync_PropagatesDatabaseFailures()
+    {
+        var db = new DatabaseService(ConnectionString);
+        var expected = new InvalidOperationException("non query fail");
+
+        db.ExecuteNonQueryOverride = (_, _, _) => Task.FromException<int>(expected);
+
+        try
+        {
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                db.SaveUserWindowLayoutAsync(5, "Shell", "<layout />", null)).ConfigureAwait(false);
+
+            Assert.Same(expected, exception);
+        }
+        finally
+        {
+            db.ResetTestOverrides();
+        }
+    }
+
+    [Fact]
     public async Task DeleteUserWindowLayoutAsync_EmitsExpectedSql_AndParameters()
     {
         var db = new DatabaseService(ConnectionString);
@@ -176,6 +218,27 @@ public class DatabaseServiceLayoutsExtensionsTests
                     Assert.Equal("@p", p.ParameterName);
                     Assert.Equal("Reset.Key", p.Value);
                 });
+        }
+        finally
+        {
+            db.ResetTestOverrides();
+        }
+    }
+
+    [Fact]
+    public async Task DeleteUserWindowLayoutAsync_PropagatesDatabaseFailures()
+    {
+        var db = new DatabaseService(ConnectionString);
+        var expected = new TimeoutException("delete fail");
+
+        db.ExecuteNonQueryOverride = (_, _, _) => Task.FromException<int>(expected);
+
+        try
+        {
+            var exception = await Assert.ThrowsAsync<TimeoutException>(() =>
+                db.DeleteUserWindowLayoutAsync(9, "Shell")).ConfigureAwait(false);
+
+            Assert.Same(expected, exception);
         }
         finally
         {
