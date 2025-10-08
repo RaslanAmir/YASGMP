@@ -1,7 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
@@ -181,7 +180,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         if (moduleHasContext)
         {
             moduleAutomationName = FormatString(_moduleAutomationNameTemplate, moduleText);
-            moduleAutomationId = FormatString(_moduleAutomationIdTemplate, NormalizeAutomationToken(moduleText));
+            moduleAutomationId = FormatString(
+                _moduleAutomationIdTemplate,
+                AutomationIdSanitizer.Normalize(moduleText, "module"));
             moduleAutomationTooltip = FormatString(_moduleAutomationTooltipTemplate, moduleText);
         }
         else
@@ -192,7 +193,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         }
 
         var recordAutomationName = FormatString(_recordAutomationNameTemplate, recordText);
-        var recordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(recordText));
+        var recordAutomationId = FormatString(
+            _recordAutomationIdTemplate,
+            AutomationIdSanitizer.Normalize(recordText, "record"));
         var recordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, recordText);
 
         return (
@@ -266,9 +269,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         string moduleText,
         string recordText)
     {
-        var moduleToken = NormalizeAutomationToken(moduleText);
-        var recordToken = NormalizeAutomationToken(recordText);
-        var labelToken = NormalizeAutomationToken(label);
+        var moduleToken = AutomationIdSanitizer.Normalize(moduleText, "module");
+        var recordToken = AutomationIdSanitizer.Normalize(recordText, "record");
+        var labelToken = AutomationIdSanitizer.Normalize(label, "field");
 
         var formatArgs = new object[]
         {
@@ -298,16 +301,6 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         return string.Format(CultureInfo.CurrentCulture, template, values);
     }
 
-    private static string NormalizeAutomationToken(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return "None";
-        }
-
-        var normalized = new string(value.Where(char.IsLetterOrDigit).ToArray());
-        return string.IsNullOrWhiteSpace(normalized) ? "Value" : normalized;
-    }
 }
 /// <summary>
 /// Represents the Inspector Field View Model.
