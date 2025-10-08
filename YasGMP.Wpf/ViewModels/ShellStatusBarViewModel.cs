@@ -1,6 +1,10 @@
 using System;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using YasGMP.Services;
+using YasGMP.Wpf.Configuration;
 
 namespace YasGMP.Wpf.ViewModels;
 
@@ -9,15 +13,28 @@ public partial class ShellStatusBarViewModel : ObservableObject
 {
     private readonly TimeProvider _timeProvider;
     private readonly DispatcherTimer _utcTimer;
+    private readonly IConfiguration _configuration;
+    private readonly DatabaseOptions _databaseOptions;
+    private readonly IHostEnvironment _hostEnvironment;
+    private readonly IUserSession _userSession;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ShellStatusBarViewModel"/> class.
     /// </summary>
     public ShellStatusBarViewModel(
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IConfiguration configuration,
+        DatabaseOptions databaseOptions,
+        IHostEnvironment hostEnvironment,
+        IUserSession userSession)
     {
         _timeProvider = timeProvider;
+        _configuration = configuration;
+        _databaseOptions = databaseOptions;
+        _hostEnvironment = hostEnvironment;
+        _userSession = userSession;
 
+        RefreshMetadata();
         UtcTime = FormatUtc(_timeProvider.GetUtcNow());
 
         _utcTimer = new DispatcherTimer
@@ -61,24 +78,54 @@ public partial class ShellStatusBarViewModel : ObservableObject
     private string _activeModule = string.Empty;
 
     /// <summary>
-    /// Applies shell metadata resolved by the hosting view-model or service.
+    /// Refreshes shell metadata from the injected configuration, environment, and session services.
     /// </summary>
-    /// <param name="company">Connected company name.</param>
-    /// <param name="environment">Runtime environment descriptor.</param>
-    /// <param name="server">Database server host.</param>
-    /// <param name="database">Database catalog name.</param>
-    /// <param name="user">Authenticated user display name.</param>
-    public void UpdateMetadata(string? company, string? environment, string? server, string? database, string? user)
+    public void RefreshMetadata()
     {
-        Company = NormalizeCompany(company);
-        Environment = NormalizeEnvironment(environment);
-        Server = NormalizeServer(server);
-        Database = NormalizeDatabase(database);
-        User = NormalizeUser(user);
+        Company = NormalizeCompany(ResolveCompany());
+        Environment = NormalizeEnvironment(ResolveEnvironment());
+        Server = NormalizeServer(_databaseOptions.Server);
+        Database = NormalizeDatabase(_databaseOptions.Database);
+        User = NormalizeUser(ResolveUser());
     }
 
     private static string FormatUtc(DateTimeOffset timestamp)
         => timestamp.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+    private string ResolveCompany()
+    {
+        var company = _configuration["Shell:Company"]
+                       ?? _configuration["Company"]
+                       ?? _configuration["AppTitle"]
+                       ?? string.Empty;
+
+        return company;
+    }
+
+    private string ResolveEnvironment()
+    {
+        var environment = _configuration["Shell:Environment"]
+                          ?? _configuration["Environment"]
+                          ?? _hostEnvironment.EnvironmentName
+                          ?? string.Empty;
+
+        return environment;
+    }
+
+    private string ResolveUser()
+    {
+        if (!string.IsNullOrWhiteSpace(_userSession.FullName))
+        {
+            return _userSession.FullName!;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_userSession.Username))
+        {
+            return _userSession.Username!;
+        }
+
+        return string.Empty;
+    }
 
     private static string NormalizeCompany(string? company)
         => string.IsNullOrWhiteSpace(company) ? "YasGMP" : company;
