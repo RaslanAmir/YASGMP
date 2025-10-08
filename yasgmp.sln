@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasGMP.Wpf", "YasGMP.Wpf\Ya
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasGMP.AppCore", "YasGMP.AppCore\YasGMP.AppCore.csproj", "{1670F97A-9844-4042-991E-38CE7C4C7FFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasGMP.Wpf.Smoke", "YasGMP.Wpf.Smoke\YasGMP.Wpf.Smoke.csproj", "{B4599B82-1F22-461C-9426-E665E04CE421}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +31,14 @@ Global
 		{8FF09402-DFC2-4029-9A9A-1F88C4358FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FF09402-DFC2-4029-9A9A-1F88C4358FAE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1670F97A-9844-4042-991E-38CE7C4C7FFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1670F97A-9844-4042-991E-38CE7C4C7FFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1670F97A-9844-4042-991E-38CE7C4C7FFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1670F97A-9844-4042-991E-38CE7C4C7FFB}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+                {1670F97A-9844-4042-991E-38CE7C4C7FFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {1670F97A-9844-4042-991E-38CE7C4C7FFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {1670F97A-9844-4042-991E-38CE7C4C7FFB}.Release|Any CPU.Build.0 = Release|Any CPU
+                {B4599B82-1F22-461C-9426-E665E04CE421}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {B4599B82-1F22-461C-9426-E665E04CE421}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {B4599B82-1F22-461C-9426-E665E04CE421}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {B4599B82-1F22-461C-9426-E665E04CE421}.Release|Any CPU.Build.0 = Release|Any CPU
+        EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
