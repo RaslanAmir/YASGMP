@@ -50,6 +50,18 @@ dotnet build
 
 Refer to platform-specific documentation for signing, deployment, and device setup.
 
+### Test matrix
+
+All contributors should execute the full regression suite before opening a pull request:
+
+```bash
+dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release --logger trx
+```
+
+The smoke harness launches the WPF shell, drives the FlaUI automation flows, and emits a `.trx` log that can be attached to PRs
+and inspected in CI artifacts. Set `YASGMP_SMOKE=0` only when diagnosing local infrastructure issues that prevent UI automation
+from launching.
+
 ## WPF desktop shell
 
 `YasGMP.Wpf` targets `net9.0-windows10.0.19041.0` (see `YasGMP.Wpf/YasGMP.Wpf.csproj`) and serves as the Windows-only desktop shell. Its `App.xaml.cs` bootstraps the same generic host, configuration, and DI container as the MAUI client, reusing the shared services that now live in the `YasGMP.AppCore` library. Refer to [README_WPF_SHELL.md](README_WPF_SHELL.md) for detailed setup, layout management, and docking workflows. Shared services together with the dock layout persistence service (`YasGMP.Wpf/Services/DockLayoutPersistenceService.cs`) ensure that saved layouts travel between the WPF shell and the MAUI app so both environments stay aligned.

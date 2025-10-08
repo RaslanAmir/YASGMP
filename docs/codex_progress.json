@@ -144,6 +144,7 @@
   "lastCommitSummary": "docs: expand CRUD adapter XML guidance",
   "notes": [
     "2026-02-06: Added regression tests for DatabaseService layout helpers, DockLayoutPersistenceService forwarding, and ShellLayoutController reset sequencing so SQL payloads stay covered while dotnet tooling remains unavailable.",
+    "2025-10-08: Authored GitHub Actions workflow 'WPF Smoke Tests' to run restore/build/FlaUI smoke automation on windows-latest using .NET 9 when available (falls back to .NET 8). Local CLI validation still blocked because dotnet --info returns 'command not found'.",
     "2026-02-08: Shell status bar layout/localization update surfaces metadata fields with accessibility bindings while dotnet CLI access is still missing.",
     "2026-02-03: DatabaseService now exposes layout persistence helpers so the WPF shell can store per-user dock/ribbon arrangements even though dotnet restore/build remain blocked by the missing CLI.",
     "2025-10-02: WPF AuditDashboardDocument view mirrors the MAUI filters/exports with busy overlay + App.xaml DataTemplate wiring while dotnet restore/build remain blocked by the missing CLI.",

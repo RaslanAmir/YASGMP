@@ -19,6 +19,7 @@
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*
   - 2025-10-07: Reconfirmed CLI absence this run; planning next increment around static analysis, documentation refresh, and schema review until installation is possible.
+  - 2025-10-08: Authored `WPF Smoke Tests` GitHub Actions workflow to run restore/build/FlaUI smoke automation on `windows-latest` using .NET 9 when available (falls back to .NET 8). Local validation remains blocked because `dotnet --info` still reports `command not found`.
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
   - 2026-01-25: Documented B1FormDocumentViewModel command/state surface so derived modules inherit SAP B1 toolbar, audit, and busy-state guidance.
   - 2026-02-10: Modules pane groups/links now source localized headers, tooltips, automation names/ids through ILocalizationService subscriptions so culture switches update without rebuilding the tree; awaiting SDK install to validate via build/smoke.
