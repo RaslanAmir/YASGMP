@@ -873,6 +873,9 @@
   <data name="ModuleTree.Category.Cockpit.AutomationName" xml:space="preserve">
     <value>Kategorija Kokpit</value>
   </data>
+  <data name="ModuleTree.Category.Cockpit.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Cockpit</value>
+  </data>
   <data name="ModuleTree.Category.Maintenance.Title" xml:space="preserve">
     <value>Održavanje</value>
   </data>
@@ -881,6 +884,9 @@
   </data>
   <data name="ModuleTree.Category.Maintenance.AutomationName" xml:space="preserve">
     <value>Kategorija Održavanje</value>
+  </data>
+  <data name="ModuleTree.Category.Maintenance.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Maintenance</value>
   </data>
   <data name="ModuleTree.Category.SupplyChain.Title" xml:space="preserve">
     <value>Opskrbni lanac</value>
@@ -891,6 +897,9 @@
   <data name="ModuleTree.Category.SupplyChain.AutomationName" xml:space="preserve">
     <value>Kategorija Opskrbni lanac</value>
   </data>
+  <data name="ModuleTree.Category.SupplyChain.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.SupplyChain</value>
+  </data>
   <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
     <value>Kvaliteta</value>
   </data>
@@ -899,6 +908,9 @@
   </data>
   <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
     <value>Kategorija Kvaliteta</value>
+  </data>
+  <data name="ModuleTree.Category.Quality.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Quality</value>
   </data>
   <data name="ModuleTree.Category.Planning.Title" xml:space="preserve">
     <value>Planiranje</value>
@@ -909,6 +921,9 @@
   <data name="ModuleTree.Category.Planning.AutomationName" xml:space="preserve">
     <value>Kategorija Planiranje</value>
   </data>
+  <data name="ModuleTree.Category.Planning.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Planning</value>
+  </data>
   <data name="ModuleTree.Category.Administration.Title" xml:space="preserve">
     <value>Administracija</value>
   </data>
@@ -917,6 +932,9 @@
   </data>
   <data name="ModuleTree.Category.Administration.AutomationName" xml:space="preserve">
     <value>Kategorija Administracija</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Administration</value>
   </data>
   <data name="ModuleTree.Category.QualityCompliance.Title" xml:space="preserve">
     <value>Kvaliteta i usklađenost</value>
@@ -927,6 +945,9 @@
   <data name="ModuleTree.Category.QualityCompliance.AutomationName" xml:space="preserve">
     <value>Kategorija Kvaliteta i usklađenost</value>
   </data>
+  <data name="ModuleTree.Category.QualityCompliance.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.QualityCompliance</value>
+  </data>
   <data name="ModuleTree.Category.Diagnostics.Title" xml:space="preserve">
     <value>Dijagnostika</value>
   </data>
@@ -935,6 +956,9 @@
   </data>
   <data name="ModuleTree.Category.Diagnostics.AutomationName" xml:space="preserve">
     <value>Kategorija Dijagnostika</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Diagnostics</value>
   </data>
   <data name="ModuleTree.Category.Documents.Title" xml:space="preserve">
     <value>Dokumenti</value>
@@ -945,6 +969,9 @@
   <data name="ModuleTree.Category.Documents.AutomationName" xml:space="preserve">
     <value>Kategorija Dokumenti</value>
   </data>
+  <data name="ModuleTree.Category.Documents.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Documents</value>
+  </data>
   <data name="ModuleTree.Node.Cockpit.Dashboard.Title" xml:space="preserve">
     <value>Nadzorna ploča</value>
   </data>
@@ -953,6 +980,9 @@
   </data>
   <data name="ModuleTree.Node.Cockpit.Dashboard.AutomationName" xml:space="preserve">
     <value>Čvor modula Nadzorna ploča</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Cockpit.Dashboard</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Assets.Title" xml:space="preserve">
     <value>Imovina</value>
@@ -963,6 +993,9 @@
   <data name="ModuleTree.Node.Maintenance.Assets.AutomationName" xml:space="preserve">
     <value>Čvor modula Imovina</value>
   </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Assets</value>
+  </data>
   <data name="ModuleTree.Node.Maintenance.Components.Title" xml:space="preserve">
     <value>Komponente</value>
   </data>
@@ -971,6 +1004,9 @@
   </data>
   <data name="ModuleTree.Node.Maintenance.Components.AutomationName" xml:space="preserve">
     <value>Čvor modula Komponente</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Components</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Warehouse.Title" xml:space="preserve">
     <value>Skladište</value>
@@ -981,6 +1017,9 @@
   <data name="ModuleTree.Node.Maintenance.Warehouse.AutomationName" xml:space="preserve">
     <value>Čvor modula Skladište</value>
   </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Warehouse</value>
+  </data>
   <data name="ModuleTree.Node.Maintenance.WorkOrders.Title" xml:space="preserve">
     <value>Radni nalozi</value>
   </data>
@@ -989,6 +1028,9 @@
   </data>
   <data name="ModuleTree.Node.Maintenance.WorkOrders.AutomationName" xml:space="preserve">
     <value>Čvor modula Radni nalozi</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.WorkOrders</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.Title" xml:space="preserve">
     <value>Kalibracija</value>
@@ -999,6 +1041,9 @@
   <data name="ModuleTree.Node.Maintenance.Calibration.AutomationName" xml:space="preserve">
     <value>Čvor modula Kalibracija</value>
   </data>
+  <data name="ModuleTree.Node.Maintenance.Calibration.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Calibration</value>
+  </data>
   <data name="ModuleTree.Node.Maintenance.Parts.Title" xml:space="preserve">
     <value>Dijelovi</value>
   </data>
@@ -1007,6 +1052,9 @@
   </data>
   <data name="ModuleTree.Node.Maintenance.Parts.AutomationName" xml:space="preserve">
     <value>Čvor modula Dijelovi</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Parts.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Parts</value>
   </data>
   <data name="ModuleTree.Node.SupplyChain.Suppliers.Title" xml:space="preserve">
     <value>Dobavljači</value>
@@ -1017,6 +1065,9 @@
   <data name="ModuleTree.Node.SupplyChain.Suppliers.AutomationName" xml:space="preserve">
     <value>Čvor modula Dobavljači</value>
   </data>
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.SupplyChain.Suppliers</value>
+  </data>
   <data name="ModuleTree.Node.SupplyChain.ExternalServicers.Title" xml:space="preserve">
     <value>Vanjski serviseri</value>
   </data>
@@ -1025,6 +1076,9 @@
   </data>
   <data name="ModuleTree.Node.SupplyChain.ExternalServicers.AutomationName" xml:space="preserve">
     <value>Čvor modula Vanjski serviseri</value>
+  </data>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.SupplyChain.ExternalServicers</value>
   </data>
   <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
     <value>CAPA</value>
@@ -1035,6 +1089,9 @@
   <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
     <value>Čvor modula CAPA</value>
   </data>
+  <data name="ModuleTree.Node.Quality.Capa.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Capa</value>
+  </data>
   <data name="ModuleTree.Node.Quality.Incidents.Title" xml:space="preserve">
     <value>Incidenti</value>
   </data>
@@ -1043,6 +1100,9 @@
   </data>
   <data name="ModuleTree.Node.Quality.Incidents.AutomationName" xml:space="preserve">
     <value>Čvor modula Incidenti</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Incidents</value>
   </data>
   <data name="ModuleTree.Node.Quality.ChangeControl.Title" xml:space="preserve">
     <value>Kontrola promjena</value>
@@ -1053,6 +1113,9 @@
   <data name="ModuleTree.Node.Quality.ChangeControl.AutomationName" xml:space="preserve">
     <value>Čvor modula Kontrola promjena</value>
   </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.ChangeControl</value>
+  </data>
   <data name="ModuleTree.Node.Quality.Validations.Title" xml:space="preserve">
     <value>Validacije</value>
   </data>
@@ -1061,6 +1124,9 @@
   </data>
   <data name="ModuleTree.Node.Quality.Validations.AutomationName" xml:space="preserve">
     <value>Čvor modula Validacije</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Validations</value>
   </data>
   <data name="ModuleTree.Node.Planning.Scheduling.Title" xml:space="preserve">
     <value>Planiranje</value>
@@ -1071,6 +1137,9 @@
   <data name="ModuleTree.Node.Planning.Scheduling.AutomationName" xml:space="preserve">
     <value>Čvor modula Planiranje</value>
   </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Planning.Scheduling</value>
+  </data>
   <data name="ModuleTree.Node.Administration.Security.Title" xml:space="preserve">
     <value>Sigurnost</value>
   </data>
@@ -1079,6 +1148,9 @@
   </data>
   <data name="ModuleTree.Node.Administration.Security.AutomationName" xml:space="preserve">
     <value>Čvor modula Sigurnost</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Administration.Security</value>
   </data>
   <data name="ModuleTree.Node.Administration.Admin.Title" xml:space="preserve">
     <value>Administracija</value>
@@ -1089,6 +1161,9 @@
   <data name="ModuleTree.Node.Administration.Admin.AutomationName" xml:space="preserve">
     <value>Čvor modula Administracija</value>
   </data>
+  <data name="ModuleTree.Node.Administration.Admin.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Administration.Admin</value>
+  </data>
   <data name="ModuleTree.Node.QualityCompliance.Audit.Title" xml:space="preserve">
     <value>Revizijski trag</value>
   </data>
@@ -1097,6 +1172,9 @@
   </data>
   <data name="ModuleTree.Node.QualityCompliance.Audit.AutomationName" xml:space="preserve">
     <value>Čvor modula Revizijski trag</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.QualityCompliance.Audit</value>
   </data>
   <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.Title" xml:space="preserve">
     <value>Revizijska nadzorna ploča</value>
@@ -1107,6 +1185,9 @@
   <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.AutomationName" xml:space="preserve">
     <value>Čvor modula Revizijska nadzorna ploča</value>
   </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.QualityCompliance.AuditDashboard</value>
+  </data>
   <data name="ModuleTree.Node.QualityCompliance.ApiAudit.Title" xml:space="preserve">
     <value>API revizijski trag</value>
   </data>
@@ -1115,6 +1196,9 @@
   </data>
   <data name="ModuleTree.Node.QualityCompliance.ApiAudit.AutomationName" xml:space="preserve">
     <value>Čvor modula API revizijski trag</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.QualityCompliance.ApiAudit</value>
   </data>
   <data name="ModuleTree.Node.Diagnostics.Diagnostics.Title" xml:space="preserve">
     <value>Dijagnostika</value>
@@ -1125,6 +1209,9 @@
   <data name="ModuleTree.Node.Diagnostics.Diagnostics.AutomationName" xml:space="preserve">
     <value>Čvor modula Dijagnostika</value>
   </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Diagnostics.Diagnostics</value>
+  </data>
   <data name="ModuleTree.Node.Documents.Attachments.Title" xml:space="preserve">
     <value>Prilozi</value>
   </data>
@@ -1133,6 +1220,9 @@
   </data>
   <data name="ModuleTree.Node.Documents.Attachments.AutomationName" xml:space="preserve">
     <value>Čvor modula Prilozi</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Documents.Attachments</value>
   </data>
   <data name="Dialog.Cfl.Content.OK" xml:space="preserve">
     <value>OK</value>
