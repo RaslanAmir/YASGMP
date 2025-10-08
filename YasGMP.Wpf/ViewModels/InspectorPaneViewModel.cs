@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
@@ -10,8 +12,18 @@ namespace YasGMP.Wpf.ViewModels;
 public partial class InspectorPaneViewModel : AnchorableViewModel
 {
     private readonly ILocalizationService _localization;
-    private string _modulePlaceholder;
-    private string _recordPlaceholder;
+    private string _modulePlaceholder = string.Empty;
+    private string _moduleTemplate = string.Empty;
+    private string _recordPlaceholder = string.Empty;
+    private string _recordTemplate = string.Empty;
+    private string _moduleAutomationNameTemplate = string.Empty;
+    private string _moduleAutomationIdTemplate = string.Empty;
+    private string _moduleAutomationTooltipTemplate = string.Empty;
+    private string _recordAutomationNameTemplate = string.Empty;
+    private string _recordAutomationIdTemplate = string.Empty;
+    private string _recordAutomationTooltipTemplate = string.Empty;
+    private string? _currentModuleContextValue;
+    private string? _currentRecordContextValue;
     /// <summary>
     /// Initializes a new instance of the InspectorPaneViewModel class.
     /// </summary>
@@ -19,16 +31,11 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     public InspectorPaneViewModel(ILocalizationService localization)
     {
         _localization = localization;
-        Title = _localization.GetString("Dock.Inspector.Title");
-        AutomationId = _localization.GetString("Dock.Inspector.AutomationId");
         ContentId = "YasGmp.Shell.Inspector";
-        _modulePlaceholder = _localization.GetString("Dock.Inspector.ModuleTitle");
-        _recordPlaceholder = _localization.GetString("Dock.Inspector.NoRecord");
-        ModuleTitle = _modulePlaceholder;
-        RecordTitle = _recordPlaceholder;
-        ModuleAutomationName = _localization.GetString("Dock.Inspector.Module.AutomationName");
-        ModuleAutomationId = _localization.GetString("Dock.Inspector.Module.AutomationId");
-        ModuleAutomationTooltip = _localization.GetString("Dock.Inspector.Module.ToolTip");
+        LoadLocalizationResources();
+        _currentModuleContextValue = null;
+        _currentRecordContextValue = null;
+        ApplyCurrentFormatting();
         Fields = new ObservableCollection<InspectorFieldViewModel>();
         _localization.LanguageChanged += OnLanguageChanged;
     }
@@ -47,6 +54,15 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
     [ObservableProperty]
     private string _moduleAutomationTooltip = "Displays the currently active module.";
+
+    [ObservableProperty]
+    private string _recordAutomationName = "Inspector record heading";
+
+    [ObservableProperty]
+    private string _recordAutomationId = "Dock.Inspector.RecordHeader";
+
+    [ObservableProperty]
+    private string _recordAutomationTooltip = "Displays the currently selected record.";
     /// <summary>
     /// Gets or sets the fields.
     /// </summary>
@@ -58,8 +74,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
     public void Update(InspectorContext context)
     {
-        ModuleTitle = string.IsNullOrWhiteSpace(context.ModuleTitle) ? _modulePlaceholder : context.ModuleTitle;
-        RecordTitle = string.IsNullOrWhiteSpace(context.RecordTitle) ? _recordPlaceholder : context.RecordTitle;
+        _currentModuleContextValue = string.IsNullOrWhiteSpace(context.ModuleTitle) ? null : context.ModuleTitle;
+        _currentRecordContextValue = string.IsNullOrWhiteSpace(context.RecordTitle) ? null : context.RecordTitle;
+        ApplyCurrentFormatting();
         Fields.Clear();
         foreach (var field in context.Fields)
         {
@@ -69,26 +86,60 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
+        LoadLocalizationResources();
+        ApplyCurrentFormatting();
+    }
+
+    private void LoadLocalizationResources()
+    {
         Title = _localization.GetString("Dock.Inspector.Title");
         AutomationId = _localization.GetString("Dock.Inspector.AutomationId");
-        var previousModulePlaceholder = _modulePlaceholder;
-        var previousRecordPlaceholder = _recordPlaceholder;
         _modulePlaceholder = _localization.GetString("Dock.Inspector.ModuleTitle");
+        _moduleTemplate = _localization.GetString("Dock.Inspector.ModuleTitle.Template");
         _recordPlaceholder = _localization.GetString("Dock.Inspector.NoRecord");
+        _recordTemplate = _localization.GetString("Dock.Inspector.RecordTitle.Template");
+        _moduleAutomationNameTemplate = _localization.GetString("Dock.Inspector.Module.AutomationName.Template");
+        _moduleAutomationIdTemplate = _localization.GetString("Dock.Inspector.Module.AutomationId.Template");
+        _moduleAutomationTooltipTemplate = _localization.GetString("Dock.Inspector.Module.ToolTip.Template");
+        _recordAutomationNameTemplate = _localization.GetString("Dock.Inspector.Record.AutomationName.Template");
+        _recordAutomationIdTemplate = _localization.GetString("Dock.Inspector.Record.AutomationId.Template");
+        _recordAutomationTooltipTemplate = _localization.GetString("Dock.Inspector.Record.ToolTip.Template");
+    }
 
-        if (string.IsNullOrWhiteSpace(ModuleTitle) || ModuleTitle == previousModulePlaceholder)
+    private void ApplyCurrentFormatting()
+    {
+        var moduleText = string.IsNullOrWhiteSpace(_currentModuleContextValue) ? _modulePlaceholder : _currentModuleContextValue;
+        var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue;
+
+        ModuleTitle = FormatString(_moduleTemplate, moduleText);
+        RecordTitle = FormatString(_recordTemplate, recordText);
+        ModuleAutomationName = FormatString(_moduleAutomationNameTemplate, moduleText);
+        ModuleAutomationId = FormatString(_moduleAutomationIdTemplate, NormalizeAutomationToken(moduleText));
+        ModuleAutomationTooltip = FormatString(_moduleAutomationTooltipTemplate, moduleText);
+        RecordAutomationName = FormatString(_recordAutomationNameTemplate, recordText);
+        RecordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(recordText));
+        RecordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, recordText);
+    }
+
+    private static string FormatString(string template, params object[] values)
+    {
+        if (string.IsNullOrWhiteSpace(template))
         {
-            ModuleTitle = _modulePlaceholder;
+            return values.Length > 0 ? Convert.ToString(values[0], CultureInfo.CurrentCulture) ?? string.Empty : string.Empty;
         }
 
-        if (string.IsNullOrWhiteSpace(RecordTitle) || RecordTitle == previousRecordPlaceholder)
+        return string.Format(CultureInfo.CurrentCulture, template, values);
+    }
+
+    private static string NormalizeAutomationToken(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
         {
-            RecordTitle = _recordPlaceholder;
+            return "None";
         }
 
-        ModuleAutomationName = _localization.GetString("Dock.Inspector.Module.AutomationName");
-        ModuleAutomationId = _localization.GetString("Dock.Inspector.Module.AutomationId");
-        ModuleAutomationTooltip = _localization.GetString("Dock.Inspector.Module.ToolTip");
+        var normalized = new string(value.Where(char.IsLetterOrDigit).ToArray());
+        return string.IsNullOrWhiteSpace(normalized) ? "Value" : normalized;
     }
 }
 /// <summary>
