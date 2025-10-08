@@ -291,17 +291,41 @@
   <data name="Dock.Inspector.ModuleTitle" xml:space="preserve">
     <value>Module</value>
   </data>
+  <data name="Dock.Inspector.ModuleTitle.Template" xml:space="preserve">
+    <value>{0}</value>
+  </data>
   <data name="Dock.Inspector.Module.AutomationName" xml:space="preserve">
     <value>Inspector module heading</value>
+  </data>
+  <data name="Dock.Inspector.Module.AutomationName.Template" xml:space="preserve">
+    <value>Inspector module heading for {0}</value>
   </data>
   <data name="Dock.Inspector.Module.AutomationId" xml:space="preserve">
     <value>Dock.Inspector.ModuleHeader</value>
   </data>
+  <data name="Dock.Inspector.Module.AutomationId.Template" xml:space="preserve">
+    <value>Dock.Inspector.ModuleHeader.{0}</value>
+  </data>
   <data name="Dock.Inspector.Module.ToolTip" xml:space="preserve">
     <value>Displays the currently active module.</value>
   </data>
+  <data name="Dock.Inspector.Module.ToolTip.Template" xml:space="preserve">
+    <value>Displays the currently active module: {0}</value>
+  </data>
   <data name="Dock.Inspector.NoRecord" xml:space="preserve">
     <value>No record selected</value>
+  </data>
+  <data name="Dock.Inspector.RecordTitle.Template" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Dock.Inspector.Record.AutomationName.Template" xml:space="preserve">
+    <value>Inspector record heading for {0}</value>
+  </data>
+  <data name="Dock.Inspector.Record.AutomationId.Template" xml:space="preserve">
+    <value>Dock.Inspector.RecordHeader.{0}</value>
+  </data>
+  <data name="Dock.Inspector.Record.ToolTip.Template" xml:space="preserve">
+    <value>Displays the currently selected record: {0}</value>
   </data>
   <data name="Module.Toolbar.Toggle.Find.Content" xml:space="preserve">
     <value>Find</value>

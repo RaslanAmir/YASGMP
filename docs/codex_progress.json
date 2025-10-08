@@ -75,7 +75,8 @@
         "2026-02-09: MainWindowViewModel now applies session/configuration metadata to the status bar via injected IUserSession/DatabaseOptions and new WPF tests cover EN\u2194HR localization/tooltips while dotnet CLI remains unavailable.",
         "2026-02-10: Modules pane groups and links now surface localized headers, tooltips, automation names, and automation ids through ILocalizationService subscriptions so culture switches update dynamically; build/smoke pending SDK install.",
         "2026-02-11: ModulesPane XAML bindings now forward the localized headers/tooltips/automation names/ids from ModuleGroupViewModel and ModuleLinkViewModel onto the expanders/buttons so Accessibility Insights/FlaUI can read the updated metadata immediately.",
-        "2026-02-12: Strings.xaml now defines automation ids for every ModuleRegistry category and module so the module tree resolves stable UIA names for smoke automation despite missing localized resources."
+        "2026-02-12: Strings.xaml now defines automation ids for every ModuleRegistry category and module so the module tree resolves stable UIA names for smoke automation despite missing localized resources.",
+        "2026-02-14: Inspector pane now formats module/record titles and automation metadata via localization templates so context updates follow language switches while the dotnet CLI remains unavailable."
       ]
     },
     {

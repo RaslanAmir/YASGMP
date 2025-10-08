@@ -291,17 +291,41 @@
   <data name="Dock.Inspector.ModuleTitle" xml:space="preserve">
     <value>Modul</value>
   </data>
+  <data name="Dock.Inspector.ModuleTitle.Template" xml:space="preserve">
+    <value>{0}</value>
+  </data>
   <data name="Dock.Inspector.Module.AutomationName" xml:space="preserve">
     <value>Zaglavlje modula inspektora</value>
+  </data>
+  <data name="Dock.Inspector.Module.AutomationName.Template" xml:space="preserve">
+    <value>Zaglavlje modula inspektora za {0}</value>
   </data>
   <data name="Dock.Inspector.Module.AutomationId" xml:space="preserve">
     <value>Dock.Inspector.ModuleHeader</value>
   </data>
+  <data name="Dock.Inspector.Module.AutomationId.Template" xml:space="preserve">
+    <value>Dock.Inspector.ModuleHeader.{0}</value>
+  </data>
   <data name="Dock.Inspector.Module.ToolTip" xml:space="preserve">
     <value>Prikazuje trenutno aktivni modul.</value>
   </data>
+  <data name="Dock.Inspector.Module.ToolTip.Template" xml:space="preserve">
+    <value>Prikazuje trenutno aktivni modul: {0}</value>
+  </data>
   <data name="Dock.Inspector.NoRecord" xml:space="preserve">
     <value>Nema odabranog zapisa</value>
+  </data>
+  <data name="Dock.Inspector.RecordTitle.Template" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Dock.Inspector.Record.AutomationName.Template" xml:space="preserve">
+    <value>Zaglavlje zapisa inspektora za {0}</value>
+  </data>
+  <data name="Dock.Inspector.Record.AutomationId.Template" xml:space="preserve">
+    <value>Dock.Inspector.RecordHeader.{0}</value>
+  </data>
+  <data name="Dock.Inspector.Record.ToolTip.Template" xml:space="preserve">
+    <value>Prikazuje trenutno odabrani zapis: {0}</value>
   </data>
   <data name="Module.Toolbar.Toggle.Find.Content" xml:space="preserve">
     <value>Traži</value>
