@@ -13,33 +13,39 @@
                            FontSize="14"
                            FontWeight="Bold"
                            Foreground="#F9F9F9"
+                           ToolTipService.ToolTip="{Binding ModuleAutomationTooltip}"
                            AutomationProperties.Name="{Binding ModuleAutomationName}"
                            AutomationProperties.AutomationId="{Binding ModuleAutomationId}"
-                           ToolTip="{Binding ModuleAutomationTooltip}"
                            AutomationProperties.HelpText="{Binding ModuleAutomationTooltip}" />
                 <TextBlock Text="{Binding RecordTitle}"
                            FontSize="12"
                            Foreground="#CCCCCC"
                            Margin="0,4,0,12"
+                           ToolTipService.ToolTip="{Binding RecordAutomationTooltip}"
                            AutomationProperties.Name="{Binding RecordAutomationName}"
                            AutomationProperties.AutomationId="{Binding RecordAutomationId}"
-                           ToolTip="{Binding RecordAutomationTooltip}"
                            AutomationProperties.HelpText="{Binding RecordAutomationTooltip}" />
             </StackPanel>
             <ItemsControl ItemsSource="{Binding Fields}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0,2"
+                              ToolTipService.ToolTip="{Binding AutomationTooltip}"
                               AutomationProperties.Name="{Binding AutomationName}"
                               AutomationProperties.AutomationId="{Binding AutomationId}"
-                              ToolTip="{Binding AutomationTooltip}"
                               AutomationProperties.HelpText="{Binding AutomationTooltip}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="180" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Label}" Foreground="#BBBBBB" />
-                            <TextBlock Text="{Binding Value}" Grid.Column="1" Foreground="#FFFFFF" TextWrapping="Wrap" />
+                            <TextBlock x:Name="FieldLabel"
+                                       Text="{Binding Label}"
+                                       Foreground="#BBBBBB" />
+                            <TextBlock Text="{Binding Value}"
+                                       Grid.Column="1"
+                                       Foreground="#FFFFFF"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.LabeledBy="{Binding ElementName=FieldLabel}" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

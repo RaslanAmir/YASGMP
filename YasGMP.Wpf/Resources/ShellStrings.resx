@@ -864,6 +864,9 @@
   <data name="ModuleTree.Category.Cockpit.AutomationName" xml:space="preserve">
     <value>Cockpit category</value>
   </data>
+  <data name="ModuleTree.Category.Cockpit.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Cockpit</value>
+  </data>
   <data name="ModuleTree.Category.Maintenance.Title" xml:space="preserve">
     <value>Maintenance</value>
   </data>
@@ -872,6 +875,9 @@
   </data>
   <data name="ModuleTree.Category.Maintenance.AutomationName" xml:space="preserve">
     <value>Maintenance category</value>
+  </data>
+  <data name="ModuleTree.Category.Maintenance.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Maintenance</value>
   </data>
   <data name="ModuleTree.Category.SupplyChain.Title" xml:space="preserve">
     <value>Supply Chain</value>
@@ -882,6 +888,9 @@
   <data name="ModuleTree.Category.SupplyChain.AutomationName" xml:space="preserve">
     <value>Supply Chain category</value>
   </data>
+  <data name="ModuleTree.Category.SupplyChain.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.SupplyChain</value>
+  </data>
   <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
     <value>Quality</value>
   </data>
@@ -890,6 +899,9 @@
   </data>
   <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
     <value>Quality category</value>
+  </data>
+  <data name="ModuleTree.Category.Quality.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Quality</value>
   </data>
   <data name="ModuleTree.Category.Planning.Title" xml:space="preserve">
     <value>Planning</value>
@@ -900,6 +912,9 @@
   <data name="ModuleTree.Category.Planning.AutomationName" xml:space="preserve">
     <value>Planning category</value>
   </data>
+  <data name="ModuleTree.Category.Planning.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Planning</value>
+  </data>
   <data name="ModuleTree.Category.Administration.Title" xml:space="preserve">
     <value>Administration</value>
   </data>
@@ -908,6 +923,9 @@
   </data>
   <data name="ModuleTree.Category.Administration.AutomationName" xml:space="preserve">
     <value>Administration category</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Administration</value>
   </data>
   <data name="ModuleTree.Category.QualityCompliance.Title" xml:space="preserve">
     <value>Quality &amp; Compliance</value>
@@ -918,6 +936,9 @@
   <data name="ModuleTree.Category.QualityCompliance.AutomationName" xml:space="preserve">
     <value>Quality and compliance category</value>
   </data>
+  <data name="ModuleTree.Category.QualityCompliance.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.QualityCompliance</value>
+  </data>
   <data name="ModuleTree.Category.Diagnostics.Title" xml:space="preserve">
     <value>Diagnostics</value>
   </data>
@@ -926,6 +947,9 @@
   </data>
   <data name="ModuleTree.Category.Diagnostics.AutomationName" xml:space="preserve">
     <value>Diagnostics category</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Diagnostics</value>
   </data>
   <data name="ModuleTree.Category.Documents.Title" xml:space="preserve">
     <value>Documents</value>
@@ -936,6 +960,9 @@
   <data name="ModuleTree.Category.Documents.AutomationName" xml:space="preserve">
     <value>Documents category</value>
   </data>
+  <data name="ModuleTree.Category.Documents.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Category.Documents</value>
+  </data>
   <data name="ModuleTree.Node.Cockpit.Dashboard.Title" xml:space="preserve">
     <value>Dashboard</value>
   </data>
@@ -944,6 +971,9 @@
   </data>
   <data name="ModuleTree.Node.Cockpit.Dashboard.AutomationName" xml:space="preserve">
     <value>Dashboard module node</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Cockpit.Dashboard</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Assets.Title" xml:space="preserve">
     <value>Assets</value>
@@ -954,6 +984,9 @@
   <data name="ModuleTree.Node.Maintenance.Assets.AutomationName" xml:space="preserve">
     <value>Assets module node</value>
   </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Assets</value>
+  </data>
   <data name="ModuleTree.Node.Maintenance.Components.Title" xml:space="preserve">
     <value>Components</value>
   </data>
@@ -962,6 +995,9 @@
   </data>
   <data name="ModuleTree.Node.Maintenance.Components.AutomationName" xml:space="preserve">
     <value>Components module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Components</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Warehouse.Title" xml:space="preserve">
     <value>Warehouse</value>
@@ -972,6 +1008,9 @@
   <data name="ModuleTree.Node.Maintenance.Warehouse.AutomationName" xml:space="preserve">
     <value>Warehouse module node</value>
   </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Warehouse</value>
+  </data>
   <data name="ModuleTree.Node.Maintenance.WorkOrders.Title" xml:space="preserve">
     <value>Work Orders</value>
   </data>
@@ -980,6 +1019,9 @@
   </data>
   <data name="ModuleTree.Node.Maintenance.WorkOrders.AutomationName" xml:space="preserve">
     <value>Work Orders module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.WorkOrders</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.Title" xml:space="preserve">
     <value>Calibration</value>
@@ -990,6 +1032,9 @@
   <data name="ModuleTree.Node.Maintenance.Calibration.AutomationName" xml:space="preserve">
     <value>Calibration module node</value>
   </data>
+  <data name="ModuleTree.Node.Maintenance.Calibration.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Calibration</value>
+  </data>
   <data name="ModuleTree.Node.Maintenance.Parts.Title" xml:space="preserve">
     <value>Parts</value>
   </data>
@@ -998,6 +1043,9 @@
   </data>
   <data name="ModuleTree.Node.Maintenance.Parts.AutomationName" xml:space="preserve">
     <value>Parts module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Parts.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Maintenance.Parts</value>
   </data>
   <data name="ModuleTree.Node.SupplyChain.Suppliers.Title" xml:space="preserve">
     <value>Suppliers</value>
@@ -1008,6 +1056,9 @@
   <data name="ModuleTree.Node.SupplyChain.Suppliers.AutomationName" xml:space="preserve">
     <value>Suppliers module node</value>
   </data>
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.SupplyChain.Suppliers</value>
+  </data>
   <data name="ModuleTree.Node.SupplyChain.ExternalServicers.Title" xml:space="preserve">
     <value>External Servicers</value>
   </data>
@@ -1016,6 +1067,9 @@
   </data>
   <data name="ModuleTree.Node.SupplyChain.ExternalServicers.AutomationName" xml:space="preserve">
     <value>External Servicers module node</value>
+  </data>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.SupplyChain.ExternalServicers</value>
   </data>
   <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
     <value>CAPA</value>
@@ -1026,6 +1080,9 @@
   <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
     <value>CAPA module node</value>
   </data>
+  <data name="ModuleTree.Node.Quality.Capa.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Capa</value>
+  </data>
   <data name="ModuleTree.Node.Quality.Incidents.Title" xml:space="preserve">
     <value>Incidents</value>
   </data>
@@ -1034,6 +1091,9 @@
   </data>
   <data name="ModuleTree.Node.Quality.Incidents.AutomationName" xml:space="preserve">
     <value>Incidents module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Incidents</value>
   </data>
   <data name="ModuleTree.Node.Quality.ChangeControl.Title" xml:space="preserve">
     <value>Change Control</value>
@@ -1044,6 +1104,9 @@
   <data name="ModuleTree.Node.Quality.ChangeControl.AutomationName" xml:space="preserve">
     <value>Change Control module node</value>
   </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.ChangeControl</value>
+  </data>
   <data name="ModuleTree.Node.Quality.Validations.Title" xml:space="preserve">
     <value>Validations</value>
   </data>
@@ -1052,6 +1115,9 @@
   </data>
   <data name="ModuleTree.Node.Quality.Validations.AutomationName" xml:space="preserve">
     <value>Validations module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Validations</value>
   </data>
   <data name="ModuleTree.Node.Planning.Scheduling.Title" xml:space="preserve">
     <value>Scheduling</value>
@@ -1062,6 +1128,9 @@
   <data name="ModuleTree.Node.Planning.Scheduling.AutomationName" xml:space="preserve">
     <value>Scheduling module node</value>
   </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Planning.Scheduling</value>
+  </data>
   <data name="ModuleTree.Node.Administration.Security.Title" xml:space="preserve">
     <value>Security</value>
   </data>
@@ -1070,6 +1139,9 @@
   </data>
   <data name="ModuleTree.Node.Administration.Security.AutomationName" xml:space="preserve">
     <value>Security module node</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Administration.Security</value>
   </data>
   <data name="ModuleTree.Node.Administration.Admin.Title" xml:space="preserve">
     <value>Administration</value>
@@ -1080,6 +1152,9 @@
   <data name="ModuleTree.Node.Administration.Admin.AutomationName" xml:space="preserve">
     <value>Administration module node</value>
   </data>
+  <data name="ModuleTree.Node.Administration.Admin.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Administration.Admin</value>
+  </data>
   <data name="ModuleTree.Node.QualityCompliance.Audit.Title" xml:space="preserve">
     <value>Audit Trail</value>
   </data>
@@ -1088,6 +1163,9 @@
   </data>
   <data name="ModuleTree.Node.QualityCompliance.Audit.AutomationName" xml:space="preserve">
     <value>Audit Trail module node</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.QualityCompliance.Audit</value>
   </data>
   <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.Title" xml:space="preserve">
     <value>Audit Dashboard</value>
@@ -1098,6 +1176,9 @@
   <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.AutomationName" xml:space="preserve">
     <value>Audit Dashboard module node</value>
   </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.QualityCompliance.AuditDashboard</value>
+  </data>
   <data name="ModuleTree.Node.QualityCompliance.ApiAudit.Title" xml:space="preserve">
     <value>API Audit Trail</value>
   </data>
@@ -1106,6 +1187,9 @@
   </data>
   <data name="ModuleTree.Node.QualityCompliance.ApiAudit.AutomationName" xml:space="preserve">
     <value>API Audit Trail module node</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.QualityCompliance.ApiAudit</value>
   </data>
   <data name="ModuleTree.Node.Diagnostics.Diagnostics.Title" xml:space="preserve">
     <value>Diagnostics</value>
@@ -1116,6 +1200,9 @@
   <data name="ModuleTree.Node.Diagnostics.Diagnostics.AutomationName" xml:space="preserve">
     <value>Diagnostics module node</value>
   </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Diagnostics.Diagnostics</value>
+  </data>
   <data name="ModuleTree.Node.Documents.Attachments.Title" xml:space="preserve">
     <value>Attachments</value>
   </data>
@@ -1124,6 +1211,9 @@
   </data>
   <data name="ModuleTree.Node.Documents.Attachments.AutomationName" xml:space="preserve">
     <value>Attachments module node</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Documents.Attachments</value>
   </data>
   <data name="Dialog.Cfl.Content.OK" xml:space="preserve">
     <value>OK</value>

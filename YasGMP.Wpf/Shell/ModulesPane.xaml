@@ -6,7 +6,7 @@
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="280"
-             ToolTip="{Binding HelpText}"
+             ToolTipService.ToolTip="{Binding HelpText}"
              AutomationProperties.Name="{Binding AutomationName}"
              AutomationProperties.AutomationId="{Binding AutomationId}"
              AutomationProperties.HelpText="{Binding HelpText}">
@@ -15,7 +15,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Expander Header="{Binding Header}"
-                              ToolTip="{Binding ToolTip}"
+                              ToolTipService.ToolTip="{Binding ToolTip}"
                               AutomationProperties.Name="{Binding AutomationName}"
                               AutomationProperties.AutomationId="{Binding AutomationId}"
                               AutomationProperties.HelpText="{Binding ToolTip}"
@@ -29,7 +29,7 @@
                                             CommandParameter="{Binding}"
                                             Margin="12,4,0,4"
                                             HorizontalContentAlignment="Left"
-                                            ToolTip="{Binding ToolTip}"
+                                            ToolTipService.ToolTip="{Binding ToolTip}"
                                             AutomationProperties.Name="{Binding AutomationName}"
                                             AutomationProperties.AutomationId="{Binding AutomationId}"
                                             AutomationProperties.HelpText="{Binding ToolTip}" />
