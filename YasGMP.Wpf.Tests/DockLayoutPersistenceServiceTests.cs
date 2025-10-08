@@ -83,6 +83,30 @@ public class DockLayoutPersistenceServiceTests
     }
 
     [Fact]
+    public async Task LoadAsync_PropagatesDatabaseFailures()
+    {
+        var database = new DatabaseService(ConnectionString);
+        var session = new StubUserSession(55);
+        var expected = new InvalidOperationException("boom");
+
+        SetExecuteSelectOverride(database, (_, _, _) => Task.FromException<DataTable>(expected));
+
+        try
+        {
+            var service = new DockLayoutPersistenceService(database, session);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.LoadAsync("Shell", CancellationToken.None)).ConfigureAwait(false);
+
+            Assert.Same(expected, exception);
+        }
+        finally
+        {
+            ResetOverrides(database);
+        }
+    }
+
+    [Fact]
     public async Task SaveAsync_DelegatesToDatabaseService_WithNullableGeometry()
     {
         var database = new DatabaseService(ConnectionString);
@@ -150,6 +174,30 @@ public class DockLayoutPersistenceServiceTests
     }
 
     [Fact]
+    public async Task SaveAsync_PropagatesDatabaseFailures()
+    {
+        var database = new DatabaseService(ConnectionString);
+        var session = new StubUserSession(78);
+        var expected = new DataException("save failed");
+
+        SetExecuteNonQueryOverride(database, (_, _, _) => Task.FromException<int>(expected));
+
+        try
+        {
+            var service = new DockLayoutPersistenceService(database, session);
+
+            var exception = await Assert.ThrowsAsync<DataException>(() =>
+                service.SaveAsync("Shell", "<layout />", null, CancellationToken.None)).ConfigureAwait(false);
+
+            Assert.Same(expected, exception);
+        }
+        finally
+        {
+            ResetOverrides(database);
+        }
+    }
+
+    [Fact]
     public async Task ResetAsync_DelegatesToDatabaseService()
     {
         var database = new DatabaseService(ConnectionString);
@@ -182,6 +230,30 @@ public class DockLayoutPersistenceServiceTests
                     Assert.Equal("@p", p.ParameterName);
                     Assert.Equal("Shell", p.Value);
                 });
+        }
+        finally
+        {
+            ResetOverrides(database);
+        }
+    }
+
+    [Fact]
+    public async Task ResetAsync_PropagatesDatabaseFailures()
+    {
+        var database = new DatabaseService(ConnectionString);
+        var session = new StubUserSession(92);
+        var expected = new TimeoutException("reset failed");
+
+        SetExecuteNonQueryOverride(database, (_, _, _) => Task.FromException<int>(expected));
+
+        try
+        {
+            var service = new DockLayoutPersistenceService(database, session);
+
+            var exception = await Assert.ThrowsAsync<TimeoutException>(() =>
+                service.ResetAsync("Shell", CancellationToken.None)).ConfigureAwait(false);
+
+            Assert.Same(expected, exception);
         }
         finally
         {
