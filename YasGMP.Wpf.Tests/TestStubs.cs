@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Models
 {
@@ -25,20 +27,9 @@ namespace YasGMP.Models
             string label,
             string? value)
         {
-            static string Normalize(string? input, string fallback)
-            {
-                if (string.IsNullOrWhiteSpace(input))
-                {
-                    return fallback;
-                }
-
-                var normalized = new string(input.Where(char.IsLetterOrDigit).ToArray());
-                return string.IsNullOrWhiteSpace(normalized) ? fallback : normalized;
-            }
-
-            var moduleToken = Normalize(moduleKey, "Module");
-            var recordToken = Normalize(recordKey, "Record");
-            var labelToken = Normalize(label, "Field");
+            var moduleToken = AutomationIdSanitizer.Normalize(moduleKey, "module");
+            var recordToken = AutomationIdSanitizer.Normalize(recordKey, "record");
+            var labelToken = AutomationIdSanitizer.Normalize(label, "field");
             var displayModule = string.IsNullOrWhiteSpace(moduleTitle) ? moduleKey : moduleTitle;
             var displayRecord = string.IsNullOrWhiteSpace(recordTitle)
                 ? (string.IsNullOrWhiteSpace(recordKey) ? "Record" : recordKey)
