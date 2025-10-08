@@ -14,6 +14,7 @@ using MySqlConnector;
 using Xunit;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.Tests;
@@ -50,7 +51,8 @@ public class DockLayoutPersistenceServiceTests
 
         try
         {
-            var service = new DockLayoutPersistenceService(database, session);
+            var auth = new StubAuthContext();
+            var service = new DockLayoutPersistenceService(database, session, auth);
             var snapshot = await service.LoadAsync("Shell", CancellationToken.None).ConfigureAwait(false);
 
             Assert.NotNull(snapshot);
@@ -93,7 +95,8 @@ public class DockLayoutPersistenceServiceTests
 
         try
         {
-            var service = new DockLayoutPersistenceService(database, session);
+            var auth = new StubAuthContext();
+            var service = new DockLayoutPersistenceService(database, session, auth);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.LoadAsync("Shell", CancellationToken.None)).ConfigureAwait(false);
@@ -110,27 +113,29 @@ public class DockLayoutPersistenceServiceTests
     public async Task SaveAsync_DelegatesToDatabaseService_WithNullableGeometry()
     {
         var database = new DatabaseService(ConnectionString);
-        var session = new StubUserSession(77);
-        string? capturedSql = null;
-        MySqlParameter[]? capturedParameters = null;
+        var session = new StubUserSession(77, "session-77");
+        var auth = new StubAuthContext("192.168.1.50", "DeviceInfo-77");
+        var commands = new List<(string Sql, MySqlParameter[] Parameters)>();
 
         SetExecuteNonQueryOverride(database, (sql, parameters, _) =>
         {
-            capturedSql = sql;
-            capturedParameters = parameters?.OfType<MySqlParameter>().ToArray();
+            commands.Add((sql, parameters?.OfType<MySqlParameter>().ToArray() ?? Array.Empty<MySqlParameter>()));
             return Task.FromResult(1);
         });
 
         try
         {
-            var service = new DockLayoutPersistenceService(database, session);
+            var service = new DockLayoutPersistenceService(database, session, auth);
             var geometry = new WindowGeometry(null, 64.0, 1400.0, null);
             await service.SaveAsync("Shell", "<layoutXml />", geometry, CancellationToken.None).ConfigureAwait(false);
 
             const string expectedSql = "INSERT INTO user_window_layouts (user_id, page_type, layout_xml, pos_x, pos_y, width, height, saved_at, created_at, updated_at)\nVALUES (@u, @p, @layout, @x, @y, @w, @h, UTC_TIMESTAMP(), UTC_TIMESTAMP(), UTC_TIMESTAMP())\nON DUPLICATE KEY UPDATE\n    layout_xml = VALUES(layout_xml),\n    pos_x = VALUES(pos_x),\n    pos_y = VALUES(pos_y),\n    width = VALUES(width),\n    height = VALUES(height),\n    saved_at = UTC_TIMESTAMP(),\n    updated_at = UTC_TIMESTAMP(),\n    created_at = COALESCE(created_at, VALUES(created_at));";
-            Assert.Equal(expectedSql, capturedSql);
+            Assert.Equal(2, commands.Count);
+
+            var upsert = commands[0];
+            Assert.Equal(expectedSql, upsert.Sql);
             Assert.Collection(
-                capturedParameters ?? Array.Empty<MySqlParameter>(),
+                upsert.Parameters,
                 p =>
                 {
                     Assert.Equal("@u", p.ParameterName);
@@ -166,6 +171,14 @@ public class DockLayoutPersistenceServiceTests
                     Assert.Equal("@h", p.ParameterName);
                     Assert.Equal(DBNull.Value, p.Value);
                 });
+
+            var auditCommand = commands[1];
+            Assert.StartsWith("INSERT INTO system_event_log", auditCommand.Sql, StringComparison.Ordinal);
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@etype" && (string?)p.Value == "LAYOUT_SAVE");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sid" && (string?)p.Value == "session-77");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@ip" && (string?)p.Value == "192.168.1.50");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@dev" && (string?)p.Value == "DeviceInfo-77");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sev" && (string?)p.Value == "audit");
         }
         finally
         {
@@ -177,19 +190,26 @@ public class DockLayoutPersistenceServiceTests
     public async Task SaveAsync_PropagatesDatabaseFailures()
     {
         var database = new DatabaseService(ConnectionString);
-        var session = new StubUserSession(78);
+        var session = new StubUserSession(78, "session-78");
+        var auth = new StubAuthContext();
         var expected = new DataException("save failed");
+        int attempts = 0;
 
-        SetExecuteNonQueryOverride(database, (_, _, _) => Task.FromException<int>(expected));
+        SetExecuteNonQueryOverride(database, (_, _, _) =>
+        {
+            attempts++;
+            return Task.FromException<int>(expected);
+        });
 
         try
         {
-            var service = new DockLayoutPersistenceService(database, session);
+            var service = new DockLayoutPersistenceService(database, session, auth);
 
             var exception = await Assert.ThrowsAsync<DataException>(() =>
                 service.SaveAsync("Shell", "<layout />", null, CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Same(expected, exception);
+            Assert.Equal(1, attempts);
         }
         finally
         {
@@ -201,25 +221,26 @@ public class DockLayoutPersistenceServiceTests
     public async Task ResetAsync_DelegatesToDatabaseService()
     {
         var database = new DatabaseService(ConnectionString);
-        var session = new StubUserSession(91);
-        string? capturedSql = null;
-        MySqlParameter[]? capturedParameters = null;
+        var session = new StubUserSession(91, "session-91");
+        var auth = new StubAuthContext("10.0.0.5", "DeviceInfo-91");
+        var commands = new List<(string Sql, MySqlParameter[] Parameters)>();
 
         SetExecuteNonQueryOverride(database, (sql, parameters, _) =>
         {
-            capturedSql = sql;
-            capturedParameters = parameters?.OfType<MySqlParameter>().ToArray();
+            commands.Add((sql, parameters?.OfType<MySqlParameter>().ToArray() ?? Array.Empty<MySqlParameter>()));
             return Task.FromResult(1);
         });
 
         try
         {
-            var service = new DockLayoutPersistenceService(database, session);
+            var service = new DockLayoutPersistenceService(database, session, auth);
             await service.ResetAsync("Shell", CancellationToken.None).ConfigureAwait(false);
 
-            Assert.Equal("DELETE FROM user_window_layouts WHERE user_id=@u AND page_type=@p;", capturedSql);
+            Assert.Equal(2, commands.Count);
+            var deleteCommand = commands[0];
+            Assert.Equal("DELETE FROM user_window_layouts WHERE user_id=@u AND page_type=@p;", deleteCommand.Sql);
             Assert.Collection(
-                capturedParameters ?? Array.Empty<MySqlParameter>(),
+                deleteCommand.Parameters,
                 p =>
                 {
                     Assert.Equal("@u", p.ParameterName);
@@ -230,6 +251,12 @@ public class DockLayoutPersistenceServiceTests
                     Assert.Equal("@p", p.ParameterName);
                     Assert.Equal("Shell", p.Value);
                 });
+
+            var auditCommand = commands[1];
+            Assert.StartsWith("INSERT INTO system_event_log", auditCommand.Sql, StringComparison.Ordinal);
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@etype" && (string?)p.Value == "LAYOUT_RESET");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sid" && (string?)p.Value == "session-91");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@ip" && (string?)p.Value == "10.0.0.5");
         }
         finally
         {
@@ -241,19 +268,26 @@ public class DockLayoutPersistenceServiceTests
     public async Task ResetAsync_PropagatesDatabaseFailures()
     {
         var database = new DatabaseService(ConnectionString);
-        var session = new StubUserSession(92);
+        var session = new StubUserSession(92, "session-92");
+        var auth = new StubAuthContext();
         var expected = new TimeoutException("reset failed");
+        int attempts = 0;
 
-        SetExecuteNonQueryOverride(database, (_, _, _) => Task.FromException<int>(expected));
+        SetExecuteNonQueryOverride(database, (_, _, _) =>
+        {
+            attempts++;
+            return Task.FromException<int>(expected);
+        });
 
         try
         {
-            var service = new DockLayoutPersistenceService(database, session);
+            var service = new DockLayoutPersistenceService(database, session, auth);
 
             var exception = await Assert.ThrowsAsync<TimeoutException>(() =>
                 service.ResetAsync("Shell", CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Same(expected, exception);
+            Assert.Equal(1, attempts);
         }
         finally
         {
@@ -267,8 +301,9 @@ public class DockLayoutPersistenceServiceTests
         await RunOnStaThread(async () =>
         {
             var database = new DatabaseService(ConnectionString);
-            var session = new StubUserSession(101);
-            var persistence = new DockLayoutPersistenceService(database, session);
+            var session = new StubUserSession(101, "session-101");
+            var auth = new StubAuthContext();
+            var persistence = new DockLayoutPersistenceService(database, session, auth);
             var controller = new ShellLayoutController(persistence);
 
             var dockManager = new DockingManager();
@@ -307,9 +342,11 @@ public class DockLayoutPersistenceServiceTests
             try
             {
                 await controller.ResetLayoutAsync(window, CancellationToken.None).ConfigureAwait(false);
-                Assert.Equal(2, sqlCalls.Count);
+                Assert.Equal(4, sqlCalls.Count);
                 Assert.Equal("DELETE FROM user_window_layouts WHERE user_id=@u AND page_type=@p;", sqlCalls[0]);
-                Assert.StartsWith("INSERT INTO user_window_layouts", sqlCalls[1], StringComparison.Ordinal);
+                Assert.StartsWith("INSERT INTO system_event_log", sqlCalls[1], StringComparison.Ordinal);
+                Assert.StartsWith("INSERT INTO user_window_layouts", sqlCalls[2], StringComparison.Ordinal);
+                Assert.StartsWith("INSERT INTO system_event_log", sqlCalls[3], StringComparison.Ordinal);
             }
             finally
             {
@@ -389,10 +426,10 @@ public class DockLayoutPersistenceServiceTests
 
     private sealed class StubUserSession : IUserSession
     {
-        public StubUserSession(int userId)
+        public StubUserSession(int userId, string? sessionId = null)
         {
             UserId = userId;
-            SessionId = Guid.NewGuid().ToString("N");
+            SessionId = sessionId ?? Guid.NewGuid().ToString("N");
         }
 
         public User? CurrentUser => null;
@@ -400,5 +437,22 @@ public class DockLayoutPersistenceServiceTests
         public string? Username => "test";
         public string? FullName => "Test User";
         public string SessionId { get; }
+    }
+
+    private sealed class StubAuthContext : IAuthContext
+    {
+        private readonly string _ip;
+        private readonly string _device;
+
+        public StubAuthContext(string? ip = null, string? device = null)
+        {
+            _ip = ip ?? "127.0.0.1";
+            _device = device ?? "Device";
+        }
+
+        public User? CurrentUser => null;
+        public string CurrentSessionId => Guid.Empty.ToString();
+        public string CurrentDeviceInfo => _device;
+        public string CurrentIpAddress => _ip;
     }
 }

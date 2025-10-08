@@ -39,6 +39,21 @@ namespace YasGMP.Services
         public sealed record UserWindowLayoutSnapshot(string? LayoutXml, UserWindowLayoutGeometry Geometry, DateTime? SavedAt, DateTime? CreatedAt, DateTime? UpdatedAt);
 
         /// <summary>
+        /// Carries audit metadata that should accompany layout persistence calls.
+        /// </summary>
+        /// <param name="IpAddress">Best-effort source IP address.</param>
+        /// <param name="DeviceInfo">Device fingerprint string.</param>
+        /// <param name="SessionId">Logical session identifier (shared with signatures/audit trail).</param>
+        /// <param name="SignatureId">Associated electronic signature identifier, when present.</param>
+        /// <param name="SignatureHash">Associated electronic signature hash, when present.</param>
+        public sealed record UserWindowLayoutAuditContext(
+            string? IpAddress,
+            string? DeviceInfo,
+            string? SessionId,
+            int? SignatureId = null,
+            string? SignatureHash = null);
+
+        /// <summary>
         /// Retrieves the persisted layout for the specified user and page type.
         /// </summary>
         /// <param name="db">The <see cref="DatabaseService"/> instance.</param>
@@ -109,6 +124,7 @@ FROM user_window_layouts WHERE user_id=@u AND page_type=@p LIMIT 1;";
             string pageType,
             string? layoutXml,
             UserWindowLayoutGeometry geometry,
+            UserWindowLayoutAuditContext? auditContext = null,
             CancellationToken token = default)
         {
             if (db == null) throw new ArgumentNullException(nameof(db));
@@ -139,6 +155,25 @@ ON DUPLICATE KEY UPDATE
             };
 
             await db.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+
+            string description = $"page={pageType}; xmlLen={(layoutXml?.Length ?? 0).ToString(CultureInfo.InvariantCulture)}; " +
+                                 $"left={FormatNullableDouble(geometry.Left)}; top={FormatNullableDouble(geometry.Top)}; " +
+                                 $"width={FormatNullableDouble(geometry.Width)}; height={FormatNullableDouble(geometry.Height)}";
+
+            await db.LogSystemEventAsync(
+                userId: userId,
+                eventType: "LAYOUT_SAVE",
+                tableName: "user_window_layouts",
+                module: "DockLayout",
+                recordId: null,
+                description: description,
+                ip: auditContext?.IpAddress,
+                severity: "audit",
+                deviceInfo: auditContext?.DeviceInfo,
+                sessionId: auditContext?.SessionId,
+                signatureId: auditContext?.SignatureId,
+                signatureHash: auditContext?.SignatureHash,
+                token: token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -148,10 +183,11 @@ ON DUPLICATE KEY UPDATE
         /// <param name="userId">User identifier.</param>
         /// <param name="pageType">Layout page type key.</param>
         /// <param name="token">Cancellation token.</param>
-        public static Task DeleteUserWindowLayoutAsync(
+        public static async Task DeleteUserWindowLayoutAsync(
             this DatabaseService db,
             int userId,
             string pageType,
+            UserWindowLayoutAuditContext? auditContext = null,
             CancellationToken token = default)
         {
             if (db == null) throw new ArgumentNullException(nameof(db));
@@ -164,7 +200,24 @@ ON DUPLICATE KEY UPDATE
                 new MySqlParameter("@p", pageType)
             };
 
-            return db.ExecuteNonQueryAsync(sql, parameters, token);
+            await db.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+
+            string description = $"page={pageType}";
+
+            await db.LogSystemEventAsync(
+                userId: userId,
+                eventType: "LAYOUT_RESET",
+                tableName: "user_window_layouts",
+                module: "DockLayout",
+                recordId: null,
+                description: description,
+                ip: auditContext?.IpAddress,
+                severity: "audit",
+                deviceInfo: auditContext?.DeviceInfo,
+                sessionId: auditContext?.SessionId,
+                signatureId: auditContext?.SignatureId,
+                signatureHash: auditContext?.SignatureHash,
+                token: token).ConfigureAwait(false);
         }
 
         private static double? ReadDouble(DataRow row, string column)
@@ -175,6 +228,13 @@ ON DUPLICATE KEY UPDATE
             }
 
             return Convert.ToDouble(row[column], CultureInfo.InvariantCulture);
+        }
+
+        private static string FormatNullableDouble(double? value)
+        {
+            return value.HasValue
+                ? value.Value.ToString(CultureInfo.InvariantCulture)
+                : "null";
         }
 
         private static MySqlParameter CreateNullableDoubleParameter(string name, double? value)

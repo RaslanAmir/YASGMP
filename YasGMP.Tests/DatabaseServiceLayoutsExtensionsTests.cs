@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -101,28 +102,33 @@ public class DatabaseServiceLayoutsExtensionsTests
     public async Task SaveUserWindowLayoutAsync_EmitsExpectedSql_AndParameters()
     {
         var db = new DatabaseService(ConnectionString);
-        string? capturedSql = null;
-        MySqlParameter[]? capturedParameters = null;
+        var commands = new List<(string Sql, MySqlParameter[] Parameters)>();
 
         db.ExecuteNonQueryOverride = (sql, parameters, _) =>
         {
-            capturedSql = sql;
-            capturedParameters = parameters?.OfType<MySqlParameter>().ToArray();
+            commands.Add((sql, parameters?.OfType<MySqlParameter>().ToArray() ?? Array.Empty<MySqlParameter>()));
             return Task.FromResult(1);
         };
 
         var geometry = new DatabaseServiceLayoutsExtensions.UserWindowLayoutGeometry(null, 20.0, null, 720.0);
+        var audit = new DatabaseServiceLayoutsExtensions.UserWindowLayoutAuditContext(
+            "10.0.0.1",
+            "Device-1",
+            "sess-123",
+            77,
+            "hash-abc");
 
         try
         {
-            await db.SaveUserWindowLayoutAsync(11, "Shell", null, geometry).ConfigureAwait(false);
+            await db.SaveUserWindowLayoutAsync(11, "Shell", null, geometry, audit).ConfigureAwait(false);
 
             const string expectedSql = "INSERT INTO user_window_layouts (user_id, page_type, layout_xml, pos_x, pos_y, width, height, saved_at, created_at, updated_at)\nVALUES (@u, @p, @layout, @x, @y, @w, @h, UTC_TIMESTAMP(), UTC_TIMESTAMP(), UTC_TIMESTAMP())\nON DUPLICATE KEY UPDATE\n    layout_xml = VALUES(layout_xml),\n    pos_x = VALUES(pos_x),\n    pos_y = VALUES(pos_y),\n    width = VALUES(width),\n    height = VALUES(height),\n    saved_at = UTC_TIMESTAMP(),\n    updated_at = UTC_TIMESTAMP(),\n    created_at = COALESCE(created_at, VALUES(created_at));";
-            Assert.Equal(expectedSql, capturedSql);
+            Assert.Equal(2, commands.Count);
 
-            Assert.NotNull(capturedParameters);
+            var upsert = commands[0];
+            Assert.Equal(expectedSql, upsert.Sql);
             Assert.Collection(
-                capturedParameters!,
+                upsert.Parameters,
                 p =>
                 {
                     Assert.Equal("@u", p.ParameterName);
@@ -158,6 +164,18 @@ public class DatabaseServiceLayoutsExtensionsTests
                     Assert.Equal("@h", p.ParameterName);
                     Assert.Equal(720.0, p.Value);
                 });
+
+            var auditCommand = commands[1];
+            Assert.StartsWith("INSERT INTO system_event_log", auditCommand.Sql, StringComparison.Ordinal);
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@etype" && (string?)p.Value == "LAYOUT_SAVE");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sid" && (string?)p.Value == "sess-123");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@ip" && (string?)p.Value == "10.0.0.1");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@dev" && (string?)p.Value == "Device-1");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sev" && (string?)p.Value == "audit");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sigId" && (object?)p.Value == 77);
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sigHash" && (string?)p.Value == "hash-abc");
+            var descParam = Assert.Single(auditCommand.Parameters, p => p.ParameterName == "@desc");
+            Assert.Contains("page=Shell", descParam.Value?.ToString());
         }
         finally
         {
@@ -171,14 +189,21 @@ public class DatabaseServiceLayoutsExtensionsTests
         var db = new DatabaseService(ConnectionString);
         var expected = new InvalidOperationException("non query fail");
 
-        db.ExecuteNonQueryOverride = (_, _, _) => Task.FromException<int>(expected);
+        int attempt = 0;
+        db.ExecuteNonQueryOverride = (_, _, _) =>
+        {
+            attempt++;
+            return Task.FromException<int>(expected);
+        };
 
         try
         {
+            var geometry = new DatabaseServiceLayoutsExtensions.UserWindowLayoutGeometry(1, 2, 3, 4);
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                db.SaveUserWindowLayoutAsync(5, "Shell", "<layout />", null)).ConfigureAwait(false);
+                db.SaveUserWindowLayoutAsync(5, "Shell", "<layout />", geometry)).ConfigureAwait(false);
 
             Assert.Same(expected, exception);
+            Assert.Equal(1, attempt);
         }
         finally
         {
@@ -190,24 +215,24 @@ public class DatabaseServiceLayoutsExtensionsTests
     public async Task DeleteUserWindowLayoutAsync_EmitsExpectedSql_AndParameters()
     {
         var db = new DatabaseService(ConnectionString);
-        string? capturedSql = null;
-        MySqlParameter[]? capturedParameters = null;
+        var commands = new List<(string Sql, MySqlParameter[] Parameters)>();
 
         db.ExecuteNonQueryOverride = (sql, parameters, _) =>
         {
-            capturedSql = sql;
-            capturedParameters = parameters?.OfType<MySqlParameter>().ToArray();
+            commands.Add((sql, parameters?.OfType<MySqlParameter>().ToArray() ?? Array.Empty<MySqlParameter>()));
             return Task.FromResult(1);
         };
 
         try
         {
-            await db.DeleteUserWindowLayoutAsync(3, "Reset.Key").ConfigureAwait(false);
+            var audit = new DatabaseServiceLayoutsExtensions.UserWindowLayoutAuditContext("127.0.0.1", "Device", "sess-1");
+            await db.DeleteUserWindowLayoutAsync(3, "Reset.Key", audit).ConfigureAwait(false);
 
-            Assert.Equal("DELETE FROM user_window_layouts WHERE user_id=@u AND page_type=@p;", capturedSql);
-            Assert.NotNull(capturedParameters);
+            Assert.Equal(2, commands.Count);
+            var deleteCommand = commands[0];
+            Assert.Equal("DELETE FROM user_window_layouts WHERE user_id=@u AND page_type=@p;", deleteCommand.Sql);
             Assert.Collection(
-                capturedParameters!,
+                deleteCommand.Parameters,
                 p =>
                 {
                     Assert.Equal("@u", p.ParameterName);
@@ -218,6 +243,11 @@ public class DatabaseServiceLayoutsExtensionsTests
                     Assert.Equal("@p", p.ParameterName);
                     Assert.Equal("Reset.Key", p.Value);
                 });
+
+            var auditCommand = commands[1];
+            Assert.StartsWith("INSERT INTO system_event_log", auditCommand.Sql, StringComparison.Ordinal);
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@etype" && (string?)p.Value == "LAYOUT_RESET");
+            Assert.Contains(auditCommand.Parameters, p => p.ParameterName == "@sid" && (string?)p.Value == "sess-1");
         }
         finally
         {
@@ -231,7 +261,12 @@ public class DatabaseServiceLayoutsExtensionsTests
         var db = new DatabaseService(ConnectionString);
         var expected = new TimeoutException("delete fail");
 
-        db.ExecuteNonQueryOverride = (_, _, _) => Task.FromException<int>(expected);
+        int attempt = 0;
+        db.ExecuteNonQueryOverride = (_, _, _) =>
+        {
+            attempt++;
+            return Task.FromException<int>(expected);
+        };
 
         try
         {
@@ -239,6 +274,7 @@ public class DatabaseServiceLayoutsExtensionsTests
                 db.DeleteUserWindowLayoutAsync(9, "Shell")).ConfigureAwait(false);
 
             Assert.Same(expected, exception);
+            Assert.Equal(1, attempt);
         }
         finally
         {

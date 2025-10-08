@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Wpf.Services
 {
@@ -10,13 +11,15 @@ namespace YasGMP.Wpf.Services
     {
         private readonly DatabaseService _database;
         private readonly IUserSession _session;
+        private readonly IAuthContext _authContext;
         /// <summary>
         /// Initializes a new instance of the DockLayoutPersistenceService class.
         /// </summary>
-        public DockLayoutPersistenceService(DatabaseService database, IUserSession session)
+        public DockLayoutPersistenceService(DatabaseService database, IUserSession session, IAuthContext authContext)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         }
         /// <summary>
         /// Executes the load async operation.
@@ -53,8 +56,13 @@ namespace YasGMP.Wpf.Services
                 geometry.Width,
                 geometry.Height);
 
+            var auditContext = new DatabaseServiceLayoutsExtensions.UserWindowLayoutAuditContext(
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _session.SessionId);
+
             await _database
-                .SaveUserWindowLayoutAsync(GetUserId(), layoutKey, layoutXml, layoutGeometry, token)
+                .SaveUserWindowLayoutAsync(GetUserId(), layoutKey, layoutXml, layoutGeometry, auditContext, token)
                 .ConfigureAwait(false);
         }
 
@@ -63,7 +71,12 @@ namespace YasGMP.Wpf.Services
         /// </summary>
         public Task ResetAsync(string layoutKey, CancellationToken token = default)
         {
-            return _database.DeleteUserWindowLayoutAsync(GetUserId(), layoutKey, token);
+            var auditContext = new DatabaseServiceLayoutsExtensions.UserWindowLayoutAuditContext(
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _session.SessionId);
+
+            return _database.DeleteUserWindowLayoutAsync(GetUserId(), layoutKey, auditContext, token);
         }
 
         private int GetUserId()
