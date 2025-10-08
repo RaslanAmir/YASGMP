@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
+using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Modules;
 using YasGMP.Wpf.Tests.TestDoubles;
 
@@ -80,7 +81,11 @@ public class AuditModuleViewModelTests
         var inspectorContext = shell.LastContext!;
         Assert.Equal(AuditModuleViewModel.ModuleKey, inspectorContext.ModuleKey);
         var timestampField = Assert.Single(inspectorContext.Fields.Where(f => f.Label == "Timestamp"));
-        Assert.Equal("Dock.Inspector.Audit.42.Timestamp", timestampField.AutomationId);
+        var moduleToken = AutomationIdSanitizer.Normalize(inspectorContext.ModuleKey, "module");
+        var recordToken = AutomationIdSanitizer.Normalize(inspectorContext.RecordKey, "record");
+        var labelToken = AutomationIdSanitizer.Normalize(timestampField.Label, "field");
+        var expectedAutomationId = $"Dock.Inspector.{moduleToken}.{recordToken}.{labelToken}";
+        Assert.Equal(expectedAutomationId, timestampField.AutomationId);
         Assert.Contains("Timestamp", timestampField.AutomationName, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Timestamp", timestampField.AutomationTooltip, StringComparison.OrdinalIgnoreCase);
     }
