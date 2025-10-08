@@ -54,6 +54,9 @@
 
     <sys:String x:Key="Dock.Modules.AutomationId">Dock.Anchorable.Modules</sys:String>
     <sys:String x:Key="Dock.Inspector.AutomationId">Dock.Anchorable.Inspector</sys:String>
+    <sys:String x:Key="Dock.Inspector.Module.AutomationName">Inspector module heading</sys:String>
+    <sys:String x:Key="Dock.Inspector.Module.AutomationId">Dock.Inspector.ModuleHeader</sys:String>
+    <sys:String x:Key="Dock.Inspector.Module.ToolTip">Displays the currently active module.</sys:String>
 
     <sys:String x:Key="Module.Toolbar.Toggle.Find.AutomationId">Toolbar.Toggle.Find</sys:String>
     <sys:String x:Key="Module.Toolbar.Toggle.Add.AutomationId">Toolbar.Toggle.Add</sys:String>

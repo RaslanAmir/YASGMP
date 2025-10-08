@@ -291,6 +291,15 @@
   <data name="Dock.Inspector.ModuleTitle" xml:space="preserve">
     <value>Module</value>
   </data>
+  <data name="Dock.Inspector.Module.AutomationName" xml:space="preserve">
+    <value>Inspector module heading</value>
+  </data>
+  <data name="Dock.Inspector.Module.AutomationId" xml:space="preserve">
+    <value>Dock.Inspector.ModuleHeader</value>
+  </data>
+  <data name="Dock.Inspector.Module.ToolTip" xml:space="preserve">
+    <value>Displays the currently active module.</value>
+  </data>
   <data name="Dock.Inspector.NoRecord" xml:space="preserve">
     <value>No record selected</value>
   </data>
