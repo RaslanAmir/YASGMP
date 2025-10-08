@@ -281,6 +281,7 @@
     "2026-02-07: Shell status bar now binds company, environment, database, server, user, and UTC clock fields via revived DatabaseOptions parsing, configuration helpers, and a dispatcher timer while dotnet restore/build/smoke remain blocked by the missing CLI.",
     "2026-02-09: MainWindowViewModel now resolves session/configuration metadata via IUserSession and DatabaseOptions, pushes it into ShellStatusBarViewModel, and WPF tests assert EN/HR localized captions/tooltips while dotnet CLI access remains blocked."
     ,
-    "2026-02-13: InspectorPaneViewModel now exposes localized module header automation name/id/tooltip properties with language-change refresh while dotnet restore/build/smoke stay blocked by the missing CLI."
+    "2026-02-13: InspectorPaneViewModel now exposes localized module header automation name/id/tooltip properties with language-change refresh while dotnet restore/build/smoke stay blocked by the missing CLI.",
+    "2026-02-15: InspectorPaneViewModel update now recomputes module automation name/id/tooltip with localized templates and default fallbacks for empty context, and refreshes cached metadata when the language changes; dotnet restore/build/smoke remain blocked by the missing CLI."
   ]
 }
