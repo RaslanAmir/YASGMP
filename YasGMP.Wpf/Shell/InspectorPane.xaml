@@ -27,7 +27,10 @@
             <ItemsControl ItemsSource="{Binding Fields}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,2">
+                        <Grid Margin="0,2"
+                              AutomationProperties.Name="{Binding AutomationName}"
+                              AutomationProperties.AutomationId="{Binding AutomationId}"
+                              ToolTip="{Binding AutomationTooltip}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="180" />
                                 <ColumnDefinition Width="*" />
