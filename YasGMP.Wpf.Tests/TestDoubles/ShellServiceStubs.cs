@@ -13,7 +13,10 @@ public sealed class StubCflDialogService : ICflDialogService
 
 public sealed class StubShellInteractionService : IShellInteractionService
 {
-    public void UpdateInspector(InspectorContext context) { }
+    public InspectorContext? LastContext { get; private set; }
+
+    public void UpdateInspector(InspectorContext context) => LastContext = context;
+
     public void UpdateStatus(string message) { }
 }
 

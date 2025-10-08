@@ -17,6 +17,56 @@ namespace YasGMP.Models
         public string? Location { get; set; }
         public string? Status { get; set; }
         public DateTime? InstallDate { get; set; }
+        public static InspectorField Create(
+            string moduleKey,
+            string moduleTitle,
+            string? recordKey,
+            string? recordTitle,
+            string label,
+            string? value)
+        {
+            static string Normalize(string? input, string fallback)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return fallback;
+                }
+
+                var normalized = new string(input.Where(char.IsLetterOrDigit).ToArray());
+                return string.IsNullOrWhiteSpace(normalized) ? fallback : normalized;
+            }
+
+            var moduleToken = Normalize(moduleKey, "Module");
+            var recordToken = Normalize(recordKey, "Record");
+            var labelToken = Normalize(label, "Field");
+            var displayModule = string.IsNullOrWhiteSpace(moduleTitle) ? moduleKey : moduleTitle;
+            var displayRecord = string.IsNullOrWhiteSpace(recordTitle)
+                ? (string.IsNullOrWhiteSpace(recordKey) ? "Record" : recordKey)
+                : recordTitle;
+
+            var automationName = string.Format(
+                CultureInfo.CurrentCulture,
+                "{0} — {1} ({2})",
+                displayModule,
+                label,
+                displayRecord);
+
+            var automationId = string.Format(
+                CultureInfo.InvariantCulture,
+                "Dock.Inspector.{0}.{1}.{2}",
+                moduleToken,
+                recordToken,
+                labelToken);
+
+            var automationTooltip = string.Format(
+                CultureInfo.CurrentCulture,
+                "{0} for {1} in {2}.",
+                label,
+                displayRecord,
+                displayModule);
+
+            return new InspectorField(label, value, automationName, automationId, automationTooltip);
+        }
     }
 
     public class Component
@@ -6566,6 +6616,7 @@ namespace YasGMP.Services.Interfaces
 namespace YasGMP.Wpf.ViewModels.Modules
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using YasGMP.Services;
@@ -6573,27 +6624,47 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
     public sealed class InspectorField
     {
-        public InspectorField(string name, string value)
+        public InspectorField(string label, string? value)
+            : this(label, value, string.Empty, string.Empty, string.Empty)
         {
-            Name = name;
-            Value = value;
         }
 
-        public string Name { get; }
+        public InspectorField(string label, string? value, string automationName, string automationId, string automationTooltip)
+        {
+            Label = label;
+            Value = value ?? string.Empty;
+            AutomationName = automationName;
+            AutomationId = automationId;
+            AutomationTooltip = automationTooltip;
+        }
+
+        public string Label { get; }
 
         public string Value { get; }
+
+        public string AutomationName { get; }
+
+        public string AutomationId { get; }
+
+        public string AutomationTooltip { get; }
     }
 
     public sealed class InspectorContext
     {
-        public InspectorContext(string title, string subtitle, IReadOnlyList<InspectorField> fields)
+        public InspectorContext(string moduleKey, string title, string? recordKey, string subtitle, IReadOnlyList<InspectorField> fields)
         {
+            ModuleKey = moduleKey;
             Title = title;
+            RecordKey = recordKey ?? string.Empty;
             Subtitle = subtitle;
-            Fields = fields;
+            Fields = fields ?? new List<InspectorField>();
         }
 
+        public string ModuleKey { get; }
+
         public string Title { get; }
+
+        public string RecordKey { get; }
 
         public string Subtitle { get; }
 

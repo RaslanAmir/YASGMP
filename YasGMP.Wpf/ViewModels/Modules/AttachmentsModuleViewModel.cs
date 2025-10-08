@@ -229,7 +229,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return base.FormatLoadedStatus(count);
     }
 
-    private static ModuleRecord ToRecord(Attachment attachment)
+    private ModuleRecord ToRecord(Attachment attachment)
     {
         var moduleKey = attachment.EntityType?.ToLowerInvariant() switch
         {
@@ -240,18 +240,21 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             _ => null
         };
 
+        var recordKey = attachment.Id.ToString(CultureInfo.InvariantCulture);
+        var recordTitle = string.IsNullOrWhiteSpace(attachment.Name) ? attachment.FileName : attachment.Name;
+
         return new ModuleRecord(
-            attachment.Id.ToString(CultureInfo.InvariantCulture),
-            string.IsNullOrWhiteSpace(attachment.Name) ? attachment.FileName : attachment.Name,
+            recordKey,
+            recordTitle,
             attachment.FileName,
             attachment.Status,
             attachment.Notes ?? attachment.Note,
-            CreateRecordInspectorFields(attachment),
+            CreateRecordInspectorFields(attachment, recordKey, recordTitle),
             moduleKey,
             attachment.EntityId);
     }
 
-    private static IReadOnlyList<InspectorField> CreateRecordInspectorFields(Attachment attachment)
+    private IReadOnlyList<InspectorField> CreateRecordInspectorFields(Attachment attachment, string recordKey, string recordTitle)
     {
         var entity = string.IsNullOrWhiteSpace(attachment.EntityType)
             ? "-"
@@ -263,10 +266,10 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
         return new List<InspectorField>
         {
-            new("Entity/Table", entity),
-            new("Linked Record Id", linkedRecordId),
-            new("SHA-256", sha256),
-            new("Status", status)
+            CreateInspectorField(recordKey, recordTitle, "Entity/Table", entity),
+            CreateInspectorField(recordKey, recordTitle, "Linked Record Id", linkedRecordId),
+            CreateInspectorField(recordKey, recordTitle, "SHA-256", sha256),
+            CreateInspectorField(recordKey, recordTitle, "Status", status)
         };
     }
 
@@ -276,14 +279,14 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         {
             ResetAttachmentState(clearStagedUploads: false, clearAttachmentRows: false);
             _shellInteractionService.UpdateInspector(
-                new InspectorContext(Title, "No attachment selected", Array.Empty<InspectorField>()));
+                new InspectorContext(ModuleKey, Title, null, "No attachment selected", Array.Empty<InspectorField>()));
             return Task.CompletedTask;
         }
 
         if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var attachmentId))
         {
             ResetAttachmentState(clearStagedUploads: false, clearAttachmentRows: false);
-            _shellInteractionService.UpdateInspector(new InspectorContext(Title, record.Title, record.InspectorFields));
+            _shellInteractionService.UpdateInspector(new InspectorContext(ModuleKey, Title, record.Key, record.Title, record.InspectorFields));
             return Task.CompletedTask;
         }
 
@@ -291,7 +294,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         if (attachment is null)
         {
             ResetAttachmentState(clearStagedUploads: false, clearAttachmentRows: false);
-            _shellInteractionService.UpdateInspector(new InspectorContext(Title, record.Title, record.InspectorFields));
+            _shellInteractionService.UpdateInspector(new InspectorContext(ModuleKey, Title, record.Key, record.Title, record.InspectorFields));
             return Task.CompletedTask;
         }
 
@@ -299,7 +302,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
         var inspectorFields = BuildInspectorFields(attachment);
         _shellInteractionService.UpdateInspector(
-            new InspectorContext(Title, attachment.DisplayName, inspectorFields));
+            new InspectorContext(ModuleKey, Title, attachment.Id.ToString(CultureInfo.InvariantCulture), attachment.DisplayName, inspectorFields));
 
         return Task.CompletedTask;
     }
@@ -325,14 +328,19 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         else
         {
             inspectorTitle = $"{mode} mode";
+            var modeKey = $"Mode.{mode}";
             inspectorFields = new List<InspectorField>
             {
-                new("Mode", mode.ToString()),
-                new("Staged Uploads", StagedUploads.Count.ToString(CultureInfo.CurrentCulture))
+                CreateInspectorField(modeKey, inspectorTitle, "Mode", mode.ToString()),
+                CreateInspectorField(
+                    modeKey,
+                    inspectorTitle,
+                    "Staged Uploads",
+                    StagedUploads.Count.ToString(CultureInfo.CurrentCulture))
             };
         }
 
-        _shellInteractionService.UpdateInspector(new InspectorContext(Title, inspectorTitle, inspectorFields));
+        _shellInteractionService.UpdateInspector(new InspectorContext(ModuleKey, Title, modeKey, inspectorTitle, inspectorFields));
 
         StatusMessage = mode switch
         {
@@ -568,41 +576,52 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
     private IReadOnlyList<InspectorField> BuildInspectorFields(AttachmentRowViewModel attachment)
     {
+        var recordKey = attachment.Id.ToString(CultureInfo.InvariantCulture);
+        var recordTitle = string.IsNullOrWhiteSpace(attachment.DisplayName)
+            ? attachment.FileName
+            : attachment.DisplayName;
+
         var fields = new List<InspectorField>
         {
-            new("Attachment Id", attachment.Id.ToString(CultureInfo.InvariantCulture)),
-            new("File Name", attachment.FileName),
-            new("Display Name", attachment.DisplayName),
-            new("Status", attachment.Status ?? "-"),
-            new("Entity", attachment.EntityDisplayName),
-            new("Uploaded", attachment.UploadedAt.ToString("g", CultureInfo.CurrentCulture)),
-            new("File Type", attachment.FileType ?? "-"),
-            new("File Size", attachment.FileSizeDisplay),
-            new("SHA-256", attachment.Sha256 ?? "-"),
-            new("Notes", attachment.Notes ?? string.Empty)
+            CreateInspectorField(recordKey, recordTitle, "Attachment Id", recordKey),
+            CreateInspectorField(recordKey, recordTitle, "File Name", attachment.FileName),
+            CreateInspectorField(recordKey, recordTitle, "Display Name", attachment.DisplayName),
+            CreateInspectorField(recordKey, recordTitle, "Status", attachment.Status ?? "-"),
+            CreateInspectorField(recordKey, recordTitle, "Entity", attachment.EntityDisplayName),
+            CreateInspectorField(
+                recordKey,
+                recordTitle,
+                "Uploaded",
+                attachment.UploadedAt.ToString("g", CultureInfo.CurrentCulture)),
+            CreateInspectorField(recordKey, recordTitle, "File Type", attachment.FileType ?? "-"),
+            CreateInspectorField(recordKey, recordTitle, "File Size", attachment.FileSizeDisplay),
+            CreateInspectorField(recordKey, recordTitle, "SHA-256", attachment.Sha256 ?? "-"),
+            CreateInspectorField(recordKey, recordTitle, "Notes", attachment.Notes ?? string.Empty)
         };
 
         if (!string.IsNullOrWhiteSpace(attachment.RetentionPolicyName) || attachment.RetainUntil is not null)
         {
-            fields.Add(new InspectorField("Retention Policy", attachment.RetentionPolicyName ?? "-"));
-            fields.Add(new InspectorField(
+            fields.Add(CreateInspectorField(recordKey, recordTitle, "Retention Policy", attachment.RetentionPolicyName ?? "-"));
+            fields.Add(CreateInspectorField(
+                recordKey,
+                recordTitle,
                 "Retain Until",
                 attachment.RetainUntil?.ToString("g", CultureInfo.CurrentCulture) ?? "-"));
         }
 
         if (attachment.RetentionLegalHold)
         {
-            fields.Add(new InspectorField("Legal Hold", "Enabled"));
+            fields.Add(CreateInspectorField(recordKey, recordTitle, "Legal Hold", "Enabled"));
         }
 
         if (attachment.RetentionReviewRequired)
         {
-            fields.Add(new InspectorField("Manual Review", "Required"));
+            fields.Add(CreateInspectorField(recordKey, recordTitle, "Manual Review", "Required"));
         }
 
         if (!string.IsNullOrWhiteSpace(attachment.RetentionNotes))
         {
-            fields.Add(new InspectorField("Retention Notes", attachment.RetentionNotes));
+            fields.Add(CreateInspectorField(recordKey, recordTitle, "Retention Notes", attachment.RetentionNotes));
         }
 
         return fields;
@@ -867,7 +886,13 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                 .ConfigureAwait(false);
 
             var inspectorFields = BuildInspectorFields(SelectedAttachment);
-            _shellInteractionService.UpdateInspector(new InspectorContext(Title, SelectedAttachment.DisplayName, inspectorFields));
+            _shellInteractionService.UpdateInspector(
+                new InspectorContext(
+                    ModuleKey,
+                    Title,
+                    SelectedAttachment.Id.ToString(CultureInfo.InvariantCulture),
+                    SelectedAttachment.DisplayName,
+                    inspectorFields));
 
             StatusMessage = $"Downloaded {FormatBytes(result.BytesWritten)} of {FormatBytes(result.TotalLength)} to '{dialog.FileName}'.";
         }

@@ -563,21 +563,26 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         }
     }
 
-    private static ModuleRecord ToRecord(Part part)
+    private ModuleRecord ToRecord(Part part)
     {
+        var recordKey = part.Id.ToString(CultureInfo.InvariantCulture);
+        var recordTitle = string.IsNullOrWhiteSpace(part.Name) ? recordKey : part.Name;
+
+        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
+
         var fields = new List<InspectorField>
         {
-            new("SKU", part.Sku ?? part.Code),
-            new("Supplier", part.DefaultSupplierName ?? "-"),
-            new("Stock", part.Stock?.ToString(CultureInfo.InvariantCulture) ?? "-"),
-            new("Min Stock", part.MinStockAlert?.ToString(CultureInfo.InvariantCulture) ?? "-"),
-            new("Location", part.Location ?? "-"),
-            new("Status", part.Status ?? "-")
+            Field("SKU", part.Sku ?? part.Code),
+            Field("Supplier", part.DefaultSupplierName ?? "-"),
+            Field("Stock", part.Stock?.ToString(CultureInfo.InvariantCulture) ?? "-"),
+            Field("Min Stock", part.MinStockAlert?.ToString(CultureInfo.InvariantCulture) ?? "-"),
+            Field("Location", part.Location ?? "-"),
+            Field("Status", part.Status ?? "-")
         };
 
         return new ModuleRecord(
-            part.Id.ToString(CultureInfo.InvariantCulture),
-            part.Name,
+            recordKey,
+            recordTitle,
             part.Code,
             part.Status,
             part.Description,

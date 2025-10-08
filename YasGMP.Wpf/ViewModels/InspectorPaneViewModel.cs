@@ -88,7 +88,12 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         Fields.Clear();
         foreach (var field in context.Fields)
         {
-            Fields.Add(new InspectorFieldViewModel(field.Label, field.Value));
+            Fields.Add(new InspectorFieldViewModel(
+                field.Label,
+                field.Value,
+                field.AutomationName,
+                field.AutomationId,
+                field.AutomationTooltip));
         }
     }
 
@@ -185,11 +190,20 @@ public partial class InspectorFieldViewModel : ObservableObject
     /// <summary>
     /// Initializes a new instance of the InspectorFieldViewModel class.
     /// </summary>
-    public InspectorFieldViewModel(string label, string value)
+    public InspectorFieldViewModel(
+        string label,
+        string value,
+        string automationName,
+        string automationId,
+        string automationTooltip)
     {
         Label = label;
         Value = value;
+        AutomationName = automationName;
+        AutomationId = automationId;
+        AutomationTooltip = automationTooltip;
     }
+
     /// <summary>
     /// Gets or sets the label.
     /// </summary>
@@ -198,4 +212,13 @@ public partial class InspectorFieldViewModel : ObservableObject
 
     [ObservableProperty]
     private string _value;
+
+    [ObservableProperty]
+    private string _automationName = string.Empty;
+
+    [ObservableProperty]
+    private string _automationId = string.Empty;
+
+    [ObservableProperty]
+    private string _automationTooltip = string.Empty;
 }

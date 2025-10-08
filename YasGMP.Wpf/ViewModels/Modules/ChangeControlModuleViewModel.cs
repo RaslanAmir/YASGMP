@@ -416,16 +416,23 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
     private ModuleRecord ToRecord(ChangeControl changeControl)
     {
+        var recordKey = changeControl.Id.ToString(CultureInfo.InvariantCulture);
+        var recordTitle = string.IsNullOrWhiteSpace(changeControl.Title)
+            ? changeControl.Code ?? recordKey
+            : changeControl.Title!;
+
+        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
+
         var fields = new List<InspectorField>
         {
-            new("Status", changeControl.StatusRaw ?? ChangeControlStatus.Draft.ToString()),
-            new("Requested", changeControl.DateRequested?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
-            new("Assigned To", changeControl.AssignedToId?.ToString(CultureInfo.InvariantCulture) ?? "-")
+            Field("Status", changeControl.StatusRaw ?? ChangeControlStatus.Draft.ToString()),
+            Field("Requested", changeControl.DateRequested?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
+            Field("Assigned To", changeControl.AssignedToId?.ToString(CultureInfo.InvariantCulture) ?? "-")
         };
 
         return new ModuleRecord(
-            changeControl.Id.ToString(CultureInfo.InvariantCulture),
-            string.IsNullOrWhiteSpace(changeControl.Title) ? changeControl.Code ?? changeControl.Id.ToString(CultureInfo.InvariantCulture) : changeControl.Title!,
+            recordKey,
+            recordTitle,
             changeControl.Code,
             changeControl.StatusRaw,
             changeControl.Description,

@@ -85,17 +85,25 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             new("WO-1001", "Preventive maintenance - Autoclave", "WO-1001", "In Progress", "Monthly PM",
                 new[]
                 {
-                    new InspectorField("Assigned To", "Technician A"),
-                    new InspectorField("Priority", "High"),
-                    new InspectorField("Due", DateTime.Now.AddDays(2).ToString("d", CultureInfo.CurrentCulture))
+                    CreateInspectorField("WO-1001", "Preventive maintenance - Autoclave", "Assigned To", "Technician A"),
+                    CreateInspectorField("WO-1001", "Preventive maintenance - Autoclave", "Priority", "High"),
+                    CreateInspectorField(
+                        "WO-1001",
+                        "Preventive maintenance - Autoclave",
+                        "Due",
+                        DateTime.Now.AddDays(2).ToString("d", CultureInfo.CurrentCulture))
                 },
                 AssetsModuleViewModel.ModuleKey, 1),
             new("WO-1002", "Calibration - pH meter", "WO-1002", "Open", "Annual calibration",
                 new[]
                 {
-                    new InspectorField("Assigned To", "Technician B"),
-                    new InspectorField("Priority", "Medium"),
-                    new InspectorField("Due", DateTime.Now.AddDays(5).ToString("d", CultureInfo.CurrentCulture))
+                    CreateInspectorField("WO-1002", "Calibration - pH meter", "Assigned To", "Technician B"),
+                    CreateInspectorField("WO-1002", "Calibration - pH meter", "Priority", "Medium"),
+                    CreateInspectorField(
+                        "WO-1002",
+                        "Calibration - pH meter",
+                        "Due",
+                        DateTime.Now.AddDays(5).ToString("d", CultureInfo.CurrentCulture))
                 },
                 CalibrationModuleViewModel.ModuleKey, 2)
         };
@@ -560,15 +568,27 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
 
-    private static ModuleRecord ToRecord(WorkOrder workOrder)
+    private ModuleRecord ToRecord(WorkOrder workOrder)
     {
         var fields = new List<InspectorField>
         {
-            new("Assigned To", workOrder.AssignedTo?.FullName ?? workOrder.AssignedTo?.Username ?? "-"),
-            new("Priority", workOrder.Priority),
-            new("Status", workOrder.Status),
-            new("Due Date", workOrder.DueDate?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
-            new("Machine", workOrder.Machine?.Name ?? workOrder.MachineId.ToString(CultureInfo.InvariantCulture))
+            CreateInspectorField(
+                workOrder.Id.ToString(CultureInfo.InvariantCulture),
+                workOrder.Title,
+                "Assigned To",
+                workOrder.AssignedTo?.FullName ?? workOrder.AssignedTo?.Username ?? "-"),
+            CreateInspectorField(workOrder.Id.ToString(CultureInfo.InvariantCulture), workOrder.Title, "Priority", workOrder.Priority),
+            CreateInspectorField(workOrder.Id.ToString(CultureInfo.InvariantCulture), workOrder.Title, "Status", workOrder.Status),
+            CreateInspectorField(
+                workOrder.Id.ToString(CultureInfo.InvariantCulture),
+                workOrder.Title,
+                "Due Date",
+                workOrder.DueDate?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
+            CreateInspectorField(
+                workOrder.Id.ToString(CultureInfo.InvariantCulture),
+                workOrder.Title,
+                "Machine",
+                workOrder.Machine?.Name ?? workOrder.MachineId.ToString(CultureInfo.InvariantCulture))
         };
 
         return new ModuleRecord(
