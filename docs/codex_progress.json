@@ -61,7 +61,8 @@
       "2026-02-22: dotnet build YasGMP.Wpf.csproj retried after binding inspector headers to automation metadata; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-02-24: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so commands exit with 'command not found'.",
       "2026-03-02: dotnet restore yasgmp.sln and dotnet build yasgmp.sln -c Release retried; CLI remains unavailable so each command exits with 'command not found'.",
-      "2026-03-03: dotnet restore yasgmp.sln plus dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried alongside MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'."
+      "2026-03-03: dotnet restore yasgmp.sln plus dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried alongside MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'.",
+      "2026-03-09: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI remains unavailable so each command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -307,6 +308,7 @@
     "2026-03-05: ShellStatusBarViewModel consumes IConfiguration, DatabaseOptions, IHostEnvironment, and IUserSession to refresh status metadata automatically, ShellStatusBar.xaml wires localized tooltips/automation ids for every field, and new WPF tests cover EN↔HR localization plus automation metadata while dotnet restore/build attempts still fail with 'command not found' because the CLI is unavailable.",
     "2026-03-06: ModulesPane.xaml now binds localized tooltips/help text and automation ids from ModuleGroup/ModuleLink view-models, InspectorPane.xaml exposes localized tooltips with AutomationProperties.LabeledBy for value cells, ShellStrings neutral/en/hr resx files define category/node automation id resources, and fresh WPF unit tests cover EN↔HR automation metadata updates while dotnet restore/build (yasgmp.sln + net9.0-windows) continue to fail with 'command not found' because the CLI remains unavailable.",
     "2026-03-07: DockLayoutPersistenceServiceTests.SaveAsync failure propagation now passes a default WindowGeometry instance to satisfy nullable struct requirements; dotnet build YasGMP.Wpf.Tests retried and still fails with 'command not found' because the CLI is unavailable.",
-    "2026-03-08: ShellStrings neutral/en/hr include localized status bar captions, tooltips, and automation names for status/company/environment/server/database/user/UTC metadata so ShellStatusBar.xaml resolves resources during EN↔HR toggles; dotnet restore/build (yasgmp.sln + net9.0-windows) retried and still fail with 'command not found' while the CLI remains absent."
+    "2026-03-08: ShellStrings neutral/en/hr include localized status bar captions, tooltips, and automation names for status/company/environment/server/database/user/UTC metadata so ShellStatusBar.xaml resolves resources during EN↔HR toggles; dotnet restore/build (yasgmp.sln + net9.0-windows) retried and still fail with 'command not found' while the CLI remains absent.",
+    "2026-03-09: ModulesPane header template now surfaces localized tooltips plus automation names/ids for each category expander, InspectorPane label/value elements echo row automation tooltips for screen readers, ShellStrings neutral/en/hr define Dock.Modules.AutomationId and Dock.Inspector.AutomationId resources, and the FlaUI smoke test asserts module group/button automation ids; dotnet restore/build retries still fail with 'command not found' without the CLI."
   ]
 }

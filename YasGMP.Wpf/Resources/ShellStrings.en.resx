@@ -288,11 +288,17 @@
   <data name="Dock.Modules.AutomationName" xml:space="preserve">
     <value>Modules pane navigation</value>
   </data>
+  <data name="Dock.Modules.AutomationId" xml:space="preserve">
+    <value>Dock.Anchorable.Modules</value>
+  </data>
   <data name="Dock.Modules.ToolTip" xml:space="preserve">
     <value>Browse and open available modules.</value>
   </data>
   <data name="Dock.Inspector.Title" xml:space="preserve">
     <value>Inspector</value>
+  </data>
+  <data name="Dock.Inspector.AutomationId" xml:space="preserve">
+    <value>Dock.Anchorable.Inspector</value>
   </data>
   <data name="Dock.Inspector.ModuleTitle" xml:space="preserve">
     <value>Module</value>

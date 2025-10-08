@@ -79,11 +79,13 @@ public class AutomationMetadataSmokeTests
 
         var cockpitAutomationId = localization.GetString("ModuleTree.Category.Cockpit.AutomationId");
         var cockpitGroup = WaitForDescendant(modulesPane, cockpitAutomationId);
+        Assert.Equal(cockpitAutomationId, cockpitGroup.AutomationId);
         Assert.Equal(localization.GetString("ModuleTree.Category.Cockpit.AutomationName"), cockpitGroup.Name);
         Assert.Equal(localization.GetString("ModuleTree.Category.Cockpit.ToolTip"), GetHelpText(cockpitGroup));
 
         var dashboardAutomationId = localization.GetString("ModuleTree.Node.Cockpit.Dashboard.AutomationId");
         var dashboardButton = WaitForDescendant(cockpitGroup, dashboardAutomationId, ControlType.Button).AsButton();
+        Assert.Equal(dashboardAutomationId, dashboardButton.AutomationId);
         Assert.Equal(localization.GetString("ModuleTree.Node.Cockpit.Dashboard.AutomationName"), dashboardButton.Name);
         Assert.Equal(localization.GetString("ModuleTree.Node.Cockpit.Dashboard.ToolTip"), GetHelpText(dashboardButton));
     }

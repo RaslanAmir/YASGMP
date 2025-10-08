@@ -15,12 +15,21 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Expander Header="{Binding Header}"
+                              Margin="0,0,0,8"
+                              IsExpanded="True"
                               ToolTipService.ToolTip="{Binding ToolTip}"
                               AutomationProperties.Name="{Binding AutomationName}"
                               AutomationProperties.AutomationId="{Binding AutomationId}"
-                              AutomationProperties.HelpText="{Binding ToolTip}"
-                              Margin="0,0,0,8"
-                              IsExpanded="True">
+                              AutomationProperties.HelpText="{Binding ToolTip}">
+                        <Expander.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Header}"
+                                           ToolTipService.ToolTip="{Binding ToolTip}"
+                                           AutomationProperties.Name="{Binding AutomationName}"
+                                           AutomationProperties.AutomationId="{Binding AutomationId}"
+                                           AutomationProperties.HelpText="{Binding ToolTip}" />
+                            </DataTemplate>
+                        </Expander.HeaderTemplate>
                         <ItemsControl ItemsSource="{Binding Modules}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
