@@ -849,41 +849,14 @@
   <data name="ModuleTree.ToolTip" xml:space="preserve">
     <value>Pregledavaj module po kategoriji.</value>
   </data>
-  <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
-    <value>Kvaliteta</value>
+  <data name="ModuleTree.Category.Cockpit.Title" xml:space="preserve">
+    <value>Kokpit</value>
   </data>
-  <data name="ModuleTree.Category.Quality.ToolTip" xml:space="preserve">
-    <value>Moduli kvalitete i usklađenosti.</value>
+  <data name="ModuleTree.Category.Cockpit.ToolTip" xml:space="preserve">
+    <value>Operativni kokpit i nadzorne ploče.</value>
   </data>
-  <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
-    <value>Kategorija Kvaliteta</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
-    <value>CAPA</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Capa.ToolTip" xml:space="preserve">
-    <value>Korektivne i preventivne radnje.</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
-    <value>Čvor CAPA</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Audits.Title" xml:space="preserve">
-    <value>Auditi</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Audits.ToolTip" xml:space="preserve">
-    <value>Dnevnik audita i nadzorne ploče.</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Audits.AutomationName" xml:space="preserve">
-    <value>Čvor Auditi</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.DocumentControl.Title" xml:space="preserve">
-    <value>Kontrola dokumenata</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.DocumentControl.ToolTip" xml:space="preserve">
-    <value>Tijekovi kontrole dokumenata.</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.DocumentControl.AutomationName" xml:space="preserve">
-    <value>Čvor Kontrola dokumenata</value>
+  <data name="ModuleTree.Category.Cockpit.AutomationName" xml:space="preserve">
+    <value>Kategorija Kokpit</value>
   </data>
   <data name="ModuleTree.Category.Maintenance.Title" xml:space="preserve">
     <value>Održavanje</value>
@@ -894,68 +867,257 @@
   <data name="ModuleTree.Category.Maintenance.AutomationName" xml:space="preserve">
     <value>Kategorija Održavanje</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.Machines.Title" xml:space="preserve">
-    <value>Strojevi</value>
+  <data name="ModuleTree.Category.SupplyChain.Title" xml:space="preserve">
+    <value>Opskrbni lanac</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.Machines.ToolTip" xml:space="preserve">
-    <value>Glavni podaci o opremi.</value>
+  <data name="ModuleTree.Category.SupplyChain.ToolTip" xml:space="preserve">
+    <value>Upravljanje dobavljačima i partnerima.</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.Machines.AutomationName" xml:space="preserve">
-    <value>Čvor Strojevi</value>
+  <data name="ModuleTree.Category.SupplyChain.AutomationName" xml:space="preserve">
+    <value>Kategorija Opskrbni lanac</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.PreventivePlans.Title" xml:space="preserve">
-    <value>Preventivni planovi</value>
+  <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
+    <value>Kvaliteta</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.PreventivePlans.ToolTip" xml:space="preserve">
-    <value>Planovi preventivnog održavanja.</value>
+  <data name="ModuleTree.Category.Quality.ToolTip" xml:space="preserve">
+    <value>Događaji kvalitete i sanacije.</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.PreventivePlans.AutomationName" xml:space="preserve">
-    <value>Čvor Preventivni planovi</value>
+  <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
+    <value>Kategorija Kvaliteta</value>
+  </data>
+  <data name="ModuleTree.Category.Planning.Title" xml:space="preserve">
+    <value>Planiranje</value>
+  </data>
+  <data name="ModuleTree.Category.Planning.ToolTip" xml:space="preserve">
+    <value>Alati za planiranje i raspoređivanje.</value>
+  </data>
+  <data name="ModuleTree.Category.Planning.AutomationName" xml:space="preserve">
+    <value>Kategorija Planiranje</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.Title" xml:space="preserve">
+    <value>Administracija</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.ToolTip" xml:space="preserve">
+    <value>Administracija i sigurnosne kontrole.</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.AutomationName" xml:space="preserve">
+    <value>Kategorija Administracija</value>
+  </data>
+  <data name="ModuleTree.Category.QualityCompliance.Title" xml:space="preserve">
+    <value>Kvaliteta i usklađenost</value>
+  </data>
+  <data name="ModuleTree.Category.QualityCompliance.ToolTip" xml:space="preserve">
+    <value>Alati audita i usklađenosti.</value>
+  </data>
+  <data name="ModuleTree.Category.QualityCompliance.AutomationName" xml:space="preserve">
+    <value>Kategorija Kvaliteta i usklađenost</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.Title" xml:space="preserve">
+    <value>Dijagnostika</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.ToolTip" xml:space="preserve">
+    <value>Alati za dijagnostiku i telemetriju.</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.AutomationName" xml:space="preserve">
+    <value>Kategorija Dijagnostika</value>
+  </data>
+  <data name="ModuleTree.Category.Documents.Title" xml:space="preserve">
+    <value>Dokumenti</value>
+  </data>
+  <data name="ModuleTree.Category.Documents.ToolTip" xml:space="preserve">
+    <value>Upravljanje dokumentima i privicima.</value>
+  </data>
+  <data name="ModuleTree.Category.Documents.AutomationName" xml:space="preserve">
+    <value>Kategorija Dokumenti</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.Title" xml:space="preserve">
+    <value>Nadzorna ploča</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.ToolTip" xml:space="preserve">
+    <value>Operativni pregled i KPI pokazatelji.</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.AutomationName" xml:space="preserve">
+    <value>Čvor modula Nadzorna ploča</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.Title" xml:space="preserve">
+    <value>Imovina</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.ToolTip" xml:space="preserve">
+    <value>Registar imovine i životni ciklus.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.AutomationName" xml:space="preserve">
+    <value>Čvor modula Imovina</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.Title" xml:space="preserve">
+    <value>Komponente</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.ToolTip" xml:space="preserve">
+    <value>Hijerarhija komponenti i životni ciklus.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.AutomationName" xml:space="preserve">
+    <value>Čvor modula Komponente</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.Title" xml:space="preserve">
+    <value>Skladište</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.ToolTip" xml:space="preserve">
+    <value>Glavni podaci skladišta.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.AutomationName" xml:space="preserve">
+    <value>Čvor modula Skladište</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.Title" xml:space="preserve">
+    <value>Radni nalozi</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.ToolTip" xml:space="preserve">
+    <value>Korektivni i preventivni poslovi.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.AutomationName" xml:space="preserve">
+    <value>Čvor modula Radni nalozi</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.Title" xml:space="preserve">
     <value>Kalibracija</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.ToolTip" xml:space="preserve">
-    <value>Rasporedi i povijest kalibracije.</value>
+    <value>Zapisi kalibracije.</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.AutomationName" xml:space="preserve">
-    <value>Čvor Kalibracija</value>
+    <value>Čvor modula Kalibracija</value>
   </data>
-  <data name="ModuleTree.Category.Warehouse.Title" xml:space="preserve">
-    <value>Skladište</value>
+  <data name="ModuleTree.Node.Maintenance.Parts.Title" xml:space="preserve">
+    <value>Dijelovi</value>
   </data>
-  <data name="ModuleTree.Category.Warehouse.ToolTip" xml:space="preserve">
-    <value>Moduli za skladište i dobavljače.</value>
+  <data name="ModuleTree.Node.Maintenance.Parts.ToolTip" xml:space="preserve">
+    <value>Dijelovi i zalihe.</value>
   </data>
-  <data name="ModuleTree.Category.Warehouse.AutomationName" xml:space="preserve">
-    <value>Kategorija Skladište</value>
+  <data name="ModuleTree.Node.Maintenance.Parts.AutomationName" xml:space="preserve">
+    <value>Čvor modula Dijelovi</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Inventory.Title" xml:space="preserve">
-    <value>Zalihe</value>
-  </data>
-  <data name="ModuleTree.Node.Warehouse.Inventory.ToolTip" xml:space="preserve">
-    <value>Pregled zaliha i inventura.</value>
-  </data>
-  <data name="ModuleTree.Node.Warehouse.Inventory.AutomationName" xml:space="preserve">
-    <value>Čvor Zalihe</value>
-  </data>
-  <data name="ModuleTree.Node.Warehouse.Suppliers.Title" xml:space="preserve">
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.Title" xml:space="preserve">
     <value>Dobavljači</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Suppliers.ToolTip" xml:space="preserve">
-    <value>Popis odobrenih dobavljača.</value>
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.ToolTip" xml:space="preserve">
+    <value>Odobreni dobavljači i izvođači.</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Suppliers.AutomationName" xml:space="preserve">
-    <value>Čvor Dobavljači</value>
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.AutomationName" xml:space="preserve">
+    <value>Čvor modula Dobavljači</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Transactions.Title" xml:space="preserve">
-    <value>Transakcije</value>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.Title" xml:space="preserve">
+    <value>Vanjski serviseri</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Transactions.ToolTip" xml:space="preserve">
-    <value>Transakcije skladišta i knjiga.</value>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.ToolTip" xml:space="preserve">
+    <value>Akreditirani laboratoriji i servisni partneri.</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Transactions.AutomationName" xml:space="preserve">
-    <value>Čvor Transakcije</value>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.AutomationName" xml:space="preserve">
+    <value>Čvor modula Vanjski serviseri</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.ToolTip" xml:space="preserve">
+    <value>Korektivne radnje i preventivni planovi.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
+    <value>Čvor modula CAPA</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.Title" xml:space="preserve">
+    <value>Incidenti</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.ToolTip" xml:space="preserve">
+    <value>Zaprimanje incidenata i istrage.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.AutomationName" xml:space="preserve">
+    <value>Čvor modula Incidenti</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.Title" xml:space="preserve">
+    <value>Kontrola promjena</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.ToolTip" xml:space="preserve">
+    <value>Tijek kontrole promjena.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.AutomationName" xml:space="preserve">
+    <value>Čvor modula Kontrola promjena</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.Title" xml:space="preserve">
+    <value>Validacije</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.ToolTip" xml:space="preserve">
+    <value>Životni ciklus IQ/OQ/PQ i rekvalifikacija.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.AutomationName" xml:space="preserve">
+    <value>Čvor modula Validacije</value>
+  </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.Title" xml:space="preserve">
+    <value>Planiranje</value>
+  </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.ToolTip" xml:space="preserve">
+    <value>Automatizirani rasporedi poslova.</value>
+  </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.AutomationName" xml:space="preserve">
+    <value>Čvor modula Planiranje</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.Title" xml:space="preserve">
+    <value>Sigurnost</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.ToolTip" xml:space="preserve">
+    <value>Korisnici i sigurnosne uloge.</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.AutomationName" xml:space="preserve">
+    <value>Čvor modula Sigurnost</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Admin.Title" xml:space="preserve">
+    <value>Administracija</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Admin.ToolTip" xml:space="preserve">
+    <value>Globalne postavke konfiguracije.</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Admin.AutomationName" xml:space="preserve">
+    <value>Čvor modula Administracija</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.Title" xml:space="preserve">
+    <value>Revizijski trag</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.ToolTip" xml:space="preserve">
+    <value>Povijest sistemskih događaja.</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.AutomationName" xml:space="preserve">
+    <value>Čvor modula Revizijski trag</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.Title" xml:space="preserve">
+    <value>Revizijska nadzorna ploča</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.ToolTip" xml:space="preserve">
+    <value>Stvarnovremenski pregled audita i izvozi.</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.AutomationName" xml:space="preserve">
+    <value>Čvor modula Revizijska nadzorna ploča</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.Title" xml:space="preserve">
+    <value>API revizijski trag</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.ToolTip" xml:space="preserve">
+    <value>Povijest aktivnosti API ključeva i forenzični zahtjevi.</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.AutomationName" xml:space="preserve">
+    <value>Čvor modula API revizijski trag</value>
+  </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.Title" xml:space="preserve">
+    <value>Dijagnostika</value>
+  </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.ToolTip" xml:space="preserve">
+    <value>Snimke telemetrije i provjere stanja.</value>
+  </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.AutomationName" xml:space="preserve">
+    <value>Čvor modula Dijagnostika</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.Title" xml:space="preserve">
+    <value>Prilozi</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.ToolTip" xml:space="preserve">
+    <value>Prilozi datoteka i certifikati.</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.AutomationName" xml:space="preserve">
+    <value>Čvor modula Prilozi</value>
   </data>
   <data name="Dialog.Cfl.Content.OK" xml:space="preserve">
     <value>OK</value>

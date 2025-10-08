@@ -846,41 +846,14 @@
   <data name="ModuleTree.ToolTip" xml:space="preserve">
     <value>Browse modules by category.</value>
   </data>
-  <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
-    <value>Quality</value>
+  <data name="ModuleTree.Category.Cockpit.Title" xml:space="preserve">
+    <value>Cockpit</value>
   </data>
-  <data name="ModuleTree.Category.Quality.ToolTip" xml:space="preserve">
-    <value>Quality and compliance modules.</value>
+  <data name="ModuleTree.Category.Cockpit.ToolTip" xml:space="preserve">
+    <value>Operations cockpit and dashboards.</value>
   </data>
-  <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
-    <value>Quality category</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
-    <value>CAPA</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Capa.ToolTip" xml:space="preserve">
-    <value>Corrective and preventive actions.</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
-    <value>CAPA node</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Audits.Title" xml:space="preserve">
-    <value>Audits</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Audits.ToolTip" xml:space="preserve">
-    <value>Audit trail and dashboards.</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.Audits.AutomationName" xml:space="preserve">
-    <value>Audits node</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.DocumentControl.Title" xml:space="preserve">
-    <value>Document Control</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.DocumentControl.ToolTip" xml:space="preserve">
-    <value>Document control workflows.</value>
-  </data>
-  <data name="ModuleTree.Node.Quality.DocumentControl.AutomationName" xml:space="preserve">
-    <value>Document control node</value>
+  <data name="ModuleTree.Category.Cockpit.AutomationName" xml:space="preserve">
+    <value>Cockpit category</value>
   </data>
   <data name="ModuleTree.Category.Maintenance.Title" xml:space="preserve">
     <value>Maintenance</value>
@@ -891,68 +864,257 @@
   <data name="ModuleTree.Category.Maintenance.AutomationName" xml:space="preserve">
     <value>Maintenance category</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.Machines.Title" xml:space="preserve">
-    <value>Machines</value>
+  <data name="ModuleTree.Category.SupplyChain.Title" xml:space="preserve">
+    <value>Supply Chain</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.Machines.ToolTip" xml:space="preserve">
-    <value>Asset master data.</value>
+  <data name="ModuleTree.Category.SupplyChain.ToolTip" xml:space="preserve">
+    <value>Supplier and partner management.</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.Machines.AutomationName" xml:space="preserve">
-    <value>Machines node</value>
+  <data name="ModuleTree.Category.SupplyChain.AutomationName" xml:space="preserve">
+    <value>Supply Chain category</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.PreventivePlans.Title" xml:space="preserve">
-    <value>Preventive Plans</value>
+  <data name="ModuleTree.Category.Quality.Title" xml:space="preserve">
+    <value>Quality</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.PreventivePlans.ToolTip" xml:space="preserve">
-    <value>Preventive maintenance plans.</value>
+  <data name="ModuleTree.Category.Quality.ToolTip" xml:space="preserve">
+    <value>Quality events and remediation.</value>
   </data>
-  <data name="ModuleTree.Node.Maintenance.PreventivePlans.AutomationName" xml:space="preserve">
-    <value>Preventive plans node</value>
+  <data name="ModuleTree.Category.Quality.AutomationName" xml:space="preserve">
+    <value>Quality category</value>
+  </data>
+  <data name="ModuleTree.Category.Planning.Title" xml:space="preserve">
+    <value>Planning</value>
+  </data>
+  <data name="ModuleTree.Category.Planning.ToolTip" xml:space="preserve">
+    <value>Scheduling and planning tools.</value>
+  </data>
+  <data name="ModuleTree.Category.Planning.AutomationName" xml:space="preserve">
+    <value>Planning category</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.Title" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.ToolTip" xml:space="preserve">
+    <value>Administration and security controls.</value>
+  </data>
+  <data name="ModuleTree.Category.Administration.AutomationName" xml:space="preserve">
+    <value>Administration category</value>
+  </data>
+  <data name="ModuleTree.Category.QualityCompliance.Title" xml:space="preserve">
+    <value>Quality &amp; Compliance</value>
+  </data>
+  <data name="ModuleTree.Category.QualityCompliance.ToolTip" xml:space="preserve">
+    <value>Audit and compliance tooling.</value>
+  </data>
+  <data name="ModuleTree.Category.QualityCompliance.AutomationName" xml:space="preserve">
+    <value>Quality and compliance category</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.Title" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.ToolTip" xml:space="preserve">
+    <value>Diagnostics and telemetry tools.</value>
+  </data>
+  <data name="ModuleTree.Category.Diagnostics.AutomationName" xml:space="preserve">
+    <value>Diagnostics category</value>
+  </data>
+  <data name="ModuleTree.Category.Documents.Title" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="ModuleTree.Category.Documents.ToolTip" xml:space="preserve">
+    <value>Document and attachment management.</value>
+  </data>
+  <data name="ModuleTree.Category.Documents.AutomationName" xml:space="preserve">
+    <value>Documents category</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.Title" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.ToolTip" xml:space="preserve">
+    <value>Operations overview and KPIs.</value>
+  </data>
+  <data name="ModuleTree.Node.Cockpit.Dashboard.AutomationName" xml:space="preserve">
+    <value>Dashboard module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.Title" xml:space="preserve">
+    <value>Assets</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.ToolTip" xml:space="preserve">
+    <value>Asset register and lifecycle.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Assets.AutomationName" xml:space="preserve">
+    <value>Assets module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.Title" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.ToolTip" xml:space="preserve">
+    <value>Component hierarchy and lifecycle.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Components.AutomationName" xml:space="preserve">
+    <value>Components module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.Title" xml:space="preserve">
+    <value>Warehouse</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.ToolTip" xml:space="preserve">
+    <value>Warehouse master data.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.Warehouse.AutomationName" xml:space="preserve">
+    <value>Warehouse module node</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.Title" xml:space="preserve">
+    <value>Work Orders</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.ToolTip" xml:space="preserve">
+    <value>Corrective and preventive jobs.</value>
+  </data>
+  <data name="ModuleTree.Node.Maintenance.WorkOrders.AutomationName" xml:space="preserve">
+    <value>Work Orders module node</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.Title" xml:space="preserve">
     <value>Calibration</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.ToolTip" xml:space="preserve">
-    <value>Calibration schedules and history.</value>
+    <value>Calibration records.</value>
   </data>
   <data name="ModuleTree.Node.Maintenance.Calibration.AutomationName" xml:space="preserve">
-    <value>Calibration node</value>
+    <value>Calibration module node</value>
   </data>
-  <data name="ModuleTree.Category.Warehouse.Title" xml:space="preserve">
-    <value>Warehouse</value>
+  <data name="ModuleTree.Node.Maintenance.Parts.Title" xml:space="preserve">
+    <value>Parts</value>
   </data>
-  <data name="ModuleTree.Category.Warehouse.ToolTip" xml:space="preserve">
-    <value>Warehouse and supplier modules.</value>
+  <data name="ModuleTree.Node.Maintenance.Parts.ToolTip" xml:space="preserve">
+    <value>Parts and spare stock.</value>
   </data>
-  <data name="ModuleTree.Category.Warehouse.AutomationName" xml:space="preserve">
-    <value>Warehouse category</value>
+  <data name="ModuleTree.Node.Maintenance.Parts.AutomationName" xml:space="preserve">
+    <value>Parts module node</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Inventory.Title" xml:space="preserve">
-    <value>Inventory</value>
-  </data>
-  <data name="ModuleTree.Node.Warehouse.Inventory.ToolTip" xml:space="preserve">
-    <value>Inventory visibility and counts.</value>
-  </data>
-  <data name="ModuleTree.Node.Warehouse.Inventory.AutomationName" xml:space="preserve">
-    <value>Inventory node</value>
-  </data>
-  <data name="ModuleTree.Node.Warehouse.Suppliers.Title" xml:space="preserve">
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.Title" xml:space="preserve">
     <value>Suppliers</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Suppliers.ToolTip" xml:space="preserve">
-    <value>Approved supplier list.</value>
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.ToolTip" xml:space="preserve">
+    <value>Approved suppliers and contractors.</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Suppliers.AutomationName" xml:space="preserve">
-    <value>Suppliers node</value>
+  <data name="ModuleTree.Node.SupplyChain.Suppliers.AutomationName" xml:space="preserve">
+    <value>Suppliers module node</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Transactions.Title" xml:space="preserve">
-    <value>Transactions</value>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.Title" xml:space="preserve">
+    <value>External Servicers</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Transactions.ToolTip" xml:space="preserve">
-    <value>Warehouse transactions and ledger.</value>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.ToolTip" xml:space="preserve">
+    <value>Accredited laboratories and service partners.</value>
   </data>
-  <data name="ModuleTree.Node.Warehouse.Transactions.AutomationName" xml:space="preserve">
-    <value>Transactions node</value>
+  <data name="ModuleTree.Node.SupplyChain.ExternalServicers.AutomationName" xml:space="preserve">
+    <value>External Servicers module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.Title" xml:space="preserve">
+    <value>CAPA</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.ToolTip" xml:space="preserve">
+    <value>Corrective actions and preventive plans.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Capa.AutomationName" xml:space="preserve">
+    <value>CAPA module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.Title" xml:space="preserve">
+    <value>Incidents</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.ToolTip" xml:space="preserve">
+    <value>Incident intake and investigations.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Incidents.AutomationName" xml:space="preserve">
+    <value>Incidents module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.Title" xml:space="preserve">
+    <value>Change Control</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.ToolTip" xml:space="preserve">
+    <value>Change control workflow.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.ChangeControl.AutomationName" xml:space="preserve">
+    <value>Change Control module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.Title" xml:space="preserve">
+    <value>Validations</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.ToolTip" xml:space="preserve">
+    <value>IQ/OQ/PQ lifecycle and requalification.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Validations.AutomationName" xml:space="preserve">
+    <value>Validations module node</value>
+  </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.Title" xml:space="preserve">
+    <value>Scheduling</value>
+  </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.ToolTip" xml:space="preserve">
+    <value>Automated job schedules.</value>
+  </data>
+  <data name="ModuleTree.Node.Planning.Scheduling.AutomationName" xml:space="preserve">
+    <value>Scheduling module node</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.Title" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.ToolTip" xml:space="preserve">
+    <value>Users and security roles.</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Security.AutomationName" xml:space="preserve">
+    <value>Security module node</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Admin.Title" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Admin.ToolTip" xml:space="preserve">
+    <value>Global configuration settings.</value>
+  </data>
+  <data name="ModuleTree.Node.Administration.Admin.AutomationName" xml:space="preserve">
+    <value>Administration module node</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.Title" xml:space="preserve">
+    <value>Audit Trail</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.ToolTip" xml:space="preserve">
+    <value>System event history.</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.Audit.AutomationName" xml:space="preserve">
+    <value>Audit Trail module node</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.Title" xml:space="preserve">
+    <value>Audit Dashboard</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.ToolTip" xml:space="preserve">
+    <value>Real-time audit feed and exports.</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.AuditDashboard.AutomationName" xml:space="preserve">
+    <value>Audit Dashboard module node</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.Title" xml:space="preserve">
+    <value>API Audit Trail</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.ToolTip" xml:space="preserve">
+    <value>API key activity history and forensic request payloads.</value>
+  </data>
+  <data name="ModuleTree.Node.QualityCompliance.ApiAudit.AutomationName" xml:space="preserve">
+    <value>API Audit Trail module node</value>
+  </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.Title" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.ToolTip" xml:space="preserve">
+    <value>Telemetry snapshots and health checks.</value>
+  </data>
+  <data name="ModuleTree.Node.Diagnostics.Diagnostics.AutomationName" xml:space="preserve">
+    <value>Diagnostics module node</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.Title" xml:space="preserve">
+    <value>Attachments</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.ToolTip" xml:space="preserve">
+    <value>File attachments and certificates.</value>
+  </data>
+  <data name="ModuleTree.Node.Documents.Attachments.AutomationName" xml:space="preserve">
+    <value>Attachments module node</value>
   </data>
   <data name="Dialog.Cfl.Content.OK" xml:space="preserve">
     <value>OK</value>
