@@ -74,8 +74,8 @@ public class AutomationMetadataSmokeTests
         var modulesAutomationId = localization.GetString("Dock.Modules.AutomationId");
         var modulesPane = WaitForElement(window, modulesAutomationId);
         Assert.Equal(modulesAutomationId, modulesPane.AutomationId);
-        Assert.Equal(localization.GetString("ModuleTree.AutomationName"), modulesPane.Name);
-        Assert.Equal(localization.GetString("ModuleTree.ToolTip"), GetHelpText(modulesPane));
+        Assert.Equal(localization.GetString("Dock.Modules.AutomationName"), modulesPane.Name);
+        Assert.Equal(localization.GetString("Dock.Modules.ToolTip"), GetHelpText(modulesPane));
 
         var cockpitAutomationId = localization.GetString("ModuleTree.Category.Cockpit.AutomationId");
         var cockpitGroup = WaitForDescendant(modulesPane, cockpitAutomationId);

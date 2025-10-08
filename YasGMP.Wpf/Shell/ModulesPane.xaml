@@ -5,7 +5,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="280">
+             d:DesignWidth="280"
+             ToolTip="{Binding HelpText}"
+             AutomationProperties.Name="{Binding AutomationName}"
+             AutomationProperties.AutomationId="{Binding AutomationId}"
+             AutomationProperties.HelpText="{Binding HelpText}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding Groups}">
             <ItemsControl.ItemTemplate>
@@ -14,6 +18,7 @@
                               ToolTip="{Binding ToolTip}"
                               AutomationProperties.Name="{Binding AutomationName}"
                               AutomationProperties.AutomationId="{Binding AutomationId}"
+                              AutomationProperties.HelpText="{Binding ToolTip}"
                               Margin="0,0,0,8"
                               IsExpanded="True">
                         <ItemsControl ItemsSource="{Binding Modules}">
@@ -26,7 +31,8 @@
                                             HorizontalContentAlignment="Left"
                                             ToolTip="{Binding ToolTip}"
                                             AutomationProperties.Name="{Binding AutomationName}"
-                                            AutomationProperties.AutomationId="{Binding AutomationId}" />
+                                            AutomationProperties.AutomationId="{Binding AutomationId}"
+                                            AutomationProperties.HelpText="{Binding ToolTip}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

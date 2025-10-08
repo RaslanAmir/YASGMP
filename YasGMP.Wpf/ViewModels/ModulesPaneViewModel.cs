@@ -15,6 +15,8 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
     private readonly IModuleNavigationService _navigationService;
 
     private readonly ILocalizationService _localization;
+    private string _automationName = string.Empty;
+    private string _helpText = string.Empty;
     /// <summary>
     /// Initializes a new instance of the ModulesPaneViewModel class.
     /// </summary>
@@ -29,6 +31,8 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
         _localization = localization;
         Title = _localization.GetString("Dock.Modules.Title");
         AutomationId = _localization.GetString("Dock.Modules.AutomationId");
+        AutomationName = _localization.GetString("Dock.Modules.AutomationName");
+        HelpText = _localization.GetString("Dock.Modules.ToolTip");
         _localization.LanguageChanged += OnLanguageChanged;
         ContentId = "YasGmp.Shell.Modules";
         Groups = new ObservableCollection<ModuleGroupViewModel>();
@@ -41,6 +45,20 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
 
     /// <summary>Command triggered when the user double clicks a module entry.</summary>
     public RelayCommand<ModuleLinkViewModel> OpenModuleCommand { get; }
+
+    /// <summary>Automation-friendly localized name for the modules pane.</summary>
+    public string AutomationName
+    {
+        get => _automationName;
+        private set => SetProperty(ref _automationName, value);
+    }
+
+    /// <summary>Localized tooltip/help text surfaced to accessibility clients.</summary>
+    public string HelpText
+    {
+        get => _helpText;
+        private set => SetProperty(ref _helpText, value);
+    }
 
     private void BuildGroups()
     {
@@ -95,6 +113,8 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
     {
         Title = _localization.GetString("Dock.Modules.Title");
         AutomationId = _localization.GetString("Dock.Modules.AutomationId");
+        AutomationName = _localization.GetString("Dock.Modules.AutomationName");
+        HelpText = _localization.GetString("Dock.Modules.ToolTip");
         foreach (var group in Groups)
         {
             group.RefreshLocalization();

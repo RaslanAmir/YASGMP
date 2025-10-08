@@ -60,7 +60,8 @@
       "2026-02-20: dotnet restore yasgmp.sln retried while aligning inspector test doubles with AutomationIdSanitizer; CLI remains unavailable so the command fails with 'command not found'.",
       "2026-02-22: dotnet build YasGMP.Wpf.csproj retried after binding inspector headers to automation metadata; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-02-24: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so commands exit with 'command not found'.",
-      "2026-03-02: dotnet restore yasgmp.sln and dotnet build yasgmp.sln -c Release retried; CLI remains unavailable so each command exits with 'command not found'."
+      "2026-03-02: dotnet restore yasgmp.sln and dotnet build yasgmp.sln -c Release retried; CLI remains unavailable so each command exits with 'command not found'.",
+      "2026-03-03: dotnet restore yasgmp.sln plus dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried alongside MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -85,8 +86,9 @@
         "2026-02-12: Strings.xaml now defines automation ids for every ModuleRegistry category and module so the module tree resolves stable UIA names for smoke automation despite missing localized resources.",
         "2026-02-14: Inspector pane now formats module/record titles and automation metadata via localization templates so context updates follow language switches while the dotnet CLI remains unavailable.",
         "2026-02-16: Inspector header formatting now rebuilds from the latest localization templates before property updates, and inspector fields regenerate automation name/id/tooltip metadata from the active module/record text with normalized fallbacks for legacy payloads; dotnet restore retried this batch still fails with 'command not found'.",
-        "2026-02-22: Inspector pane XAML now binds module and record headers to the localized automation metadata published by the view-model so accessibility tooling receives the correct names/ids/tooltips once a Windows host is available; dotnet build for YasGMP.Wpf.csproj retried this batch still exits with 'command not found'."
-        ,"2026-03-01: Introduced YasGMP.Wpf.Smoke FlaUI project that builds/launches the shell, toggles localization via ServiceLocator, and verifies Modules pane plus inspector automation metadata for English/Croatian while dotnet restore/build still fail with 'command not found'."
+        "2026-02-22: Inspector pane XAML now binds module and record headers to the localized automation metadata published by the view-model so accessibility tooling receives the correct names/ids/tooltips once a Windows host is available; dotnet build for YasGMP.Wpf.csproj retried this batch still exits with 'command not found'.",
+        "2026-03-01: Introduced YasGMP.Wpf.Smoke FlaUI project that builds/launches the shell, toggles localization via ServiceLocator, and verifies Modules pane plus inspector automation metadata for English/Croatian while dotnet restore/build still fail with 'command not found'.",
+        "2026-03-03: Modules pane root now binds Dock.Modules automation name/help text and inspector field templates expose AutomationProperties.HelpText so accessibility metadata flows through expander/button rows; dotnet restore/build retried for yasgmp.sln and YasGMP.Wpf still exit with 'command not found'."
       ]
     },
     {
