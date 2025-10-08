@@ -84,28 +84,27 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         var moduleText = moduleHasContext ? _currentModuleContextValue! : _modulePlaceholder;
         var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue!;
 
-        ApplyFormatting(moduleHasContext, moduleText, recordText);
+        var presentation = BuildPresentation(moduleHasContext, moduleText, recordText);
+
+        ModuleTitle = presentation.ModuleTitle;
+        RecordTitle = presentation.RecordTitle;
+        ModuleAutomationName = presentation.ModuleAutomationName;
+        ModuleAutomationId = presentation.ModuleAutomationId;
+        ModuleAutomationTooltip = presentation.ModuleAutomationTooltip;
+        RecordAutomationName = presentation.RecordAutomationName;
+        RecordAutomationId = presentation.RecordAutomationId;
+        RecordAutomationTooltip = presentation.RecordAutomationTooltip;
+
         Fields.Clear();
         foreach (var field in context.Fields)
         {
-            Fields.Add(new InspectorFieldViewModel(
-                field.Label,
-                field.Value,
-                field.AutomationName,
-                field.AutomationId,
-                field.AutomationTooltip));
+            Fields.Add(CreateFieldViewModel(field, moduleText, recordText));
         }
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         LoadLocalizationResources();
-        ModuleAutomationName = _moduleAutomationNameDefault;
-        ModuleAutomationId = _moduleAutomationIdDefault;
-        ModuleAutomationTooltip = _moduleAutomationTooltipDefault;
-        RecordAutomationName = FormatString(_recordAutomationNameTemplate, _recordPlaceholder);
-        RecordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(_recordPlaceholder));
-        RecordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, _recordPlaceholder);
         ApplyCurrentFormatting();
     }
 
@@ -134,30 +133,90 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         var moduleText = moduleHasContext ? _currentModuleContextValue! : _modulePlaceholder;
         var recordText = string.IsNullOrWhiteSpace(_currentRecordContextValue) ? _recordPlaceholder : _currentRecordContextValue!;
 
-        ApplyFormatting(moduleHasContext, moduleText, recordText);
+        var presentation = BuildPresentation(moduleHasContext, moduleText, recordText);
+
+        ModuleTitle = presentation.ModuleTitle;
+        RecordTitle = presentation.RecordTitle;
+        ModuleAutomationName = presentation.ModuleAutomationName;
+        ModuleAutomationId = presentation.ModuleAutomationId;
+        ModuleAutomationTooltip = presentation.ModuleAutomationTooltip;
+        RecordAutomationName = presentation.RecordAutomationName;
+        RecordAutomationId = presentation.RecordAutomationId;
+        RecordAutomationTooltip = presentation.RecordAutomationTooltip;
     }
 
-    private void ApplyFormatting(bool moduleHasContext, string moduleText, string recordText)
+    private (string ModuleTitle, string RecordTitle, string ModuleAutomationName, string ModuleAutomationId, string ModuleAutomationTooltip, string RecordAutomationName, string RecordAutomationId, string RecordAutomationTooltip) BuildPresentation(bool moduleHasContext, string moduleText, string recordText)
     {
-        ModuleTitle = FormatString(_moduleTemplate, moduleText);
-        RecordTitle = FormatString(_recordTemplate, recordText);
+        var moduleTitle = FormatString(_moduleTemplate, moduleText);
+        var recordTitle = FormatString(_recordTemplate, recordText);
+
+        string moduleAutomationName;
+        string moduleAutomationId;
+        string moduleAutomationTooltip;
 
         if (moduleHasContext)
         {
-            ModuleAutomationName = FormatString(_moduleAutomationNameTemplate, moduleText);
-            ModuleAutomationId = FormatString(_moduleAutomationIdTemplate, NormalizeAutomationToken(moduleText));
-            ModuleAutomationTooltip = FormatString(_moduleAutomationTooltipTemplate, moduleText);
+            moduleAutomationName = FormatString(_moduleAutomationNameTemplate, moduleText);
+            moduleAutomationId = FormatString(_moduleAutomationIdTemplate, NormalizeAutomationToken(moduleText));
+            moduleAutomationTooltip = FormatString(_moduleAutomationTooltipTemplate, moduleText);
         }
         else
         {
-            ModuleAutomationName = _moduleAutomationNameDefault;
-            ModuleAutomationId = _moduleAutomationIdDefault;
-            ModuleAutomationTooltip = _moduleAutomationTooltipDefault;
+            moduleAutomationName = _moduleAutomationNameDefault;
+            moduleAutomationId = _moduleAutomationIdDefault;
+            moduleAutomationTooltip = _moduleAutomationTooltipDefault;
         }
 
-        RecordAutomationName = FormatString(_recordAutomationNameTemplate, recordText);
-        RecordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(recordText));
-        RecordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, recordText);
+        var recordAutomationName = FormatString(_recordAutomationNameTemplate, recordText);
+        var recordAutomationId = FormatString(_recordAutomationIdTemplate, NormalizeAutomationToken(recordText));
+        var recordAutomationTooltip = FormatString(_recordAutomationTooltipTemplate, recordText);
+
+        return (
+            moduleTitle,
+            recordTitle,
+            moduleAutomationName,
+            moduleAutomationId,
+            moduleAutomationTooltip,
+            recordAutomationName,
+            recordAutomationId,
+            recordAutomationTooltip);
+    }
+
+    private InspectorFieldViewModel CreateFieldViewModel(InspectorField field, string moduleText, string recordText)
+    {
+        var label = field.Label ?? string.Empty;
+        var value = field.Value ?? string.Empty;
+
+        var moduleToken = NormalizeAutomationToken(moduleText);
+        var recordToken = NormalizeAutomationToken(recordText);
+        var labelToken = NormalizeAutomationToken(label);
+
+        var formatArgs = new object[]
+        {
+            moduleText,
+            recordText,
+            label,
+            value,
+            moduleToken,
+            recordToken,
+            labelToken,
+        };
+
+        var automationNameTemplate = string.IsNullOrWhiteSpace(field.AutomationName)
+            ? "{0} — {2} ({1})"
+            : field.AutomationName;
+        var automationIdTemplate = string.IsNullOrWhiteSpace(field.AutomationId)
+            ? "Dock.Inspector.{4}.{5}.{6}"
+            : field.AutomationId;
+        var automationTooltipTemplate = string.IsNullOrWhiteSpace(field.AutomationTooltip)
+            ? "{2} for {1} in {0}."
+            : field.AutomationTooltip;
+
+        var automationName = FormatString(automationNameTemplate, formatArgs);
+        var automationId = FormatString(automationIdTemplate, formatArgs);
+        var automationTooltip = FormatString(automationTooltipTemplate, formatArgs);
+
+        return new InspectorFieldViewModel(label, value, automationName, automationId, automationTooltip);
     }
 
     private static string FormatString(string template, params object[] values)
