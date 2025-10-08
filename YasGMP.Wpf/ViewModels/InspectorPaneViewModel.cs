@@ -26,6 +26,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         _recordPlaceholder = _localization.GetString("Dock.Inspector.NoRecord");
         ModuleTitle = _modulePlaceholder;
         RecordTitle = _recordPlaceholder;
+        ModuleAutomationName = _localization.GetString("Dock.Inspector.Module.AutomationName");
+        ModuleAutomationId = _localization.GetString("Dock.Inspector.Module.AutomationId");
+        ModuleAutomationTooltip = _localization.GetString("Dock.Inspector.Module.ToolTip");
         Fields = new ObservableCollection<InspectorFieldViewModel>();
         _localization.LanguageChanged += OnLanguageChanged;
     }
@@ -35,6 +38,15 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
 
     [ObservableProperty]
     private string _recordTitle = "No record selected";
+
+    [ObservableProperty]
+    private string _moduleAutomationName = "Inspector module heading";
+
+    [ObservableProperty]
+    private string _moduleAutomationId = "Dock.Inspector.ModuleHeader";
+
+    [ObservableProperty]
+    private string _moduleAutomationTooltip = "Displays the currently active module.";
     /// <summary>
     /// Gets or sets the fields.
     /// </summary>
@@ -73,6 +85,10 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         {
             RecordTitle = _recordPlaceholder;
         }
+
+        ModuleAutomationName = _localization.GetString("Dock.Inspector.Module.AutomationName");
+        ModuleAutomationId = _localization.GetString("Dock.Inspector.Module.AutomationId");
+        ModuleAutomationTooltip = _localization.GetString("Dock.Inspector.Module.ToolTip");
     }
 }
 /// <summary>
