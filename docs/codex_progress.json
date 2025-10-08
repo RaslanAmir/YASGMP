@@ -53,8 +53,8 @@
       "2026-02-06: dotnet --info and dotnet restore yasgmp.sln retried while adding layout persistence tests; CLI still missing so both commands exit with 'command not found'.",
       "2026-02-09: dotnet --version/restore/build retried for yasgmp.sln, YasGMP.Wpf, and MAUI targets; CLI remains unavailable so each command exits with 'command not found'.",
       "2025-10-07T11:06Z: Latest container session reconfirmed 'command not found' for dotnet --info; continuing documentation-only cadence until SDK installation.",
-      "2026-02-10: dotnet restore yasgmp.sln plus dotnet build for YasGMP.Wpf.csproj and yasgmp.csproj -f net8.0-windows10.0.19041.0 retried; CLI still missing so every command exits with 'command not found'."
-      ,"2026-02-16: dotnet restore yasgmp.sln retried while adding inspector automation metadata; CLI remains unavailable so the command exits with 'command not found'."
+      "2026-02-10: dotnet restore yasgmp.sln plus dotnet build for YasGMP.Wpf.csproj and yasgmp.csproj -f net8.0-windows10.0.19041.0 retried; CLI still missing so every command exits with 'command not found'.",
+      "2026-02-16: dotnet restore yasgmp.sln retried while adding inspector automation metadata; CLI remains unavailable so the command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -77,8 +77,8 @@
         "2026-02-10: Modules pane groups and links now surface localized headers, tooltips, automation names, and automation ids through ILocalizationService subscriptions so culture switches update dynamically; build/smoke pending SDK install.",
         "2026-02-11: ModulesPane XAML bindings now forward the localized headers/tooltips/automation names/ids from ModuleGroupViewModel and ModuleLinkViewModel onto the expanders/buttons so Accessibility Insights/FlaUI can read the updated metadata immediately.",
         "2026-02-12: Strings.xaml now defines automation ids for every ModuleRegistry category and module so the module tree resolves stable UIA names for smoke automation despite missing localized resources.",
-        "2026-02-14: Inspector pane now formats module/record titles and automation metadata via localization templates so context updates follow language switches while the dotnet CLI remains unavailable."
-        ,"2026-02-16: Inspector context normalization now generates automation name/id/tooltip metadata per field using module and record identifiers (fallbacks cover legacy lists); dotnet restore retried this batch still fails with 'command not found'."
+        "2026-02-14: Inspector pane now formats module/record titles and automation metadata via localization templates so context updates follow language switches while the dotnet CLI remains unavailable.",
+        "2026-02-16: Inspector header formatting now rebuilds from the latest localization templates before property updates, and inspector fields regenerate automation name/id/tooltip metadata from the active module/record text with normalized fallbacks for legacy payloads; dotnet restore retried this batch still fails with 'command not found'."
       ]
     },
     {
