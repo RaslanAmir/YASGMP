@@ -59,7 +59,8 @@
       "2026-02-19: dotnet restore yasgmp.sln retried after introducing AutomationIdSanitizer; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-02-20: dotnet restore yasgmp.sln retried while aligning inspector test doubles with AutomationIdSanitizer; CLI remains unavailable so the command fails with 'command not found'.",
       "2026-02-22: dotnet build YasGMP.Wpf.csproj retried after binding inspector headers to automation metadata; CLI remains unavailable so the command exits with 'command not found'.",
-      "2026-02-24: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so commands exit with 'command not found'."
+      "2026-02-24: dotnet restore/build retried for yasgmp.sln; CLI remains unavailable so commands exit with 'command not found'.",
+      "2026-03-02: dotnet restore yasgmp.sln and dotnet build yasgmp.sln -c Release retried; CLI remains unavailable so each command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -298,6 +299,7 @@
     "2026-02-20: Inspector test doubles now reuse AutomationIdSanitizer for module/record/field tokens so WPF unit data aligns with production automation identifiers; dotnet restore/build retries still fail with 'command not found' while the CLI is absent.",
     "2026-02-21: Added AutomationIdSanitizer and InspectorField regression tests covering null/empty, localized, and punctuation-heavy inputs while asserting sanitized inspector automation ids; dotnet restore/build/test/smoke attempts continue to return 'command not found' without the CLI.",
     "2026-02-23: Inspector pane XAML now binds inspector field row containers to localized automation name/id/tooltip metadata so accessibility tools can read the context; dotnet restore and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj retried but still fail with 'command not found' because the CLI remains unavailable.",
-    "2026-02-25: InspectorField.Create now reads automation name/tooltip templates plus record fallbacks from ShellStrings so inspector rows localize UIA metadata in EN/HR; dotnet restore/build (yasgmp.sln + net9.0-windows) still fail with 'command not found' because the CLI is missing."
+    "2026-02-25: InspectorField.Create now reads automation name/tooltip templates plus record fallbacks from ShellStrings so inspector rows localize UIA metadata in EN/HR; dotnet restore/build (yasgmp.sln + net9.0-windows) still fail with 'command not found' because the CLI is missing.",
+    "2026-03-02: ShellStatusBarViewModel now documents status text and active module properties to clear CS1591 while dotnet restore/build attempts still fail with 'command not found' because the CLI is missing."
   ]
 }
