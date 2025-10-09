@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Configuration;
@@ -45,27 +46,27 @@ public partial class ShellStatusBarViewModel : ObservableObject
         _utcTimer.Start();
     }
 
-    /// <summary>Gets or sets the company name displayed in the status bar.</summary>
+    /// <summary>Gets or sets the company name resolved from configuration/session metadata.</summary>
     [ObservableProperty]
     private string _company = string.Empty;
 
-    /// <summary>Gets or sets the database name surfaced in the status bar.</summary>
+    /// <summary>Gets or sets the database name extracted from <see cref="DatabaseOptions"/>.</summary>
     [ObservableProperty]
     private string _database = string.Empty;
 
-    /// <summary>Gets or sets the interactive user label.</summary>
+    /// <summary>Gets or sets the interactive user label pulled from the active <see cref="IUserSession"/>.</summary>
     [ObservableProperty]
     private string _user = string.Empty;
 
-    /// <summary>Gets or sets the active environment descriptor.</summary>
+    /// <summary>Gets or sets the active environment descriptor derived from <see cref="IHostEnvironment"/>.</summary>
     [ObservableProperty]
     private string _environment = string.Empty;
 
-    /// <summary>Gets or sets the database server host name.</summary>
+    /// <summary>Gets or sets the database server host name extracted from <see cref="DatabaseOptions"/>.</summary>
     [ObservableProperty]
     private string _server = string.Empty;
 
-    /// <summary>Gets or sets the formatted UTC timestamp.</summary>
+    /// <summary>Gets or sets the formatted UTC timestamp refreshed via the injected <see cref="TimeProvider"/>.</summary>
     [ObservableProperty]
     private string _utcTime = string.Empty;
 
@@ -90,7 +91,7 @@ public partial class ShellStatusBarViewModel : ObservableObject
     }
 
     private static string FormatUtc(DateTimeOffset timestamp)
-        => timestamp.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        => timestamp.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'", CultureInfo.InvariantCulture);
 
     private string ResolveCompany()
     {

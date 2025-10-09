@@ -231,14 +231,40 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
             var textBlocks = FindVisualChildren<TextBlock>(border).ToList();
             Assert.NotEmpty(textBlocks);
 
-                foreach (var textBlock in textBlocks)
+            var labeledByExpectations = new Dictionary<string, string>
+            {
+                ["StatusBar.Status.Value"] = "StatusLabel",
+                ["StatusBar.ActiveModule.Value"] = "ActiveModuleLabel",
+                ["StatusBar.Company.Value"] = "CompanyLabel",
+                ["StatusBar.Environment.Value"] = "EnvironmentLabel",
+                ["StatusBar.Server.Value"] = "ServerLabel",
+                ["StatusBar.Database.Value"] = "DatabaseLabel",
+                ["StatusBar.User.Value"] = "UserLabel",
+                ["StatusBar.UtcTime.Value"] = "UtcTimeLabel"
+            };
+
+            foreach (var labelName in labeledByExpectations.Values.Distinct())
+            {
+                var labelElement = control.FindName(labelName);
+                Assert.IsType<TextBlock>(labelElement);
+            }
+
+            foreach (var textBlock in textBlocks)
+            {
+                var automationId = AutomationProperties.GetAutomationId(textBlock);
+                Assert.False(string.IsNullOrWhiteSpace(automationId));
+                Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBlock)));
+                var tooltip = ToolTipService.GetToolTip(textBlock) as string;
+                Assert.False(string.IsNullOrWhiteSpace(tooltip));
+                Assert.Equal(tooltip, AutomationProperties.GetHelpText(textBlock));
+
+                if (automationId is not null && labeledByExpectations.TryGetValue(automationId, out var labelName))
                 {
-                    Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetAutomationId(textBlock)));
-                    Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBlock)));
-                    var tooltip = ToolTipService.GetToolTip(textBlock) as string;
-                    Assert.False(string.IsNullOrWhiteSpace(tooltip));
-                    Assert.Equal(tooltip, AutomationProperties.GetHelpText(textBlock));
+                    var labeledBy = AutomationProperties.GetLabeledBy(textBlock);
+                    var labelElement = Assert.IsType<TextBlock>(control.FindName(labelName));
+                    Assert.Same(labelElement, labeledBy);
                 }
+            }
 
             await Task.CompletedTask;
         });
