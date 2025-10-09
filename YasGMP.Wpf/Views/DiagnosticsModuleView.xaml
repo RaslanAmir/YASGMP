@@ -9,20 +9,13 @@
              d:DesignWidth="600">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
-            <ItemsControl ItemsSource="{Binding Toolbar}">
+            <ItemsControl ItemsSource="{Binding Toolbar}"
+                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <ToggleButton Content="{Binding Caption}"
-                                      Command="{Binding Command}"
-                                      IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
             <Button Content="{DynamicResource Module.Toolbar.Command.Refresh.Content}" Command="{Binding RefreshCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Refresh.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Refresh.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Refresh.AutomationId}"/>
