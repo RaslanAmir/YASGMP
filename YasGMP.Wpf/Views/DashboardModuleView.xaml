@@ -11,23 +11,13 @@
         <ToolBar DockPanel.Dock="Top"
                 AutomationProperties.Name="{DynamicResource Dashboard.Toolbar.AutomationName}"
                 AutomationProperties.AutomationId="{DynamicResource Dashboard.Toolbar.AutomationId}">
-            <ItemsControl ItemsSource="{Binding Toolbar}">
+            <ItemsControl ItemsSource="{Binding Toolbar}"
+                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <ToggleButton Content="{Binding Caption}"
-                                      Command="{Binding Command}"
-                                      IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0"
-                                     ToolTipService.ToolTip="{Binding ToolTip}"
-                                     AutomationProperties.Name="{Binding AutomationName}"
-                                     AutomationProperties.AutomationId="{Binding AutomationId}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
             <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}"
