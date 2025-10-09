@@ -178,6 +178,35 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return sample.Select(ToRecord).ToList();
     }
 
+    protected override async Task OnActivatedAsync(object? parameter)
+    {
+        if (parameter is null)
+        {
+            return;
+        }
+
+        if (parameter is string text && string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        var (target, _, _) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+        if (target is null)
+        {
+            return;
+        }
+
+        var key = target.Id.ToString(CultureInfo.InvariantCulture);
+        var existing = Records.FirstOrDefault(record => string.Equals(record.Key, key, StringComparison.Ordinal));
+        if (existing is not null)
+        {
+            SelectedRecord = existing;
+            return;
+        }
+
+        await RefreshAsync(parameter).ConfigureAwait(false);
+    }
+
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
