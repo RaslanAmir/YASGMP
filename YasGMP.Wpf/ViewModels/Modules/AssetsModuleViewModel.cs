@@ -87,8 +87,64 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
-        return machines.Select(ToRecord).ToList();
+        var (target, machines, _) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+
+        var records = new List<ModuleRecord>();
+        if (target is not null)
+        {
+            records.Add(ToRecord(target));
+        }
+
+        foreach (var machine in machines)
+        {
+            if (target is not null && machine.Id == target.Id)
+            {
+                continue;
+            }
+
+            records.Add(ToRecord(machine));
+        }
+
+        return records;
+    }
+
+    private async Task<(Machine? Target, IReadOnlyList<Machine> Machines, bool FilterActive)> ResolveNavigationPayloadAsync(object? parameter)
+    {
+        if (parameter is int id)
+        {
+            var target = await _machineService.TryGetByIdAsync(id).ConfigureAwait(false);
+            var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+            return (target, machines, false);
+        }
+
+        if (parameter is string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+                return (null, machines, false);
+            }
+
+            if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericId))
+            {
+                var target = await _machineService.TryGetByIdAsync(numericId).ConfigureAwait(false);
+                var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+                return (target, machines, false);
+            }
+
+            var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+            var matches = machines
+                .Where(machine =>
+                    (!string.IsNullOrWhiteSpace(machine.Code) && machine.Code.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(machine.Name) && machine.Name.Contains(text, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var target = matches.FirstOrDefault();
+            return (target, matches, true);
+        }
+
+        var allMachines = await _machineService.GetAllAsync().ConfigureAwait(false);
+        return (null, allMachines, false);
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
