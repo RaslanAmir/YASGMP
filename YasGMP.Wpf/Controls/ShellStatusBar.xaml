@@ -14,7 +14,8 @@
             AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Container.AutomationId}">
         <DockPanel LastChildFill="True">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{DynamicResource Shell.StatusBar.Status.Label}"
+                <TextBlock x:Name="StatusLabel"
+                           Text="{DynamicResource Shell.StatusBar.Status.Label}"
                            Foreground="#AAAAAA"
                            Margin="0,0,4,0"
                            VerticalAlignment="Center"
@@ -28,8 +29,10 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.Status.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.Status.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.Status.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Status.Value.AutomationId}" />
-                <TextBlock Text="{DynamicResource Shell.StatusBar.ActiveModule.Label}"
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Status.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=StatusLabel}" />
+                <TextBlock x:Name="ActiveModuleLabel"
+                           Text="{DynamicResource Shell.StatusBar.ActiveModule.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -43,12 +46,14 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.ActiveModule.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.ActiveModule.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.ActiveModule.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.ActiveModule.Value.AutomationId}" />
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.ActiveModule.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=ActiveModuleLabel}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal"
                         DockPanel.Dock="Right"
                         VerticalAlignment="Center">
-                <TextBlock Text="{DynamicResource Shell.StatusBar.Company.Label}"
+                <TextBlock x:Name="CompanyLabel"
+                           Text="{DynamicResource Shell.StatusBar.Company.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -62,8 +67,10 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.Company.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.Company.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.Company.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Company.Value.AutomationId}" />
-                <TextBlock Text="{DynamicResource Shell.StatusBar.Environment.Label}"
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Company.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=CompanyLabel}" />
+                <TextBlock x:Name="EnvironmentLabel"
+                           Text="{DynamicResource Shell.StatusBar.Environment.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -77,8 +84,10 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.Environment.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.Environment.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.Environment.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Environment.Value.AutomationId}" />
-                <TextBlock Text="{DynamicResource Shell.StatusBar.Server.Label}"
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Environment.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=EnvironmentLabel}" />
+                <TextBlock x:Name="ServerLabel"
+                           Text="{DynamicResource Shell.StatusBar.Server.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -92,8 +101,10 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.Server.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.Server.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.Server.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Server.Value.AutomationId}" />
-                <TextBlock Text="{DynamicResource Shell.StatusBar.Database.Label}"
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Server.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=ServerLabel}" />
+                <TextBlock x:Name="DatabaseLabel"
+                           Text="{DynamicResource Shell.StatusBar.Database.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -107,8 +118,10 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.Database.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.Database.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.Database.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Database.Value.AutomationId}" />
-                <TextBlock Text="{DynamicResource Shell.StatusBar.User.Label}"
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.Database.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=DatabaseLabel}" />
+                <TextBlock x:Name="UserLabel"
+                           Text="{DynamicResource Shell.StatusBar.User.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -122,8 +135,10 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.User.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.User.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.User.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.User.Value.AutomationId}" />
-                <TextBlock Text="{DynamicResource Shell.StatusBar.UtcTime.Label}"
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.User.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=UserLabel}" />
+                <TextBlock x:Name="UtcTimeLabel"
+                           Text="{DynamicResource Shell.StatusBar.UtcTime.Label}"
                            Foreground="#AAAAAA"
                            Margin="16,0,4,0"
                            VerticalAlignment="Center"
@@ -137,7 +152,8 @@
                            ToolTipService.ToolTip="{DynamicResource Shell.StatusBar.UtcTime.Value.ToolTip}"
                            AutomationProperties.HelpText="{DynamicResource Shell.StatusBar.UtcTime.Value.ToolTip}"
                            AutomationProperties.Name="{DynamicResource Shell.StatusBar.UtcTime.Value.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.UtcTime.Value.AutomationId}" />
+                           AutomationProperties.AutomationId="{DynamicResource Shell.StatusBar.UtcTime.Value.AutomationId}"
+                           AutomationProperties.LabeledBy="{Binding ElementName=UtcTimeLabel}" />
             </StackPanel>
         </DockPanel>
     </Border>
