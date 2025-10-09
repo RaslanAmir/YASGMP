@@ -168,6 +168,64 @@ public class AssetsModuleViewModelTests
     }
 
     [Fact]
+    public async Task InitializeAsync_TargetId_SelectsRecordAndAppliesGoldenArrowFilter()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.AddRange(new[]
+        {
+            new Machine
+            {
+                Id = 101,
+                Code = "AST-101",
+                Name = "Buffer Tank",
+                Status = "active",
+                Manufacturer = "Fabrikam",
+                Location = "Suite 100"
+            },
+            new Machine
+            {
+                Id = 202,
+                Code = "AST-202",
+                Name = "Filling Line",
+                Status = "maintenance",
+                Manufacturer = "Contoso",
+                Location = "Suite 200"
+            }
+        });
+
+        var target = new Machine
+        {
+            Id = 303,
+            Code = "AST-303",
+            Name = "Bioreactor",
+            Status = "active",
+            Manufacturer = "Tailspin",
+            Location = "Suite 300"
+        };
+        machineAdapter.Saved.Add(target);
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        await viewModel.InitializeAsync(target.Id);
+
+        Assert.Equal(target.Id.ToString(), viewModel.SelectedRecord?.Key);
+        Assert.Equal(target.Name, viewModel.SearchText);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal("Filtered Assets by \"Bioreactor\".", viewModel.StatusMessage);
+    }
+
+    [Fact]
     public async Task AttachDocumentCommand_UploadsAttachmentViaService()
     {
         var database = new DatabaseService();
