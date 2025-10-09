@@ -184,6 +184,7 @@ public class DockLayoutPersistenceServiceTests
                 {
                     Assert.Equal("@layout", p.ParameterName);
                     Assert.Equal("<layoutXml />", p.Value);
+                    Assert.Equal(MySqlDbType.LongText, p.MySqlDbType);
                 },
                 p =>
                 {
