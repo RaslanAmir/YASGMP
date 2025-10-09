@@ -110,6 +110,40 @@ public class DockLayoutPersistenceServiceTests
     }
 
     [Fact]
+    public async Task LoadAsync_ReturnsNullWhenDatabaseReturnsNoRows()
+    {
+        var database = new DatabaseService(ConnectionString);
+        var session = new StubUserSession(56);
+
+        SetExecuteSelectOverride(database, (_, _, _) =>
+        {
+            var table = new DataTable();
+            table.Columns.Add("layout_xml", typeof(string));
+            table.Columns.Add("pos_x", typeof(double));
+            table.Columns.Add("pos_y", typeof(double));
+            table.Columns.Add("width", typeof(double));
+            table.Columns.Add("height", typeof(double));
+            table.Columns.Add("saved_at", typeof(DateTime));
+            table.Columns.Add("created_at", typeof(DateTime));
+            table.Columns.Add("updated_at", typeof(DateTime));
+            return Task.FromResult(table);
+        });
+
+        try
+        {
+            var auth = new StubAuthContext();
+            var service = new DockLayoutPersistenceService(database, session, auth);
+            var snapshot = await service.LoadAsync("Shell", CancellationToken.None).ConfigureAwait(false);
+
+            Assert.Null(snapshot);
+        }
+        finally
+        {
+            ResetOverrides(database);
+        }
+    }
+
+    [Fact]
     public async Task SaveAsync_DelegatesToDatabaseService_WithNullableGeometry()
     {
         var database = new DatabaseService(ConnectionString);
