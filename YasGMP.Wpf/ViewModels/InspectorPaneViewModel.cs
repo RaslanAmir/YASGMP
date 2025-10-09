@@ -24,6 +24,10 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     private string _recordAutomationNameTemplate = string.Empty;
     private string _recordAutomationIdTemplate = string.Empty;
     private string _recordAutomationTooltipTemplate = string.Empty;
+    private string _fieldAutomationNameTemplate = "{0} — {2} ({1})";
+    private string _fieldAutomationIdTemplate = "Dock.Inspector.{4}.{5}.{6}";
+    private string _fieldAutomationTooltipTemplate = "{2} for {1} in {0}.";
+    private string _fieldRecordFallback = "Record";
     private string? _currentModuleContextValue;
     private string? _currentRecordContextValue;
     /// <summary>
@@ -148,6 +152,10 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         _recordAutomationNameTemplate = _localization.GetString("Dock.Inspector.Record.AutomationName.Template");
         _recordAutomationIdTemplate = _localization.GetString("Dock.Inspector.Record.AutomationId.Template");
         _recordAutomationTooltipTemplate = _localization.GetString("Dock.Inspector.Record.ToolTip.Template");
+        _fieldAutomationNameTemplate = ResolveTemplate("Dock.Inspector.Field.AutomationName.Template", "{0} — {2} ({1})");
+        _fieldAutomationIdTemplate = ResolveTemplate("Dock.Inspector.Field.AutomationId.Template", "Dock.Inspector.{4}.{5}.{6}");
+        _fieldAutomationTooltipTemplate = ResolveTemplate("Dock.Inspector.Field.AutomationTooltip.Template", "{2} for {1} in {0}.");
+        _fieldRecordFallback = ResolveTemplate("Dock.Inspector.Field.RecordFallback", "Record");
     }
 
     private void ApplyCurrentFormatting()
@@ -215,13 +223,13 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         var value = field.Value ?? string.Empty;
 
         var automationNameTemplate = string.IsNullOrWhiteSpace(field.AutomationName)
-            ? "{0} — {2} ({1})"
+            ? _fieldAutomationNameTemplate
             : field.AutomationName;
         var automationIdTemplate = string.IsNullOrWhiteSpace(field.AutomationId)
-            ? "Dock.Inspector.{4}.{5}.{6}"
+            ? _fieldAutomationIdTemplate
             : field.AutomationId;
         var automationTooltipTemplate = string.IsNullOrWhiteSpace(field.AutomationTooltip)
-            ? "{2} for {1} in {0}."
+            ? _fieldAutomationTooltipTemplate
             : field.AutomationTooltip;
 
         var automation = BuildFieldAutomation(
@@ -272,23 +280,45 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         var moduleToken = AutomationIdSanitizer.Normalize(moduleText, "module");
         var recordToken = AutomationIdSanitizer.Normalize(recordText, "record");
         var labelToken = AutomationIdSanitizer.Normalize(label, "field");
+        var moduleDisplay = string.IsNullOrWhiteSpace(moduleText) ? _modulePlaceholder : moduleText;
+        var recordDisplay = string.IsNullOrWhiteSpace(recordText) ? _fieldRecordFallback : recordText;
+        var valueDisplay = value;
 
-        var formatArgs = new object[]
-        {
-            moduleText,
-            recordText,
+        var automationName = FormatString(
+            automationNameTemplate,
+            moduleDisplay,
             label,
-            value,
+            recordDisplay,
+            valueDisplay,
             moduleToken,
             recordToken,
-            labelToken,
-        };
-
-        var automationName = FormatString(automationNameTemplate, formatArgs);
-        var automationId = FormatString(automationIdTemplate, formatArgs);
-        var automationTooltip = FormatString(automationTooltipTemplate, formatArgs);
+            labelToken);
+        var automationId = FormatStringInvariant(
+            automationIdTemplate,
+            moduleDisplay,
+            label,
+            recordDisplay,
+            valueDisplay,
+            moduleToken,
+            recordToken,
+            labelToken);
+        var automationTooltip = FormatString(
+            automationTooltipTemplate,
+            label,
+            recordDisplay,
+            moduleDisplay,
+            valueDisplay,
+            moduleToken,
+            recordToken,
+            labelToken);
 
         return (automationName, automationId, automationTooltip);
+    }
+
+    private string ResolveTemplate(string key, string fallback)
+    {
+        var localized = _localization.GetString(key);
+        return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
     }
 
     private static string FormatString(string template, params object[] values)
@@ -299,6 +329,16 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
         }
 
         return string.Format(CultureInfo.CurrentCulture, template, values);
+    }
+
+    private static string FormatStringInvariant(string template, params object[] values)
+    {
+        if (string.IsNullOrWhiteSpace(template))
+        {
+            return values.Length > 0 ? Convert.ToString(values[0], CultureInfo.InvariantCulture) ?? string.Empty : string.Empty;
+        }
+
+        return string.Format(CultureInfo.InvariantCulture, template, values);
     }
 
 }
