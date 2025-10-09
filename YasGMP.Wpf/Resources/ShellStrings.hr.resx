@@ -300,6 +300,9 @@
   <data name="Dock.Inspector.AutomationId" xml:space="preserve">
     <value>Dock.Anchorable.Inspector</value>
   </data>
+  <data name="Dock.Inspector.ToolTip" xml:space="preserve">
+    <value>Pregledaj aktivni kontekst modula i detalje odabranog zapisa.</value>
+  </data>
   <data name="Dock.Inspector.ModuleTitle" xml:space="preserve">
     <value>Modul</value>
   </data>

@@ -23,6 +23,8 @@ public sealed class InspectorPaneViewModelTests : IDisposable
     {
         var viewModel = new InspectorPaneViewModel(_localization);
 
+        Assert.Equal(_localization.GetString("Dock.Inspector.ToolTip"), viewModel.HelpText);
+
         var moduleTitle = _localization.GetString("Module.Title.Dashboard");
         var recordKey = "WO-1001";
         var recordTitle = "Preventive maintenance";
@@ -83,6 +85,8 @@ public sealed class InspectorPaneViewModelTests : IDisposable
         moduleTitle = _localization.GetString("Module.Title.Dashboard");
         moduleToken = AutomationIdSanitizer.Normalize(moduleTitle, "module");
         recordToken = AutomationIdSanitizer.Normalize(recordTitle, "record");
+
+        Assert.Equal(_localization.GetString("Dock.Inspector.ToolTip"), viewModel.HelpText);
 
         moduleAutomationIdTemplate = _localization.GetString("Dock.Inspector.Module.AutomationId.Template");
         Assert.Equal(

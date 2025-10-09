@@ -47,6 +47,9 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     }
 
     [ObservableProperty]
+    private string _helpText = string.Empty;
+
+    [ObservableProperty]
     private string _moduleTitle = "Module";
 
     [ObservableProperty]
@@ -139,6 +142,7 @@ public partial class InspectorPaneViewModel : AnchorableViewModel
     {
         Title = _localization.GetString("Dock.Inspector.Title");
         AutomationId = _localization.GetString("Dock.Inspector.AutomationId");
+        HelpText = _localization.GetString("Dock.Inspector.ToolTip");
         _modulePlaceholder = _localization.GetString("Dock.Inspector.ModuleTitle");
         _moduleTemplate = _localization.GetString("Dock.Inspector.ModuleTitle.Template");
         _recordPlaceholder = _localization.GetString("Dock.Inspector.NoRecord");
