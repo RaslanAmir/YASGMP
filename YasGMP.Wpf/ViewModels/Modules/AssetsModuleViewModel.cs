@@ -105,7 +105,38 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             records.Add(ToRecord(machine));
         }
 
+        if (target is not null)
+        {
+            ApplyNavigationSelection(target, records);
+        }
+
         return records;
+    }
+
+    private bool ApplyNavigationSelection(Machine target, IReadOnlyList<ModuleRecord>? records = null)
+    {
+        var source = records ?? Records;
+        if (source is null || source.Count == 0)
+        {
+            return false;
+        }
+
+        var key = target.Id.ToString(CultureInfo.InvariantCulture);
+        var match = source.FirstOrDefault(record => string.Equals(record.Key, key, StringComparison.Ordinal));
+        if (match is null)
+        {
+            return false;
+        }
+
+        SelectedRecord = match;
+
+        var search = string.IsNullOrWhiteSpace(match.Title)
+            ? (string.IsNullOrWhiteSpace(match.Code) ? key : match.Code)
+            : match.Title;
+
+        SearchText = search;
+        StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
+        return true;
     }
 
     private async Task<(Machine? Target, IReadOnlyList<Machine> Machines, bool FilterActive)> ResolveNavigationPayloadAsync(object? parameter)
@@ -196,15 +227,13 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
-        var key = target.Id.ToString(CultureInfo.InvariantCulture);
-        var existing = Records.FirstOrDefault(record => string.Equals(record.Key, key, StringComparison.Ordinal));
-        if (existing is not null)
+        if (ApplyNavigationSelection(target))
         {
-            SelectedRecord = existing;
             return;
         }
 
         await RefreshAsync(parameter).ConfigureAwait(false);
+        ApplyNavigationSelection(target);
     }
 
     protected override async Task<CflRequest?> CreateCflRequestAsync()
