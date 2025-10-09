@@ -78,6 +78,35 @@ public class DatabaseServiceLayoutsExtensionsTests
     }
 
     [Fact]
+    public async Task GetUserWindowLayoutAsync_ReturnsNullWhenNoRows()
+    {
+        var db = new DatabaseService(ConnectionString);
+        db.ExecuteSelectOverride = (_, _, _) =>
+        {
+            var empty = new DataTable();
+            empty.Columns.Add("layout_xml", typeof(string));
+            empty.Columns.Add("pos_x", typeof(double));
+            empty.Columns.Add("pos_y", typeof(double));
+            empty.Columns.Add("width", typeof(double));
+            empty.Columns.Add("height", typeof(double));
+            empty.Columns.Add("saved_at", typeof(DateTime));
+            empty.Columns.Add("created_at", typeof(DateTime));
+            empty.Columns.Add("updated_at", typeof(DateTime));
+            return Task.FromResult(empty);
+        };
+
+        try
+        {
+            var snapshot = await db.GetUserWindowLayoutAsync(99, "Shell").ConfigureAwait(false);
+            Assert.Null(snapshot);
+        }
+        finally
+        {
+            db.ResetTestOverrides();
+        }
+    }
+
+    [Fact]
     public async Task GetUserWindowLayoutAsync_PropagatesDatabaseFailures()
     {
         var db = new DatabaseService(ConnectionString);
