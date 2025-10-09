@@ -13,6 +13,7 @@
             <StackPanel DockPanel.Dock="Top"
                         ToolTipService.ToolTip="{Binding ModuleAutomationTooltip}"
                         AutomationProperties.Name="{Binding ModuleAutomationName}"
+                        AutomationProperties.AutomationId="{Binding ModuleAutomationId}"
                         AutomationProperties.HelpText="{Binding ModuleAutomationTooltip}">
                 <TextBlock Text="{Binding ModuleTitle}"
                            FontSize="14"
@@ -47,7 +48,8 @@
                                        Text="{Binding Label}"
                                        Foreground="#BBBBBB"
                                        ToolTipService.ToolTip="{Binding AutomationTooltip}"
-                                       AutomationProperties.Name="{Binding Label, TargetNullValue=''}" />
+                                       AutomationProperties.Name="{Binding Label, TargetNullValue=''}"
+                                       AutomationProperties.HelpText="{Binding AutomationTooltip}" />
                             <TextBlock Text="{Binding Value}"
                                        Grid.Column="1"
                                        Foreground="#FFFFFF"

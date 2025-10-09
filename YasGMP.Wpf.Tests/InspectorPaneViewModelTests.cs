@@ -38,6 +38,7 @@ public sealed class InspectorPaneViewModelTests : IDisposable
         var recordToken = AutomationIdSanitizer.Normalize(recordTitle, "record");
         var labelToken = AutomationIdSanitizer.Normalize("Status", "field");
 
+        var fieldAutomationIdTemplate = _localization.GetString("Dock.Inspector.Field.AutomationId.Template");
         var moduleAutomationIdTemplate = _localization.GetString("Dock.Inspector.Module.AutomationId.Template");
         Assert.Equal(
             string.Format(CultureInfo.InvariantCulture, moduleAutomationIdTemplate, moduleToken),
@@ -53,10 +54,19 @@ public sealed class InspectorPaneViewModelTests : IDisposable
             string.Format(CultureInfo.InvariantCulture, recordAutomationIdTemplate, recordToken),
             viewModel.RecordAutomationId);
 
-        var expectedFieldAutomationId = $"Dock.Inspector.{moduleToken}.{recordToken}.{labelToken}";
-
         var field = Assert.Single(viewModel.Fields);
-        Assert.Equal(expectedFieldAutomationId, field.AutomationId);
+        Assert.Equal(
+            string.Format(
+                CultureInfo.InvariantCulture,
+                fieldAutomationIdTemplate,
+                moduleTitle,
+                field.Label,
+                recordTitle,
+                field.Value,
+                moduleToken,
+                recordToken,
+                labelToken),
+            field.AutomationId);
 
         var fieldAutomationNameTemplate = _localization.GetString("Dock.Inspector.Field.AutomationName.Template");
         Assert.Equal(
@@ -90,8 +100,18 @@ public sealed class InspectorPaneViewModelTests : IDisposable
             viewModel.RecordAutomationId);
 
         field = Assert.Single(viewModel.Fields);
-        expectedFieldAutomationId = $"Dock.Inspector.{moduleToken}.{recordToken}.{labelToken}";
-        Assert.Equal(expectedFieldAutomationId, field.AutomationId);
+        Assert.Equal(
+            string.Format(
+                CultureInfo.InvariantCulture,
+                fieldAutomationIdTemplate,
+                moduleTitle,
+                field.Label,
+                recordTitle,
+                field.Value,
+                moduleToken,
+                recordToken,
+                labelToken),
+            field.AutomationId);
 
         fieldAutomationNameTemplate = _localization.GetString("Dock.Inspector.Field.AutomationName.Template");
         Assert.Equal(
@@ -99,6 +119,51 @@ public sealed class InspectorPaneViewModelTests : IDisposable
             field.AutomationName);
 
         fieldAutomationTooltipTemplate = _localization.GetString("Dock.Inspector.Field.AutomationTooltip.Template");
+        Assert.Equal(
+            string.Format(CultureInfo.CurrentCulture, fieldAutomationTooltipTemplate, field.Label, recordTitle, moduleTitle),
+            field.AutomationTooltip);
+    }
+
+    [Fact]
+    public void Update_WithPlainField_ComposesTemplatesFromLocalization()
+    {
+        var viewModel = new InspectorPaneViewModel(_localization);
+
+        var moduleTitle = _localization.GetString("Module.Title.Dashboard");
+        var recordKey = "WO-2001";
+        var recordTitle = "Filter replacement";
+
+        var fields = new[]
+        {
+            new InspectorField("Status", "Scheduled"),
+        };
+
+        viewModel.Update(new InspectorContext("Dashboard", moduleTitle, recordKey, recordTitle, fields));
+
+        var moduleToken = AutomationIdSanitizer.Normalize(moduleTitle, "module");
+        var recordToken = AutomationIdSanitizer.Normalize(recordTitle, "record");
+        var labelToken = AutomationIdSanitizer.Normalize("Status", "field");
+
+        var fieldAutomationNameTemplate = _localization.GetString("Dock.Inspector.Field.AutomationName.Template");
+        var fieldAutomationIdTemplate = _localization.GetString("Dock.Inspector.Field.AutomationId.Template");
+        var fieldAutomationTooltipTemplate = _localization.GetString("Dock.Inspector.Field.AutomationTooltip.Template");
+
+        var field = Assert.Single(viewModel.Fields);
+        Assert.Equal(
+            string.Format(CultureInfo.CurrentCulture, fieldAutomationNameTemplate, moduleTitle, field.Label, recordTitle),
+            field.AutomationName);
+        Assert.Equal(
+            string.Format(
+                CultureInfo.InvariantCulture,
+                fieldAutomationIdTemplate,
+                moduleTitle,
+                field.Label,
+                recordTitle,
+                field.Value,
+                moduleToken,
+                recordToken,
+                labelToken),
+            field.AutomationId);
         Assert.Equal(
             string.Format(CultureInfo.CurrentCulture, fieldAutomationTooltipTemplate, field.Label, recordTitle, moduleTitle),
             field.AutomationTooltip);

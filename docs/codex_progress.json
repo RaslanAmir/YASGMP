@@ -63,7 +63,8 @@
       "2026-03-02: dotnet restore yasgmp.sln and dotnet build yasgmp.sln -c Release retried; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-03-03: dotnet restore yasgmp.sln plus dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried alongside MAUI net9.0-windows targets; CLI still missing so every command exits with 'command not found'.",
       "2026-03-09: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI remains unavailable so each command exits with 'command not found'.",
-      "2026-03-10: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI is still missing so every command exits with 'command not found'."
+      "2026-03-10: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI is still missing so every command exits with 'command not found'.",
+      "2026-03-11: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI remains unavailable so each command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -146,8 +147,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "chore: expand layout persistence null coverage",
+  "lastCommitSummary": "feat: localize shell automation metadata",
   "notes": [
+    "2026-03-11: Modules pane styles now bind localized automation metadata from module templates, inspector fields reuse ShellStrings automation name/id/tooltip formats, and unit tests cover the localized fallbacks while dotnet restore/build/smoke remain blocked because the CLI is still absent.",
     "2026-03-10: DatabaseService layout helpers and DockLayoutPersistenceService now have null-row regression coverage to ensure empty result sets return null snapshots without throwing; dotnet restore/build/smoke remain blocked because the CLI is still absent.",
     "2026-02-06: Added regression tests for DatabaseService layout helpers, DockLayoutPersistenceService forwarding, and ShellLayoutController reset sequencing so SQL payloads stay covered while dotnet tooling remains unavailable.",
     "2025-10-08: Authored GitHub Actions workflow 'WPF Smoke Tests' to run restore/build/FlaUI smoke automation on windows-latest using .NET 9 when available (falls back to .NET 8). Local CLI validation still blocked because dotnet --info returns 'command not found'.",
