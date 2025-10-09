@@ -12,59 +12,14 @@
              AutomationProperties.HelpText="{Binding HelpText}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding Groups}">
-            <ItemsControl.Resources>
-                <Style TargetType="Expander">
-                    <Setter Property="Margin" Value="0,0,0,8" />
-                    <Setter Property="IsExpanded" Value="True" />
-                    <Setter Property="ToolTipService.ToolTip">
-                        <Setter.Value>
-                            <Binding Path="ToolTip" />
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="AutomationProperties.Name">
-                        <Setter.Value>
-                            <Binding Path="AutomationName" />
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="AutomationProperties.AutomationId">
-                        <Setter.Value>
-                            <Binding Path="AutomationId" />
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="AutomationProperties.HelpText">
-                        <Setter.Value>
-                            <Binding Path="ToolTip" />
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-                <Style TargetType="Button">
-                    <Setter Property="Margin" Value="12,4,0,4" />
-                    <Setter Property="HorizontalContentAlignment" Value="Left" />
-                    <Setter Property="ToolTipService.ToolTip">
-                        <Setter.Value>
-                            <Binding Path="ToolTip" />
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="AutomationProperties.Name">
-                        <Setter.Value>
-                            <Binding Path="AutomationName" />
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="AutomationProperties.AutomationId">
-                        <Setter.Value>
-                            <Binding Path="AutomationId" />
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="AutomationProperties.HelpText">
-                        <Setter.Value>
-                            <Binding Path="ToolTip" />
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ItemsControl.Resources>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Expander Header="{Binding Header}">
+                    <Expander Margin="0,0,0,8"
+                              IsExpanded="True"
+                              ToolTipService.ToolTip="{Binding ToolTip}"
+                              AutomationProperties.Name="{Binding AutomationName}"
+                              AutomationProperties.AutomationId="{Binding AutomationId}"
+                              AutomationProperties.HelpText="{Binding ToolTip}">
                         <Expander.HeaderTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Header}"
@@ -77,9 +32,15 @@
                         <ItemsControl ItemsSource="{Binding Modules}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Content="{Binding Title}"
+                                    <Button Margin="12,4,0,4"
+                                            HorizontalContentAlignment="Left"
+                                            Content="{Binding Title}"
                                             Command="{Binding OpenCommand}"
-                                            CommandParameter="{Binding}" />
+                                            CommandParameter="{Binding}"
+                                            ToolTipService.ToolTip="{Binding ToolTip}"
+                                            AutomationProperties.Name="{Binding AutomationName}"
+                                            AutomationProperties.AutomationId="{Binding AutomationId}"
+                                            AutomationProperties.HelpText="{Binding ToolTip}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

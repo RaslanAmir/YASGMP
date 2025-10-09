@@ -24,6 +24,7 @@ public sealed class LocalizationServiceTests : IDisposable
 
         Assert.Equal("Home", _service.GetString("Ribbon.Tab.Home.Header"));
         Assert.Equal("Modules", _service.GetString("Dock.Modules.Title"));
+        Assert.Equal("Review the active module context and selected record details.", _service.GetString("Dock.Inspector.ToolTip"));
         Assert.Equal("Find", _service.GetString("Module.Toolbar.Toggle.Find.Content"));
     }
 
@@ -34,6 +35,7 @@ public sealed class LocalizationServiceTests : IDisposable
 
         Assert.Equal("Početna", _service.GetString("Ribbon.Tab.Home.Header"));
         Assert.Equal("Moduli", _service.GetString("Dock.Modules.Title"));
+        Assert.Equal("Pregledaj aktivni kontekst modula i detalje odabranog zapisa.", _service.GetString("Dock.Inspector.ToolTip"));
         Assert.Equal("Traži", _service.GetString("Module.Toolbar.Toggle.Find.Content"));
     }
 

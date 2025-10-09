@@ -23,6 +23,8 @@ public sealed class ModulesPaneViewModelTests : IDisposable
     {
         var viewModel = CreateViewModel();
 
+        Assert.Equal(_localization.GetString("Dock.Modules.ToolTip"), viewModel.HelpText);
+
         var group = Assert.Single(viewModel.Groups);
         Assert.Equal(_localization.GetString("ModuleTree.Category.Cockpit.ToolTip"), group.ToolTip);
         Assert.Equal(_localization.GetString("ModuleTree.Category.Cockpit.AutomationName"), group.AutomationName);
@@ -40,6 +42,8 @@ public sealed class ModulesPaneViewModelTests : IDisposable
         var viewModel = CreateViewModel();
 
         _localization.SetLanguage("hr");
+
+        Assert.Equal(_localization.GetString("Dock.Modules.ToolTip"), viewModel.HelpText);
 
         var group = Assert.Single(viewModel.Groups);
         Assert.Equal(_localization.GetString("ModuleTree.Category.Cockpit.ToolTip"), group.ToolTip);
