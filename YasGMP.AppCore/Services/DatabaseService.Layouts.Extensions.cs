@@ -147,7 +147,7 @@ ON DUPLICATE KEY UPDATE
             {
                 new MySqlParameter("@u", userId),
                 new MySqlParameter("@p", pageType),
-                new MySqlParameter("@layout", string.IsNullOrWhiteSpace(layoutXml) ? DBNull.Value : layoutXml),
+                CreateLayoutXmlParameter("@layout", layoutXml),
                 CreateNullableDoubleParameter("@x", geometry.Left),
                 CreateNullableDoubleParameter("@y", geometry.Top),
                 CreateNullableDoubleParameter("@w", geometry.Width),
@@ -242,6 +242,15 @@ ON DUPLICATE KEY UPDATE
             var parameter = new MySqlParameter(name, MySqlDbType.Double)
             {
                 Value = value.HasValue ? value.Value : DBNull.Value
+            };
+            return parameter;
+        }
+
+        private static MySqlParameter CreateLayoutXmlParameter(string name, string? layoutXml)
+        {
+            var parameter = new MySqlParameter(name, MySqlDbType.LongText)
+            {
+                Value = string.IsNullOrWhiteSpace(layoutXml) ? DBNull.Value : layoutXml
             };
             return parameter;
         }

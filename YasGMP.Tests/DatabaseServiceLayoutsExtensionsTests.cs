@@ -172,6 +172,7 @@ public class DatabaseServiceLayoutsExtensionsTests
                 {
                     Assert.Equal("@layout", p.ParameterName);
                     Assert.Equal(DBNull.Value, p.Value);
+                    Assert.Equal(MySqlDbType.LongText, p.MySqlDbType);
                 },
                 p =>
                 {
