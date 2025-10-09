@@ -8,16 +8,22 @@
              d:DesignHeight="400"
              d:DesignWidth="600">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <Style x:Key="BusyAwareToolbarButtonStyle" TargetType="Button">
-            <Setter Property="Margin" Value="4,0,0,0" />
-            <Setter Property="Padding" Value="12,4" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                    <Setter Property="IsEnabled" Value="False" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <Style x:Key="BusyAwareToolbarButtonStyle" TargetType="Button">
+                <Setter Property="Margin" Value="4,0,0,0" />
+                <Setter Property="Padding" Value="12,4" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">

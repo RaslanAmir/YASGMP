@@ -323,6 +323,7 @@
     "2026-03-12: Layout persistence now pins the @layout parameter to LongText so AvalonDock XML snapshots avoid truncation, and AppCore/WPF regression tests assert the typed parameter while dotnet restore/build remain blocked by the missing CLI.",
     "2026-03-13: Inspector pane help text and modules pane automation bindings refreshed via localized metadata while dotnet restore/build remain blocked by the missing CLI.",
     "2026-03-14: Smoke test summaries now surface localization resource keys with EN↔HR coverage in unit tests while dotnet restore/build continue to fail with 'command not found' because the CLI is unavailable.",
-    "2026-03-15: Module toolbar ToggleButton template centralized into a shared ResourceDictionary and merged via App.xaml so modules/documents share caption/command/check/enabled/tooltip/automation bindings; dotnet restore yasgmp.sln retried but still fails with 'command not found' because the CLI is unavailable."
+    "2026-03-15: Module toolbar ToggleButton template centralized into a shared ResourceDictionary and merged via App.xaml so modules/documents share caption/command/check/enabled/tooltip/automation bindings; dotnet restore yasgmp.sln retried but still fails with 'command not found' because the CLI is unavailable.",
+    "2026-03-16: Every module/document view now merges ModuleToolbarResources via ResourceDictionary.MergedDictionaries so toolbars bind the shared ToggleButton template without inline definitions; dotnet restore yasgmp.sln, dotnet build yasgmp.sln, and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows still fail with 'command not found' while the CLI is missing."
   ]
 }
