@@ -338,7 +338,8 @@ public class DockLayoutPersistenceServiceTests
             var session = new StubUserSession(101, "session-101");
             var auth = new StubAuthContext();
             var persistence = new DockLayoutPersistenceService(database, session, auth);
-            var controller = new ShellLayoutController(persistence);
+            var localization = new LocalizationService();
+            var controller = new ShellLayoutController(persistence, localization);
 
             var dockManager = new DockingManager();
             var layoutRoot = new LayoutRoot();

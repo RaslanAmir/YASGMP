@@ -714,6 +714,36 @@
   <data name="Module.Status.Ready" xml:space="preserve">
     <value>Ready</value>
   </data>
+  <data name="Shell.Status.Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Shell.Status.LayoutReset" xml:space="preserve">
+    <value>Layout reset to default</value>
+  </data>
+  <data name="Shell.Status.Smoke.Disabled" xml:space="preserve">
+    <value>Smoke test disabled. Set {0}=1 to enable.</value>
+  </data>
+  <data name="Shell.Status.Smoke.Running" xml:space="preserve">
+    <value>Running debug smoke test...</value>
+  </data>
+  <data name="Shell.Status.Smoke.Failed" xml:space="preserve">
+    <value>Smoke test failed: {0}</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Default" xml:space="preserve">
+    <value>YasGMP</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Default" xml:space="preserve">
+    <value>Production</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Default" xml:space="preserve">
+    <value>&lt;unknown&gt;</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Default" xml:space="preserve">
+    <value>&lt;unknown&gt;</value>
+  </data>
+  <data name="Shell.StatusBar.User.Default" xml:space="preserve">
+    <value>Offline</value>
+  </data>
   <data name="Module.Status.SaveFailure" xml:space="preserve">
     <value>Failed to save {0}: {1}</value>
   </data>

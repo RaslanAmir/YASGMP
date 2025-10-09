@@ -6,18 +6,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using YasGMP.Services;
 using YasGMP.Wpf.Configuration;
+using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels;
 
 /// <summary>Status bar view-model displayed along the bottom edge of the shell.</summary>
 public partial class ShellStatusBarViewModel : ObservableObject
 {
+    private const string ReadyStatusKey = "Shell.Status.Ready";
+    private const string CompanyFallbackKey = "Shell.StatusBar.Company.Default";
+    private const string EnvironmentFallbackKey = "Shell.StatusBar.Environment.Default";
+    private const string ServerFallbackKey = "Shell.StatusBar.Server.Default";
+    private const string DatabaseFallbackKey = "Shell.StatusBar.Database.Default";
+    private const string UserFallbackKey = "Shell.StatusBar.User.Default";
+
     private readonly TimeProvider _timeProvider;
     private readonly DispatcherTimer _utcTimer;
     private readonly IConfiguration _configuration;
     private readonly DatabaseOptions _databaseOptions;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly IUserSession _userSession;
+    private readonly ILocalizationService _localization;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ShellStatusBarViewModel"/> class.
@@ -27,16 +36,21 @@ public partial class ShellStatusBarViewModel : ObservableObject
         IConfiguration configuration,
         DatabaseOptions databaseOptions,
         IHostEnvironment hostEnvironment,
-        IUserSession userSession)
+        IUserSession userSession,
+        ILocalizationService localization)
     {
         _timeProvider = timeProvider;
         _configuration = configuration;
         _databaseOptions = databaseOptions;
         _hostEnvironment = hostEnvironment;
         _userSession = userSession;
+        _localization = localization;
+
+        _localization.LanguageChanged += OnLanguageChanged;
 
         RefreshMetadata();
         UtcTime = FormatUtc(_timeProvider.GetUtcNow());
+        StatusText = _localization.GetString(ReadyStatusKey);
 
         _utcTimer = new DispatcherTimer
         {
@@ -72,7 +86,7 @@ public partial class ShellStatusBarViewModel : ObservableObject
 
     /// <summary>Gets or sets the current shell status message presented to the operator.</summary>
     [ObservableProperty]
-    private string _statusText = "Ready";
+    private string _statusText = string.Empty;
 
     /// <summary>Gets or sets the label for the module currently in focus.</summary>
     [ObservableProperty]
@@ -128,18 +142,23 @@ public partial class ShellStatusBarViewModel : ObservableObject
         return string.Empty;
     }
 
-    private static string NormalizeCompany(string? company)
-        => string.IsNullOrWhiteSpace(company) ? "YasGMP" : company;
+    private string NormalizeCompany(string? company)
+        => string.IsNullOrWhiteSpace(company) ? _localization.GetString(CompanyFallbackKey) : company;
 
-    private static string NormalizeEnvironment(string? environment)
-        => string.IsNullOrWhiteSpace(environment) ? "Production" : environment;
+    private string NormalizeEnvironment(string? environment)
+        => string.IsNullOrWhiteSpace(environment) ? _localization.GetString(EnvironmentFallbackKey) : environment;
 
-    private static string NormalizeServer(string? server)
-        => string.IsNullOrWhiteSpace(server) ? "<unknown>" : server;
+    private string NormalizeServer(string? server)
+        => string.IsNullOrWhiteSpace(server) ? _localization.GetString(ServerFallbackKey) : server;
 
-    private static string NormalizeDatabase(string? database)
-        => string.IsNullOrWhiteSpace(database) ? "<unknown>" : database;
+    private string NormalizeDatabase(string? database)
+        => string.IsNullOrWhiteSpace(database) ? _localization.GetString(DatabaseFallbackKey) : database;
 
-    private static string NormalizeUser(string? user)
-        => string.IsNullOrWhiteSpace(user) ? "Offline" : user;
+    private string NormalizeUser(string? user)
+        => string.IsNullOrWhiteSpace(user) ? _localization.GetString(UserFallbackKey) : user;
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        RefreshMetadata();
+    }
 }

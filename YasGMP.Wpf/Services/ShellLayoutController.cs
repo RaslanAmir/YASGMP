@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using AvalonDock;
 using AvalonDock.Layout.Serialization;
+using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Wpf.Services
@@ -12,7 +13,10 @@ namespace YasGMP.Wpf.Services
     /// <summary>Coordinates AvalonDock with layout persistence and view-model resolution.</summary>
     public sealed class ShellLayoutController
     {
+        private const string LayoutResetStatusKey = "Shell.Status.LayoutReset";
+
         private readonly DockLayoutPersistenceService _persistence;
+        private readonly ILocalizationService _localization;
         private DockingManager? _dockManager;
         private MainWindowViewModel? _viewModel;
         private string? _defaultLayout;
@@ -21,9 +25,10 @@ namespace YasGMP.Wpf.Services
         /// Initializes a new instance of the ShellLayoutController class.
         /// </summary>
 
-        public ShellLayoutController(DockLayoutPersistenceService persistence)
+        public ShellLayoutController(DockLayoutPersistenceService persistence, ILocalizationService localization)
         {
             _persistence = persistence;
+            _localization = localization;
         }
         /// <summary>
         /// Executes the attach operation.
@@ -124,7 +129,8 @@ namespace YasGMP.Wpf.Services
 
             if (_viewModel != null)
             {
-                _viewModel.StatusText = "Layout reset to default";
+                var localizedMessage = _localization.GetString(LayoutResetStatusKey);
+                _viewModel.UpdateStatusFromResource(LayoutResetStatusKey, localizedMessage);
             }
 
             await _persistence.ResetAsync(LayoutKey, token).ConfigureAwait(false);
