@@ -218,7 +218,15 @@ public partial class MainWindowViewModel : ObservableObject
         {
             SetStatusFromResource(SmokeRunningStatusKey);
             var result = await _smokeTestService.RunAsync();
-            SetStatusRaw(result.Summary);
+            if (!string.IsNullOrWhiteSpace(result.SummaryResourceKey))
+            {
+                var args = result.SummaryResourceArguments?.ToArray() ?? Array.Empty<object?>();
+                SetStatusFromResource(result.SummaryResourceKey!, args);
+            }
+            else
+            {
+                SetStatusRaw(result.Summary);
+            }
         }
         catch (Exception ex)
         {

@@ -321,6 +321,7 @@
   ],
   "progress": [
     "2026-03-12: Layout persistence now pins the @layout parameter to LongText so AvalonDock XML snapshots avoid truncation, and AppCore/WPF regression tests assert the typed parameter while dotnet restore/build remain blocked by the missing CLI.",
-    "2026-03-13: Inspector pane help text and modules pane automation bindings refreshed via localized metadata while dotnet restore/build remain blocked by the missing CLI."
+    "2026-03-13: Inspector pane help text and modules pane automation bindings refreshed via localized metadata while dotnet restore/build remain blocked by the missing CLI.",
+    "2026-03-14: Smoke test summaries now surface localization resource keys with EN↔HR coverage in unit tests while dotnet restore/build continue to fail with 'command not found' because the CLI is unavailable."
   ]
 }
