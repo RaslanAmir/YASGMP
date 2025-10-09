@@ -25,6 +25,11 @@ public sealed class DebugSmokeTestService
     /// </summary>
     public const string EnvironmentToggleName = "YASGMP_SMOKE";
 
+    private const string SmokeDisabledStatusKey = "Shell.Status.Smoke.Disabled";
+    private const string SmokeAlreadyRunningStatusKey = "Shell.Status.Smoke.AlreadyRunning";
+    private const string SmokeResultWithLogStatusKey = "Shell.Status.Smoke.Result.WithLog";
+    private const string SmokeResultLogFailureStatusKey = "Shell.Status.Smoke.Result.LogFailure";
+
     private static readonly string[] EnabledTokens =
     {
         "1", "true", "yes", "y", "on", "enable", "enabled"
@@ -82,12 +87,14 @@ public sealed class DebugSmokeTestService
         if (!IsEnabled)
         {
             return DebugSmokeTestResult.Skipped(
-                $"Smoke test disabled. Set {EnvironmentToggleName}=1 to enable the debug harness.");
+                $"Smoke test disabled. Set {EnvironmentToggleName}=1 to enable the debug harness.",
+                SmokeDisabledStatusKey,
+                EnvironmentToggleName);
         }
 
         if (Interlocked.CompareExchange(ref _isRunning, 1, 0) != 0)
         {
-            return DebugSmokeTestResult.Skipped("Smoke test already running.");
+            return DebugSmokeTestResult.Skipped("Smoke test already running.", SmokeAlreadyRunningStatusKey);
         }
 
         try
@@ -150,7 +157,15 @@ public sealed class DebugSmokeTestService
                 File.WriteAllText(logPath, logBuilder.ToString());
                 var allPassed = steps.All(static s => s.Succeeded);
                 var summary = $"{passedSteps}/{steps.Count} smoke checks succeeded. Log written to {logPath}.";
-                return DebugSmokeTestResult.Completed(allPassed, summary, logPath, steps);
+                return DebugSmokeTestResult.Completed(
+                    allPassed,
+                    summary,
+                    logPath,
+                    steps,
+                    SmokeResultWithLogStatusKey,
+                    passedSteps,
+                    steps.Count,
+                    logPath);
             }
             catch (Exception ex)
             {
@@ -158,7 +173,15 @@ public sealed class DebugSmokeTestService
                 var allPassed = steps.All(static s => s.Succeeded);
                 var passedAfter = steps.Count(static s => s.Succeeded);
                 var summary = $"{passedAfter}/{steps.Count} smoke checks succeeded. Failed to persist log: {ex.Message}";
-                return DebugSmokeTestResult.Completed(allPassed, summary, null, steps);
+                return DebugSmokeTestResult.Completed(
+                    allPassed,
+                    summary,
+                    null,
+                    steps,
+                    SmokeResultLogFailureStatusKey,
+                    passedAfter,
+                    steps.Count,
+                    ex.Message);
             }
         }
         finally
@@ -437,19 +460,35 @@ public sealed class DebugSmokeTestService
 }
 
 /// <summary>Result payload returned by <see cref="DebugSmokeTestService"/>.</summary>
-public sealed record DebugSmokeTestResult(bool WasRun, bool Passed, string Summary, string? LogPath, IReadOnlyList<DebugSmokeTestStep> Steps)
+public sealed record DebugSmokeTestResult(
+    bool WasRun,
+    bool Passed,
+    string Summary,
+    string? LogPath,
+    IReadOnlyList<DebugSmokeTestStep> Steps,
+    string? SummaryResourceKey,
+    IReadOnlyList<object?> SummaryResourceArguments)
 {
     /// <summary>
     /// Executes the skipped operation.
     /// </summary>
-    public static DebugSmokeTestResult Skipped(string summary)
-        => new(false, false, summary, null, Array.Empty<DebugSmokeTestStep>());
+    public static DebugSmokeTestResult Skipped(string summary, string? resourceKey = null, params object?[]? arguments)
+        => new(false, false, summary, null, Array.Empty<DebugSmokeTestStep>(), resourceKey, Normalize(arguments));
     /// <summary>
     /// Executes the completed operation.
     /// </summary>
 
-    public static DebugSmokeTestResult Completed(bool passed, string summary, string? logPath, IReadOnlyList<DebugSmokeTestStep> steps)
-        => new(true, passed, summary, logPath, steps);
+    public static DebugSmokeTestResult Completed(
+        bool passed,
+        string summary,
+        string? logPath,
+        IReadOnlyList<DebugSmokeTestStep> steps,
+        string? resourceKey = null,
+        params object?[]? arguments)
+        => new(true, passed, summary, logPath, steps, resourceKey, Normalize(arguments));
+
+    private static IReadOnlyList<object?> Normalize(object?[]? arguments)
+        => arguments is { Length: > 0 } ? arguments.ToArray() : Array.Empty<object?>();
 }
 
 /// <summary>Represents a single step executed by the smoke harness.</summary>

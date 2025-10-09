@@ -26,6 +26,13 @@ public sealed class LocalizationServiceTests : IDisposable
         Assert.Equal("Modules", _service.GetString("Dock.Modules.Title"));
         Assert.Equal("Review the active module context and selected record details.", _service.GetString("Dock.Inspector.ToolTip"));
         Assert.Equal("Find", _service.GetString("Module.Toolbar.Toggle.Find.Content"));
+        Assert.Equal("Smoke test already running.", _service.GetString("Shell.Status.Smoke.AlreadyRunning"));
+        Assert.Equal(
+            "3/5 smoke checks succeeded. Log written to C\\logs\\output.log.",
+            _service.GetString("Shell.Status.Smoke.Result.WithLog", 3, 5, "C\\logs\\output.log"));
+        Assert.Equal(
+            "3/5 smoke checks succeeded. Failed to persist log: disk full",
+            _service.GetString("Shell.Status.Smoke.Result.LogFailure", 3, 5, "disk full"));
     }
 
     [Fact]
@@ -37,6 +44,13 @@ public sealed class LocalizationServiceTests : IDisposable
         Assert.Equal("Moduli", _service.GetString("Dock.Modules.Title"));
         Assert.Equal("Pregledaj aktivni kontekst modula i detalje odabranog zapisa.", _service.GetString("Dock.Inspector.ToolTip"));
         Assert.Equal("Traži", _service.GetString("Module.Toolbar.Toggle.Find.Content"));
+        Assert.Equal("Smoke test već je u tijeku.", _service.GetString("Shell.Status.Smoke.AlreadyRunning"));
+        Assert.Equal(
+            "3/5 provjera dima je uspješno završilo. Zapis je spremljen u C\\logs\\output.log.",
+            _service.GetString("Shell.Status.Smoke.Result.WithLog", 3, 5, "C\\logs\\output.log"));
+        Assert.Equal(
+            "3/5 provjera dima je uspješno završilo. Spremanje zapisa nije uspjelo: disk full",
+            _service.GetString("Shell.Status.Smoke.Result.LogFailure", 3, 5, "disk full"));
     }
 
     [Fact]

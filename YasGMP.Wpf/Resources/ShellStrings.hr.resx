@@ -738,6 +738,15 @@
   <data name="Shell.Status.Smoke.Failed" xml:space="preserve">
     <value>Smoke test nije uspio: {0}</value>
   </data>
+  <data name="Shell.Status.Smoke.AlreadyRunning" xml:space="preserve">
+    <value>Smoke test već je u tijeku.</value>
+  </data>
+  <data name="Shell.Status.Smoke.Result.WithLog" xml:space="preserve">
+    <value>{0}/{1} provjera dima je uspješno završilo. Zapis je spremljen u {2}.</value>
+  </data>
+  <data name="Shell.Status.Smoke.Result.LogFailure" xml:space="preserve">
+    <value>{0}/{1} provjera dima je uspješno završilo. Spremanje zapisa nije uspjelo: {2}</value>
+  </data>
   <data name="Shell.StatusBar.Company.Default" xml:space="preserve">
     <value>YasGMP</value>
   </data>

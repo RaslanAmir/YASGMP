@@ -732,6 +732,15 @@
   <data name="Shell.Status.Smoke.Failed" xml:space="preserve">
     <value>Smoke test failed: {0}</value>
   </data>
+  <data name="Shell.Status.Smoke.AlreadyRunning" xml:space="preserve">
+    <value>Smoke test already running.</value>
+  </data>
+  <data name="Shell.Status.Smoke.Result.WithLog" xml:space="preserve">
+    <value>{0}/{1} smoke checks succeeded. Log written to {2}.</value>
+  </data>
+  <data name="Shell.Status.Smoke.Result.LogFailure" xml:space="preserve">
+    <value>{0}/{1} smoke checks succeeded. Failed to persist log: {2}</value>
+  </data>
   <data name="Shell.StatusBar.Company.Default" xml:space="preserve">
     <value>YasGMP</value>
   </data>
