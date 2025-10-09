@@ -720,6 +720,36 @@
   <data name="Module.Status.Ready" xml:space="preserve">
     <value>Spremno</value>
   </data>
+  <data name="Shell.Status.Ready" xml:space="preserve">
+    <value>Spremno</value>
+  </data>
+  <data name="Shell.Status.LayoutReset" xml:space="preserve">
+    <value>Raspored je vraćen na zadani</value>
+  </data>
+  <data name="Shell.Status.Smoke.Disabled" xml:space="preserve">
+    <value>Smoke test je onemogućen. Postavite {0}=1 za omogućavanje.</value>
+  </data>
+  <data name="Shell.Status.Smoke.Running" xml:space="preserve">
+    <value>Pokretanje debug smoke testa...</value>
+  </data>
+  <data name="Shell.Status.Smoke.Failed" xml:space="preserve">
+    <value>Smoke test nije uspio: {0}</value>
+  </data>
+  <data name="Shell.StatusBar.Company.Default" xml:space="preserve">
+    <value>YasGMP</value>
+  </data>
+  <data name="Shell.StatusBar.Environment.Default" xml:space="preserve">
+    <value>Produkcija</value>
+  </data>
+  <data name="Shell.StatusBar.Server.Default" xml:space="preserve">
+    <value>&lt;nepoznato&gt;</value>
+  </data>
+  <data name="Shell.StatusBar.Database.Default" xml:space="preserve">
+    <value>&lt;nepoznato&gt;</value>
+  </data>
+  <data name="Shell.StatusBar.User.Default" xml:space="preserve">
+    <value>Izvan mreže</value>
+  </data>
   <data name="Module.Status.SaveFailure" xml:space="preserve">
     <value>Spremanje za {0} nije uspjelo: {1}</value>
   </data>

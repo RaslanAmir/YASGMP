@@ -168,6 +168,37 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ShellStatusBarControl_LanguageToggle_UpdatesActiveLabel()
+    {
+        await RunOnStaThread(async () =>
+        {
+            EnsureApplicationResources();
+
+            _localizationService.SetLanguage("en");
+
+            var control = new ShellStatusBar
+            {
+                DataContext = CreateMetadataViewModel()
+            };
+
+            control.Measure(new Size(1, 1));
+            control.Arrange(new Rect(new Size(1, 1)));
+            control.UpdateLayout();
+
+            var activeLabel = Assert.IsType<TextBlock>(control.FindName("ActiveModuleLabel"));
+            Assert.Equal("Active module:", activeLabel.Text);
+
+            _localizationService.SetLanguage("hr");
+
+            await control.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+
+            Assert.Equal("Aktivni modul:", activeLabel.Text);
+
+            await Task.CompletedTask;
+        });
+    }
+
+    [Fact]
     public void RefreshMetadata_NormalizesAndPopulatesFields()
     {
         var defaultViewModel = CreateViewModel();
@@ -203,6 +234,26 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
         Assert.Equal("db01", configuredViewModel.Server);
         Assert.Equal("yasgmp", configuredViewModel.Database);
         Assert.Equal("Jane Doe", configuredViewModel.User);
+    }
+
+    [Fact]
+    public void RefreshMetadata_LanguageToggle_UpdatesFallbacks()
+    {
+        var viewModel = CreateViewModel();
+
+        Assert.Equal("YasGMP", viewModel.Company);
+        Assert.Equal("Production", viewModel.Environment);
+        Assert.Equal("<unknown>", viewModel.Server);
+        Assert.Equal("<unknown>", viewModel.Database);
+        Assert.Equal("Offline", viewModel.User);
+
+        _localizationService.SetLanguage("hr");
+
+        Assert.Equal("YasGMP", viewModel.Company);
+        Assert.Equal("Produkcija", viewModel.Environment);
+        Assert.Equal("<nepoznato>", viewModel.Server);
+        Assert.Equal("<nepoznato>", viewModel.Database);
+        Assert.Equal("Izvan mreže", viewModel.User);
     }
 
     [Fact]
@@ -275,7 +326,7 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
         _localizationService.SetLanguage(_originalLanguage);
     }
 
-    private static ShellStatusBarViewModel CreateMetadataViewModel()
+    private ShellStatusBarViewModel CreateMetadataViewModel()
     {
         return CreateViewModel(
             new Dictionary<string, string?>
@@ -295,11 +346,12 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
             environmentName: "QA");
     }
 
-    private static ShellStatusBarViewModel CreateViewModel(
+    private ShellStatusBarViewModel CreateViewModel(
         IDictionary<string, string?>? configurationValues = null,
         DatabaseOptions? databaseOptions = null,
         StubUserSession? userSession = null,
-        string? environmentName = null)
+        string? environmentName = null,
+        ILocalizationService? localization = null)
     {
         var builder = new ConfigurationBuilder();
         if (configurationValues != null)
@@ -315,13 +367,15 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
         };
 
         var session = userSession ?? new StubUserSession();
+        var localizationService = localization ?? _localizationService;
 
         return new ShellStatusBarViewModel(
             TimeProvider.System,
             configuration,
             options,
             hostEnvironment,
-            session);
+            session,
+            localizationService);
     }
 
     private static void EnsureApplicationResources()

@@ -14,10 +14,19 @@ namespace YasGMP.Wpf.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ObservableObject
 {
+    private const string ReadyStatusKey = "Shell.Status.Ready";
+    private const string LayoutResetStatusKey = "Shell.Status.LayoutReset";
+    private const string SmokeDisabledStatusKey = "Shell.Status.Smoke.Disabled";
+    private const string SmokeRunningStatusKey = "Shell.Status.Smoke.Running";
+    private const string SmokeFailedStatusKey = "Shell.Status.Smoke.Failed";
+
     private readonly IModuleRegistry _moduleRegistry;
     private readonly ShellInteractionService _shellInteraction;
     private readonly DebugSmokeTestService _smokeTestService;
-    private string _statusText = "Ready";
+    private readonly ILocalizationService _localization;
+    private string _statusText = string.Empty;
+    private string? _statusResourceKey;
+    private object?[]? _statusResourceArguments;
 
     [ObservableProperty]
     private DocumentViewModel? _activeDocument;
@@ -31,11 +40,13 @@ public partial class MainWindowViewModel : ObservableObject
         InspectorPaneViewModel inspectorPane,
         ShellStatusBarViewModel statusBar,
         ShellInteractionService shellInteraction,
-        DebugSmokeTestService smokeTestService)
+        DebugSmokeTestService smokeTestService,
+        ILocalizationService localization)
     {
         _moduleRegistry = moduleRegistry;
         _shellInteraction = shellInteraction;
         _smokeTestService = smokeTestService;
+        _localization = localization;
         ModulesPane = modulesPane;
         InspectorPane = inspectorPane;
         StatusBar = statusBar;
@@ -43,9 +54,11 @@ public partial class MainWindowViewModel : ObservableObject
         WindowCommands = new WindowMenuViewModel(this);
         RunSmokeTestCommand = new AsyncRelayCommand(RunSmokeTestAsync, () => _smokeTestService.IsEnabled);
 
+        _localization.LanguageChanged += OnLanguageChanged;
+
         _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update);
         RefreshShellContext();
-        StatusBar.StatusText = _statusText;
+        SetStatusFromResource(ReadyStatusKey);
     }
 
     /// <summary>Left-hand navigation pane listing modules.</summary>
@@ -129,13 +142,30 @@ public partial class MainWindowViewModel : ObservableObject
         ActiveDocument = null;
         StatusBar.ActiveModule = string.Empty;
         OpenModule(DashboardModuleViewModel.ModuleKey);
-        StatusText = "Layout reset to default";
+        SetStatusFromResource(LayoutResetStatusKey);
     }
 
     /// <summary>Re-evaluates and pushes connection/session metadata into the status bar.</summary>
     public void RefreshShellContext()
     {
         StatusBar.RefreshMetadata();
+    }
+
+    /// <summary>Updates the shell status bar using a localization resource key.</summary>
+    /// <param name="resourceKey">Localization resource key resolved through the injected service.</param>
+    /// <param name="arguments">Optional format arguments applied with the current culture.</param>
+    public void UpdateStatusFromResource(string resourceKey, params object?[] arguments)
+    {
+        SetStatusFromResource(resourceKey, arguments);
+    }
+
+    /// <summary>Updates the shell status bar using a pre-localized message while tracking the resource key.</summary>
+    /// <param name="resourceKey">Localization resource key associated with the message.</param>
+    /// <param name="localizedMessage">Localized message previously resolved by the caller.</param>
+    /// <param name="arguments">Optional format arguments to replay when languages change.</param>
+    public void UpdateStatusFromResource(string resourceKey, string localizedMessage, params object?[] arguments)
+    {
+        SetStatusFromResourceWithMessage(resourceKey, localizedMessage, arguments);
     }
 
     private ModuleDocumentViewModel OpenModuleInternal(string moduleKey, object? parameter)
@@ -172,32 +202,66 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void UpdateStatusInternal(string message)
     {
-        StatusText = message;
+        SetStatusRaw(message);
     }
 
     private async Task RunSmokeTestAsync()
     {
         if (!_smokeTestService.IsEnabled)
         {
-            StatusText = $"Smoke test disabled. Set {DebugSmokeTestService.EnvironmentToggleName}=1 to enable.";
+            SetStatusFromResource(SmokeDisabledStatusKey, DebugSmokeTestService.EnvironmentToggleName);
             RunSmokeTestCommand.NotifyCanExecuteChanged();
             return;
         }
 
         try
         {
-            StatusText = "Running debug smoke test...";
+            SetStatusFromResource(SmokeRunningStatusKey);
             var result = await _smokeTestService.RunAsync();
-            StatusText = result.Summary;
+            SetStatusRaw(result.Summary);
         }
         catch (Exception ex)
         {
-            StatusText = $"Smoke test failed: {ex.Message}";
+            SetStatusFromResource(SmokeFailedStatusKey, ex.Message);
         }
         finally
         {
             RunSmokeTestCommand.NotifyCanExecuteChanged();
         }
+    }
+
+    private void SetStatusFromResource(string resourceKey, params object?[] arguments)
+    {
+        var args = arguments is { Length: > 0 } ? arguments.ToArray() : Array.Empty<object?>();
+        _statusResourceKey = resourceKey;
+        _statusResourceArguments = args;
+        StatusText = _localization.GetString(resourceKey, args);
+    }
+
+    private void SetStatusFromResourceWithMessage(string resourceKey, string localizedMessage, params object?[] arguments)
+    {
+        var args = arguments is { Length: > 0 } ? arguments.ToArray() : Array.Empty<object?>();
+        _statusResourceKey = resourceKey;
+        _statusResourceArguments = args;
+        StatusText = localizedMessage;
+    }
+
+    private void SetStatusRaw(string message)
+    {
+        _statusResourceKey = null;
+        _statusResourceArguments = null;
+        StatusText = message;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        if (_statusResourceKey is null)
+        {
+            return;
+        }
+
+        var args = _statusResourceArguments ?? Array.Empty<object?>();
+        StatusText = _localization.GetString(_statusResourceKey, args);
     }
 
     private static string? TryParseModuleKey(string contentId)
