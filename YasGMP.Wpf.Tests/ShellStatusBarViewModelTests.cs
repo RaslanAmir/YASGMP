@@ -272,49 +272,74 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
             control.Arrange(new Rect(new Size(1, 1)));
             control.UpdateLayout();
 
-            var border = Assert.IsType<Border>(control.Content);
-            Assert.Equal("StatusBar.Container", AutomationProperties.GetAutomationId(border));
-            Assert.Equal("Shell status bar", AutomationProperties.GetName(border));
-            var borderTooltip = ToolTipService.GetToolTip(border) as string;
-            Assert.Equal("Displays YasGMP connection and session metadata.", borderTooltip);
-            Assert.Equal(borderTooltip, AutomationProperties.GetHelpText(border));
-
-            var textBlocks = FindVisualChildren<TextBlock>(border).ToList();
-            Assert.NotEmpty(textBlocks);
-
-            var labeledByExpectations = new Dictionary<string, string>
+            string GetResourceString(string key)
             {
-                ["StatusBar.Status.Value"] = "StatusLabel",
-                ["StatusBar.ActiveModule.Value"] = "ActiveModuleLabel",
-                ["StatusBar.Company.Value"] = "CompanyLabel",
-                ["StatusBar.Environment.Value"] = "EnvironmentLabel",
-                ["StatusBar.Server.Value"] = "ServerLabel",
-                ["StatusBar.Database.Value"] = "DatabaseLabel",
-                ["StatusBar.User.Value"] = "UserLabel",
-                ["StatusBar.UtcTime.Value"] = "UtcTimeLabel"
-            };
-
-            foreach (var labelName in labeledByExpectations.Values.Distinct())
-            {
-                var labelElement = control.FindName(labelName);
-                Assert.IsType<TextBlock>(labelElement);
+                var resource = control.TryFindResource(key);
+                return Assert.IsType<string>(resource);
             }
 
-            foreach (var textBlock in textBlocks)
+            void AssertElementMetadata(FrameworkElement element, string prefix)
             {
-                var automationId = AutomationProperties.GetAutomationId(textBlock);
-                Assert.False(string.IsNullOrWhiteSpace(automationId));
-                Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBlock)));
-                var tooltip = ToolTipService.GetToolTip(textBlock) as string;
-                Assert.False(string.IsNullOrWhiteSpace(tooltip));
-                Assert.Equal(tooltip, AutomationProperties.GetHelpText(textBlock));
+                var expectedTooltip = GetResourceString($"{prefix}.ToolTip");
+                Assert.Equal(expectedTooltip, ToolTipService.GetToolTip(element) as string);
+                Assert.Equal(expectedTooltip, AutomationProperties.GetHelpText(element));
 
-                if (automationId is not null && labeledByExpectations.TryGetValue(automationId, out var labelName))
-                {
-                    var labeledBy = AutomationProperties.GetLabeledBy(textBlock);
-                    var labelElement = Assert.IsType<TextBlock>(control.FindName(labelName));
-                    Assert.Same(labelElement, labeledBy);
-                }
+                var expectedName = GetResourceString($"{prefix}.AutomationName");
+                Assert.Equal(expectedName, AutomationProperties.GetName(element));
+
+                var expectedAutomationId = GetResourceString($"{prefix}.AutomationId");
+                Assert.Equal(expectedAutomationId, AutomationProperties.GetAutomationId(element));
+            }
+
+            var border = Assert.IsType<Border>(control.Content);
+            AssertElementMetadata(border, "Shell.StatusBar.Container");
+
+            var labelExpectations = new (string Name, string Prefix)[]
+            {
+                ("StatusLabel", "Shell.StatusBar.Status.Label"),
+                ("ActiveModuleLabel", "Shell.StatusBar.ActiveModule.Label"),
+                ("CompanyLabel", "Shell.StatusBar.Company.Label"),
+                ("EnvironmentLabel", "Shell.StatusBar.Environment.Label"),
+                ("ServerLabel", "Shell.StatusBar.Server.Label"),
+                ("DatabaseLabel", "Shell.StatusBar.Database.Label"),
+                ("UserLabel", "Shell.StatusBar.User.Label"),
+                ("UtcTimeLabel", "Shell.StatusBar.UtcTime.Label")
+            };
+
+            var labels = new Dictionary<string, TextBlock>();
+            foreach (var (name, prefix) in labelExpectations)
+            {
+                var label = Assert.IsType<TextBlock>(control.FindName(name));
+                AssertElementMetadata(label, prefix);
+                Assert.Null(AutomationProperties.GetLabeledBy(label));
+                labels[name] = label;
+            }
+
+            var textBlocks = FindVisualChildren<TextBlock>(border)
+                .Select(tb => (TextBlock: tb, Id: AutomationProperties.GetAutomationId(tb)))
+                .Where(pair => !string.IsNullOrWhiteSpace(pair.Id))
+                .ToDictionary(pair => pair.Id!, pair => pair.TextBlock);
+
+            var valueExpectations = new (string Prefix, string LabelName)[]
+            {
+                ("Shell.StatusBar.Status.Value", "StatusLabel"),
+                ("Shell.StatusBar.ActiveModule.Value", "ActiveModuleLabel"),
+                ("Shell.StatusBar.Company.Value", "CompanyLabel"),
+                ("Shell.StatusBar.Environment.Value", "EnvironmentLabel"),
+                ("Shell.StatusBar.Server.Value", "ServerLabel"),
+                ("Shell.StatusBar.Database.Value", "DatabaseLabel"),
+                ("Shell.StatusBar.User.Value", "UserLabel"),
+                ("Shell.StatusBar.UtcTime.Value", "UtcTimeLabel")
+            };
+
+            foreach (var (prefix, labelName) in valueExpectations)
+            {
+                var expectedAutomationId = GetResourceString($"{prefix}.AutomationId");
+                Assert.True(textBlocks.TryGetValue(expectedAutomationId, out var textBlock));
+                AssertElementMetadata(textBlock, prefix);
+
+                var expectedLabel = Assert.Contains(labelName, labels);
+                Assert.Same(expectedLabel, AutomationProperties.GetLabeledBy(textBlock));
             }
 
             await Task.CompletedTask;

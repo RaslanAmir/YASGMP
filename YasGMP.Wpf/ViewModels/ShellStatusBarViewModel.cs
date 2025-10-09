@@ -60,31 +60,50 @@ public partial class ShellStatusBarViewModel : ObservableObject
         _utcTimer.Start();
     }
 
-    /// <summary>Gets or sets the company name resolved from configuration/session metadata.</summary>
+    /// <summary>
+    /// Gets or sets the normalized company name resolved from <see cref="IConfiguration"/> or
+    /// session-provided metadata.
+    /// </summary>
     [ObservableProperty]
     private string _company = string.Empty;
 
-    /// <summary>Gets or sets the database name extracted from <see cref="DatabaseOptions"/>.</summary>
+    /// <summary>
+    /// Gets or sets the normalized database name extracted from the injected
+    /// <see cref="DatabaseOptions"/> instance.
+    /// </summary>
     [ObservableProperty]
     private string _database = string.Empty;
 
-    /// <summary>Gets or sets the interactive user label pulled from the active <see cref="IUserSession"/>.</summary>
+    /// <summary>
+    /// Gets or sets the normalized interactive user label pulled from the active
+    /// <see cref="IUserSession"/>.
+    /// </summary>
     [ObservableProperty]
     private string _user = string.Empty;
 
-    /// <summary>Gets or sets the active environment descriptor derived from <see cref="IHostEnvironment"/>.</summary>
+    /// <summary>
+    /// Gets or sets the normalized environment descriptor derived from
+    /// <see cref="IHostEnvironment"/> and configuration values.
+    /// </summary>
     [ObservableProperty]
     private string _environment = string.Empty;
 
-    /// <summary>Gets or sets the database server host name extracted from <see cref="DatabaseOptions"/>.</summary>
+    /// <summary>
+    /// Gets or sets the normalized database server host name extracted from
+    /// <see cref="DatabaseOptions"/>.
+    /// </summary>
     [ObservableProperty]
     private string _server = string.Empty;
 
-    /// <summary>Gets or sets the formatted UTC timestamp refreshed via the injected <see cref="TimeProvider"/>.</summary>
+    /// <summary>
+    /// Gets or sets the formatted UTC timestamp refreshed via the injected <see cref="TimeProvider"/>.
+    /// </summary>
     [ObservableProperty]
     private string _utcTime = string.Empty;
 
-    /// <summary>Gets or sets the current shell status message presented to the operator.</summary>
+    /// <summary>
+    /// Gets or sets the localized shell status message presented to the operator.
+    /// </summary>
     [ObservableProperty]
     private string _statusText = string.Empty;
 
