@@ -53,6 +53,54 @@ public sealed class ModuleToolbarCommandTests
         Assert.Equal("AlatnaTraka_Trazi", command.AutomationId);
     }
 
+    [Fact]
+    public void LanguageChange_NotifiesCaptionTooltipAndAutomationProperties()
+    {
+        var localization = new FakeLocalizationService(
+            new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["en"] = new(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Module.Toolbar.Toggle.Add.Content"] = "Add",
+                    ["Module.Toolbar.Toggle.Add.ToolTip"] = "Create a new record.",
+                    ["Module.Toolbar.Toggle.Add.AutomationName"] = "Add command",
+                    ["Module.Toolbar.Toggle.Add.AutomationId"] = "Toolbar_Add"
+                },
+                ["hr"] = new(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Module.Toolbar.Toggle.Add.Content"] = "Dodaj",
+                    ["Module.Toolbar.Toggle.Add.ToolTip"] = "Kreiraj novi zapis.",
+                    ["Module.Toolbar.Toggle.Add.AutomationName"] = "Naredba dodaj",
+                    ["Module.Toolbar.Toggle.Add.AutomationId"] = "AlatnaTraka_Dodaj"
+                }
+            },
+            initialLanguage: "en");
+
+        var command = new ModuleToolbarCommand(
+            captionKey: "Module.Toolbar.Toggle.Add.Content",
+            command: new RelayCommand(() => { }),
+            localization: localization,
+            toolTipKey: "Module.Toolbar.Toggle.Add.ToolTip",
+            automationNameKey: "Module.Toolbar.Toggle.Add.AutomationName",
+            automationIdKey: "Module.Toolbar.Toggle.Add.AutomationId");
+
+        var observed = new List<string>();
+        command.PropertyChanged += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.PropertyName))
+            {
+                observed.Add(args.PropertyName);
+            }
+        };
+
+        localization.SetLanguage("hr");
+
+        Assert.Contains(nameof(ModuleToolbarCommand.Caption), observed);
+        Assert.Contains(nameof(ModuleToolbarCommand.ToolTip), observed);
+        Assert.Contains(nameof(ModuleToolbarCommand.AutomationName), observed);
+        Assert.Contains(nameof(ModuleToolbarCommand.AutomationId), observed);
+    }
+
     private sealed class FakeLocalizationService : ILocalizationService
     {
         private readonly IDictionary<string, IDictionary<string, string>> _resources;
