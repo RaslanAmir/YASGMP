@@ -1,4 +1,4 @@
-﻿# Codex Plan - WPF Shell & Full Integration
+# Codex Plan - WPF Shell & Full Integration
 
 ## Current Compile Status
 - [x] Dotnet SDKs detected and recorded *(9.0.305 via `logs/20251003-dotnet-info.txt`; bootstrap transcript: `logs/bootstrap-dotnet9-transcript.txt`)**
@@ -218,6 +218,11 @@
 - Build: WPF and MAUI Windows builds succeed on .NET 9; warnings only
 - Smoke: Harness button is wired; environment prevents GUI automation here — recorded TODO
 
+
+Editor i18n updates in this increment:
+- Assets view: localized grid headers, search label, and editor field labels; added grid/search a11y tooltips
+- Dashboard view: localized grid headers and search label; added grid/search a11y tooltips
+- Components view: localized grid headers and search label; added grid/search a11y tooltips
 Open items:
 - Translate remaining editor field labels and status strings across views
 - Extend AutomationProperties coverage to inputs, grid columns, and dialogs
@@ -230,3 +235,9 @@ Open items:
 - Bound key UI to resources: Ribbon tabs (Home/View/Tools), Backstage (Layout/Save/Reset), anchorables (Modules/Inspector).
 - A11y: Added `AutomationProperties.Name` to Modules/Inspector panes and module launch buttons.
 - Build: WPF compiles clean on .NET 9; MAUI builds with existing warnings.
+
+
+
+Test run (solution):
+- Executed dotnet test -c Release; MAUI/WPF builds remained green, but some AppCore tests failed due to EF service configuration (unrelated to WPF shell i18n/a11y). See logs/dotnet-test.txt for details. No changes applied to non-WPF test code in this batch.
+

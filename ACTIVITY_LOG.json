@@ -1,246 +1,289 @@
-﻿[
-    {
-        "run_id":  "RUN-2025-10-03T145222",
-        "scope":  [
-                      "environment",
-                      "planning",
-                      "compliance-artifacts"
-                  ],
-        "actions":  [
-                        {
-                            "type":  "command",
-                            "name":  "dotnet --info",
-                            "status":  "success",
-                            "artifacts":  [
-                                              "logs/20251003-dotnet-info.txt"
-                                          ]
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet restore yasgmp.sln",
-                            "status":  "success",
-                            "artifacts":  [
-                                              "logs/20251003-dotnet-restore.txt"
-                                          ]
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
-                            "status":  "failed",
-                            "artifacts":  [
-                                              "logs/20251003-dotnet-build-maui.txt"
-                                          ],
-                            "notes":  "YasGMP.AppCore net9.0 target references Microsoft.Maui.* diagnostics without matching assemblies"
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
-                            "status":  "failed",
-                            "artifacts":  [
-                                              "logs/20251003-dotnet-build-wpf.txt"
-                                          ],
-                            "notes":  "Same AppCore net9.0 Microsoft.Maui.* dependency gap"
-                        },
-                        {
-                            "type":  "doc_update",
-                            "path":  "docs/codex_plan.md",
-                            "status":  "updated"
-                        },
-                        {
-                            "type":  "doc_update",
-                            "path":  "docs/codex_progress.json",
-                            "status":  "updated"
-                        },
-                        {
-                            "type":  "artifact_update",
-                            "path":  "logs/*.txt",
-                            "status":  "added"
-                        }
-                    ],
-        "summary":  {
-                        "issues_found":  [
-                                             "YasGMP.AppCore net9.0 target still pulls in Microsoft.Maui.* diagnostics and YasGMP.ViewModels link, breaking MAUI+WPF builds"
-                                         ],
-                        "todos_created":  [
-                                              "Segregate MAUI-only diagnostics from AppCore or add conditional multi-targeting",
-                                              "Provide WPF-safe diagnostics/audit storage abstraction",
-                                              "Re-run MAUI/WPF builds + smoke after refactor"
-                                          ],
-                        "blocking_risks":  [
-                                               "Builds remain red until AppCore packaging is resolved"
-                                           ]
-                    }
-    },
-    {
-        "run_id":  "RUN-2025-10-03T151410",
-        "scope":  [
-                      "appcore",
-                      "diagnostics",
-                      "build"
-                  ],
-        "actions":  [
-                        {
-                            "type":  "code_change",
-                            "paths":  [
-                                          "Diagnostics/DiagnosticsPathProvider.cs",
-                                          "Diagnostics/CrashHandler.cs",
-                                          "Diagnostics/DiagnosticsHub.cs",
-                                          "Diagnostics/LogSinks/ElasticCompatibleSink.cs",
-                                          "Diagnostics/LogSinks/FileLogSink.cs",
-                                          "Diagnostics/LogSinks/SQLiteLogSink.cs",
-                                          "Diagnostics/ReplayHarness.cs",
-                                          "Diagnostics/ChangeControlAssignmentHarness.cs",
-                                          "YasGMP.AppCore/YasGMP.AppCore.csproj",
-                                          "YasGMP.AppCore/AssemblyInfo.Shared.cs",
-                                          "Services/Platform/MauiFilePicker.cs",
-                                          "MauiProgram.cs",
-                                          "YasGMP.Wpf/MainWindow.xaml",
-                                          "YasGMP.Wpf/Views/AttachmentsModuleView.xaml"
-                                      ],
-                            "status":  "updated",
-                            "notes":  "Replaced Microsoft.Maui.Storage usage with DiagnosticsPathProvider, gated harness for MAUI builds, added AppCore constants and internals visibility"
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet restore yasgmp.sln",
-                            "status":  "success"
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
-                            "status":  "success",
-                            "artifacts":  [
-                                              "logs/20251003-dotnet-build-maui.txt"
-                                          ],
-                            "notes":  "Succeeded with MSB3277 dependency warnings"
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
-                            "status":  "failed",
-                            "artifacts":  [
-                                              "logs/20251003-dotnet-build-wpf.txt"
-                                          ],
-                            "notes":  "Fails due to corrupted AssetsModuleViewModel (duplicate class definition) after resolving ribbon/layout namespaces."
-                        },
-                        {
-                            "type":  "doc_update",
-                            "path":  "docs/codex_plan.md",
-                            "status":  "updated"
-                        },
-                        {
-                            "type":  "doc_update",
-                            "path":  "docs/codex_progress.json",
-                            "status":  "updated"
-                        },
-                        {
-                            "type":  "issues_update",
-                            "path":  "Codex_Issues.yaml",
-                            "status":  "updated"
-                        }
-                    ],
-        "summary":  {
-                        "issues_found":  [
-                                             "WPF build blocked by duplicated partial definition in AssetsModuleViewModel.cs (syntax errors)"
-                                         ],
-                        "todos_created":  [
-                                              "Refactor AssetsModuleViewModel.cs to remove duplicate partial definitions and restore valid syntax",
-                                              "After Assets viewmodel repair, rerun WPF build and smoke harness",
-                                              "Complete Fluent.Ribbon namespace cleanup verification (now resolved)"
-                                          ],
-                        "blocking_risks":  [
-                                               "Desktop shell still cannot compile because AssetsModuleViewModel.cs contains duplicated class bodies"
-                                           ]
-                    }
+[
+  {
+    "run_id": "RUN-2025-10-03T145222",
+    "scope": [
+      "environment",
+      "planning",
+      "compliance-artifacts"
+    ],
+    "actions": [
+      {
+        "type": "command",
+        "name": "dotnet --info",
+        "status": "success",
+        "artifacts": [
+          "logs/20251003-dotnet-info.txt"
+        ]
+      },
+      {
+        "type": "command",
+        "name": "dotnet restore yasgmp.sln",
+        "status": "success",
+        "artifacts": [
+          "logs/20251003-dotnet-restore.txt"
+        ]
+      },
+      {
+        "type": "command",
+        "name": "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
+        "status": "failed",
+        "artifacts": [
+          "logs/20251003-dotnet-build-maui.txt"
+        ],
+        "notes": "YasGMP.AppCore net9.0 target references Microsoft.Maui.* diagnostics without matching assemblies"
+      },
+      {
+        "type": "command",
+        "name": "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
+        "status": "failed",
+        "artifacts": [
+          "logs/20251003-dotnet-build-wpf.txt"
+        ],
+        "notes": "Same AppCore net9.0 Microsoft.Maui.* dependency gap"
+      },
+      {
+        "type": "doc_update",
+        "path": "docs/codex_plan.md",
+        "status": "updated"
+      },
+      {
+        "type": "doc_update",
+        "path": "docs/codex_progress.json",
+        "status": "updated"
+      },
+      {
+        "type": "artifact_update",
+        "path": "logs/*.txt",
+        "status": "added"
+      }
+    ],
+    "summary": {
+      "issues_found": [
+        "YasGMP.AppCore net9.0 target still pulls in Microsoft.Maui.* diagnostics and YasGMP.ViewModels link, breaking MAUI+WPF builds"
+      ],
+      "todos_created": [
+        "Segregate MAUI-only diagnostics from AppCore or add conditional multi-targeting",
+        "Provide WPF-safe diagnostics/audit storage abstraction",
+        "Re-run MAUI/WPF builds + smoke after refactor"
+      ],
+      "blocking_risks": [
+        "Builds remain red until AppCore packaging is resolved"
+      ]
     }
-    ,
-    {
-        "run_id":  "RUN-2025-10-10T131500",
-        "scope":  [
-                      "wpf-shell",
-                      "i18n",
-                      "a11y",
-                      "build"
-                  ],
-        "actions":  [
-                        {
-                            "type":  "code_change",
-                            "paths":  [
-                                          "YasGMP.Wpf/MainWindow.xaml",
-                                          "YasGMP.Wpf/App.xaml.cs",
-                                          "YasGMP.Wpf/Resources/Strings.en.xaml",
-                                          "YasGMP.Wpf/Resources/Strings.hr.xaml",
-                                          "YasGMP.Wpf/Shell/ModulesPane.xaml"
-                                      ],
-                            "status":  "updated",
-                            "notes":  "Switched AvalonDock to schema xmlns, seeded EN↔HR resources, bound tabs/backstage/anchorables, added AutomationProperties.Name for a11y"
-        },
-        {
-            "type":  "code_change",
-            "paths":  [
-                          "YasGMP.Wpf/Views/AssetsModuleView.xaml",
-                          "YasGMP.Wpf/Views/DashboardModuleView.xaml",
-                          "YasGMP.Wpf/Views/ComponentsModuleView.xaml",
-                          "YasGMP.Wpf/Views/WarehouseModuleView.xaml",
-                          "YasGMP.Wpf/Views/WorkOrdersModuleView.xaml",
-                          "YasGMP.Wpf/Views/CalibrationModuleView.xaml",
-                          "YasGMP.Wpf/Views/PartsModuleView.xaml",
-                          "YasGMP.Wpf/Views/SuppliersModuleView.xaml",
-                          "YasGMP.Wpf/Views/ExternalServicersModuleView.xaml",
-                          "YasGMP.Wpf/Views/CapaModuleView.xaml",
-                          "YasGMP.Wpf/Views/IncidentsModuleView.xaml",
-                          "YasGMP.Wpf/Views/ChangeControlModuleView.xaml",
-                          "YasGMP.Wpf/Views/ValidationsModuleView.xaml",
-                          "YasGMP.Wpf/Views/SchedulingModuleView.xaml",
-                          "YasGMP.Wpf/Views/SecurityModuleView.xaml",
-                          "YasGMP.Wpf/Views/AttachmentsModuleView.xaml",
-                          "YasGMP.Wpf/Views/AuditDashboardDocument.xaml",
-                          "YasGMP.Wpf/Views/AuditLogDocument.xaml",
-                          "YasGMP.Wpf/Views/DiagnosticsModuleView.xaml"
-                      ],
-            "status":  "updated",
-            "notes":  "Added AutomationProperties.Name and ToolTips to module view roots and toolbar items; localized common buttons"
-        },
-        {
-            "type":  "command",
-            "name":  "dotnet restore yasgmp.sln",
-            "status":  "success"
-        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
-                            "status":  "success",
-                            "notes":  "MAUI builds with dependency warnings"
-                        },
-                        {
-                            "type":  "command",
-                            "name":  "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
-                            "status":  "success",
-                            "notes":  "WPF builds clean"
-                        },
-                        {
-                            "type":  "doc_update",
-                            "path":  "docs/codex_plan.md",
-                            "status":  "updated"
-                        },
-                        {
-                            "type":  "doc_update",
-                            "path":  "docs/codex_progress.json",
-                            "status":  "updated"
-                        }
-                    ],
-        "summary":  {
-                        "issues_found":  [
-                                             "Hardcoded strings remain across many modules, module registry titles, and tooltips"
-                                         ],
-                        "todos_created":  [
-                                              "Expand EN↔HR resource coverage across module views/view-models",
-                                              "Bind Ribbon group headers and remaining buttons to resources",
-                                              "Add AutomationProperties.Name + ToolTip to all user-visible controls"
-                                          ],
-                        "blocking_risks":  [
-                                               "None for build; smoke harness integration pending end-to-end run permission"
-                                           ]
-                    }
+  },
+  {
+    "run_id": "RUN-2025-10-03T151410",
+    "scope": [
+      "appcore",
+      "diagnostics",
+      "build"
+    ],
+    "actions": [
+      {
+        "type": "code_change",
+        "paths": [
+          "Diagnostics/DiagnosticsPathProvider.cs",
+          "Diagnostics/CrashHandler.cs",
+          "Diagnostics/DiagnosticsHub.cs",
+          "Diagnostics/LogSinks/ElasticCompatibleSink.cs",
+          "Diagnostics/LogSinks/FileLogSink.cs",
+          "Diagnostics/LogSinks/SQLiteLogSink.cs",
+          "Diagnostics/ReplayHarness.cs",
+          "Diagnostics/ChangeControlAssignmentHarness.cs",
+          "YasGMP.AppCore/YasGMP.AppCore.csproj",
+          "YasGMP.AppCore/AssemblyInfo.Shared.cs",
+          "Services/Platform/MauiFilePicker.cs",
+          "MauiProgram.cs",
+          "YasGMP.Wpf/MainWindow.xaml",
+          "YasGMP.Wpf/Views/AttachmentsModuleView.xaml"
+        ],
+        "status": "updated",
+        "notes": "Replaced Microsoft.Maui.Storage usage with DiagnosticsPathProvider, gated harness for MAUI builds, added AppCore constants and internals visibility"
+      },
+      {
+        "type": "command",
+        "name": "dotnet restore yasgmp.sln",
+        "status": "success"
+      },
+      {
+        "type": "command",
+        "name": "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
+        "status": "success",
+        "artifacts": [
+          "logs/20251003-dotnet-build-maui.txt"
+        ],
+        "notes": "Succeeded with MSB3277 dependency warnings"
+      },
+      {
+        "type": "command",
+        "name": "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
+        "status": "failed",
+        "artifacts": [
+          "logs/20251003-dotnet-build-wpf.txt"
+        ],
+        "notes": "Fails due to corrupted AssetsModuleViewModel (duplicate class definition) after resolving ribbon/layout namespaces."
+      },
+      {
+        "type": "doc_update",
+        "path": "docs/codex_plan.md",
+        "status": "updated"
+      },
+      {
+        "type": "doc_update",
+        "path": "docs/codex_progress.json",
+        "status": "updated"
+      },
+      {
+        "type": "issues_update",
+        "path": "Codex_Issues.yaml",
+        "status": "updated"
+      }
+    ],
+    "summary": {
+      "issues_found": [
+        "WPF build blocked by duplicated partial definition in AssetsModuleViewModel.cs (syntax errors)"
+      ],
+      "todos_created": [
+        "Refactor AssetsModuleViewModel.cs to remove duplicate partial definitions and restore valid syntax",
+        "After Assets viewmodel repair, rerun WPF build and smoke harness",
+        "Complete Fluent.Ribbon namespace cleanup verification (now resolved)"
+      ],
+      "blocking_risks": [
+        "Desktop shell still cannot compile because AssetsModuleViewModel.cs contains duplicated class bodies"
+      ]
     }
+  },
+  {
+    "run_id": "RUN-2025-10-10T131500",
+    "scope": [
+      "wpf-shell",
+      "i18n",
+      "a11y",
+      "build"
+    ],
+    "actions": [
+      {
+        "type": "code_change",
+        "paths": [
+          "YasGMP.Wpf/MainWindow.xaml",
+          "YasGMP.Wpf/App.xaml.cs",
+          "YasGMP.Wpf/Resources/Strings.en.xaml",
+          "YasGMP.Wpf/Resources/Strings.hr.xaml",
+          "YasGMP.Wpf/Shell/ModulesPane.xaml"
+        ],
+        "status": "updated",
+        "notes": "Switched AvalonDock to schema xmlns, seeded EN↔HR resources, bound tabs/backstage/anchorables, added AutomationProperties.Name for a11y"
+      },
+      {
+        "type": "code_change",
+        "paths": [
+          "YasGMP.Wpf/Views/AssetsModuleView.xaml",
+          "YasGMP.Wpf/Views/DashboardModuleView.xaml",
+          "YasGMP.Wpf/Views/ComponentsModuleView.xaml",
+          "YasGMP.Wpf/Views/WarehouseModuleView.xaml",
+          "YasGMP.Wpf/Views/WorkOrdersModuleView.xaml",
+          "YasGMP.Wpf/Views/CalibrationModuleView.xaml",
+          "YasGMP.Wpf/Views/PartsModuleView.xaml",
+          "YasGMP.Wpf/Views/SuppliersModuleView.xaml",
+          "YasGMP.Wpf/Views/ExternalServicersModuleView.xaml",
+          "YasGMP.Wpf/Views/CapaModuleView.xaml",
+          "YasGMP.Wpf/Views/IncidentsModuleView.xaml",
+          "YasGMP.Wpf/Views/ChangeControlModuleView.xaml",
+          "YasGMP.Wpf/Views/ValidationsModuleView.xaml",
+          "YasGMP.Wpf/Views/SchedulingModuleView.xaml",
+          "YasGMP.Wpf/Views/SecurityModuleView.xaml",
+          "YasGMP.Wpf/Views/AttachmentsModuleView.xaml",
+          "YasGMP.Wpf/Views/AuditDashboardDocument.xaml",
+          "YasGMP.Wpf/Views/AuditLogDocument.xaml",
+          "YasGMP.Wpf/Views/DiagnosticsModuleView.xaml"
+        ],
+        "status": "updated",
+        "notes": "Added AutomationProperties.Name and ToolTips to module view roots and toolbar items; localized common buttons"
+      },
+      {
+        "type": "command",
+        "name": "dotnet restore yasgmp.sln",
+        "status": "success"
+      },
+      {
+        "type": "command",
+        "name": "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
+        "status": "success",
+        "notes": "MAUI builds with dependency warnings"
+      },
+      {
+        "type": "command",
+        "name": "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
+        "status": "success",
+        "notes": "WPF builds clean"
+      },
+      {
+        "type": "doc_update",
+        "path": "docs/codex_plan.md",
+        "status": "updated"
+      },
+      {
+        "type": "doc_update",
+        "path": "docs/codex_progress.json",
+        "status": "updated"
+      }
+    ],
+    "summary": {
+      "issues_found": [
+        "Hardcoded strings remain across many modules, module registry titles, and tooltips"
+      ],
+      "todos_created": [
+        "Expand EN↔HR resource coverage across module views/view-models",
+        "Bind Ribbon group headers and remaining buttons to resources",
+        "Add AutomationProperties.Name + ToolTip to all user-visible controls"
+      ],
+      "blocking_risks": [
+        "None for build; smoke harness integration pending end-to-end run permission"
+      ]
+    }
+  },
+  {
+    "run_id": "RUN-2025-10-10T142108",
+    "scope": [
+      "wpf-shell",
+      "i18n",
+      "a11y",
+      "tests"
+    ],
+    "actions": [
+      {
+        "type": "code_change",
+        "paths": [
+          "YasGMP.Wpf/Resources/Strings.en.xaml",
+          "YasGMP.Wpf/Resources/Strings.hr.xaml",
+          "YasGMP.Wpf/Views/AssetsModuleView.xaml",
+          "YasGMP.Wpf/Views/DashboardModuleView.xaml",
+          "YasGMP.Wpf/Views/ComponentsModuleView.xaml",
+          "README_WPF_SHELL.md"
+        ],
+        "notes": "Added editor view i18n, a11y on grids/search, acceptance checklist.",
+        "status": "updated"
+      },
+      {
+        "type": "command",
+        "artifacts": [
+          "logs/dotnet-test.txt"
+        ],
+        "notes": "AppCore tests failed (EF service configuration); WPF/MAUI builds green.",
+        "name": "dotnet test -c Release",
+        "status": "failed"
+      }
+    ],
+    "summary": {
+      "issues_found": [
+        "AppCore EF test failures unrelated to WPF i18n"
+      ],
+      "todos_created": [
+        "Investigate EF test DI when prioritizing AppCore test fixes"
+      ],
+      "blocking_risks": [
+        "None for WPF shell build; tests failing confined to AppCore suite"
+      ]
+    }
+  }
 ]
