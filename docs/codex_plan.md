@@ -1,17 +1,20 @@
 # Codex Plan — WPF Shell & Full Integration
 
 ## Current Compile Status
-- [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
+- [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.305 — previously 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
+  - 2025-10-10T10:05Z: dotnet-install.sh reprovisioned SDK 9.0.305 via `./dotnet-install.sh --channel 9.0`; `dotnet --info` confirms the toolchain but Windows 10 SDK/workloads cannot be installed inside the Linux container.
   - 2025-10-10T06:38Z: dotnet-install.sh provisioned SDK 9.0.100 and `dotnet --info` now reports the toolchain on linux-x64; Windows 10 SDK/workloads still missing so Windows-targeted restore/build/test must run on a Windows host.
   - 2025-10-07T11:06Z: Current container session again reports `bash: command not found: dotnet`; document cadence remained static-analysis only until SDK was provisioned.
   - 2026-02-09T09:42Z: `dotnet --version` retried for this batch; container still returns `bash: command not found: dotnet`.
   - 2026-02-20T08:57Z: `dotnet restore yasgmp.sln` retried post-inspector automation updates; container still reports `bash: command not found: dotnet`.
   - 2026-03-24T09:15Z: `dotnet restore yasgmp.sln` retried after updating Assets navigation regression tests; container still reports `bash: command not found: dotnet`.
   - 2026-03-25T08:40Z: `dotnet --version` retried while tightening B1FormDocumentViewModel command refresh hooks; container again responds `bash: command not found: dotnet`.
-- [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 run failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
+- [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
+  - 2025-10-10T10:07Z: `dotnet restore -p:EnableWindowsTargeting=true` exits with NETSDK1147 (maui-tizen workload) after `dotnet workload install maui` reports the workload is unsupported on Linux.
   - 2025-10-10T06:40Z: `dotnet restore` now launches but aborts with NETSDK1100 (EnableWindowsTargeting) and NETSDK1147 (missing maui-tizen workload) because Windows SDK/workloads are unavailable on this host.
 - [ ] MAUI builds *(blocked on Windows workloads; historical attempts failed before CLI install and the latest 2025-10-10 run surfaced NETSDK1147 requiring maui-tizen workload on Windows.)*
-- [ ] WPF builds *(restore now runs but the 2025-10-10 Release build failed on cross-targeted AppCore references — YasGMP.Helpers/Diagnostics namespaces and signature DTOs are unresolved until Windows desktop dependencies are available on a Windows host.)*
+- [ ] WPF builds *(restore now runs but the 2025-10-10 Release builds failed on cross-targeted AppCore references — YasGMP.Helpers/Diagnostics namespaces and signature DTOs are unresolved until Windows desktop dependencies are available on a Windows host.)*
+  - 2025-10-10T10:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restores but fails with dozens of CS0234/CS0246/CS0535 errors because YasGMP.AppCore expects Helpers/Diagnostics projects and signature DTO types that are unavailable without the Windows solution build.
   - 2025-10-10T06:42Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restored packages but failed with unresolved YasGMP.Helpers/Diagnostics namespaces and missing SignatureMetadataDto/WorkOrderSignaturePersistRequest types — requires building on Windows with full solution references.
 
 ## Decisions & Pins
@@ -19,10 +22,11 @@
 - Repo-level SDK pin: `global.json` set to **9.0.100** *(reinforced via bootstrap script).* 
 - AvalonDock: **4.72.1** *(pinned in `YasGMP.Wpf.csproj`).*
 - Other NuGets: **Fluent.Ribbon 11.0.1**, **CommunityToolkit.Mvvm 8.4.0**, **Microsoft.Extensions.* 9.0.3**, **MySqlConnector 2.4.0** *(pinned in csproj).* 
-- Environment gap: Windows desktop prerequisites (Windows 10 SDK 19041+, MAUI workloads) must still be installed on a Windows host. The linux container now carries .NET SDK 9.0.100 via dotnet-install, but cross-targeted builds/tests must run on Windows.
+- Environment gap: Windows desktop prerequisites (Windows 10 SDK 19041+, MAUI workloads) must still be installed on a Windows host. The linux container now carries .NET SDK 9.0.305 via dotnet-install, but cross-targeted builds/tests must run on Windows.
 
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(Windows 10 SDK/workloads absent; dotnet 9 CLI now present)*
+  - 2025-10-10: dotnet-install.sh reran with `--channel 9.0` to upgrade the local SDK to 9.0.305; Windows 10 SDK provisioning must occur on Windows because the Linux container cannot host the installer.
   - 2025-10-10: Installed dotnet SDK 9.0.100 via dotnet-install.sh and verified `dotnet --info`; Windows-targeted restore/build/test still require Windows 10 SDK 19041+ and MAUI workloads on a Windows host.
   - 2025-10-07: Reconfirmed CLI absence this run; planning next increment around static analysis, documentation refresh, and schema review until installation is possible.
   - 2025-10-08: Authored `WPF Smoke Tests` GitHub Actions workflow to run restore/build/FlaUI smoke automation on `windows-latest` using .NET 9 when available (falls back to .NET 8). Local validation remains blocked because `dotnet --info` still reports `command not found`.
@@ -111,7 +115,8 @@
   - Settings/Admin — [ ] todo
 
 - **Open Issues / Blockers**
-- Windows desktop prerequisites missing. .NET 9 SDK 9.0.100 is now installed via dotnet-install, but Windows 10 SDK 19041+ and MAUI workloads remain absent so cross-targeted restore/build/test fail with NETSDK1100/NETSDK1147/NU1201/NU1605. Run `scripts/bootstrap-dotnet9.ps1` or provision a Windows host with the required SDKs/workloads before rerunning restore/build/test/smoke.
+- Windows desktop prerequisites missing. .NET 9 SDK 9.0.305 is now installed via dotnet-install, but Windows 10 SDK 19041+ and MAUI workloads remain absent so cross-targeted restore/build/test fail with NETSDK1100/NETSDK1147/NU1201/NU1605. Run `scripts/bootstrap-dotnet9.ps1` or provision a Windows host with the required SDKs/workloads before rerunning restore/build/test/smoke.
+  - 2025-10-10: Windows 10 SDK 19041+ cannot be installed in this Linux container; rerun provisioning on a Windows host with the official SDK installer.
   - Pending inventory of MAUI assets/services/modules; schedule once SDK issue is resolved.
   - Smoke automation is blocked until SDK + Windows tooling are installed.
 - Audit inspector surfacing and smoke automation remain blocked until the SDK gap is resolved.
