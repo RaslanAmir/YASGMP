@@ -77,6 +77,7 @@
 - **B4+ — Module rollout:**
   - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
     - 2026-03-24: Updated Assets module regression coverage to assert navigation parameter filters use machine code/id in search text and status messaging while dotnet restore/build remain blocked by the missing CLI.
+    - 2026-03-28: Assets navigation now normalizes id/code payloads (ints, strings, dictionaries, ModuleRecord) so Golden Arrow drill-down filters reapply SelectedRecord/SearchText/Status after refresh; `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with **command not found** until the CLI is installed.
   - Components — [x] done *(mode-aware editor wired to ComponentService with IElectronicSignatureDialogService gating persistence; audit surfacing remains blocked on SDK access)*
   - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, stock health warnings, and e-signature capture baked into save flows; audit surfacing remains blocked on SDK access)*
   - Work Orders — [x] done *(CRUD adapter wired with attachments and e-signature capture ahead of adapter calls; audit surfacing queued once SDK access returns)*

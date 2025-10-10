@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -231,6 +232,71 @@ public class AssetsModuleViewModelTests
         Assert.Equal(parameter, opened.SearchText);
         Assert.Equal(FormMode.View, opened.Mode);
         Assert.Equal($"Filtered Assets by \"{parameter}\".", opened.StatusMessage);
+    }
+
+    [Fact]
+    public async Task OpenModule_WithNavigationIdParameter_SelectsMatchingRecord()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.AddRange(new[]
+        {
+            new Machine
+            {
+                Id = 11,
+                Code = "AST-011",
+                Name = "Autoclave",
+                Status = "active",
+                Manufacturer = "Contoso",
+                Location = "Suite 100"
+            },
+            new Machine
+            {
+                Id = 22,
+                Code = "AST-022",
+                Name = "Filling Line",
+                Status = "maintenance",
+                Manufacturer = "Fabrikam",
+                Location = "Suite 200"
+            }
+        });
+
+        var target = new Machine
+        {
+            Id = 33,
+            Code = "AST-033",
+            Name = "Bioreactor",
+            Status = "active",
+            Manufacturer = "Tailspin",
+            Location = "Suite 300"
+        };
+        machineAdapter.Saved.Add(target);
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new RecordingModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        navigation.Resolver = (moduleKey, parameter) =>
+        {
+            Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
+            return viewModel;
+        };
+
+        var opened = (AssetsModuleViewModel)navigation.OpenModule(AssetsModuleViewModel.ModuleKey, target.Id);
+        var initializeTask = navigation.LastInitializationTask ?? throw new InvalidOperationException("InitializeAsync was not invoked.");
+        await initializeTask.ConfigureAwait(false);
+
+        Assert.Same(viewModel, opened);
+        Assert.Equal(target.Id.ToString(), opened.SelectedRecord?.Key);
+        Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), opened.SearchText);
+        Assert.Equal(FormMode.View, opened.Mode);
+        Assert.Equal($"Filtered Assets by \"{target.Id}\".", opened.StatusMessage);
     }
 
     [Fact]
