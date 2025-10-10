@@ -45,7 +45,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="{DynamicResource Label_Search}:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          AutomationProperties.Name="{DynamicResource Label_Search}"
                          ToolTip="{DynamicResource Tooltip_SearchBox}" />

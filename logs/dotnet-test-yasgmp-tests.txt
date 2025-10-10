@@ -1,0 +1,39 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  YasGMP.AppCore -> C:\GitHub\YASGMP\YASGMP\YasGMP.AppCore\bin\Release\net8.0\YasGMP.AppCore.dll
+  yasgmp -> C:\GitHub\YASGMP\YASGMP\bin\Release\net8.0-windows10.0.19041.0\win-x64\yasgmp.dll
+  YasGMP.Tests -> C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\bin\Release\net8.0-windows10.0.19041.0\win-x64\YasGMP.Tests.dll
+Test run for C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\bin\Release\net8.0-windows10.0.19041.0\win-x64\YasGMP.Tests.dll (.NETCoreApp,Version=v8.0)
+A total of 1 test files matched the specified pattern.
+  Failed YasGMP.Tests.ValidationServiceTests.UpdateAsync_PassesSourceMetadataToDatabase [58 ms]
+  Error Message:
+   System.Collections.Generic.KeyNotFoundException : The given key '@source_ip' was not present in the dictionary.
+  Stack Trace:
+     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at YasGMP.Tests.ValidationServiceTests.UpdateAsync_PassesSourceMetadataToDatabase() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 100
+--- End of stack trace from previous location ---
+  Failed YasGMP.Tests.ValidationServiceTests.CreateAsync_PassesSourceMetadataToDatabase [1 ms]
+  Error Message:
+   System.Collections.Generic.KeyNotFoundException : The given key '@source_ip' was not present in the dictionary.
+  Stack Trace:
+     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at YasGMP.Tests.ValidationServiceTests.CreateAsync_PassesSourceMetadataToDatabase() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 78
+--- End of stack trace from previous location ---
+  Failed YasGMP.Tests.ValidationServiceTests.UpdateAsync_PreservesExistingDigitalSignature [< 1 ms]
+  Error Message:
+   System.Collections.Generic.KeyNotFoundException : The given key '@sig' was not present in the dictionary.
+  Stack Trace:
+     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at YasGMP.Tests.ValidationServiceTests.UpdateAsync_PreservesExistingDigitalSignature() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 57
+--- End of stack trace from previous location ---
+  Failed YasGMP.Tests.ValidationServiceTests.CreateAsync_PreservesExistingDigitalSignature [< 1 ms]
+  Error Message:
+   System.Collections.Generic.KeyNotFoundException : The given key '@sig' was not present in the dictionary.
+  Stack Trace:
+     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at YasGMP.Tests.ValidationServiceTests.CreateAsync_PreservesExistingDigitalSignature() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 36
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     4, Passed:    14, Skipped:     0, Total:    18, Duration: 2 s - YasGMP.Tests.dll (net8.0)
+
+Workload updates are available. Run `dotnet workload list` for more information.

@@ -1,3 +1,2 @@
   Determining projects to restore...
-  Restored C:\GitHub\YASGMP\YASGMP\yasgmp.csproj (in 1,82 sec).
-  3 of 4 projects are up-to-date for restore.
+  All projects are up-to-date for restore.

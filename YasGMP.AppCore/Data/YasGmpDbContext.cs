@@ -206,6 +206,9 @@ namespace YasGMP.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Mark legacy placeholder models as keyless so tests using InMemory provider do not fail model validation
+            modelBuilder.Entity<PermissionType>().HasNoKey();
+
             var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
             var customFieldsComparer = new ValueComparer<Dictionary<string, string>>(

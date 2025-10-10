@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YasGMP.Wpf.Smoke</name>
+    </assembly>
+    <members>
+        <member name="T:YasGMP.Wpf.Smoke.SmokeFactAttribute">
+            <summary>
+            Conditional xUnit fact that only runs when both the YASGMP_SMOKE env var is enabled
+            and FlaUI.UIA3 is available on the machine. Otherwise, the test is skipped by default.
+            </summary>
+        </member>
+    </members>
+</doc>
