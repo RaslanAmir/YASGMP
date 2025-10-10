@@ -300,6 +300,69 @@ public class AssetsModuleViewModelTests
     }
 
     [Fact]
+    public async Task InitializeAsync_WithMachineId_ReappliesSelectionAndSearch()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.AddRange(new[]
+        {
+            new Machine
+            {
+                Id = 41,
+                Code = "AST-041",
+                Name = "Chromatography Skid",
+                Status = "active",
+                Manufacturer = "Contoso",
+                Location = "Suite 400"
+            },
+            new Machine
+            {
+                Id = 42,
+                Code = "AST-042",
+                Name = "Filling Line",
+                Status = "maintenance",
+                Manufacturer = "Fabrikam",
+                Location = "Suite 420"
+            }
+        });
+
+        var target = new Machine
+        {
+            Id = 43,
+            Code = "AST-043",
+            Name = "Lyophilizer",
+            Status = "active",
+            Manufacturer = "Tailspin",
+            Location = "Suite 430"
+        };
+        machineAdapter.Saved.Add(target);
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+
+        await viewModel.InitializeAsync(null);
+        await Task.Yield();
+
+        Assert.NotNull(viewModel.SelectedRecord);
+        Assert.NotEqual(target.Id.ToString(CultureInfo.InvariantCulture), viewModel.SelectedRecord?.Key);
+
+        await viewModel.InitializeAsync(target.Id);
+        await Task.Yield();
+
+        Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), viewModel.SelectedRecord?.Key);
+        Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), viewModel.SearchText);
+        Assert.Equal($"Filtered Assets by \"{target.Id}\".", viewModel.StatusMessage);
+    }
+
+    [Fact]
     public async Task AttachDocumentCommand_UploadsAttachmentViaService()
     {
         var database = new DatabaseService();

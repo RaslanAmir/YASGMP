@@ -35,6 +35,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
+    private string? _pendingNavigationStatusMessage;
+    private string? _pendingNavigationSelectionKey;
     /// <summary>
     /// Initializes a new instance of the AssetsModuleViewModel class.
     /// </summary>
@@ -122,28 +124,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (filterActive)
         {
-            if (target is not null && ApplyNavigationSelection(target, records, searchTerm))
+            if (target is not null && ApplyNavigationSelection(target, records, searchTerm, queueReselect: true))
             {
                 return records;
             }
 
             if (selectedRecord is not null)
             {
-                SelectedRecord = selectedRecord;
-                var search = string.IsNullOrWhiteSpace(searchTerm)
-                    ? (string.IsNullOrWhiteSpace(selectedRecord.Title)
-                        ? (string.IsNullOrWhiteSpace(selectedRecord.Code) ? selectedRecord.Key : selectedRecord.Code)
-                        : selectedRecord.Title)
-                    : searchTerm;
-
-                SearchText = search;
-                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
+                var search = ResolveNavigationSearchText(selectedRecord, searchTerm);
+                ApplyNavigationHighlight(selectedRecord, search, queueReselect: true);
             }
             else if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                SearchText = searchTerm;
-                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
-                SelectedRecord = null;
+                ApplyNavigationHighlight(null, searchTerm, clearSelection: true, queueReselect: true);
             }
 
             return records;
@@ -151,13 +144,17 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (target is not null)
         {
-            ApplyNavigationSelection(target, records, searchTerm);
+            ApplyNavigationSelection(target, records, searchTerm, queueReselect: true);
         }
 
         return records;
     }
 
-    private bool ApplyNavigationSelection(Machine target, IReadOnlyList<ModuleRecord>? records = null, string? searchOverride = null)
+    private bool ApplyNavigationSelection(
+        Machine target,
+        IReadOnlyList<ModuleRecord>? records = null,
+        string? searchOverride = null,
+        bool queueReselect = false)
     {
         var source = records ?? Records;
         if (source is null || source.Count == 0)
@@ -172,23 +169,101 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return false;
         }
 
-        var forceReload = ReferenceEquals(SelectedRecord, match);
-        if (forceReload)
+        var search = ResolveNavigationSearchText(match, searchOverride);
+        ApplyNavigationHighlight(match, search, queueReselect: queueReselect);
+        return true;
+    }
+
+    private void ApplyNavigationHighlight(
+        ModuleRecord? record,
+        string search,
+        bool clearSelection = false,
+        bool queueReselect = false)
+    {
+        if (record is not null)
+        {
+            if (ReferenceEquals(SelectedRecord, record))
+            {
+                SelectedRecord = null;
+            }
+
+            SelectedRecord = record;
+        }
+        else if (clearSelection)
+        {
+            SelectedRecord = null;
+        }
+
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            search = string.Empty;
+        }
+
+        SearchText = search;
+
+        var status = _localization.GetString("Module.Status.Filtered", Title, search);
+        StatusMessage = status;
+
+        _pendingNavigationSelectionKey = queueReselect ? record?.Key : null;
+        _pendingNavigationStatusMessage = queueReselect ? status : null;
+    }
+
+    private static string ResolveNavigationSearchText(ModuleRecord record, string? searchOverride)
+    {
+        if (!string.IsNullOrWhiteSpace(searchOverride))
+        {
+            return searchOverride!;
+        }
+
+        if (!string.IsNullOrWhiteSpace(record.Title))
+        {
+            return record.Title;
+        }
+
+        if (!string.IsNullOrWhiteSpace(record.Code))
+        {
+            return record.Code!;
+        }
+
+        return record.Key ?? string.Empty;
+    }
+
+    private void EnsurePendingNavigationSelection()
+    {
+        if (string.IsNullOrWhiteSpace(_pendingNavigationSelectionKey))
+        {
+            _pendingNavigationSelectionKey = null;
+            return;
+        }
+
+        var match = Records.FirstOrDefault(
+            record => string.Equals(record.Key, _pendingNavigationSelectionKey, StringComparison.Ordinal));
+        _pendingNavigationSelectionKey = null;
+        if (match is null)
+        {
+            return;
+        }
+
+        if (ReferenceEquals(SelectedRecord, match))
         {
             SelectedRecord = null;
         }
 
         SelectedRecord = match;
+    }
 
-        var search = !string.IsNullOrWhiteSpace(searchOverride)
-            ? searchOverride!
-            : string.IsNullOrWhiteSpace(match.Title)
-                ? (string.IsNullOrWhiteSpace(match.Code) ? key : match.Code)
-                : match.Title;
+    protected override string FormatLoadedStatus(int count)
+    {
+        EnsurePendingNavigationSelection();
 
-        SearchText = search;
-        StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
-        return true;
+        if (!string.IsNullOrWhiteSpace(_pendingNavigationStatusMessage))
+        {
+            var message = _pendingNavigationStatusMessage!;
+            _pendingNavigationStatusMessage = null;
+            return message;
+        }
+
+        return base.FormatLoadedStatus(count);
     }
 
     private async Task<(Machine? Target, IReadOnlyList<Machine> Machines, bool FilterActive, string? SearchTerm)> ResolveNavigationPayloadAsync(object? parameter)
