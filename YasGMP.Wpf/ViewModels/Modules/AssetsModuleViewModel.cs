@@ -37,6 +37,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private bool _suppressEditorDirtyNotifications;
     private string? _pendingNavigationStatusMessage;
     private string? _pendingNavigationSelectionKey;
+
+    private readonly record struct AssetNavigationContext(int? Id, string? Code, string SearchText)
+    {
+        public bool HasFilter => Id.HasValue || !string.IsNullOrWhiteSpace(Code);
+    }
     /// <summary>
     /// Initializes a new instance of the AssetsModuleViewModel class.
     /// </summary>
@@ -90,12 +95,27 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
+        var navigation = TryCreateNavigationContext(parameter);
         var (target, machines, filterActive, searchTerm) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+        var effectiveSearch = !string.IsNullOrWhiteSpace(navigation?.SearchText)
+            ? navigation!.SearchText
+            : searchTerm;
+        var shouldFilter = filterActive || (navigation?.HasFilter ?? false);
+
+        IReadOnlyList<Machine> machineCandidates = machines;
+        if (!filterActive && navigation?.HasFilter == true && machines.Count > 0)
+        {
+            var filtered = FilterMachinesByNavigation(machines, navigation.Value);
+            if (filtered.Count > 0)
+            {
+                machineCandidates = filtered;
+            }
+        }
 
         var records = new List<ModuleRecord>();
         ModuleRecord? selectedRecord = null;
 
-        foreach (var machine in machines)
+        foreach (var machine in machineCandidates)
         {
             var record = ToRecord(machine);
             records.Add(record);
@@ -122,21 +142,24 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             }
         }
 
-        if (filterActive)
+        if (shouldFilter)
         {
-            if (target is not null && ApplyNavigationSelection(target, records, searchTerm, queueReselect: true))
+            if (target is not null
+                && ApplyNavigationSelection(target, records, effectiveSearch, queueReselect: true))
             {
                 return records;
             }
 
             if (selectedRecord is not null)
             {
-                var search = ResolveNavigationSearchText(selectedRecord, searchTerm);
+                var search = string.IsNullOrWhiteSpace(effectiveSearch)
+                    ? ResolveNavigationSearchText(selectedRecord, searchTerm)
+                    : effectiveSearch!;
                 ApplyNavigationHighlight(selectedRecord, search, queueReselect: true);
             }
-            else if (!string.IsNullOrWhiteSpace(searchTerm))
+            else if (!string.IsNullOrWhiteSpace(effectiveSearch))
             {
-                ApplyNavigationHighlight(null, searchTerm, clearSelection: true, queueReselect: true);
+                ApplyNavigationHighlight(null, effectiveSearch!, clearSelection: true, queueReselect: true);
             }
 
             return records;
@@ -144,7 +167,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (target is not null)
         {
-            ApplyNavigationSelection(target, records, searchTerm, queueReselect: true);
+            ApplyNavigationSelection(target, records, effectiveSearch, queueReselect: true);
         }
 
         return records;
@@ -628,6 +651,158 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return false;
     }
 
+    private static AssetNavigationContext? TryCreateNavigationContext(object? parameter, string? searchOverride = null)
+    {
+        static string? ResolveSearch(string? candidate, string? overrideValue)
+        {
+            if (!string.IsNullOrWhiteSpace(overrideValue))
+            {
+                var trimmed = overrideValue.Trim();
+                if (trimmed.Length > 0)
+                {
+                    return trimmed;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate))
+            {
+                var trimmed = candidate.Trim();
+                if (trimmed.Length > 0)
+                {
+                    return trimmed;
+                }
+            }
+
+            return null;
+        }
+
+        switch (parameter)
+        {
+            case null:
+                {
+                    var search = ResolveSearch(null, searchOverride);
+                    return search is null ? null : new AssetNavigationContext(null, null, search);
+                }
+            case int id:
+                {
+                    var search = ResolveSearch(id.ToString(CultureInfo.InvariantCulture), searchOverride);
+                    return search is null ? null : new AssetNavigationContext(id, null, search);
+                }
+            case string text:
+                {
+                    var trimmed = text.Trim();
+                    if (trimmed.Length == 0)
+                    {
+                        var search = ResolveSearch(null, searchOverride);
+                        return search is null ? null : new AssetNavigationContext(null, null, search);
+                    }
+
+                    if (int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericId))
+                    {
+                        var search = ResolveSearch(trimmed, searchOverride);
+                        return search is null ? null : new AssetNavigationContext(numericId, null, search);
+                    }
+
+                    var codeSearch = ResolveSearch(trimmed, searchOverride);
+                    return codeSearch is null ? null : new AssetNavigationContext(null, trimmed, codeSearch);
+                }
+            case Machine machine:
+                {
+                    if (machine.Id > 0)
+                    {
+                        var fallback = !string.IsNullOrWhiteSpace(machine.Code)
+                            ? machine.Code
+                            : machine.Id.ToString(CultureInfo.InvariantCulture);
+                        var search = ResolveSearch(fallback, searchOverride);
+                        return search is null ? null : new AssetNavigationContext(machine.Id, null, search);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(machine.Code))
+                    {
+                        var code = machine.Code!;
+                        var search = ResolveSearch(code, searchOverride);
+                        return search is null ? null : new AssetNavigationContext(null, code.Trim(), search);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(machine.Name))
+                    {
+                        var name = machine.Name!;
+                        var search = ResolveSearch(name, searchOverride);
+                        return search is null ? null : new AssetNavigationContext(null, name.Trim(), search);
+                    }
+
+                    break;
+                }
+            case ModuleRecord record:
+                {
+                    var nextParameter = record.RelatedParameter
+                        ?? (!string.IsNullOrWhiteSpace(record.Code) ? record.Code : record.Key);
+                    if (nextParameter is null)
+                    {
+                        break;
+                    }
+
+                    return TryCreateNavigationContext(nextParameter, searchOverride ?? record.Code ?? record.Key);
+                }
+        }
+
+        if (TryNormalizeNavigationParameter(parameter, out var normalized, out var normalizedSearch))
+        {
+            return TryCreateNavigationContext(normalized, normalizedSearch ?? searchOverride);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchOverride))
+        {
+            var search = searchOverride.Trim();
+            if (search.Length > 0)
+            {
+                return new AssetNavigationContext(null, null, search);
+            }
+        }
+
+        return null;
+    }
+
+    private static List<Machine> FilterMachinesByNavigation(IReadOnlyList<Machine> machines, AssetNavigationContext navigation)
+    {
+        if (machines.Count == 0)
+        {
+            return new List<Machine>();
+        }
+
+        if (navigation.Id is int id)
+        {
+            return machines.Where(machine => machine.Id == id).ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(navigation.Code))
+        {
+            var code = navigation.Code!;
+            var equalityMatches = machines
+                .Where(machine =>
+                    (!string.IsNullOrWhiteSpace(machine.Code)
+                        && string.Equals(machine.Code, code, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrWhiteSpace(machine.Name)
+                        && string.Equals(machine.Name, code, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            if (equalityMatches.Count > 0)
+            {
+                return equalityMatches;
+            }
+
+            return machines
+                .Where(machine =>
+                    (!string.IsNullOrWhiteSpace(machine.Code)
+                        && machine.Code.Contains(code, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrWhiteSpace(machine.Name)
+                        && machine.Name.Contains(code, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+
+        return new List<Machine>();
+    }
+
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var sample = new[]
@@ -671,14 +846,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
+        var navigation = TryCreateNavigationContext(parameter);
         var (target, _, filterActive, searchTerm) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+        var effectiveSearch = !string.IsNullOrWhiteSpace(navigation?.SearchText)
+            ? navigation!.SearchText
+            : searchTerm;
+        var shouldFilter = filterActive || (navigation?.HasFilter ?? false);
         if (target is null)
         {
-            if (filterActive && !string.IsNullOrWhiteSpace(searchTerm))
+            if (shouldFilter && !string.IsNullOrWhiteSpace(effectiveSearch))
             {
                 await RefreshAsync(parameter).ConfigureAwait(false);
-                SearchText = searchTerm;
-                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
+                SearchText = effectiveSearch;
+                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, effectiveSearch);
             }
 
             return;
@@ -689,7 +869,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             await EnterViewModeCommand.ExecuteAsync(null).ConfigureAwait(false);
         }
 
-        if (ApplyNavigationSelection(target, searchOverride: searchTerm))
+        if (ApplyNavigationSelection(target, searchOverride: effectiveSearch))
         {
             return;
         }
@@ -701,10 +881,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             await EnterViewModeCommand.ExecuteAsync(null).ConfigureAwait(false);
         }
 
-        if (!ApplyNavigationSelection(target, searchOverride: searchTerm) && !string.IsNullOrWhiteSpace(searchTerm))
+        if (!ApplyNavigationSelection(target, searchOverride: effectiveSearch)
+            && !string.IsNullOrWhiteSpace(effectiveSearch))
         {
-            SearchText = searchTerm;
-            StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
+            SearchText = effectiveSearch;
+            StatusMessage = _localization.GetString("Module.Status.Filtered", Title, effectiveSearch);
         }
     }
 
