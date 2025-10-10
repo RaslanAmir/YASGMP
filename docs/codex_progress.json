@@ -2,7 +2,7 @@
   "branch": "feature/wpf-shell-full-yasgmp",
   "sdk": {
     "wpfTarget": "net9.0-windows10.0.19041.0",
-    "detected": false,
+    "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
       "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK",
@@ -71,7 +71,8 @@
       "2025-10-10: dotnet restore yasgmp.sln retried for FormMode state machine updates; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-03-27: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried after centralizing the module toolbar template; each command still fails with 'command not found' because the dotnet CLI is unavailable.",
       "2026-03-28: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Tests were retried after Assets navigation updates; each command still fails with 'command not found' because the dotnet CLI is unavailable in this container.",
-      "2026-03-30: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Debug, dotnet build yasgmp.csproj -c Debug, and dotnet test YasGMP.Wpf.Tests.csproj retried; the container still reports 'command not found' because the dotnet CLI is unavailable."
+      "2026-03-30: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Debug, dotnet build yasgmp.csproj -c Debug, and dotnet test YasGMP.Wpf.Tests.csproj retried; the container still reports 'command not found' because the dotnet CLI is unavailable.",
+      "2025-10-10: dotnet-install.sh added SDK 9.0.100 so `dotnet --info` succeeds on linux-x64; `dotnet restore` now runs but Windows-targeted build/test (WPF Release, DockLayoutPersistenceService unit tests, FlaUI smoke harness) fail with NETSDK1100/NETSDK1147/NU1201/NU1605 until Windows 10 SDK 19041+ and MAUI workloads are installed on a Windows host."
     ]
   },
   "batches": [
@@ -351,6 +352,7 @@
     "2026-03-26: Added B1FormDocumentViewModel regression tests covering selection/dirty/validation command gating and retried dotnet restore yasgmp.sln; CLI is still unavailable so the command exits with 'command not found'.",
     "2026-03-27: ModuleToolbarCommandTests now spin up an STA dispatcher, instantiate the shared ToggleButton DataTemplate, and assert tooltips plus automation metadata update when the localization language changes; dotnet restore/build retries remain blocked by the missing CLI.",
     "2026-03-28: Assets module navigation normalizes id/code payloads (ints/strings/dictionaries/ModuleRecord) so drill-down reselects records and preserves search/status across refresh; dotnet restore/build/test remain blocked with 'command not found' until the CLI is installed.",
-    "2026-03-30: Tightened B1FormDocumentViewModel.CanEnterMode gating (null-selection, dirty-editor, validation-error coverage) and refreshed command state notifications after validation/save/cancel; awaiting dotnet CLI to validate via build/test."
+    "2026-03-30: Tightened B1FormDocumentViewModel.CanEnterMode gating (null-selection, dirty-editor, validation-error coverage) and refreshed command state notifications after validation/save/cancel; awaiting dotnet CLI to validate via build/test.",
+    "2025-10-10: dotnet-install.sh provisioned SDK 9.0.100; restore now runs but WPF Release build, DockLayoutPersistenceService unit tests, and the FlaUI smoke harness all fail with NETSDK1100/NU1201/NU1605 on linux because Windows 10 SDK 19041+ and MAUI workloads are unavailable \u2014 rerun on a Windows host."
   ]
 }

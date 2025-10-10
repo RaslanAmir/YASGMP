@@ -80,5 +80,56 @@
         "I-001"
       ]
     }
+  },
+  {
+    "run_id": "2025-10-10T06:50:00Z",
+    "scope": {
+      "folders_scanned": 6,
+      "files_scanned": 9,
+      "modules_touched": [
+        "Environment",
+        "Build",
+        "Tests"
+      ]
+    },
+    "actions": [
+      {
+        "type": "command",
+        "command": "./dotnet-install.sh --version 9.0.100 --install-dir $HOME/dotnet",
+        "outcome": "succeeded",
+        "details": "Provisioned .NET SDK 9.0.100 inside container via dotnet-install script."
+      },
+      {
+        "type": "command",
+        "command": "dotnet --info",
+        "outcome": "succeeded",
+        "details": "dotnet CLI now available; reports SDK 9.0.100 on linux-x64."
+      },
+      {
+        "type": "command",
+        "command": "dotnet restore",
+        "outcome": "failed",
+        "details": "Restore aborted with NETSDK1100 (EnableWindowsTargeting) and NETSDK1147 (missing maui-tizen workload) because Windows workloads/SDKs are unavailable on this host."
+      },
+      {
+        "type": "command",
+        "command": "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true",
+        "outcome": "failed",
+        "details": "Build stopped after cross-targeting warnings uncovered missing YasGMP.Helpers/Diagnostics references and signature DTO types in AppCore."
+      },
+      {
+        "type": "command",
+        "command": "dotnet test YasGMP.Wpf.Tests/YasGMP.Wpf.Tests.csproj --filter FullyQualifiedName~DockLayoutPersistenceServiceTests -c Release -p:EnableWindowsTargeting=true",
+        "outcome": "failed",
+        "details": "Restore for test project failed with NU1605 downgrade warnings and NU1201 because YasGMP.Wpf requires net9.0-windows10.0.19041."
+      }
+    ],
+    "summary": {
+      "issues_found": 0,
+      "todos_created": 0,
+      "blocking_risks": [
+        "WindowsSDK-19041"
+      ]
+    }
   }
 ]

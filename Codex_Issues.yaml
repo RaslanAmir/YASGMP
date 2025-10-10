@@ -1,3 +1,4 @@
+
 - id: I-001
   file: docs/codex_plan.md
   module: Environment
@@ -5,12 +6,14 @@
   type: BuildEnv
   severity: "❌ High"
   description: |
-    The execution environment lacks the dotnet CLI, preventing restore/build/test workflows for the WPF and MAUI projects. This blocks compliance validation, smoke automation, and .NET 9 targeting enforcement.
+    .NET SDK 9.0.100 is now installed in the container, but the Windows 10 SDK 19041+ and MAUI workloads are still missing.
+    Restore/build/test for Windows-targeted projects fail with NETSDK1100/NETSDK1147 and the WPF build hits unresolved YasGMP.Helpers/Diagnostics references and signature DTO types.
+    Use a Windows host with the Windows desktop SDK/workloads to unblock the release build/test cadence.
   references:
     - docs/codex_plan.md
     - docs/codex_progress.json
   suggested_fix: |
-    Install the .NET 9 SDK (9.0.100) and Windows 10 SDK 19041+ on the host or container. Re-run dotnet --info, dotnet restore, and dotnet build for yasgmp.sln and YasGMP.Wpf once available.
+    Install the Windows 10 SDK (19041+) and required MAUI workloads on a Windows environment, then rerun `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true`, and `dotnet test YasGMP.Wpf.Tests --filter DockLayoutPersistenceServiceTests`.
   status: open
   resolved_in: null
   tags: [buildenv, net9]
