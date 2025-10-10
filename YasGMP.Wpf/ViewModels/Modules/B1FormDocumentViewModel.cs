@@ -459,12 +459,17 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             return false;
         }
 
-        if (Mode == mode && mode != FormMode.Find)
+        if (mode == FormMode.Find)
+        {
+            return true;
+        }
+
+        if (Mode == mode)
         {
             return false;
         }
 
-        if (HasValidationErrors && mode != FormMode.Find)
+        if (HasValidationErrors)
         {
             return false;
         }
@@ -472,7 +477,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         return mode switch
         {
             FormMode.View or FormMode.Update => SelectedRecord is not null,
-            FormMode.Add => !IsDirty,
+            FormMode.Add => !IsDirty && !HasValidationErrors,
             _ => true
         };
     }
@@ -626,10 +631,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     {
         if (ValidationMessages.Count == 0)
         {
+            RefreshCommandStates();
             return;
         }
 
         ValidationMessages.Clear();
+        RefreshCommandStates();
     }
 
     /// <summary>Pushes validation errors to the observable collection.</summary>
@@ -638,6 +645,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         ValidationMessages.Clear();
         if (errors is null)
         {
+            RefreshCommandStates();
             return;
         }
 
@@ -648,6 +656,8 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
                 ValidationMessages.Add(error);
             }
         }
+
+        RefreshCommandStates();
     }
 
     private void OnValidationMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
