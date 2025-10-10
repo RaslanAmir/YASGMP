@@ -40,6 +40,17 @@
   <sys:String x:Key="Label_SerialNo">Serial No.</sys:String>
   <sys:String x:Key="Label_LifecyclePhase">Lifecycle Phase</sys:String>
   <sys:String x:Key="Label_Notes">Notes</sys:String>
+  <sys:String x:Key="Label_RequestedBy">Requested By</sys:String>
+  <sys:String x:Key="Label_DateRequested">Date Requested</sys:String>
+  <sys:String x:Key="Label_AssignedTo">Assigned To</sys:String>
+  <sys:String x:Key="Label_DateAssigned">Date Assigned</sys:String>
+  <sys:String x:Key="Label_LastModified">Last Modified</sys:String>
+  <sys:String x:Key="Label_Description">Description</sys:String>
+  <sys:String x:Key="Label_CriticalIncident">Critical incident</sys:String>
+  <sys:String x:Key="Label_RiskLevel">Risk Level</sys:String>
+  <sys:String x:Key="Label_Anomaly">Anomaly</sys:String>
+  <sys:String x:Key="Label_ClosureComment">Closure Comment</sys:String>
+  <sys:String x:Key="Label_Requested">Requested</sys:String>
 
   <sys:String x:Key="Column_Code">Code</sys:String>
   <sys:String x:Key="Column_Title">Title</sys:String>
@@ -142,4 +153,18 @@
   <sys:String x:Key="Tooltip_Attach">Attach a document to the current record.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigate to the related record.</sys:String>
 
+  <!-- External Servicers Labels -->
+  <sys:String x:Key="Label_Name">Name</sys:String>
+  <sys:String x:Key="Label_ServiceType">Service Type</sys:String>
+  <sys:String x:Key="Label_VATID">VAT / ID</sys:String>
+  <sys:String x:Key="Label_ContactPerson">Contact Person</sys:String>
+  <sys:String x:Key="Label_Email">Email</sys:String>
+  <sys:String x:Key="Label_Phone">Phone</sys:String>
+  <sys:String x:Key="Label_Address">Address</sys:String>
+  <sys:String x:Key="Label_CooperationStart">Cooperation Start</sys:String>
+  <sys:String x:Key="Label_CooperationEnd">Cooperation End</sys:String>
+  <sys:String x:Key="Label_Comment">Comment</sys:String>
+  <sys:String x:Key="Label_ExtraNotes">Extra Notes</sys:String>
+  <sys:String x:Key="Label_Certificates">Certificates</sys:String>
+  <sys:String x:Key="Label_DigitalSignature">Digital Signature</sys:String>
 </ResourceDictionary>

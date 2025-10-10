@@ -57,10 +57,10 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="150" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Requested" Binding="{Binding InspectorFields[1].Value}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="150" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Label_Requested}" Binding="{Binding InspectorFields[1].Value}" Width="140" />
                 </DataGrid.Columns>
                 <DataGrid.ToolTip>
                     <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
@@ -74,7 +74,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Change Control Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Module_ChangeControl_Title}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="150" />
@@ -92,57 +92,57 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="Code" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Code}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Code, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Title" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Title}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Title, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Status" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Status}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
                                       Grid.Column="1"
                                       ItemsSource="{Binding StatusOptions}"
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Requested By" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_RequestedBy}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="3"
                                      Grid.Column="1"
                                      Text="{Binding Editor.RequestedById, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Date Requested" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_DateRequested}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="4"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.DateRequested, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Assigned To" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_AssignedTo}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.AssignedToId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Date Assigned" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_DateAssigned}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="6"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.DateAssigned, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Last Modified" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_LastModified}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBlock Grid.Row="7"
                                        Grid.Column="1"
                                        Text="{Binding Editor.LastModified, StringFormat={}{0:G}}"
                                        VerticalAlignment="Center" />
                         </Grid>
 
-                        <TextBlock Text="Description" Margin="0,0,0,4" />
+                        <TextBlock Text="{DynamicResource Label_Description}" Margin="0,0,0,4" />
                         <TextBox Text="{Binding Editor.Description, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"
                                  Height="120"

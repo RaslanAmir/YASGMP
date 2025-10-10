@@ -1,0 +1,15 @@
+*** Begin Patch
+*** Update File: docs/codex_plan.md
+@@
+ Editor i18n updates in this increment:
+ - Assets view: localized grid headers, search label, and editor field labels; added grid/search a11y tooltips
+ - Dashboard view: localized grid headers and search label; added grid/search a11y tooltips
+ - Components view: localized grid headers and search label; added grid/search a11y tooltips
++- Incidents/CAPA/Change Control/Validations/Scheduling/Security/Suppliers/External Servicers: localized search label + grid tooltips and a11y. Began per-field label localization (titles/status/type/priority and common fields); will continue deep coverage next.
+@@
+ Test run (solution):
+ - Executed `dotnet test -c Release`; MAUI/WPF builds remained green, but some AppCore tests failed due to EF service configuration (unrelated to WPF shell i18n/a11y). See `logs/dotnet-test.txt` for details. No changes applied to non-WPF test code in this batch.
++ - Executed targeted tests:
++   - YasGMP.Tests: EF model ambiguity resolved (PermissionType keyless + enum mapping). AttachmentRetention test now passes; Validation parameter assertions align with DatabaseService extensions. See `logs/dotnet-test-yasgmp-tests.txt`.
++   - YasGMP.Wpf.Smoke: added FlaUI-based end-to-end placeholder under `SmokeFact` with `YASGMP_SMOKE` toggle. Test skipped by default; passes environment sanity check. See `logs/dotnet-test-wpf-smoke.txt`.
+*** End Patch

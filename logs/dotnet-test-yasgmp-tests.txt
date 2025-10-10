@@ -1,39 +1,26 @@
   Determining projects to restore...
   All projects are up-to-date for restore.
   YasGMP.AppCore -> C:\GitHub\YASGMP\YASGMP\YasGMP.AppCore\bin\Release\net8.0\YasGMP.AppCore.dll
-  yasgmp -> C:\GitHub\YASGMP\YASGMP\bin\Release\net8.0-windows10.0.19041.0\win-x64\yasgmp.dll
-  YasGMP.Tests -> C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\bin\Release\net8.0-windows10.0.19041.0\win-x64\YasGMP.Tests.dll
-Test run for C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\bin\Release\net8.0-windows10.0.19041.0\win-x64\YasGMP.Tests.dll (.NETCoreApp,Version=v8.0)
-A total of 1 test files matched the specified pattern.
-  Failed YasGMP.Tests.ValidationServiceTests.UpdateAsync_PassesSourceMetadataToDatabase [58 ms]
-  Error Message:
-   System.Collections.Generic.KeyNotFoundException : The given key '@source_ip' was not present in the dictionary.
-  Stack Trace:
-     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at YasGMP.Tests.ValidationServiceTests.UpdateAsync_PassesSourceMetadataToDatabase() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 100
---- End of stack trace from previous location ---
-  Failed YasGMP.Tests.ValidationServiceTests.CreateAsync_PassesSourceMetadataToDatabase [1 ms]
-  Error Message:
-   System.Collections.Generic.KeyNotFoundException : The given key '@source_ip' was not present in the dictionary.
-  Stack Trace:
-     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at YasGMP.Tests.ValidationServiceTests.CreateAsync_PassesSourceMetadataToDatabase() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 78
---- End of stack trace from previous location ---
-  Failed YasGMP.Tests.ValidationServiceTests.UpdateAsync_PreservesExistingDigitalSignature [< 1 ms]
-  Error Message:
-   System.Collections.Generic.KeyNotFoundException : The given key '@sig' was not present in the dictionary.
-  Stack Trace:
-     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at YasGMP.Tests.ValidationServiceTests.UpdateAsync_PreservesExistingDigitalSignature() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 57
---- End of stack trace from previous location ---
-  Failed YasGMP.Tests.ValidationServiceTests.CreateAsync_PreservesExistingDigitalSignature [< 1 ms]
-  Error Message:
-   System.Collections.Generic.KeyNotFoundException : The given key '@sig' was not present in the dictionary.
-  Stack Trace:
-     at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at YasGMP.Tests.ValidationServiceTests.CreateAsync_PreservesExistingDigitalSignature() in C:\GitHub\YASGMP\YASGMP\YasGMP.Tests\ValidationServiceTests.cs:line 36
---- End of stack trace from previous location ---
-
-Failed!  - Failed:     4, Passed:    14, Skipped:     0, Total:    18, Duration: 2 s - YasGMP.Tests.dll (net8.0)
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\.NETCoreApp,Version=v9.0.AssemblyAttributes.cs(4,12): error CS0579: Duplicate 'global::System.Runtime.Versioning.TargetFrameworkAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(13,12): error CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(14,12): error CS0579: Duplicate 'System.Reflection.AssemblyConfigurationAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(15,12): error CS0579: Duplicate 'System.Reflection.AssemblyFileVersionAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(16,12): error CS0579: Duplicate 'System.Reflection.AssemblyInformationalVersionAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(17,12): error CS0579: Duplicate 'System.Reflection.AssemblyProductAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(18,12): error CS0579: Duplicate 'System.Reflection.AssemblyTitleAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(19,12): error CS0579: Duplicate 'System.Reflection.AssemblyVersionAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\obj\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.AssemblyInfo.cs(20,12): error CS0579: Duplicate 'System.Runtime.Versioning.TargetPlatformAttribute' attribute [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\EndToEndSmokeTests.cs(7,7): error CS0246: The type or namespace name 'FlaUI' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\EndToEndSmokeTests.cs(8,7): error CS0246: The type or namespace name 'FlaUI' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\EndToEndSmokeTests.cs(9,7): error CS0246: The type or namespace name 'FlaUI' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\EndToEndSmokeTests.cs(10,7): error CS0246: The type or namespace name 'Xunit' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\SmokeFacts.cs(3,7): error CS0246: The type or namespace name 'Xunit' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\SmokeHarnessTests.cs(3,7): error CS0246: The type or namespace name 'Xunit' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\EndToEndSmokeTests.cs(128,37): error CS0246: The type or namespace name 'Xunit' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\SmokeFacts.cs(11,42): error CS0246: The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\EndToEndSmokeTests.cs(16,6): error CS0616: 'SmokeFactAttribute' is not an attribute class [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\SmokeHarnessTests.cs(9,6): error CS0616: 'SmokeFactAttribute' is not an attribute class [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\SmokeHarnessTests.cs(17,6): error CS0246: The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\SmokeHarnessTests.cs(17,6): error CS0246: The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?) [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net8.0-windows10.0.19041.0]
 
 Workload updates are available. Run `dotnet workload list` for more information.

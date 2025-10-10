@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YasGMP.Wpf.Smoke")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+643bb3cf0f29aabd8f2b7a81926eaf35c8ab6608")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+daabd63bf084041ccdb8d54ce38cf6dee2587d95")]
 [assembly: System.Reflection.AssemblyProductAttribute("YasGMP.Wpf.Smoke")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YasGMP.Wpf.Smoke")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

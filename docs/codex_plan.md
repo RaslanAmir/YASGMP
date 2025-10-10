@@ -240,4 +240,7 @@ Open items:
 
 Test run (solution):
 - Executed dotnet test -c Release; MAUI/WPF builds remained green, but some AppCore tests failed due to EF service configuration (unrelated to WPF shell i18n/a11y). See logs/dotnet-test.txt for details. No changes applied to non-WPF test code in this batch.
+- Executed targeted tests:
+  - YasGMP.Tests: EF model ambiguity resolved (PermissionType keyless + enum mapping). AttachmentRetention test now passes; Validation parameter assertions align with DatabaseService extensions. See logs/dotnet-test-yasgmp-tests.txt.
+  - YasGMP.Wpf.Smoke: added FlaUI-based end-to-end placeholder under SmokeFact with YASGMP_SMOKE toggle. Test skipped by default; passes environment sanity check. See logs/dotnet-test-wpf-smoke.txt.
 

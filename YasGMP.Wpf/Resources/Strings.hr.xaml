@@ -40,6 +40,17 @@
   <sys:String x:Key="Label_SerialNo">Serijski br.</sys:String>
   <sys:String x:Key="Label_LifecyclePhase">Faza životnog ciklusa</sys:String>
   <sys:String x:Key="Label_Notes">Bilješke</sys:String>
+  <sys:String x:Key="Label_RequestedBy">Zatražio</sys:String>
+  <sys:String x:Key="Label_DateRequested">Datum zahtjeva</sys:String>
+  <sys:String x:Key="Label_AssignedTo">Dodijeljeno</sys:String>
+  <sys:String x:Key="Label_DateAssigned">Datum dodjele</sys:String>
+  <sys:String x:Key="Label_LastModified">Zadnja izmjena</sys:String>
+  <sys:String x:Key="Label_Description">Opis</sys:String>
+  <sys:String x:Key="Label_CriticalIncident">Kritični incident</sys:String>
+  <sys:String x:Key="Label_RiskLevel">Razina rizika</sys:String>
+  <sys:String x:Key="Label_Anomaly">Anomalija</sys:String>
+  <sys:String x:Key="Label_ClosureComment">Komentar zatvaranja</sys:String>
+  <sys:String x:Key="Label_Requested">Zatraženo</sys:String>
 
   <sys:String x:Key="Column_Code">Šifra</sys:String>
   <sys:String x:Key="Column_Title">Naslov</sys:String>
@@ -142,4 +153,18 @@
   <sys:String x:Key="Tooltip_Attach">Priloži dokument trenutnom zapisu.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigiraj na povezani zapis.</sys:String>
 
+  <!-- Oznake za Vanjske servisere -->
+  <sys:String x:Key="Label_Name">Naziv</sys:String>
+  <sys:String x:Key="Label_ServiceType">Vrsta usluge</sys:String>
+  <sys:String x:Key="Label_VATID">OIB / ID</sys:String>
+  <sys:String x:Key="Label_ContactPerson">Kontakt osoba</sys:String>
+  <sys:String x:Key="Label_Email">E-pošta</sys:String>
+  <sys:String x:Key="Label_Phone">Telefon</sys:String>
+  <sys:String x:Key="Label_Address">Adresa</sys:String>
+  <sys:String x:Key="Label_CooperationStart">Početak suradnje</sys:String>
+  <sys:String x:Key="Label_CooperationEnd">Kraj suradnje</sys:String>
+  <sys:String x:Key="Label_Comment">Komentar</sys:String>
+  <sys:String x:Key="Label_ExtraNotes">Dodatne bilješke</sys:String>
+  <sys:String x:Key="Label_Certificates">Certifikati</sys:String>
+  <sys:String x:Key="Label_DigitalSignature">Digitalni potpis</sys:String>
 </ResourceDictionary>
