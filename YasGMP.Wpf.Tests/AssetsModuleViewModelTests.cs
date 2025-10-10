@@ -272,6 +272,61 @@ public class AssetsModuleViewModelTests
         Assert.Equal("hello.txt", upload.FileName);
     }
 
+    [Fact]
+    public async Task OnActivatedAsync_FromEditMode_ReselectsRecordAndRefreshesAttachments()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 5,
+            Code = "M-100",
+            Name = "Mixer",
+            Manufacturer = "Globex",
+            Location = "Suite 2",
+            UrsDoc = "URS-MIX-01"
+        });
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+
+        await viewModel.InitializeAsync(5);
+        await Task.Yield();
+
+        Assert.Equal("Mixer", viewModel.Editor.Name);
+        Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
+
+        var canExecuteRaised = 0;
+        viewModel.AttachDocumentCommand.CanExecuteChanged += (_, _) => canExecuteRaised++;
+
+        viewModel.Mode = FormMode.Update;
+        Assert.True(viewModel.IsEditorEnabled);
+        Assert.False(viewModel.AttachDocumentCommand.CanExecute(null));
+
+        canExecuteRaised = 0;
+
+        machineAdapter.Saved[0].Name = "Mixer Reloaded";
+        machineAdapter.Saved[0].Location = "Suite 9";
+
+        await viewModel.InitializeAsync(5);
+        await Task.Yield();
+
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.False(viewModel.IsEditorEnabled);
+        Assert.Equal("Mixer Reloaded", viewModel.Editor.Name);
+        Assert.Equal("Suite 9", viewModel.Editor.Location);
+        Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
+        Assert.True(canExecuteRaised > 0);
+    }
+
     private static Task<bool> InvokeSaveAsync(AssetsModuleViewModel viewModel)
     {
         var method = typeof(AssetsModuleViewModel)
