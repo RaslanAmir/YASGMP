@@ -55,3 +55,20 @@ During startup the shell attaches the controller, initializes workspace tabs, ca
 4. **Support layout restore:** If the document needs a deterministic `ContentId` (e.g., for pinned tools), extend `ShellLayoutController.OnLayoutSerializationCallback` and `MainWindowViewModel.EnsureDocumentForId` so deserialization can recreate or locate the instance.【F:YasGMP.Wpf/Services/ShellLayoutController.cs†L114-L135】【F:YasGMP.Wpf/ViewModels/MainWindowViewModel.cs†L91-L109】
 
 Following these steps keeps layout serialization stable and ensures new documents participate in the save/restore cycle shared with the rest of the shell.
+
+
+## Acceptance Checklist
+
+- WPF project builds and runs (Ribbon + AvalonDock + layout persistence)
+- MAUI builds/runs unaffected (Windows target)
+- ModulesPane lists all modules and opens editors
+- ModuleRegistry uses EN↔HR resources for titles/categories/descriptions
+- Ribbon/Backstage/Home groups/buttons bind to resources; tooltips localized
+- Views expose AutomationProperties.Name and ToolTips for a11y/smoke hooks
+- B1 FormModes & command enablement wired across editors
+- CFL pickers + Golden Arrow navigation operational
+- Attachments DB-backed with upload/preview/download (hash, retention)
+- E-signature prompts on regulated saves; audit surfaced in Audit views
+- Smoke harness toggled via YASGMP_SMOKE and logs to %LOCALAPPDATA%/YasGMP/logs
+
+

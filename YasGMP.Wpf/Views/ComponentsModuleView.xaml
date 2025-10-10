@@ -47,8 +47,10 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Label_Search}:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{DynamicResource Label_Search}"
+                         ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
@@ -60,11 +62,15 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Name" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
                     <DataGridTextColumn Header="Machine" Binding="{Binding InspectorFields[0].Value}" Width="180" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
                 </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
+                <DataGrid AutomationProperties.Name="{DynamicResource Module_Components_Title}" />
             </DataGrid>
             <Border Grid.Row="1"
                     Grid.Column="1"

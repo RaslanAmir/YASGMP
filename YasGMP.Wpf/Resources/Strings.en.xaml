@@ -25,6 +25,31 @@
   <sys:String x:Key="Label_Modules">Modules</sys:String>
   <sys:String x:Key="Label_Inspector">Inspector</sys:String>
 
+  <!-- Common Labels / Columns -->
+  <sys:String x:Key="Label_Search">Search</sys:String>
+  <sys:String x:Key="Label_Code">Code</sys:String>
+  <sys:String x:Key="Label_Title">Title</sys:String>
+  <sys:String x:Key="Label_Status">Status</sys:String>
+  <sys:String x:Key="Label_Location">Location</sys:String>
+  <sys:String x:Key="Label_AssetDetails">Asset Details</sys:String>
+  <sys:String x:Key="Label_URS_Document">URS Document</sys:String>
+  <sys:String x:Key="Label_InstallDate">Install Date</sys:String>
+  <sys:String x:Key="Label_ProcurementDate">Procurement Date</sys:String>
+  <sys:String x:Key="Label_WarrantyUntil">Warranty Until</sys:String>
+  <sys:String x:Key="Label_CriticalAsset">Critical asset</sys:String>
+  <sys:String x:Key="Label_SerialNo">Serial No.</sys:String>
+  <sys:String x:Key="Label_LifecyclePhase">Lifecycle Phase</sys:String>
+  <sys:String x:Key="Label_Notes">Notes</sys:String>
+
+  <sys:String x:Key="Column_Code">Code</sys:String>
+  <sys:String x:Key="Column_Title">Title</sys:String>
+  <sys:String x:Key="Column_Status">Status</sys:String>
+  <sys:String x:Key="Column_Location">Location</sys:String>
+
+  <!-- Common Tooltips / A11y -->
+  <sys:String x:Key="Tooltip_SearchBox">Filter records as you type.</sys:String>
+  <sys:String x:Key="Tooltip_RecordsGrid">Double-click to open; use toolbar for actions.</sys:String>
+
   <!-- Categories -->
   <sys:String x:Key="Category_Cockpit">Cockpit</sys:String>
   <sys:String x:Key="Category_Maintenance">Maintenance</sys:String>

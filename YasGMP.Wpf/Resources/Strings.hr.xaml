@@ -25,6 +25,31 @@
   <sys:String x:Key="Label_Modules">Moduli</sys:String>
   <sys:String x:Key="Label_Inspector">Inspektor</sys:String>
 
+  <!-- Zajedničke oznake / Stupci -->
+  <sys:String x:Key="Label_Search">Pretraga</sys:String>
+  <sys:String x:Key="Label_Code">Šifra</sys:String>
+  <sys:String x:Key="Label_Title">Naslov</sys:String>
+  <sys:String x:Key="Label_Status">Status</sys:String>
+  <sys:String x:Key="Label_Location">Lokacija</sys:String>
+  <sys:String x:Key="Label_AssetDetails">Detalji imovine</sys:String>
+  <sys:String x:Key="Label_URS_Document">URS dokument</sys:String>
+  <sys:String x:Key="Label_InstallDate">Datum instalacije</sys:String>
+  <sys:String x:Key="Label_ProcurementDate">Datum nabave</sys:String>
+  <sys:String x:Key="Label_WarrantyUntil">Jamstvo do</sys:String>
+  <sys:String x:Key="Label_CriticalAsset">Kritična imovina</sys:String>
+  <sys:String x:Key="Label_SerialNo">Serijski br.</sys:String>
+  <sys:String x:Key="Label_LifecyclePhase">Faza životnog ciklusa</sys:String>
+  <sys:String x:Key="Label_Notes">Bilješke</sys:String>
+
+  <sys:String x:Key="Column_Code">Šifra</sys:String>
+  <sys:String x:Key="Column_Title">Naslov</sys:String>
+  <sys:String x:Key="Column_Status">Status</sys:String>
+  <sys:String x:Key="Column_Location">Lokacija</sys:String>
+
+  <!-- Zajednički ToolTipovi / A11y -->
+  <sys:String x:Key="Tooltip_SearchBox">Filtriraj zapise tijekom tipkanja.</sys:String>
+  <sys:String x:Key="Tooltip_RecordsGrid">Dvoklik za otvaranje; koristi alatnu traku za radnje.</sys:String>
+
   <!-- Kategorije -->
   <sys:String x:Key="Category_Cockpit">Nadzorna ploča</sys:String>
   <sys:String x:Key="Category_Maintenance">Održavanje</sys:String>

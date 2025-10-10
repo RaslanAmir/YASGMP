@@ -45,8 +45,10 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Label_Search}:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{DynamicResource Label_Search}"
+                         ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       ItemsSource="{Binding RecordsView}"
@@ -56,11 +58,15 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
+                <DataGrid AutomationProperties.Name="{DynamicResource Module_Dashboard_Title}" />
             </DataGrid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
         </Grid>
