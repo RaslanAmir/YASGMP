@@ -87,25 +87,53 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var (target, machines, _) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+        var (target, machines, filterActive, searchTerm) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
 
         var records = new List<ModuleRecord>();
-        if (target is not null)
-        {
-            records.Add(ToRecord(target));
-        }
+        ModuleRecord? selectedRecord = null;
 
         foreach (var machine in machines)
         {
+            var record = ToRecord(machine);
+            records.Add(record);
+
             if (target is not null && machine.Id == target.Id)
             {
-                continue;
+                selectedRecord = record;
             }
-
-            records.Add(ToRecord(machine));
         }
 
-        if (target is not null)
+        if (target is not null && selectedRecord is null)
+        {
+            selectedRecord = ToRecord(target);
+            records.Insert(0, selectedRecord);
+        }
+
+        if (filterActive)
+        {
+            if (selectedRecord is null && records.Count > 0)
+            {
+                selectedRecord = records[0];
+            }
+
+            if (selectedRecord is not null)
+            {
+                SelectedRecord = selectedRecord;
+                var search = string.IsNullOrWhiteSpace(selectedRecord.Title)
+                    ? (string.IsNullOrWhiteSpace(selectedRecord.Code) ? selectedRecord.Key : selectedRecord.Code)
+                    : selectedRecord.Title;
+
+                SearchText = search;
+                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
+            }
+            else if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                SearchText = searchTerm;
+                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
+                SelectedRecord = null;
+            }
+        }
+        else if (target is not null)
         {
             ApplyNavigationSelection(target, records);
         }
@@ -139,13 +167,18 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return true;
     }
 
-    private async Task<(Machine? Target, IReadOnlyList<Machine> Machines, bool FilterActive)> ResolveNavigationPayloadAsync(object? parameter)
+    private async Task<(Machine? Target, IReadOnlyList<Machine> Machines, bool FilterActive, string? SearchTerm)> ResolveNavigationPayloadAsync(object? parameter)
     {
         if (parameter is int id)
         {
             var target = await _machineService.TryGetByIdAsync(id).ConfigureAwait(false);
-            var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
-            return (target, machines, false);
+            var search = id.ToString(CultureInfo.InvariantCulture);
+            if (target is null)
+            {
+                return (null, Array.Empty<Machine>(), true, search);
+            }
+
+            return (target, new[] { target }, true, search);
         }
 
         if (parameter is string text)
@@ -153,14 +186,18 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             if (string.IsNullOrWhiteSpace(text))
             {
                 var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
-                return (null, machines, false);
+                return (null, machines, false, null);
             }
 
             if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericId))
             {
                 var target = await _machineService.TryGetByIdAsync(numericId).ConfigureAwait(false);
-                var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
-                return (target, machines, false);
+                if (target is null)
+                {
+                    return (null, Array.Empty<Machine>(), true, text);
+                }
+
+                return (target, new[] { target }, true, text);
             }
 
             var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
@@ -171,11 +208,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 .ToList();
 
             var target = matches.FirstOrDefault();
-            return (target, matches, true);
+            return (target, matches, true, text);
         }
 
         var allMachines = await _machineService.GetAllAsync().ConfigureAwait(false);
-        return (null, allMachines, false);
+        return (null, allMachines, false, null);
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
@@ -221,7 +258,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
-        var (target, _, _) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+        var (target, _, _, _) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
         if (target is null)
         {
             return;
