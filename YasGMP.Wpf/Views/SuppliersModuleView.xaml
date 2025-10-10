@@ -29,9 +29,9 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
+            <Button Content="{DynamicResource Button_Attach}" Command="{Binding AttachDocumentCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}" Margin="8,0,0,0" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -57,10 +57,10 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
-                    <DataGridTextColumn Header="Type" Binding="{Binding InspectorFields[0].Value}" Width="140" />
-                    <DataGridTextColumn Header="Country" Binding="{Binding InspectorFields[4].Value}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Name}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Type}" Binding="{Binding InspectorFields[0].Value}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Country}" Binding="{Binding InspectorFields[4].Value}" Width="120" />
                 </DataGrid.Columns>
                 <DataGrid.ToolTip>
                     <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
@@ -74,7 +74,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Supplier Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Label_SupplierDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="160" />
@@ -97,87 +97,87 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock Text="Name" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Name}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Supplier Type" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_SupplierType}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.SupplierType, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Status" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Status}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
                                       Grid.Column="1"
                                       ItemsSource="{Binding StatusOptions}"
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Risk Level" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_RiskLevel}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="3"
                                       Grid.Column="1"
                                       ItemsSource="{Binding RiskOptions}"
                                       SelectedItem="{Binding Editor.RiskLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="VAT Number" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_VATID}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
                                      Text="{Binding Editor.VatNumber, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Email" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Email}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Email, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Phone" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Phone}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="6"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Phone, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Website" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Website}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Website, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Address" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Address}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Address, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="City" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_City}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="9"
                                      Grid.Column="1"
                                      Text="{Binding Editor.City, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Country" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Country}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="10"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Country, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Contract File" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_ContractFile}" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="11"
                                      Grid.Column="1"
                                      Text="{Binding Editor.ContractFile, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Cooperation Start" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_CooperationStart}" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="12"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.CooperationStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Cooperation End" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_CooperationEnd}" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="13"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.CooperationEnd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -185,17 +185,17 @@
 
                             <CheckBox Grid.Row="14"
                                       Grid.Column="1"
-                                      Content="Qualified"
+                                      Content="{DynamicResource Label_Qualified}"
                                       IsChecked="{Binding Editor.IsQualified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}"
                                       Margin="0,4,0,0" />
                         </Grid>
 
-                        <TextBlock Text="Registered Authorities" Margin="0,12,0,4" />
+                        <TextBlock Text="{DynamicResource Label_RegisteredAuthorities}" Margin="0,12,0,4" />
                         <TextBox Text="{Binding Editor.RegisteredAuthorities, UpdateSourceTrigger=PropertyChanged}"
                                  IsEnabled="{Binding IsEditorEnabled}" />
 
-                        <TextBlock Text="Notes" Margin="0,12,0,4" />
+                        <TextBlock Text="{DynamicResource Label_Notes}" Margin="0,12,0,4" />
                         <TextBox Text="{Binding Editor.Notes, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"
                                  Height="80"

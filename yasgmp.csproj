@@ -93,6 +93,9 @@
     <None Include="YasGMP.AppCore\**\*.cs" />
     <Compile Remove="YasGMP.Wpf.Tests\**\*.cs" />
     <None Include="YasGMP.Wpf.Tests\**\*.cs" />
+    <!-- Exclude WPF Smoke tests from the main app build -->
+    <Compile Remove="YasGMP.Wpf.Smoke\**\*.cs" />
+    <None Include="YasGMP.Wpf.Smoke\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

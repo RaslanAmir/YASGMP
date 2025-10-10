@@ -60,6 +60,9 @@
   <sys:String x:Key="Column_Type">Type</sys:String>
   <sys:String x:Key="Column_Machine">Machine</sys:String>
   <sys:String x:Key="Column_Incident">Incident</sys:String>
+  <sys:String x:Key="Column_Name">Name</sys:String>
+  <sys:String x:Key="Column_Recurrence">Recurrence</sys:String>
+  <sys:String x:Key="Column_NextDue">Next Due</sys:String>
 
   <!-- Common Tooltips / A11y -->
   <sys:String x:Key="Tooltip_SearchBox">Filter records as you type.</sys:String>
@@ -167,4 +170,100 @@
   <sys:String x:Key="Label_ExtraNotes">Extra Notes</sys:String>
   <sys:String x:Key="Label_Certificates">Certificates</sys:String>
   <sys:String x:Key="Label_DigitalSignature">Digital Signature</sys:String>
+
+  <!-- Incidents Labels -->
+  <sys:String x:Key="Label_IncidentDetails">Incident Details</sys:String>
+  <sys:String x:Key="Label_Detected">Detected</sys:String>
+  <sys:String x:Key="Label_Reported">Reported</sys:String>
+  <sys:String x:Key="Label_ReportedBy">Reported By</sys:String>
+  <sys:String x:Key="Label_Investigator">Investigator</sys:String>
+  <sys:String x:Key="Label_WorkOrder">Work Order</sys:String>
+  <sys:String x:Key="Label_CapaCase">CAPA Case</sys:String>
+  <sys:String x:Key="Label_Classification">Classification</sys:String>
+  <sys:String x:Key="Label_RootCause">Root Cause</sys:String>
+
+  <!-- CAPA Labels -->
+  <sys:String x:Key="Label_CAPADetails">CAPA Details</sys:String>
+  <sys:String x:Key="Label_Priority">Priority</sys:String>
+  <sys:String x:Key="Label_Opened">Opened</sys:String>
+  <sys:String x:Key="Label_Closed">Closed</sys:String>
+  <sys:String x:Key="Label_Reason">Reason</sys:String>
+  <sys:String x:Key="Label_CorrectiveAction">Corrective Action</sys:String>
+  <sys:String x:Key="Label_PreventiveAction">Preventive Action</sys:String>
+  <sys:String x:Key="Label_Actions">Actions</sys:String>
+
+  <!-- Validation Labels -->
+  <sys:String x:Key="Label_Type">Type</sys:String>
+  <sys:String x:Key="Label_Target">Target</sys:String>
+  <sys:String x:Key="Label_Machine">Machine</sys:String>
+  <sys:String x:Key="Label_Component">Component</sys:String>
+  <sys:String x:Key="Label_StartDate">Start Date</sys:String>
+  <sys:String x:Key="Label_EndDate">End Date</sys:String>
+  <sys:String x:Key="Label_NextDue">Next Due</sys:String>
+  <sys:String x:Key="Label_Documentation">Documentation</sys:String>
+  <sys:String x:Key="Label_Comments">Comments</sys:String>
+  <sys:String x:Key="Label_ProtocolCode">Protocol Code</sys:String>
+
+  <!-- Validation Details Title -->
+  <sys:String x:Key="Label_ValidationDetails">Validation Details</sys:String>
+
+  <!-- Scheduling Labels -->
+  <sys:String x:Key="Label_ExecuteNow">Execute Now</sys:String>
+  <sys:String x:Key="Label_Acknowledge">Acknowledge</sys:String>
+  <sys:String x:Key="Label_IsCritical">Is Critical</sys:String>
+  <sys:String x:Key="Label_RequiresAck">Requires Acknowledgment</sys:String>
+  <sys:String x:Key="Label_AlertOnFailure">Alert On Failure</sys:String>
+  <sys:String x:Key="Label_EscalationNote">Escalation Note</sys:String>
+  <sys:String x:Key="Label_LastResult">Last Result</sys:String>
+  <sys:String x:Key="Label_LastError">Last Error</sys:String>
+  <sys:String x:Key="Label_LastExecuted">Last Executed</sys:String>
+  <sys:String x:Key="Label_Retries">Retries</sys:String>
+  <sys:String x:Key="Label_MaxRetries">Max Retries</sys:String>
+  <sys:String x:Key="Label_ExtraParams">Extra Params</sys:String>
+  <sys:String x:Key="Label_Device">Device</sys:String>
+  <sys:String x:Key="Label_Session">Session</sys:String>
+  <sys:String x:Key="Label_IpAddress">IP Address</sys:String>
+  <sys:String x:Key="Label_JobType">Job Type</sys:String>
+  <sys:String x:Key="Label_CronExpression">Cron Expression</sys:String>
+  <sys:String x:Key="Label_EntityType">Entity Type</sys:String>
+  <sys:String x:Key="Label_EntityId">Entity Id</sys:String>
+  <sys:String x:Key="Label_Recurrence">Recurrence</sys:String>
+
+  <!-- Scheduling Details Title -->
+  <sys:String x:Key="Label_ScheduledJobDetails">Scheduled Job Details</sys:String>
+
+  <!-- Security Labels -->
+  <sys:String x:Key="Label_Username">Username</sys:String>
+  <sys:String x:Key="Label_DisplayName">Display Name</sys:String>
+  <sys:String x:Key="Label_EmailAddress">Email</sys:String>
+  <sys:String x:Key="Label_Department">Department</sys:String>
+  <sys:String x:Key="Label_Active">Active</sys:String>
+  <sys:String x:Key="Label_Locked">Locked</sys:String>
+  <sys:String x:Key="Label_TwoFactor">Two Factor</sys:String>
+  <sys:String x:Key="Label_NewPassword">New Password</sys:String>
+  <sys:String x:Key="Label_ConfirmPassword">Confirm Password</sys:String>
+  <sys:String x:Key="Label_AssignedRoles">Assigned Roles</sys:String>
+  <sys:String x:Key="Label_FullName">Full Name</sys:String>
+  <sys:String x:Key="Label_PrimaryRole">Primary Role</sys:String>
+
+  <!-- Security Details Title -->
+  <sys:String x:Key="Label_UserDetails">User Details</sys:String>
+
+  <!-- Suppliers Labels -->
+  <sys:String x:Key="Label_Contact">Contact</sys:String>
+  <sys:String x:Key="Label_Website">Website</sys:String>
+  <sys:String x:Key="Label_City">City</sys:String>
+  <sys:String x:Key="Label_Country">Country</sys:String>
+  <sys:String x:Key="Label_ContractFile">Contract File</sys:String>
+  <sys:String x:Key="Label_Qualified">Qualified</sys:String>
+  <sys:String x:Key="Label_RegisteredAuthorities">Registered Authorities</sys:String>
+
+  <!-- Supplier Details Title -->
+  <sys:String x:Key="Label_SupplierDetails">Supplier Details</sys:String>
+
+  <!-- Additional Columns -->
+  <sys:String x:Key="Column_Target">Target</sys:String>
+  <sys:String x:Key="Column_Username">Username</sys:String>
+  <sys:String x:Key="Column_Role">Role</sys:String>
+  <sys:String x:Key="Column_Country">Country</sys:String>
 </ResourceDictionary>

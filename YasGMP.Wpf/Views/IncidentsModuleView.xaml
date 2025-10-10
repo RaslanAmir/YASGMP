@@ -29,9 +29,16 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachEvidenceCommand}" Margin="8,0,0,0" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Button_CFL}"
+                    ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}"
+                    Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Button_Attach}"
+                    ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}"
+                    Command="{Binding AttachEvidenceCommand}"
+                    Margin="8,0,0,0" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                                        Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -74,7 +81,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Incident Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Label_IncidentDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="160" />
@@ -134,55 +141,55 @@
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Detected" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Detected}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="5"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.DetectedAt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Reported" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Reported}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="6"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.ReportedAt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Reported By" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_ReportedBy}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
                                      Text="{Binding Editor.ReportedById, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Assigned To" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_AssignedTo}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
                                      Grid.Column="1"
                                      Text="{Binding Editor.AssignedToId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Investigator" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Investigator}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="9"
                                      Grid.Column="1"
                                      Text="{Binding Editor.AssignedInvestigator, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Work Order" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_WorkOrder}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="10"
                                      Grid.Column="1"
                                      Text="{Binding Editor.WorkOrderId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="CAPA Case" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_CapaCase}" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="11"
                                      Grid.Column="1"
                                      Text="{Binding Editor.CapaCaseId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Classification" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Classification}" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="12"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Classification, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Root Cause" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                            <TextBlock Text="{DynamicResource Label_RootCause}" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
                             <TextBox Grid.Row="13"
                                      Grid.Column="1"
                                      Text="{Binding Editor.RootCause, UpdateSourceTrigger=PropertyChanged}"
@@ -192,28 +199,28 @@
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
-                                <CheckBox Content="Critical incident"
+                                <CheckBox Content="{DynamicResource Label_CriticalIncident}"
                                           IsChecked="{Binding Editor.IsCritical, Mode=TwoWay}"
                                           IsEnabled="{Binding IsEditorEnabled}" />
-                                <TextBlock Text="Risk Level" Margin="16,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Label_RiskLevel}" Margin="16,0,8,0" VerticalAlignment="Center" />
                                 <TextBox Width="80"
                                          Text="{Binding Editor.RiskLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          IsEnabled="{Binding IsEditorEnabled}" />
-                                <TextBlock Text="Anomaly" Margin="16,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Label_Anomaly}" Margin="16,0,8,0" VerticalAlignment="Center" />
                                 <TextBox Width="80"
                                          Text="{Binding Editor.AnomalyScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          IsEnabled="{Binding IsEditorEnabled}" />
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock Text="Closure Comment" Margin="0,12,0,4" />
+                        <TextBlock Text="{DynamicResource Label_ClosureComment}" Margin="0,12,0,4" />
                         <TextBox Text="{Binding Editor.ClosureComment, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  Height="60"
                                  IsEnabled="{Binding IsEditorEnabled}" />
 
-                        <TextBlock Text="Notes" Margin="0,12,0,4" />
+                        <TextBlock Text="{DynamicResource Label_Notes}" Margin="0,12,0,4" />
                         <TextBox Text="{Binding Editor.Notes, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"

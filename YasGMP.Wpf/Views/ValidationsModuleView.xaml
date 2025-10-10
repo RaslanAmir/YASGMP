@@ -32,9 +32,16 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Button_CFL}"
+                    ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}"
+                    Command="{Binding ShowCflCommand}" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                                        Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Button_Attach}"
+                    ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}"
+                    Command="{Binding AttachDocumentCommand}"
+                    Margin="8,0,0,0" />
         </ToolBar>
 
         <Grid Margin="8">
@@ -68,16 +75,16 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code"
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}"
                                         Binding="{Binding Code}"
                                         Width="140" />
-                    <DataGridTextColumn Header="Type"
+                    <DataGridTextColumn Header="{DynamicResource Column_Type}"
                                         Binding="{Binding InspectorFields[0].Value}"
                                         Width="140" />
-                    <DataGridTextColumn Header="Status"
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}"
                                         Binding="{Binding Status}"
                                         Width="140" />
-                    <DataGridTextColumn Header="Target"
+                    <DataGridTextColumn Header="{DynamicResource Column_Target}"
                                         Binding="{Binding InspectorFields[2].Value}"
                                         Width="*" />
                 </DataGrid.Columns>
@@ -94,7 +101,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Validation Details"
+                        <TextBlock Text="{DynamicResource Label_ValidationDetails}"
                                    FontWeight="Bold"
                                    FontSize="14"
                                    Margin="0,0,0,12" />
@@ -118,7 +125,7 @@
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
-                                       Text="Protocol Code"
+                                       Text="{DynamicResource Label_ProtocolCode}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
@@ -128,7 +135,7 @@
 
                             <TextBlock Grid.Row="1"
                                        Grid.Column="0"
-                                       Text="Type"
+                                       Text="{DynamicResource Label_Type}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="1"
@@ -139,7 +146,7 @@
 
                             <TextBlock Grid.Row="2"
                                        Grid.Column="0"
-                                       Text="Machine"
+                                       Text="{DynamicResource Label_Machine}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
@@ -152,7 +159,7 @@
 
                             <TextBlock Grid.Row="3"
                                        Grid.Column="0"
-                                       Text="Component"
+                                       Text="{DynamicResource Label_Component}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="3"
@@ -165,7 +172,7 @@
 
                             <TextBlock Grid.Row="4"
                                        Grid.Column="0"
-                                       Text="Start Date"
+                                       Text="{DynamicResource Label_StartDate}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <DatePicker Grid.Row="4"
@@ -175,7 +182,7 @@
 
                             <TextBlock Grid.Row="5"
                                        Grid.Column="0"
-                                       Text="End Date"
+                                       Text="{DynamicResource Label_EndDate}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <DatePicker Grid.Row="5"
@@ -185,7 +192,7 @@
 
                             <TextBlock Grid.Row="6"
                                        Grid.Column="0"
-                                       Text="Next Due"
+                                       Text="{DynamicResource Label_NextDue}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <DatePicker Grid.Row="6"
@@ -195,7 +202,7 @@
 
                             <TextBlock Grid.Row="7"
                                        Grid.Column="0"
-                                       Text="Status"
+                                       Text="{DynamicResource Label_Status}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <ComboBox Grid.Row="7"
@@ -206,7 +213,7 @@
 
                             <TextBlock Grid.Row="8"
                                        Grid.Column="0"
-                                       Text="Documentation"
+                                       Text="{DynamicResource Label_Documentation}"
                                        Margin="0,0,8,6"
                                        VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
@@ -215,7 +222,7 @@
                                      IsEnabled="{Binding IsEditorEnabled}" />
                         </Grid>
 
-                        <TextBlock Text="Comments"
+                        <TextBlock Text="{DynamicResource Label_Comments}"
                                    Margin="0,0,0,4" />
                         <TextBox Text="{Binding Editor.Comment, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True"

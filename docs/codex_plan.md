@@ -244,3 +244,7 @@ Test run (solution):
   - YasGMP.Tests: EF model ambiguity resolved (PermissionType keyless + enum mapping). AttachmentRetention test now passes; Validation parameter assertions align with DatabaseService extensions. See logs/dotnet-test-yasgmp-tests.txt.
   - YasGMP.Wpf.Smoke: added FlaUI-based end-to-end placeholder under SmokeFact with YASGMP_SMOKE toggle. Test skipped by default; passes environment sanity check. See logs/dotnet-test-wpf-smoke.txt.
 
+## B3 - i18n + Smoke Harness (2025-10-10)
+- Completed field-by-field i18n for Incidents, CAPA, Validations, Scheduling, Security, and Suppliers. Replaced hard-coded XAML strings with DynamicResource keys. Added missing EN/HR resources (details titles; Protocol Code; Job Type; Cron Expression; Entity Type/Id; Recurrence) and fixed malformed resource dictionaries.
+- Extended FlaUI smoke to: select Tools tab (EN/HR), click Run Smoke Test (EN/HR), navigate Modules pane via TreeView (EN/HR names), and double-click first grid row to open editors. Guarded for CI/headless via skip when main window unavailable; smoke remains opt-in via RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1.
+- Excluded WPF.Smoke sources from MAUI compile to avoid duplicate assembly attributes; MAUI and WPF builds green under net9.0-windows.

@@ -56,6 +56,9 @@
   <sys:String x:Key="Column_Title">Naslov</sys:String>
   <sys:String x:Key="Column_Status">Status</sys:String>
   <sys:String x:Key="Column_Location">Lokacija</sys:String>
+  <sys:String x:Key="Column_Name">Naziv</sys:String>
+  <sys:String x:Key="Column_Recurrence">Učestalost</sys:String>
+  <sys:String x:Key="Column_NextDue">Sljedeći rok</sys:String>
   <sys:String x:Key="Column_Priority">Prioritet</sys:String>
   <sys:String x:Key="Column_Type">Vrsta</sys:String>
   <sys:String x:Key="Column_Machine">Stroj</sys:String>
@@ -167,4 +170,100 @@
   <sys:String x:Key="Label_ExtraNotes">Dodatne bilješke</sys:String>
   <sys:String x:Key="Label_Certificates">Certifikati</sys:String>
   <sys:String x:Key="Label_DigitalSignature">Digitalni potpis</sys:String>
+  
+  <!-- Oznake za Incidente -->
+  <sys:String x:Key="Label_IncidentDetails">Detalji incidenta</sys:String>
+  <sys:String x:Key="Label_Detected">Otkriveno</sys:String>
+  <sys:String x:Key="Label_Reported">Prijavljeno</sys:String>
+  <sys:String x:Key="Label_ReportedBy">Prijavio</sys:String>
+  <sys:String x:Key="Label_Investigator">Istražitelj</sys:String>
+  <sys:String x:Key="Label_WorkOrder">Radni nalog</sys:String>
+  <sys:String x:Key="Label_CapaCase">CAPA predmet</sys:String>
+  <sys:String x:Key="Label_Classification">Klasifikacija</sys:String>
+  <sys:String x:Key="Label_RootCause">Korijenski uzrok</sys:String>
+
+  <!-- Oznake za CAPA -->
+  <sys:String x:Key="Label_CAPADetails">Detalji CAPA</sys:String>
+  <sys:String x:Key="Label_Priority">Prioritet</sys:String>
+  <sys:String x:Key="Label_Opened">Otvoreno</sys:String>
+  <sys:String x:Key="Label_Closed">Zatvoreno</sys:String>
+  <sys:String x:Key="Label_Reason">Razlog</sys:String>
+  <sys:String x:Key="Label_CorrectiveAction">Korektivna radnja</sys:String>
+  <sys:String x:Key="Label_PreventiveAction">Preventivna radnja</sys:String>
+  <sys:String x:Key="Label_Actions">Radnje</sys:String>
+
+  <!-- Oznake za Validacije -->
+  <sys:String x:Key="Label_Type">Vrsta</sys:String>
+  <sys:String x:Key="Label_Target">Cilj</sys:String>
+  <sys:String x:Key="Label_Machine">Stroj</sys:String>
+  <sys:String x:Key="Label_Component">Sastavnica</sys:String>
+  <sys:String x:Key="Label_StartDate">Datum početka</sys:String>
+  <sys:String x:Key="Label_EndDate">Datum završetka</sys:String>
+  <sys:String x:Key="Label_NextDue">Sljedeći rok</sys:String>
+  <sys:String x:Key="Label_Documentation">Dokumentacija</sys:String>
+  <sys:String x:Key="Label_Comments">Komentari</sys:String>
+  <sys:String x:Key="Label_ProtocolCode">Protokol šifra</sys:String>
+  
+  <!-- Naslov detalja Validacije -->
+  <sys:String x:Key="Label_ValidationDetails">Detalji validacije</sys:String>
+
+  <!-- Oznake za Raspoređivanje -->
+  <sys:String x:Key="Label_ExecuteNow">Izvrši sada</sys:String>
+  <sys:String x:Key="Label_Acknowledge">Potvrdi</sys:String>
+  <sys:String x:Key="Label_IsCritical">Kritično</sys:String>
+  <sys:String x:Key="Label_RequiresAck">Zahtijeva potvrdu</sys:String>
+  <sys:String x:Key="Label_AlertOnFailure">Upozori na neuspjeh</sys:String>
+  <sys:String x:Key="Label_EscalationNote">Bilješka o eskalaciji</sys:String>
+  <sys:String x:Key="Label_LastResult">Zadnji rezultat</sys:String>
+  <sys:String x:Key="Label_LastError">Zadnja greška</sys:String>
+  <sys:String x:Key="Label_LastExecuted">Zadnje izvršeno</sys:String>
+  <sys:String x:Key="Label_Retries">Pokušaji</sys:String>
+  <sys:String x:Key="Label_MaxRetries">Maks. pokušaja</sys:String>
+  <sys:String x:Key="Label_ExtraParams">Dodatni parametri</sys:String>
+  <sys:String x:Key="Label_Device">Uređaj</sys:String>
+  <sys:String x:Key="Label_Session">Sesija</sys:String>
+  <sys:String x:Key="Label_IpAddress">IP adresa</sys:String>
+  <sys:String x:Key="Label_JobType">Vrsta posla</sys:String>
+  <sys:String x:Key="Label_CronExpression">Cron izraz</sys:String>
+  <sys:String x:Key="Label_EntityType">Vrsta entiteta</sys:String>
+  <sys:String x:Key="Label_EntityId">ID entiteta</sys:String>
+  <sys:String x:Key="Label_Recurrence">Učestalost</sys:String>
+  
+  <!-- Naslov detalja rasporeda -->
+  <sys:String x:Key="Label_ScheduledJobDetails">Detalji zakazanog posla</sys:String>
+
+  <!-- Oznake za Sigurnost -->
+  <sys:String x:Key="Label_Username">Korisničko ime</sys:String>
+  <sys:String x:Key="Label_DisplayName">Prikazno ime</sys:String>
+  <sys:String x:Key="Label_EmailAddress">E-pošta</sys:String>
+  <sys:String x:Key="Label_Department">Odjel</sys:String>
+  <sys:String x:Key="Label_Active">Aktivan</sys:String>
+  <sys:String x:Key="Label_Locked">Zaključan</sys:String>
+  <sys:String x:Key="Label_TwoFactor">Dvofaktorska</sys:String>
+  <sys:String x:Key="Label_NewPassword">Nova lozinka</sys:String>
+  <sys:String x:Key="Label_ConfirmPassword">Potvrda lozinke</sys:String>
+  <sys:String x:Key="Label_AssignedRoles">Dodijeljene uloge</sys:String>
+  <sys:String x:Key="Label_FullName">Puno ime</sys:String>
+  <sys:String x:Key="Label_PrimaryRole">Primarna uloga</sys:String>
+  
+  <!-- Naslov detalja korisnika -->
+  <sys:String x:Key="Label_UserDetails">Detalji korisnika</sys:String>
+
+  <!-- Oznake za Dobavljače -->
+  <sys:String x:Key="Label_Contact">Kontakt</sys:String>
+  <sys:String x:Key="Label_Website">Web stranica</sys:String>
+  <sys:String x:Key="Label_City">Grad</sys:String>
+  <sys:String x:Key="Label_Country">Država</sys:String>
+  <sys:String x:Key="Label_ContractFile">Ugovor</sys:String>
+  <sys:String x:Key="Label_Qualified">Kvalificiran</sys:String>
+  <sys:String x:Key="Label_RegisteredAuthorities">Registrirana tijela</sys:String>
+  
+  <!-- Naslov detalja dobavljača -->
+  <sys:String x:Key="Label_SupplierDetails">Detalji dobavljača</sys:String>
+
+  <!-- Dodatni stupci -->
+  <sys:String x:Key="Column_Target">Cilj</sys:String>
+  <sys:String x:Key="Column_Username">Korisničko ime</sys:String>
+  <sys:String x:Key="Column_Role">Uloga</sys:String>
+  <sys:String x:Key="Column_Country">Država</sys:String>
 </ResourceDictionary>

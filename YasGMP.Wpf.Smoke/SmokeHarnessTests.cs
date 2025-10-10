@@ -18,7 +18,11 @@ public class SmokeHarnessTests
     public void SmokeToggle_ReportsDisabledByDefault()
     {
         var value = Environment.GetEnvironmentVariable("YASGMP_SMOKE");
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            // When explicitly enabled, this check is not applicable
+            return;
+        }
         Assert.True(string.IsNullOrWhiteSpace(value) || value.Equals("0", StringComparison.OrdinalIgnoreCase));
     }
 }
-

@@ -4,6 +4,8 @@
                 "wpfTarget":  "net9.0-windows10.0.19041.0",
                 "detected":  true,
                 "notes":  [
+                              "2025-10-10: dotnet restore/build succeeded for yasgmp.sln (Release). MAUI + WPF builds green under net9.0-windows.",
+                              "2025-10-10: WPF.Smoke excluded from MAUI compile to avoid duplicate assembly attributes; EndToEnd smoke updated for EN/HR Tools tab and module tree navigation; skip-by-default and guarded when UI automation not permitted.",
                               "2025-10-10: dotnet --info/restore/build available; MAUI and WPF builds executed on host (WPF clean, MAUI with dependency warnings).",
                               "2025-10-10 (Increment 2): WPF + MAUI Windows builds succeeded under net9.0; i18n/a11y updates landed for ModuleRegistry and Ribbon. Logs: logs/dotnet-restore.txt, logs/dotnet-build-wpf.txt, logs/dotnet-build-maui.txt.",
                               "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
