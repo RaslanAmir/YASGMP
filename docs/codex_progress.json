@@ -67,6 +67,7 @@
       "2026-03-11: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-03-23: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Tests --filter AssetsModuleViewModel were retried; the dotnet CLI is still missing so each command exits with 'command not found'.",
       "2026-03-24: dotnet restore yasgmp.sln retried after Assets navigation regression updates; CLI remains unavailable so the command exits with 'command not found'.",
+      "2026-03-26: dotnet restore yasgmp.sln retried while adding B1FormDocumentViewModel command gating regression tests; CLI remains unavailable so the command exits with 'command not found'.",
       "2025-10-10: dotnet restore yasgmp.sln retried for FormMode state machine updates; CLI remains unavailable so the command exits with 'command not found'."
     ]
   },
@@ -342,6 +343,7 @@
     "2026-03-23: Assets module activation exits edit mode before applying navigation selection, forces a SelectedRecord reselection to reload _loadedMachine, and adds regression coverage so attachments command enablement refreshes after drill-down while dotnet restore/build/test remain blocked by the missing CLI.",
     "2026-03-24: Assets module tests now mock the navigation service to open the module with machine code parameters, asserting SearchText and localized status messaging echo the parameter while dotnet restore/build/test continue to fail with 'command not found' in this container.",
     "2025-10-10: B1FormDocumentViewModel.CanEnterMode now blocks non-Find transitions when validation errors exist, requires a selected record for View/Update, and prevents Add while dirty so toolbar enablement aligns with SAP B1; dotnet restore yasgmp.sln retried but the CLI remains unavailable (command not found).",
-    "2026-03-25: Refined B1FormDocumentViewModel command state refresh triggers (selected record, dirty flag, cancel) to mirror SAP B1 toolbar toggles; dotnet restore/build/test remain blocked with 'command not found' due to the missing CLI."
+    "2026-03-25: Refined B1FormDocumentViewModel command state refresh triggers (selected record, dirty flag, cancel) to mirror SAP B1 toolbar toggles; dotnet restore/build/test remain blocked with 'command not found' due to the missing CLI.",
+    "2026-03-26: Added B1FormDocumentViewModel regression tests covering selection/dirty/validation command gating and retried dotnet restore yasgmp.sln; CLI is still unavailable so the command exits with 'command not found'."
   ]
 }
