@@ -325,6 +325,11 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         RefreshCommandStates();
     }
 
+    partial void OnIsDirtyChanged(bool value)
+    {
+        RefreshCommandStates();
+    }
+
     partial void OnStatusMessageChanged(string value)
     {
         _shellInteraction.UpdateStatus(value);
@@ -353,11 +358,13 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         {
             _shellInteraction.UpdateInspector(new InspectorContext(ModuleKey, Title, null, "No record selected", Array.Empty<InspectorField>()));
             _ = OnRecordSelectedAsync(null);
+            RefreshCommandStates();
             return;
         }
 
         _shellInteraction.UpdateInspector(new InspectorContext(ModuleKey, Title, value.Key, value.Title, value.InspectorFields));
         _ = OnRecordSelectedAsync(value);
+        RefreshCommandStates();
     }
 
     private Task SetFindModeAsync()
@@ -544,6 +551,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             Mode = FormMode.View;
         }
         StatusMessage = _localization.GetString(CancelledStatusKey, Title);
+        RefreshCommandStates();
     }
 
     private async Task ShowCflAsync()
