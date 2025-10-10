@@ -446,7 +446,29 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     }
 
     private bool CanEnterMode(FormMode mode)
-        => !IsBusy && (Mode != mode || mode == FormMode.Find);
+    {
+        if (IsBusy)
+        {
+            return false;
+        }
+
+        if (Mode == mode && mode != FormMode.Find)
+        {
+            return false;
+        }
+
+        if (HasValidationErrors && mode != FormMode.Find)
+        {
+            return false;
+        }
+
+        return mode switch
+        {
+            FormMode.View or FormMode.Update => SelectedRecord is not null,
+            FormMode.Add => !IsDirty,
+            _ => true
+        };
+    }
 
     private async Task<bool> SaveAsync()
     {
