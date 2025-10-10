@@ -5,6 +5,7 @@
   - 2025-10-07T11:06Z: Current container session again reports `bash: command not found: dotnet`; document cadence remains static-analysis only until SDK is provisioned.
   - 2026-02-09T09:42Z: `dotnet --version` retried for this batch; container still returns `bash: command not found: dotnet`.
   - 2026-02-20T08:57Z: `dotnet restore yasgmp.sln` retried post-inspector automation updates; container still reports `bash: command not found: dotnet`.
+  - 2026-03-24T09:15Z: `dotnet restore yasgmp.sln` retried after updating Assets navigation regression tests; container still reports `bash: command not found: dotnet`.
 - [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-18, 2025-12-31, 2026-01-30, 2026-02-02, 2026-02-10, 2026-02-19, 2026-02-25, 2026-03-23 → **command not found**)*
 - [ ] MAUI builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31, 2026-01-30, 2026-02-02, 2026-02-10, 2026-02-19, 2026-02-25, 2026-03-23 → **command not found**)*
 - [ ] WPF builds *(pending SDK availability; `dotnet build` retried 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31, 2026-01-30, 2026-02-02, 2026-02-10, 2026-02-19, 2026-02-22, 2026-02-25, 2026-03-23 → **command not found**)*
@@ -69,6 +70,7 @@
 - **B3 — Editor framework** (templates, host, unsaved-guard) — [ ] todo
 - **B4+ — Module rollout:**
   - Assets/Machines — [x] done *(mode-aware CRUD with attachment uploads and e-signature capture via IElectronicSignatureDialogService; audit surfacing still pending)*
+    - 2026-03-24: Updated Assets module regression coverage to assert navigation parameter filters use machine code/id in search text and status messaging while dotnet restore/build remain blocked by the missing CLI.
   - Components — [x] done *(mode-aware editor wired to ComponentService with IElectronicSignatureDialogService gating persistence; audit surfacing remains blocked on SDK access)*
   - Parts & Warehouses — [x] done *(inventory snapshots, warehouse ledger preview, stock health warnings, and e-signature capture baked into save flows; audit surfacing remains blocked on SDK access)*
   - Work Orders — [x] done *(CRUD adapter wired with attachments and e-signature capture ahead of adapter calls; audit surfacing queued once SDK access returns)*
