@@ -104,13 +104,22 @@ public class B1FormDocumentViewModelTests
         Assert.True(viewModel.EnterAddModeCommand.CanExecute(null));
         Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
         Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
 
-        viewModel.ValidationMessages.Add("Validation failed");
+        viewModel.InjectValidationErrors(new[] { "Validation failed" });
 
         Assert.True(viewModel.HasValidationErrors);
         Assert.False(viewModel.EnterAddModeCommand.CanExecute(null));
         Assert.False(viewModel.EnterViewModeCommand.CanExecute(null));
         Assert.False(viewModel.EnterUpdateModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
+
+        viewModel.ClearValidation();
+
+        Assert.False(viewModel.HasValidationErrors);
+        Assert.True(viewModel.EnterAddModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
     }
 
     private sealed class TestDocumentViewModel : B1FormDocumentViewModel
@@ -131,6 +140,10 @@ public class B1FormDocumentViewModelTests
         public void MarkAsDirty() => MarkDirty();
 
         public void InvokeResetDirty() => ResetDirty();
+
+        public void InjectValidationErrors(IEnumerable<string> errors) => ApplyValidation(errors);
+
+        public void ClearValidation() => ClearValidationMessages();
 
         protected override Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
             => Task.FromResult<IReadOnlyList<ModuleRecord>>(Array.Empty<ModuleRecord>());
