@@ -38,6 +38,81 @@ public class B1FormDocumentViewModelTests
         Assert.Equal(FormMode.Add, viewModel.Mode);
     }
 
+    [Fact]
+    public void EnterViewAndUpdateRemainDisabledWithoutSelection()
+    {
+        var localization = new StubLocalizationService();
+        var viewModel = new TestDocumentViewModel(
+            new NullCflDialogService(),
+            new PassiveShellInteractionService(),
+            new PassiveModuleNavigationService(),
+            localization,
+            "noop");
+
+        viewModel.Mode = FormMode.Find;
+        viewModel.SelectedRecord = null;
+
+        Assert.False(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.False(viewModel.EnterUpdateModeCommand.CanExecute(null));
+
+        var record = new ModuleRecord("1", "First");
+        viewModel.Records.Add(record);
+        viewModel.SelectedRecord = record;
+
+        Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void EnterAddModeDisabledWhileDirtyUntilReset()
+    {
+        var localization = new StubLocalizationService();
+        var viewModel = new TestDocumentViewModel(
+            new NullCflDialogService(),
+            new PassiveShellInteractionService(),
+            new PassiveModuleNavigationService(),
+            localization,
+            "noop");
+
+        Assert.True(viewModel.EnterAddModeCommand.CanExecute(null));
+
+        viewModel.MarkAsDirty();
+
+        Assert.False(viewModel.EnterAddModeCommand.CanExecute(null));
+
+        viewModel.InvokeResetDirty();
+
+        Assert.True(viewModel.EnterAddModeCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ModeTransitionsBlockedWhenValidationErrorsPresent()
+    {
+        var localization = new StubLocalizationService();
+        var viewModel = new TestDocumentViewModel(
+            new NullCflDialogService(),
+            new PassiveShellInteractionService(),
+            new PassiveModuleNavigationService(),
+            localization,
+            "noop");
+
+        viewModel.Mode = FormMode.Find;
+        var record = new ModuleRecord("1", "First");
+        viewModel.Records.Add(record);
+        viewModel.SelectedRecord = record;
+
+        Assert.True(viewModel.EnterAddModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
+
+        viewModel.ValidationMessages.Add("Validation failed");
+
+        Assert.True(viewModel.HasValidationErrors);
+        Assert.False(viewModel.EnterAddModeCommand.CanExecute(null));
+        Assert.False(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.False(viewModel.EnterUpdateModeCommand.CanExecute(null));
+    }
+
     private sealed class TestDocumentViewModel : B1FormDocumentViewModel
     {
         private readonly string _cancellationMessage;
@@ -52,6 +127,10 @@ public class B1FormDocumentViewModelTests
         {
             _cancellationMessage = cancellationMessage;
         }
+
+        public void MarkAsDirty() => MarkDirty();
+
+        public void InvokeResetDirty() => ResetDirty();
 
         protected override Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
             => Task.FromResult<IReadOnlyList<ModuleRecord>>(Array.Empty<ModuleRecord>());
