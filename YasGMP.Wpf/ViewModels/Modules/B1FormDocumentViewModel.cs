@@ -469,11 +469,6 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             return false;
         }
 
-        if (HasValidationErrors)
-        {
-            return false;
-        }
-
         return mode switch
         {
             FormMode.View or FormMode.Update => SelectedRecord is not null,
