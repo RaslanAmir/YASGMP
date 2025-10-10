@@ -131,5 +131,57 @@
         "WindowsSDK-19041"
       ]
     }
+  },
+  {
+    "run_id": "2025-10-10T10:15:00Z",
+    "scope": {
+      "folders_scanned": 6,
+      "files_scanned": 9,
+      "modules_touched": [
+        "Environment",
+        "Build",
+        "Tests"
+      ]
+    },
+    "actions": [
+      {
+        "type": "command",
+        "command": "./dotnet-install.sh --channel 9.0",
+        "outcome": "succeeded",
+        "details": "Installed .NET SDK 9.0.305 into ~/.dotnet for cross-platform restore attempts."
+      },
+      {
+        "type": "command",
+        "command": "dotnet --info",
+        "outcome": "succeeded",
+        "details": "SDK 9.0.305 detected on linux-x64; Windows desktop workloads still absent."
+      },
+      {
+        "type": "command",
+        "command": "dotnet restore -p:EnableWindowsTargeting=true",
+        "outcome": "failed",
+        "details": "Restore stops with NETSDK1147 requiring the maui-tizen workload on this non-Windows host."
+      },
+      {
+        "type": "command",
+        "command": "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true",
+        "outcome": "failed",
+        "details": "Compilation hits unresolved YasGMP.Helpers/Diagnostics namespaces and missing signature DTO types in AppCore."
+      },
+      {
+        "type": "command",
+        "command": "dotnet test YasGMP.Wpf.Tests -c Release -p:EnableWindowsTargeting=true --filter FullyQualifiedName~DockLayoutPersistenceServiceTests",
+        "outcome": "failed",
+        "details": "Test restore fails with NU1605 downgrade and NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041."
+      }
+    ],
+    "summary": {
+      "issues_found": 0,
+      "todos_created": 0,
+      "blocking_risks": [
+        "I-001",
+        "WindowsSDK-19041"
+      ]
+    }
   }
 ]
