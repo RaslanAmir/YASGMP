@@ -153,6 +153,7 @@ public sealed class ModuleToolbarCommandTests
             toggle.ApplyTemplate();
 
             Assert.Equal("Find", toggle.Content);
+            Assert.True(ToolTipService.GetShowOnDisabled(toggle));
             Assert.Equal("Locate an existing record.", ToolTipService.GetToolTip(toggle));
             Assert.Equal("Find command", AutomationProperties.GetName(toggle));
             Assert.Equal("Toolbar_Find", AutomationProperties.GetAutomationId(toggle));
