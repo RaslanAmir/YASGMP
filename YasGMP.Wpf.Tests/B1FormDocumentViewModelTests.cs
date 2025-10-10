@@ -61,6 +61,11 @@ public class B1FormDocumentViewModelTests
 
         Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
         Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
+
+        viewModel.SelectedRecord = null;
+
+        Assert.False(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.False(viewModel.EnterUpdateModeCommand.CanExecute(null));
     }
 
     [Fact]
@@ -138,6 +143,23 @@ public class B1FormDocumentViewModelTests
         Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
 
         viewModel.InjectValidationErrors(new[] { "Validation failed" });
+
+        Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void FindModeRemainsAvailableWhileDirty()
+    {
+        var localization = new StubLocalizationService();
+        var viewModel = new TestDocumentViewModel(
+            new NullCflDialogService(),
+            new PassiveShellInteractionService(),
+            new PassiveModuleNavigationService(),
+            localization,
+            "noop");
+
+        viewModel.Mode = FormMode.Find;
+        viewModel.MarkAsDirty();
 
         Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
     }

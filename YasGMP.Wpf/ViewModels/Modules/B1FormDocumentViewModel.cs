@@ -435,6 +435,8 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         {
             SelectedRecord = null;
         }
+
+        RefreshCommandStates();
     }
 
     private bool FilterRecord(object obj)
@@ -471,11 +473,15 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
         return mode switch
         {
-            FormMode.View or FormMode.Update => SelectedRecord is not null,
-            FormMode.Add => !IsDirty && !HasValidationErrors,
+            FormMode.Add => CanEnterAddMode(),
+            FormMode.View or FormMode.Update => HasSelectedRecord(),
             _ => true
         };
     }
+
+    private bool HasSelectedRecord() => SelectedRecord is not null;
+
+    private bool CanEnterAddMode() => !IsDirty && !HasValidationErrors;
 
     private async Task<bool> SaveAsync()
     {
