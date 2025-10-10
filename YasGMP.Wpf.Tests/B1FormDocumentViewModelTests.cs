@@ -86,7 +86,7 @@ public class B1FormDocumentViewModelTests
     }
 
     [Fact]
-    public void ModeTransitionsBlockedWhenValidationErrorsPresent()
+    public void ValidationErrorsOnlyBlockAddMode()
     {
         var localization = new StubLocalizationService();
         var viewModel = new TestDocumentViewModel(
@@ -110,8 +110,8 @@ public class B1FormDocumentViewModelTests
 
         Assert.True(viewModel.HasValidationErrors);
         Assert.False(viewModel.EnterAddModeCommand.CanExecute(null));
-        Assert.False(viewModel.EnterViewModeCommand.CanExecute(null));
-        Assert.False(viewModel.EnterUpdateModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
+        Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
         Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
 
         viewModel.ClearValidation();
@@ -120,6 +120,26 @@ public class B1FormDocumentViewModelTests
         Assert.True(viewModel.EnterAddModeCommand.CanExecute(null));
         Assert.True(viewModel.EnterViewModeCommand.CanExecute(null));
         Assert.True(viewModel.EnterUpdateModeCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void FindModeRemainsReentrant()
+    {
+        var localization = new StubLocalizationService();
+        var viewModel = new TestDocumentViewModel(
+            new NullCflDialogService(),
+            new PassiveShellInteractionService(),
+            new PassiveModuleNavigationService(),
+            localization,
+            "noop");
+
+        viewModel.Mode = FormMode.Find;
+
+        Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
+
+        viewModel.InjectValidationErrors(new[] { "Validation failed" });
+
+        Assert.True(viewModel.EnterFindModeCommand.CanExecute(null));
     }
 
     private sealed class TestDocumentViewModel : B1FormDocumentViewModel
