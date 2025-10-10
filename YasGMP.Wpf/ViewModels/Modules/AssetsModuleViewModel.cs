@@ -156,6 +156,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return false;
         }
 
+        var forceReload = ReferenceEquals(SelectedRecord, match);
+        if (forceReload)
+        {
+            SelectedRecord = null;
+        }
+
         SelectedRecord = match;
 
         var search = string.IsNullOrWhiteSpace(match.Title)
@@ -264,12 +270,23 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
+        if (IsInEditMode)
+        {
+            await EnterViewModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+        }
+
         if (ApplyNavigationSelection(target))
         {
             return;
         }
 
         await RefreshAsync(parameter).ConfigureAwait(false);
+
+        if (IsInEditMode)
+        {
+            await EnterViewModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+        }
+
         ApplyNavigationSelection(target);
     }
 
