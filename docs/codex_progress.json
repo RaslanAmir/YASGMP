@@ -12,6 +12,7 @@
       "2025-09-28: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
       "2025-10-06: dotnet --info/restore/build retried; CLI remains unavailable in the container so commands exit with 'command not found'.",
       "2025-10-07: dotnet restore/build retried for yasgmp.sln and platform targets; CLI remains unavailable so every command exits with 'command not found'.",
+      "2025-10-09T06:55Z: dotnet --info retried for this increment; CLI still missing so command exits with 'command not found'.",
       "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked.",
       "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container.",
       "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container.",
@@ -322,6 +323,7 @@
   "progress": [
     "2026-03-12: Layout persistence now pins the @layout parameter to LongText so AvalonDock XML snapshots avoid truncation, and AppCore/WPF regression tests assert the typed parameter while dotnet restore/build remain blocked by the missing CLI.",
     "2026-03-13: Inspector pane help text and modules pane automation bindings refreshed via localized metadata while dotnet restore/build remain blocked by the missing CLI.",
-    "2026-03-14: Smoke test summaries now surface localization resource keys with EN↔HR coverage in unit tests while dotnet restore/build continue to fail with 'command not found' because the CLI is unavailable."
+    "2026-03-14: Smoke test summaries now surface localization resource keys with EN↔HR coverage in unit tests while dotnet restore/build continue to fail with 'command not found' because the CLI is unavailable.",
+    "2026-03-14: Logged status snapshot + next-action checklist (SDK install, restore/build/test reruns, SAP B1 shell gating) to keep stakeholders aligned while the environment remains documentation-only."
   ]
 }

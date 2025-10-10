@@ -3,6 +3,7 @@
 ## Current Compile Status
 - [ ] Dotnet SDKs detected and recorded *(blocked: `dotnet` CLI not available in container PATH`; `dotnet --info` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-28, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-31, 2026-02-10, 2026-02-19, 2026-02-25 → **command not found**)*
   - 2025-10-07T11:06Z: Current container session again reports `bash: command not found: dotnet`; document cadence remains static-analysis only until SDK is provisioned.
+  - 2025-10-09T06:55Z: Latest verification for this increment again returned `bash: command not found: dotnet`; work remains limited to static analysis/documentation until SDK installation.
   - 2026-02-09T09:42Z: `dotnet --version` retried for this batch; container still returns `bash: command not found: dotnet`.
   - 2026-02-20T08:57Z: `dotnet restore yasgmp.sln` retried post-inspector automation updates; container still reports `bash: command not found: dotnet`.
 - [ ] Solution restores *(pending SDK availability; `dotnet restore` retried 2025-09-24, 2025-09-25, 2025-09-26, 2025-09-27, 2025-09-29, 2025-10-06, 2025-10-07, 2025-10-14, 2025-10-17, 2025-10-23, 2025-10-24, 2025-10-30, 2025-11-01, 2025-11-02, 2025-11-04, 2025-11-07, 2025-11-09, and 2025-11-18, 2025-11-19, 2025-11-30, 2025-12-04, 2025-12-08, 2025-12-18, 2025-12-31, 2026-01-30, 2026-02-02, 2026-02-10, 2026-02-19, 2026-02-25 → **command not found**)*
@@ -15,6 +16,16 @@
 - AvalonDock: **4.72.1** *(pinned in `YasGMP.Wpf.csproj`).*
 - Other NuGets: **Fluent.Ribbon 11.0.1**, **CommunityToolkit.Mvvm 8.4.0**, **Microsoft.Extensions.* 9.0.3**, **MySqlConnector 2.4.0** *(pinned in csproj).* 
 - Environment gap: install/enable **.NET 9 SDK** and **Windows 10 SDK (19041+)** on the host. The build container currently lacks `dotnet`; run `scripts/bootstrap-dotnet9.ps1` or install via `winget install Microsoft.DotNet.SDK.9`.
+
+## Status Snapshot — 2026-03-14
+- Environment: documentation-only cadence while the container still reports `bash: command not found: dotnet` on every restore/build/test attempt (last verified 2025-10-09T06:55Z).
+- Shell foundation: localization, automation metadata, and inspector/status bar wiring are in place; awaiting builds/smoke to validate.
+- Compliance overlays: audit, attachment, and electronic signature service scaffolds completed with unit templates queued for execution once the SDK is available.
+
+## Next Actions (blocked until .NET SDK is installed)
+1. Provision the .NET 9 SDK + Windows 10 SDK (19041+) on the build host, then re-run `dotnet --info`, `dotnet restore yasgmp.sln`, and `dotnet build` for MAUI + WPF targets to lift Batch B0.
+2. Execute WPF + AppCore unit suites and FlaUI smoke harness to validate localization, automation metadata, audit/signature hooks, and attachment workflows end-to-end.
+3. Resume Batch B1 shell milestones: finalize SAP B1 form-mode command gating, golden arrow navigation wiring, and ModulePane layout persistence tests once builds are passing.
 
 ## Batches
 - **B0 — Environment stabilization** (SDKs, NuGets, XAML namespaces) — **blocked** *(no `dotnet` CLI)*

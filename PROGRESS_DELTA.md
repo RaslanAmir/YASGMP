@@ -1,2 +1,3 @@
 - Module Environment: blocked → blocked | Reasons: dotnet CLI still unavailable; static documentation refreshed | Issues closed: []
 - Batch B0: blocked → blocked | Reasons: 2025-10-07T11:06Z CLI absence reconfirmed; next actions scoped to documentation, schema review, and static analysis | Issues closed: []
+- Environment cadence: documentation-only → documentation-only | Reasons: 2025-10-09T06:55Z CLI check again failed with `command not found`; awaiting SDK install; status snapshot + next-action checklist published for stakeholders | Issues closed: []

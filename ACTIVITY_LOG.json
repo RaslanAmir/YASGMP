@@ -80,5 +80,80 @@
         "I-001"
       ]
     }
+  },
+  {
+    "run_id": "2025-10-09T06:55:09Z",
+    "scope": {
+      "folders_scanned": 4,
+      "files_scanned": 6,
+      "modules_touched": []
+    },
+    "actions": [
+      {
+        "type": "env_guard",
+        "rule": "cli-missing",
+        "status": "enforced"
+      },
+      {
+        "type": "command",
+        "command": "dotnet --info",
+        "outcome": "not_found",
+        "details": "bash: command not found: dotnet"
+      },
+      {
+        "type": "update_file",
+        "path": "docs/codex_plan.md",
+        "summary": "Recorded 2025-10-09T06:55Z CLI absence for Batch B0 compile status."
+      },
+      {
+        "type": "update_file",
+        "path": "docs/codex_progress.json",
+        "summary": "Added 2025-10-09T06:55Z sdk.notes entry capturing dotnet --info failure."
+      }
+    ],
+    "summary": {
+      "issues_found": 0,
+      "todos_created": 0,
+      "blocking_risks": [
+        "I-001"
+      ]
+    }
+  },
+  {
+    "run_id": "2026-03-14T09:40:00Z",
+    "scope": {
+      "folders_scanned": 5,
+      "files_scanned": 5,
+      "modules_touched": []
+    },
+    "actions": [
+      {
+        "type": "env_guard",
+        "rule": "cli-missing",
+        "status": "enforced"
+      },
+      {
+        "type": "update_file",
+        "path": "docs/codex_plan.md",
+        "summary": "Published status snapshot and next-action checklist pending .NET SDK installation."
+      },
+      {
+        "type": "update_file",
+        "path": "docs/codex_progress.json",
+        "summary": "Logged progress note covering status snapshot + pending actions while environment remains documentation-only."
+      },
+      {
+        "type": "update_file",
+        "path": "PROGRESS_DELTA.md",
+        "summary": "Noted stakeholder status snapshot publication while cadence stays documentation-only."
+      }
+    ],
+    "summary": {
+      "issues_found": 0,
+      "todos_created": 0,
+      "blocking_risks": [
+        "I-001"
+      ]
+    }
   }
 ]
