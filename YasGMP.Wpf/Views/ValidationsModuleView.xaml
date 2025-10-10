@@ -51,7 +51,7 @@
             <DockPanel Grid.Row="0"
                        Grid.ColumnSpan="2"
                        Margin="0,0,0,8">
-                <TextBlock Text="Search:"
+                <TextBlock Text="{DynamicResource Label_Search}"
                            VerticalAlignment="Center"
                            Margin="0,0,8,0" />
                 <TextBox Width="220"
@@ -81,6 +81,9 @@
                                         Binding="{Binding InspectorFields[2].Value}"
                                         Width="*" />
                 </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
             </DataGrid>
 
             <Border Grid.Row="1"
@@ -242,3 +245,6 @@
         </Grid>
     </DockPanel>
 </UserControl>
+
+
+

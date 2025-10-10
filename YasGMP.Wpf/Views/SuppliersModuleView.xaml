@@ -44,8 +44,8 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="240" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="240" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{DynamicResource Label_Search}" ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
@@ -62,6 +62,9 @@
                     <DataGridTextColumn Header="Type" Binding="{Binding InspectorFields[0].Value}" Width="140" />
                     <DataGridTextColumn Header="Country" Binding="{Binding InspectorFields[4].Value}" Width="120" />
                 </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
             </DataGrid>
             <Border Grid.Row="1"
                     Grid.Column="1"
@@ -221,3 +224,6 @@
         </Grid>
     </DockPanel>
 </UserControl>
+
+
+

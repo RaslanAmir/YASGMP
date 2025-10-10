@@ -45,6 +45,10 @@
   <sys:String x:Key="Column_Title">Naslov</sys:String>
   <sys:String x:Key="Column_Status">Status</sys:String>
   <sys:String x:Key="Column_Location">Lokacija</sys:String>
+  <sys:String x:Key="Column_Priority">Prioritet</sys:String>
+  <sys:String x:Key="Column_Type">Vrsta</sys:String>
+  <sys:String x:Key="Column_Machine">Stroj</sys:String>
+  <sys:String x:Key="Column_Incident">Incident</sys:String>
 
   <!-- Zajednički ToolTipovi / A11y -->
   <sys:String x:Key="Tooltip_SearchBox">Filtriraj zapise tijekom tipkanja.</sys:String>

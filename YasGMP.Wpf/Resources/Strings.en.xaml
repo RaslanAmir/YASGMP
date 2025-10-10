@@ -45,6 +45,10 @@
   <sys:String x:Key="Column_Title">Title</sys:String>
   <sys:String x:Key="Column_Status">Status</sys:String>
   <sys:String x:Key="Column_Location">Location</sys:String>
+  <sys:String x:Key="Column_Priority">Priority</sys:String>
+  <sys:String x:Key="Column_Type">Type</sys:String>
+  <sys:String x:Key="Column_Machine">Machine</sys:String>
+  <sys:String x:Key="Column_Incident">Incident</sys:String>
 
   <!-- Common Tooltips / A11y -->
   <sys:String x:Key="Tooltip_SearchBox">Filter records as you type.</sys:String>

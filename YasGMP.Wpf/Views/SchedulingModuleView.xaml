@@ -46,7 +46,7 @@
             </Grid.RowDefinitions>
 
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
@@ -70,8 +70,11 @@
                         <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
                         <DataGridTextColumn Header="Recurrence" Binding="{Binding InspectorFields[1].Value}" Width="*" />
                         <DataGridTextColumn Header="Next Due" Binding="{Binding InspectorFields[0].Value}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
+            </DataGrid>
 
                 <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,0,0,16">
@@ -231,3 +234,6 @@
         </Grid>
     </DockPanel>
 </UserControl>
+
+
+
