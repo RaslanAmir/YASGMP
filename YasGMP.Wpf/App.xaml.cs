@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.IO;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +27,9 @@ namespace YasGMP.Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Load localization resources (EN↔HR) before composing the shell.
+            TryLoadLocalizationResources();
 
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((_, cfg) =>
@@ -147,27 +152,48 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ModuleRegistry>(sp =>
                         {
                             var registry = new ModuleRegistry(sp);
-                            registry.Register<DashboardModuleViewModel>(DashboardModuleViewModel.ModuleKey, "Dashboard", "Cockpit", "Operations overview and KPIs");
-                            registry.Register<AssetsModuleViewModel>(AssetsModuleViewModel.ModuleKey, "Assets", "Maintenance", "Asset register and lifecycle");
-                            registry.Register<ComponentsModuleViewModel>(ComponentsModuleViewModel.ModuleKey, "Components", "Maintenance", "Component hierarchy and lifecycle");
-                            registry.Register<WarehouseModuleViewModel>(WarehouseModuleViewModel.ModuleKey, "Warehouse", "Maintenance", "Warehouse master data");
-                            registry.Register<WorkOrdersModuleViewModel>(WorkOrdersModuleViewModel.ModuleKey, "Work Orders", "Maintenance", "Corrective and preventive jobs");
-                            registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey, "Calibration", "Maintenance", "Calibration records");
-                            registry.Register<PartsModuleViewModel>(PartsModuleViewModel.ModuleKey, "Parts", "Maintenance", "Parts and spare stock");
-                            registry.Register<SuppliersModuleViewModel>(SuppliersModuleViewModel.ModuleKey, "Suppliers", "Supply Chain", "Approved suppliers and contractors");
-                            registry.Register<ExternalServicersModuleViewModel>(ExternalServicersModuleViewModel.ModuleKey, "External Servicers", "Supply Chain", "Accredited laboratories and service partners");
-                            registry.Register<CapaModuleViewModel>(CapaModuleViewModel.ModuleKey, "CAPA", "Quality", "Corrective actions and preventive plans");
-                            registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
-                            registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
-                            registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");
-                            registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
-                            registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
-                            registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");
-                            registry.Register<AuditLogDocumentViewModel>(AuditLogDocumentViewModel.ModuleKey, "Audit Trail", "Quality & Compliance", "System event history");
-                            registry.Register<AuditDashboardDocumentViewModel>(AuditDashboardDocumentViewModel.ModuleKey, "Audit Dashboard", "Quality & Compliance", "Real-time audit feed and exports");
-                            registry.Register<ApiAuditModuleViewModel>(ApiAuditModuleViewModel.ModuleKey, "API Audit Trail", "Quality & Compliance", "API key activity history and forensic request payloads");
-                            registry.Register<DiagnosticsModuleViewModel>(DiagnosticsModuleViewModel.ModuleKey, "Diagnostics", "Diagnostics", "Telemetry snapshots and health checks");
-                            registry.Register<AttachmentsModuleViewModel>(AttachmentsModuleViewModel.ModuleKey, "Attachments", "Documents", "File attachments and certificates");
+                            registry.Register<DashboardModuleViewModel>(DashboardModuleViewModel.ModuleKey,
+                                L("Module_Dashboard_Title", "Dashboard"), L("Category_Cockpit", "Cockpit"), L("Module_Dashboard_Tooltip", "Operations overview and KPIs"));
+                            registry.Register<AssetsModuleViewModel>(AssetsModuleViewModel.ModuleKey,
+                                L("Module_Assets_Title", "Assets"), L("Category_Maintenance", "Maintenance"), L("Module_Assets_Tooltip", "Asset register and lifecycle"));
+                            registry.Register<ComponentsModuleViewModel>(ComponentsModuleViewModel.ModuleKey,
+                                L("Module_Components_Title", "Components"), L("Category_Maintenance", "Maintenance"), L("Module_Components_Tooltip", "Component hierarchy and lifecycle"));
+                            registry.Register<WarehouseModuleViewModel>(WarehouseModuleViewModel.ModuleKey,
+                                L("Module_Warehouse_Title", "Warehouse"), L("Category_Maintenance", "Maintenance"), L("Module_Warehouse_Tooltip", "Warehouse master data"));
+                            registry.Register<WorkOrdersModuleViewModel>(WorkOrdersModuleViewModel.ModuleKey,
+                                L("Module_WorkOrders_Title", "Work Orders"), L("Category_Maintenance", "Maintenance"), L("Module_WorkOrders_Tooltip", "Corrective and preventive jobs"));
+                            registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey,
+                                L("Module_Calibration_Title", "Calibration"), L("Category_Maintenance", "Maintenance"), L("Module_Calibration_Tooltip", "Calibration records"));
+                            registry.Register<PartsModuleViewModel>(PartsModuleViewModel.ModuleKey,
+                                L("Module_Parts_Title", "Parts"), L("Category_Maintenance", "Maintenance"), L("Module_Parts_Tooltip", "Parts and spare stock"));
+                            registry.Register<SuppliersModuleViewModel>(SuppliersModuleViewModel.ModuleKey,
+                                L("Module_Suppliers_Title", "Suppliers"), L("Category_SupplyChain", "Supply Chain"), L("Module_Suppliers_Tooltip", "Approved suppliers and contractors"));
+                            registry.Register<ExternalServicersModuleViewModel>(ExternalServicersModuleViewModel.ModuleKey,
+                                L("Module_ExternalServicers_Title", "External Servicers"), L("Category_SupplyChain", "Supply Chain"), L("Module_ExternalServicers_Tooltip", "Accredited laboratories and service partners"));
+                            registry.Register<CapaModuleViewModel>(CapaModuleViewModel.ModuleKey,
+                                L("Module_CAPA_Title", "CAPA"), L("Category_Quality", "Quality"), L("Module_CAPA_Tooltip", "Corrective actions and preventive plans"));
+                            registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey,
+                                L("Module_Incidents_Title", "Incidents"), L("Category_Quality", "Quality"), L("Module_Incidents_Tooltip", "Incident intake and investigations"));
+                            registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey,
+                                L("Module_ChangeControl_Title", "Change Control"), L("Category_Quality", "Quality"), L("Module_ChangeControl_Tooltip", "Change control workflow"));
+                            registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey,
+                                L("Module_Validations_Title", "Validations"), L("Category_Quality", "Quality"), L("Module_Validations_Tooltip", "IQ/OQ/PQ lifecycle and requalification"));
+                            registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey,
+                                L("Module_Scheduling_Title", "Scheduling"), L("Category_Planning", "Planning"), L("Module_Scheduling_Tooltip", "Automated job schedules"));
+                            registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey,
+                                L("Module_Security_Title", "Security"), L("Category_Administration", "Administration"), L("Module_Security_Tooltip", "Users and security roles"));
+                            registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey,
+                                L("Module_Administration_Title", "Administration"), L("Category_Administration", "Administration"), L("Module_Administration_Tooltip", "Global configuration settings"));
+                            registry.Register<AuditLogDocumentViewModel>(AuditLogDocumentViewModel.ModuleKey,
+                                L("Module_AuditTrail_Title", "Audit Trail"), L("Category_QualityCompliance", "Quality & Compliance"), L("Module_AuditTrail_Tooltip", "System event history"));
+                            registry.Register<AuditDashboardDocumentViewModel>(AuditDashboardDocumentViewModel.ModuleKey,
+                                L("Module_AuditDashboard_Title", "Audit Dashboard"), L("Category_QualityCompliance", "Quality & Compliance"), L("Module_AuditDashboard_Tooltip", "Real-time audit feed and exports"));
+                            registry.Register<ApiAuditModuleViewModel>(ApiAuditModuleViewModel.ModuleKey,
+                                L("Module_ApiAuditTrail_Title", "API Audit Trail"), L("Category_QualityCompliance", "Quality & Compliance"), L("Module_ApiAuditTrail_Tooltip", "API key activity history and forensic request payloads"));
+                            registry.Register<DiagnosticsModuleViewModel>(DiagnosticsModuleViewModel.ModuleKey,
+                                L("Module_Diagnostics_Title", "Diagnostics"), L("Category_Diagnostics", "Diagnostics"), L("Module_Diagnostics_Tooltip", "Telemetry snapshots and health checks"));
+                            registry.Register<AttachmentsModuleViewModel>(AttachmentsModuleViewModel.ModuleKey,
+                                L("Module_Attachments_Title", "Attachments"), L("Category_Documents", "Documents"), L("Module_Attachments_Tooltip", "File attachments and certificates"));
                             return registry;
                         });
                         svc.AddSingleton<IModuleRegistry>(sp => sp.GetRequiredService<ModuleRegistry>());
@@ -221,6 +247,62 @@ namespace YasGMP.Wpf
             }
 
             return conn;
+        }
+
+        /// <summary>
+        /// Attempts to load a culture-specific resource dictionary for UI strings.
+        /// Falls back to English if a specific culture pack is not found.
+        /// </summary>
+        private static void TryLoadLocalizationResources()
+        {
+            try
+            {
+                var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant();
+                var app = Current;
+                if (app is null)
+                {
+                    return;
+                }
+
+                string packRelative = culture switch
+                {
+                    "hr" => "Resources/Strings.hr.xaml",
+                    _ => "Resources/Strings.en.xaml"
+                };
+
+                var uri = new Uri(packRelative, UriKind.Relative);
+                var dict = (ResourceDictionary)Application.LoadComponent(uri);
+                app.Resources.MergedDictionaries.Add(dict);
+            }
+            catch
+            {
+                // Non-fatal: localization resources are additive; fallback to default labels.
+            }
+        }
+
+        /// <summary>
+        /// Resolves a localized string from application resources with a safe fallback.
+        /// </summary>
+        private static string L(string key, string fallback)
+        {
+            try
+            {
+                var app = Current;
+                if (app?.Resources.Contains(key) == true)
+                {
+                    var value = app.Resources[key] as string;
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        return value!;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore localization lookup failures and use fallback.
+            }
+
+            return fallback;
         }
     }
 }

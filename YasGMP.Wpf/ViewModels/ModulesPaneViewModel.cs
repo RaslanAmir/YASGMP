@@ -17,7 +17,7 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
     {
         _moduleRegistry = moduleRegistry;
         _navigationService = navigationService;
-        Title = "Modules";
+        Title = TryGetString("Label_Modules", "Modules");
         ContentId = "YasGmp.Shell.Modules";
         Groups = new ObservableCollection<ModuleGroupViewModel>();
         OpenModuleCommand = new RelayCommand<ModuleLinkViewModel>(OpenModule);
@@ -54,6 +54,28 @@ public partial class ModulesPaneViewModel : AnchorableViewModel
 
         var document = _navigationService.OpenModule(link.Metadata.Key);
         _navigationService.Activate(document);
+    }
+
+    private static string TryGetString(string key, string fallback)
+    {
+        try
+        {
+            var app = System.Windows.Application.Current;
+            if (app?.Resources.Contains(key) == true)
+            {
+                var value = app.Resources[key] as string;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value!;
+                }
+            }
+        }
+        catch
+        {
+            // ignore and use fallback
+        }
+
+        return fallback;
     }
 }
 

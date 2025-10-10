@@ -57,9 +57,48 @@
   references:
     - logs/20251003-dotnet-build-wpf.txt
   suggested_fix: Remove the duplicated class body, restore the intended method implementation, and ensure the file compiles under C# 12 (file-scoped namespace).
-  status: open
-  resolved_in: null
+  status: resolved
+  resolved_in: increment-20251010-01
   tags:
     - wpf
     - assets
     - build
+
+- id: I-2025-10-10-001
+  file: YasGMP.Wpf/MainWindow.xaml
+  module: WpfShell
+  context: i18n
+  type: localization
+  severity: major
+  description: Many UI labels (Ribbon groups, module registry titles, tooltips) are hardcoded in English and not bound to resources.
+  references:
+    - YasGMP.Wpf/MainWindow.xaml
+    - YasGMP.Wpf/App.xaml.cs
+  suggested_fix: Expand EN↔HR ResourceDictionaries to cover all Ribbon groups/buttons and migrate ModuleRegistry titles and view-model status strings to resources.
+  status: in_progress
+  resolved_in: null
+  progress: |
+    Increment 2 migrated ModuleRegistry titles/categories/descriptions to EN↔HR resources and replaced hardcoded Home ribbon/group/button labels with DynamicResource bindings. Added AutomationProperties.Name + ToolTips on ribbon items; localized ModulesPane groups via localized categories. Remaining: translate field labels inside editor views and surface i18n for status messages.
+  tags:
+    - wpf
+    - i18n
+    - accessibility
+
+- id: I-2025-10-10-002
+  file: YasGMP.Wpf/Shell/ModulesPane.xaml
+  module: WpfShell
+  context: a11y
+  type: accessibility
+  severity: moderate
+  description: Not all user-visible controls expose AutomationProperties.Name or ToolTip content; a11y coverage is incomplete.
+  references:
+    - YasGMP.Wpf/Shell/ModulesPane.xaml
+    - YasGMP.Wpf/MainWindow.xaml
+  suggested_fix: Bind AutomationProperties.Name to headers/titles consistently and ensure every visible control has a meaningful ToolTip; add unit checks where feasible.
+  status: in_progress
+  resolved_in: null
+  progress: |
+    Added AutomationProperties.Name and ToolTip content for Backstage + Ribbon buttons and module view roots; propagated automation/tooltips to toolbar ToggleButtons (caption-bound) and common view buttons (CFL/Attach/Golden Arrow). Next: extend coverage to grid columns, input controls, and dialog launchers.
+  tags:
+    - wpf
+    - accessibility

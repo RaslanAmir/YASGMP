@@ -1,0 +1,60 @@
+<fluent:RibbonWindow x:Class="YasGMP.Wpf.MainWindow"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:fluent="urn:fluent-ribbon"
+                     xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+                     xmlns:adLayout="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
+                     xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
+                     xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
+                     xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+                     Title="YasGMP Cockpit"
+                     Width="1280"
+                     Height="800"
+                     Loaded="OnLoaded"
+                     Closing="OnClosing"
+                     mc:Ignorable="d">
+    <DockPanel>
+        <fluent:Ribbon x:Name="ShellRibbon"
+                       DockPanel.Dock="Top"
+                       
+                       IsQuickAccessToolBarVisible="False">
+            <fluent:Ribbon.Menu>
+                <fluent:Backstage x:Name="ShellBackstage">
+                    <fluent:BackstageTabControl>
+                        <fluent:BackstageTabItem Header="Layout">
+                            <StackPanel Margin="16">
+                                <fluent:Button Header="Save Layout"
+                                               Width="180"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.SaveLayoutCommand}" />
+                                <fluent:Button Header="Reset Layout"
+                                               Width="180"
+                                               Command="{Binding WindowCommands.ResetLayoutCommand}" />
+                            </StackPanel>
+                        </fluent:BackstageTabItem>
+                        <fluent:BackstageTabItem Header="Quality &amp; Compliance">
+                            <StackPanel Margin="16">
+                                <fluent:Button Header="Audit Trail"
+                                               Width="220"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.OpenAuditTrailCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="&#xE81C;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Open the immutable audit trail browser." />
+                                    </ToolTipService.ToolTip>
+                                </fluent:Button>
+                                <fluent:Button Header="Audit Dashboard"
+                                               Width="220"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="&#xE9D2;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>

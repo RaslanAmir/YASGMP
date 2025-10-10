@@ -6,7 +6,9 @@
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="600">
+             d:DesignWidth="600"
+             AutomationProperties.Name="{DynamicResource Module_Diagnostics_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_Diagnostics_Tooltip}">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">

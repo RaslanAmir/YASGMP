@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <!-- Ribbon Tabs -->
+  <sys:String x:Key="Tab_Home">Home</sys:String>
+  <sys:String x:Key="Tab_View">View</sys:String>
+  <sys:String x:Key="Tab_Tools">Tools</sys:String>
+
+  <!-- Groups / Backstage -->
+  <sys:String x:Key="Group_Layout">Layout</sys:String>
+  <sys:String x:Key="Group_Persistence">Persistence</sys:String>
+  <sys:String x:Key="Group_Diagnostics">Diagnostics</sys:String>
+  <sys:String x:Key="Group_QualityCompliance">Quality &amp; Compliance</sys:String>
+  <sys:String x:Key="Backstage_Layout">Layout</sys:String>
+  <sys:String x:Key="Backstage_SaveLayout">Save Layout</sys:String>
+  <sys:String x:Key="Backstage_ResetLayout">Reset Layout</sys:String>
+
+  <!-- Buttons -->
+  <sys:String x:Key="Button_AuditTrail">Audit Trail</sys:String>
+  <sys:String x:Key="Button_AuditDashboard">Audit Dashboard</sys:String>
+  <sys:String x:Key="Button_ApiAuditTrail">API Audit Trail</sys:String>
+  <sys:String x:Key="Button_RunSmokeTest">Run Smoke Test</sys:String>
+
+  <!-- Anchorable Titles -->
+  <sys:String x:Key="Label_Modules">Modules</sys:String>
+  <sys:String x:Key="Label_Inspector">Inspector</sys:String>
+
+  <!-- Categories -->
+  <sys:String x:Key="Category_Cockpit">Cockpit</sys:String>
+  <sys:String x:Key="Category_Maintenance">Maintenance</sys:String>
+  <sys:String x:Key="Category_SupplyChain">Supply Chain</sys:String>
+  <sys:String x:Key="Category_Quality">Quality</sys:String>
+  <sys:String x:Key="Category_QualityCompliance">Quality &amp; Compliance</sys:String>
+  <sys:String x:Key="Category_Planning">Planning</sys:String>
+  <sys:String x:Key="Category_Administration">Administration</sys:String>
+  <sys:String x:Key="Category_Diagnostics">Diagnostics</sys:String>
+  <sys:String x:Key="Category_Documents">Documents</sys:String>
+
+  <!-- Modules: Titles -->
+  <sys:String x:Key="Module_Dashboard_Title">Dashboard</sys:String>
+  <sys:String x:Key="Module_Assets_Title">Assets</sys:String>
+  <sys:String x:Key="Module_Components_Title">Components</sys:String>
+  <sys:String x:Key="Module_Warehouse_Title">Warehouse</sys:String>
+  <sys:String x:Key="Module_WorkOrders_Title">Work Orders</sys:String>
+  <sys:String x:Key="Module_Calibration_Title">Calibration</sys:String>
+  <sys:String x:Key="Module_Parts_Title">Parts</sys:String>
+  <sys:String x:Key="Module_Suppliers_Title">Suppliers</sys:String>
+  <sys:String x:Key="Module_ExternalServicers_Title">External Servicers</sys:String>
+  <sys:String x:Key="Module_CAPA_Title">CAPA</sys:String>
+  <sys:String x:Key="Module_Incidents_Title">Incidents</sys:String>
+  <sys:String x:Key="Module_ChangeControl_Title">Change Control</sys:String>
+  <sys:String x:Key="Module_Validations_Title">Validations</sys:String>
+  <sys:String x:Key="Module_Scheduling_Title">Scheduling</sys:String>
+  <sys:String x:Key="Module_Security_Title">Security</sys:String>
+  <sys:String x:Key="Module_Administration_Title">Administration</sys:String>
+  <sys:String x:Key="Module_AuditTrail_Title">Audit Trail</sys:String>
+  <sys:String x:Key="Module_AuditDashboard_Title">Audit Dashboard</sys:String>
+  <sys:String x:Key="Module_ApiAuditTrail_Title">API Audit Trail</sys:String>
+  <sys:String x:Key="Module_Diagnostics_Title">Diagnostics</sys:String>
+  <sys:String x:Key="Module_Attachments_Title">Attachments</sys:String>
+
+  <!-- Modules: Descriptions / Tooltips -->
+  <sys:String x:Key="Module_Dashboard_Tooltip">Operations overview and KPIs</sys:String>
+  <sys:String x:Key="Module_Assets_Tooltip">Asset register and lifecycle</sys:String>
+  <sys:String x:Key="Module_Components_Tooltip">Component hierarchy and lifecycle</sys:String>
+  <sys:String x:Key="Module_Warehouse_Tooltip">Warehouse master data</sys:String>
+  <sys:String x:Key="Module_WorkOrders_Tooltip">Corrective and preventive jobs</sys:String>
+  <sys:String x:Key="Module_Calibration_Tooltip">Calibration records</sys:String>
+  <sys:String x:Key="Module_Parts_Tooltip">Parts and spare stock</sys:String>
+  <sys:String x:Key="Module_Suppliers_Tooltip">Approved suppliers and contractors</sys:String>
+  <sys:String x:Key="Module_ExternalServicers_Tooltip">Accredited laboratories and service partners</sys:String>
+  <sys:String x:Key="Module_CAPA_Tooltip">Corrective actions and preventive plans</sys:String>
+  <sys:String x:Key="Module_Incidents_Tooltip">Incident intake and investigations</sys:String>
+  <sys:String x:Key="Module_ChangeControl_Tooltip">Change control workflow</sys:String>
+  <sys:String x:Key="Module_Validations_Tooltip">IQ/OQ/PQ lifecycle and requalification</sys:String>
+  <sys:String x:Key="Module_Scheduling_Tooltip">Automated job schedules</sys:String>
+  <sys:String x:Key="Module_Security_Tooltip">Users and security roles</sys:String>
+  <sys:String x:Key="Module_Administration_Tooltip">Global configuration settings</sys:String>
+  <sys:String x:Key="Module_AuditTrail_Tooltip">System event history</sys:String>
+  <sys:String x:Key="Module_AuditDashboard_Tooltip">Real-time audit feed and exports</sys:String>
+  <sys:String x:Key="Module_ApiAuditTrail_Tooltip">API key activity history and forensic request payloads</sys:String>
+  <sys:String x:Key="Module_Diagnostics_Tooltip">Telemetry snapshots and health checks</sys:String>
+  <sys:String x:Key="Module_Attachments_Tooltip">File attachments and certificates</sys:String>
+
+  <!-- Ribbon Buttons (Home) -->
+  <sys:String x:Key="Button_Machines">Machines</sys:String>
+  <sys:String x:Key="Button_Parts">Parts</sys:String>
+  <sys:String x:Key="Button_WorkOrders">Work Orders</sys:String>
+  <sys:String x:Key="Button_Calibration">Calibration</sys:String>
+  <sys:String x:Key="Button_Suppliers">Suppliers</sys:String>
+  <sys:String x:Key="Button_Security">Security</sys:String>
+  <sys:String x:Key="Button_Administration">Administration</sys:String>
+  <sys:String x:Key="Button_Diagnostics">Diagnostics</sys:String>
+
+  <!-- Ribbon Tooltips -->
+  <sys:String x:Key="Tooltip_OpenAuditTrail">Open the immutable audit trail browser.</sys:String>
+  <sys:String x:Key="Tooltip_OpenAuditDashboard">Launch the live audit dashboard with trend analytics.</sys:String>
+  <sys:String x:Key="Tooltip_OpenApiAudit">Review API key usage and forensic request payloads.</sys:String>
+  <sys:String x:Key="Tooltip_OpenMachines">Open Machines master data.</sys:String>
+  <sys:String x:Key="Tooltip_OpenParts">Open Parts and inventory records.</sys:String>
+  <sys:String x:Key="Tooltip_OpenWorkOrders">Open Work Orders module.</sys:String>
+  <sys:String x:Key="Tooltip_OpenCalibration">Open Calibration records.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSuppliers">Open Suppliers registry.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSecurity">Manage users and security roles.</sys:String>
+  <sys:String x:Key="Tooltip_OpenAdministration">Open global configuration settings.</sys:String>
+  <sys:String x:Key="Tooltip_OpenDiagnostics">Open diagnostics and telemetry.</sys:String>
+
+  <!-- Common Buttons in Views -->
+  <sys:String x:Key="Button_CFL">Choose From List</sys:String>
+  <sys:String x:Key="Button_Attach">Attach</sys:String>
+  <sys:String x:Key="Button_GoldenArrow">Open Related (Golden Arrow)</sys:String>
+  <sys:String x:Key="Tooltip_CFL">Choose from available records.</sys:String>
+  <sys:String x:Key="Tooltip_Attach">Attach a document to the current record.</sys:String>
+  <sys:String x:Key="Tooltip_GoldenArrow">Navigate to the related record.</sys:String>
+
+</ResourceDictionary>

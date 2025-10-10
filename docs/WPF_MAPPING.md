@@ -1,5 +1,17 @@
 # MAUI ↔ WPF Parity Map
 
+### XAML Namespace Mapping (AvalonDock)
+
+Current implementation uses Dirkster.AvalonDock packages and CLR namespace mappings:
+
+```
+xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+xmlns:adLayout="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
+xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
+```
+
+Guardrail preference is the Xceed XML namespace (`http://schemas.xceed.com/wpf/xaml/avalondock`). Transitioning requires referencing the Xceed.Wpf.AvalonDock assembly and refactoring Dirkster-specific CLR usages in code (e.g., ShellLayoutController signatures). This migration will be scheduled once package alignment is approved.
+
 This document inventories the YasGMP MAUI experience and tracks the corresponding WPF shell implementations. Each table groups functionality by module so future desktop parity work has an authoritative in-repo checklist.
 
 ## Legend
@@ -14,8 +26,8 @@ This document inventories the YasGMP MAUI experience and tracks the correspondin
 ### Pages & View-Models
 | Feature | MAUI Page(s) | MAUI View-Model(s) | WPF Document | WPF Pane | Notes / TODO |
 | --- | --- | --- | --- | --- | --- |
-| Dashboard KPIs | [DashboardPage](../Views/DashboardPage.xaml) | [DashboardViewModel](../ViewModels/DashboardViewModel.cs) | **TODO:** None yet | [CockpitView](../YasGMP.Wpf/Views/CockpitView.xaml) | Align cockpit metrics with MAUI dashboard surface.
-| Launchpad navigation | [MainPage](../Views/MainPage.xaml) | [MainPageViewModel](../ViewModels/MainPageViewModel.cs) | **TODO:** None yet | [ModuleTreeView](../YasGMP.Wpf/Views/ModuleTreeView.xaml) | WPF module tree should mirror Shell routes and favorites.
+| Dashboard KPIs | [DashboardPage](../Views/DashboardPage.xaml) | [DashboardViewModel](../ViewModels/DashboardViewModel.cs) | [DashboardModuleView](../YasGMP.Wpf/Views/DashboardModuleView.xaml) | [CockpitView](../YasGMP.Wpf/Views/CockpitView.xaml) | Shell now localizes module title/tooltip; KPIs parity tracked.
+| Launchpad navigation | [MainPage](../Views/MainPage.xaml) | [MainPageViewModel](../ViewModels/MainPageViewModel.cs) | [ModulesPane](../YasGMP.Wpf/Shell/ModulesPane.xaml) | [ModuleTreeView](../YasGMP.Wpf/Views/ModuleTreeView.xaml) | ModulesPane groups reflect localized categories from ModuleRegistry.
 | Authentication | [LoginPage](../Views/LoginPage.xaml) | [LoginViewModel](../ViewModels/LoginViewModel.cs) | **TODO:** None yet | — | **TODO:** Build WPF login pane/dialog and wire authentication flow.
 
 ### Services
@@ -135,3 +147,11 @@ This document inventories the YasGMP MAUI experience and tracks the correspondin
 | [DatabaseService](../Services/DatabaseService.cs)<br>[DbCommandWrapper](../Services/Database/DbCommandWrapper.cs)<br>[DbSlowQueryRegistry](../Services/Database/DbSlowQueryRegistry.cs)<br>[DbTelemetry](../Services/Database/DbTelemetry.cs)<br>[ShadowReplicator](../Services/Database/ShadowReplicator.cs) | Core data access, diagnostics, replication helpers. | **TODO:** None yet | **TODO:** Ensure WPF host reuses shared database infrastructure.
 | [DatabaseService.Migrations](../Services/DatabaseService.Migrations.cs)<br>[DatabaseService.TestHooks](../Services/DatabaseService.TestHooks.cs) | Migration and test instrumentation helpers. | **TODO:** None yet | **TODO:** Port migration/test utilities for WPF dev workflows.
 | [DatabaseService.DashboardExtensions](../Services/DatabaseService.DashboardExtensions.cs) | KPI aggregations backing dashboards. | **TODO:** None yet | **TODO:** Feed WPF cockpit and dashboards via shared extensions.
+
+
+### Localization & Accessibility
+- Resource packs: YasGMP.Wpf/Resources/Strings.en.xaml, Strings.hr.xaml
+- Shell labels bind via DynamicResource (Ribbon Tabs/Groups/Buttons, Backstage, Anchorables)
+- ModuleRegistry uses resource lookups for titles/categories/descriptions at registration time
+- Module views set AutomationProperties.Name and tooltips for root controls and toolbar items (initial coverage)
+

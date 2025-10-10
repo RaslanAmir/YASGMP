@@ -7,7 +7,9 @@
              xmlns:shared="clr-namespace:YasGMP.Wpf.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="600">
+             d:DesignWidth="600"
+             AutomationProperties.Name="{DynamicResource Module_Assets_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_Assets_Tooltip}">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -26,9 +28,20 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="CFL"
+                    AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    ToolTip="{DynamicResource Tooltip_CFL}"
+                    Command="{Binding ShowCflCommand}" />
+            <Button Content="Attach"
+                    AutomationProperties.Name="{DynamicResource Button_Attach}"
+                    ToolTip="{DynamicResource Tooltip_Attach}"
+                    Command="{Binding AttachDocumentCommand}"
+                    Margin="8,0,0,0" />
+            <controls:GoldenArrowButton
+                AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                Command="{Binding GoldenArrowCommand}"
+                Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>

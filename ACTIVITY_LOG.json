@@ -153,4 +153,94 @@
                                            ]
                     }
     }
+    ,
+    {
+        "run_id":  "RUN-2025-10-10T131500",
+        "scope":  [
+                      "wpf-shell",
+                      "i18n",
+                      "a11y",
+                      "build"
+                  ],
+        "actions":  [
+                        {
+                            "type":  "code_change",
+                            "paths":  [
+                                          "YasGMP.Wpf/MainWindow.xaml",
+                                          "YasGMP.Wpf/App.xaml.cs",
+                                          "YasGMP.Wpf/Resources/Strings.en.xaml",
+                                          "YasGMP.Wpf/Resources/Strings.hr.xaml",
+                                          "YasGMP.Wpf/Shell/ModulesPane.xaml"
+                                      ],
+                            "status":  "updated",
+                            "notes":  "Switched AvalonDock to schema xmlns, seeded EN↔HR resources, bound tabs/backstage/anchorables, added AutomationProperties.Name for a11y"
+        },
+        {
+            "type":  "code_change",
+            "paths":  [
+                          "YasGMP.Wpf/Views/AssetsModuleView.xaml",
+                          "YasGMP.Wpf/Views/DashboardModuleView.xaml",
+                          "YasGMP.Wpf/Views/ComponentsModuleView.xaml",
+                          "YasGMP.Wpf/Views/WarehouseModuleView.xaml",
+                          "YasGMP.Wpf/Views/WorkOrdersModuleView.xaml",
+                          "YasGMP.Wpf/Views/CalibrationModuleView.xaml",
+                          "YasGMP.Wpf/Views/PartsModuleView.xaml",
+                          "YasGMP.Wpf/Views/SuppliersModuleView.xaml",
+                          "YasGMP.Wpf/Views/ExternalServicersModuleView.xaml",
+                          "YasGMP.Wpf/Views/CapaModuleView.xaml",
+                          "YasGMP.Wpf/Views/IncidentsModuleView.xaml",
+                          "YasGMP.Wpf/Views/ChangeControlModuleView.xaml",
+                          "YasGMP.Wpf/Views/ValidationsModuleView.xaml",
+                          "YasGMP.Wpf/Views/SchedulingModuleView.xaml",
+                          "YasGMP.Wpf/Views/SecurityModuleView.xaml",
+                          "YasGMP.Wpf/Views/AttachmentsModuleView.xaml",
+                          "YasGMP.Wpf/Views/AuditDashboardDocument.xaml",
+                          "YasGMP.Wpf/Views/AuditLogDocument.xaml",
+                          "YasGMP.Wpf/Views/DiagnosticsModuleView.xaml"
+                      ],
+            "status":  "updated",
+            "notes":  "Added AutomationProperties.Name and ToolTips to module view roots and toolbar items; localized common buttons"
+        },
+        {
+            "type":  "command",
+            "name":  "dotnet restore yasgmp.sln",
+            "status":  "success"
+        },
+                        {
+                            "type":  "command",
+                            "name":  "dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 -c Release",
+                            "status":  "success",
+                            "notes":  "MAUI builds with dependency warnings"
+                        },
+                        {
+                            "type":  "command",
+                            "name":  "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release",
+                            "status":  "success",
+                            "notes":  "WPF builds clean"
+                        },
+                        {
+                            "type":  "doc_update",
+                            "path":  "docs/codex_plan.md",
+                            "status":  "updated"
+                        },
+                        {
+                            "type":  "doc_update",
+                            "path":  "docs/codex_progress.json",
+                            "status":  "updated"
+                        }
+                    ],
+        "summary":  {
+                        "issues_found":  [
+                                             "Hardcoded strings remain across many modules, module registry titles, and tooltips"
+                                         ],
+                        "todos_created":  [
+                                              "Expand EN↔HR resource coverage across module views/view-models",
+                                              "Bind Ribbon group headers and remaining buttons to resources",
+                                              "Add AutomationProperties.Name + ToolTip to all user-visible controls"
+                                          ],
+                        "blocking_risks":  [
+                                               "None for build; smoke harness integration pending end-to-end run permission"
+                                           ]
+                    }
+    }
 ]

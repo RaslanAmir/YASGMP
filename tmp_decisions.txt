@@ -1,0 +1,7 @@
+- id: DEC-2025-10-03-001
+  date: 2025-10-03
+  decision: Rebaseline environment as .NET 9 ready and schedule AppCore diagnostics partitioning before further WPF module work.
+  impact: Ensures planning artifacts reflect current build blockers so remediation batches can focus on segregating MAUI-only dependencies.
+  status: accepted
+
+

@@ -4,3 +4,20 @@
   impact: Ensures planning artifacts reflect current build blockers so remediation batches can focus on segregating MAUI-only dependencies.
   status: accepted
 
+- id: DEC-2025-10-10-001
+  date: 2025-10-10
+  decision: Use Xceed/AvalonDock XML schema namespace (http://schemas.xceed.com/wpf/xaml/avalondock) instead of CLR namespaces in XAML for DockingManager and Layout types.
+  impact: Aligns with guardrails, reduces MC3074 designer warnings, and unifies XAML across views.
+  status: accepted
+
+- id: DEC-2025-10-10-002
+  date: 2025-10-10
+  decision: Introduce runtime-loaded WPF ResourceDictionaries (Strings.en.xaml, Strings.hr.xaml) for EN↔HR and bind shell UI via DynamicResource.
+  impact: Establishes i18n foundation with minimal intrusion; enables incremental migration of strings across modules while keeping MAUI unaffected.
+  status: accepted
+
+- id: DEC-2025-10-10-003
+  date: 2025-10-10
+  decision: Localize ModuleRegistry metadata via resource keys and bind Ribbon/Backstage labels using DynamicResource; add AutomationProperties.Name across shell and module views.
+  impact: Enables EN↔HR switching without code changes and improves accessibility/smoke harness stability with deterministic automation names.
+  status: accepted

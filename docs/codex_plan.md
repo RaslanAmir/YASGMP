@@ -203,3 +203,30 @@
 
 
 
+
+## Increment 2 (2025-10-10) — i18n + a11y + Registry
+- Migrated ModuleRegistry registrations to use EN↔HR resources for titles, categories, and descriptions via helper `L(key, fallback)` in `YasGMP.Wpf/App.xaml.cs`.
+- Expanded resource packs (`YasGMP.Wpf/Resources/Strings.en.xaml`, `Strings.hr.xaml`) with:
+  - Categories (Cockpit, Maintenance, Supply Chain, Quality, Quality & Compliance, Planning, Administration, Diagnostics, Documents)
+  - Module Titles + ToolTips (Dashboard, Assets, Components, Warehouse, Work Orders, Calibration, Parts, Suppliers, External Servicers, CAPA, Incidents, Change Control, Validations, Scheduling, Security, Administration, Audit Trail, Audit Dashboard, API Audit Trail, Diagnostics, Attachments)
+  - Ribbon button labels + tooltips and common view button captions (CFL, Attach, Golden Arrow)
+- Updated `MainWindow.xaml`:
+  - Replaced hardcoded Home/Groups/Buttons with `DynamicResource` bindings
+  - Added `AutomationProperties.Name` and `ToolTip` for Backstage + Ribbon buttons
+- Added `AutomationProperties.Name` + ToolTip on module view roots and toolbar ToggleButtons in representative module views (Dashboard, Assets, Components, Warehouse, Work Orders, Calibration, Parts, Suppliers, External Servicers, CAPA, Incidents, Change Control, Validations, Scheduling, Security, Attachments, AuditLog/AuditDashboard, Diagnostics)
+- Localized ModulesPane title via `Label_Modules`; categories in the pane now reflect localized metadata from ModuleRegistry
+- Build: WPF and MAUI Windows builds succeed on .NET 9; warnings only
+- Smoke: Harness button is wired; environment prevents GUI automation here — recorded TODO
+
+Open items:
+- Translate remaining editor field labels and status strings across views
+- Extend AutomationProperties coverage to inputs, grid columns, and dialogs
+- Add unit checks for a11y bindings where feasible; wire FlaUI harness when available
+
+## Increment 2025-10-10 — WPF Shell i18n + A11y + AvalonDock Namespace
+
+- Updated MainWindow to use `xmlns:ad="http://schemas.xceed.com/wpf/xaml/avalondock"` and replaced old `adLayout/adControls` usage.
+- Added `Resources/Strings.en.xaml` and `Resources/Strings.hr.xaml`; App loads culture-specific dictionary on startup.
+- Bound key UI to resources: Ribbon tabs (Home/View/Tools), Backstage (Layout/Save/Reset), anchorables (Modules/Inspector).
+- A11y: Added `AutomationProperties.Name` to Modules/Inspector panes and module launch buttons.
+- Build: WPF compiles clean on .NET 9; MAUI builds with existing warnings.

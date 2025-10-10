@@ -1,0 +1,140 @@
+                                   Command="{Binding WindowCommands.OpenDashboardCommand}" />
+                    <fluent:Button Header="Assets"
+                                   Command="{Binding WindowCommands.OpenAssetsCommand}" />
+                    <fluent:Button Header="Components"
+                                   Command="{Binding WindowCommands.OpenComponentsCommand}" />
+                    <fluent:Button Header="Work Orders"
+                                   Command="{Binding WindowCommands.OpenWorkOrdersCommand}" />
+                    <fluent:Button Header="Calibration"
+                                   Command="{Binding WindowCommands.OpenCalibrationCommand}" />
+                    <fluent:Button Header="Parts"
+                                   Command="{Binding WindowCommands.OpenPartsCommand}" />
+                    <fluent:Button Header="Warehouse"
+                                   Command="{Binding WindowCommands.OpenWarehouseCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Quality">
+                    <fluent:Button Header="CAPA"
+                                   Command="{Binding WindowCommands.OpenCapaCommand}" />
+                    <fluent:Button Header="Incidents"
+                                   Command="{Binding WindowCommands.OpenIncidentsCommand}" />
+                    <fluent:Button Header="Change Control"
+                                   Command="{Binding WindowCommands.OpenChangeControlCommand}" />
+                    <fluent:Button Header="Validations"
+                                   Command="{Binding WindowCommands.OpenValidationsCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Quality &amp; Compliance">
+                    <fluent:Button Header="Audit Trail"
+                                   Command="{Binding WindowCommands.OpenAuditTrailCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xE81C;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Open the immutable audit trail browser." />
+                        </ToolTipService.ToolTip>
+                    </fluent:Button>
+                    <fluent:Button Header="Audit Dashboard"
+                                   Command="{Binding WindowCommands.OpenAuditDashboardCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xE9D2;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Launch the live audit dashboard with trend analytics." />
+                        </ToolTipService.ToolTip>
+                    </fluent:Button>
+                    <fluent:Button Header="API Audit Trail"
+                                   Command="{Binding WindowCommands.OpenApiAuditCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xEBC3;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Review API key usage and forensic request payloads." />
+                        </ToolTipService.ToolTip>
+                    </fluent:Button>
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Supply Chain">
+                    <fluent:Button Header="Suppliers"
+                                   Command="{Binding WindowCommands.OpenSuppliersCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Administration">
+                    <fluent:Button Header="Security"
+                                   Command="{Binding WindowCommands.OpenSecurityCommand}" />
+                    <fluent:Button Header="Administration"
+                                   Command="{Binding WindowCommands.OpenAdministrationCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Diagnostics">
+                    <fluent:Button Header="Diagnostics"
+                                   Command="{Binding WindowCommands.OpenDiagnosticsCommand}" />
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+
+            <fluent:RibbonTabItem Header="View">
+                <fluent:RibbonGroupBox Header="Layout">
+                    <fluent:Button Header="Reset Layout"
+                                   Command="{Binding WindowCommands.ResetLayoutCommand}" />
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+
+            <fluent:RibbonTabItem Header="Tools">
+                <fluent:RibbonGroupBox Header="Persistence">
+                    <fluent:Button Header="Save Layout"
+                                   Command="{Binding WindowCommands.SaveLayoutCommand}" />
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Diagnostics">
+                    <fluent:Button Header="Run Smoke Test"
+                                   Command="{Binding RunSmokeTestCommand}" />
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+        </fluent:Ribbon>
+
+        <controls:ShellStatusBar DockPanel.Dock="Bottom" DataContext="{Binding StatusBar}" />
+
+        <Grid>
+            <ad:DockingManager x:Name="DockManager"
+                               DocumentsSource="{Binding Documents}"
+                               ActiveContent="{Binding ActiveDocument, Mode=TwoWay}">
+                <ad:DockingManager.Theme>
+                    <adThemes:MetroTheme />
+                </ad:DockingManager.Theme>
+
+                <ad:DockingManager.DocumentHeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Title}" />
+                    </DataTemplate>
+                </ad:DockingManager.DocumentHeaderTemplate>
+
+                <ad:DockingManager.LayoutItemContainerStyle>
+                    <Style TargetType="{x:Type adControls:LayoutItem}">
+                        <Setter Property="Title" Value="{Binding Model.Title}" />
+                        <Setter Property="ContentId" Value="{Binding Model.ContentId}" />
+                    </Style>
+                </ad:DockingManager.LayoutItemContainerStyle>
+
+                <ad:DockingManager.Layout>
+                    <adLayout:LayoutRoot>
+                        <adLayout:LayoutPanel Orientation="Horizontal">
+                            <adLayout:LayoutAnchorablePane DockWidth="280">
+                                <adLayout:LayoutAnchorable Title="Modules"
+                                                          ContentId="YasGmp.Shell.Modules"
+                                                          Content="{Binding ModulesPane}" />
+                            </adLayout:LayoutAnchorablePane>
+                            <adLayout:LayoutPanel Orientation="Horizontal">
+                                <adLayout:LayoutDocumentPane />
+                                <adLayout:LayoutAnchorablePane DockWidth="320">
+                                    <adLayout:LayoutAnchorable Title="Inspector"
+                                                              ContentId="YasGmp.Shell.Inspector"
+                                                              Content="{Binding InspectorPane}" />
+                                </adLayout:LayoutAnchorablePane>
+                            </adLayout:LayoutPanel>
+                        </adLayout:LayoutPanel>
+                    </adLayout:LayoutRoot>
+                </ad:DockingManager.Layout>
+            </ad:DockingManager>
+        </Grid>
+    </DockPanel>
+</fluent:RibbonWindow>

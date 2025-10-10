@@ -17,6 +17,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Button Content="{Binding Metadata.Title}"
+                                            AutomationProperties.Name="{Binding Metadata.Title}"
                                             Command="{Binding OpenCommand}"
                                             CommandParameter="{Binding}"
                                             Margin="12,4,0,4"

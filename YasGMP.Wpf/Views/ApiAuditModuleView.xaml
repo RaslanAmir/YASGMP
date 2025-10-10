@@ -6,7 +6,9 @@
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="600">
+             d:DesignWidth="600"
+             AutomationProperties.Name="{DynamicResource Module_ApiAuditTrail_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_ApiAuditTrail_Tooltip}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>

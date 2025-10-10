@@ -6,7 +6,9 @@
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="600">
+             d:DesignWidth="600"
+             AutomationProperties.Name="{DynamicResource Module_Dashboard_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_Dashboard_Tooltip}">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -18,6 +20,8 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <ToggleButton Content="{Binding Caption}"
+                                      AutomationProperties.Name="{Binding Caption}"
+                                      ToolTipService.ToolTip="{Binding Caption}"
                                       Command="{Binding Command}"
                                       IsChecked="{Binding IsChecked}"
                                       Margin="0,0,4,0" />
@@ -25,8 +29,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="CFL"
+                    AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    ToolTip="{DynamicResource Tooltip_CFL}"
+                    Command="{Binding ShowCflCommand}" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                       AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                                       ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                                       Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>

@@ -6,7 +6,9 @@
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="600"
-             d:DesignWidth="960">
+             d:DesignWidth="960"
+             AutomationProperties.Name="{DynamicResource Module_Scheduling_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_Scheduling_Tooltip}">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
