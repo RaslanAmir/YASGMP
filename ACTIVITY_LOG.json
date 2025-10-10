@@ -183,5 +183,66 @@
         "WindowsSDK-19041"
       ]
     }
+  },
+  {
+    "run_id": "2025-10-10T11:26:00Z",
+    "scope": {
+      "folders_scanned": 6,
+      "files_scanned": 9,
+      "modules_touched": [
+        "Environment",
+        "Build",
+        "Tests"
+      ]
+    },
+    "actions": [
+      {
+        "type": "command",
+        "command": "bash dotnet-install.sh -c 9.0 --install-dir $HOME/.dotnet",
+        "outcome": "succeeded",
+        "details": "Installed .NET SDK 9.0.305 via dotnet-install; Windows workloads remain unavailable on Linux."
+      },
+      {
+        "type": "command",
+        "command": "dotnet --info",
+        "outcome": "succeeded",
+        "details": "Verified SDK 9.0.305 on linux-x64; Windows 10 SDK 19041+ cannot be provisioned in this container."
+      },
+      {
+        "type": "command",
+        "command": "dotnet restore yasgmp.sln",
+        "outcome": "failed",
+        "details": "Restore stops with NETSDK1147 (missing maui-tizen workload) even when EnableWindowsTargeting=true on Linux."
+      },
+      {
+        "type": "command",
+        "command": "dotnet restore YasGMP.Wpf/YasGMP.Wpf.csproj -p:EnableWindowsTargeting=true",
+        "outcome": "succeeded",
+        "details": "Project-level restore completes once EnableWindowsTargeting is set; requires Windows host for full solution."
+      },
+      {
+        "type": "command",
+        "command": "dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true",
+        "outcome": "failed",
+        "details": "Compilation fails with unresolved YasGMP.Helpers/Diagnostics namespaces and missing SignatureMetadata DTOs in AppCore."
+      },
+      {
+        "type": "command",
+        "command": "dotnet test YasGMP.Wpf.Tests -c Release -p:EnableWindowsTargeting=true --filter FullyQualifiedName~DockLayoutPersistenceServiceTests",
+        "outcome": "failed",
+        "details": "Restore fails with NU1605 downgrade (Microsoft.Extensions.Configuration.Abstractions 9.0.3\u21929.0.0) and NU1201 due to net9.0-windows10.0.19041 target."
+      },
+      {
+        "type": "note",
+        "details": "Windows 10 SDK 19041+ is unavailable on this Linux container; FlaUI smoke automation cannot execute without a Windows desktop host."
+      }
+    ],
+    "summary": {
+      "issues_found": 0,
+      "todos_created": 0,
+      "blocking_risks": [
+        "WindowsSDK-19041"
+      ]
+    }
   }
 ]

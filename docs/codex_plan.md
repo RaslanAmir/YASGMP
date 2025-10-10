@@ -2,6 +2,7 @@
 
 ## Current Compile Status
 - [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.305 — previously 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
+  - 2025-10-10T11:26Z: `bash dotnet-install.sh -c 9.0 --install-dir ~/.dotnet` reprovisioned SDK 9.0.305. `dotnet --info` confirms the toolchain, but Windows 10 SDK 19041+ cannot be installed inside this Linux container.
   - 2025-10-10T10:05Z: dotnet-install.sh reprovisioned SDK 9.0.305 via `./dotnet-install.sh --channel 9.0`; `dotnet --info` confirms the toolchain but Windows 10 SDK/workloads cannot be installed inside the Linux container.
   - 2025-10-10T06:38Z: dotnet-install.sh provisioned SDK 9.0.100 and `dotnet --info` now reports the toolchain on linux-x64; Windows 10 SDK/workloads still missing so Windows-targeted restore/build/test must run on a Windows host.
   - 2025-10-07T11:06Z: Current container session again reports `bash: command not found: dotnet`; document cadence remained static-analysis only until SDK was provisioned.
@@ -11,11 +12,13 @@
   - 2026-03-25T08:40Z: `dotnet --version` retried while tightening B1FormDocumentViewModel command refresh hooks; container again responds `bash: command not found: dotnet`.
   - 2026-04-04T09:10Z: `dotnet restore yasgmp.sln` retried after Assets drill-down updates; container still returns `bash: command not found: dotnet`.
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
+  - 2025-10-10T11:24Z: `dotnet restore yasgmp.sln` (with `EnableWindowsTargeting=true`) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; full solution restore remains Windows-host only.
   - 2025-10-10T10:07Z: `dotnet restore -p:EnableWindowsTargeting=true` exits with NETSDK1147 (maui-tizen workload) after `dotnet workload install maui` reports the workload is unsupported on Linux.
   - 2025-10-10T06:40Z: `dotnet restore` now launches but aborts with NETSDK1100 (EnableWindowsTargeting) and NETSDK1147 (missing maui-tizen workload) because Windows SDK/workloads are unavailable on this host.
 - [ ] MAUI builds *(blocked on Windows workloads; historical attempts failed before CLI install and the latest 2025-10-10 run surfaced NETSDK1147 requiring maui-tizen workload on Windows.)*
   - 2026-04-04T09:12Z: `dotnet build yasgmp.csproj -c Release -p:EnableWindowsTargeting=true` retried; command still fails with `bash: command not found: dotnet` inside the container.
 - [ ] WPF builds *(restore now runs but the 2025-10-10 Release builds failed on cross-targeted AppCore references — YasGMP.Helpers/Diagnostics namespaces and signature DTOs are unresolved until Windows desktop dependencies are available on a Windows host.)*
+  - 2025-10-10T11:25Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` still fails — AppCore compilation reports missing YasGMP.Helpers/Diagnostics namespaces and SignatureMetadata DTOs during the Release build.
   - 2026-04-04T09:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` retried; container still reports `bash: command not found: dotnet`.
   - 2025-10-10T10:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restores but fails with dozens of CS0234/CS0246/CS0535 errors because YasGMP.AppCore expects Helpers/Diagnostics projects and signature DTO types that are unavailable without the Windows solution build.
   - 2025-10-10T06:42Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restored packages but failed with unresolved YasGMP.Helpers/Diagnostics namespaces and missing SignatureMetadataDto/WorkOrderSignaturePersistRequest types — requires building on Windows with full solution references.
@@ -36,6 +39,7 @@
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
   - 2025-10-10: `B1FormDocumentViewModel.CanEnterMode` now blocks transitions when validation errors exist (except returning to Find), prevents Add re-entry while dirty, and requires a selected record for View/Update so toolbar enablement mirrors SAP B1 semantics; `dotnet restore` now runs but Windows-targeted build/test attempts fail with NETSDK1100/NU1201 until the Windows 10 SDK and workloads are available.
   - 2025-10-10: DockLayoutPersistenceService test focus run attempted via `dotnet test YasGMP.Wpf.Tests --filter FullyQualifiedName~DockLayoutPersistenceServiceTests -c Release -p:EnableWindowsTargeting=true`; restore surfaced NU1605 downgrade + NU1201 compatibility errors because YasGMP.Wpf targets net9.0-windows10.0.19041 and Windows-only SDKs are unavailable.
+  - 2025-10-10T11:25Z: Retried `dotnet test YasGMP.Wpf.Tests -c Release -p:EnableWindowsTargeting=true --filter FullyQualifiedName~DockLayoutPersistenceServiceTests`; restore still fails (NU1605 downgrade to Microsoft.Extensions.Configuration.Abstractions 9.0.0 and NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041).
   - 2025-10-10: FlaUI smoke harness `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release -p:EnableWindowsTargeting=true` fails restore with NU1605 downgrades and NU1201 because YasGMP.Wpf only targets net9.0-windows10.0.19041; requires Windows 10 SDK + workloads.
   - 2026-01-25: Documented B1FormDocumentViewModel command/state surface so derived modules inherit SAP B1 toolbar, audit, and busy-state guidance.
   - 2026-02-10: Modules pane groups/links now source localized headers, tooltips, automation names/ids through ILocalizationService subscriptions so culture switches update without rebuilding the tree; awaiting SDK install to validate via build/smoke.
