@@ -65,7 +65,8 @@
       "2026-03-09: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-03-10: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI is still missing so every command exits with 'command not found'.",
       "2026-03-11: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried; CLI remains unavailable so each command exits with 'command not found'.",
-      "2026-03-23: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Tests --filter AssetsModuleViewModel were retried; the dotnet CLI is still missing so each command exits with 'command not found'."
+      "2026-03-23: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Tests --filter AssetsModuleViewModel were retried; the dotnet CLI is still missing so each command exits with 'command not found'.",
+      "2026-03-24: dotnet restore yasgmp.sln retried after Assets navigation regression updates; CLI remains unavailable so the command exits with 'command not found'."
     ]
   },
   "batches": [
@@ -335,6 +336,7 @@
     "2026-03-20: Assets module tests now cover golden-arrow InitializeAsync(targetId) flows to ensure SelectedRecord, SearchText, FormMode.View, and localized filtered status messaging persist after navigation; dotnet restore/build for yasgmp.sln and YasGMP.Wpf net9.0-windows retried but still fail with 'command not found' because the CLI is unavailable.",
     "2026-03-21: Module toolbar command tests now capture PropertyChanged sequences for caption, tooltip, and automation metadata during language switches so accessibility tooling observes refreshed bindings; dotnet restore/build (yasgmp.sln, YasGMP.Wpf net9.0, MAUI net9.0-windows) remain blocked with 'command not found' because the CLI is unavailable.",
     "2026-03-22: Assets LoadAsync now narrows machine collections to navigation matches, auto-selects the filtered record, and surfaces localized filtered status/search text for ID/code payloads; dotnet restore/build/test and WPF smoke retries still fail with 'command not found' because the CLI is unavailable.",
-    "2026-03-23: Assets module activation exits edit mode before applying navigation selection, forces a SelectedRecord reselection to reload _loadedMachine, and adds regression coverage so attachments command enablement refreshes after drill-down while dotnet restore/build/test remain blocked by the missing CLI."
+    "2026-03-23: Assets module activation exits edit mode before applying navigation selection, forces a SelectedRecord reselection to reload _loadedMachine, and adds regression coverage so attachments command enablement refreshes after drill-down while dotnet restore/build/test remain blocked by the missing CLI.",
+    "2026-03-24: Assets module tests now mock the navigation service to open the module with machine code parameters, asserting SearchText and localized status messaging echo the parameter while dotnet restore/build/test continue to fail with 'command not found' in this container."
   ]
 }

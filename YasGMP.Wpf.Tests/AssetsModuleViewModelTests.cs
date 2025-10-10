@@ -168,7 +168,7 @@ public class AssetsModuleViewModelTests
     }
 
     [Fact]
-    public async Task InitializeAsync_TargetId_SelectsRecordAndAppliesGoldenArrowFilter()
+    public async Task OpenModule_WithNavigationParameter_UsesParameterForFilter()
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
@@ -210,19 +210,27 @@ public class AssetsModuleViewModelTests
         var signatureDialog = new TestElectronicSignatureDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
-        var navigation = new TestModuleNavigationService();
+        var navigation = new RecordingModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
         var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
-        await viewModel.InitializeAsync(null);
+        navigation.Resolver = (moduleKey, parameter) =>
+        {
+            Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
+            return viewModel;
+        };
 
-        await viewModel.InitializeAsync(target.Id);
+        var parameter = target.Code ?? throw new InvalidOperationException("Target code required for navigation test.");
+        var opened = (AssetsModuleViewModel)navigation.OpenModule(AssetsModuleViewModel.ModuleKey, parameter);
+        var initializeTask = navigation.LastInitializationTask ?? throw new InvalidOperationException("InitializeAsync was not invoked.");
+        await initializeTask.ConfigureAwait(false);
 
-        Assert.Equal(target.Id.ToString(), viewModel.SelectedRecord?.Key);
-        Assert.Equal(target.Name, viewModel.SearchText);
-        Assert.Equal(FormMode.View, viewModel.Mode);
-        Assert.Equal("Filtered Assets by \"Bioreactor\".", viewModel.StatusMessage);
+        Assert.Same(viewModel, opened);
+        Assert.Equal(target.Id.ToString(), opened.SelectedRecord?.Key);
+        Assert.Equal(parameter, opened.SearchText);
+        Assert.Equal(FormMode.View, opened.Mode);
+        Assert.Equal($"Filtered Assets by \"{parameter}\".", opened.StatusMessage);
     }
 
     [Fact]
@@ -333,5 +341,34 @@ public class AssetsModuleViewModelTests
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(AssetsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+
+    private sealed class RecordingModuleNavigationService : IModuleNavigationService
+    {
+        public Func<string, object?, ModuleDocumentViewModel>? Resolver { get; set; }
+
+        public ModuleDocumentViewModel? LastOpened { get; private set; }
+
+        public object? LastParameter { get; private set; }
+
+        public Task? LastInitializationTask { get; private set; }
+
+        public ModuleDocumentViewModel OpenModule(string moduleKey, object? parameter = null)
+        {
+            if (Resolver is null)
+            {
+                throw new InvalidOperationException("No resolver configured for module navigation.");
+            }
+
+            var module = Resolver(moduleKey, parameter);
+            LastOpened = module;
+            LastParameter = parameter;
+            LastInitializationTask = module.InitializeAsync(parameter);
+            return module;
+        }
+
+        public void Activate(ModuleDocumentViewModel document)
+        {
+        }
     }
 }
