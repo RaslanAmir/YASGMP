@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -109,19 +110,31 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             records.Insert(0, selectedRecord);
         }
 
+        if (target is not null && selectedRecord is not null)
+        {
+            var matchIndex = records.IndexOf(selectedRecord);
+            if (matchIndex > 0)
+            {
+                records.RemoveAt(matchIndex);
+                records.Insert(0, selectedRecord);
+            }
+        }
+
         if (filterActive)
         {
-            if (selectedRecord is null && records.Count > 0)
+            if (target is not null && ApplyNavigationSelection(target, records, searchTerm))
             {
-                selectedRecord = records[0];
+                return records;
             }
 
             if (selectedRecord is not null)
             {
                 SelectedRecord = selectedRecord;
-                var search = string.IsNullOrWhiteSpace(selectedRecord.Title)
-                    ? (string.IsNullOrWhiteSpace(selectedRecord.Code) ? selectedRecord.Key : selectedRecord.Code)
-                    : selectedRecord.Title;
+                var search = string.IsNullOrWhiteSpace(searchTerm)
+                    ? (string.IsNullOrWhiteSpace(selectedRecord.Title)
+                        ? (string.IsNullOrWhiteSpace(selectedRecord.Code) ? selectedRecord.Key : selectedRecord.Code)
+                        : selectedRecord.Title)
+                    : searchTerm;
 
                 SearchText = search;
                 StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
@@ -132,16 +145,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
                 SelectedRecord = null;
             }
+
+            return records;
         }
-        else if (target is not null)
+
+        if (target is not null)
         {
-            ApplyNavigationSelection(target, records);
+            ApplyNavigationSelection(target, records, searchTerm);
         }
 
         return records;
     }
 
-    private bool ApplyNavigationSelection(Machine target, IReadOnlyList<ModuleRecord>? records = null)
+    private bool ApplyNavigationSelection(Machine target, IReadOnlyList<ModuleRecord>? records = null, string? searchOverride = null)
     {
         var source = records ?? Records;
         if (source is null || source.Count == 0)
@@ -164,9 +180,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         SelectedRecord = match;
 
-        var search = string.IsNullOrWhiteSpace(match.Title)
-            ? (string.IsNullOrWhiteSpace(match.Code) ? key : match.Code)
-            : match.Title;
+        var search = !string.IsNullOrWhiteSpace(searchOverride)
+            ? searchOverride!
+            : string.IsNullOrWhiteSpace(match.Title)
+                ? (string.IsNullOrWhiteSpace(match.Code) ? key : match.Code)
+                : match.Title;
 
         SearchText = search;
         StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
@@ -175,10 +193,17 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     private async Task<(Machine? Target, IReadOnlyList<Machine> Machines, bool FilterActive, string? SearchTerm)> ResolveNavigationPayloadAsync(object? parameter)
     {
+        string? searchOverride = null;
+        if (TryNormalizeNavigationParameter(parameter, out var normalized, out var overrideText))
+        {
+            parameter = normalized;
+            searchOverride = overrideText;
+        }
+
         if (parameter is int id)
         {
             var target = await _machineService.TryGetByIdAsync(id).ConfigureAwait(false);
-            var search = id.ToString(CultureInfo.InvariantCulture);
+            var search = searchOverride ?? id.ToString(CultureInfo.InvariantCulture);
             if (target is null)
             {
                 return (null, Array.Empty<Machine>(), true, search);
@@ -189,36 +214,343 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (parameter is string text)
         {
-            if (string.IsNullOrWhiteSpace(text))
+            var trimmed = text.Trim();
+            if (trimmed.Length == 0)
             {
                 var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
                 return (null, machines, false, null);
             }
 
-            if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericId))
+            if (int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericId))
             {
                 var target = await _machineService.TryGetByIdAsync(numericId).ConfigureAwait(false);
                 if (target is null)
                 {
-                    return (null, Array.Empty<Machine>(), true, text);
+                    var search = searchOverride ?? trimmed;
+                    return (null, Array.Empty<Machine>(), true, search);
                 }
 
-                return (target, new[] { target }, true, text);
+                var search = searchOverride ?? trimmed;
+                return (target, new[] { target }, true, search);
             }
 
             var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
             var matches = machines
                 .Where(machine =>
-                    (!string.IsNullOrWhiteSpace(machine.Code) && machine.Code.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrWhiteSpace(machine.Name) && machine.Name.Contains(text, StringComparison.OrdinalIgnoreCase)))
+                    (!string.IsNullOrWhiteSpace(machine.Code) && machine.Code.Contains(trimmed, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(machine.Name) && machine.Name.Contains(trimmed, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
             var target = matches.FirstOrDefault();
-            return (target, matches, true, text);
+            var search = searchOverride ?? trimmed;
+            return (target, matches, true, search);
+        }
+
+        if (parameter is Machine machine)
+        {
+            var search = searchOverride
+                ?? (!string.IsNullOrWhiteSpace(machine.Code)
+                    ? machine.Code
+                    : machine.Id > 0
+                        ? machine.Id.ToString(CultureInfo.InvariantCulture)
+                        : machine.Name);
+
+            if (machine.Id > 0)
+            {
+                var target = await _machineService.TryGetByIdAsync(machine.Id).ConfigureAwait(false) ?? machine;
+                return (target, new[] { target }, true, search);
+            }
+
+            if (!string.IsNullOrWhiteSpace(machine.Code))
+            {
+                return await ResolveNavigationPayloadAsync(machine.Code).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrWhiteSpace(machine.Name))
+            {
+                var machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+                var matches = machines
+                    .Where(m => string.Equals(m.Name, machine.Name, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                var target = matches.FirstOrDefault();
+                return (target, matches, true, search);
+            }
+
+            return (null, Array.Empty<Machine>(), true, search);
+        }
+
+        if (parameter is ModuleRecord record)
+        {
+            var nextParameter = record.RelatedParameter ?? (!string.IsNullOrWhiteSpace(record.Code) ? record.Code : record.Key);
+            return await ResolveNavigationPayloadAsync(nextParameter).ConfigureAwait(false);
         }
 
         var allMachines = await _machineService.GetAllAsync().ConfigureAwait(false);
         return (null, allMachines, false, null);
+    }
+
+    private static bool TryNormalizeNavigationParameter(object? parameter, out object? normalized, out string? searchOverride)
+    {
+        normalized = parameter;
+        searchOverride = null;
+
+        if (parameter is null)
+        {
+            return false;
+        }
+
+        if (parameter is ModuleRecord record)
+        {
+            var candidate = record.RelatedParameter
+                ?? (!string.IsNullOrWhiteSpace(record.Code) ? record.Code : record.Key);
+
+            if (candidate is null)
+            {
+                return false;
+            }
+
+            return TryNormalizeNavigationParameter(candidate, out normalized, out searchOverride);
+        }
+
+        if (parameter is Machine machine)
+        {
+            if (machine.Id > 0)
+            {
+                normalized = machine.Id;
+                searchOverride = !string.IsNullOrWhiteSpace(machine.Code)
+                    ? machine.Code
+                    : machine.Id.ToString(CultureInfo.InvariantCulture);
+                return true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(machine.Code))
+            {
+                normalized = machine.Code;
+                searchOverride = machine.Code.Trim();
+                return true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(machine.Name))
+            {
+                normalized = machine.Name;
+                searchOverride = machine.Name.Trim();
+                return true;
+            }
+
+            return false;
+        }
+
+        if (TryGetNavigationValueFromDictionary(parameter, out var dictionaryValue))
+        {
+            return TryNormalizeNavigationParameter(dictionaryValue, out normalized, out searchOverride);
+        }
+
+        switch (parameter)
+        {
+            case string text:
+                normalized = text;
+                searchOverride = text.Trim();
+                return true;
+            case int intValue:
+                normalized = intValue;
+                searchOverride = intValue.ToString(CultureInfo.InvariantCulture);
+                return true;
+            case long longValue:
+                if (longValue <= int.MaxValue && longValue >= int.MinValue)
+                {
+                    normalized = (int)longValue;
+                }
+                else
+                {
+                    normalized = longValue.ToString(CultureInfo.InvariantCulture);
+                }
+
+                searchOverride = Convert.ToString(longValue, CultureInfo.InvariantCulture);
+                return true;
+            case uint uintValue:
+                if (uintValue <= int.MaxValue)
+                {
+                    normalized = (int)uintValue;
+                }
+                else
+                {
+                    normalized = uintValue.ToString(CultureInfo.InvariantCulture);
+                }
+
+                searchOverride = Convert.ToString(uintValue, CultureInfo.InvariantCulture);
+                return true;
+            case ushort ushortValue:
+                normalized = (int)ushortValue;
+                searchOverride = ushortValue.ToString(CultureInfo.InvariantCulture);
+                return true;
+            case short shortValue:
+                normalized = (int)shortValue;
+                searchOverride = shortValue.ToString(CultureInfo.InvariantCulture);
+                return true;
+            case byte byteValue:
+                normalized = (int)byteValue;
+                searchOverride = byteValue.ToString(CultureInfo.InvariantCulture);
+                return true;
+            case sbyte sbyteValue:
+                normalized = (int)sbyteValue;
+                searchOverride = sbyteValue.ToString(CultureInfo.InvariantCulture);
+                return true;
+            case ulong ulongValue:
+                if (ulongValue <= int.MaxValue)
+                {
+                    normalized = (int)ulongValue;
+                }
+                else
+                {
+                    normalized = ulongValue.ToString(CultureInfo.InvariantCulture);
+                }
+
+                searchOverride = Convert.ToString(ulongValue, CultureInfo.InvariantCulture);
+                return true;
+            case float floatValue:
+                normalized = floatValue.ToString(CultureInfo.InvariantCulture);
+                searchOverride = normalized as string;
+                return true;
+            case double doubleValue:
+                normalized = doubleValue.ToString(CultureInfo.InvariantCulture);
+                searchOverride = normalized as string;
+                return true;
+            case decimal decimalValue:
+                normalized = decimalValue.ToString(CultureInfo.InvariantCulture);
+                searchOverride = normalized as string;
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryGetNavigationValueFromDictionary(object? candidate, out object? value)
+    {
+        if (candidate is null)
+        {
+            value = null;
+            return false;
+        }
+
+        if (candidate is IReadOnlyDictionary<string, object?> readOnlyDictionary
+            && TryGetNavigationValueFromPairs(readOnlyDictionary, out value))
+        {
+            return true;
+        }
+
+        if (candidate is IDictionary<string, object?> typedDictionary
+            && TryGetNavigationValueFromPairs(typedDictionary, out value))
+        {
+            return true;
+        }
+
+        if (candidate is IDictionary dictionary)
+        {
+            object? best = null;
+            var bestPriority = int.MaxValue;
+
+            foreach (DictionaryEntry entry in dictionary)
+            {
+                if (entry.Key is not string key)
+                {
+                    continue;
+                }
+
+                if (!TryGetNavigationKeyPriority(key, out var priority))
+                {
+                    continue;
+                }
+
+                if (priority < bestPriority)
+                {
+                    bestPriority = priority;
+                    best = entry.Value;
+
+                    if (priority == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (bestPriority != int.MaxValue)
+            {
+                value = best;
+                return true;
+            }
+        }
+
+        value = null;
+        return false;
+    }
+
+    private static bool TryGetNavigationValueFromPairs(IEnumerable<KeyValuePair<string, object?>> pairs, out object? value)
+    {
+        object? best = null;
+        var bestPriority = int.MaxValue;
+
+        foreach (var pair in pairs)
+        {
+            if (!TryGetNavigationKeyPriority(pair.Key, out var priority))
+            {
+                continue;
+            }
+
+            if (priority < bestPriority)
+            {
+                bestPriority = priority;
+                best = pair.Value;
+
+                if (priority == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (bestPriority == int.MaxValue)
+        {
+            value = null;
+            return false;
+        }
+
+        value = best;
+        return true;
+    }
+
+    private static bool TryGetNavigationKeyPriority(string? key, out int priority)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            priority = int.MaxValue;
+            return false;
+        }
+
+        if (string.Equals(key, "machineId", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "assetId", StringComparison.OrdinalIgnoreCase))
+        {
+            priority = 0;
+            return true;
+        }
+
+        if (string.Equals(key, "id", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "recordId", StringComparison.OrdinalIgnoreCase))
+        {
+            priority = 1;
+            return true;
+        }
+
+        if (string.Equals(key, "code", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "assetCode", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "machineCode", StringComparison.OrdinalIgnoreCase))
+        {
+            priority = 2;
+            return true;
+        }
+
+        priority = int.MaxValue;
+        return false;
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
@@ -264,9 +596,16 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
-        var (target, _, _, _) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
+        var (target, _, filterActive, searchTerm) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
         if (target is null)
         {
+            if (filterActive && !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                await RefreshAsync(parameter).ConfigureAwait(false);
+                SearchText = searchTerm;
+                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
+            }
+
             return;
         }
 
@@ -275,7 +614,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             await EnterViewModeCommand.ExecuteAsync(null).ConfigureAwait(false);
         }
 
-        if (ApplyNavigationSelection(target))
+        if (ApplyNavigationSelection(target, searchOverride: searchTerm))
         {
             return;
         }
@@ -287,7 +626,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             await EnterViewModeCommand.ExecuteAsync(null).ConfigureAwait(false);
         }
 
-        ApplyNavigationSelection(target);
+        if (!ApplyNavigationSelection(target, searchOverride: searchTerm) && !string.IsNullOrWhiteSpace(searchTerm))
+        {
+            SearchText = searchTerm;
+            StatusMessage = _localization.GetString("Module.Status.Filtered", Title, searchTerm);
+        }
     }
 
     protected override async Task<CflRequest?> CreateCflRequestAsync()
