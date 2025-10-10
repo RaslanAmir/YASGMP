@@ -6,6 +6,7 @@
                       IsChecked="{Binding IsChecked}"
                       IsEnabled="{Binding IsEnabled}"
                       ToolTipService.ToolTip="{Binding ToolTip}"
+                      ToolTipService.ShowOnDisabled="True"
                       AutomationProperties.Name="{Binding AutomationName}"
                       AutomationProperties.AutomationId="{Binding AutomationId}"
                       Margin="0,0,4,0" />
