@@ -53,6 +53,13 @@
             InitializeComponent
             </summary>
         </member>
+        <member name="T:YasGMP.Wpf.Converters.ResourceStringConverter">
+            <summary>
+            Resolves an application resource by key and returns it as a string.
+            Returns the original value when the key is not found or not a string.
+            One-way only; ConvertBack is not supported.
+            </summary>
+        </member>
         <member name="T:YasGMP.Wpf.Dialogs.CflDialog">
             <summary>
             CflDialog
@@ -4645,14 +4652,59 @@
             <summary>Tree node representation for a GMP feature module.</summary>
         </member>
         <member name="T:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel">
-            <summary>Status bar view-model displayed along the bottom edge of the shell.</summary>
+            <summary>
+            Status bar view-model displayed along the bottom edge of the shell.
+            Exposes environment diagnostics required for SAP B1 parity and Part 11 overlays.
+            </summary>
             <inheritdoc/>
+        </member>
+        <member name="M:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.#ctor(YasGMP.Services.IUserSession,YasGMP.Wpf.Services.DatabaseOptions,Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>Initializes a new instance of the <see cref="T:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel"/> class.</summary>
+            <param name="userSession">User session for current username.</param>
+            <param name="dbOptions">Database connection settings to display DB and host.</param>
+            <param name="hostEnvironment">Host environment for environment name.</param>
+        </member>
+        <member name="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._utcNow">
+            <summary>Gets or sets the current UTC timestamp string.</summary>
+        </member>
+        <member name="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._environmentName">
+            <summary>Gets or sets the logical deployment environment (e.g., Development/Staging/Production).</summary>
+        </member>
+        <member name="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._databaseName">
+            <summary>Gets or sets the connected database name.</summary>
+        </member>
+        <member name="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._serverName">
+            <summary>Gets or sets the database server or host name.</summary>
+        </member>
+        <member name="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._userName">
+            <summary>Gets or sets the signed-in user label for the status bar.</summary>
+        </member>
+        <member name="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._smokeStatus">
+            <summary>Gets or sets the latest smoke harness status short message.</summary>
         </member>
         <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.StatusText">
             <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._statusText"/>
         </member>
         <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.ActiveModule">
             <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._activeModule"/>
+        </member>
+        <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.UtcNow">
+            <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._utcNow"/>
+        </member>
+        <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.EnvironmentName">
+            <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._environmentName"/>
+        </member>
+        <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.DatabaseName">
+            <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._databaseName"/>
+        </member>
+        <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.ServerName">
+            <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._serverName"/>
+        </member>
+        <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.UserName">
+            <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._userName"/>
+        </member>
+        <member name="P:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel.SmokeStatus">
+            <inheritdoc cref="F:YasGMP.Wpf.ViewModels.ShellStatusBarViewModel._smokeStatus"/>
         </member>
         <member name="T:YasGMP.Wpf.ViewModels.WindowMenuViewModel">
             <summary>Window menu command surface wired to shell-level operations.</summary>
@@ -5606,6 +5658,24 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ActiveModule">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ActiveModule" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.UtcNow">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "UtcNow" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.EnvironmentName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "EnvironmentName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DatabaseName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DatabaseName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ServerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ServerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.UserName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "UserName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SmokeStatus">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SmokeStatus" generated properties.</summary>
+        </member>
         <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
             <summary>
             A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
@@ -6151,6 +6221,24 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ActiveModule">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ActiveModule" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.UtcNow">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "UtcNow" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.EnvironmentName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "EnvironmentName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DatabaseName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DatabaseName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ServerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ServerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.UserName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "UserName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SmokeStatus">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SmokeStatus" generated properties.</summary>
         </member>
     </members>
 </doc>

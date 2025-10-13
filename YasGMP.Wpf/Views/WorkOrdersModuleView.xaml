@@ -4,11 +4,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+             xmlns:conv="clr-namespace:YasGMP.Wpf.Converters"
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="600"
              AutomationProperties.Name="{DynamicResource Module_WorkOrders_Title}"
              ToolTipService.ToolTip="{DynamicResource Module_WorkOrders_Tooltip}">
+    <UserControl.Resources>
+        <conv:ResourceStringConverter x:Key="ResourceString" />
+    </UserControl.Resources>
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -19,19 +23,34 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <ToggleButton Content="{Binding Caption}"
-                                      AutomationProperties.Name="{Binding Caption}"
-                                      ToolTipService.ToolTip="{Binding Caption}"
-                                      Command="{Binding Command}"
-                                      IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0" />
+                        <ToggleButton
+                            Content="{Binding CaptionKey, Converter={StaticResource ResourceString}}"
+                            Command="{Binding Command}"
+                            IsChecked="{Binding IsChecked}"
+                            Margin="0,0,4,0"
+                            AutomationProperties.Name="{Binding AutomationNameKey, Converter={StaticResource ResourceString}}">
+                            <ToggleButton.ToolTip>
+                                <ToolTip Content="{Binding ToolTipKey, Converter={StaticResource ResourceString}}" />
+                            </ToggleButton.ToolTip>
+                        </ToggleButton>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
-            <Button Content="{DynamicResource Button_Attach}" Command="{Binding AttachDocumentCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}" Margin="8,0,0,0" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}" Margin="8,0,0,0" />
+            <Button Content="CFL"
+                    AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    ToolTip="{DynamicResource Tooltip_CFL}"
+                    Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Button_Attach}"
+                    AutomationProperties.Name="{DynamicResource Button_Attach}"
+                    ToolTip="{DynamicResource Tooltip_Attach}"
+                    Command="{Binding AttachDocumentCommand}"
+                    Margin="8,0,0,0" />
+            <controls:GoldenArrowButton
+                AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                Command="{Binding GoldenArrowCommand}"
+                Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -41,7 +60,10 @@
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
                 <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Tooltip_SearchBox}" />
+                <TextBox Width="220"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{DynamicResource Label_Search}"
+                         ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -56,6 +78,9 @@
                           IsReadOnly="True"
                           CanUserAddRows="False"
                           CanUserDeleteRows="False">
+                    <DataGrid.ToolTip>
+                        <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                    </DataGrid.ToolTip>
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
                         <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />

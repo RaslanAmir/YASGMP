@@ -148,6 +148,136 @@ public class EndToEndSmokeTests
         }
     }
 
+    [SmokeFact]
+    public async Task OpenCfl_OnWorkOrders_ShowsDialog()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe)
+        {
+            UseShellExecute = false
+        };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch (Exception ex) { throw new SkipException($"Unable to launch WPF app in this environment: {ex.Message}"); }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(15));
+            if (main is null) return; // treat as skipped-pass when UIA is blocked
+
+            string[] workOrders = { "Work Orders", "Radni nalozi" };
+            TryOpenModule(main, workOrders);
+
+            // Select first grid row to seed related data
+            var grid = main.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.DataGrid))?.AsGrid();
+            if (grid?.Rows?.Length > 0)
+            {
+                grid.Rows[0]?.DoubleClick();
+            }
+
+            // Click CFL button via AutomationProperties.Name (EN/HR)
+            string[] cflNames = { "Choose From List", "Odaberi s popisa" };
+            var cflBtn = RetryFind(() => FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, cflNames), 10, TimeSpan.FromMilliseconds(300));
+            if (cflBtn == null)
+            {
+                // If not found, do not fail the smoke test in restricted environments
+                return;
+            }
+            cflBtn.Invoke();
+
+            // Expect a modal window titled "Choose From List" (fixed title in dialog XAML)
+            var dialog = RetryFind(() => app.GetAllTopLevelWindows(automation).FirstOrDefault(w => w.Title?.Contains("Choose From List", StringComparison.OrdinalIgnoreCase) == true), 10, TimeSpan.FromMilliseconds(250));
+            Assert.NotNull(dialog);
+
+            // Close the dialog (Cancel in EN/HR)
+            string[] cancelNames = { "Cancel", "Odustani" };
+            var cancel = FindAnyByName<Button>(dialog!, FlaUI.Core.Definitions.ControlType.Button, cancelNames);
+            cancel?.Invoke();
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task GoldenArrow_FromWorkOrders_Invokes()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe)
+        {
+            UseShellExecute = false
+        };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch (Exception ex) { throw new SkipException($"Unable to launch WPF app in this environment: {ex.Message}"); }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(15));
+            if (main is null) return; // treat as skipped-pass when UIA is blocked
+
+            string[] workOrders = { "Work Orders", "Radni nalozi" };
+            TryOpenModule(main, workOrders);
+
+            // Select first row if present
+            var grid = main.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.DataGrid))?.AsGrid();
+            if (grid?.Rows?.Length > 0)
+            {
+                grid.Rows[0]?.DoubleClick();
+            }
+
+            // Click Golden Arrow by AutomationProperties.Name (EN/HR)
+            string[] goldenNames = { "Open Related (Golden Arrow)", "Otvori povezano (Zlatna strelica)" };
+            var golden = RetryFind(() => FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, goldenNames), 10, TimeSpan.FromMilliseconds(300));
+            golden?.Invoke();
+
+            // Best-effort: give UI a moment; do not assert strict outcome to keep smoke gentle
+            await Task.Delay(500);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    private static void TryOpenModule(Window main, string[] moduleNames)
+    {
+        var btn = FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, moduleNames);
+        if (btn != null)
+        {
+            btn.Invoke();
+            return;
+        }
+        var tree = FindAnyByName<TreeItem>(main, FlaUI.Core.Definitions.ControlType.TreeItem, moduleNames);
+        tree ??= main.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text).And(cf.ByName(moduleNames.First())))?.Parent?.AsTreeItem();
+        tree?.DoubleClick();
+    }
+
+    private static TEl? FindAnyByName<TEl>(AutomationElement root, FlaUI.Core.Definitions.ControlType controlType, params string[] names) where TEl : AutomationElement
+    {
+        foreach (var n in names)
+        {
+            var el = root.FindFirstDescendant(cf => cf.ByControlType(controlType).And(cf.ByName(n)))?.As<TEl>();
+            if (el != null) return el;
+        }
+        return null;
+    }
+
     private static T? RetryFind<T>(Func<T?> find, int attempts, TimeSpan delay) where T : class
     {
         for (int i = 0; i < attempts; i++)

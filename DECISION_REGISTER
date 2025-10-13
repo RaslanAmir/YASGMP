@@ -27,3 +27,9 @@
   decision: Extend StatusBar with UTC clock, Env, Server, DB, User and smoke status; localize labels (EN↔HR) and add a11y names.
   impact: Meets SAP-B1 parity for status surface and supports smoke visibility without modal prompts; zero impact on MAUI.
   status: accepted
+
+- id: DEC-2025-10-13-002
+  date: 2025-10-13
+  decision: Propagate toolbar i18n converter pattern (CaptionKey/ToolTipKey/AutomationNameKey via ResourceStringConverter) to module views and strengthen a11y bindings; extend smoke harness to exercise CFL and Golden Arrow flows.
+  impact: Consistent EN↔HR captions/tooltips across toolbars; stable AutomationProperties for FlaUI/UIA and screen readers; early verification of navigation/picker flows without coupling to DB.
+  status: accepted

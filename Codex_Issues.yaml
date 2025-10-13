@@ -102,3 +102,37 @@
   tags:
     - wpf
     - accessibility
+
+- id: I-2025-10-13-003
+  file: YasGMP.Wpf/Views/WorkOrdersModuleView.xaml
+  module: WorkOrders
+  context: i18n-a11y
+  type: localization
+  severity: moderate
+  description: Toolbar buttons bound to hardcoded captions lacked resource-backed i18n and AutomationProperties bindings.
+  references:
+    - YasGMP.Wpf/ViewModels/Modules/ModuleToolbarCommand.cs
+  suggested_fix: Bind toolbar Content/AutomationProperties/ToolTip via CaptionKey/AutomationNameKey/ToolTipKey using ResourceStringConverter.
+  status: resolved
+  resolved_in: increment-20251013-02
+  tags:
+    - wpf
+    - i18n
+    - accessibility
+
+- id: I-2025-10-13-004
+  file: YasGMP.Wpf/Views/WarehouseModuleView.xaml
+  module: Warehouse
+  context: i18n-a11y
+  type: localization
+  severity: moderate
+  description: Toolbar used raw Caption bindings; CFL/Attach/Golden Arrow buttons missed AutomationProperties.Name.
+  references:
+    - YasGMP.Wpf/Views/AssetsModuleView.xaml
+  suggested_fix: Mirror Assets toolbar i18n pattern and set a11y names/tooltips; add grid/search a11y bindings.
+  status: resolved
+  resolved_in: increment-20251013-02
+  tags:
+    - wpf
+    - i18n
+    - accessibility
