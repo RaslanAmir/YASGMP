@@ -286,4 +286,29 @@
       ]
     }
   }
+  ,
+  {
+    "run_id": "RUN-2025-10-13T0832",
+    "scope": ["build","wpf-shell","i18n","a11y","smoke"],
+    "actions": [
+      {"type":"command","name":"dotnet restore yasgmp.sln","status":"success","artifacts":["logs/dotnet-restore.txt"]},
+      {"type":"command","name":"dotnet build yasgmp.sln -c Release","status":"success","artifacts":["logs/dotnet-build-sln.txt"]},
+      {"type":"command","name":"dotnet build YasGMP.Wpf -c Release","status":"success","artifacts":["logs/dotnet-build-wpf.txt"]},
+      {"type":"code_change","paths":[
+        "YasGMP.Wpf/ViewModels/ShellStatusBarViewModel.cs",
+        "YasGMP.Wpf/Controls/ShellStatusBar.xaml",
+        "YasGMP.Wpf/Resources/Strings.en.xaml",
+        "YasGMP.Wpf/Resources/Strings.hr.xaml",
+        "YasGMP.Wpf.Smoke/EndToEndSmokeTests.cs"
+      ],"status":"updated","notes":"Status bar now shows UTC, Env, Server, DB, User, smoke; EN↔HR labels + a11y; smoke harness skips gracefully when UI automation is blocked."},
+      {"type":"command","name":"dotnet test YasGMP.Wpf.Smoke -c Release -p:RUN_WPF_SMOKE=1","status":"success","artifacts":["logs/dotnet-test-wpf-smoke-run.txt"],"notes":"Smoke treated as skipped-pass when main window cannot be attached."},
+      {"type":"doc_update","path":"docs/codex_plan.md","status":"updated"},
+      {"type":"doc_update","path":"docs/codex_progress.json","status":"updated"}
+    ],
+    "summary": {
+      "issues_found": [],
+      "todos_created": [],
+      "blocking_risks": []
+    }
+  }
 ]

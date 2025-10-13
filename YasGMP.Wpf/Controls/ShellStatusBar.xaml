@@ -5,13 +5,37 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="24"
-             d:DesignWidth="800">
+             d:DesignWidth="1100"
+             AutomationProperties.Name="Shell Status Bar">
     <Border Background="#2D2D30" Padding="8,2">
         <DockPanel>
-            <TextBlock Text="{Binding StatusText}" Foreground="White" />
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding StatusText}" Foreground="White" />
+                <TextBlock Text="  •  " Foreground="#777777" />
+                <TextBlock Text="{DynamicResource Label_UTC}" Foreground="#AAAAAA"/>
+                <TextBlock Text=": " Foreground="#AAAAAA"/>
+                <TextBlock Text="{Binding UtcNow}" Foreground="#CCCCCC"/>
+                <TextBlock Text="  •  " Foreground="#777777" />
+                <TextBlock Text="{DynamicResource Label_Env}" Foreground="#AAAAAA"/>
+                <TextBlock Text=": " Foreground="#AAAAAA"/>
+                <TextBlock Text="{Binding EnvironmentName}" Foreground="#CCCCCC"/>
+                <TextBlock Text="  •  " Foreground="#777777" />
+                <TextBlock Text="{DynamicResource Label_Server}" Foreground="#AAAAAA"/>
+                <TextBlock Text=": " Foreground="#AAAAAA"/>
+                <TextBlock Text="{Binding ServerName}" Foreground="#CCCCCC"/>
+                <TextBlock Text="  •  " Foreground="#777777" />
+                <TextBlock Text="{DynamicResource Label_DB}" Foreground="#AAAAAA"/>
+                <TextBlock Text=": " Foreground="#AAAAAA"/>
+                <TextBlock Text="{Binding DatabaseName}" Foreground="#CCCCCC"/>
+                <TextBlock Text="  •  " Foreground="#777777" />
+                <TextBlock Text="{Binding SmokeStatus}" Foreground="#CCCCCC"/>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                <TextBlock Text="Active:" Foreground="#AAAAAA" Margin="0,0,4,0" />
+                <TextBlock Text="{DynamicResource Label_Active}" Foreground="#AAAAAA" Margin="0,0,4,0" />
                 <TextBlock Text="{Binding ActiveModule}" Foreground="#CCCCCC" />
+                <TextBlock Text="  •  " Foreground="#777777" />
+                <TextBlock Text="{DynamicResource Label_User}" Foreground="#AAAAAA" Margin="8,0,4,0" />
+                <TextBlock Text="{Binding UserName}" Foreground="#CCCCCC" />
             </StackPanel>
         </DockPanel>
     </Border>

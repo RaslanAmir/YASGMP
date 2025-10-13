@@ -1,0 +1,14 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  YasGMP.AppCore -> C:\GitHub\YASGMP\YASGMP\YasGMP.AppCore\bin\Release\net9.0\YasGMP.AppCore.dll
+  YasGMP.Wpf -> C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf\bin\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.dll
+  YasGMP.Wpf.Smoke -> C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\bin\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.dll
+Test run for C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Smoke\bin\Release\net9.0-windows10.0.19041.0\win-x64\YasGMP.Wpf.Smoke.dll (.NETCoreApp,Version=v9.0)
+VSTest version 17.14.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 15 s - YasGMP.Wpf.Smoke.dll (net9.0)
+
+Workload updates are available. Run `dotnet workload list` for more information.

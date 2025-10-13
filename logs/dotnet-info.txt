@@ -1,4 +1,4 @@
-﻿.NET SDK:
+.NET SDK:
  Version:           9.0.305
  Commit:            3fc74f3529
  Workload version:  9.0.300-manifests.6fcb754b

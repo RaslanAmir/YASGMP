@@ -21,3 +21,9 @@
   decision: Localize ModuleRegistry metadata via resource keys and bind Ribbon/Backstage labels using DynamicResource; add AutomationProperties.Name across shell and module views.
   impact: Enables EN↔HR switching without code changes and improves accessibility/smoke harness stability with deterministic automation names.
   status: accepted
+
+- id: DEC-2025-10-13-001
+  date: 2025-10-13
+  decision: Extend StatusBar with UTC clock, Env, Server, DB, User and smoke status; localize labels (EN↔HR) and add a11y names.
+  impact: Meets SAP-B1 parity for status surface and supports smoke visibility without modal prompts; zero impact on MAUI.
+  status: accepted

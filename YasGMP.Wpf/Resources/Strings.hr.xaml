@@ -24,6 +24,12 @@
   <!-- Naslovi sidrenih panela -->
   <sys:String x:Key="Label_Modules">Moduli</sys:String>
   <sys:String x:Key="Label_Inspector">Inspektor</sys:String>
+  <sys:String x:Key="Label_Active">Aktivno</sys:String>
+  <sys:String x:Key="Label_User">Korisnik</sys:String>
+  <sys:String x:Key="Label_DB">Baza</sys:String>
+  <sys:String x:Key="Label_Server">Posluzitelj</sys:String>
+  <sys:String x:Key="Label_Env">Okruzenje</sys:String>
+  <sys:String x:Key="Label_UTC">UTC</sys:String>
 
   <!-- Zajedničke oznake / Stupci -->
   <sys:String x:Key="Label_Search">Pretraga</sys:String>

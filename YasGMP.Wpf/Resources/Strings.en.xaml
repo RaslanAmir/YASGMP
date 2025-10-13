@@ -24,6 +24,12 @@
   <!-- Anchorable Titles -->
   <sys:String x:Key="Label_Modules">Modules</sys:String>
   <sys:String x:Key="Label_Inspector">Inspector</sys:String>
+  <sys:String x:Key="Label_Active">Active</sys:String>
+  <sys:String x:Key="Label_User">User</sys:String>
+  <sys:String x:Key="Label_DB">DB</sys:String>
+  <sys:String x:Key="Label_Server">Server</sys:String>
+  <sys:String x:Key="Label_Env">Env</sys:String>
+  <sys:String x:Key="Label_UTC">UTC</sys:String>
 
   <!-- Common Labels / Columns -->
   <sys:String x:Key="Label_Search">Search</sys:String>
