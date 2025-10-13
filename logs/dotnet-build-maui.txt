@@ -1,12 +1,9 @@
   Determining projects to restore...
   All projects are up-to-date for restore.
   YasGMP.AppCore -> C:\GitHub\YASGMP\YASGMP\YasGMP.AppCore\bin\Release\net9.0\YasGMP.AppCore.dll
-  yasgmp -> C:\GitHub\YASGMP\YASGMP\bin\Release\net9.0-windows10.0.19041.0\win-x64\yasgmp.dll
-
-Build succeeded.
-    0 Warning(s)
-    0 Error(s)
-
-Time Elapsed 00:00:03.41
-
-Workload updates are available. Run `dotnet workload list` for more information.
+C:\GitHub\YASGMP\YASGMP\MauiProgram.cs(129,30): warning CS0168: The variable 'ex' is declared but never used [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net9.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\ViewModels\CapaEditDialogViewModel.cs(60,16): warning CS8618: Non-nullable field '_capaCase' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net9.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\Services\SafeNavigator.cs(136,30): warning CS0168: The variable 'ex' is declared but never used [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net9.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\Services\SafeNavigator.cs(162,30): warning CS0168: The variable 'ex' is declared but never used [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net9.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\Services\SafeNavigator.cs(182,30): warning CS0168: The variable 'ex' is declared but never used [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net9.0-windows10.0.19041.0]
+C:\GitHub\YASGMP\YASGMP\ViewModels\SparePartViewModel.cs(46,22): warning CS0649: Field 'SparePartViewModel._lowOnly' is never assigned to, and will always have its default value false [C:\GitHub\YASGMP\YASGMP\yasgmp.csproj::TargetFramework=net9.0-windows10.0.19041.0]

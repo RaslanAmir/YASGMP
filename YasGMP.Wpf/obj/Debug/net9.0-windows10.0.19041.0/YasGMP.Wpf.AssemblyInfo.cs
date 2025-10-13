@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YasGMP.Wpf")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d6d4ad5925b14821f7ca1ba79e9f7e1f205ffcf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+55d9ad0b035ef97e25c5cc35ca5929d74be75fcf")]
 [assembly: System.Reflection.AssemblyProductAttribute("YasGMP.Wpf")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YasGMP.Wpf")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

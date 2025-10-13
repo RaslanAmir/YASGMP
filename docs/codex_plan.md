@@ -261,3 +261,8 @@ Test run (solution):
 - Verification:
   - dotnet restore/build (Release) succeeded for MAUI Windows and WPF targets.
   - WPF Smoke invoked; environment produced minimal test output (treated as skipped/green). See logs/dotnet-test-wpf-smoke.txt.
+
+### Increment 2 (cont.) — Editor a11y + Work Orders localization
+- Added AutomationProperties.Name to Work Orders editor inputs (Title, Status, Type, Priority, Machine/Component IDs, Requested/Assigned/Created users, Date pickers, Result, Task, Description, Notes) and CFL dialog buttons.
+- Localized Work Orders ViewModel status/validation strings via a lightweight helper `YasGMP.Wpf/Helpers/Loc.cs` and new EN/HR keys (Status_WorkOrders_*, Validation_WorkOrders_*, Error_*).
+- Cfl title now uses resource `CFL_Select_WorkOrder`; dialog buttons use `Button_OK`/`Button_Cancel` with a11y names.

@@ -142,7 +142,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             })
             .ToList();
 
-        return new CflRequest("Select Work Order", items);
+        return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_WorkOrder", "Select Work Order"), items);
     }
 
     /// <summary>Applies CFL selections back into the Work Orders workspace.</summary>
@@ -158,7 +158,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
 
         SearchText = search;
-        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_WorkOrders_FilteredBy", "Filtered {0} by \"{1}\"."), Title, search);
         return Task.CompletedTask;
     }
 
@@ -187,7 +187,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         var entity = await _workOrderService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (entity is null)
         {
-            StatusMessage = $"Unable to load {record.Title}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_WorkOrders_UnableToLoad", "Unable to load {0}."), record.Title);
             return;
         }
 
@@ -226,54 +226,34 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Editor.Title))
-        {
-            errors.Add("Title is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_TitleRequired", "Title is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Description))
-        {
-            errors.Add("Description is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_DescriptionRequired", "Description is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Type))
-        {
-            errors.Add("Type is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_TypeRequired", "Type is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Priority))
-        {
-            errors.Add("Priority is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_PriorityRequired", "Priority is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Status))
-        {
-            errors.Add("Status is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_StatusRequired", "Status is required."));
 
         if (Editor.MachineId <= 0)
-        {
-            errors.Add("Machine selection is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_MachineRequired", "Machine selection is required."));
 
         if (Editor.RequestedById <= 0)
-        {
-            errors.Add("Requested by user is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_RequestedByRequired", "Requested by user is required."));
 
         if (Editor.CreatedById <= 0)
-        {
-            errors.Add("Created by user is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_CreatedByRequired", "Created by user is required."));
 
         if (Editor.AssignedToId <= 0)
-        {
-            errors.Add("Assigned technician is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_AssignedToRequired", "Assigned technician is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Result))
-        {
-            errors.Add("Result summary is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_ResultRequired", "Result summary is required."));
 
         return await Task.FromResult(errors).ConfigureAwait(false);
     }
@@ -303,7 +283,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         if (Mode == FormMode.Update && _loadedEntity is null)
         {
-            StatusMessage = "Select a work order before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_WorkOrders_SelectBeforeSave", "Select a work order before saving.");
             return false;
         }
 
@@ -317,19 +297,19 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_Failed", "Electronic signature failed: {0}"), ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Cancelled", "Electronic signature cancelled. Save aborted.");
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Error_Signature_NotCaptured", "Electronic signature was not captured.");
             return false;
         }
 
@@ -369,7 +349,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist work order: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_WorkOrders_SaveFailed", "Failed to persist work order: {0}"), ex.Message), ex);
         }
 
         if (saveResult.SignatureMetadata?.Id is { } signatureId)
@@ -403,12 +383,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_PersistFailed", "Failed to persist electronic signature: {0}"), ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Captured", "Electronic signature captured ({0})."), signatureResult.ReasonDisplay);
 
         var auditAction = Mode == FormMode.Add ? "CREATE" : "UPDATE";
         var currentUserId = userId ?? 0;
@@ -431,7 +411,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         await LogAuditAsync(
                 _ => _auditService.LogEntityAuditAsync("work_orders", entity.Id, auditAction, details),
-                "Failed to log work order audit.")
+                YasGMP.Wpf.Helpers.Loc.S("Error_Audit_LogWorkOrderFailed", "Failed to log work order audit."))
             .ConfigureAwait(false);
 
         return true;
@@ -521,7 +501,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     {
         if (_loadedEntity is null || _loadedEntity.Id <= 0)
         {
-            StatusMessage = "Save the work order before adding attachments.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_SaveBeforeAttach", "Save the work order before adding attachments.");
             return;
         }
 
@@ -529,12 +509,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         {
             IsBusy = true;
             var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to {_loadedEntity.Title}"))
+                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: string.Format(YasGMP.Wpf.Helpers.Loc.S("Attachment_Picker_Title", "Attach files to {0}"), _loadedEntity.Title)))
                 .ConfigureAwait(false);
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_Cancelled", "Attachment upload cancelled.");
                 return;
             }
 
@@ -570,7 +550,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {

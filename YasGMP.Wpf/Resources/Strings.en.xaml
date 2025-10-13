@@ -170,6 +170,7 @@
 
   <!-- Common Buttons in Views -->
   <sys:String x:Key="Button_CFL">Choose From List</sys:String>
+  <sys:String x:Key="Button_OK">OK</sys:String>
   <sys:String x:Key="Button_Attach">Attach</sys:String>
   <sys:String x:Key="Button_GoldenArrow">Open Related (Golden Arrow)</sys:String>
   <sys:String x:Key="Tooltip_CFL">Choose from available records.</sys:String>
@@ -358,6 +359,32 @@
   <sys:String x:Key="Label_Category">Category</sys:String>
   <sys:String x:Key="Label_MinStock">Min Stock</sys:String>
   <sys:String x:Key="Label_SKU">SKU</sys:String>
+
+  <!-- Work Orders: Status/Validation -->
+  <sys:String x:Key="Status_WorkOrders_FilteredBy">Filtered {0} by "{1}".</sys:String>
+  <sys:String x:Key="Status_WorkOrders_UnableToLoad">Unable to load {0}.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TitleRequired">Title is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_DescriptionRequired">Description is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TypeRequired">Type is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_PriorityRequired">Priority is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_StatusRequired">Status is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_MachineRequired">Machine selection is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_RequestedByRequired">Requested by user is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_CreatedByRequired">Created by user is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_AssignedToRequired">Assigned technician is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_ResultRequired">Result summary is required.</sys:String>
+  <sys:String x:Key="Status_WorkOrders_SelectBeforeSave">Select a work order before saving.</sys:String>
+  <sys:String x:Key="Error_Signature_Failed">Electronic signature failed: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Cancelled">Electronic signature cancelled. Save aborted.</sys:String>
+  <sys:String x:Key="Error_Signature_NotCaptured">Electronic signature was not captured.</sys:String>
+  <sys:String x:Key="Error_Signature_PersistFailed">Failed to persist electronic signature: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Captured">Electronic signature captured ({0}).</sys:String>
+  <sys:String x:Key="Error_Audit_LogWorkOrderFailed">Failed to log work order audit.</sys:String>
+  <sys:String x:Key="Status_Attach_SaveBeforeAttach">Save the work order before adding attachments.</sys:String>
+  <sys:String x:Key="Status_Attach_Cancelled">Attachment upload cancelled.</sys:String>
+  <sys:String x:Key="Error_Attach_UploadFailed">Attachment upload failed: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_WorkOrder">Select Work Order</sys:String>
+  <sys:String x:Key="Attachment_Picker_Title">Attach files to {0}</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
   <sys:String x:Key="Label_Price">Price</sys:String>
   <!-- Signature Metadata -->

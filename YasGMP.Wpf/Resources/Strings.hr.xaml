@@ -170,6 +170,7 @@
 
   <!-- Zajednički gumbi u prikazima -->
   <sys:String x:Key="Button_CFL">Odaberi s popisa</sys:String>
+  <sys:String x:Key="Button_OK">U redu</sys:String>
   <sys:String x:Key="Button_Attach">Priloži</sys:String>
   <sys:String x:Key="Button_GoldenArrow">Otvori povezano (Zlatna strelica)</sys:String>
   <sys:String x:Key="Tooltip_CFL">Odaberi među dostupnim zapisima.</sys:String>
@@ -358,6 +359,32 @@
   <sys:String x:Key="Label_Category">Kategorija</sys:String>
   <sys:String x:Key="Label_MinStock">Min. zaliha</sys:String>
   <sys:String x:Key="Label_SKU">SKU</sys:String>
+
+  <!-- Radni nalozi: Status/Validacija -->
+  <sys:String x:Key="Status_WorkOrders_FilteredBy">Filtrirano {0} po "{1}".</sys:String>
+  <sys:String x:Key="Status_WorkOrders_UnableToLoad">Nije moguće učitati {0}.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TitleRequired">Naslov je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_DescriptionRequired">Opis je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TypeRequired">Vrsta je obavezna.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_PriorityRequired">Prioritet je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_StatusRequired">Status je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_MachineRequired">Odabir stroja je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_RequestedByRequired">Polje "Zatražio" je obavezno.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_CreatedByRequired">Polje "Kreirao" je obavezno.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_AssignedToRequired">Potrebno je dodijeliti tehničara.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_ResultRequired">Sažetak rezultata je obavezan.</sys:String>
+  <sys:String x:Key="Status_WorkOrders_SelectBeforeSave">Odaberite radni nalog prije spremanja.</sys:String>
+  <sys:String x:Key="Error_Signature_Failed">Elektronički potpis nije uspio: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Cancelled">Elektronički potpis je otkazan. Spremanje prekinuto.</sys:String>
+  <sys:String x:Key="Error_Signature_NotCaptured">Elektronički potpis nije zabilježen.</sys:String>
+  <sys:String x:Key="Error_Signature_PersistFailed">Neuspjelo spremanje elektroničkog potpisa: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Captured">Elektronički potpis zabilježen ({0}).</sys:String>
+  <sys:String x:Key="Error_Audit_LogWorkOrderFailed">Neuspjelo zapisivanje revizije radnog naloga.</sys:String>
+  <sys:String x:Key="Status_Attach_SaveBeforeAttach">Spremite radni nalog prije dodavanja priloga.</sys:String>
+  <sys:String x:Key="Status_Attach_Cancelled">Prijenos priloga otkazan.</sys:String>
+  <sys:String x:Key="Error_Attach_UploadFailed">Prijenos priloga nije uspio: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_WorkOrder">Odaberite radni nalog</sys:String>
+  <sys:String x:Key="Attachment_Picker_Title">Priloži datoteke uz {0}</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
   <sys:String x:Key="Label_Price">Cijena</sys:String>
   <!-- Metapodaci potpisa -->
