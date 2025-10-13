@@ -29,9 +29,9 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach" Command="{Binding AttachDocumentCommand}" Margin="8,0,0,0" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
+            <Button Content="{DynamicResource Button_Attach}" Command="{Binding AttachDocumentCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}" Margin="8,0,0,0" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -44,8 +44,8 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
-                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
@@ -57,9 +57,9 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Description}" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
             <Border Grid.Row="1"
@@ -70,7 +70,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Calibration Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Module_Calibration_Title}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="160" />
@@ -86,7 +86,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="Component" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Component}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="0"
                                       Grid.Column="1"
                                       ItemsSource="{Binding ComponentOptions}"
@@ -95,7 +95,7 @@
                                       SelectedValue="{Binding Editor.ComponentId, Mode=TwoWay}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Supplier" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Suppliers}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="1"
                                       Grid.Column="1"
                                       ItemsSource="{Binding SupplierOptions}"
@@ -104,31 +104,31 @@
                                       SelectedValue="{Binding Editor.SupplierId, Mode=TwoWay}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Calibration Date" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_CalibrationDate}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="2"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.CalibrationDate, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Next Due" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_NextDue}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="3"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.NextDue, Mode=TwoWay}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Result" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Result}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Result, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Certificate" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Certificate}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.CertDoc, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Comments" Grid.Row="6" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" />
+                            <TextBlock Text="{DynamicResource Label_Comments}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" />
                             <TextBox Grid.Row="6"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Comment, UpdateSourceTrigger=PropertyChanged}"

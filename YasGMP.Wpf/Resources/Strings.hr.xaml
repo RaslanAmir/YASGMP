@@ -359,4 +359,26 @@
   <sys:String x:Key="Tooltip_EnterPasswordPin">Unesite svoju YasGMP lozinku ili PIN.</sys:String>
   <sys:String x:Key="Button_Confirm">Potvrdi</sys:String>
   <sys:String x:Key="Button_Cancel">Odustani</sys:String>
+  <!-- Skladište oznake/stupci -->
+  <sys:String x:Key="Label_Responsible">Odgovorna osoba</sys:String>
+  <sys:String x:Key="Label_QRCode">QR kod</sys:String>
+  <sys:String x:Key="Label_ClimateMode">Klimatski režim</sys:String>
+  <sys:String x:Key="Label_LastQualified">Zadnja kvalifikacija</sys:String>
+  <sys:String x:Key="Text_UnderMinimumStock">Otkrivena zaliha ispod minimuma za jednu ili više stavki.</sys:String>
+  <sys:String x:Key="Label_StockSnapshot">Stanje zaliha</sys:String>
+  <sys:String x:Key="Label_RecentMovements">Nedavni pomaci</sys:String>
+  <sys:String x:Key="Column_Part">Dio</sys:String>
+  <sys:String x:Key="Column_Qty">Količina</sys:String>
+  <sys:String x:Key="Column_Reserved">Rezervirano</sys:String>
+  <sys:String x:Key="Column_Blocked">Blokirano</sys:String>
+  <sys:String x:Key="Column_Min">Min</sys:String>
+  <sys:String x:Key="Column_Max">Max</sys:String>
+  <sys:String x:Key="Column_Batch">Šarža</sys:String>
+  <sys:String x:Key="Column_Expiry">Rok</sys:String>
+  <sys:String x:Key="Column_When">Vrijeme</sys:String>
+  <sys:String x:Key="Column_Document">Dokument</sys:String>
+  <sys:String x:Key="Column_Note">Bilješka</sys:String>
+  <!-- Oznake kalibracije -->
+  <sys:String x:Key="Label_CalibrationDate">Datum kalibracije</sys:String>
+  <sys:String x:Key="Label_Certificate">Certifikat</sys:String>
  </ResourceDictionary>

@@ -359,4 +359,26 @@
   <sys:String x:Key="Tooltip_EnterPasswordPin">Enter your YasGMP password or PIN.</sys:String>
   <sys:String x:Key="Button_Confirm">Confirm</sys:String>
   <sys:String x:Key="Button_Cancel">Cancel</sys:String>
+  <!-- Warehouse labels/columns -->
+  <sys:String x:Key="Label_Responsible">Responsible</sys:String>
+  <sys:String x:Key="Label_QRCode">QR Code</sys:String>
+  <sys:String x:Key="Label_ClimateMode">Climate Mode</sys:String>
+  <sys:String x:Key="Label_LastQualified">Last Qualified</sys:String>
+  <sys:String x:Key="Text_UnderMinimumStock">Under-minimum stock detected for one or more items.</sys:String>
+  <sys:String x:Key="Label_StockSnapshot">Stock Snapshot</sys:String>
+  <sys:String x:Key="Label_RecentMovements">Recent Movements</sys:String>
+  <sys:String x:Key="Column_Part">Part</sys:String>
+  <sys:String x:Key="Column_Qty">Qty</sys:String>
+  <sys:String x:Key="Column_Reserved">Reserved</sys:String>
+  <sys:String x:Key="Column_Blocked">Blocked</sys:String>
+  <sys:String x:Key="Column_Min">Min</sys:String>
+  <sys:String x:Key="Column_Max">Max</sys:String>
+  <sys:String x:Key="Column_Batch">Batch</sys:String>
+  <sys:String x:Key="Column_Expiry">Expiry</sys:String>
+  <sys:String x:Key="Column_When">When</sys:String>
+  <sys:String x:Key="Column_Document">Document</sys:String>
+  <sys:String x:Key="Column_Note">Note</sys:String>
+  <!-- Calibration labels -->
+  <sys:String x:Key="Label_CalibrationDate">Calibration Date</sys:String>
+  <sys:String x:Key="Label_Certificate">Certificate</sys:String>
  </ResourceDictionary>
