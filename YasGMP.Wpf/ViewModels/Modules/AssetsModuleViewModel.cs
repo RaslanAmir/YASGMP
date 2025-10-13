@@ -962,7 +962,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         var machine = await _machineService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (machine is null)
         {
-            StatusMessage = $"Unable to locate asset #{id}.";
+            StatusMessage = _localization.GetString("Module.Assets.Status.AssetNotFound", id);
             return;
         }
 
@@ -1022,7 +1022,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (Mode == FormMode.Update && _loadedMachine is null)
         {
-            StatusMessage = "Select an asset before saving.";
+            StatusMessage = _localization.GetString("Module.Assets.Status.SelectBeforeSave");
             return false;
         }
 
@@ -1036,19 +1036,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = _localization.GetString("Module.Assets.Status.SignatureFailed", ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = _localization.GetString("Module.Assets.Status.SignatureCancelled");
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = _localization.GetString("Module.Assets.Status.SignatureNotCaptured");
             return false;
         }
 
@@ -1144,12 +1144,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = _localization.GetString("Module.Assets.Status.SignaturePersistenceFailed", ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = _localization.GetString("Module.Assets.Status.SignatureCaptured", signatureResult.ReasonDisplay);
         return true;
     }
 
@@ -1245,7 +1245,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     {
         if (_loadedMachine is null || _loadedMachine.Id <= 0)
         {
-            StatusMessage = "Save the asset before adding attachments.";
+            StatusMessage = _localization.GetString("Module.Assets.Status.SaveBeforeAttachment");
             return;
         }
 
@@ -1258,7 +1258,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = _localization.GetString("Module.Assets.Status.AttachmentCancelled");
                 return;
             }
 
@@ -1294,7 +1294,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = _localization.GetString("Module.Assets.Status.AttachmentFailed", ex.Message);
         }
         finally
         {

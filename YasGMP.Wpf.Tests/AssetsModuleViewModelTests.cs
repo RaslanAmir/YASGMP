@@ -15,15 +15,21 @@ using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
 
-public class AssetsModuleViewModelTests
+public class AssetsModuleViewModelTests : IDisposable
 {
+    private readonly LocalizationService _localization = new();
+    private readonly string _originalLanguage;
+
+    public AssetsModuleViewModelTests()
+    {
+        _originalLanguage = _localization.CurrentLanguage;
+        _localization.SetLanguage("en");
+    }
+
     [Fact]
     public async Task OnSaveAsync_AddMode_PersistsMachineThroughAdapter()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
-        var audit = new AuditService(database);
-        var audit = new AuditService(database);
         var audit = new AuditService(database);
         const int adapterSignatureId = 4321;
         var machineAdapter = new FakeMachineCrudService
@@ -43,7 +49,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -59,7 +65,7 @@ public class AssetsModuleViewModelTests
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
-        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Assets.Status.SignatureCaptured", "QA Reason"), viewModel.StatusMessage);
         Assert.False(viewModel.IsDirty);
         Assert.Single(machineAdapter.Saved);
         var persisted = machineAdapter.Saved[0];
@@ -91,6 +97,7 @@ public class AssetsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_SignatureCancelled_StaysInEditModeAndSkipsPersist()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var machineAdapter = new FakeMachineCrudService();
         var auth = new TestAuthContext
         {
@@ -106,7 +113,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -123,7 +130,7 @@ public class AssetsModuleViewModelTests
 
         Assert.False(saved);
         Assert.Equal(FormMode.Add, viewModel.Mode);
-        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Assets.Status.SignatureCancelled"), viewModel.StatusMessage);
         Assert.Empty(machineAdapter.Saved);
         Assert.Empty(signatureDialog.PersistedResults);
     }
@@ -132,6 +139,7 @@ public class AssetsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_SignatureCaptureThrows_SurfacesStatusAndSkipsPersist()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var machineAdapter = new FakeMachineCrudService();
         var auth = new TestAuthContext
         {
@@ -147,7 +155,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -164,7 +172,7 @@ public class AssetsModuleViewModelTests
 
         Assert.False(saved);
         Assert.Equal(FormMode.Add, viewModel.Mode);
-        Assert.Equal("Electronic signature failed: Dialog offline", viewModel.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Assets.Status.SignatureFailed", "Dialog offline"), viewModel.StatusMessage);
         Assert.Empty(machineAdapter.Saved);
         Assert.Empty(signatureDialog.PersistedResults);
     }
@@ -216,7 +224,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         navigation.Resolver = (moduleKey, parameter) =>
         {
             Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
@@ -232,7 +240,7 @@ public class AssetsModuleViewModelTests
         Assert.Equal(target.Id.ToString(), opened.SelectedRecord?.Key);
         Assert.Equal(parameter, opened.SearchText);
         Assert.Equal(FormMode.View, opened.Mode);
-        Assert.Equal($"Filtered Assets by \"{parameter}\".", opened.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Status.Filtered", opened.Title, parameter), opened.StatusMessage);
     }
 
     [Fact]
@@ -282,7 +290,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         navigation.Resolver = (moduleKey, parameter) =>
         {
             Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
@@ -297,7 +305,7 @@ public class AssetsModuleViewModelTests
         Assert.Equal(target.Id.ToString(), opened.SelectedRecord?.Key);
         Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), opened.SearchText);
         Assert.Equal(FormMode.View, opened.Mode);
-        Assert.Equal($"Filtered Assets by \"{target.Id}\".", opened.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Status.Filtered", opened.Title, target.Id.ToString(CultureInfo.InvariantCulture)), opened.StatusMessage);
     }
 
     [Fact]
@@ -347,7 +355,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         navigation.Resolver = (moduleKey, parameter) =>
         {
             Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
@@ -367,7 +375,7 @@ public class AssetsModuleViewModelTests
         Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), opened.SelectedRecord?.Key);
         Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), opened.SearchText);
         Assert.Equal(FormMode.View, opened.Mode);
-        Assert.Equal($"Filtered Assets by \"{target.Id}\".", opened.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Status.Filtered", opened.Title, target.Id.ToString(CultureInfo.InvariantCulture)), opened.StatusMessage);
         Assert.True(opened.EnterUpdateModeCommand.CanExecute(null));
     }
 
@@ -418,7 +426,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
 
         await viewModel.InitializeAsync(null);
         await Task.Yield();
@@ -431,13 +439,14 @@ public class AssetsModuleViewModelTests
 
         Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), viewModel.SelectedRecord?.Key);
         Assert.Equal(target.Id.ToString(CultureInfo.InvariantCulture), viewModel.SearchText);
-        Assert.Equal($"Filtered Assets by \"{target.Id}\".", viewModel.StatusMessage);
+        Assert.Equal(_localization.GetString("Module.Status.Filtered", viewModel.Title, target.Id.ToString(CultureInfo.InvariantCulture)), viewModel.StatusMessage);
     }
 
     [Fact]
     public async Task AttachDocumentCommand_UploadsAttachmentViaService()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var machineAdapter = new FakeMachineCrudService();
         machineAdapter.Saved.Add(new Machine
         {
@@ -468,7 +477,7 @@ public class AssetsModuleViewModelTests
             new PickedFile("hello.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
@@ -505,7 +514,7 @@ public class AssetsModuleViewModelTests
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
 
         await viewModel.InitializeAsync(5);
         await Task.Yield();
@@ -535,6 +544,8 @@ public class AssetsModuleViewModelTests
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
         Assert.True(canExecuteRaised > 0);
     }
+
+    public void Dispose() => _localization.SetLanguage(_originalLanguage);
 
     private static Task<bool> InvokeSaveAsync(AssetsModuleViewModel viewModel)
     {
