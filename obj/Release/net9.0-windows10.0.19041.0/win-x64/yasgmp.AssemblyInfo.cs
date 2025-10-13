@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("yasgmp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cd358013b045526dc93db5f471259894d1102896")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+05fe27dae53d3791e3645d925cb128cedcb90b63")]
 [assembly: System.Reflection.AssemblyProductAttribute("yasgmp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("yasgmp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

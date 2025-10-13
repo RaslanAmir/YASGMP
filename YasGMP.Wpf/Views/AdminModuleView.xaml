@@ -29,7 +29,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
@@ -50,10 +50,10 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Description}" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />

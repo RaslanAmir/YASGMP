@@ -155,6 +155,10 @@
   <sys:String x:Key="Tooltip_CFL">Choose from available records.</sys:String>
   <sys:String x:Key="Tooltip_Attach">Attach a document to the current record.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigate to the related record.</sys:String>
+  <sys:String x:Key="Button_ApplyFilters">Apply Filters</sys:String>
+  <sys:String x:Key="Button_Refresh">Refresh</sys:String>
+  <sys:String x:Key="Button_ExportPdf">Export PDF</sys:String>
+  <sys:String x:Key="Button_ExportExcel">Export Excel</sys:String>
 
   <!-- Attachments Buttons/Tooltips -->
   <sys:String x:Key="Button_PickFiles">Pick Files</sys:String>
@@ -187,6 +191,13 @@
 
   <!-- Additional Columns -->
   <sys:String x:Key="Column_Description">Description</sys:String>
+  <sys:String x:Key="Column_Timestamp">Timestamp</sys:String>
+  <sys:String x:Key="Column_ApiKey">API Key</sys:String>
+  <sys:String x:Key="Column_Action">Action</sys:String>
+  <sys:String x:Key="Column_User">User</sys:String>
+  <sys:String x:Key="Column_IpAddress">IP Address</sys:String>
+  <sys:String x:Key="Column_Request">Request</sys:String>
+  <sys:String x:Key="Column_Details">Details</sys:String>
 
   <!-- Misc tooltips -->
   <sys:String x:Key="Tooltip_DigitalSignatureWorkflow">Digital signatures are captured via the e-signature workflow.</sys:String>
@@ -209,6 +220,8 @@
   <sys:String x:Key="Label_ExtraNotes">Extra Notes</sys:String>
   <sys:String x:Key="Label_Certificates">Certificates</sys:String>
   <sys:String x:Key="Label_DigitalSignature">Digital Signature</sys:String>
+  <sys:String x:Key="Label_Manufacturer">Manufacturer</sys:String>
+  <sys:String x:Key="Label_Model">Model</sys:String>
   <sys:String x:Key="Label_User">User</sys:String>
   <sys:String x:Key="Label_Action">Action</sys:String>
   <sys:String x:Key="Label_From">From</sys:String>
@@ -311,4 +324,11 @@
   <sys:String x:Key="Column_Username">Username</sys:String>
   <sys:String x:Key="Column_Role">Role</sys:String>
   <sys:String x:Key="Column_Country">Country</sys:String>
+  <sys:String x:Key="Label_WorkOrderDetails">Work Order Details</sys:String>
+  <sys:String x:Key="Label_CreatedBy">Created By</sys:String>
+  <sys:String x:Key="Label_DateOpen">Date Open</sys:String>
+  <sys:String x:Key="Label_DueDate">Due Date</sys:String>
+  <sys:String x:Key="Label_DateClosed">Date Closed</sys:String>
+  <sys:String x:Key="Label_Result">Result</sys:String>
+  <sys:String x:Key="Label_TaskDescription">Task Description</sys:String>
 </ResourceDictionary>

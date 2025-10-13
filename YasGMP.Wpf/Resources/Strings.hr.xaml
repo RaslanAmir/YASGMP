@@ -155,6 +155,10 @@
   <sys:String x:Key="Tooltip_CFL">Odaberi među dostupnim zapisima.</sys:String>
   <sys:String x:Key="Tooltip_Attach">Priloži dokument trenutnom zapisu.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigiraj na povezani zapis.</sys:String>
+  <sys:String x:Key="Button_ApplyFilters">Primijeni filtre</sys:String>
+  <sys:String x:Key="Button_Refresh">Osvježi</sys:String>
+  <sys:String x:Key="Button_ExportPdf">Izvoz PDF</sys:String>
+  <sys:String x:Key="Button_ExportExcel">Izvoz Excel</sys:String>
 
   <!-- Prilozi: gumbi/ToolTipovi -->
   <sys:String x:Key="Button_PickFiles">Odaberi datoteke</sys:String>
@@ -187,6 +191,13 @@
 
   <!-- Dodatni stupci -->
   <sys:String x:Key="Column_Description">Opis</sys:String>
+  <sys:String x:Key="Column_Timestamp">Vremenska oznaka</sys:String>
+  <sys:String x:Key="Column_ApiKey">API ključ</sys:String>
+  <sys:String x:Key="Column_Action">Radnja</sys:String>
+  <sys:String x:Key="Column_User">Korisnik</sys:String>
+  <sys:String x:Key="Column_IpAddress">IP adresa</sys:String>
+  <sys:String x:Key="Column_Request">Zahtjev</sys:String>
+  <sys:String x:Key="Column_Details">Detalji</sys:String>
 
   <!-- Ostali ToolTipovi -->
   <sys:String x:Key="Tooltip_DigitalSignatureWorkflow">Digitalni potpisi se bilježe kroz e-potpis tijek rada.</sys:String>
@@ -215,6 +226,8 @@
   <sys:String x:Key="Label_To">Do</sys:String>
   <sys:String x:Key="Label_ApiKey">API ključ</sys:String>
   <sys:String x:Key="Label_Loading">Učitavanje...</sys:String>
+  <sys:String x:Key="Label_Manufacturer">Proizvođač</sys:String>
+  <sys:String x:Key="Label_Model">Model</sys:String>
   
   <!-- Oznake za Incidente -->
   <sys:String x:Key="Label_IncidentDetails">Detalji incidenta</sys:String>
@@ -311,4 +324,11 @@
   <sys:String x:Key="Column_Username">Korisničko ime</sys:String>
   <sys:String x:Key="Column_Role">Uloga</sys:String>
   <sys:String x:Key="Column_Country">Država</sys:String>
+  <sys:String x:Key="Label_WorkOrderDetails">Detalji radnog naloga</sys:String>
+  <sys:String x:Key="Label_CreatedBy">Kreirao</sys:String>
+  <sys:String x:Key="Label_DateOpen">Datum otvaranja</sys:String>
+  <sys:String x:Key="Label_DueDate">Rok</sys:String>
+  <sys:String x:Key="Label_DateClosed">Datum zatvaranja</sys:String>
+  <sys:String x:Key="Label_Result">Rezultat</sys:String>
+  <sys:String x:Key="Label_TaskDescription">Opis zadatka</sys:String>
 </ResourceDictionary>

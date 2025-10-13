@@ -32,7 +32,7 @@
                     AutomationProperties.Name="{DynamicResource Button_CFL}"
                     ToolTip="{DynamicResource Tooltip_CFL}"
                     Command="{Binding ShowCflCommand}" />
-            <Button Content="Attach"
+            <Button Content="{DynamicResource Button_Attach}"
                     AutomationProperties.Name="{DynamicResource Button_Attach}"
                     ToolTip="{DynamicResource Tooltip_Attach}"
                     Command="{Binding AttachDocumentCommand}"
@@ -115,13 +115,13 @@
                                      Text="{Binding Editor.Code, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Name}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Description" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                            <TextBlock Text="{DynamicResource Label_Description}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
                             <TextBox Grid.Row="2"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Description, UpdateSourceTrigger=PropertyChanged}"
@@ -130,13 +130,13 @@
                                      TextWrapping="Wrap"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Manufacturer" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Manufacturer}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="3"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Manufacturer, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="Model" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Model}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Model, UpdateSourceTrigger=PropertyChanged}"

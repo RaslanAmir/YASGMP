@@ -30,7 +30,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
@@ -73,7 +73,7 @@
                     <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Column="2"
-                            Content="Apply Filters"
+                            Content="{DynamicResource Button_ApplyFilters}"
                             Command="{Binding RefreshCommand}"
                             Margin="12,0,0,0"
                             Padding="12,4" />
@@ -87,13 +87,13 @@
                           CanUserAddRows="False"
                           CanUserDeleteRows="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
-                        <DataGridTextColumn Header="API Key" Binding="{Binding Title}" Width="220" />
-                        <DataGridTextColumn Header="Action" Binding="{Binding Code}" Width="200" />
-                        <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[2].Value}" Width="200" />
-                        <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[3].Value}" Width="160" />
-                        <DataGridTextColumn Header="Request" Binding="{Binding InspectorFields[4].Value}" Width="2*" />
-                        <DataGridTextColumn Header="Details" Binding="{Binding Description}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Column_Timestamp}" Binding="{Binding InspectorFields[0].Value}" Width="160" />
+                        <DataGridTextColumn Header="{DynamicResource Column_ApiKey}" Binding="{Binding Title}" Width="220" />
+                        <DataGridTextColumn Header="{DynamicResource Column_Action}" Binding="{Binding Code}" Width="200" />
+                        <DataGridTextColumn Header="{DynamicResource Column_User}" Binding="{Binding InspectorFields[2].Value}" Width="200" />
+                        <DataGridTextColumn Header="{DynamicResource Column_IpAddress}" Binding="{Binding InspectorFields[3].Value}" Width="160" />
+                        <DataGridTextColumn Header="{DynamicResource Column_Request}" Binding="{Binding InspectorFields[4].Value}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Column_Details}" Binding="{Binding Description}" Width="2*" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <Border Background="#80FFFFFF"
