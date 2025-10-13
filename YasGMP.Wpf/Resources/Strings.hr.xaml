@@ -156,6 +156,45 @@
   <sys:String x:Key="Tooltip_Attach">Priloži dokument trenutnom zapisu.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigiraj na povezani zapis.</sys:String>
 
+  <!-- Prilozi: gumbi/ToolTipovi -->
+  <sys:String x:Key="Button_PickFiles">Odaberi datoteke</sys:String>
+  <sys:String x:Key="Button_Download">Preuzmi</sys:String>
+  <sys:String x:Key="Button_Delete">Obriši</sys:String>
+  <sys:String x:Key="Tooltip_PickFiles">Odaberite datoteke za pripremu prijenosa.</sys:String>
+  <sys:String x:Key="Tooltip_DownloadAttachment">Preuzmi odabrani prilog.</sys:String>
+  <sys:String x:Key="Tooltip_DeleteAttachment">Obriši odabrani prilog nakon potvrde.</sys:String>
+
+  <!-- Prilozi: oznake -->
+  <sys:String x:Key="Label_AttachmentDetails">Detalji priloga</sys:String>
+  <sys:String x:Key="Label_Entity">Entitet</sys:String>
+  <sys:String x:Key="Label_EntityType">Vrsta entiteta</sys:String>
+  <sys:String x:Key="Label_EntityId">ID entiteta</sys:String>
+  <sys:String x:Key="Label_FileName">Naziv datoteke</sys:String>
+  <sys:String x:Key="Label_ContentType">Vrsta sadržaja</sys:String>
+  <sys:String x:Key="Label_FileType">Vrsta datoteke</sys:String>
+  <sys:String x:Key="Label_FileSize">Veličina datoteke</sys:String>
+  <sys:String x:Key="Label_SHA256">SHA-256</sys:String>
+  <sys:String x:Key="Label_RetentionPolicy">Politika zadržavanja</sys:String>
+  <sys:String x:Key="Label_RetainUntil">Zadržati do</sys:String>
+  <sys:String x:Key="Label_RetentionFlags">Oznake zadržavanja</sys:String>
+  <sys:String x:Key="Label_RetentionNotes">Bilješke o zadržavanju</sys:String>
+  <sys:String x:Key="Label_StagedUploads">Pripremljeni prijenosi</sys:String>
+  <sys:String x:Key="Label_Processing">Obrada...</sys:String>
+  <sys:String x:Key="Label_LegalHold">Pravna blokada</sys:String>
+  <sys:String x:Key="Label_ReviewRequired">Potrebna provjera</sys:String>
+  <sys:String x:Key="Text_NoFilesStaged">Nema pripremljenih datoteka za prijenos. Koristite Upload za dodavanje prije spremanja.</sys:String>
+  <sys:String x:Key="Text_SelectAttachmentToViewDetails">Odaberite prilog za prikaz detalja.</sys:String>
+
+  <!-- Dodatni stupci -->
+  <sys:String x:Key="Column_Description">Opis</sys:String>
+
+  <!-- Ostali ToolTipovi -->
+  <sys:String x:Key="Tooltip_DigitalSignatureWorkflow">Digitalni potpisi se bilježe kroz e-potpis tijek rada.</sys:String>
+
+  <!-- Kokpit/Nadzorna ploča -->
+  <sys:String x:Key="Label_ProductionKpis">Proizvodni KPI</sys:String>
+  <sys:String x:Key="Label_Notices">Obavijesti</sys:String>
+
   <!-- Oznake za Vanjske servisere -->
   <sys:String x:Key="Label_Name">Naziv</sys:String>
   <sys:String x:Key="Label_ServiceType">Vrsta usluge</sys:String>

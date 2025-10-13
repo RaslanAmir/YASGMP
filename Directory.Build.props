@@ -14,4 +14,9 @@
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'yasgmp' Or '$(MSBuildProjectName)' == 'YasGMP.Tests'">
     <NoWarn>$(NoWarn);CS1570;CS1573;CS1574;CS1587;CS1998;CS8321;CS8602;SA1413;SA1503;SA1513;SA1600;SA1633;SA1200;SA0001;xUnit1030</NoWarn>
   </PropertyGroup>
+
+  <!-- Optional CI test filter: set env YASGMP_TEST_FILTER to a VSTest filter expression to apply globally -->
+  <PropertyGroup Condition="'$(YASGMP_TEST_FILTER)' != ''">
+    <VSTestTestCaseFilter>$(YASGMP_TEST_FILTER)</VSTestTestCaseFilter>
+  </PropertyGroup>
 </Project>

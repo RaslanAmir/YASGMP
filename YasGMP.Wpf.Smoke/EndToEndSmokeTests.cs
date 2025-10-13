@@ -26,7 +26,17 @@ public class EndToEndSmokeTests
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var logsDir = Path.Combine(localAppData, "YasGMP", "logs");
         Directory.CreateDirectory(logsDir);
-        var before = Directory.GetFiles(logsDir, "smoke_*.log").Select(File.GetLastWriteTimeUtc).DefaultIfEmpty(DateTime.MinValue).Max();
+        DateTime GetLatestSmokeTimestamp()
+        {
+            var legacy = Directory.GetFiles(logsDir, "smoke_*.log");
+            var current = Directory.GetFiles(logsDir, "smoke-*.txt");
+            return legacy.Concat(current)
+                         .Select(File.GetLastWriteTimeUtc)
+                         .DefaultIfEmpty(DateTime.MinValue)
+                         .Max();
+        }
+
+        var before = GetLatestSmokeTimestamp();
 
         var psi = new ProcessStartInfo(exe)
         {
@@ -78,10 +88,7 @@ public class EndToEndSmokeTests
             bool logFound = false;
             while (DateTime.UtcNow < timeoutAt)
             {
-                var latest = Directory.GetFiles(logsDir, "smoke_*.log")
-                    .Select(File.GetLastWriteTimeUtc)
-                    .DefaultIfEmpty(before)
-                    .Max();
+                var latest = GetLatestSmokeTimestamp();
                 if (latest > before)
                 {
                     logFound = true;

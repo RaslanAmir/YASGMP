@@ -29,7 +29,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
@@ -197,7 +197,7 @@
                         <TextBlock Text="{DynamicResource Label_DigitalSignature}" Margin="0,12,0,4" />
                         <TextBox Text="{Binding Editor.DigitalSignature, UpdateSourceTrigger=PropertyChanged}"
                                  IsEnabled="False"
-                                 ToolTip="Digital signatures are captured via the e-signature workflow." />
+                                 ToolTip="{DynamicResource Tooltip_DigitalSignatureWorkflow}" />
 
                         <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>

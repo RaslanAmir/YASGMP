@@ -156,6 +156,45 @@
   <sys:String x:Key="Tooltip_Attach">Attach a document to the current record.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigate to the related record.</sys:String>
 
+  <!-- Attachments Buttons/Tooltips -->
+  <sys:String x:Key="Button_PickFiles">Pick Files</sys:String>
+  <sys:String x:Key="Button_Download">Download</sys:String>
+  <sys:String x:Key="Button_Delete">Delete</sys:String>
+  <sys:String x:Key="Tooltip_PickFiles">Select files to stage for upload.</sys:String>
+  <sys:String x:Key="Tooltip_DownloadAttachment">Download the selected attachment.</sys:String>
+  <sys:String x:Key="Tooltip_DeleteAttachment">Delete the selected attachment after confirmation.</sys:String>
+
+  <!-- Attachments Labels -->
+  <sys:String x:Key="Label_AttachmentDetails">Attachment Details</sys:String>
+  <sys:String x:Key="Label_Entity">Entity</sys:String>
+  <sys:String x:Key="Label_EntityType">Entity Type</sys:String>
+  <sys:String x:Key="Label_EntityId">Entity ID</sys:String>
+  <sys:String x:Key="Label_FileName">File Name</sys:String>
+  <sys:String x:Key="Label_ContentType">Content Type</sys:String>
+  <sys:String x:Key="Label_FileType">File Type</sys:String>
+  <sys:String x:Key="Label_FileSize">File Size</sys:String>
+  <sys:String x:Key="Label_SHA256">SHA-256</sys:String>
+  <sys:String x:Key="Label_RetentionPolicy">Retention Policy</sys:String>
+  <sys:String x:Key="Label_RetainUntil">Retain Until</sys:String>
+  <sys:String x:Key="Label_RetentionFlags">Retention Flags</sys:String>
+  <sys:String x:Key="Label_RetentionNotes">Retention Notes</sys:String>
+  <sys:String x:Key="Label_StagedUploads">Staged Uploads</sys:String>
+  <sys:String x:Key="Label_Processing">Processing...</sys:String>
+  <sys:String x:Key="Label_LegalHold">Legal Hold</sys:String>
+  <sys:String x:Key="Label_ReviewRequired">Review Required</sys:String>
+  <sys:String x:Key="Text_NoFilesStaged">No files staged for upload. Use Upload to add files before saving.</sys:String>
+  <sys:String x:Key="Text_SelectAttachmentToViewDetails">Select an attachment to view details.</sys:String>
+
+  <!-- Additional Columns -->
+  <sys:String x:Key="Column_Description">Description</sys:String>
+
+  <!-- Misc tooltips -->
+  <sys:String x:Key="Tooltip_DigitalSignatureWorkflow">Digital signatures are captured via the e-signature workflow.</sys:String>
+
+  <!-- Cockpit/Dashboard -->
+  <sys:String x:Key="Label_ProductionKpis">Production KPIs</sys:String>
+  <sys:String x:Key="Label_Notices">Notices</sys:String>
+
   <!-- External Servicers Labels -->
   <sys:String x:Key="Label_Name">Name</sys:String>
   <sys:String x:Key="Label_ServiceType">Service Type</sys:String>

@@ -1,0 +1,50 @@
+                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Grid Grid.Row="1"
+                  Grid.Column="1"
+                  Margin="8,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            Style="{StaticResource WorkflowVisibleElementStyle}"
+                            Margin="0,0,0,8">
+                    <Button Content="Pick Files"
+                            Command="{Binding UploadCommand}"
+                            Style="{StaticResource WorkflowButtonStyle}"
+                            ToolTipService.ToolTip="Select files to stage for upload."
+                            AutomationProperties.Name="PickFilesButton" />
+                    <Button Content="Download"
+                            Command="{Binding DownloadCommand}"
+                            CommandParameter="{Binding SelectedAttachment}"
+                            Style="{StaticResource WorkflowButtonStyle}"
+                            ToolTipService.ToolTip="Download the selected attachment."
+                            AutomationProperties.Name="DownloadAttachmentButton" />
+                    <Button Content="Delete"
+                            Command="{Binding DeleteCommand}"
+                            CommandParameter="{Binding SelectedAttachment}"
+                            Style="{StaticResource WorkflowButtonStyle}"
+                            ToolTipService.ToolTip="Delete the selected attachment after confirmation."
+                            AutomationProperties.Name="DeleteAttachmentButton" />
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Padding="12"
+                        BorderBrush="Gainsboro"
+                        BorderThickness="1"
+                        Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+                    <Border.DataContext>
+                        <Binding Path="SelectedAttachment" />
+                    </Border.DataContext>
+                    <Grid>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer.Style>
+                                <Style TargetType="ScrollViewer">

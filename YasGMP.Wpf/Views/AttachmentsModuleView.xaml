@@ -45,13 +45,13 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL"
+            <Button Content="{DynamicResource Button_CFL}"
                     Command="{Binding ShowCflCommand}"
-                    ToolTipService.ToolTip="Open the choose-from-list finder."
+                    ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}"
                     AutomationProperties.Name="ChooseFromListButton" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
                                        Margin="8,0,0,0"
-                                       ToolTipService.ToolTip="Navigate to the linked record via Golden Arrow."
+                                       ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}"
                                        AutomationProperties.Name="GoldenArrowButton" />
         </ToolBar>
 
@@ -75,14 +75,14 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
-                           Text="Search:"
+                           Text="{DynamicResource Label_Search}"
                            VerticalAlignment="Center"
                            Margin="0,0,8,0"
-                           ToolTipService.ToolTip="Filter attachments by code, title, or description."
+                           ToolTipService.ToolTip="{DynamicResource Tooltip_SearchBox}"
                            AutomationProperties.Name="SearchLabel" />
                 <TextBox Grid.Column="1"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         ToolTipService.ToolTip="Type to filter the attachment list."
+                         ToolTipService.ToolTip="{DynamicResource Tooltip_SearchBox}"
                          AutomationProperties.Name="SearchTextBox" />
             </Grid>
 
@@ -94,13 +94,13 @@
                       IsReadOnly="True"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      ToolTipService.ToolTip="Existing attachments for the selected entity."
+                      ToolTipService.ToolTip="{DynamicResource Tooltip_RecordsGrid}"
                       AutomationProperties.Name="AttachmentRecordsGrid">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Description}" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -116,22 +116,22 @@
                             Orientation="Horizontal"
                             Style="{StaticResource WorkflowVisibleElementStyle}"
                             Margin="0,0,0,8">
-                    <Button Content="Pick Files"
+                    <Button Content="{DynamicResource Button_PickFiles}"
                             Command="{Binding UploadCommand}"
                             Style="{StaticResource WorkflowButtonStyle}"
-                            ToolTipService.ToolTip="Select files to stage for upload."
+                            ToolTipService.ToolTip="{DynamicResource Tooltip_PickFiles}"
                             AutomationProperties.Name="PickFilesButton" />
-                    <Button Content="Download"
+                    <Button Content="{DynamicResource Button_Download}"
                             Command="{Binding DownloadCommand}"
                             CommandParameter="{Binding SelectedAttachment}"
                             Style="{StaticResource WorkflowButtonStyle}"
-                            ToolTipService.ToolTip="Download the selected attachment."
+                            ToolTipService.ToolTip="{DynamicResource Tooltip_DownloadAttachment}"
                             AutomationProperties.Name="DownloadAttachmentButton" />
-                    <Button Content="Delete"
+                    <Button Content="{DynamicResource Button_Delete}"
                             Command="{Binding DeleteCommand}"
                             CommandParameter="{Binding SelectedAttachment}"
                             Style="{StaticResource WorkflowButtonStyle}"
-                            ToolTipService.ToolTip="Delete the selected attachment after confirmation."
+                            ToolTipService.ToolTip="{DynamicResource Tooltip_DeleteAttachment}"
                             AutomationProperties.Name="DeleteAttachmentButton" />
                 </StackPanel>
 
@@ -156,7 +156,7 @@
                                 </Style>
                             </ScrollViewer.Style>
                             <StackPanel>
-                                <TextBlock Text="Attachment Details"
+                                <TextBlock Text="{DynamicResource Label_AttachmentDetails}"
                                            FontWeight="Bold"
                                            FontSize="16"
                                            Margin="0,0,0,12"
@@ -183,11 +183,11 @@
                                     <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="1" Grid.Column="0" Text="File Name:" Margin="0,0,8,4" />
                                     <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FileName}" IsReadOnly="True" Margin="0,0,0,4" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Status:" Margin="0,0,8,4" />
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Label_Status}" Margin="0,0,8,4" />
                                     <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Status}" IsReadOnly="True" Margin="0,0,0,4" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Entity:" Margin="0,0,8,4" />
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Label_Entity}" Margin="0,0,8,4" />
                                     <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EntityDisplayName}" IsReadOnly="True" Margin="0,0,0,4" />
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="File Type:" Margin="0,0,8,4" />
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Label_FileType}" Margin="0,0,8,4" />
                                     <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding FileType}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="5" Grid.Column="0" Text="File Size:" Margin="0,0,8,4" />
                                     <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding FileSizeDisplay}" IsReadOnly="True" Margin="0,0,0,4" />
@@ -227,13 +227,13 @@
                                                     </Grid.RowDefinitions>
                                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="File Name:" Margin="0,0,8,4" VerticalAlignment="Center" />
                                                     <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}" />
-                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Content Type:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Label_ContentType}" Margin="0,0,8,4" VerticalAlignment="Center" />
                                                     <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ContentType, UpdateSourceTrigger=PropertyChanged}" />
-                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Entity Type:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Label_EntityType}" Margin="0,0,8,4" VerticalAlignment="Center" />
                                                     <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EntityType, UpdateSourceTrigger=PropertyChanged}" />
-                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Entity ID:" Margin="0,0,8,4" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Label_EntityId}" Margin="0,0,8,4" VerticalAlignment="Center" />
                                                     <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EntityId, UpdateSourceTrigger=PropertyChanged}" />
-                                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes:" Margin="0,0,8,0" VerticalAlignment="Top" />
+                                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Label_Notes}" Margin="0,0,8,0" VerticalAlignment="Top" />
                                                     <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40" />
                                                 </Grid>
                                             </Border>
@@ -258,7 +258,7 @@
                                 </TextBlock>
                             </StackPanel>
                         </ScrollViewer>
-                        <TextBlock Text="Select an attachment to view details."
+                        <TextBlock Text="{DynamicResource Text_SelectAttachmentToViewDetails}"
                                    FontStyle="Italic"
                                    Foreground="Gray"
                                    HorizontalAlignment="Center"
@@ -324,7 +324,7 @@
                             Orientation="Vertical"
                             Margin="24">
                     <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
-                    <TextBlock Text="Processing..."
+                    <TextBlock Text="{DynamicResource Label_Processing}"
                                Margin="0,12,0,0"
                                HorizontalAlignment="Center"
                                Foreground="White"

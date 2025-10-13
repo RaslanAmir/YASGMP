@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YasGMP.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+84c41097c95bf378fb30806504dd2a27c2a16547")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+15a6f439154d807e55d407f89074c5f30472c6cb")]
 [assembly: System.Reflection.AssemblyProductAttribute("YasGMP.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YasGMP.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
