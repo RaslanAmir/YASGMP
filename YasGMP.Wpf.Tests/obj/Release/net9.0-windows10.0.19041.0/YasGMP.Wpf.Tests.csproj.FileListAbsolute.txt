@@ -1,0 +1,8 @@
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\bin\Release\net9.0-windows10.0.19041.0\.msCoverageSourceRootsMapping_YasGMP.Wpf.Tests
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\bin\Release\net9.0-windows10.0.19041.0\CoverletSourceRootsMapping_YasGMP.Wpf.Tests
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\obj\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.Tests.csproj.AssemblyReference.cache
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\obj\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.Tests.GeneratedMSBuildEditorConfig.editorconfig
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\obj\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.Tests.AssemblyInfoInputs.cache
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\obj\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.Tests.AssemblyInfo.cs
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\obj\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.Tests.csproj.CoreCompileInputs.cache
+C:\GitHub\YASGMP\YASGMP\YasGMP.Wpf.Tests\obj\Release\net9.0-windows10.0.19041.0\YasGMP.Wpf.Tests.sourcelink.json

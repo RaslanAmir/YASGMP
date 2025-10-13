@@ -56,7 +56,8 @@
       "2025-10-06: dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj succeeded after resolving configuration extension conflicts, AsyncRelayCommand overload mismatches, and legacy adapter logging signatures.",
       "2025-10-30: dotnet restore yasgmp.sln and dotnet build (yasgmp.csproj net9.0-windows10.0.19041.0, YasGMP.Wpf.csproj) now succeed locally (MSB3277 dependency conflicts on MAUI build, NETSDK1137 warning on WPF); CLI verified.",
       "2025-10-13: Applied toolbar i18n/a11y converter pattern (CaptionKey/ToolTipKey/AutomationNameKey via ResourceStringConverter) to Work Orders and Warehouse; added CFL/Golden Arrow smoke checks.",
-      "2025-10-13: Extended a11y on Work Orders editor inputs and localized Work Orders VM (status/validation) via Loc helper and EN/HR resource keys; dialog a11y updated (OK/Cancel)."
+      "2025-10-13: Extended a11y on Work Orders editor inputs and localized Work Orders VM (status/validation) via Loc helper and EN/HR resource keys; dialog a11y updated (OK/Cancel).",
+      "2025-10-13: Added per-input ToolTips + HelpText (Work Orders); Warehouse VM CFL/filtered/lookup messages localized; added unit test to assert validation uses resource strings (not executed due to existing test stubs issues)."
     ]
   },
   "batches": [

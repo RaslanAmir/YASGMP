@@ -113,84 +113,112 @@
                             <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.Title, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Title}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Title}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Title}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{DynamicResource Label_Status}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="0" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.Status, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Status}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Status}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Status}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Label_Type}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.Type, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Type}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Type}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Type}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource Label_Priority}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="1" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.Priority, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Priority}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Priority}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Priority}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Label_Machine}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.MachineId, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Machine}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Machine}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Machine}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource Label_Component}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="2" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.ComponentId, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Component}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Component}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Component}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Label_RequestedBy}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="3" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.RequestedById, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_RequestedBy}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_RequestedBy}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_RequestedBy}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="3" Grid.Column="1" Text="{DynamicResource Label_AssignedTo}" Margin="8,0,0,4" />
                             <TextBox Grid.Row="3" Grid.Column="1" Margin="8,0,0,12"
                                      Text="{Binding Editor.AssignedToId, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_AssignedTo}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_AssignedTo}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_AssignedTo}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Label_CreatedBy}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="4" Grid.Column="0" Margin="0,0,8,12"
                                      Text="{Binding Editor.CreatedById, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_CreatedBy}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_CreatedBy}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_CreatedBy}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="4" Grid.Column="1" Text="{DynamicResource Label_DateOpen}" Margin="8,0,0,4" />
                             <DatePicker Grid.Row="4" Grid.Column="1" Margin="8,0,0,12"
                                         SelectedDate="{Binding Editor.DateOpen, Mode=TwoWay}"
                                         AutomationProperties.Name="{DynamicResource Label_DateOpen}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_DateOpen}"
+                                        ToolTip="{DynamicResource Tooltip_WorkOrders_DateOpen}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="{DynamicResource Label_DueDate}" Margin="0,0,8,4" />
                             <DatePicker Grid.Row="5" Grid.Column="0" Margin="0,0,8,12"
                                         SelectedDate="{Binding Editor.DueDate, Mode=TwoWay}"
                                         AutomationProperties.Name="{DynamicResource Label_DueDate}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_DueDate}"
+                                        ToolTip="{DynamicResource Tooltip_WorkOrders_DueDate}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="5" Grid.Column="1" Text="{DynamicResource Label_DateClosed}" Margin="8,0,0,4" />
                             <DatePicker Grid.Row="5" Grid.Column="1" Margin="8,0,0,12"
                                         SelectedDate="{Binding Editor.DateClose, Mode=TwoWay}"
                                         AutomationProperties.Name="{DynamicResource Label_DateClosed}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_DateClosed}"
+                                        ToolTip="{DynamicResource Tooltip_WorkOrders_DateClosed}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Text="{DynamicResource Label_Result}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      Text="{Binding Editor.Result, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Result}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Result}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Result}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Text="{DynamicResource Label_TaskDescription}" Margin="0,0,8,4" />
                             <TextBox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
                                      Text="{Binding Editor.TaskDescription, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_TaskDescription}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_TaskDescription}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_TaskDescription}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Text="{DynamicResource Label_Description}" Margin="0,0,8,4" />
@@ -200,6 +228,8 @@
                                      Height="80"
                                      Text="{Binding Editor.Description, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Description}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Description}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Description}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Grid.Row="9" Grid.Column="0" Text="{DynamicResource Label_Notes}" Margin="0,0,8,4" />
@@ -209,6 +239,8 @@
                                      Height="80"
                                      Text="{Binding Editor.Notes, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="{DynamicResource Label_Notes}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_WorkOrders_Notes}"
+                                     ToolTip="{DynamicResource Tooltip_WorkOrders_Notes}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
                         </Grid>
                     </StackPanel>

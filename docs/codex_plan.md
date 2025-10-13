@@ -266,3 +266,5 @@ Test run (solution):
 - Added AutomationProperties.Name to Work Orders editor inputs (Title, Status, Type, Priority, Machine/Component IDs, Requested/Assigned/Created users, Date pickers, Result, Task, Description, Notes) and CFL dialog buttons.
 - Localized Work Orders ViewModel status/validation strings via a lightweight helper `YasGMP.Wpf/Helpers/Loc.cs` and new EN/HR keys (Status_WorkOrders_*, Validation_WorkOrders_*, Error_*).
 - Cfl title now uses resource `CFL_Select_WorkOrder`; dialog buttons use `Button_OK`/`Button_Cancel` with a11y names.
+- Added per-input ToolTips + AutomationProperties.HelpText in Work Orders editor (Tooltip_WorkOrders_* keys).
+- Localized Warehouse CFL title and status messages (filtered/unable-to-locate).

@@ -112,6 +112,20 @@
     - wpf
     - accessibility
 
+- id: I-2025-10-13-007
+  file: YasGMP.Wpf/ViewModels/Modules/WarehouseModuleViewModel.cs
+  module: Warehouse
+  context: i18n
+  type: localization
+  severity: minor
+  description: Warehouse ViewModel used inline English strings for CFL title, filtered-status, and not-found messages.
+  suggested_fix: Use Loc helper with EN↔HR resource keys for CFL title and status messages.
+  status: resolved
+  resolved_in: increment-20251013-04
+  tags:
+    - wpf
+    - i18n
+
 - id: I-2025-10-10-002
   file: YasGMP.Wpf/Shell/ModulesPane.xaml
   module: WpfShell

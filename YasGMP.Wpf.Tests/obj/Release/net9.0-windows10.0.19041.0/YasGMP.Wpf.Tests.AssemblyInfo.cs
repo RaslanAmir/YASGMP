@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("YasGMP.Wpf")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("YasGMP.Wpf.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b4737d04e659359d0bbc9bc6e4b8af9c170a57a")]
-[assembly: System.Reflection.AssemblyProductAttribute("YasGMP.Wpf")]
-[assembly: System.Reflection.AssemblyTitleAttribute("YasGMP.Wpf")]
+[assembly: System.Reflection.AssemblyProductAttribute("YasGMP.Wpf.Tests")]
+[assembly: System.Reflection.AssemblyTitleAttribute("YasGMP.Wpf.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows10.0.19041.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows10.0.19041.0")]

@@ -385,6 +385,27 @@
   <sys:String x:Key="Error_Attach_UploadFailed">Attachment upload failed: {0}</sys:String>
   <sys:String x:Key="CFL_Select_WorkOrder">Select Work Order</sys:String>
   <sys:String x:Key="Attachment_Picker_Title">Attach files to {0}</sys:String>
+  <sys:String x:Key="CFL_Select_Warehouse">Select Warehouse</sys:String>
+  <sys:String x:Key="Status_Warehouse_FilteredBy">Filtered {0} by "{1}".</sys:String>
+  <sys:String x:Key="Status_Warehouse_UnableToLocateById">Unable to locate warehouse #{0}.</sys:String>
+
+  <!-- Work Orders: Input Tooltips -->
+  <sys:String x:Key="Tooltip_WorkOrders_Title">Short title for the work order.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Status">Workflow status (e.g., OPEN/CLOSED).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Type">Category of work (e.g., MAINTENANCE).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Priority">Relative priority (e.g., High/Medium/Low).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Machine">Related machine identifier.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Component">Optional component identifier.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_RequestedBy">User who requested the work.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_AssignedTo">Technician assigned to the task.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_CreatedBy">User who created the record.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateOpen">Date when the work order was opened.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DueDate">Target completion date.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateClosed">Date when the work order was closed.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Result">Outcome or execution result.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_TaskDescription">Planned steps or instructions.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Description">Detailed description of the issue/task.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Notes">Additional notes or context.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
   <sys:String x:Key="Label_Price">Price</sys:String>
   <!-- Signature Metadata -->

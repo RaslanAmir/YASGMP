@@ -152,7 +152,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             return new CflItem(key, label, descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null);
         }).ToList();
 
-        return new CflRequest("Select Warehouse", items);
+        return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_Warehouse", "Select Warehouse"), items);
     }
 
     /// <summary>Applies CFL selections back into the Warehouse workspace.</summary>
@@ -170,7 +170,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             SearchText = result.Selected.Label;
         }
 
-        StatusMessage = $"Filtered {Title} by \"{SearchText}\".";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Warehouse_FilteredBy", "Filtered {0} by \"{1}\"."), Title, SearchText);
         return Task.CompletedTask;
     }
 
@@ -200,7 +200,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         var warehouse = await _warehouseService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (warehouse is null)
         {
-            StatusMessage = $"Unable to locate warehouse #{id}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Warehouse_UnableToLocateById", "Unable to locate warehouse #{0}."), id);
             return;
         }
 

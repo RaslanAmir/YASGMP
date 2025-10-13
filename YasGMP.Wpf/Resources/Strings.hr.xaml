@@ -385,6 +385,27 @@
   <sys:String x:Key="Error_Attach_UploadFailed">Prijenos priloga nije uspio: {0}</sys:String>
   <sys:String x:Key="CFL_Select_WorkOrder">Odaberite radni nalog</sys:String>
   <sys:String x:Key="Attachment_Picker_Title">Priloži datoteke uz {0}</sys:String>
+  <sys:String x:Key="CFL_Select_Warehouse">Odaberite skladište</sys:String>
+  <sys:String x:Key="Status_Warehouse_FilteredBy">Filtrirano {0} po "{1}".</sys:String>
+  <sys:String x:Key="Status_Warehouse_UnableToLocateById">Nije moguće pronaći skladište #{0}.</sys:String>
+
+  <!-- Radni nalozi: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_WorkOrders_Title">Kratki naslov radnog naloga.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Status">Status tijeka (npr. OTVOREN/ZATVOREN).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Type">Vrsta posla (npr. ODRŽAVANJE).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Priority">Relativni prioritet (npr. Visok/Srednji/Nizak).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Machine">Identifikator povezanog stroja.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Component">Opcionalni identifikator sastavnice.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_RequestedBy">Korisnik koji je zatražio posao.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_AssignedTo">Tehničar dodijeljen zadatku.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_CreatedBy">Korisnik koji je kreirao zapis.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateOpen">Datum otvaranja radnog naloga.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DueDate">Ciljani datum završetka.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateClosed">Datum zatvaranja radnog naloga.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Result">Ishod ili rezultat izvršenja.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_TaskDescription">Planirani koraci ili upute.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Description">Detaljan opis problema/zadatka.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Notes">Dodatne bilješke ili kontekst.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
   <sys:String x:Key="Label_Price">Cijena</sys:String>
   <!-- Metapodaci potpisa -->
