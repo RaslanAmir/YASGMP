@@ -10,6 +10,10 @@
     <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AppCoreTargetFrameworks Condition="'$(AppCoreTargetFrameworks)' == ''">net8.0;net9.0</AppCoreTargetFrameworks>
+  </PropertyGroup>
+
   <!-- Centralised warning suppression for noisy analyzers during test runs -->
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'yasgmp' Or '$(MSBuildProjectName)' == 'YasGMP.Tests'">
     <NoWarn>$(NoWarn);CS1570;CS1573;CS1574;CS1587;CS1998;CS8321;CS8602;SA1413;SA1503;SA1513;SA1600;SA1633;SA1200;SA0001;xUnit1030</NoWarn>
