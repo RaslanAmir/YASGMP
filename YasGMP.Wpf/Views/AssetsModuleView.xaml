@@ -79,7 +79,11 @@
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Code.Header}" />
-                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Code.Header}" />
+                                <Setter Property="AutomationProperties.Name">
+                                    <Setter.Value>
+                                        <Binding Path="Code" />
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Code.Cell.AutomationId}" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
@@ -96,7 +100,11 @@
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Title.Header}" />
-                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Title.Header}" />
+                                <Setter Property="AutomationProperties.Name">
+                                    <Setter.Value>
+                                        <Binding Path="Title" />
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Title.Cell.AutomationId}" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
@@ -113,7 +121,11 @@
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Status.Header}" />
-                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.Grid.Column.Status.Header}" />
+                                <Setter Property="AutomationProperties.Name">
+                                    <Setter.Value>
+                                        <Binding Path="Status" />
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Status.Cell.AutomationId}" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
@@ -130,7 +142,11 @@
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Module.Assets.Header.Location}" />
-                                <Setter Property="AutomationProperties.Name" Value="{DynamicResource Module.Assets.Header.Location}" />
+                                <Setter Property="AutomationProperties.Name">
+                                    <Setter.Value>
+                                        <Binding Path="InspectorFields[0].Value" />
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Location.Cell.AutomationId}" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
