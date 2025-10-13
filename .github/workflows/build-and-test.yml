@@ -1,0 +1,31 @@
+name: build-and-test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore yasgmp.sln
+
+      - name: Build (Release)
+        run: dotnet build yasgmp.sln -c Release --no-restore
+
+      - name: Test (Release)
+        env:
+          YASGMP_TEST_FILTER: ${{ vars.YASGMP_TEST_FILTER }}
+        run: |
+          if ($env:YASGMP_TEST_FILTER) { Write-Host "Using VSTest filter: $env:YASGMP_TEST_FILTER" }
+          dotnet test yasgmp.sln -c Release --no-build
+
