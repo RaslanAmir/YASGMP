@@ -510,6 +510,36 @@
   <data name="Module.Assets.Status.Scrapped" xml:space="preserve">
     <value>otpisan</value>
   </data>
+  <data name="Module.Assets.Status.AssetNotFound" xml:space="preserve">
+    <value>Nije moguće pronaći imovinu br. {0}.</value>
+  </data>
+  <data name="Module.Assets.Status.SelectBeforeSave" xml:space="preserve">
+    <value>Odaberite imovinu prije spremanja.</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureFailed" xml:space="preserve">
+    <value>Elektronički potpis nije uspio: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureCancelled" xml:space="preserve">
+    <value>Elektronički potpis je otkazan. Spremanje je prekinuto.</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureNotCaptured" xml:space="preserve">
+    <value>Elektronički potpis nije zabilježen.</value>
+  </data>
+  <data name="Module.Assets.Status.SignaturePersistenceFailed" xml:space="preserve">
+    <value>Neuspjelo spremanje elektroničkog potpisa: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureCaptured" xml:space="preserve">
+    <value>Elektronički potpis zabilježen ({0}).</value>
+  </data>
+  <data name="Module.Assets.Status.SaveBeforeAttachment" xml:space="preserve">
+    <value>Spremite imovinu prije dodavanja privitaka.</value>
+  </data>
+  <data name="Module.Assets.Status.AttachmentCancelled" xml:space="preserve">
+    <value>Učitavanje privitka je otkazano.</value>
+  </data>
+  <data name="Module.Assets.Status.AttachmentFailed" xml:space="preserve">
+    <value>Učitavanje privitka nije uspjelo: {0}</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>u kvalifikaciji</value>
   </data>

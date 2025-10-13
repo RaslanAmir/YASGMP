@@ -230,7 +230,7 @@
         "type": "command",
         "command": "dotnet test YasGMP.Wpf.Tests -c Release -p:EnableWindowsTargeting=true --filter FullyQualifiedName~DockLayoutPersistenceServiceTests",
         "outcome": "failed",
-        "details": "Restore fails with NU1605 downgrade (Microsoft.Extensions.Configuration.Abstractions 9.0.3\u21929.0.0) and NU1201 due to net9.0-windows10.0.19041 target."
+        "details": "Restore fails with NU1605 downgrade (Microsoft.Extensions.Configuration.Abstractions 9.0.3→9.0.0) and NU1201 due to net9.0-windows10.0.19041 target."
       },
       {
         "type": "note",
@@ -403,8 +403,7 @@
         "Accessibility inspector validation deferred pending Windows host availability."
       ]
     }
-  }
-  ,
+  },
   {
     "run_id": "2026-04-06T12:00:00Z",
     "scope": {
@@ -450,6 +449,85 @@
       ],
       "notes": [
         "Awaiting Windows host to re-run accessibility automation after binding change."
+      ]
+    }
+  },
+  {
+    "run_id": "2026-04-07T09:25:00Z",
+    "scope": {
+      "folders_scanned": 6,
+      "files_scanned": 10,
+      "modules_touched": [
+        "Assets",
+        "Localization"
+      ]
+    },
+    "actions": [
+      {
+        "type": "env_guard",
+        "rule": "cli-missing",
+        "status": "enforced"
+      },
+      {
+        "type": "command",
+        "command": "dotnet --version",
+        "outcome": "not_found",
+        "details": "bash: command not found: dotnet"
+      },
+      {
+        "type": "update_file",
+        "path": "YasGMP.Wpf/ViewModels/Modules/AssetsModuleViewModel.cs",
+        "summary": "Replaced literal status strings with localization service lookups."
+      },
+      {
+        "type": "update_file",
+        "path": "YasGMP.Wpf/Resources/ShellStrings.resx",
+        "summary": "Added neutral Assets status messages for localization."
+      },
+      {
+        "type": "update_file",
+        "path": "YasGMP.Wpf/Resources/ShellStrings.en.resx",
+        "summary": "Added English translations for new Assets status messages."
+      },
+      {
+        "type": "update_file",
+        "path": "YasGMP.Wpf/Resources/ShellStrings.hr.resx",
+        "summary": "Added Croatian translations for new Assets status messages."
+      },
+      {
+        "type": "update_file",
+        "path": "YasGMP.Wpf.Tests/AssetsModuleViewModelTests.cs",
+        "summary": "Updated tests to use LocalizationService and assert localized status output."
+      },
+      {
+        "type": "update_file",
+        "path": "docs/codex_plan.md",
+        "summary": "Logged localization sweep and recorded latest env_guard status."
+      },
+      {
+        "type": "update_file",
+        "path": "docs/codex_progress.json",
+        "summary": "Appended SDK note and progress entry for Assets status localization."
+      },
+      {
+        "type": "update_file",
+        "path": "DECISION_REGISTER.md",
+        "summary": "Recorded decision to localize Assets status messaging via ShellStrings."
+      },
+      {
+        "type": "update_file",
+        "path": "Codex_Issues.yaml",
+        "summary": "Logged follow-up issue for verifying localized status messages once CLI is available."
+      }
+    ],
+    "summary": {
+      "issues_found": 0,
+      "todos_created": 1,
+      "blocking_risks": [
+        "I-001"
+      ],
+      "notes": [
+        "Localization verification on Windows still pending due to missing CLI."
       ]
     }
   }

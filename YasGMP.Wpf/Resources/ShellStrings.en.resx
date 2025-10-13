@@ -510,6 +510,36 @@
   <data name="Module.Assets.Status.Scrapped" xml:space="preserve">
     <value>scrapped</value>
   </data>
+  <data name="Module.Assets.Status.AssetNotFound" xml:space="preserve">
+    <value>Unable to locate asset #{0}.</value>
+  </data>
+  <data name="Module.Assets.Status.SelectBeforeSave" xml:space="preserve">
+    <value>Select an asset before saving.</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureFailed" xml:space="preserve">
+    <value>Electronic signature failed: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureCancelled" xml:space="preserve">
+    <value>Electronic signature cancelled. Save aborted.</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureNotCaptured" xml:space="preserve">
+    <value>Electronic signature was not captured.</value>
+  </data>
+  <data name="Module.Assets.Status.SignaturePersistenceFailed" xml:space="preserve">
+    <value>Failed to persist electronic signature: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.SignatureCaptured" xml:space="preserve">
+    <value>Electronic signature captured ({0}).</value>
+  </data>
+  <data name="Module.Assets.Status.SaveBeforeAttachment" xml:space="preserve">
+    <value>Save the asset before adding attachments.</value>
+  </data>
+  <data name="Module.Assets.Status.AttachmentCancelled" xml:space="preserve">
+    <value>Attachment upload cancelled.</value>
+  </data>
+  <data name="Module.Assets.Status.AttachmentFailed" xml:space="preserve">
+    <value>Attachment upload failed: {0}</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>in-qualification</value>
   </data>

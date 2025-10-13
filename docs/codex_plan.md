@@ -11,6 +11,7 @@
   - 2026-03-24T09:15Z: `dotnet restore yasgmp.sln` retried after updating Assets navigation regression tests; container still reports `bash: command not found: dotnet`.
   - 2026-03-25T08:40Z: `dotnet --version` retried while tightening B1FormDocumentViewModel command refresh hooks; container again responds `bash: command not found: dotnet`.
   - 2026-04-04T09:10Z: `dotnet restore yasgmp.sln` retried after Assets drill-down updates; container still returns `bash: command not found: dotnet`.
+  - 2026-04-07T09:20Z: `dotnet --version` retried ahead of the Assets status localization batch; command still returns `bash: command not found: dotnet`, so env_guard remains static-analysis.
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
   - 2025-10-10T11:24Z: `dotnet restore yasgmp.sln` (with `EnableWindowsTargeting=true`) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; full solution restore remains Windows-host only.
   - 2025-10-10T10:07Z: `dotnet restore -p:EnableWindowsTargeting=true` exits with NETSDK1147 (maui-tizen workload) after `dotnet workload install maui` reports the workload is unsupported on Linux.
@@ -74,6 +75,10 @@
 3. **DatabaseService Extensions:** Add `AppendAuditHashAsync(entityKey, auditPayload, signatureMetadata)` which calculates SHA-256 of serialized audit payload + previous hash, stores both the audit row and hash envelope transactionally, and returns the persisted hash token to the caller for UI confirmation.
 4. **ViewModel Surfacing:** Extend module view-models to surface the latest hash token, enabling the inspector/status bar to display verification cues and emit correlation identifiers for smoke automation.
 5. **Verification Workflow:** Outline periodic verification routines (scheduled job + manual command) that recompute hash chains per entity, flag tampering anomalies, and surface the status through the dashboard/reporting modules.
+
+### Increment 2 Update — 2026-04-07 Localization Sweep
+- Localized Assets module status messages through ShellStrings (neutral/en/hr) and routed AssetsModuleViewModel status surfaces through `ILocalizationService` so runtime language switches stay in sync.
+- Expanded Assets module unit coverage to assert localized status messaging via `LocalizationService`, noting that build/test execution still awaits dotnet CLI availability (env_guard=static-analysis).
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
