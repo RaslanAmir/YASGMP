@@ -55,3 +55,24 @@
   resolved_in: null
   tags: [audit, signature, backlog]
 
+- id: I-004
+  file: YasGMP.Wpf/Views/AssetsModuleView.xaml
+  module: Assets
+  context: Accessibility validation
+  type: Accessibility
+  severity: "⚠️ Medium"
+  description: |
+    AssetsModuleView now binds localized ToolTip/Automation metadata for search, grid, and editor controls.
+    Accessibility inspector validation remains pending because the Windows-specific tooling is unavailable inside the Linux container.
+  references:
+    - YasGMP.Wpf/Views/AssetsModuleView.xaml
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+    - ACTIVITY_LOG.json
+  suggested_fix: |
+    Re-run the Windows Accessibility Insights or FlaUI-based automation suite on a Windows host to confirm each control exposes the expected tooltip,
+    AutomationName, and AutomationId metadata once the dotnet CLI and desktop tooling are available.
+  status: open
+  resolved_in: null
+  tags: [accessibility, localization, env-guard]
+
