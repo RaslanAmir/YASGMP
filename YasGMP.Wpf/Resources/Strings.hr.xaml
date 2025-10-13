@@ -406,6 +406,41 @@
   <sys:String x:Key="Tooltip_WorkOrders_TaskDescription">Planirani koraci ili upute.</sys:String>
   <sys:String x:Key="Tooltip_WorkOrders_Description">Detaljan opis problema/zadatka.</sys:String>
   <sys:String x:Key="Tooltip_WorkOrders_Notes">Dodatne bilješke ili kontekst.</sys:String>
+
+  <!-- Imovina: Status/Validacija & CFL -->
+  <sys:String x:Key="CFL_Select_Asset">Odaberite imovinu</sys:String>
+  <sys:String x:Key="Status_Assets_FilteredBy">Filtrirano {0} po "{1}".</sys:String>
+  <sys:String x:Key="Status_Assets_UnableToLocateById">Nije moguće pronaći imovinu #{0}.</sys:String>
+  <sys:String x:Key="Status_Assets_SelectBeforeSave">Odaberite imovinu prije spremanja.</sys:String>
+  <sys:String x:Key="Error_Assets_SaveFailed">Neuspjelo spremanje imovine: {0}</sys:String>
+
+  <!-- Imovina: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Assets_Code">Jedinstvena šifra/taga imovine.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Name">Naziv imovine u registrima.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Description">Detaljan opis imovine.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Model">Model proizvođača.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Manufacturer">Proizvođač imovine.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Location">Trenutna lokacija.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Status">Stanje životnog ciklusa.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_UrsDoc">Referenca na URS dokument.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_InstallDate">Datum instalacije/puštanja u rad.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_ProcurementDate">Datum nabave.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_WarrantyUntil">Datum isteka jamstva.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_IsCritical">Označava je li imovina kritična.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_SerialNumber">Serijski broj proizvođača.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_LifecyclePhase">Trenutna faza životnog ciklusa.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Notes">Dodatne bilješke ili kontekst.</sys:String>
+
+  <!-- Skladište: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Warehouse_Name">Naziv skladišta.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Location">Fizička lokacija skladišta.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Status">Operativni status.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Responsible">Odgovorna osoba/tim.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_QrCode">QR kod identifikator (opcionalno).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_ClimateMode">Način klime/temperature (ako je primjenjivo).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Qualified">Zastavica kvalificiranosti.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_LastQualified">Datum zadnje kvalifikacije.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Notes">Bilješke o uvjetima/ograničenjima.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
   <sys:String x:Key="Label_Price">Cijena</sys:String>
   <!-- Metapodaci potpisa -->

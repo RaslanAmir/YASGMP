@@ -118,12 +118,18 @@
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Name}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_Name}"
+                                     ToolTip="{DynamicResource Tooltip_Warehouse_Name}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Location}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Location, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Location}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_Location}"
+                                     ToolTip="{DynamicResource Tooltip_Warehouse_Location}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Status}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
@@ -131,29 +137,43 @@
                                       Grid.Column="1"
                                       ItemsSource="{Binding StatusOptions}"
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsEditorEnabled}" />
+                                      AutomationProperties.Name="{DynamicResource Label_Status}"
+                                      AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_Status}"
+                                      ToolTip="{DynamicResource Tooltip_Warehouse_Status}"
+                                     IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Responsible}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="3"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Responsible, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Responsible}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_Responsible}"
+                                     ToolTip="{DynamicResource Tooltip_Warehouse_Responsible}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_QRCode}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
                                      Text="{Binding Editor.QrCode, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_QRCode}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_QrCode}"
+                                     ToolTip="{DynamicResource Tooltip_Warehouse_QrCode}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_ClimateMode}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.ClimateMode, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_ClimateMode}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_ClimateMode}"
+                                     ToolTip="{DynamicResource Tooltip_Warehouse_ClimateMode}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
                                 <CheckBox Content="{DynamicResource Label_Qualified}"
                                           IsChecked="{Binding Editor.IsQualified, Mode=TwoWay}"
+                                          AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_Qualified}"
+                                          ToolTip="{DynamicResource Tooltip_Warehouse_Qualified}"
                                           IsEnabled="{Binding IsEditorEnabled}" />
                                 <TextBlock Text="{DynamicResource Label_LastQualified}" Margin="16,0,8,0" VerticalAlignment="Center" />
                                 <DatePicker SelectedDate="{Binding Editor.LastQualified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -164,6 +184,9 @@
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Note, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Notes}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Warehouse_Notes}"
+                                     ToolTip="{DynamicResource Tooltip_Warehouse_Notes}"
                                      AcceptsReturn="True"
                                      Height="60"
                                      TextWrapping="Wrap"

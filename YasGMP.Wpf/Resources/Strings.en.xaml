@@ -406,6 +406,41 @@
   <sys:String x:Key="Tooltip_WorkOrders_TaskDescription">Planned steps or instructions.</sys:String>
   <sys:String x:Key="Tooltip_WorkOrders_Description">Detailed description of the issue/task.</sys:String>
   <sys:String x:Key="Tooltip_WorkOrders_Notes">Additional notes or context.</sys:String>
+
+  <!-- Assets: Status/Validation & CFL -->
+  <sys:String x:Key="CFL_Select_Asset">Select Asset</sys:String>
+  <sys:String x:Key="Status_Assets_FilteredBy">Filtered {0} by "{1}".</sys:String>
+  <sys:String x:Key="Status_Assets_UnableToLocateById">Unable to locate asset #{0}.</sys:String>
+  <sys:String x:Key="Status_Assets_SelectBeforeSave">Select an asset before saving.</sys:String>
+  <sys:String x:Key="Error_Assets_SaveFailed">Failed to persist asset: {0}</sys:String>
+
+  <!-- Assets: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Assets_Code">Unique asset code or inventory tag.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Name">Asset name as seen in registers.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Description">Detailed description of the asset.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Model">Manufacturer’s model identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Manufacturer">Company that built the asset.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Location">Current physical location.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Status">Lifecycle state (active/maintenance/etc.).</sys:String>
+  <sys:String x:Key="Tooltip_Assets_UrsDoc">URS document reference.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_InstallDate">Date when installed/commissioned.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_ProcurementDate">Date of purchase.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_WarrantyUntil">Warranty expiration date.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_IsCritical">Whether the asset is critical.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_SerialNumber">Manufacturer serial number.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_LifecyclePhase">Current lifecycle phase.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Notes">Additional notes or context.</sys:String>
+
+  <!-- Warehouse: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Warehouse_Name">Warehouse display name.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Location">Physical location of the warehouse.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Status">Operational status.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Responsible">Responsible person/team.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_QrCode">QR code identifier (optional).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_ClimateMode">Climate/temperature mode (if applicable).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Qualified">Qualified flag.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_LastQualified">Date of last qualification.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Notes">Notes about conditions/constraints.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
   <sys:String x:Key="Label_Price">Price</sys:String>
   <!-- Signature Metadata -->

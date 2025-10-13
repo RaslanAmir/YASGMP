@@ -268,3 +268,4 @@ Test run (solution):
 - Cfl title now uses resource `CFL_Select_WorkOrder`; dialog buttons use `Button_OK`/`Button_Cancel` with a11y names.
 - Added per-input ToolTips + AutomationProperties.HelpText in Work Orders editor (Tooltip_WorkOrders_* keys).
 - Localized Warehouse CFL title and status messages (filtered/unable-to-locate).
+- Extended ToolTips/HelpText to Assets & Warehouse editors (Tooltip_Assets_* and Tooltip_Warehouse_* keys), and localized Assets VM messages (CFL title; filtered/select-before-save/unable-to-locate; save failed).

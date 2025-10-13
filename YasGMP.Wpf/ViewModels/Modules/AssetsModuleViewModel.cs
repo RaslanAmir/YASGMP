@@ -163,7 +163,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             })
             .ToList();
 
-        return new CflRequest("Select Asset", items);
+        return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_Asset", "Select Asset"), items);
     }
 
     /// <summary>Applies the selected CFL result back to the asset list and inspector.</summary>
@@ -179,7 +179,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         SearchText = search;
-        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Assets_FilteredBy", "Filtered {0} by \"{1}\"."), Title, search);
         return Task.CompletedTask;
     }
 
@@ -208,7 +208,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         var machine = await _machineService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (machine is null)
         {
-            StatusMessage = $"Unable to locate asset #{id}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Assets_UnableToLocateById", "Unable to locate asset #{0}."), id);
             return;
         }
 
@@ -274,7 +274,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (Mode == FormMode.Update && _loadedMachine is null)
         {
-            StatusMessage = "Select an asset before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Assets_SelectBeforeSave", "Select an asset before saving.");
             return false;
         }
 
@@ -288,19 +288,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_Failed", "Electronic signature failed: {0}"), ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Cancelled", "Electronic signature cancelled. Save aborted.");
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Error_Signature_NotCaptured", "Electronic signature was not captured.");
             return false;
         }
 
@@ -362,7 +362,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist asset: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Assets_SaveFailed", "Failed to persist asset: {0}"), ex.Message), ex);
         }
 
         if (saveResult.SignatureMetadata?.Id is { } signatureId)
@@ -396,12 +396,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_PersistFailed", "Failed to persist electronic signature: {0}"), ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Captured", "Electronic signature captured ({0})."), signatureResult.ReasonDisplay);
         return true;
     }
 
@@ -514,7 +514,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_Cancelled", "Attachment upload cancelled.");
                 return;
             }
 
@@ -550,7 +550,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {
