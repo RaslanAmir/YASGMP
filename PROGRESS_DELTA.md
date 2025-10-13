@@ -1,2 +1,3 @@
 - Module Environment: blocked → blocked | Reasons: dotnet CLI still unavailable; static documentation refreshed | Issues closed: []
 - Batch B0: blocked → blocked | Reasons: 2025-10-07T11:06Z CLI absence reconfirmed; next actions scoped to documentation, schema review, and static analysis | Issues closed: []
+- Increment 1 Planning: new → drafted | Reasons: Created compliance backlog (inventory, traceability, audit hash-chain) pending execution once CLI available | Issues closed: []

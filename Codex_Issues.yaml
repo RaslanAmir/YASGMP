@@ -17,3 +17,21 @@
   status: open
   resolved_in: null
   tags: [buildenv, net9]
+- id: I-002
+  file: docs/codex_plan.md
+  module: Planning
+  context: Increment 1 backlog
+  type: Planning
+  severity: "⚠️ Medium"
+  description: |
+    Repository-wide folder/module inventory and entity traceability maps required for SAP B1 parity and compliance are still outstanding.
+    Increment 1 logged the backlog but no concrete mappings exist yet.
+  references:
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+  suggested_fix: |
+    Produce the per-folder inventory and entity traceability map during Increment 2, aligning Views/ViewModels/Services/DB artifacts.
+  status: open
+  resolved_in: null
+  tags: [planning, parity, compliance]
+
