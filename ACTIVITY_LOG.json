@@ -490,5 +490,84 @@
         "FlaUI may be blocked on CI/headless nodes; smoke remains opt-in via YASGMP_SMOKE=1"
       ]
     }
+  },
+  {
+    "run_id": "RUN-2025-10-13T094200",
+    "scope": [
+      "wpf-shell",
+      "a11y",
+      "i18n",
+      "dialogs",
+      "build",
+      "pr-prep"
+    ],
+    "actions": [
+      {
+        "status": "updated",
+        "paths": [
+          "YasGMP.Wpf/Views/WorkOrdersModuleView.xaml"
+        ],
+        "notes": "Added AutomationProperties.Name to all editor inputs for screen reader clarity.",
+        "type": "code_change"
+      },
+      {
+        "status": "updated",
+        "paths": [
+          "YasGMP.Wpf/ViewModels/Modules/WorkOrdersModuleViewModel.cs",
+          "YasGMP.Wpf/Helpers/Loc.cs",
+          "YasGMP.Wpf/Resources/Strings.en.xaml",
+          "YasGMP.Wpf/Resources/Strings.hr.xaml"
+        ],
+        "notes": "Localized Work Orders status/validation/messages via Loc helper and new EN/HR resources.",
+        "type": "code_change"
+      },
+      {
+        "status": "updated",
+        "paths": [
+          "YasGMP.Wpf/Dialogs/CflDialog.xaml",
+          "YasGMP.Wpf/Views/Dialogs/ElectronicSignatureDialog.xaml"
+        ],
+        "notes": "Dialog a11y: AutomationProperties for OK/Cancel and inputs; localized OK.",
+        "type": "code_change"
+      },
+      {
+        "status": "success",
+        "name": "dotnet build YasGMP.Wpf -c Release",
+        "artifacts": [
+          "logs/dotnet-build-wpf.txt"
+        ],
+        "type": "command"
+      },
+      {
+        "status": "success",
+        "name": "dotnet build yasgmp -f net9.0-windows10.0.19041.0 -c Release",
+        "artifacts": [
+          "logs/dotnet-build-maui.txt"
+        ],
+        "type": "command"
+      },
+      {
+        "status": "added",
+        "notes": "PR body with acceptance checklist and increment summary.",
+        "path": "docs/PR_BODY_WPF_SHELL.md",
+        "type": "pr_prep"
+      },
+      {
+        "status": "success",
+        "name": "push",
+        "notes": "feature/wpf-shell-full-yasgmp pushed to origin",
+        "type": "git"
+      }
+    ],
+    "summary": {
+      "issues_found": [],
+      "todos_created": [
+        "Apply field-level tooltips/help text where needed",
+        "Localize any remaining inline messages across other modules"
+      ],
+      "blocking_risks": [
+        "Cannot auto-create PR without GitHub CLI/token; PR body provided for manual creation"
+      ]
+    }
   }
 ]

@@ -84,6 +84,34 @@
     - i18n
     - accessibility
 
+- id: I-2025-10-13-005
+  file: YasGMP.Wpf/ViewModels/Modules/WorkOrdersModuleViewModel.cs
+  module: WorkOrders
+  context: i18n
+  type: localization
+  severity: minor
+  description: Work Orders ViewModel returned inline English status and validation strings.
+  suggested_fix: Use a small resource helper to fetch EN↔HR strings and add keys for status/validation; keep fallbacks for safety.
+  status: resolved
+  resolved_in: increment-20251013-03
+  tags:
+    - wpf
+    - i18n
+
+- id: I-2025-10-13-006
+  file: YasGMP.Wpf/Views/Dialogs/ElectronicSignatureDialog.xaml
+  module: ESignature
+  context: a11y
+  type: accessibility
+  severity: minor
+  description: Dialog inputs and buttons lacked AutomationProperties.Name bindings.
+  suggested_fix: Bind AutomationProperties.Name to label/button resource keys and localize OK/Cancel button content.
+  status: resolved
+  resolved_in: increment-20251013-03
+  tags:
+    - wpf
+    - accessibility
+
 - id: I-2025-10-10-002
   file: YasGMP.Wpf/Shell/ModulesPane.xaml
   module: WpfShell
