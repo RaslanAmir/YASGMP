@@ -464,6 +464,32 @@
   <sys:String x:Key="Tooltip_Incidents_Component">Identifikator povezane sastavnice.</sys:String>
   <sys:String x:Key="Tooltip_Incidents_AssignedTo">Dodijeljeni istražitelj/tehničar.</sys:String>
   <sys:String x:Key="Tooltip_Incidents_LastModified">Zadnje izmijenjeno (vrijeme/korisnik).</sys:String>
+
+  <!-- CAPA: CFL/Status/Greške -->
+  <sys:String x:Key="Status_CAPA_SelectBeforeSave">Odaberite CAPA slučaj prije spremanja.</sys:String>
+  <sys:String x:Key="Error_CAPA_SaveFailed">Neuspjelo spremanje CAPA slučaja: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_CAPA">Odaberite CAPA</sys:String>
+  <sys:String x:Key="Status_CAPA_LoadedTitle">Učitano {0}.</sys:String>
+  <sys:String x:Key="Status_CAPA_FilteredBy">Filtrirano CAPA slučajeva po "{0}".</sys:String>
+  <sys:String x:Key="Attachment_Picker_CAPA">Odaberite CAPA prilog</sys:String>
+  <sys:String x:Key="Status_Attach_NoneSelected">Nije odabrana nijedna datoteka.</sys:String>
+
+  <!-- CAPA: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_CAPA_Title">Kratki naslov CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Description">Detaljan opis problema.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Component">Povezana sastavnica.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_AssignedTo">Dodijeljena osoba za CAPA slučaj.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Priority">Prioritet CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Status">Trenutni status CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Opened">Datum otvaranja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Closed">Datum zatvaranja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Reason">Razlog CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_RootCause">Analiza korijenskog uzroka.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_CorrectiveAction">Korektivne radnje koje treba provesti.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_PreventiveAction">Preventivne radnje za sprječavanje ponavljanja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Actions">Sažetak dogovorenih radnji.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Notes">Dodatne bilješke ili kontekst.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Comments">Komentari recenzenata.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
   <sys:String x:Key="Label_Price">Cijena</sys:String>
   <!-- Metapodaci potpisa -->

@@ -464,6 +464,32 @@
   <sys:String x:Key="Tooltip_Incidents_Component">Related component identifier.</sys:String>
   <sys:String x:Key="Tooltip_Incidents_AssignedTo">Assigned investigator/technician.</sys:String>
   <sys:String x:Key="Tooltip_Incidents_LastModified">Last modified timestamp/user.</sys:String>
+
+  <!-- CAPA: CFL/Status/Errors -->
+  <sys:String x:Key="Status_CAPA_SelectBeforeSave">Select a CAPA case before saving.</sys:String>
+  <sys:String x:Key="Error_CAPA_SaveFailed">Failed to persist CAPA case: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_CAPA">Select CAPA</sys:String>
+  <sys:String x:Key="Status_CAPA_LoadedTitle">Loaded {0}.</sys:String>
+  <sys:String x:Key="Status_CAPA_FilteredBy">Filtered CAPA cases by "{0}".</sys:String>
+  <sys:String x:Key="Attachment_Picker_CAPA">Select CAPA attachment</sys:String>
+  <sys:String x:Key="Status_Attach_NoneSelected">No files selected.</sys:String>
+
+  <!-- CAPA: Input Tooltips -->
+  <sys:String x:Key="Tooltip_CAPA_Title">Short title for the CAPA case.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Description">Detailed description of the issue.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Component">Related component.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_AssignedTo">Assignee for the CAPA case.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Priority">Priority of the CAPA case.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Status">Current CAPA status.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Opened">Date opened.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Closed">Date closed.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Reason">Reason for the CAPA.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_RootCause">Root cause analysis.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_CorrectiveAction">Corrective actions to be performed.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_PreventiveAction">Preventive actions to avoid recurrence.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Actions">Summary of agreed actions.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Notes">Additional notes or context.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Comments">Reviewer comments.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
   <sys:String x:Key="Label_Price">Price</sys:String>
   <!-- Signature Metadata -->

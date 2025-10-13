@@ -264,7 +264,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     {
         if (Mode == FormMode.Update && _loadedCapa is null)
         {
-            StatusMessage = "Select a CAPA case before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_CAPA_SelectBeforeSave", "Select a CAPA case before saving.");
             return false;
         }
 
@@ -337,7 +337,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist CAPA case: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_CAPA_SaveFailed", "Failed to persist CAPA case: {0}"), ex.Message), ex);
         }
 
         _loadedCapa = capa;
@@ -425,7 +425,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             })
             .ToList();
 
-        return new CflRequest("Select CAPA", items);
+        return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_CAPA", "Select CAPA"), items);
     }
 
     /// <summary>Applies CFL selections back into the CAPA workspace.</summary>
@@ -437,12 +437,12 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         {
             SelectedRecord = match;
             SearchText = match.Title;
-            StatusMessage = $"Loaded {match.Title}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_CAPA_LoadedTitle", "Loaded {0}."), match.Title);
             return Task.CompletedTask;
         }
 
         SearchText = result.Selected.Label;
-        StatusMessage = $"Filtered CAPA cases by \"{result.Selected.Label}\".";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_CAPA_FilteredBy", "Filtered CAPA cases by \"{0}\"."), result.Selected.Label);
         RecordsView.Refresh();
         return Task.CompletedTask;
     }
@@ -473,12 +473,12 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             UpdateAttachmentCommandState();
 
             var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(true, null, "Select CAPA attachment"))
+                .PickFilesAsync(new FilePickerRequest(true, null, YasGMP.Wpf.Helpers.Loc.S("Attachment_Picker_CAPA", "Select CAPA attachment")))
                 .ConfigureAwait(false);
 
             if (files.Count == 0)
             {
-                StatusMessage = "No files selected.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_NoneSelected", "No files selected.");
                 return;
             }
 
@@ -514,7 +514,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {

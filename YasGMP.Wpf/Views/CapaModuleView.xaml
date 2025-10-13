@@ -107,6 +107,9 @@
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Title, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Title}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Title}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_Title}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Description}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -116,53 +119,77 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="80"
+                                     AutomationProperties.Name="{DynamicResource Label_Description}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Description}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_Description}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Component}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
-                                      Grid.Column="1"
-                                      ItemsSource="{Binding ComponentOptions}"
-                                      SelectedValuePath="Id"
-                                      DisplayMemberPath="Name"
-                                      SelectedValue="{Binding Editor.ComponentId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsEditorEnabled}" />
+                                       Grid.Column="1"
+                                       ItemsSource="{Binding ComponentOptions}"
+                                       SelectedValuePath="Id"
+                                       DisplayMemberPath="Name"
+                                       SelectedValue="{Binding Editor.ComponentId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       AutomationProperties.Name="{DynamicResource Label_Component}"
+                                       AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Component}"
+                                       ToolTip="{DynamicResource Tooltip_CAPA_Component}"
+                                       IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_AssignedTo}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="3"
                                      Grid.Column="1"
                                      Text="{Binding Editor.AssignedToId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_AssignedTo}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_AssignedTo}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_AssignedTo}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Priority}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="4"
-                                      Grid.Column="1"
-                                      ItemsSource="{Binding PriorityOptions}"
-                                      SelectedItem="{Binding Editor.Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsEditorEnabled}" />
+                                       Grid.Column="1"
+                                       ItemsSource="{Binding PriorityOptions}"
+                                       SelectedItem="{Binding Editor.Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       AutomationProperties.Name="{DynamicResource Label_Priority}"
+                                       AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Priority}"
+                                       ToolTip="{DynamicResource Tooltip_CAPA_Priority}"
+                                       IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Status}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="5"
-                                      Grid.Column="1"
-                                      ItemsSource="{Binding StatusOptions}"
-                                      SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsEditorEnabled}" />
+                                       Grid.Column="1"
+                                       ItemsSource="{Binding StatusOptions}"
+                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       AutomationProperties.Name="{DynamicResource Label_Status}"
+                                       AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Status}"
+                                       ToolTip="{DynamicResource Tooltip_CAPA_Status}"
+                                       IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Opened}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="6"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.DateOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        AutomationProperties.Name="{DynamicResource Label_Opened}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Opened}"
+                                        ToolTip="{DynamicResource Tooltip_CAPA_Opened}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Closed}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="7"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.DateClose, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        AutomationProperties.Name="{DynamicResource Label_Closed}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Closed}"
+                                        ToolTip="{DynamicResource Tooltip_CAPA_Closed}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Reason}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Reason, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Reason}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Reason}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_Reason}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_RootCause}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -172,6 +199,9 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="60"
+                                     AutomationProperties.Name="{DynamicResource Label_RootCause}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_RootCause}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_RootCause}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_CorrectiveAction}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -181,6 +211,9 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="60"
+                                     AutomationProperties.Name="{DynamicResource Label_CorrectiveAction}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_CorrectiveAction}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_CorrectiveAction}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_PreventiveAction}" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -190,6 +223,9 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="60"
+                                     AutomationProperties.Name="{DynamicResource Label_PreventiveAction}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_PreventiveAction}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_PreventiveAction}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Actions}" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -199,6 +235,9 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="60"
+                                     AutomationProperties.Name="{DynamicResource Label_Actions}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Actions}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_Actions}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Notes}" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -208,6 +247,9 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="60"
+                                     AutomationProperties.Name="{DynamicResource Label_Notes}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Notes}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_Notes}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Label_Comments}" Grid.Row="14" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
@@ -217,6 +259,9 @@
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      Height="60"
+                                     AutomationProperties.Name="{DynamicResource Label_Comments}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_CAPA_Comments}"
+                                     ToolTip="{DynamicResource Tooltip_CAPA_Comments}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
                         </Grid>
 
