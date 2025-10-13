@@ -2,6 +2,7 @@
 
 ## Current Compile Status
 - [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.305 — previously 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
+  - 2025-10-13T12:08Z: Requested Windows-specific provisioning/restores/builds/tests re-run per workstation validation brief; container remains linux-x64 without Windows 10 SDK workloads so every `dotnet` invocation exits `command not found`.
   - 2025-10-13T10:58Z: `dotnet --info` retried after retargeting MAUI/AppCore to .NET 9; command still returns `bash: command not found: dotnet` so validation remains Windows-host only.
   - 2025-10-10T11:26Z: `bash dotnet-install.sh -c 9.0 --install-dir ~/.dotnet` reprovisioned SDK 9.0.305. `dotnet --info` confirms the toolchain, but Windows 10 SDK 19041+ cannot be installed inside this Linux container.
   - 2025-10-10T10:05Z: dotnet-install.sh reprovisioned SDK 9.0.305 via `./dotnet-install.sh --channel 9.0`; `dotnet --info` confirms the toolchain but Windows 10 SDK/workloads cannot be installed inside the Linux container.
