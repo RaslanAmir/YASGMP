@@ -331,4 +331,32 @@
   <sys:String x:Key="Label_DateClosed">Datum zatvaranja</sys:String>
   <sys:String x:Key="Label_Result">Rezultat</sys:String>
   <sys:String x:Key="Label_TaskDescription">Opis zadatka</sys:String>
-</ResourceDictionary>
+  <sys:String x:Key="Column_Oee">OEE %</sys:String>
+  <sys:String x:Key="Column_LastMaintenance">Zadnje održavanje</sys:String>
+  <sys:String x:Key="Column_NextMaintenance">Sljedeće održavanje</sys:String>
+  <sys:String x:Key="Column_Stock">Zaliha</sys:String>
+  <sys:String x:Key="Label_Category">Kategorija</sys:String>
+  <sys:String x:Key="Label_MinStock">Min. zaliha</sys:String>
+  <sys:String x:Key="Label_SKU">SKU</sys:String>
+  <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
+  <sys:String x:Key="Label_Price">Cijena</sys:String>
+  <!-- Metapodaci potpisa -->
+  <sys:String x:Key="Label_SignatureMetadata">Metapodaci potpisa</sys:String>
+  <sys:String x:Key="Label_SignatureHash">Hash potpisa</sys:String>
+  <sys:String x:Key="Label_ReasonNote">Bilješka razloga</sys:String>
+  <sys:String x:Key="Label_SignedBy">Potpisao</sys:String>
+  <sys:String x:Key="Label_SignerId">ID potpisnika</sys:String>
+  <sys:String x:Key="Label_SignedAtUtc">Potpisano u (UTC)</sys:String>
+  <sys:String x:Key="Label_SourceIp">Izvorni IP</sys:String>
+  <sys:String x:Key="Label_SessionId">ID sesije</sys:String>
+  <sys:String x:Key="Label_DeviceInfo">Informacije o uređaju</sys:String>
+  <sys:String x:Key="Label_LastModifiedUtc">Zadnja izmjena (UTC)</sys:String>
+  <!-- Dijalog e-potpisa -->
+  <sys:String x:Key="Text_SignatureDialog_Intro">Ponovno unesite vjerodajnicu i zabilježite GMP-usklađen razlog prije primjene potpisa.</sys:String>
+  <sys:String x:Key="Label_PasswordPin">Lozinka/PIN</sys:String>
+  <sys:String x:Key="Label_ReasonCode">Šifra razloga</sys:String>
+  <sys:String x:Key="Label_CustomCode">Prilagođena šifra</sys:String>
+  <sys:String x:Key="Tooltip_EnterPasswordPin">Unesite svoju YasGMP lozinku ili PIN.</sys:String>
+  <sys:String x:Key="Button_Confirm">Potvrdi</sys:String>
+  <sys:String x:Key="Button_Cancel">Odustani</sys:String>
+ </ResourceDictionary>

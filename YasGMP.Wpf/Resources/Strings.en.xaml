@@ -331,4 +331,32 @@
   <sys:String x:Key="Label_DateClosed">Date Closed</sys:String>
   <sys:String x:Key="Label_Result">Result</sys:String>
   <sys:String x:Key="Label_TaskDescription">Task Description</sys:String>
-</ResourceDictionary>
+  <sys:String x:Key="Column_Oee">OEE %</sys:String>
+  <sys:String x:Key="Column_LastMaintenance">Last Maintenance</sys:String>
+  <sys:String x:Key="Column_NextMaintenance">Next Maintenance</sys:String>
+  <sys:String x:Key="Column_Stock">Stock</sys:String>
+  <sys:String x:Key="Label_Category">Category</sys:String>
+  <sys:String x:Key="Label_MinStock">Min Stock</sys:String>
+  <sys:String x:Key="Label_SKU">SKU</sys:String>
+  <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
+  <sys:String x:Key="Label_Price">Price</sys:String>
+  <!-- Signature Metadata -->
+  <sys:String x:Key="Label_SignatureMetadata">Signature Metadata</sys:String>
+  <sys:String x:Key="Label_SignatureHash">Signature Hash</sys:String>
+  <sys:String x:Key="Label_ReasonNote">Reason Note</sys:String>
+  <sys:String x:Key="Label_SignedBy">Signed By</sys:String>
+  <sys:String x:Key="Label_SignerId">Signer ID</sys:String>
+  <sys:String x:Key="Label_SignedAtUtc">Signed At (UTC)</sys:String>
+  <sys:String x:Key="Label_SourceIp">Source IP</sys:String>
+  <sys:String x:Key="Label_SessionId">Session ID</sys:String>
+  <sys:String x:Key="Label_DeviceInfo">Device Info</sys:String>
+  <sys:String x:Key="Label_LastModifiedUtc">Last Modified (UTC)</sys:String>
+  <!-- Signature Dialog -->
+  <sys:String x:Key="Text_SignatureDialog_Intro">Re-enter your credential and capture a GMP-compliant reason before applying the signature.</sys:String>
+  <sys:String x:Key="Label_PasswordPin">Password/PIN</sys:String>
+  <sys:String x:Key="Label_ReasonCode">Reason code</sys:String>
+  <sys:String x:Key="Label_CustomCode">Custom code</sys:String>
+  <sys:String x:Key="Tooltip_EnterPasswordPin">Enter your YasGMP password or PIN.</sys:String>
+  <sys:String x:Key="Button_Confirm">Confirm</sys:String>
+  <sys:String x:Key="Button_Cancel">Cancel</sys:String>
+ </ResourceDictionary>

@@ -6,7 +6,7 @@
              mc:Ignorable="d"
              d:DesignHeight="200"
              d:DesignWidth="400">
-    <GroupBox Header="Signature Metadata"
+    <GroupBox Header="{DynamicResource Label_SignatureMetadata}"
               Padding="8"
               Margin="0,12,0,0">
         <Grid>
@@ -27,7 +27,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Signature Hash" Grid.Row="0" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_SignatureHash}" Grid.Row="0" Margin="0,0,8,4" />
             <TextBox Grid.Row="0"
                      Grid.Column="1"
                      Text="{Binding SignatureHash}"
@@ -35,7 +35,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Reason" Grid.Row="1" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_Reason}" Grid.Row="1" Margin="0,0,8,4" />
             <TextBox Grid.Row="1"
                      Grid.Column="1"
                      Text="{Binding SignatureReason}"
@@ -43,7 +43,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Reason Note" Grid.Row="2" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_ReasonNote}" Grid.Row="2" Margin="0,0,8,4" />
             <TextBox Grid.Row="2"
                      Grid.Column="1"
                      Text="{Binding SignatureNote}"
@@ -52,7 +52,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Signed By" Grid.Row="3" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_SignedBy}" Grid.Row="3" Margin="0,0,8,4" />
             <TextBox Grid.Row="3"
                      Grid.Column="1"
                      Text="{Binding SignerUserName}"
@@ -60,7 +60,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Signer ID" Grid.Row="4" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_SignerId}" Grid.Row="4" Margin="0,0,8,4" />
             <TextBox Grid.Row="4"
                      Grid.Column="1"
                      Text="{Binding SignerUserId}"
@@ -68,7 +68,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Signed At (UTC)" Grid.Row="5" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_SignedAtUtc}" Grid.Row="5" Margin="0,0,8,4" />
             <TextBox Grid.Row="5"
                      Grid.Column="1"
                      Text="{Binding SignatureTimestampUtc, StringFormat=yyyy-MM-dd HH:mm:ss}"
@@ -76,7 +76,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Source IP" Grid.Row="6" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_SourceIp}" Grid.Row="6" Margin="0,0,8,4" />
             <TextBox Grid.Row="6"
                      Grid.Column="1"
                      Text="{Binding SourceIp}"
@@ -84,7 +84,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Session ID" Grid.Row="7" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_SessionId}" Grid.Row="7" Margin="0,0,8,4" />
             <TextBox Grid.Row="7"
                      Grid.Column="1"
                      Text="{Binding SessionId}"
@@ -92,7 +92,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Device Info" Grid.Row="8" Margin="0,0,8,4" />
+            <TextBlock Text="{DynamicResource Label_DeviceInfo}" Grid.Row="8" Margin="0,0,8,4" />
             <TextBox Grid.Row="8"
                      Grid.Column="1"
                      Text="{Binding DeviceInfo}"
@@ -101,7 +101,7 @@
                      BorderThickness="0"
                      Background="Transparent" />
 
-            <TextBlock Text="Last Modified (UTC)" Grid.Row="9" Margin="0,0,8,0" />
+            <TextBlock Text="{DynamicResource Label_LastModifiedUtc}" Grid.Row="9" Margin="0,0,8,0" />
             <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Vertical">
                 <TextBox Text="{Binding LastModifiedUtc, StringFormat=yyyy-MM-dd HH:mm:ss}"
                          IsReadOnly="True"
