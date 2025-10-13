@@ -2364,4 +2364,86 @@
   <data name="Shell.StatusBar.UtcTime.Value.AutomationName" xml:space="preserve">
     <value>Vrijednost UTC vremena</value>
   </data>
+
+  <data name="Module.Assets.Search.AutomationId" xml:space="preserve">
+    <value>Assets.SearchTextBox</value>
+  </data>
+  <data name="Module.Assets.Grid.AutomationId" xml:space="preserve">
+    <value>Assets.DataGrid</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Code.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Code.Header</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Code.Cell.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Code.Cell</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Title.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Title.Header</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Title.Cell.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Title.Cell</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Status.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Status.Header</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Status.Cell.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Status.Cell</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Location.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Location.Header</value>
+  </data>
+  <data name="Module.Assets.Grid.Column.Location.Cell.AutomationId" xml:space="preserve">
+    <value>Assets.Grid.Column.Location.Cell</value>
+  </data>
+  <data name="Module.Assets.Form.Code.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Code</value>
+  </data>
+  <data name="Module.Assets.Form.Name.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Name</value>
+  </data>
+  <data name="Module.Assets.Form.Description.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Description</value>
+  </data>
+  <data name="Module.Assets.Form.Manufacturer.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Manufacturer</value>
+  </data>
+  <data name="Module.Assets.Form.Model.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Model</value>
+  </data>
+  <data name="Module.Assets.Form.Location.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Location</value>
+  </data>
+  <data name="Module.Assets.Form.Status.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Status</value>
+  </data>
+  <data name="Module.Assets.Form.Urs.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Urs</value>
+  </data>
+  <data name="Module.Assets.Form.InstallDate.AutomationId" xml:space="preserve">
+    <value>Assets.Form.InstallDate</value>
+  </data>
+  <data name="Module.Assets.Form.ProcurementDate.AutomationId" xml:space="preserve">
+    <value>Assets.Form.ProcurementDate</value>
+  </data>
+  <data name="Module.Assets.Form.WarrantyUntil.AutomationId" xml:space="preserve">
+    <value>Assets.Form.WarrantyUntil</value>
+  </data>
+  <data name="Module.Assets.Form.CriticalAsset.AutomationId" xml:space="preserve">
+    <value>Assets.Form.CriticalAsset</value>
+  </data>
+  <data name="Module.Assets.Form.SerialNumber.AutomationId" xml:space="preserve">
+    <value>Assets.Form.SerialNumber</value>
+  </data>
+  <data name="Module.Assets.Form.LifecyclePhase.AutomationId" xml:space="preserve">
+    <value>Assets.Form.LifecyclePhase</value>
+  </data>
+  <data name="Module.Assets.Form.Notes.AutomationId" xml:space="preserve">
+    <value>Assets.Form.Notes</value>
+  </data>
+  <data name="Module.Assets.ValidationMessages.AutomationId" xml:space="preserve">
+    <value>Assets.ValidationMessages</value>
+  </data>
+  <data name="Module.Assets.Grid.ToolTip" xml:space="preserve">
+    <value>Prikazuje filtrirana sredstva.</value>
+  </data>
 </root>
