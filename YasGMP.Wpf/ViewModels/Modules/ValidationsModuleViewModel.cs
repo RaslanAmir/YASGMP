@@ -239,7 +239,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         var validation = await _validationService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (validation is null)
         {
-            StatusMessage = $"Unable to load validation #{id}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Validations_UnableToLocateById", "Unable to load validation #{0}."), id);
             return;
         }
 
@@ -330,7 +330,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
         if (Mode == FormMode.Update && _loadedValidation is null)
         {
-            StatusMessage = "Select a validation before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Validations_SelectBeforeSave", "Select a validation before saving.");
             return false;
         }
 
@@ -344,19 +344,19 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_Failed", "Electronic signature failed: {0}"), ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Cancelled", "Electronic signature cancelled. Save aborted.");
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Error_Signature_NotCaptured", "Electronic signature was not captured.");
             return false;
         }
 
@@ -404,7 +404,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist validation: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Validations_SaveFailed", "Failed to persist validation: {0}"), ex.Message), ex);
         }
 
         _loadedValidation = entity;
@@ -433,12 +433,12 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_PersistFailed", "Failed to persist electronic signature: {0}"), ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Captured", "Electronic signature captured ({0})."), signatureResult.ReasonDisplay);
         return true;
     }
 
@@ -659,12 +659,12 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         {
             IsBusy = true;
             var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to {_loadedValidation.Code}"))
+                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: string.Format(YasGMP.Wpf.Helpers.Loc.S("Attachment_Picker_Title", "Attach files to {0}"), _loadedValidation.Code)))
                 .ConfigureAwait(false);
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_Cancelled", "Attachment upload cancelled.");
                 return;
             }
 
@@ -698,7 +698,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {

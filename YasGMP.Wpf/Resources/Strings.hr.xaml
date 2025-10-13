@@ -442,6 +442,23 @@
   <sys:String x:Key="Tooltip_Warehouse_LastQualified">Datum zadnje kvalifikacije.</sys:String>
   <sys:String x:Key="Tooltip_Warehouse_Notes">Bilješke o uvjetima/ograničenjima.</sys:String>
 
+  <!-- Validacije: Status/Greške -->
+  <sys:String x:Key="Status_Validations_UnableToLocateById">Nije moguće učitati validaciju #{0}.</sys:String>
+  <sys:String x:Key="Status_Validations_SelectBeforeSave">Odaberite validaciju prije spremanja.</sys:String>
+  <sys:String x:Key="Error_Validations_SaveFailed">Neuspjelo spremanje validacije: {0}</sys:String>
+
+  <!-- Validacije: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Validations_ProtocolCode">Broj protokola ili identifikator.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Type">Vrsta validacije (IQ/OQ/PQ).</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Machine">Povezani stroj.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Component">Povezana sastavnica.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_StartDate">Datum početka validacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_EndDate">Datum završetka validacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_NextDue">Sljedeći rok za revalidaciju.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Status">Trenutni status validacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Documentation">Poveznica ili sažetak dokumentacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Comments">Dodatni komentari.</sys:String>
+
   <!-- Incidenti: CFL/Status/Greške -->
   <sys:String x:Key="Status_Incidents_UnableToLoad">Nije moguće učitati {0}.</sys:String>
   <sys:String x:Key="Status_Incidents_CflOnlyInEdit">CFL pretraživanja dostupna su samo tijekom uređivanja incidenta.</sys:String>

@@ -442,6 +442,23 @@
   <sys:String x:Key="Tooltip_Warehouse_LastQualified">Date of last qualification.</sys:String>
   <sys:String x:Key="Tooltip_Warehouse_Notes">Notes about conditions/constraints.</sys:String>
 
+  <!-- Validations: Status/Errors -->
+  <sys:String x:Key="Status_Validations_UnableToLocateById">Unable to load validation #{0}.</sys:String>
+  <sys:String x:Key="Status_Validations_SelectBeforeSave">Select a validation before saving.</sys:String>
+  <sys:String x:Key="Error_Validations_SaveFailed">Failed to persist validation: {0}</sys:String>
+
+  <!-- Validations: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Validations_ProtocolCode">Protocol number or identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Type">Validation type (IQ/OQ/PQ).</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Machine">Related machine.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Component">Related component.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_StartDate">Start date of the validation.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_EndDate">End date of the validation.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_NextDue">Next due date for revalidation.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Status">Current validation status.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Documentation">Documentation link or summary.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Comments">Additional comments.</sys:String>
+
   <!-- Incidents: CFL/Status/Errors -->
   <sys:String x:Key="Status_Incidents_UnableToLoad">Unable to load {0}.</sys:String>
   <sys:String x:Key="Status_Incidents_CflOnlyInEdit">CFL lookups are only available while editing an incident.</sys:String>
