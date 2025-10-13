@@ -186,6 +186,7 @@
     - 2026-01-06: Editor pane now drives staged uploads through the AttachmentService, requiring an electronic signature before committing changes and hiding commands when the workflow is unavailable.
     - 2026-01-07: Attachments editor now enforces retention rules during save/delete, shows busy overlays tied to IsBusy, and surfaces validation/status messaging while dotnet restore/build remain blocked by the missing CLI.
   - Dashboard/Reports — [~] in-progress *(dashboard cockpit now binds toolbar toggles, CFL/Golden Arrow commands, search label, and grid columns through the localization service with automation metadata for Accessibility Insights/FlaUI validation; module tree categories/nodes now surface localized captions/tooltips across EN↔HR switches.)*
+    - 2026-04-08: Documented DashboardModuleView + ModulesPane coverage in `docs/WPF_MAPPING.md` so parity matrix reflects localized KPIs and navigation metadata; `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were retried and each still fail immediately with `bash: command not found: dotnet` while the CLI remains unavailable in this container.
   - Settings/Admin — [ ] todo
 
 - **Open Issues / Blockers**

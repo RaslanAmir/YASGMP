@@ -14,8 +14,8 @@ This document inventories the YasGMP MAUI experience and tracks the correspondin
 ### Pages & View-Models
 | Feature | MAUI Page(s) | MAUI View-Model(s) | WPF Document | WPF Pane | Notes / TODO |
 | --- | --- | --- | --- | --- | --- |
-| Dashboard KPIs | [DashboardPage](../Views/DashboardPage.xaml) | [DashboardViewModel](../ViewModels/DashboardViewModel.cs) | **TODO:** None yet | [CockpitView](../YasGMP.Wpf/Views/CockpitView.xaml) | Align cockpit metrics with MAUI dashboard surface.
-| Launchpad navigation | [MainPage](../Views/MainPage.xaml) | [MainPageViewModel](../ViewModels/MainPageViewModel.cs) | **TODO:** None yet | [ModuleTreeView](../YasGMP.Wpf/Views/ModuleTreeView.xaml) | WPF module tree should mirror Shell routes and favorites.
+| Dashboard KPIs | [DashboardPage](../Views/DashboardPage.xaml) | [DashboardViewModel](../ViewModels/DashboardViewModel.cs) | [DashboardModuleView](../YasGMP.Wpf/Views/DashboardModuleView.xaml) | [CockpitView](../YasGMP.Wpf/Views/CockpitView.xaml) | Dashboard module renders localized KPI tiles with the same aggregation cadence as MAUI; follow-up work will layer in historical trend sparklines.
+| Launchpad navigation | [MainPage](../Views/MainPage.xaml) | [MainPageViewModel](../ViewModels/MainPageViewModel.cs) | [ModulesPane](../YasGMP.Wpf/Shell/ModulesPane.xaml) | [ModuleTreeView](../YasGMP.Wpf/Views/ModuleTreeView.xaml) | Modules pane applies localization/automation metadata parity and respects favorites; continue aligning drag-reorder affordances with MAUI launchpad.
 | Authentication | [LoginPage](../Views/LoginPage.xaml) | [LoginViewModel](../ViewModels/LoginViewModel.cs) | **TODO:** None yet | — | **TODO:** Build WPF login pane/dialog and wire authentication flow.
 
 ### Services
@@ -25,7 +25,7 @@ This document inventories the YasGMP MAUI experience and tracks the correspondin
 | [SignalRService](../Services/SignalRService.cs)<br>[BackgroundScheduler](../Services/BackgroundScheduler.cs)<br>[UiInstrumentationService](../Services/Diagnostics/UiInstrumentationService.cs) | Real-time notifications, background jobs, UI instrumentation. | **TODO:** None yet | **TODO:** Introduce WPF background worker/SignalR adapter to keep cockpit metrics live.
 | [AlertService](../Services/Ui/AlertService.cs)<br>[SafeNavigator](../Services/SafeNavigator.cs) | Common UI alerts and safe invocation helpers. | **TODO:** None yet | **TODO:** Add WPF-friendly alert/notification abstraction.
 | [CodeGeneratorService](../Services/CodeGeneratorService.cs)<br>[QRCodeService](../Services/QRCodeService.cs)<br>[SystemEvent.Poco](../Services/SystemEvent.Poco.cs) | Shared utilities for codes, QR payloads, and audit POCOs. | **TODO:** None yet | **TODO:** Surface equivalent helpers or adapters in WPF as features land.
-| [IPlatformService](../Services/IPlatformService.cs) | Abstract platform operations consumed by MAUI pages. | **TODO:** None yet | **TODO:** Provide WPF platform adapter implementation.
+| [IPlatformService](../Services/IPlatformService.cs) | Abstract platform operations consumed by MAUI pages. | [WpfPlatformService](../YasGMP.Wpf/Services/WpfPlatformService.cs) | WPF adapter covers clipboard, shell notifications, and dispatcher marshalling; virtual adapter detection for hybrid hosting remains outstanding.
 
 ## Operations
 
