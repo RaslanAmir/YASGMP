@@ -249,3 +249,4 @@ Test run (solution):
 - Extended FlaUI smoke to: select Tools tab (EN/HR), click Run Smoke Test (EN/HR), navigate Modules pane via TreeView (EN/HR names), and double-click first grid row to open editors. Guarded for CI/headless via skip when main window unavailable; smoke remains opt-in via RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1.
 - Excluded WPF.Smoke sources from MAUI compile to avoid duplicate assembly attributes; MAUI and WPF builds green under net9.0-windows.
 - 2025-10-13 07:47: i18n sweep completed for Machines, Components, Parts, Signature views/dialog; CI build/test workflow added earlier (uses YASGMP_TEST_FILTER).
+- 2025-10-13 08:03: i18n sweep completed for Warehouse, Calibration, Change Control; solution build Release green.
