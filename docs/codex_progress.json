@@ -382,6 +382,7 @@
     "2026-04-05: Increment 2 documentation drop delivered (per-folder inventory table, entity traceability map, audit/signature hash-chain outline) recorded in docs/codex_plan.md; associated planning TODOs marked complete.",
     "2026-04-06: Assets module view search, grid headers/cells, and editor fields now pull localized tooltips plus automation names/ids from ShellStrings; dotnet restore/build/test remain blocked without the CLI (env_guard=static-analysis).",
     "2026-04-06: Assets grid cell automation names now bind directly to Code/Title/Status/Location values so screen readers announce cell content rather than repeating headers; dotnet restore/build/test remain blocked without the CLI (env_guard=static-analysis).",
-    "2026-04-07: AssetsModuleViewModel now surfaces localized status messages via ShellStrings and tests assert the new localization flow while dotnet restore/build/test remain blocked without the CLI (command not found)."
+    "2026-04-07: AssetsModuleViewModel now surfaces localized status messages via ShellStrings and tests assert the new localization flow while dotnet restore/build/test remain blocked without the CLI (command not found).",
+    "2026-04-07: Signature metadata control, cockpit dashboard, and audit log document now pull headings/tooltips/automation ids from ShellStrings with EN/HR unit coverage while dotnet restore/build/test remain blocked because the CLI is unavailable (command not found)."
   ]
 }

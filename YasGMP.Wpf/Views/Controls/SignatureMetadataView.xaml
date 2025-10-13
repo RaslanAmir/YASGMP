@@ -6,9 +6,12 @@
              mc:Ignorable="d"
              d:DesignHeight="200"
              d:DesignWidth="400">
-    <GroupBox Header="Signature Metadata"
+    <GroupBox Header="{DynamicResource SignatureMetadata.Group.Header}"
               Padding="8"
-              Margin="0,12,0,0">
+              Margin="0,12,0,0"
+              ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Group.ToolTip}"
+              AutomationProperties.Name="{DynamicResource SignatureMetadata.Group.AutomationName}"
+              AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Group.AutomationId}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="160" />
@@ -27,90 +30,173 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Signature Hash" Grid.Row="0" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="0"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.SignatureHash.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignatureHash.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignatureHash.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignatureHash.AutomationId}" />
             <TextBox Grid.Row="0"
                      Grid.Column="1"
                      Text="{Binding SignatureHash}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignatureHash.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignatureHash.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignatureHash.AutomationId}" />
 
-            <TextBlock Text="Reason" Grid.Row="1" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="1"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.Reason.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.Reason.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.Reason.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.Reason.AutomationId}" />
             <TextBox Grid.Row="1"
                      Grid.Column="1"
                      Text="{Binding SignatureReason}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.Reason.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.Reason.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.Reason.AutomationId}" />
 
-            <TextBlock Text="Reason Note" Grid.Row="2" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="2"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.ReasonNote.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.ReasonNote.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.ReasonNote.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.ReasonNote.AutomationId}" />
             <TextBox Grid.Row="2"
                      Grid.Column="1"
                      Text="{Binding SignatureNote}"
                      IsReadOnly="True"
                      TextWrapping="Wrap"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.ReasonNote.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.ReasonNote.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.ReasonNote.AutomationId}" />
 
-            <TextBlock Text="Signed By" Grid.Row="3" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="3"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.SignedBy.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignedBy.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignedBy.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignedBy.AutomationId}" />
             <TextBox Grid.Row="3"
                      Grid.Column="1"
                      Text="{Binding SignerUserName}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignedBy.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignedBy.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignedBy.AutomationId}" />
 
-            <TextBlock Text="Signer ID" Grid.Row="4" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="4"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.SignerId.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignerId.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignerId.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignerId.AutomationId}" />
             <TextBox Grid.Row="4"
                      Grid.Column="1"
                      Text="{Binding SignerUserId}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignerId.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignerId.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignerId.AutomationId}" />
 
-            <TextBlock Text="Signed At (UTC)" Grid.Row="5" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="5"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.SignedAtUtc.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignedAtUtc.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignedAtUtc.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignedAtUtc.AutomationId}" />
             <TextBox Grid.Row="5"
                      Grid.Column="1"
                      Text="{Binding SignatureTimestampUtc, StringFormat=yyyy-MM-dd HH:mm:ss}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SignedAtUtc.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SignedAtUtc.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SignedAtUtc.AutomationId}" />
 
-            <TextBlock Text="Source IP" Grid.Row="6" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="6"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.SourceIp.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SourceIp.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SourceIp.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SourceIp.AutomationId}" />
             <TextBox Grid.Row="6"
                      Grid.Column="1"
                      Text="{Binding SourceIp}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SourceIp.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SourceIp.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SourceIp.AutomationId}" />
 
-            <TextBlock Text="Session ID" Grid.Row="7" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="7"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.SessionId.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SessionId.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SessionId.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SessionId.AutomationId}" />
             <TextBox Grid.Row="7"
                      Grid.Column="1"
                      Text="{Binding SessionId}"
                      IsReadOnly="True"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.SessionId.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.SessionId.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.SessionId.AutomationId}" />
 
-            <TextBlock Text="Device Info" Grid.Row="8" Margin="0,0,8,4" />
+            <TextBlock Grid.Row="8"
+                       Margin="0,0,8,4"
+                       Text="{DynamicResource SignatureMetadata.Field.DeviceInfo.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.DeviceInfo.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.DeviceInfo.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.DeviceInfo.AutomationId}" />
             <TextBox Grid.Row="8"
                      Grid.Column="1"
                      Text="{Binding DeviceInfo}"
                      IsReadOnly="True"
                      TextWrapping="Wrap"
                      BorderThickness="0"
-                     Background="Transparent" />
+                     Background="Transparent"
+                     ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.DeviceInfo.ToolTip}"
+                     AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.DeviceInfo.AutomationName}"
+                     AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.DeviceInfo.AutomationId}" />
 
-            <TextBlock Text="Last Modified (UTC)" Grid.Row="9" Margin="0,0,8,0" />
+            <TextBlock Grid.Row="9"
+                       Margin="0,0,8,0"
+                       Text="{DynamicResource SignatureMetadata.Field.LastModified.Label}"
+                       ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.LastModified.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.LastModified.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.LastModified.AutomationId}" />
             <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Vertical">
                 <TextBox Text="{Binding LastModifiedUtc, StringFormat=yyyy-MM-dd HH:mm:ss}"
                          IsReadOnly="True"
                          BorderThickness="0"
-                         Background="Transparent" />
+                         Background="Transparent"
+                         ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.LastModified.Timestamp.ToolTip}"
+                         AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.LastModified.Timestamp.AutomationName}"
+                         AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.LastModified.Timestamp.AutomationId}" />
                 <TextBox Text="{Binding LastModifiedByName}"
                          IsReadOnly="True"
                          BorderThickness="0"
-                         Background="Transparent" />
+                         Background="Transparent"
+                         ToolTipService.ToolTip="{DynamicResource SignatureMetadata.Field.LastModified.By.ToolTip}"
+                         AutomationProperties.Name="{DynamicResource SignatureMetadata.Field.LastModified.By.AutomationName}"
+                         AutomationProperties.AutomationId="{DynamicResource SignatureMetadata.Field.LastModified.By.AutomationId}" />
             </StackPanel>
         </Grid>
     </GroupBox>
