@@ -2,6 +2,7 @@
 
 ## Current Compile Status
 - [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.305 — previously 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
+  - 2025-10-13T10:58Z: `dotnet --info` retried after retargeting MAUI/AppCore to .NET 9; command still returns `bash: command not found: dotnet` so validation remains Windows-host only.
   - 2025-10-10T11:26Z: `bash dotnet-install.sh -c 9.0 --install-dir ~/.dotnet` reprovisioned SDK 9.0.305. `dotnet --info` confirms the toolchain, but Windows 10 SDK 19041+ cannot be installed inside this Linux container.
   - 2025-10-10T10:05Z: dotnet-install.sh reprovisioned SDK 9.0.305 via `./dotnet-install.sh --channel 9.0`; `dotnet --info` confirms the toolchain but Windows 10 SDK/workloads cannot be installed inside the Linux container.
   - 2025-10-10T06:38Z: dotnet-install.sh provisioned SDK 9.0.100 and `dotnet --info` now reports the toolchain on linux-x64; Windows 10 SDK/workloads still missing so Windows-targeted restore/build/test must run on a Windows host.
@@ -13,12 +14,15 @@
   - 2026-04-04T09:10Z: `dotnet restore yasgmp.sln` retried after Assets drill-down updates; container still returns `bash: command not found: dotnet`.
   - 2026-04-07T09:20Z: `dotnet --version` retried ahead of the Assets status localization batch; command still returns `bash: command not found: dotnet`, so env_guard remains static-analysis.
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
+  - 2025-10-13T10:59Z: `dotnet restore yasgmp.sln` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2025-10-10T11:24Z: `dotnet restore yasgmp.sln` (with `EnableWindowsTargeting=true`) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; full solution restore remains Windows-host only.
   - 2025-10-10T10:07Z: `dotnet restore -p:EnableWindowsTargeting=true` exits with NETSDK1147 (maui-tizen workload) after `dotnet workload install maui` reports the workload is unsupported on Linux.
   - 2025-10-10T06:40Z: `dotnet restore` now launches but aborts with NETSDK1100 (EnableWindowsTargeting) and NETSDK1147 (missing maui-tizen workload) because Windows SDK/workloads are unavailable on this host.
 - [ ] MAUI builds *(blocked on Windows workloads; historical attempts failed before CLI install and the latest 2025-10-10 run surfaced NETSDK1147 requiring maui-tizen workload on Windows.)*
+  - 2025-10-13T11:00Z: `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried after retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2026-04-04T09:12Z: `dotnet build yasgmp.csproj -c Release -p:EnableWindowsTargeting=true` retried; command still fails with `bash: command not found: dotnet` inside the container.
 - [ ] WPF builds *(restore now runs but the 2025-10-10 Release builds failed on cross-targeted AppCore references — YasGMP.Helpers/Diagnostics namespaces and signature DTOs are unresolved until Windows desktop dependencies are available on a Windows host.)*
+  - 2025-10-13T11:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2025-10-10T11:25Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` still fails — AppCore compilation reports missing YasGMP.Helpers/Diagnostics namespaces and SignatureMetadata DTOs during the Release build.
   - 2026-04-04T09:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` retried; container still reports `bash: command not found: dotnet`.
   - 2025-10-10T10:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restores but fails with dozens of CS0234/CS0246/CS0535 errors because YasGMP.AppCore expects Helpers/Diagnostics projects and signature DTO types that are unavailable without the Windows solution build.
@@ -82,9 +86,11 @@
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
+- MAUI shell retargeted to **net9.0-windows10.0.19041.0** with MAUI Controls 9.0.110 and EF Core 9.0.x stack pinned for .NET 9 compatibility (Windows validation pending).
 - Repo-level SDK pin: `global.json` set to **9.0.100** *(reinforced via bootstrap script).* 
 - AvalonDock: **4.72.1** *(pinned in `YasGMP.Wpf.csproj`).*
-- Other NuGets: **Fluent.Ribbon 11.0.1**, **CommunityToolkit.Mvvm 8.4.0**, **Microsoft.Extensions.* 9.0.3**, **MySqlConnector 2.4.0** *(pinned in csproj).* 
+- Other NuGets: **Fluent.Ribbon 11.0.1**, **CommunityToolkit.Mvvm 8.4.0**, **Microsoft.Extensions.* 9.0.3**, **MySqlConnector 2.4.0** *(pinned in csproj).*
+- AppCore now multi-targets **net8.0;net9.0** via `Directory.Build.props` so WPF/Maui hosts can migrate without breaking net8 consumers.
 - Environment gap: Windows desktop prerequisites (Windows 10 SDK 19041+, MAUI workloads) must still be installed on a Windows host. The linux container now carries .NET SDK 9.0.305 via dotnet-install, but cross-targeted builds/tests must run on Windows.
 
 ## Batches
