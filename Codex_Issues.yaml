@@ -55,3 +55,43 @@
   resolved_in: null
   tags: [audit, signature, backlog]
 
+- id: I-004
+  file: YasGMP.Wpf/Views/AssetsModuleView.xaml
+  module: Assets
+  context: Accessibility validation
+  type: Accessibility
+  severity: "⚠️ Medium"
+  description: |
+    AssetsModuleView now binds localized ToolTip/Automation metadata for search, grid, and editor controls.
+    Accessibility inspector validation remains pending because the Windows-specific tooling is unavailable inside the Linux container.
+  references:
+    - YasGMP.Wpf/Views/AssetsModuleView.xaml
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+    - ACTIVITY_LOG.json
+  suggested_fix: |
+    Re-run the Windows Accessibility Insights or FlaUI-based automation suite on a Windows host to confirm each control exposes the expected tooltip,
+    AutomationName, and AutomationId metadata once the dotnet CLI and desktop tooling are available.
+  status: open
+  resolved_in: null
+  tags: [accessibility, localization, env-guard]
+
+- id: I-005
+  file: YasGMP.Wpf/Views/AssetsModuleView.xaml
+  module: Assets
+  context: DataGrid cell automation regression guard
+  type: Accessibility
+  severity: "ℹ️ Low"
+  description: |
+    AutomationProperties.Name on Assets list grid cells now binds to Code/Title/Status/Location values to avoid overwriting cell content with header text.
+    Need to re-run Windows accessibility tooling to confirm UIA clients read the live values after the binding change.
+  references:
+    - YasGMP.Wpf/Views/AssetsModuleView.xaml
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+  suggested_fix: |
+    Execute Accessibility Insights or the FlaUI smoke harness on a Windows host to verify DataGrid cells now report the localized value text via UI Automation Name.
+  status: open
+  resolved_in: null
+  tags: [accessibility, env-guard, regression]
+
