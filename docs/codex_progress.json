@@ -58,7 +58,8 @@
       "2025-10-13: Applied toolbar i18n/a11y converter pattern (CaptionKey/ToolTipKey/AutomationNameKey via ResourceStringConverter) to Work Orders and Warehouse; added CFL/Golden Arrow smoke checks.",
       "2025-10-13: Extended a11y on Work Orders editor inputs and localized Work Orders VM (status/validation) via Loc helper and EN/HR resource keys; dialog a11y updated (OK/Cancel).",
       "2025-10-13: Added per-input ToolTips + HelpText (Work Orders); Warehouse VM CFL/filtered/lookup messages localized; added unit test to assert validation uses resource strings (not executed due to existing test stubs issues).",
-      "2025-10-13: Extended ToolTips/HelpText to Assets & Warehouse editors; localized Assets VM CFL/status/errors via Loc helper."
+      "2025-10-13: Extended ToolTips/HelpText to Assets & Warehouse editors; localized Assets VM CFL/status/errors via Loc helper.",
+      "2025-10-13: Incidents editor now uses resource-backed toolbar; added ToolTips/HelpText + DynamicResource labels; localized Incidents VM messages for CFL/linking/errors."
     ]
   },
   "batches": [

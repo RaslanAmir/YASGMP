@@ -269,3 +269,4 @@ Test run (solution):
 - Added per-input ToolTips + AutomationProperties.HelpText in Work Orders editor (Tooltip_WorkOrders_* keys).
 - Localized Warehouse CFL title and status messages (filtered/unable-to-locate).
 - Extended ToolTips/HelpText to Assets & Warehouse editors (Tooltip_Assets_* and Tooltip_Warehouse_* keys), and localized Assets VM messages (CFL title; filtered/select-before-save/unable-to-locate; save failed).
+- Incidents: migrated toolbar to resource-backed converter; added ToolTips/HelpText and DynamicResource labels; localized VM messages (unable to load; CFL-only-in-edit; no-related-for-link; select-related; unable-to-load-related; linked WO/CAPA).

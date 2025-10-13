@@ -441,6 +441,29 @@
   <sys:String x:Key="Tooltip_Warehouse_Qualified">Qualified flag.</sys:String>
   <sys:String x:Key="Tooltip_Warehouse_LastQualified">Date of last qualification.</sys:String>
   <sys:String x:Key="Tooltip_Warehouse_Notes">Notes about conditions/constraints.</sys:String>
+
+  <!-- Incidents: CFL/Status/Errors -->
+  <sys:String x:Key="Status_Incidents_UnableToLoad">Unable to load {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_CflOnlyInEdit">CFL lookups are only available while editing an incident.</sys:String>
+  <sys:String x:Key="Status_Incidents_NoRelatedForLink">No related CAPA cases or work orders available for linking.</sys:String>
+  <sys:String x:Key="CFL_Select_RelatedRecord">Select related record</sys:String>
+  <sys:String x:Key="Status_Incidents_UnableToLoadRelated">Unable to load related records: {0}</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedWorkOrder">Linked work order {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedCapa">Linked CAPA case {0}.</sys:String>
+
+  <!-- Incidents: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Incidents_Title">Short incident title.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Description">Detailed description of the incident.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Type">Incident category (e.g., Deviation, Quality).</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Priority">Relative priority.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Status">Current status.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Detected">When the incident was detected.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Reported">When the incident was reported.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Target">Target system/component.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Machine">Related machine identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Component">Related component identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_AssignedTo">Assigned investigator/technician.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_LastModified">Last modified timestamp/user.</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
   <sys:String x:Key="Label_Price">Price</sys:String>
   <!-- Signature Metadata -->

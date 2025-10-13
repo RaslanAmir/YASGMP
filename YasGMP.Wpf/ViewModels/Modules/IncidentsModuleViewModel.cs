@@ -191,7 +191,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         var incident = await _incidentService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (incident is null)
         {
-            StatusMessage = $"Unable to load {record.Title}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Incidents_UnableToLoad", "Unable to load {0}."), record.Title);
             return;
         }
 
@@ -265,7 +265,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     {
         if (!IsInEditMode)
         {
-            StatusMessage = "CFL lookups are only available while editing an incident.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Incidents_CflOnlyInEdit", "CFL lookups are only available while editing an incident.");
             return null;
         }
 
@@ -328,15 +328,15 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
             if (items.Count == 0)
             {
-                StatusMessage = "No related CAPA cases or work orders available for linking.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Incidents_NoRelatedForLink", "No related CAPA cases or work orders available for linking.");
                 return null;
             }
 
-            return new CflRequest("Select related record", items);
+            return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_RelatedRecord", "Select related record"), items);
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Unable to load related records: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Incidents_UnableToLoadRelated", "Unable to load related records: {0}"), ex.Message);
             return null;
         }
     }
@@ -357,7 +357,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             if (int.TryParse(key.AsSpan(WorkOrderCflPrefix.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var workOrderId))
             {
                 Editor.WorkOrderId = workOrderId;
-                StatusMessage = $"Linked work order {result.Selected.Label}.";
+                StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Incidents_LinkedWorkOrder", "Linked work order {0}."), result.Selected.Label);
                 MarkDirty();
             }
 
@@ -370,7 +370,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             {
                 Editor.CapaCaseId = capaId;
                 Editor.LinkedCapaId = capaId;
-                StatusMessage = $"Linked CAPA case {result.Selected.Label}.";
+                StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Incidents_LinkedCapa", "Linked CAPA case {0}."), result.Selected.Label);
                 MarkDirty();
             }
         }

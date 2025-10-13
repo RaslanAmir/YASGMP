@@ -441,6 +441,29 @@
   <sys:String x:Key="Tooltip_Warehouse_Qualified">Zastavica kvalificiranosti.</sys:String>
   <sys:String x:Key="Tooltip_Warehouse_LastQualified">Datum zadnje kvalifikacije.</sys:String>
   <sys:String x:Key="Tooltip_Warehouse_Notes">Bilješke o uvjetima/ograničenjima.</sys:String>
+
+  <!-- Incidenti: CFL/Status/Greške -->
+  <sys:String x:Key="Status_Incidents_UnableToLoad">Nije moguće učitati {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_CflOnlyInEdit">CFL pretraživanja dostupna su samo tijekom uređivanja incidenta.</sys:String>
+  <sys:String x:Key="Status_Incidents_NoRelatedForLink">Nema povezanih CAPA slučajeva ili radnih naloga za povezivanje.</sys:String>
+  <sys:String x:Key="CFL_Select_RelatedRecord">Odaberite povezani zapis</sys:String>
+  <sys:String x:Key="Status_Incidents_UnableToLoadRelated">Nije moguće učitati povezane zapise: {0}</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedWorkOrder">Povezan radni nalog {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedCapa">Povezan CAPA slučaj {0}.</sys:String>
+
+  <!-- Incidenti: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Incidents_Title">Kratki naslov incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Description">Detaljan opis incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Type">Kategorija (npr. Odstupanje, Kvaliteta).</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Priority">Relativni prioritet.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Status">Trenutni status.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Detected">Vrijeme otkrivanja incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Reported">Vrijeme prijave incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Target">Ciljni sustav/komponenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Machine">Identifikator povezanog stroja.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Component">Identifikator povezane sastavnice.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_AssignedTo">Dodijeljeni istražitelj/tehničar.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_LastModified">Zadnje izmijenjeno (vrijeme/korisnik).</sys:String>
   <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
   <sys:String x:Key="Label_Price">Cijena</sys:String>
   <!-- Metapodaci potpisa -->
