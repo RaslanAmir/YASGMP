@@ -23,6 +23,59 @@
   - 2025-10-10T10:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restores but fails with dozens of CS0234/CS0246/CS0535 errors because YasGMP.AppCore expects Helpers/Diagnostics projects and signature DTO types that are unavailable without the Windows solution build.
   - 2025-10-10T06:42Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restored packages but failed with unresolved YasGMP.Helpers/Diagnostics namespaces and missing SignatureMetadataDto/WorkOrderSignaturePersistRequest types — requires building on Windows with full solution references.
 
+
+## Increment 2025-10-13 — Baseline Revalidation
+- Confirmed the Linux container still lacks the `dotnet` CLI; documented env_guard for Increment 1 and kept execution static-analysis only.
+- Prepared an end-to-end compliance backlog covering:
+  - [ ] Repository-wide folder/module inventory aligned to SAP B1 form modes, CFL, golden arrows, RBAC, and audit overlays.
+  - [ ] Database alignment plan (yasgmp.sql ↔ EF models ↔ DatabaseService extensions) with forthcoming `yasgmp.sql.delta.patch`.
+  - [ ] Directory.Build.props review to centralise .NET 9 targeting, analyzer strictness, and documentation output enforcement.
+  - [ ] EN↔HR localization sweep across Views/ViewModels/Resources ensuring runtime switch support and automation metadata.
+  - [ ] Cross-cutting observability/security roadmap (structured logging, metrics, retention/legal hold, signature rotation).
+- Next Increment Goals (Increment 2):
+  1. Draft per-folder inventory template and seed ModulesPane coverage notes. ✅
+  2. Begin entity traceability mapping (Assets → Services → ViewModels → Views). ✅
+  3. Outline audit/signature hash-chain upgrade specification for DatabaseService extensions. ✅
+
+## Increment 2025-10-20 — Inventory & Traceability (Increment 2)
+
+### Scope & Outcomes
+- ✅ Produced a repository-wide per-folder/module inventory aligned to SAP B1 parity checkpoints (Form Modes, Golden Arrows, CFL, Toolbars, Status, i18n/a11y).
+- ✅ Authored the initial entity traceability map for the Assets domain, binding database schema ↔ adapters/services ↔ view-models ↔ WPF views.
+- ✅ Drafted the append-only audit/signature hash-chain extension outline for DatabaseService with RBAC + e-signature sequencing and observability hooks.
+
+### Per-Folder / Module Inventory Snapshot (Increment 2)
+| Folder | Purpose & Key Assets | SAP B1 Parity & Compliance Coverage | Outstanding Gaps / Next Actions |
+| --- | --- | --- | --- |
+| `YasGMP.Wpf` | Shell bootstrap, App.xaml resources, localization bootstrapping, docking host, ribbon, status bar. | ✅ Ribbon tabs + dock layout persistence scaffolds, localization wiring for shell chrome, automation metadata seeded. | 🚧 Verify runtime ribbon command bindings once CLI restored; smoke coverage pending (B1 shortcuts, golden arrows).
+| `Views` | XAML views per module (Assets, Components, CAPA, etc.) and shared dialogs. | ✅ MVVM bindings, tooltips, AutomationProperties, localization resources enumerated. | 🚧 Expand Choose-From-List (F4) pickers for every grid; extend virtualization/per-user layout persistence verification.
+| `ViewModels` | Module view-models built on `B1FormDocumentViewModel`, toolbar command wrappers, navigation services. | ✅ Form mode gating, e-signature integration scaffolds, localization refresh notifications. | 🚧 Add audit append hooks + RBAC denial messaging per regulated command.
+| `Services` | DatabaseService, attachment/signature/audit adapters, localization service. | ✅ Parameterized DatabaseService helpers, attachment retention logic, localization dispatch. | 🚧 Implement hash-chain audit append + signature manifest persistence per outline; extend metrics/tracing instrumentation.
+| `Resources` | RESX localization, resource dictionaries for toolbars/status, automation metadata. | ✅ EN↔HR coverage for shell/menu/toolbars; automation IDs/names tooltips centralised. | 🚧 Expand module-specific strings for remaining forms; ensure validation/tooltips share resources for CFL dialog prompts.
+| `docs` | Codex plan/progress, WPF mapping, compliance guides. | ✅ Increment 2 artifacts recorded with traceability + audit plan. | 🚧 Continue documenting module-specific acceptance checklists as parity work lands.
+| `YasGMP.AppCore` | Shared models, services consumed by MAUI + WPF shells. | ✅ Entity models aligned with MAUI adapters; signature DTO definitions centralised. | 🚧 Confirm EF configurations match forthcoming `yasgmp.sql.delta.patch`; extend XML docs for new audit fields.
+
+### Entity Traceability Map — Assets Module Focus
+| Entity | Database Source | Adapter / Service Layer | ViewModel(s) | View(s) | Compliance Hooks |
+| --- | --- | --- | --- | --- | --- |
+| `Asset` (`Machine`) | `Assets` table, joins to `AssetCategories`, `Locations`. | `AssetsService` → `DatabaseService.AssetsExtensions`. | `AssetsModuleViewModel`, `AssetEditorViewModel`. | `AssetsModuleView.xaml`, `AssetEditorView.xaml`. | RBAC check via `IAuthorizationService`; signature prompt on Save via `IElectronicSignatureDialogService`; audit append pending hash-chain implementation.
+| `AssetAttachment` | `AssetAttachments`, `AttachmentBlobs`. | `AttachmentService` with retention metadata. | `AssetAttachmentViewModel` (child), `AttachmentsPaneViewModel`. | `AttachmentsPane.xaml`. | Signature enforced on upload/delete; retention policy flags persisted; audit log stub records (await hash-chain).
+| `MaintenanceOrder` (linked asset WO) | `WorkOrders`, `WorkOrderTasks`. | `WorkOrdersService` bridging assets module golden arrows. | `AssetWorkOrdersViewModel`. | `AssetWorkOrdersView.xaml`. | Golden Arrow navigation triggers regulated update flows; RBAC gating active; audit export/close pending.
+| `CalibrationRecord` (asset linked) | `Calibrations`, `CalibrationSteps`. | `CalibrationService` with asset foreign key filters. | `AssetCalibrationViewModel`. | `AssetCalibrationView.xaml`. | Signature capture enforced for approval; audit append queued for hash-chain; export operations require correlationId instrumentation.
+
+### Audit / Signature Hash-Chain Extension Outline
+1. **Trigger Points:** CREATE/UPDATE/DELETE/EXPORT/ROLLBACK/APPROVE/CLOSE/ESCALATE operations from WPF modules invoke new `DatabaseService.AuditTrailExtensions.AppendAsync` with payload metadata (userId, roleId, ipAddress, deviceId, sessionId, correlationId, timestamp).
+2. **RBAC → Signature → Audit Pipeline:** `IRbacPolicyEvaluator` enforces access; on allow, `IElectronicSignatureDialogService` captures credential + reason; append operation records the signature manifest ID plus SHA-256 of the signed payload.
+3. **Hash Chaining:** Each audit entry stores `PreviousHash` (last entry per scope/user) and calculates `CurrentHash = SHA256(PreviousHash + SerializedAuditPayload)` ensuring tamper-evident ordering. Database schema requires `AuditLog` table expansion (`HashOrdinal`, `PreviousHash`, `CurrentHash`, `CorrelationId`, `SignatureManifestId`).
+4. **Observability:** Wrap append operations in `Activity` span with structured logging (JSON) and metrics counters (success/failure latency). Emit warnings for skipped signature (RBAC deny) with localized UX feedback and audit denial entry.
+5. **Retention & Legal Hold:** Integrate with existing retention service to flag audit entries participating in holds; purge operations require dual authorization and append compensating audit records referencing purge manifest.
+6. **Validation & Testing:** Author unit tests for hash-chain continuity, signature manifest linking, and RBAC denial logging; provide smoke harness extension to replay regulated flows and assert audit invariants (hash continuity, correlation id presence).
+
+### Follow-Up Actions
+- 🚧 Draft schema update proposal (`yasgmp.sql.delta.patch`) introducing hash chain columns + indices.
+- 🚧 Extend entity traceability to Components, CAPA, and Audit modules.
+- 🚧 Prepare GitHub Actions workflow updates to run documentation lint + JSON schema validation once CLI available.
+
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
 - Repo-level SDK pin: `global.json` set to **9.0.100** *(reinforced via bootstrap script).* 

@@ -79,7 +79,11 @@
       "2025-10-10T11:26Z: dotnet-install.sh -c 9.0 installed SDK 9.0.305; dotnet --info succeeds, but Windows 10 SDK 19041+ cannot be provisioned on this Linux host.",
       "2025-10-10T11:24Z: dotnet restore yasgmp.sln (-p:EnableWindowsTargeting=true) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; rerun on a Windows host with the Windows SDK/workloads installed.",
       "2025-10-10T11:25Z: dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true fails with missing YasGMP.Helpers/Diagnostics namespaces and SignatureMetadata DTOs in AppCore; full compile needs the Windows solution build.",
-      "2025-10-10T11:25Z: dotnet test YasGMP.Wpf.Tests -c Release -p:EnableWindowsTargeting=true --filter DockLayoutPersistenceServiceTests fails restore with NU1605 downgrade (Microsoft.Extensions.Configuration.Abstractions 9.0.3\u21929.0.0) and NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041."
+      "2025-10-10T11:25Z: dotnet test YasGMP.Wpf.Tests -c Release -p:EnableWindowsTargeting=true --filter DockLayoutPersistenceServiceTests fails restore with NU1605 downgrade (Microsoft.Extensions.Configuration.Abstractions 9.0.3\u21929.0.0) and NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041.",
+      "2025-10-13: dotnet --info still fails with 'command not found'; Increment 1 remains static-analysis only."
+    ],
+    "progress": [
+      "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable."
     ]
   },
   "batches": [
@@ -371,6 +375,9 @@
     "2025-10-10T10:12Z: dotnet test YasGMP.Wpf.Tests --filter DockLayoutPersistenceServiceTests -c Release -p:EnableWindowsTargeting=true fails restore with NU1605 downgrade + NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041; FlaUI smoke harness remains blocked on Windows tooling.",
     "2025-10-10T11:24Z: Solution-level restore still blocked by NETSDK1147 (missing maui-tizen workload) on Linux even with EnableWindowsTargeting=true; Windows 10 SDK/workloads remain required on a Windows host.",
     "2025-10-10T11:25Z: WPF Release build hits unresolved YasGMP.Helpers/Diagnostics namespaces and SignatureMetadata DTOs in AppCore; tests stay blocked until the Windows solution build succeeds.",
+    "2026-04-05: Increment 2 documentation drop captured per-folder inventory, entity traceability, and audit hash-chain outline while CLI remains unavailable for runtime validation.",
+    "2026-04-05: Assets entity traceability map now links database tables → adapters/services → view-models → views with compliance hooks documented (RBAC, signatures, pending audit hash chain).",
+    "2026-04-05: Audit/signature hash-chain design recorded for DatabaseService (trigger sequence, hash persistence, observability, retention) awaiting schema delta + implementation once CLI access returns.",
     "2025-10-10T11:25Z: DockLayoutPersistenceServiceTests focus run fails restore with NU1605/NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041; FlaUI automation still requires a Windows desktop host."
   ]
 }
