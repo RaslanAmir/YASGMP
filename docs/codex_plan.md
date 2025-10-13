@@ -33,9 +33,47 @@
   - [ ] EN↔HR localization sweep across Views/ViewModels/Resources ensuring runtime switch support and automation metadata.
   - [ ] Cross-cutting observability/security roadmap (structured logging, metrics, retention/legal hold, signature rotation).
 - Next Increment Goals (Increment 2):
-  1. Draft per-folder inventory template and seed ModulesPane coverage notes.
-  2. Begin entity traceability mapping (Assets → Services → ViewModels → Views).
-  3. Outline audit/signature hash-chain upgrade specification for DatabaseService extensions.
+  1. **[x]** Draft per-folder inventory template and seed ModulesPane coverage notes.
+  2. **[x]** Begin entity traceability mapping (Assets → Services → ViewModels → Views).
+  3. **[x]** Outline audit/signature hash-chain upgrade specification for DatabaseService extensions.
+
+### Increment 2 Artifact Drop — Documentation Deliverables
+
+| Folder / Module | Primary Responsibility | SAP B1 Parity Hooks | Compliance / Notes | Status |
+| --- | --- | --- | --- | --- |
+| `AppShell.xaml` / `AppShell.xaml.cs` | WPF shell bootstrap, Ribbon + Dock host orchestration | FormMode toolbar wiring, ModulesPane registration | Localization + accessibility verified; smoke registration pending CLI | `In-Progress` |
+| `ModulesPane` (Views/ViewModels) | Module navigation tree, localization metadata, automation ids | Golden Arrow launch points, CFL invocation shortcuts | Requires periodic update as modules go live; includes EN↔HR resources | `Tracked` |
+| `Views/*` (per module) | Individual document hosts with inspector/editor panes | FormMode state machine binding, toolbar template reuse | Tooltips + AutomationProperties wired via resources | `Tracked` |
+| `ViewModels/*` | B1FormDocumentViewModel derivatives orchestrating CRUD | Command gating, navigation payload reconciliation | Awaiting audit trail enrichment post hash-chain extensions | `Tracked` |
+| `YasGMP.AppCore` | Shared models + adapters consumed by MAUI/WPF shells | Adapter/service parity, shared validation | XML docs enforced; audit hash linking queued | `Tracked` |
+| `Services/DatabaseService` | Persistence gateway + layout/audit helpers | Choose-From-List lookups, attachments, signature capture | Hash-chain extension outlined below; implementation blocked on SDK validation | `Planned` |
+| `docs/` | Planning, mapping, parity matrices | Acceptance checklist cross-reference | codex_plan / progress synchronized each batch | `Current` |
+
+#### Entity Traceability Map (Seed)
+
+| Entity | Database Source | Adapter / Service | ViewModel | View |
+| --- | --- | --- | --- | --- |
+| Assets (Machines) | `Machines` table (`yasgmp.sql`) | `MachineService` via `DatabaseService` (AppCore) | `AssetsModuleViewModel` (`ViewModels/Assets`) | `AssetsModuleView.xaml` |
+| Components | `Components` table | `ComponentService` (AppCore) | `ComponentsModuleViewModel` | `ComponentsModuleView.xaml` |
+| Parts | `Parts` + `PartInventory` tables | `PartsService` (AppCore) | `PartsModuleViewModel` | `PartsModuleView.xaml` |
+| Warehouses | `Warehouses`, `WarehouseLedger` tables | `WarehouseService` (AppCore) | `WarehousesModuleViewModel` | `WarehousesModuleView.xaml` |
+| Work Orders | `WorkOrders`, `WorkOrderTasks` tables | `WorkOrderService` (AppCore) | `WorkOrdersModuleViewModel` | `WorkOrdersModuleView.xaml` |
+| Calibration | `CalibrationEvents` table | `CalibrationService` (AppCore) | `CalibrationModuleViewModel` | `CalibrationModuleView.xaml` |
+| Incidents / CAPA | `Incidents`, `CorrectiveActions`, `ChangeControls` tables | `IncidentService`, `CapaService`, `ChangeControlService` (AppCore) | `IncidentModuleViewModel`, `CapaModuleViewModel`, `ChangeControlModuleViewModel` | `IncidentModuleView.xaml`, `CapaModuleView.xaml`, `ChangeControlModuleView.xaml` |
+| Validations (IQ/OQ/PQ) | `Validations` table family | `ValidationService` (AppCore) | `ValidationModuleViewModel` | `ValidationModuleView.xaml` |
+| Scheduled Jobs | `ScheduledJobs`, `JobExecutions` tables | `ScheduledJobService` (AppCore) | `ScheduledJobsModuleViewModel` | `ScheduledJobsModuleView.xaml` |
+| Users / Roles | `Users`, `Roles`, `UserRoleAssignments` tables | `UserRoleService` (AppCore) | `UsersModuleViewModel` | `UsersModuleView.xaml` |
+| Suppliers / External Servicers | `Suppliers`, `ExternalServicers` tables | `SupplierService`, `ExternalServicerService` (AppCore) | `SuppliersModuleViewModel`, `ExternalServicersModuleViewModel` | `SuppliersModuleView.xaml`, `ExternalServicersModuleView.xaml` |
+| Audit Log | `AuditEntries`, `ApiAuditEntries` tables | `AuditLogService`, `ApiAuditService` (AppCore) | `AuditLogModuleViewModel`, `ApiAuditModuleViewModel` | `AuditLogModuleView.xaml`, `ApiAuditModuleView.xaml` |
+| Attachments | `Attachments`, `AttachmentBlobs` tables | `AttachmentService` (AppCore) | `AttachmentsModuleViewModel` | `AttachmentsModuleView.xaml` |
+
+#### Audit / Signature Hash-Chain Extension (Draft Outline)
+
+1. **Hash Model Extension:** Introduce `AuditEnvelopeHash` (GUID, PreviousHash, CurrentHash, Timestamp, ActorMetadata) persisted via `DatabaseService` to maintain an append-only chain keyed per entity instance.
+2. **Signature Capture Integration:** Update `IElectronicSignatureDialogService` consumers to include the computed `CurrentHash` and previous envelope reference in the signature manifest before persisting.
+3. **DatabaseService Extensions:** Add `AppendAuditHashAsync(entityKey, auditPayload, signatureMetadata)` which calculates SHA-256 of serialized audit payload + previous hash, stores both the audit row and hash envelope transactionally, and returns the persisted hash token to the caller for UI confirmation.
+4. **ViewModel Surfacing:** Extend module view-models to surface the latest hash token, enabling the inspector/status bar to display verification cues and emit correlation identifiers for smoke automation.
+5. **Verification Workflow:** Outline periodic verification routines (scheduled job + manual command) that recompute hash chains per entity, flag tampering anomalies, and surface the status through the dashboard/reporting modules.
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).

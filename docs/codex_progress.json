@@ -375,6 +375,7 @@
     "2025-10-10T10:12Z: dotnet test YasGMP.Wpf.Tests --filter DockLayoutPersistenceServiceTests -c Release -p:EnableWindowsTargeting=true fails restore with NU1605 downgrade + NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041; FlaUI smoke harness remains blocked on Windows tooling.",
     "2025-10-10T11:24Z: Solution-level restore still blocked by NETSDK1147 (missing maui-tizen workload) on Linux even with EnableWindowsTargeting=true; Windows 10 SDK/workloads remain required on a Windows host.",
     "2025-10-10T11:25Z: WPF Release build hits unresolved YasGMP.Helpers/Diagnostics namespaces and SignatureMetadata DTOs in AppCore; tests stay blocked until the Windows solution build succeeds.",
-    "2025-10-10T11:25Z: DockLayoutPersistenceServiceTests focus run fails restore with NU1605/NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041; FlaUI automation still requires a Windows desktop host."
+    "2025-10-10T11:25Z: DockLayoutPersistenceServiceTests focus run fails restore with NU1605/NU1201 because YasGMP.Wpf targets net9.0-windows10.0.19041; FlaUI automation still requires a Windows desktop host.",
+    "2026-04-05: Increment 2 documentation drop delivered (per-folder inventory table, entity traceability map, audit/signature hash-chain outline) recorded in docs/codex_plan.md; associated planning TODOs marked complete."
   ]
 }

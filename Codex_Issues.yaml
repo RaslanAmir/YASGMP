@@ -31,7 +31,27 @@
     - docs/codex_progress.json
   suggested_fix: |
     Produce the per-folder inventory and entity traceability map during Increment 2, aligning Views/ViewModels/Services/DB artifacts.
+  status: closed
+  resolved_in: docs/codex_plan.md
+  tags: [planning, parity, compliance]
+
+- id: I-003
+  file: Services/DatabaseService
+  module: Compliance
+  context: Audit hash-chain implementation
+  type: Compliance
+  severity: "⚠️ Medium"
+  description: |
+    Increment 2 documentation outlines the AuditEnvelopeHash model and AppendAuditHashAsync workflow, but the DatabaseService extensions,
+    signature manifest updates, and verification routines remain unimplemented.
+    Implement the outlined hash-chain persistence and expose verification cues in the inspector/status bar once SDK validation is possible.
+  references:
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+  suggested_fix: |
+    Add the AuditEnvelopeHash storage schema, extend DatabaseService with AppendAuditHashAsync, update IElectronicSignatureDialogService consumers
+    to include hash metadata, and surface the resulting tokens through relevant view-models and dashboards.
   status: open
   resolved_in: null
-  tags: [planning, parity, compliance]
+  tags: [audit, signature, backlog]
 
