@@ -13,12 +13,19 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Production KPIs"
+        <TextBlock Text="{DynamicResource Cockpit.Section.Metrics.Header}"
                    FontSize="14"
                    FontWeight="Bold"
-                   Margin="0,0,0,8" />
+                   Margin="0,0,0,8"
+                   ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Metrics.ToolTip}"
+                   AutomationProperties.Name="{DynamicResource Cockpit.Section.Metrics.AutomationName}"
+                   AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Metrics.AutomationId}" />
 
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding Metrics}">
+        <ItemsControl Grid.Row="1"
+                      ItemsSource="{Binding Metrics}"
+                      ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Metrics.Items.ToolTip}"
+                      AutomationProperties.Name="{DynamicResource Cockpit.Section.Metrics.Items.AutomationName}"
+                      AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Metrics.Items.AutomationId}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" />
@@ -41,8 +48,16 @@
         </ItemsControl>
 
         <StackPanel Grid.Row="2" Margin="0,12,0,0">
-            <TextBlock Text="Notices" FontWeight="Bold" Margin="0,0,0,4" />
-            <ItemsControl ItemsSource="{Binding Notices}">
+            <TextBlock Text="{DynamicResource Cockpit.Section.Notices.Header}"
+                       FontWeight="Bold"
+                       Margin="0,0,0,4"
+                       ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Notices.ToolTip}"
+                       AutomationProperties.Name="{DynamicResource Cockpit.Section.Notices.AutomationName}"
+                       AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Notices.AutomationId}" />
+            <ItemsControl ItemsSource="{Binding Notices}"
+                          ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Notices.Items.ToolTip}"
+                          AutomationProperties.Name="{DynamicResource Cockpit.Section.Notices.Items.AutomationName}"
+                          AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Notices.Items.AutomationId}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <DockPanel Margin="0,0,0,4">

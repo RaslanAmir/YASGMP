@@ -33,6 +33,10 @@ public sealed class LocalizationServiceTests : IDisposable
         Assert.Equal(
             "3/5 smoke checks succeeded. Failed to persist log: disk full",
             _service.GetString("Shell.Status.Smoke.Result.LogFailure", 3, 5, "disk full"));
+        Assert.Equal("Signature Metadata", _service.GetString("SignatureMetadata.Group.Header"));
+        Assert.Equal("Production KPIs", _service.GetString("Cockpit.Section.Metrics.Header"));
+        Assert.Equal("User", _service.GetString("Audit.Filter.User.Label"));
+        Assert.Equal("Audit log is loading.", _service.GetString("Audit.Progress.Indicator.ToolTip"));
     }
 
     [Fact]
@@ -51,6 +55,10 @@ public sealed class LocalizationServiceTests : IDisposable
         Assert.Equal(
             "3/5 provjera dima je uspješno završilo. Spremanje zapisa nije uspjelo: disk full",
             _service.GetString("Shell.Status.Smoke.Result.LogFailure", 3, 5, "disk full"));
+        Assert.Equal("Metapodaci potpisa", _service.GetString("SignatureMetadata.Group.Header"));
+        Assert.Equal("Proizvodni KPI pokazatelji", _service.GetString("Cockpit.Section.Metrics.Header"));
+        Assert.Equal("Korisnik", _service.GetString("Audit.Filter.User.Label"));
+        Assert.Equal("Revizijski dnevnik se učitava.", _service.GetString("Audit.Progress.Indicator.ToolTip"));
     }
 
     [Fact]

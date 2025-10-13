@@ -2476,4 +2476,430 @@
   <data name="Module.Assets.Grid.ToolTip" xml:space="preserve">
     <value>Prikazuje filtrirana sredstva.</value>
   </data>
+  <data name="SignatureMetadata.Group.Header" xml:space="preserve">
+    <value>Metapodaci potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Group.ToolTip" xml:space="preserve">
+    <value>Pregledajte metapodatke elektroničkog potpisa zabilježene tijekom autorizacije.</value>
+  </data>
+  <data name="SignatureMetadata.Group.AutomationName" xml:space="preserve">
+    <value>Grupa metapodataka potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Group.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Group</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignatureHash.Label" xml:space="preserve">
+    <value>Hash potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignatureHash.ToolTip" xml:space="preserve">
+    <value>SHA-256 sažetak zabilježen pri potpisivanju.</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignatureHash.AutomationName" xml:space="preserve">
+    <value>Hash elektroničkog potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignatureHash.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.SignatureHash</value>
+  </data>
+  <data name="SignatureMetadata.Field.Reason.Label" xml:space="preserve">
+    <value>Razlog</value>
+  </data>
+  <data name="SignatureMetadata.Field.Reason.ToolTip" xml:space="preserve">
+    <value>Razlog odabran tijekom potpisivanja.</value>
+  </data>
+  <data name="SignatureMetadata.Field.Reason.AutomationName" xml:space="preserve">
+    <value>Razlog potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.Reason.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.Reason</value>
+  </data>
+  <data name="SignatureMetadata.Field.ReasonNote.Label" xml:space="preserve">
+    <value>Bilješka razloga</value>
+  </data>
+  <data name="SignatureMetadata.Field.ReasonNote.ToolTip" xml:space="preserve">
+    <value>Dodatne napomene unesene prilikom potpisivanja.</value>
+  </data>
+  <data name="SignatureMetadata.Field.ReasonNote.AutomationName" xml:space="preserve">
+    <value>Bilješka razloga potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.ReasonNote.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.ReasonNote</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedBy.Label" xml:space="preserve">
+    <value>Potpisao</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedBy.ToolTip" xml:space="preserve">
+    <value>Puno ime potpisnika.</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedBy.AutomationName" xml:space="preserve">
+    <value>Potpisnik</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedBy.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.SignedBy</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignerId.Label" xml:space="preserve">
+    <value>ID potpisnika</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignerId.ToolTip" xml:space="preserve">
+    <value>Jedinstveni identifikator potpisnika.</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignerId.AutomationName" xml:space="preserve">
+    <value>Identifikator potpisnika</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignerId.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.SignerId</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedAtUtc.Label" xml:space="preserve">
+    <value>Potpisano u (UTC)</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedAtUtc.ToolTip" xml:space="preserve">
+    <value>UTC datum i vrijeme kada je potpis zabilježen.</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedAtUtc.AutomationName" xml:space="preserve">
+    <value>Vrijeme potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.SignedAtUtc.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.SignedAtUtc</value>
+  </data>
+  <data name="SignatureMetadata.Field.SourceIp.Label" xml:space="preserve">
+    <value>Izvorni IP</value>
+  </data>
+  <data name="SignatureMetadata.Field.SourceIp.ToolTip" xml:space="preserve">
+    <value>Klijentska IP adresa pri potpisivanju.</value>
+  </data>
+  <data name="SignatureMetadata.Field.SourceIp.AutomationName" xml:space="preserve">
+    <value>Izvorni IP potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.SourceIp.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.SourceIp</value>
+  </data>
+  <data name="SignatureMetadata.Field.SessionId.Label" xml:space="preserve">
+    <value>ID sesije</value>
+  </data>
+  <data name="SignatureMetadata.Field.SessionId.ToolTip" xml:space="preserve">
+    <value>Identifikator sesije izdan pri potpisivanju.</value>
+  </data>
+  <data name="SignatureMetadata.Field.SessionId.AutomationName" xml:space="preserve">
+    <value>ID sesije potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.SessionId.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.SessionId</value>
+  </data>
+  <data name="SignatureMetadata.Field.DeviceInfo.Label" xml:space="preserve">
+    <value>Informacije o uređaju</value>
+  </data>
+  <data name="SignatureMetadata.Field.DeviceInfo.ToolTip" xml:space="preserve">
+    <value>Podaci o uređaju prikupljeni tijekom potpisivanja.</value>
+  </data>
+  <data name="SignatureMetadata.Field.DeviceInfo.AutomationName" xml:space="preserve">
+    <value>Informacije o uređaju potpisa</value>
+  </data>
+  <data name="SignatureMetadata.Field.DeviceInfo.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.DeviceInfo</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.Label" xml:space="preserve">
+    <value>Zadnja izmjena (UTC)</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.ToolTip" xml:space="preserve">
+    <value>UTC vrijeme i korisnik posljednje izmjene zapisa.</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.AutomationName" xml:space="preserve">
+    <value>Metapodaci zadnje izmjene</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.LastModified</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.Timestamp.ToolTip" xml:space="preserve">
+    <value>UTC vrijeme posljednje izmjene.</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.Timestamp.AutomationName" xml:space="preserve">
+    <value>Vrijeme zadnje izmjene</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.Timestamp.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.LastModified.Timestamp</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.By.ToolTip" xml:space="preserve">
+    <value>Korisnik koji je zadnji ažurirao zapis.</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.By.AutomationName" xml:space="preserve">
+    <value>Korisnik zadnje izmjene</value>
+  </data>
+  <data name="SignatureMetadata.Field.LastModified.By.AutomationId" xml:space="preserve">
+    <value>SignatureMetadata.Field.LastModified.By</value>
+  </data>
+  <data name="Cockpit.Anchor.Title" xml:space="preserve">
+    <value>Kokpit</value>
+  </data>
+  <data name="Cockpit.Anchor.AutomationId" xml:space="preserve">
+    <value>Cockpit.Anchor</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.Header" xml:space="preserve">
+    <value>Proizvodni KPI pokazatelji</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.ToolTip" xml:space="preserve">
+    <value>Sažetak pokazatelja proizvodnih performansi.</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.AutomationName" xml:space="preserve">
+    <value>Naslov proizvodnih KPI-jeva</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.AutomationId" xml:space="preserve">
+    <value>Cockpit.Section.Metrics</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.Items.ToolTip" xml:space="preserve">
+    <value>Popis trenutačnih proizvodnih KPI-jeva.</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.Items.AutomationName" xml:space="preserve">
+    <value>Popis proizvodnih KPI-jeva</value>
+  </data>
+  <data name="Cockpit.Section.Metrics.Items.AutomationId" xml:space="preserve">
+    <value>Cockpit.Section.Metrics.Items</value>
+  </data>
+  <data name="Cockpit.Section.Notices.Header" xml:space="preserve">
+    <value>Obavijesti</value>
+  </data>
+  <data name="Cockpit.Section.Notices.ToolTip" xml:space="preserve">
+    <value>Najnovije operativne obavijesti i upozorenja.</value>
+  </data>
+  <data name="Cockpit.Section.Notices.AutomationName" xml:space="preserve">
+    <value>Naslov obavijesti kokpita</value>
+  </data>
+  <data name="Cockpit.Section.Notices.AutomationId" xml:space="preserve">
+    <value>Cockpit.Section.Notices</value>
+  </data>
+  <data name="Cockpit.Section.Notices.Items.ToolTip" xml:space="preserve">
+    <value>Obavijesti i podsjetnici za operatere.</value>
+  </data>
+  <data name="Cockpit.Section.Notices.Items.AutomationName" xml:space="preserve">
+    <value>Popis obavijesti kokpita</value>
+  </data>
+  <data name="Cockpit.Section.Notices.Items.AutomationId" xml:space="preserve">
+    <value>Cockpit.Section.Notices.Items</value>
+  </data>
+  <data name="Cockpit.Metric.OpenCapas.Label" xml:space="preserve">
+    <value>Otvorene CAPA-e</value>
+  </data>
+  <data name="Cockpit.Metric.PreventiveJobsDue.Label" xml:space="preserve">
+    <value>Preventivni zadaci dospijevaju</value>
+  </data>
+  <data name="Cockpit.Metric.MachinesOffline.Label" xml:space="preserve">
+    <value>Strojevi izvan rada</value>
+  </data>
+  <data name="Cockpit.Metric.OnTimeDeliveries.Label" xml:space="preserve">
+    <value>Isporuke na vrijeme</value>
+  </data>
+  <data name="Cockpit.Notice.SterilizerExpiring" xml:space="preserve">
+    <value>Validacija sterilizatora #2 istječe za 5 dana</value>
+  </data>
+  <data name="Cockpit.Notice.CalibrationOverdue" xml:space="preserve">
+    <value>Kalibracija kasni: aparat za otapanje</value>
+  </data>
+  <data name="Cockpit.Notice.DeviationsAwaitingApproval" xml:space="preserve">
+    <value>Dva odstupanja čekaju odobrenje QA</value>
+  </data>
+  <data name="Audit.Filter.User.Label" xml:space="preserve">
+    <value>Korisnik</value>
+  </data>
+  <data name="Audit.Filter.User.ToolTip" xml:space="preserve">
+    <value>Filtriraj događaje prema SAP korisničkom identifikatoru.</value>
+  </data>
+  <data name="Audit.Filter.User.AutomationName" xml:space="preserve">
+    <value>Filter korisnika revizije</value>
+  </data>
+  <data name="Audit.Filter.User.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.User</value>
+  </data>
+  <data name="Audit.Filter.Entity.Label" xml:space="preserve">
+    <value>Entitet</value>
+  </data>
+  <data name="Audit.Filter.Entity.ToolTip" xml:space="preserve">
+    <value>Filtriraj prema pogođenom entitetu ili tablici.</value>
+  </data>
+  <data name="Audit.Filter.Entity.AutomationName" xml:space="preserve">
+    <value>Filter entiteta revizije</value>
+  </data>
+  <data name="Audit.Filter.Entity.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.Entity</value>
+  </data>
+  <data name="Audit.Filter.Action.Label" xml:space="preserve">
+    <value>Radnja</value>
+  </data>
+  <data name="Audit.Filter.Action.ToolTip" xml:space="preserve">
+    <value>Filtriraj prema vrsti radnje događaja.</value>
+  </data>
+  <data name="Audit.Filter.Action.AutomationName" xml:space="preserve">
+    <value>Filter radnje revizije</value>
+  </data>
+  <data name="Audit.Filter.Action.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.Action</value>
+  </data>
+  <data name="Audit.Filter.From.Label" xml:space="preserve">
+    <value>Od</value>
+  </data>
+  <data name="Audit.Filter.From.ToolTip" xml:space="preserve">
+    <value>Prikaži događaje na ili nakon ovog datuma.</value>
+  </data>
+  <data name="Audit.Filter.From.AutomationName" xml:space="preserve">
+    <value>Filter datuma od</value>
+  </data>
+  <data name="Audit.Filter.From.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.From</value>
+  </data>
+  <data name="Audit.Filter.To.Label" xml:space="preserve">
+    <value>Do</value>
+  </data>
+  <data name="Audit.Filter.To.ToolTip" xml:space="preserve">
+    <value>Prikaži događaje na ili prije ovog datuma.</value>
+  </data>
+  <data name="Audit.Filter.To.AutomationName" xml:space="preserve">
+    <value>Filter datuma do</value>
+  </data>
+  <data name="Audit.Filter.To.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.To</value>
+  </data>
+  <data name="Audit.Filter.Search.Label" xml:space="preserve">
+    <value>Pretraga:</value>
+  </data>
+  <data name="Audit.Filter.Search.ToolTip" xml:space="preserve">
+    <value>Pretraži opis i podatke o uređaju.</value>
+  </data>
+  <data name="Audit.Filter.Search.AutomationName" xml:space="preserve">
+    <value>Oznaka pretrage revizije</value>
+  </data>
+  <data name="Audit.Filter.Search.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.Search</value>
+  </data>
+  <data name="Audit.Filter.Search.Input.ToolTip" xml:space="preserve">
+    <value>Unesite tekst za pretraživanje unutar zapisa revizijskog dnevnika.</value>
+  </data>
+  <data name="Audit.Filter.Search.Input.AutomationName" xml:space="preserve">
+    <value>Polje pretrage revizije</value>
+  </data>
+  <data name="Audit.Filter.Search.Input.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.Search.Input</value>
+  </data>
+  <data name="Audit.Filter.Button.Apply.Content" xml:space="preserve">
+    <value>Primijeni</value>
+  </data>
+  <data name="Audit.Filter.Button.Apply.ToolTip" xml:space="preserve">
+    <value>Primijeni trenutne filtre na revizijski dnevnik.</value>
+  </data>
+  <data name="Audit.Filter.Button.Apply.AutomationName" xml:space="preserve">
+    <value>Primijeni filtre</value>
+  </data>
+  <data name="Audit.Filter.Button.Apply.AutomationId" xml:space="preserve">
+    <value>Audit.Filter.Button.Apply</value>
+  </data>
+  <data name="Audit.Grid.ToolTip" xml:space="preserve">
+    <value>Prikazuje filtrirane zapise revizijskog dnevnika.</value>
+  </data>
+  <data name="Audit.Grid.AutomationName" xml:space="preserve">
+    <value>Mreža revizijskog dnevnika</value>
+  </data>
+  <data name="Audit.Grid.AutomationId" xml:space="preserve">
+    <value>Audit.Grid</value>
+  </data>
+  <data name="Audit.Grid.Column.Timestamp.Header" xml:space="preserve">
+    <value>Vremenska oznaka</value>
+  </data>
+  <data name="Audit.Grid.Column.Timestamp.ToolTip" xml:space="preserve">
+    <value>UTC vremenska oznaka događaja.</value>
+  </data>
+  <data name="Audit.Grid.Column.Timestamp.AutomationName" xml:space="preserve">
+    <value>Vremenska oznaka revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.Timestamp.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.Timestamp</value>
+  </data>
+  <data name="Audit.Grid.Column.User.Header" xml:space="preserve">
+    <value>Korisnik</value>
+  </data>
+  <data name="Audit.Grid.Column.User.ToolTip" xml:space="preserve">
+    <value>Operator povezan s događajem.</value>
+  </data>
+  <data name="Audit.Grid.Column.User.AutomationName" xml:space="preserve">
+    <value>Korisnik događaja revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.User.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.User</value>
+  </data>
+  <data name="Audit.Grid.Column.Entity.Header" xml:space="preserve">
+    <value>Entitet</value>
+  </data>
+  <data name="Audit.Grid.Column.Entity.ToolTip" xml:space="preserve">
+    <value>Entitet ili tablica na koju se događaj odnosi.</value>
+  </data>
+  <data name="Audit.Grid.Column.Entity.AutomationName" xml:space="preserve">
+    <value>Entitet događaja revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.Entity.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.Entity</value>
+  </data>
+  <data name="Audit.Grid.Column.Action.Header" xml:space="preserve">
+    <value>Radnja</value>
+  </data>
+  <data name="Audit.Grid.Column.Action.ToolTip" xml:space="preserve">
+    <value>Izvršena operacija (CREATE, UPDATE itd.).</value>
+  </data>
+  <data name="Audit.Grid.Column.Action.AutomationName" xml:space="preserve">
+    <value>Radnja događaja revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.Action.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.Action</value>
+  </data>
+  <data name="Audit.Grid.Column.Device.Header" xml:space="preserve">
+    <value>Uređaj</value>
+  </data>
+  <data name="Audit.Grid.Column.Device.ToolTip" xml:space="preserve">
+    <value>Podaci o uređaju zabilježeni za događaj.</value>
+  </data>
+  <data name="Audit.Grid.Column.Device.AutomationName" xml:space="preserve">
+    <value>Uređaj događaja revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.Device.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.Device</value>
+  </data>
+  <data name="Audit.Grid.Column.IpAddress.Header" xml:space="preserve">
+    <value>IP adresa</value>
+  </data>
+  <data name="Audit.Grid.Column.IpAddress.ToolTip" xml:space="preserve">
+    <value>Polazna IP adresa.</value>
+  </data>
+  <data name="Audit.Grid.Column.IpAddress.AutomationName" xml:space="preserve">
+    <value>IP adresa događaja revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.IpAddress.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.IpAddress</value>
+  </data>
+  <data name="Audit.Grid.Column.Description.Header" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Audit.Grid.Column.Description.ToolTip" xml:space="preserve">
+    <value>Detaljan opis događaja.</value>
+  </data>
+  <data name="Audit.Grid.Column.Description.AutomationName" xml:space="preserve">
+    <value>Opis događaja revizije</value>
+  </data>
+  <data name="Audit.Grid.Column.Description.AutomationId" xml:space="preserve">
+    <value>Audit.Grid.Column.Description</value>
+  </data>
+  <data name="Audit.Progress.Indicator.ToolTip" xml:space="preserve">
+    <value>Revizijski dnevnik se učitava.</value>
+  </data>
+  <data name="Audit.Progress.Indicator.AutomationName" xml:space="preserve">
+    <value>Pokazatelj učitavanja revizije</value>
+  </data>
+  <data name="Audit.Progress.Indicator.AutomationId" xml:space="preserve">
+    <value>Audit.Progress.Indicator</value>
+  </data>
+  <data name="Audit.Progress.Loading.Text" xml:space="preserve">
+    <value>Učitavanje...</value>
+  </data>
+  <data name="Audit.Progress.Loading.ToolTip" xml:space="preserve">
+    <value>Revizijski zapisi se učitavaju.</value>
+  </data>
+  <data name="Audit.Progress.Loading.AutomationName" xml:space="preserve">
+    <value>Status učitavanja revizije</value>
+  </data>
+  <data name="Audit.Progress.Loading.AutomationId" xml:space="preserve">
+    <value>Audit.Progress.Loading</value>
+  </data>
 </root>

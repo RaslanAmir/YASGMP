@@ -39,8 +39,11 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL"
-                    Command="{Binding ShowCflCommand}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}"
+                    Command="{Binding ShowCflCommand}"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}" />
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -48,21 +51,36 @@
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
             <Separator />
-            <Button Content="Apply Filters"
+            <Button Content="{DynamicResource Audit.Toolbar.Command.ApplyFilter.Content}"
                     Command="{Binding ApplyFilterCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
-            <Button Content="Refresh"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ApplyFilter.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ApplyFilter.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ApplyFilter.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Command.Refresh.Content}"
                     Command="{Binding RefreshCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
-            <Button Content="Export CSV"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Refresh.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Refresh.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Refresh.AutomationId}" />
+            <Button Content="{DynamicResource Audit.Toolbar.Command.ExportCsv.Content}"
                     Command="{Binding ExportCsvCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
-            <Button Content="Export Excel"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ExportCsv.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ExportCsv.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ExportCsv.AutomationId}" />
+            <Button Content="{DynamicResource Audit.Toolbar.Command.ExportExcel.Content}"
                     Command="{Binding ExportXlsxCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
-            <Button Content="Export PDF"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ExportExcel.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ExportExcel.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ExportExcel.AutomationId}" />
+            <Button Content="{DynamicResource Audit.Toolbar.Command.ExportPdf.Content}"
                     Command="{Binding ExportPdfCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ExportPdf.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ExportPdf.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ExportPdf.AutomationId}" />
         </ToolBar>
 
         <Grid Margin="8">
@@ -75,25 +93,60 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,8">
                 <WrapPanel Margin="0,0,0,8">
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="User" FontWeight="SemiBold" />
-                        <TextBox Text="{Binding AuditLog.FilterUserIdText, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{DynamicResource Audit.Filter.User.Label}"
+                                   FontWeight="SemiBold"
+                                   ToolTipService.ToolTip="{DynamicResource Audit.Filter.User.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Audit.Filter.User.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Audit.Filter.User.AutomationId}" />
+                        <TextBox Text="{Binding AuditLog.FilterUserIdText, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTipService.ToolTip="{DynamicResource Audit.Filter.User.ToolTip}"
+                                 AutomationProperties.Name="{DynamicResource Audit.Filter.User.AutomationName}"
+                                 AutomationProperties.AutomationId="{DynamicResource Audit.Filter.User.AutomationId}" />
                     </StackPanel>
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="Entity" FontWeight="SemiBold" />
-                        <TextBox Text="{Binding AuditLog.FilterEntity, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{DynamicResource Audit.Filter.Entity.Label}"
+                                   FontWeight="SemiBold"
+                                   ToolTipService.ToolTip="{DynamicResource Audit.Filter.Entity.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Audit.Filter.Entity.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Entity.AutomationId}" />
+                        <TextBox Text="{Binding AuditLog.FilterEntity, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTipService.ToolTip="{DynamicResource Audit.Filter.Entity.ToolTip}"
+                                 AutomationProperties.Name="{DynamicResource Audit.Filter.Entity.AutomationName}"
+                                 AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Entity.AutomationId}" />
                     </StackPanel>
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="Action" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Audit.Filter.Action.Label}"
+                                   FontWeight="SemiBold"
+                                   ToolTipService.ToolTip="{DynamicResource Audit.Filter.Action.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Audit.Filter.Action.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Action.AutomationId}" />
                         <ComboBox ItemsSource="{Binding AuditLog.ActionTypes}"
-                                  SelectedItem="{Binding AuditLog.SelectedAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                  SelectedItem="{Binding AuditLog.SelectedAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  ToolTipService.ToolTip="{DynamicResource Audit.Filter.Action.ToolTip}"
+                                  AutomationProperties.Name="{DynamicResource Audit.Filter.Action.AutomationName}"
+                                  AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Action.AutomationId}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="From" FontWeight="SemiBold" />
-                        <DatePicker SelectedDate="{Binding AuditLog.FilterFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{DynamicResource Audit.Filter.From.Label}"
+                                   FontWeight="SemiBold"
+                                   ToolTipService.ToolTip="{DynamicResource Audit.Filter.From.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Audit.Filter.From.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Audit.Filter.From.AutomationId}" />
+                        <DatePicker SelectedDate="{Binding AuditLog.FilterFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTipService.ToolTip="{DynamicResource Audit.Filter.From.ToolTip}"
+                                    AutomationProperties.Name="{DynamicResource Audit.Filter.From.AutomationName}"
+                                    AutomationProperties.AutomationId="{DynamicResource Audit.Filter.From.AutomationId}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="To" FontWeight="SemiBold" />
-                        <DatePicker SelectedDate="{Binding AuditLog.FilterTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{DynamicResource Audit.Filter.To.Label}"
+                                   FontWeight="SemiBold"
+                                   ToolTipService.ToolTip="{DynamicResource Audit.Filter.To.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Audit.Filter.To.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Audit.Filter.To.AutomationId}" />
+                        <DatePicker SelectedDate="{Binding AuditLog.FilterTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTipService.ToolTip="{DynamicResource Audit.Filter.To.ToolTip}"
+                                    AutomationProperties.Name="{DynamicResource Audit.Filter.To.AutomationName}"
+                                    AutomationProperties.AutomationId="{DynamicResource Audit.Filter.To.AutomationId}" />
                     </StackPanel>
                 </WrapPanel>
 
@@ -104,21 +157,35 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Text="{DynamicResource Audit.Filter.Search.Label}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"
+                               ToolTipService.ToolTip="{DynamicResource Audit.Filter.Search.ToolTip}"
+                               AutomationProperties.Name="{DynamicResource Audit.Filter.Search.AutomationName}"
+                               AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Search.AutomationId}" />
                     <TextBox Grid.Column="1"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTipService.ToolTip="{DynamicResource Audit.Filter.Search.Input.ToolTip}"
+                             AutomationProperties.Name="{DynamicResource Audit.Filter.Search.Input.AutomationName}"
+                             AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Search.Input.AutomationId}" />
                     <Button Grid.Column="2"
-                            Content="Apply"
+                            Content="{DynamicResource Audit.Filter.Button.Apply.Content}"
                             Command="{Binding ApplyFilterCommand}"
                             Margin="12,0,0,0"
                             Padding="12,4"
-                            Style="{StaticResource BusyAwareToolbarButtonStyle}" />
+                            Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                            ToolTipService.ToolTip="{DynamicResource Audit.Filter.Button.Apply.ToolTip}"
+                            AutomationProperties.Name="{DynamicResource Audit.Filter.Button.Apply.AutomationName}"
+                            AutomationProperties.AutomationId="{DynamicResource Audit.Filter.Button.Apply.AutomationId}" />
                     <Button Grid.Column="3"
-                            Content="Refresh"
+                            Content="{DynamicResource Module.Toolbar.Command.Refresh.Content}"
                             Command="{Binding RefreshCommand}"
                             Margin="12,0,0,0"
                             Padding="12,4"
-                            Style="{StaticResource BusyAwareToolbarButtonStyle}" />
+                            Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                            ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Refresh.ToolTip}"
+                            AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Refresh.AutomationName}"
+                            AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Refresh.AutomationId}" />
                 </Grid>
             </StackPanel>
 
@@ -128,15 +195,130 @@
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           CanUserAddRows="False"
-                          CanUserDeleteRows="False">
+                          CanUserDeleteRows="False"
+                          ToolTipService.ToolTip="{DynamicResource Audit.Grid.ToolTip}"
+                          AutomationProperties.Name="{DynamicResource Audit.Grid.AutomationName}"
+                          AutomationProperties.AutomationId="{DynamicResource Audit.Grid.AutomationId}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
-                        <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[1].Value}" Width="180" />
-                        <DataGridTextColumn Header="Entity" Binding="{Binding InspectorFields[2].Value}" Width="220" />
-                        <DataGridTextColumn Header="Action" Binding="{Binding InspectorFields[3].Value}" Width="120" />
-                        <DataGridTextColumn Header="Device" Binding="{Binding InspectorFields[4].Value}" Width="200" />
-                        <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[5].Value}" Width="160" />
-                        <DataGridTextColumn Header="Description" Binding="{Binding InspectorFields[6].Value}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.Timestamp.Header}"
+                                              Binding="{Binding InspectorFields[0].Value}"
+                                              Width="160">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Timestamp.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Timestamp.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.Timestamp.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Timestamp.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Timestamp.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.User.Header}"
+                                              Binding="{Binding InspectorFields[1].Value}"
+                                              Width="180">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.User.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.User.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.User.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.User.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.User.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.Entity.Header}"
+                                              Binding="{Binding InspectorFields[2].Value}"
+                                              Width="220">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Entity.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Entity.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.Entity.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Entity.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Entity.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.Action.Header}"
+                                              Binding="{Binding InspectorFields[3].Value}"
+                                              Width="120">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Action.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Action.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.Action.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Action.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Action.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.Device.Header}"
+                                              Binding="{Binding InspectorFields[4].Value}"
+                                              Width="200">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Device.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Device.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.Device.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Device.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Device.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.IpAddress.Header}"
+                                              Binding="{Binding InspectorFields[5].Value}"
+                                              Width="160">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.IpAddress.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.IpAddress.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.IpAddress.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.IpAddress.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.IpAddress.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="{DynamicResource Audit.Grid.Column.Description.Header}"
+                                              Binding="{Binding InspectorFields[6].Value}"
+                                              Width="2*">
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Description.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Description.AutomationName}" />
+                                    <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Audit.Grid.Column.Description.AutomationId}" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Audit.Grid.Column.Description.ToolTip}" />
+                                    <Setter Property="AutomationProperties.Name" Value="{DynamicResource Audit.Grid.Column.Description.AutomationName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -147,12 +329,20 @@
                                 VerticalAlignment="Center"
                                 Orientation="Vertical"
                                 Margin="24">
-                        <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
-                        <TextBlock Text="Loading..."
+                        <ProgressBar IsIndeterminate="True"
+                                     Width="200"
+                                     Height="20"
+                                     ToolTipService.ToolTip="{DynamicResource Audit.Progress.Indicator.ToolTip}"
+                                     AutomationProperties.Name="{DynamicResource Audit.Progress.Indicator.AutomationName}"
+                                     AutomationProperties.AutomationId="{DynamicResource Audit.Progress.Indicator.AutomationId}" />
+                        <TextBlock Text="{DynamicResource Audit.Progress.Loading.Text}"
                                    Margin="0,12,0,0"
                                    HorizontalAlignment="Center"
                                    Foreground="Gray"
-                                   FontStyle="Italic" />
+                                   FontStyle="Italic"
+                                   ToolTipService.ToolTip="{DynamicResource Audit.Progress.Loading.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Audit.Progress.Loading.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Audit.Progress.Loading.AutomationId}" />
                     </StackPanel>
                 </Border>
             </Grid>
