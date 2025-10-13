@@ -59,13 +59,13 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
         Toolbar = new ObservableCollection<ModuleToolbarCommand>
         {
-            new("Find", EnterFindModeCommand),
-            new("Add", EnterAddModeCommand),
-            new("View", EnterViewModeCommand),
-            new("Update", EnterUpdateModeCommand),
-            new("Save", SaveCommand),
-            new("Cancel", CancelCommand),
-            new("Refresh", RefreshCommand)
+            new("Button_Find", EnterFindModeCommand, toolTipKey: "Tooltip_Find", associatedMode: FormMode.Find),
+            new("Button_Add", EnterAddModeCommand, toolTipKey: "Tooltip_Add", associatedMode: FormMode.Add),
+            new("Button_View", EnterViewModeCommand, toolTipKey: "Tooltip_View", associatedMode: FormMode.View),
+            new("Button_Update", EnterUpdateModeCommand, toolTipKey: "Tooltip_Update", associatedMode: FormMode.Update),
+            new("Button_Save", SaveCommand, toolTipKey: "Tooltip_Save"),
+            new("Button_Cancel", CancelCommand, toolTipKey: "Tooltip_Cancel"),
+            new("Button_Refresh", RefreshCommand, toolTipKey: "Tooltip_Refresh")
         };
     }
 

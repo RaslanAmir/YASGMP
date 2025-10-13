@@ -20,6 +20,13 @@
   <sys:String x:Key="Button_AuditDashboard">Revizijska nadzorna ploča</sys:String>
   <sys:String x:Key="Button_ApiAuditTrail">API revizijski zapis</sys:String>
   <sys:String x:Key="Button_RunSmokeTest">Pokreni brzi test</sys:String>
+  <sys:String x:Key="Button_Find">Pretraži</sys:String>
+  <sys:String x:Key="Button_Add">Dodaj</sys:String>
+  <sys:String x:Key="Button_View">Prikaz</sys:String>
+  <sys:String x:Key="Button_Update">Uredi</sys:String>
+  <sys:String x:Key="Button_Save">Spremi</sys:String>
+  <sys:String x:Key="Button_Cancel">Odustani</sys:String>
+  <sys:String x:Key="Button_Refresh">Osvježi</sys:String>
 
   <!-- Naslovi sidrenih panela -->
   <sys:String x:Key="Label_Modules">Moduli</sys:String>
@@ -145,6 +152,13 @@
   <sys:String x:Key="Tooltip_OpenAuditTrail">Otvori preglednik nepromjenjivog revizijskog zapisa.</sys:String>
   <sys:String x:Key="Tooltip_OpenAuditDashboard">Pokreni nadzornu ploču revizije s trendovima.</sys:String>
   <sys:String x:Key="Tooltip_OpenApiAudit">Pregled korištenja API ključeva i forenzičkih zahtjeva.</sys:String>
+  <sys:String x:Key="Tooltip_Find">Pretraživanje/filtriranje zapisa (Nađi)</sys:String>
+  <sys:String x:Key="Tooltip_Add">Dodaj novi zapis</sys:String>
+  <sys:String x:Key="Tooltip_View">Prikaz odabranog zapisa</sys:String>
+  <sys:String x:Key="Tooltip_Update">Uredi odabrani zapis</sys:String>
+  <sys:String x:Key="Tooltip_Save">Spremi promjene</sys:String>
+  <sys:String x:Key="Tooltip_Cancel">Odustani od promjena</sys:String>
+  <sys:String x:Key="Tooltip_Refresh">Osvježi listu i urednik</sys:String>
   <sys:String x:Key="Tooltip_OpenMachines">Otvori matične podatke Strojeva.</sys:String>
   <sys:String x:Key="Tooltip_OpenParts">Otvori Dijelove i zalihe.</sys:String>
   <sys:String x:Key="Tooltip_OpenWorkOrders">Otvori modul Radnih naloga.</sys:String>

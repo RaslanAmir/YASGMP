@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "2025-10-13: Status bar now surfaces UTC, Env, Server, DB, User and smoke status with EN↔HR labels; WPF/MAUI Release builds green; smoke harness guarded and treated as skipped when UI automation is blocked.",
+      "2025-10-13: B1 FormMode toolbar on Assets uses resource-backed captions/tooltips (EN↔HR) via ResourceStringConverter; base view-model now seeds toolbar with keys (Button_Find/Add/View/Update/Save/Cancel/Refresh).",
       "2025-10-13 08:03: WPF i18n sweep completed for Warehouse/Calibration/Change Control; Release build green.",
       "2025-10-13 07:47: WPF i18n sweep completed for Machines/Components/Parts/Signature; solution build Release green.",
       "2025-10-10: dotnet restore/build succeeded for yasgmp.sln (Release). MAUI + WPF builds green under net9.0-windows.",

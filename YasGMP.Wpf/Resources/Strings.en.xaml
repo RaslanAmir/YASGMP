@@ -20,6 +20,13 @@
   <sys:String x:Key="Button_AuditDashboard">Audit Dashboard</sys:String>
   <sys:String x:Key="Button_ApiAuditTrail">API Audit Trail</sys:String>
   <sys:String x:Key="Button_RunSmokeTest">Run Smoke Test</sys:String>
+  <sys:String x:Key="Button_Find">Find</sys:String>
+  <sys:String x:Key="Button_Add">Add</sys:String>
+  <sys:String x:Key="Button_View">View</sys:String>
+  <sys:String x:Key="Button_Update">Update</sys:String>
+  <sys:String x:Key="Button_Save">Save</sys:String>
+  <sys:String x:Key="Button_Cancel">Cancel</sys:String>
+  <sys:String x:Key="Button_Refresh">Refresh</sys:String>
 
   <!-- Anchorable Titles -->
   <sys:String x:Key="Label_Modules">Modules</sys:String>
@@ -145,6 +152,13 @@
   <sys:String x:Key="Tooltip_OpenAuditTrail">Open the immutable audit trail browser.</sys:String>
   <sys:String x:Key="Tooltip_OpenAuditDashboard">Launch the live audit dashboard with trend analytics.</sys:String>
   <sys:String x:Key="Tooltip_OpenApiAudit">Review API key usage and forensic request payloads.</sys:String>
+  <sys:String x:Key="Tooltip_Find">Search/filter records (Find mode)</sys:String>
+  <sys:String x:Key="Tooltip_Add">Add a new record</sys:String>
+  <sys:String x:Key="Tooltip_View">View the selected record</sys:String>
+  <sys:String x:Key="Tooltip_Update">Edit the selected record</sys:String>
+  <sys:String x:Key="Tooltip_Save">Save changes</sys:String>
+  <sys:String x:Key="Tooltip_Cancel">Cancel changes</sys:String>
+  <sys:String x:Key="Tooltip_Refresh">Refresh list and editor</sys:String>
   <sys:String x:Key="Tooltip_OpenMachines">Open Machines master data.</sys:String>
   <sys:String x:Key="Tooltip_OpenParts">Open Parts and inventory records.</sys:String>
   <sys:String x:Key="Tooltip_OpenWorkOrders">Open Work Orders module.</sys:String>

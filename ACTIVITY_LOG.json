@@ -311,4 +311,21 @@
       "blocking_risks": []
     }
   }
+  ,
+  {
+    "run_id": "RUN-2025-10-13T0910",
+    "scope": ["wpf-shell","form-modes","i18n","a11y","smoke"],
+    "actions": [
+      {"type":"code_change","paths":[
+        "YasGMP.Wpf/ViewModels/Modules/B1FormDocumentViewModel.cs",
+        "YasGMP.Wpf/Views/AssetsModuleView.xaml",
+        "YasGMP.Wpf/Converters/ResourceStringConverter.cs",
+        "YasGMP.Wpf/Resources/Strings.en.xaml",
+        "YasGMP.Wpf/Resources/Strings.hr.xaml"
+      ],"status":"updated","notes":"Toolbar captions/tooltips for FormMode commands now use EN↔HR resource keys via a WPF ResourceStringConverter. Assets toolbar template binds to keys with a11y names."},
+      {"type":"command","name":"dotnet build YasGMP.Wpf -c Release","status":"success","artifacts":["logs/dotnet-build-wpf.txt"]},
+      {"type":"command","name":"dotnet test YasGMP.Wpf.Smoke -c Release -p:RUN_WPF_SMOKE=1","status":"success","artifacts":["logs/dotnet-test-wpf-smoke-run.txt"],"notes":"Smoke run remains green (guarded for UI automation)."}
+    ],
+    "summary": {"issues_found": [], "todos_created": [], "blocking_risks": []}
+  }
 ]
