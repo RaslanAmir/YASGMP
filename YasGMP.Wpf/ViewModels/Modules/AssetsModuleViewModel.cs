@@ -26,6 +26,31 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     /// </summary>
     public new const string ModuleKey = "Assets";
 
+    /// <summary>
+    /// Resource key for the select-before-save status message.
+    /// </summary>
+    private const string SelectBeforeSaveStatusMessageKey = "Module.Assets.StatusMessage.SelectBeforeSave";
+
+    /// <summary>
+    /// Resource key for the electronic signature cancellation status message.
+    /// </summary>
+    private const string SignatureCancelledStatusMessageKey = "Module.Assets.StatusMessage.SignatureCancelled";
+
+    /// <summary>
+    /// Resource key for the missing electronic signature status message.
+    /// </summary>
+    private const string SignatureMissingStatusMessageKey = "Module.Assets.StatusMessage.SignatureMissing";
+
+    /// <summary>
+    /// Resource key for the save-before-attachments status message.
+    /// </summary>
+    private const string SaveBeforeAttachmentsStatusMessageKey = "Module.Assets.StatusMessage.SaveBeforeAttachments";
+
+    /// <summary>
+    /// Resource key for the attachment upload cancelled status message.
+    /// </summary>
+    private const string AttachmentUploadCancelledStatusMessageKey = "Module.Assets.StatusMessage.AttachmentCancelled";
+
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
     private readonly IFilePicker _filePicker;
@@ -1022,7 +1047,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (Mode == FormMode.Update && _loadedMachine is null)
         {
-            StatusMessage = "Select an asset before saving.";
+            StatusMessage = _localization.GetString(SelectBeforeSaveStatusMessageKey);
             return false;
         }
 
@@ -1042,13 +1067,13 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = _localization.GetString(SignatureCancelledStatusMessageKey);
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = _localization.GetString(SignatureMissingStatusMessageKey);
             return false;
         }
 
@@ -1245,7 +1270,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     {
         if (_loadedMachine is null || _loadedMachine.Id <= 0)
         {
-            StatusMessage = "Save the asset before adding attachments.";
+            StatusMessage = _localization.GetString(SaveBeforeAttachmentsStatusMessageKey);
             return;
         }
 
@@ -1258,7 +1283,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = _localization.GetString(AttachmentUploadCancelledStatusMessageKey);
                 return;
             }
 

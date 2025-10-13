@@ -2,4 +2,6 @@
 - [D-002] Decision: Adopt phased static-analysis backlog (inventory → traceability → audit spec) until dotnet CLI + Windows SDK are provisioned | Impact: Planning cadence, documentation | Date: 2025-10-13
 - [D-003] Decision: Ratify Increment 2 documentation artifacts (module inventory, entity traceability map, audit hash-chain outline) as compliance baseline pending implementation | Impact: Planning, DatabaseService roadmap, smoke automation | Date: 2026-04-05
 - [D-004] Decision: Standardize Assets module UI controls on localized tooltip + automation metadata bindings sourced from ShellStrings to satisfy accessibility guardrails while CLI remains unavailable | Impact: Assets module UX/accessibility | Date: 2026-04-06
+- [D-005] Decision: Bind Assets grid cell AutomationProperties.Name to the underlying row values so assistive tech announces cell content instead of repeating headers while retaining localized tooltips/automation ids | Impact: Assets module accessibility, automation tests | Date: 2026-04-06
+- [D-006] Decision: Source Assets save/cancel/attachment status messaging from ShellStrings EN↔HR resources to keep regulated communications localized and auditable | Impact: Assets module compliance & i18n | Date: 2026-04-07
 

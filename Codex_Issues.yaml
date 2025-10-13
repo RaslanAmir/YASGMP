@@ -76,3 +76,23 @@
   resolved_in: null
   tags: [accessibility, localization, env-guard]
 
+- id: I-005
+  file: YasGMP.Wpf.Tests/AssetsModuleViewModelTests.cs
+  module: Assets
+  context: Status message localization coverage
+  type: Testing
+  severity: "⚠️ Medium"
+  description: |
+    AssetsModuleViewModel now sources save/cancel/attachment status messaging from ShellStrings, but the unit test suite still asserts hardcoded English strings.
+    Add localization-aware assertions that validate the resource keys/values for EN and HR once the dotnet CLI becomes available to execute the tests.
+  references:
+    - YasGMP.Wpf/ViewModels/Modules/AssetsModuleViewModel.cs
+    - YasGMP.Wpf/Resources/ShellStrings.resx
+    - docs/codex_plan.md
+    - docs/codex_progress.json
+  suggested_fix: |
+    Update AssetsModuleViewModelTests to stub ILocalizationService with resource dictionaries for EN/HR and assert StatusMessage derives from the keyed values during save, signature cancel, signature missing, and attachment flows.
+  status: open
+  resolved_in: null
+  tags: [localization, testing, env-guard]
+

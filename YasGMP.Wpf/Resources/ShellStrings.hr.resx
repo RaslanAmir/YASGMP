@@ -510,6 +510,21 @@
   <data name="Module.Assets.Status.Scrapped" xml:space="preserve">
     <value>otpisan</value>
   </data>
+  <data name="Module.Assets.StatusMessage.SelectBeforeSave" xml:space="preserve">
+    <value>Odaberite sredstvo prije spremanja.</value>
+  </data>
+  <data name="Module.Assets.StatusMessage.SignatureCancelled" xml:space="preserve">
+    <value>Elektronički potpis je otkazan. Spremanje je prekinuto.</value>
+  </data>
+  <data name="Module.Assets.StatusMessage.SignatureMissing" xml:space="preserve">
+    <value>Elektronički potpis nije zabilježen.</value>
+  </data>
+  <data name="Module.Assets.StatusMessage.SaveBeforeAttachments" xml:space="preserve">
+    <value>Spremite sredstvo prije dodavanja privitaka.</value>
+  </data>
+  <data name="Module.Assets.StatusMessage.AttachmentCancelled" xml:space="preserve">
+    <value>Učitavanje privitka je otkazano.</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>u kvalifikaciji</value>
   </data>
