@@ -23,6 +23,20 @@
   - 2025-10-10T10:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restores but fails with dozens of CS0234/CS0246/CS0535 errors because YasGMP.AppCore expects Helpers/Diagnostics projects and signature DTO types that are unavailable without the Windows solution build.
   - 2025-10-10T06:42Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restored packages but failed with unresolved YasGMP.Helpers/Diagnostics namespaces and missing SignatureMetadataDto/WorkOrderSignaturePersistRequest types — requires building on Windows with full solution references.
 
+
+## Increment 2025-10-13 — Baseline Revalidation
+- Confirmed the Linux container still lacks the `dotnet` CLI; documented env_guard for Increment 1 and kept execution static-analysis only.
+- Prepared an end-to-end compliance backlog covering:
+  - [ ] Repository-wide folder/module inventory aligned to SAP B1 form modes, CFL, golden arrows, RBAC, and audit overlays.
+  - [ ] Database alignment plan (yasgmp.sql ↔ EF models ↔ DatabaseService extensions) with forthcoming `yasgmp.sql.delta.patch`.
+  - [ ] Directory.Build.props review to centralise .NET 9 targeting, analyzer strictness, and documentation output enforcement.
+  - [ ] EN↔HR localization sweep across Views/ViewModels/Resources ensuring runtime switch support and automation metadata.
+  - [ ] Cross-cutting observability/security roadmap (structured logging, metrics, retention/legal hold, signature rotation).
+- Next Increment Goals (Increment 2):
+  1. Draft per-folder inventory template and seed ModulesPane coverage notes.
+  2. Begin entity traceability mapping (Assets → Services → ViewModels → Views).
+  3. Outline audit/signature hash-chain upgrade specification for DatabaseService extensions.
+
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
 - Repo-level SDK pin: `global.json` set to **9.0.100** *(reinforced via bootstrap script).* 
