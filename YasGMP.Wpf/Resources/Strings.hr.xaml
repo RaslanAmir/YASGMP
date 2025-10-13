@@ -209,6 +209,12 @@
   <sys:String x:Key="Label_ExtraNotes">Dodatne bilješke</sys:String>
   <sys:String x:Key="Label_Certificates">Certifikati</sys:String>
   <sys:String x:Key="Label_DigitalSignature">Digitalni potpis</sys:String>
+  <sys:String x:Key="Label_User">Korisnik</sys:String>
+  <sys:String x:Key="Label_Action">Radnja</sys:String>
+  <sys:String x:Key="Label_From">Od</sys:String>
+  <sys:String x:Key="Label_To">Do</sys:String>
+  <sys:String x:Key="Label_ApiKey">API ključ</sys:String>
+  <sys:String x:Key="Label_Loading">Učitavanje...</sys:String>
   
   <!-- Oznake za Incidente -->
   <sys:String x:Key="Label_IncidentDetails">Detalji incidenta</sys:String>

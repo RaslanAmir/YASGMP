@@ -70,24 +70,24 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,8">
                 <WrapPanel Margin="0,0,0,8">
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="User" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_User}" FontWeight="SemiBold" />
                         <TextBox Text="{Binding Dashboard.FilterUser, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="Entity" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_Entity}" FontWeight="SemiBold" />
                         <TextBox Text="{Binding Dashboard.FilterEntity, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="Action" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_Action}" FontWeight="SemiBold" />
                         <ComboBox ItemsSource="{Binding Dashboard.ActionTypes}"
                                   SelectedItem="{Binding Dashboard.SelectedAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="From" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_From}" FontWeight="SemiBold" />
                         <DatePicker SelectedDate="{Binding Dashboard.FilterFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="To" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_To}" FontWeight="SemiBold" />
                         <DatePicker SelectedDate="{Binding Dashboard.FilterTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </WrapPanel>
@@ -99,7 +99,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <TextBox Grid.Column="1"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Column="2"
@@ -136,7 +136,7 @@
                                 Orientation="Vertical"
                                 Margin="24">
                         <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
-                        <TextBlock Text="Loading..."
+                        <TextBlock Text="{DynamicResource Label_Loading}"
                                    Margin="0,12,0,0"
                                    HorizontalAlignment="Center"
                                    Foreground="Gray"

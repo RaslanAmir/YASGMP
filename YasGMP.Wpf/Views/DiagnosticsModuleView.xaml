@@ -37,8 +37,8 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       ItemsSource="{Binding RecordsView}"

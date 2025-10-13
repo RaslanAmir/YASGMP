@@ -209,6 +209,12 @@
   <sys:String x:Key="Label_ExtraNotes">Extra Notes</sys:String>
   <sys:String x:Key="Label_Certificates">Certificates</sys:String>
   <sys:String x:Key="Label_DigitalSignature">Digital Signature</sys:String>
+  <sys:String x:Key="Label_User">User</sys:String>
+  <sys:String x:Key="Label_Action">Action</sys:String>
+  <sys:String x:Key="Label_From">From</sys:String>
+  <sys:String x:Key="Label_To">To</sys:String>
+  <sys:String x:Key="Label_ApiKey">API Key</sys:String>
+  <sys:String x:Key="Label_Loading">Loading...</sys:String>
 
   <!-- Incidents Labels -->
   <sys:String x:Key="Label_IncidentDetails">Incident Details</sys:String>

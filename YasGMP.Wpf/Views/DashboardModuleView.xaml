@@ -61,7 +61,7 @@
                     <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
                     <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
                     <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Description}" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
                 <DataGrid.ToolTip>
                     <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
