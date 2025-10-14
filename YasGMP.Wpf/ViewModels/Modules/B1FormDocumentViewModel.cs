@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -83,6 +84,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     /// <summary>Whether the view-model completed its initial data load.</summary>
     public bool IsInitialized { get; private set; }
+
+    private string? _provenance;
+    protected void SetProvenance(string? provenance)
+    {
+        _provenance = string.IsNullOrWhiteSpace(provenance) ? null : provenance;
+    }
 
     /// <summary>Validation errors surfaced to the UI when saving fails.</summary>
     public ObservableCollection<string> ValidationMessages { get; }
@@ -186,7 +193,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             count = 0;
         }
 
-        return $"Loaded {count} record(s).";
+        var text = $"Loaded {count} record(s).";
+        if (!string.IsNullOrWhiteSpace(_provenance))
+        {
+            text += $" ({_provenance})";
+        }
+        return text;
     }
 
     partial void OnModeChanged(FormMode value)
@@ -434,6 +446,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     private void RefreshCommandStates()
     {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(new Action(RefreshCommandStates));
+            return;
+        }
         EnterFindModeCommand.NotifyCanExecuteChanged();
         EnterAddModeCommand.NotifyCanExecuteChanged();
         EnterViewModeCommand.NotifyCanExecuteChanged();
