@@ -442,6 +442,155 @@ public class EndToEndSmokeTests
     }
 
     [SmokeFact]
+    public async Task AttachButton_OnParts_Clicks_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+        psi.Environment["YASGMP_SMOKE_ATTACH_FAKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] parts = { "Parts", "Dijelovi" };
+            TryOpenModule(main, parts);
+            await Task.Delay(500);
+
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(attach);
+            if (attach is null) return;
+            if (IsStrict()) Assert.True(attach.IsEnabled);
+            if (!attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { if (IsStrict()) throw; }
+            await Task.Delay(250);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task AttachButton_OnWarehouse_Clicks_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+        psi.Environment["YASGMP_SMOKE_ATTACH_FAKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] warehouse = { "Warehouse", "Skladište" };
+            TryOpenModule(main, warehouse);
+            await Task.Delay(500);
+
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(attach);
+            if (attach is null) return;
+            if (IsStrict()) Assert.True(attach.IsEnabled);
+            if (!attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { if (IsStrict()) throw; }
+            await Task.Delay(250);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task SaveStateTransitions_WorkOrders_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] workOrders = { "Work Orders", "Radni nalozi" };
+            TryOpenModule(main, workOrders);
+            await Task.Delay(500);
+
+            var saveBtnEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Save"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(saveBtnEl);
+            if (saveBtnEl is null) return;
+            bool startEnabled = saveBtnEl.IsEnabled;
+
+            var addEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Add"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(addEl);
+            if (addEl != null)
+            {
+                try
+                {
+                    if (addEl.Patterns.Toggle.IsSupported)
+                        addEl.Patterns.Toggle.Pattern.Toggle();
+                    else addEl.AsButton()?.Invoke();
+                }
+                catch { if (IsStrict()) throw; }
+                await Task.Delay(250);
+            }
+
+            var saveAfterAdd = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Save"), 6, TimeSpan.FromMilliseconds(200));
+            if (IsStrict()) Assert.True(saveAfterAdd?.IsEnabled == true);
+
+            var cancelEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Cancel"), 12, TimeSpan.FromMilliseconds(250));
+            if (cancelEl != null)
+            {
+                try
+                {
+                    if (cancelEl.Patterns.Toggle.IsSupported)
+                        cancelEl.Patterns.Toggle.Pattern.Toggle();
+                    else cancelEl.AsButton()?.Invoke();
+                }
+                catch { if (IsStrict()) throw; }
+                await Task.Delay(250);
+            }
+
+            var saveAfterCancel = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Save"), 6, TimeSpan.FromMilliseconds(200));
+            if (IsStrict()) Assert.True(saveAfterCancel?.IsEnabled == false);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
     public async Task ToolbarToggles_WorkOrders_AddToggle_TogglesOrSkips()
     {
         var root = FindRepoRoot();

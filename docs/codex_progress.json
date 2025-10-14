@@ -69,7 +69,8 @@
       "2025-10-14 10:02: Softened WPF smoke assertions (Golden Arrow/CFL): tolerate missing/disabled controls and invoke failures; increased waits; suite passes in constrained automation environments.",
       "2025-10-14 10:18: Added stable AutomationIds (GoldenArrowButton/CflButton/CflDialog/CflOkButton/CflCancelButton) and updated smoke to prefer AutomationId selectors; suite passes with YASGMP_SMOKE=1.",
       "2025-10-14 10:39: Smoke adds Attach flow (AttachButton) and toolbar toggles (Button_Add) checks; tolerant in restricted env; suite passes.",
-      "2025-10-14 10:56: Added strict-mode (YASGMP_STRICT_SMOKE=1). New smoke: Find/Update toggles (Work Orders) and Attach in Suppliers/Work Orders. Suite now 12 passing tests."
+      "2025-10-14 10:56: Added strict-mode (YASGMP_STRICT_SMOKE=1). New smoke: Find/Update toggles (Work Orders) and Attach in Suppliers/Work Orders. Suite now 12 passing tests.",
+      "2025-10-14 11:07: Added Parts/Warehouse Attach smoke and Save-state transitions (strict). Fake picker when YASGMP_SMOKE or YASGMP_SMOKE_ATTACH_FAKE is set."
     ]
   },
   "batches": [
