@@ -41,13 +41,18 @@ namespace YasGMP.Wpf
             TryLoadLocalizationResources();
             ConfigureRibbonLocalization();
 
-            // CLI switch: --smoke-strict enables strict smoke mode without requiring env vars
+            // CLI switches: --smoke enables smoke mode; --smoke-strict enables strict smoke mode
             try
             {
                 if (e?.Args != null)
                 {
                     foreach (var arg in e.Args)
                     {
+                        if (string.Equals(arg, "--smoke", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "/smoke", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Environment.SetEnvironmentVariable("YASGMP_SMOKE", "1");
+                        }
                         if (string.Equals(arg, "--smoke-strict", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(arg, "/smoke-strict", StringComparison.OrdinalIgnoreCase))
                         {
@@ -71,9 +76,20 @@ namespace YasGMP.Wpf
                     var connectionString = ResolveConnectionString(ctx.Configuration);
                     services.AddSingleton(new DatabaseOptions(connectionString));
 
-                    // Config switch: Smoke:Strict=true also enables strict smoke mode if not already set via CLI/env
+                    // Config switches: Smoke:Enabled=true, Smoke:Strict=true
                     try
                     {
+                        var smokeEnabled = ctx.Configuration["Smoke:Enabled"];
+                        if (!string.IsNullOrWhiteSpace(smokeEnabled) &&
+                            (string.Equals(smokeEnabled, "1", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(smokeEnabled, "true", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            var currentSmoke = Environment.GetEnvironmentVariable("YASGMP_SMOKE");
+                            if (string.IsNullOrWhiteSpace(currentSmoke))
+                            {
+                                Environment.SetEnvironmentVariable("YASGMP_SMOKE", "1");
+                            }
+                        }
                         var strictCfg = ctx.Configuration["Smoke:Strict"];
                         if (!string.IsNullOrWhiteSpace(strictCfg) &&
                             (string.Equals(strictCfg, "1", StringComparison.OrdinalIgnoreCase) ||

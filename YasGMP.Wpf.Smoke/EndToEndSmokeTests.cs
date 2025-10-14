@@ -522,6 +522,86 @@ public class EndToEndSmokeTests
     }
 
     [SmokeFact]
+    public async Task AttachButton_OnCalibration_Clicks_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+        psi.Environment["YASGMP_SMOKE_ATTACH_FAKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] calibration = { "Calibration", "Kalibracija", "Kalibracije" };
+            TryOpenModule(main, calibration);
+            await Task.Delay(500);
+
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(attach);
+            if (attach is null) return;
+            if (IsStrict()) Assert.True(attach.IsEnabled);
+            if (!attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { if (IsStrict()) throw; }
+            await Task.Delay(250);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task AttachButton_OnValidations_Clicks_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+        psi.Environment["YASGMP_SMOKE_ATTACH_FAKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] validations = { "Validations", "Validacije" };
+            TryOpenModule(main, validations);
+            await Task.Delay(500);
+
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(attach);
+            if (attach is null) return;
+            if (IsStrict()) Assert.True(attach.IsEnabled);
+            if (!attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { if (IsStrict()) throw; }
+            await Task.Delay(250);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
     public async Task SaveStateTransitions_WorkOrders_StrictOrSkip()
     {
         var root = FindRepoRoot();
