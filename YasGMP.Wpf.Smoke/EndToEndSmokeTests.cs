@@ -334,7 +334,7 @@ public class EndToEndSmokeTests
             TryOpenModule(main, workOrders);
             await Task.Delay(500);
 
-            string[] ids = { "Button_Find", "Button_Update" };
+            string[] ids = { "Button_Find", "Button_View", "Button_Update" };
             foreach (var id in ids)
             {
                 var el = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, id), 12, TimeSpan.FromMilliseconds(250));

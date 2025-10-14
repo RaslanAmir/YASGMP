@@ -30,6 +30,10 @@ public partial class ShellStatusBarViewModel : ObservableObject
         (ServerName, DatabaseName) = TryParseServerAndDb(dbOptions.ConnectionString);
         EnvironmentName = string.IsNullOrWhiteSpace(hostEnvironment.EnvironmentName) ? "Production" : hostEnvironment.EnvironmentName;
         SmokeStatus = GetLastSmokeStatus();
+        if (IsStrictEnabled())
+        {
+            SmokeStatus = string.IsNullOrWhiteSpace(SmokeStatus) ? "Smoke: Strict" : $"{SmokeStatus} • Strict";
+        }
         UtcNow = DateTime.UtcNow.ToString("u");
 
         _utcTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -109,6 +113,18 @@ public partial class ShellStatusBarViewModel : ObservableObject
         {
             return "Smoke: n/a";
         }
+    }
+
+    private static bool IsStrictEnabled()
+    {
+        try
+        {
+            var v = Environment.GetEnvironmentVariable("YASGMP_STRICT_SMOKE");
+            if (string.IsNullOrWhiteSpace(v)) return false;
+            v = v.Trim().ToLowerInvariant();
+            return v is "1" or "true" or "yes" or "y" or "on" or "enable" or "enabled";
+        }
+        catch { return false; }
     }
 }
 
