@@ -2,6 +2,8 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows;
+using System.Threading.Tasks;
+using Fluent.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +16,7 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
+using YasGMP.Wpf.Localization;
 
 namespace YasGMP.Wpf
 {
@@ -24,12 +27,19 @@ namespace YasGMP.Wpf
     {
         private IHost? _host;
 
+        static App()
+        {
+            ConfigureRibbonLocalization();
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             // Load localization resources (EN↔HR) before composing the shell.
+            HookGlobalExceptionLogging();
             TryLoadLocalizationResources();
+            ConfigureRibbonLocalization();
 
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((_, cfg) =>
@@ -249,6 +259,26 @@ namespace YasGMP.Wpf
             return conn;
         }
 
+        private static void ConfigureRibbonLocalization()
+        {
+            try
+            {
+                var culture = CultureInfo.CurrentUICulture;
+                if (culture.TwoLetterISOLanguageName.Equals("hr", StringComparison.OrdinalIgnoreCase))
+                {
+                    var map = Fluent.RibbonLocalization.Current.LocalizationMap;
+                    map["hr-HR"] = typeof(CroatianRibbonLocalization);
+                    map["hr"] = typeof(CroatianRibbonLocalization);
+                    Fluent.RibbonLocalization.Current.Localization = new CroatianRibbonLocalization();
+                    Fluent.RibbonLocalization.Current.Culture = culture;
+                }
+            }
+            catch
+            {
+                // Ignore localization failures and keep Fluent.Ribbon defaults.
+            }
+        }
+
         /// <summary>
         /// Attempts to load a culture-specific resource dictionary for UI strings.
         /// Falls back to English if a specific culture pack is not found.
@@ -277,6 +307,65 @@ namespace YasGMP.Wpf
             catch
             {
                 // Non-fatal: localization resources are additive; fallback to default labels.
+            }
+        }
+
+        /// <summary>
+        /// Hooks global exception handlers to capture unhandled exceptions to a crash log under
+        /// %LOCALAPPDATA%/YasGMP/logs. This helps diagnose early startup/XAML errors that do not
+        /// surface nicely under Visual Studio's Just My Code settings.
+        /// </summary>
+        private static void HookGlobalExceptionLogging()
+        {
+            try
+            {
+                Application.Current.DispatcherUnhandledException += (_, args) =>
+                {
+                    try { WriteCrashLog("DispatcherUnhandledException", args.Exception); }
+                    catch { /* ignore secondary failures */ }
+                };
+
+                AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+                {
+                    try { WriteCrashLog("AppDomain.UnhandledException", args.ExceptionObject as Exception); }
+                    catch { }
+                };
+
+                TaskScheduler.UnobservedTaskException += (_, args) =>
+                {
+                    try { WriteCrashLog("TaskScheduler.UnobservedTaskException", args.Exception); }
+                    catch { }
+                };
+            }
+            catch
+            {
+                // Swallow any unexpected issues while wiring logging.
+            }
+        }
+
+        private static void WriteCrashLog(string source, Exception? ex)
+        {
+            try
+            {
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var dir = Path.Combine(local, "YasGMP", "logs");
+                Directory.CreateDirectory(dir);
+                var file = Path.Combine(dir, $"wpf-crash-{DateTime.UtcNow:yyyyMMdd-HHmmss}.txt");
+                using var sw = new StreamWriter(file, append: false);
+                sw.WriteLine($"[{DateTime.UtcNow:O}] {source}");
+                if (ex is not null)
+                {
+                    sw.WriteLine(ex.ToString());
+                }
+                else
+                {
+                    sw.WriteLine("(no exception instance available)");
+                }
+                sw.Flush();
+            }
+            catch
+            {
+                // As a last resort, do nothing if logging fails.
             }
         }
 
