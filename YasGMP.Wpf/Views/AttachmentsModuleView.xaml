@@ -203,8 +203,8 @@
                                     <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding RetainUntil, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Retention Flags:" Margin="0,0,8,4" />
                                     <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Vertical" Margin="0,0,0,4">
-                                        <CheckBox Content="Legal Hold" IsChecked="{Binding RetentionLegalHold}" IsEnabled="False" Margin="0,0,0,4" />
-                                        <CheckBox Content="Review Required" IsChecked="{Binding RetentionReviewRequired}" IsEnabled="False" Margin="0,0,0,4" />
+                                        <CheckBox Content="Legal Hold" IsChecked="{Binding RetentionLegalHold, Mode=OneWay}" IsEnabled="False" Margin="0,0,0,4" />
+                                        <CheckBox Content="Review Required" IsChecked="{Binding RetentionReviewRequired, Mode=OneWay}" IsEnabled="False" Margin="0,0,0,4" />
                                         <TextBlock Text="Retention Notes" FontWeight="SemiBold" Margin="0,8,0,4" />
                                         <TextBox Text="{Binding RetentionNotes, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40" />
                                     </StackPanel>
