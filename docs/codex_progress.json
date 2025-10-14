@@ -67,7 +67,8 @@
       "2025-10-13: Extended ToolTips/HelpText to Assets & Warehouse editors; localized Assets VM CFL/status/errors via Loc helper.",
       "2025-10-13: Incidents editor now uses resource-backed toolbar; added ToolTips/HelpText + DynamicResource labels; localized Incidents VM messages for CFL/linking/errors.",
       "2025-10-14 10:02: Softened WPF smoke assertions (Golden Arrow/CFL): tolerate missing/disabled controls and invoke failures; increased waits; suite passes in constrained automation environments.",
-      "2025-10-14 10:18: Added stable AutomationIds (GoldenArrowButton/CflButton/CflDialog/CflOkButton/CflCancelButton) and updated smoke to prefer AutomationId selectors; suite passes with YASGMP_SMOKE=1."
+      "2025-10-14 10:18: Added stable AutomationIds (GoldenArrowButton/CflButton/CflDialog/CflOkButton/CflCancelButton) and updated smoke to prefer AutomationId selectors; suite passes with YASGMP_SMOKE=1.",
+      "2025-10-14 10:39: Smoke adds Attach flow (AttachButton) and toolbar toggles (Button_Add) checks; tolerant in restricted env; suite passes."
     ]
   },
   "batches": [

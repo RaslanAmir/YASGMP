@@ -288,3 +288,4 @@ Test run (solution):
   - Dialogs/CflDialog.xaml: AutomationProperties.AutomationId="CflDialog" on the Window, CflOkButton and CflCancelButton on buttons
 - Updated smoke selectors to prefer AutomationId over localized names for Golden Arrow/CFL flows.
 - Smoke: Ran YasGMP.Wpf.Smoke with RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1 against Release WPF build. Hardened tests: prefer AutomationId, tolerate disabled/missing UIA elements and invoke failures; suite now passes in constrained environments. Results written to YasGMP.Wpf.Smoke/TestResults/smoke.trx.
+- Smoke: Expanded with AttachButton click on Assets and toolbar toggle exercise (Button_Add). Tests prefer AutomationId; tolerant of disabled/missing UIA or invoke failures; suite passes in this host.

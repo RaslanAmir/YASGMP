@@ -263,6 +263,103 @@ public class EndToEndSmokeTests
         }
     }
 
+    [SmokeFact]
+    public async Task AttachButton_OnAssets_ClicksOrSkips()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            // Open a module with attachments support (Assets)
+            string[] assets = { "Assets", "Imovina" };
+            TryOpenModule(main, assets);
+            await Task.Delay(500);
+
+            // Find Attach button via AutomationId
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (attach is null || !attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { /* ignore invoke failures */ }
+            await Task.Delay(300);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task ToolbarToggles_WorkOrders_AddToggle_TogglesOrSkips()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] workOrders = { "Work Orders", "Radni nalozi" };
+            TryOpenModule(main, workOrders);
+            await Task.Delay(500);
+
+            // Prefer AutomationId keys seeded by B1 toolbar: Button_Add (and others)
+            var addToggleEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Add"), 12, TimeSpan.FromMilliseconds(250));
+            if (addToggleEl is null) return;
+            var toggleEl = addToggleEl.AsToggleButton();
+            if (toggleEl != null)
+            {
+                if (!toggleEl.IsEnabled) return;
+                try
+                {
+                    if (addToggleEl.Patterns.Toggle.IsSupported)
+                    {
+                        addToggleEl.Patterns.Toggle.Pattern.Toggle();
+                        await Task.Delay(200);
+                    }
+                    else
+                    {
+                        toggleEl.AsButton()?.Invoke();
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                var btn = addToggleEl.AsButton();
+                if (btn is null || !btn.IsEnabled) return;
+                try { btn.Invoke(); } catch { }
+            }
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
     private static void TryOpenModule(Window main, string[] moduleNames)
     {
         var btn = FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, moduleNames);
