@@ -137,11 +137,11 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     {
         if (IsInitialized)
         {
-            await OnActivatedAsync(parameter).ConfigureAwait(false);
+            await OnActivatedAsync(parameter);
             return;
         }
 
-        await RefreshAsync(parameter).ConfigureAwait(false);
+        await RefreshAsync(parameter);
         IsInitialized = true;
     }
 
@@ -273,7 +273,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         {
             IsBusy = true;
             StatusMessage = $"Loading {Title} records...";
-            var records = await LoadAsync(parameter).ConfigureAwait(false);
+            var records = await LoadAsync(parameter);
             ApplyRecords(records);
             StatusMessage = FormatLoadedStatus(Records.Count);
         }
@@ -342,7 +342,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         try
         {
             IsBusy = true;
-            var validation = await ValidateAsync().ConfigureAwait(false);
+            var validation = await ValidateAsync();
             ApplyValidation(validation);
             if (validation.Count > 0)
             {
@@ -351,7 +351,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             }
 
             var previousMessage = StatusMessage;
-            var saved = await OnSaveAsync().ConfigureAwait(false);
+            var saved = await OnSaveAsync();
             if (saved)
             {
                 if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
@@ -361,7 +361,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
                 ResetDirty();
                 Mode = FormMode.View;
-                await RefreshAsync().ConfigureAwait(false);
+                await RefreshAsync();
             }
             else
             {
@@ -404,19 +404,19 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     private async Task ShowCflAsync()
     {
-        var request = await CreateCflRequestAsync().ConfigureAwait(false);
+        var request = await CreateCflRequestAsync();
         if (request is null)
         {
             return;
         }
 
-        var result = await _cflDialogService.ShowAsync(request).ConfigureAwait(false);
+        var result = await _cflDialogService.ShowAsync(request);
         if (result is null)
         {
             return;
         }
 
-        await OnCflSelectionAsync(result).ConfigureAwait(false);
+        await OnCflSelectionAsync(result);
     }
 
     private void NavigateToRelated()
