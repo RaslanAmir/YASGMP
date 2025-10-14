@@ -4,9 +4,10 @@
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:fluent="urn:fluent-ribbon"
-                     xmlns:ad="http://schemas.xceed.com/wpf/xaml/avalondock"
+                     xmlns:ad="https://github.com/Dirkster99/AvalonDock"
                      xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
                      xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+                     xmlns:shell="clr-namespace:YasGMP.Wpf.Shell"
                      Title="YasGMP Cockpit"
                      Width="1280"
                      Height="800"
@@ -240,27 +241,32 @@
 
                 <ad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type ad:LayoutItem}">
-                        <Setter Property="Title" Value="{Binding Model.Title}" />
-                        <Setter Property="ContentId" Value="{Binding Model.ContentId}" />
+                        <Setter Property="Title" Value="{Binding LayoutElement.Title}" />
+                        <Setter Property="ContentId" Value="{Binding LayoutElement.ContentId}" />
                     </Style>
                 </ad:DockingManager.LayoutItemContainerStyle>
-
                 <ad:DockingManager.Layout>
                     <ad:LayoutRoot>
                         <ad:LayoutPanel Orientation="Horizontal">
                             <ad:LayoutAnchorablePane DockWidth="280">
-                                <ad:LayoutAnchorable Title="{DynamicResource Label_Modules}"
+                                <ad:LayoutAnchorable x:Name="ModulesAnchorable"
+                                                     Title="{DynamicResource Label_Modules}"
                                                      ContentId="YasGmp.Shell.Modules"
-                                                     Content="{Binding ModulesPane}"
-                                                     AutomationProperties.Name="{DynamicResource Label_Modules}" />
+                                                     AutomationProperties.Name="{DynamicResource Label_Modules}">
+                                    <shell:ModulesPane x:Name="ModulesPaneContent"
+                                                      DataContext="{Binding ModulesPane}" />
+                                </ad:LayoutAnchorable>
                             </ad:LayoutAnchorablePane>
                             <ad:LayoutPanel Orientation="Horizontal">
                                 <ad:LayoutDocumentPane />
                                 <ad:LayoutAnchorablePane DockWidth="320">
-                                    <ad:LayoutAnchorable Title="{DynamicResource Label_Inspector}"
+                                    <ad:LayoutAnchorable x:Name="InspectorAnchorable"
+                                                         Title="{DynamicResource Label_Inspector}"
                                                          ContentId="YasGmp.Shell.Inspector"
-                                                         Content="{Binding InspectorPane}"
-                                                         AutomationProperties.Name="{DynamicResource Label_Inspector}" />
+                                                         AutomationProperties.Name="{DynamicResource Label_Inspector}">
+                                        <shell:InspectorPane x:Name="InspectorPaneContent"
+                                                             DataContext="{Binding InspectorPane}" />
+                                    </ad:LayoutAnchorable>
                                 </ad:LayoutAnchorablePane>
                             </ad:LayoutPanel>
                         </ad:LayoutPanel>
