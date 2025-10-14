@@ -67,7 +67,8 @@
                       IsReadOnly="True"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      Margin="0,0,8,0">
+                      Margin="0,0,8,0"
+                      AutomationProperties.Name="{DynamicResource Module_Components_Title}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
                     <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
@@ -77,7 +78,6 @@
                 <DataGrid.ToolTip>
                     <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
                 </DataGrid.ToolTip>
-                <DataGrid AutomationProperties.Name="{DynamicResource Module_Components_Title}" />
             </DataGrid>
             <Border Grid.Row="1"
                     Grid.Column="1"
