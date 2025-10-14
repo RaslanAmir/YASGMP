@@ -550,6 +550,7 @@ public class EndToEndSmokeTests
             if (IsStrict()) Assert.NotNull(saveBtnEl);
             if (saveBtnEl is null) return;
             bool startEnabled = saveBtnEl.IsEnabled;
+            if (IsStrict()) Assert.False(startEnabled); // Save should be disabled initially in View/Find
 
             var addEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Add"), 12, TimeSpan.FromMilliseconds(250));
             if (IsStrict()) Assert.NotNull(addEl);
@@ -567,6 +568,22 @@ public class EndToEndSmokeTests
 
             var saveAfterAdd = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Save"), 6, TimeSpan.FromMilliseconds(200));
             if (IsStrict()) Assert.True(saveAfterAdd?.IsEnabled == true);
+
+            // Switch to View; Save should disable again
+            var viewEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_View"), 12, TimeSpan.FromMilliseconds(250));
+            if (viewEl != null)
+            {
+                try
+                {
+                    if (viewEl.Patterns.Toggle.IsSupported)
+                        viewEl.Patterns.Toggle.Pattern.Toggle();
+                    else viewEl.AsButton()?.Invoke();
+                }
+                catch { if (IsStrict()) throw; }
+                await Task.Delay(250);
+                var saveAfterView = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Save"), 6, TimeSpan.FromMilliseconds(200));
+                if (IsStrict()) Assert.True(saveAfterView?.IsEnabled == false);
+            }
 
             var cancelEl = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, "Button_Cancel"), 12, TimeSpan.FromMilliseconds(250));
             if (cancelEl != null)

@@ -41,6 +41,23 @@ namespace YasGMP.Wpf
             TryLoadLocalizationResources();
             ConfigureRibbonLocalization();
 
+            // CLI switch: --smoke-strict enables strict smoke mode without requiring env vars
+            try
+            {
+                if (e?.Args != null)
+                {
+                    foreach (var arg in e.Args)
+                    {
+                        if (string.Equals(arg, "--smoke-strict", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(arg, "/smoke-strict", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Environment.SetEnvironmentVariable("YASGMP_STRICT_SMOKE", "1");
+                        }
+                    }
+                }
+            }
+            catch { /* ignore arg parsing issues */ }
+
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((_, cfg) =>
                 {
@@ -53,6 +70,23 @@ namespace YasGMP.Wpf
 
                     var connectionString = ResolveConnectionString(ctx.Configuration);
                     services.AddSingleton(new DatabaseOptions(connectionString));
+
+                    // Config switch: Smoke:Strict=true also enables strict smoke mode if not already set via CLI/env
+                    try
+                    {
+                        var strictCfg = ctx.Configuration["Smoke:Strict"];
+                        if (!string.IsNullOrWhiteSpace(strictCfg) &&
+                            (string.Equals(strictCfg, "1", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(strictCfg, "true", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            var current = Environment.GetEnvironmentVariable("YASGMP_STRICT_SMOKE");
+                            if (string.IsNullOrWhiteSpace(current))
+                            {
+                                Environment.SetEnvironmentVariable("YASGMP_STRICT_SMOKE", "1");
+                            }
+                        }
+                    }
+                    catch { /* tolerate config issues in constrained hosts */ }
 
                     // Attachments encryption options (align with MAUI setup)
                     var encryptionOptions = new AttachmentEncryptionOptions
