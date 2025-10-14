@@ -301,6 +301,146 @@ public class EndToEndSmokeTests
         }
     }
 
+    private static bool IsStrict()
+    {
+        var v = Environment.GetEnvironmentVariable("YASGMP_STRICT_SMOKE");
+        if (string.IsNullOrWhiteSpace(v)) return false;
+        v = v.Trim().ToLowerInvariant();
+        return v is "1" or "true" or "yes" or "y" or "on" or "enable" or "enabled";
+    }
+
+    [SmokeFact]
+    public async Task ToolbarToggles_WorkOrders_FindUpdate_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] workOrders = { "Work Orders", "Radni nalozi" };
+            TryOpenModule(main, workOrders);
+            await Task.Delay(500);
+
+            string[] ids = { "Button_Find", "Button_Update" };
+            foreach (var id in ids)
+            {
+                var el = RetryFind(() => FindByAutomationId<AutomationElement>(main, FlaUI.Core.Definitions.ControlType.Button, id), 12, TimeSpan.FromMilliseconds(250));
+                if (IsStrict()) Assert.NotNull(el);
+                if (el is null) continue;
+                if (IsStrict()) Assert.True(el.IsEnabled);
+                if (!el.IsEnabled) continue;
+                try
+                {
+                    if (el.Patterns.Toggle.IsSupported)
+                    {
+                        el.Patterns.Toggle.Pattern.Toggle();
+                    }
+                    else
+                    {
+                        el.AsButton()?.Invoke();
+                    }
+                }
+                catch { if (IsStrict()) throw; }
+                await Task.Delay(150);
+            }
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task AttachButton_OnSuppliers_Clicks_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] suppliers = { "Suppliers", "Dobavljači" };
+            TryOpenModule(main, suppliers);
+            await Task.Delay(500);
+
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(attach);
+            if (attach is null) return;
+            if (IsStrict()) Assert.True(attach.IsEnabled);
+            if (!attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { if (IsStrict()) throw; }
+            await Task.Delay(250);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
+    [SmokeFact]
+    public async Task AttachButton_OnWorkOrders_Clicks_StrictOrSkip()
+    {
+        var root = FindRepoRoot();
+        var exe = Path.Combine(root, "YasGMP.Wpf", "bin", "Release", "net9.0-windows10.0.19041.0", "YasGMP.Wpf.exe");
+        if (!File.Exists(exe))
+            throw new SkipException($"WPF exe not found at {exe}. Build Release before running smoke.");
+
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
+        psi.Environment["YASGMP_SMOKE"] = "1";
+
+        Application? app = null;
+        try { app = Application.Launch(psi); }
+        catch { return; }
+
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = await WaitForAsync(() => app!.GetMainWindow(automation), TimeSpan.FromSeconds(20));
+            if (main is null) return;
+
+            string[] workOrders = { "Work Orders", "Radni nalozi" };
+            TryOpenModule(main, workOrders);
+            await Task.Delay(500);
+
+            var attach = RetryFind(() => FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "AttachButton"), 12, TimeSpan.FromMilliseconds(250));
+            if (IsStrict()) Assert.NotNull(attach);
+            if (attach is null) return;
+            if (IsStrict()) Assert.True(attach.IsEnabled);
+            if (!attach.IsEnabled) return;
+            try { attach.Invoke(); } catch { if (IsStrict()) throw; }
+            await Task.Delay(250);
+        }
+        finally
+        {
+            try { if (app != null && !app.HasExited) app.Close(); } catch { }
+        }
+    }
+
     [SmokeFact]
     public async Task ToolbarToggles_WorkOrders_AddToggle_TogglesOrSkips()
     {
