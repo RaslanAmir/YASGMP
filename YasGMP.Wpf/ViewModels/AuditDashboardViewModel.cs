@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.Wpf.Helpers;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
 
@@ -49,8 +50,8 @@ public partial class AuditDashboardViewModel : ObservableObject
         ExportExcelCommand = new AsyncRelayCommand(ExecuteExportExcelAsync, () => FilteredAudits.Count > 0);
         FilteredAudits.CollectionChanged += (_, __) =>
         {
-            ExportPdfCommand.NotifyCanExecuteChanged();
-            ExportExcelCommand.NotifyCanExecuteChanged();
+            UiCommandHelper.NotifyCanExecuteOnUi(ExportPdfCommand);
+            UiCommandHelper.NotifyCanExecuteOnUi(ExportExcelCommand);
         };
     }
 
@@ -111,8 +112,8 @@ public partial class AuditDashboardViewModel : ObservableObject
             FilteredAudits.Add(entry);
         }
 
-        ExportPdfCommand.NotifyCanExecuteChanged();
-        ExportExcelCommand.NotifyCanExecuteChanged();
+        UiCommandHelper.NotifyCanExecuteOnUi(ExportPdfCommand);
+        UiCommandHelper.NotifyCanExecuteOnUi(ExportExcelCommand);
     }
 
     private async Task ExecuteExportPdfAsync()
