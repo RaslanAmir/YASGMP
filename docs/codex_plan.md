@@ -272,5 +272,11 @@ Test run (solution):
 - Cfl title now uses resource `CFL_Select_WorkOrder`; dialog buttons use `Button_OK`/`Button_Cancel` with a11y names.
 - Added per-input ToolTips + AutomationProperties.HelpText in Work Orders editor (Tooltip_WorkOrders_* keys).
 - Localized Warehouse CFL title and status messages (filtered/unable-to-locate).
-- Extended ToolTips/HelpText to Assets & Warehouse editors (Tooltip_Assets_* and Tooltip_Warehouse_* keys), and localized Assets VM messages (CFL title; filtered/select-before-save/unable-to-locate; save failed).
-- Incidents: migrated toolbar to resource-backed converter; added ToolTips/HelpText and DynamicResource labels; localized VM messages (unable to load; CFL-only-in-edit; no-related-for-link; select-related; unable-to-load-related; linked WO/CAPA).
+ - Extended ToolTips/HelpText to Assets & Warehouse editors (Tooltip_Assets_* and Tooltip_Warehouse_* keys), and localized Assets VM messages (CFL title; filtered/select-before-save/unable-to-locate; save failed).
+ - Incidents: migrated toolbar to resource-backed converter; added ToolTips/HelpText and DynamicResource labels; localized VM messages (unable to load; CFL-only-in-edit; no-related-for-link; select-related; unable-to-load-related; linked WO/CAPA).
+
+## Hotfix 2025-10-14 — DI fix for ValidationService
+- Issue: AppDomain.UnhandledException reported "Unable to resolve service for type 'YasGMP.Services.Interfaces.IValidationAuditService' while attempting to activate 'YasGMP.Services.ValidationService'" when launching modules that depend on `ValidationService`.
+- Change: Registered `IValidationAuditService` -> `ValidationAuditService` in WPF host DI (App.xaml.cs). `ValidationService` now resolves correctly.
+- Build: Executed `dotnet restore` (solution) and `dotnet build` for WPF + MAUI Windows targets (Debug and Release) under .NET 9 — all succeeded (warnings only).
+- Smoke: Ran `YasGMP.Wpf.Smoke` with `RUN_WPF_SMOKE=1` and `YASGMP_SMOKE=1` against Release WPF build. A couple of UIA interactions failed (button not enabled/located); primary DI crash is resolved. Will harden harness tolerance in a later batch.

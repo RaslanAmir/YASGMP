@@ -54,6 +54,28 @@ namespace YasGMP.Wpf
                     var connectionString = ResolveConnectionString(ctx.Configuration);
                     services.AddSingleton(new DatabaseOptions(connectionString));
 
+                    // Attachments encryption options (align with MAUI setup)
+                    var encryptionOptions = new AttachmentEncryptionOptions
+                    {
+                        KeyMaterial = Environment.GetEnvironmentVariable("YASGMP_ATTACHMENT_KEY")
+                                      ?? ctx.Configuration["Attachments:Encryption:Key"],
+                        KeyId = Environment.GetEnvironmentVariable("YASGMP_ATTACHMENT_KEY_ID")
+                                 ?? ctx.Configuration["Attachments:Encryption:KeyId"]
+                                 ?? "default"
+                    };
+
+                    var chunkEnv = Environment.GetEnvironmentVariable("YASGMP_ATTACHMENT_CHUNK_SIZE");
+                    if (!string.IsNullOrWhiteSpace(chunkEnv) && int.TryParse(chunkEnv, out var chunkSizeEnv) && chunkSizeEnv > 0)
+                    {
+                        encryptionOptions.ChunkSize = chunkSizeEnv;
+                    }
+                    else if (int.TryParse(ctx.Configuration["Attachments:Encryption:ChunkSize"], out var chunkSizeCfg) && chunkSizeCfg > 0)
+                    {
+                        encryptionOptions.ChunkSize = chunkSizeCfg;
+                    }
+
+                    services.AddSingleton(encryptionOptions);
+
                     services.AddYasGmpCoreServices(core =>
                     {
                         core.UseConnectionString(connectionString);
@@ -61,6 +83,9 @@ namespace YasGMP.Wpf
 
                         var svc = core.Services;
                         svc.AddSingleton<AuditService>();
+                        // Ensure Validation audit sink is available for ValidationService
+                        svc.AddTransient<IValidationAuditService, ValidationAuditService>();
+                        svc.AddSingleton<ICalibrationAuditService, CalibrationAuditAdapter>();
                         svc.AddSingleton<ExportService>();
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();

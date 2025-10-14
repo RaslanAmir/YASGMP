@@ -4,6 +4,8 @@
     "wpfTarget": "net9.0-windows10.0.19041.0",
     "detected": true,
   "notes": [
+      "2025-10-14 09:31: DI hotfix — registered IValidationAuditService -> ValidationAuditService in WPF host so ValidationService resolves. WPF + MAUI Windows builds green under .NET 9.",
+      "2025-10-14 09:35: Ran WPF smoke (Release) with YASGMP_SMOKE=1; some UIA-dependent interactions failed to invoke/locate controls on this host. Primary DI crash resolved; will increase harness tolerance in a later batch.",
       "2025-10-14: Resolved startup binding errors by explicitly binding DataContext for ModulesPane/InspectorPane in MainWindow.xaml (Groups/ModuleTitle/RecordTitle/Fields now bind to their child VMs immediately; no early binding spam).",
       "2025-10-14: Added crash logging hooks in App.xaml.cs that write wpf-crash-*.txt to %LOCALAPPDATA%/YasGMP/logs to capture NotSupported/XamlParse faults reported on some hosts.",
       "2025-10-14: Fixed cross-thread ObservableCollection updates by removing ConfigureAwait(false) in B1FormDocumentViewModel (Initialize/Refresh/Save/CFL flows). Prevents CollectionView thread exceptions and stabilizes startup.",
