@@ -184,19 +184,25 @@ public class EndToEndSmokeTests
 
             // Click CFL button via AutomationProperties.Name (EN/HR)
             string[] cflNames = { "Choose From List", "Odaberi s popisa" };
-            var cflBtn = RetryFind(() => FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, cflNames), 14, TimeSpan.FromMilliseconds(300));
+            var cflBtn = RetryFind(() =>
+            {
+                return FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "CflButton")
+                    ?? FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, cflNames);
+            }, 14, TimeSpan.FromMilliseconds(300));
             if (cflBtn == null) return; // tolerate missing UIA metadata
             if (!cflBtn.IsEnabled) return; // tolerate disabled state
             try { cflBtn.Invoke(); }
             catch { return; } // tolerate invoke failures
 
             // Expect a modal window titled "Choose From List" (fixed title in dialog XAML)
-            var dialog = RetryFind(() => app.GetAllTopLevelWindows(automation).FirstOrDefault(w => w.Title?.Contains("Choose From List", StringComparison.OrdinalIgnoreCase) == true), 16, TimeSpan.FromMilliseconds(300));
+            var dialog = RetryFind(() => app.GetAllTopLevelWindows(automation)
+                .FirstOrDefault(w => w.AutomationId == "CflDialog" || w.Title?.Contains("Choose From List", StringComparison.OrdinalIgnoreCase) == true), 16, TimeSpan.FromMilliseconds(300));
             if (dialog is null) return; // tolerate dialog not discoverable
 
             // Close the dialog (Cancel in EN/HR)
             string[] cancelNames = { "Cancel", "Odustani" };
-            var cancel = FindAnyByName<Button>(dialog!, FlaUI.Core.Definitions.ControlType.Button, cancelNames);
+            var cancel = FindByAutomationId<Button>(dialog!, FlaUI.Core.Definitions.ControlType.Button, "CflCancelButton")
+                         ?? FindAnyByName<Button>(dialog!, FlaUI.Core.Definitions.ControlType.Button, cancelNames);
             if (cancel is null) return; // tolerate missing cancel
             try { cancel.Invoke(); } catch { /* ignore */ }
         }
@@ -239,7 +245,11 @@ public class EndToEndSmokeTests
 
             // Click Golden Arrow by AutomationProperties.Name (EN/HR)
             string[] goldenNames = { "Open Related (Golden Arrow)", "Otvori povezano (Zlatna strelica)" };
-            var golden = RetryFind(() => FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, goldenNames), 14, TimeSpan.FromMilliseconds(300));
+            var golden = RetryFind(() =>
+            {
+                return FindByAutomationId<Button>(main, FlaUI.Core.Definitions.ControlType.Button, "GoldenArrowButton")
+                       ?? FindAnyByName<Button>(main, FlaUI.Core.Definitions.ControlType.Button, goldenNames);
+            }, 14, TimeSpan.FromMilliseconds(300));
             if (golden is null) return; // tolerate missing button
             if (!golden.IsEnabled) return; // tolerate disabled state
             try { golden.Invoke(); } catch { /* ignore invoke failures in constrained env */ }
@@ -285,6 +295,18 @@ public class EndToEndSmokeTests
             Thread.Sleep(delay);
         }
         return null;
+    }
+
+    private static TEl? FindByAutomationId<TEl>(AutomationElement root, FlaUI.Core.Definitions.ControlType controlType, string automationId) where TEl : AutomationElement
+    {
+        try
+        {
+            return root.FindFirstDescendant(cf => cf.ByControlType(controlType).And(cf.ByAutomationId(automationId)))?.As<TEl>();
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static async Task<T?> WaitForAsync<T>(Func<T?> fn, TimeSpan timeout) where T : class

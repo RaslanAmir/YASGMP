@@ -1,6 +1,7 @@
 <Button x:Class="YasGMP.Wpf.Controls.GoldenArrowButton"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        AutomationProperties.AutomationId="GoldenArrowButton"
         Width="24"
         Height="24"
         ToolTip="Open related record"

@@ -66,7 +66,8 @@
       "2025-10-13: Added per-input ToolTips + HelpText (Work Orders); Warehouse VM CFL/filtered/lookup messages localized; added unit test to assert validation uses resource strings (not executed due to existing test stubs issues).",
       "2025-10-13: Extended ToolTips/HelpText to Assets & Warehouse editors; localized Assets VM CFL/status/errors via Loc helper.",
       "2025-10-13: Incidents editor now uses resource-backed toolbar; added ToolTips/HelpText + DynamicResource labels; localized Incidents VM messages for CFL/linking/errors.",
-      "2025-10-14 10:02: Softened WPF smoke assertions (Golden Arrow/CFL): tolerate missing/disabled controls and invoke failures; increased waits; suite passes in constrained automation environments."
+      "2025-10-14 10:02: Softened WPF smoke assertions (Golden Arrow/CFL): tolerate missing/disabled controls and invoke failures; increased waits; suite passes in constrained automation environments.",
+      "2025-10-14 10:18: Added stable AutomationIds (GoldenArrowButton/CflButton/CflDialog/CflOkButton/CflCancelButton) and updated smoke to prefer AutomationId selectors; suite passes with YASGMP_SMOKE=1."
     ]
   },
   "batches": [

@@ -39,6 +39,7 @@
             <Separator />
             <Button Content="CFL"
                     AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    AutomationProperties.AutomationId="CflButton"
                     ToolTip="{DynamicResource Tooltip_CFL}"
                     Command="{Binding ShowCflCommand}" />
             <Button Content="{DynamicResource Button_Attach}"
@@ -48,6 +49,7 @@
                     Margin="8,0,0,0" />
             <controls:GoldenArrowButton
                 AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                AutomationProperties.AutomationId="GoldenArrowButton"
                 ToolTip="{DynamicResource Tooltip_GoldenArrow}"
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0" />

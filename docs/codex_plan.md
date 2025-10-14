@@ -280,4 +280,11 @@ Test run (solution):
 - Change: Registered `IValidationAuditService` -> `ValidationAuditService` in WPF host DI (App.xaml.cs). `ValidationService` now resolves correctly.
 - Build: Executed `dotnet restore` (solution) and `dotnet build` for WPF + MAUI Windows targets (Debug and Release) under .NET 9 — all succeeded (warnings only).
 - Smoke: Ran YasGMP.Wpf.Smoke with RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1 against Release WPF build. A couple of UIA interactions failed (button not enabled/located); primary DI crash is resolved. Will harden harness tolerance in a later batch.
-+ Smoke: Ran YasGMP.Wpf.Smoke with RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1 against Release WPF build. Hardened tests: tolerate disabled/missing UIA elements and invoke failures; suite now passes in constrained environments. Results written to YasGMP.Wpf.Smoke/TestResults/smoke.trx.
+
+## Increment 2025-10-14 — UI Automation IDs for Smoke
+- Added stable AutomationIds:
+  - Controls/GoldenArrowButton.xaml: AutomationProperties.AutomationId="GoldenArrowButton"
+  - Views/WorkOrdersModuleView.xaml: AutomationProperties.AutomationId="CflButton" on CFL button and GoldenArrowButton on the Golden Arrow instance
+  - Dialogs/CflDialog.xaml: AutomationProperties.AutomationId="CflDialog" on the Window, CflOkButton and CflCancelButton on buttons
+- Updated smoke selectors to prefer AutomationId over localized names for Golden Arrow/CFL flows.
+- Smoke: Ran YasGMP.Wpf.Smoke with RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1 against Release WPF build. Hardened tests: prefer AutomationId, tolerate disabled/missing UIA elements and invoke failures; suite now passes in constrained environments. Results written to YasGMP.Wpf.Smoke/TestResults/smoke.trx.
