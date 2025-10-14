@@ -7,6 +7,7 @@
       "2025-10-14: Resolved startup binding errors by explicitly binding DataContext for ModulesPane/InspectorPane in MainWindow.xaml (Groups/ModuleTitle/RecordTitle/Fields now bind to their child VMs immediately; no early binding spam).",
       "2025-10-14: Added crash logging hooks in App.xaml.cs that write wpf-crash-*.txt to %LOCALAPPDATA%/YasGMP/logs to capture NotSupported/XamlParse faults reported on some hosts.",
       "2025-10-14: Fixed cross-thread ObservableCollection updates by removing ConfigureAwait(false) in B1FormDocumentViewModel (Initialize/Refresh/Save/CFL flows). Prevents CollectionView thread exceptions and stabilizes startup.",
+      "2025-10-14: Added ActiveContentToDocumentConverter and bound it in MainWindow.xaml so AvalonDock ActiveContent does not attempt to convert Modules/Inspector panes into DocumentViewModel (fixes TypeConverter errors).",
       "2025-10-13: Status bar now surfaces UTC, Env, Server, DB, User and smoke status with EN↔HR labels; WPF/MAUI Release builds green; smoke harness guarded and treated as skipped when UI automation is blocked.",
       "2025-10-13: B1 FormMode toolbar on Assets uses resource-backed captions/tooltips (EN↔HR) via ResourceStringConverter; base view-model now seeds toolbar with keys (Button_Find/Add/View/Update/Save/Cancel/Refresh).",
       "2025-10-13 08:03: WPF i18n sweep completed for Warehouse/Calibration/Change Control; Release build green.",

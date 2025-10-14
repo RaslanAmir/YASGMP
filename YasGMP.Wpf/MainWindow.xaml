@@ -8,12 +8,16 @@
                      xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
                      xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
                      xmlns:shell="clr-namespace:YasGMP.Wpf.Shell"
+                     xmlns:conv="clr-namespace:YasGMP.Wpf.Converters"
                      Title="YasGMP Cockpit"
                      Width="1280"
                      Height="800"
                      Loaded="OnLoaded"
                      Closing="OnClosing"
                      mc:Ignorable="d">
+    <fluent:RibbonWindow.Resources>
+        <conv:ActiveContentToDocumentConverter x:Key="ActiveContentToDocument" />
+    </fluent:RibbonWindow.Resources>
     <DockPanel>
         <fluent:Ribbon x:Name="ShellRibbon"
                        DockPanel.Dock="Top"
@@ -228,7 +232,7 @@
         <Grid>
             <ad:DockingManager x:Name="DockManager"
                                DocumentsSource="{Binding Documents}"
-                               ActiveContent="{Binding ActiveDocument, Mode=TwoWay}">
+                               ActiveContent="{Binding ActiveDocument, Mode=TwoWay, Converter={StaticResource ActiveContentToDocument}}">
                 <ad:DockingManager.Theme>
                     <adThemes:MetroTheme />
                 </ad:DockingManager.Theme>
