@@ -24,7 +24,7 @@
                                       ToolTipService.ToolTip="{Binding Caption}"
                                       Command="{Binding Command}"
                                       IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0" />
+                                      Margin="0,0,4,0" AutomationProperties.AutomationId="{Binding AutomationIdKey}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

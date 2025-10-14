@@ -25,7 +25,7 @@
                                       AutomationProperties.Name="{Binding AutomationNameKey, Converter={StaticResource ResourceString}}"
                                       Command="{Binding Command}"
                                       IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0">
+                                       Margin="0,0,4,0" AutomationProperties.AutomationId="{Binding AutomationIdKey}">
                             <ToggleButton.ToolTip>
                                 <ToolTip Content="{Binding ToolTipKey, Converter={StaticResource ResourceString}}" />
                             </ToggleButton.ToolTip>
