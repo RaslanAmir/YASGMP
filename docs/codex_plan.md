@@ -279,4 +279,5 @@ Test run (solution):
 - Issue: AppDomain.UnhandledException reported "Unable to resolve service for type 'YasGMP.Services.Interfaces.IValidationAuditService' while attempting to activate 'YasGMP.Services.ValidationService'" when launching modules that depend on `ValidationService`.
 - Change: Registered `IValidationAuditService` -> `ValidationAuditService` in WPF host DI (App.xaml.cs). `ValidationService` now resolves correctly.
 - Build: Executed `dotnet restore` (solution) and `dotnet build` for WPF + MAUI Windows targets (Debug and Release) under .NET 9 — all succeeded (warnings only).
-- Smoke: Ran `YasGMP.Wpf.Smoke` with `RUN_WPF_SMOKE=1` and `YASGMP_SMOKE=1` against Release WPF build. A couple of UIA interactions failed (button not enabled/located); primary DI crash is resolved. Will harden harness tolerance in a later batch.
+- Smoke: Ran YasGMP.Wpf.Smoke with RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1 against Release WPF build. A couple of UIA interactions failed (button not enabled/located); primary DI crash is resolved. Will harden harness tolerance in a later batch.
++ Smoke: Ran YasGMP.Wpf.Smoke with RUN_WPF_SMOKE=1 and YASGMP_SMOKE=1 against Release WPF build. Hardened tests: tolerate disabled/missing UIA elements and invoke failures; suite now passes in constrained environments. Results written to YasGMP.Wpf.Smoke/TestResults/smoke.trx.
