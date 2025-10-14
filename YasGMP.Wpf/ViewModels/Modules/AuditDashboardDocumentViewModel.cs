@@ -363,6 +363,12 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
 
     private void UpdateCommandStates()
     {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(new Action(UpdateCommandStates));
+            return;
+        }
         _applyFilterCommand.NotifyCanExecuteChanged();
         _exportPdfCommand.NotifyCanExecuteChanged();
         _exportExcelCommand.NotifyCanExecuteChanged();

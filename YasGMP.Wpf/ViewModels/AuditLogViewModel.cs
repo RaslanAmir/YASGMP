@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.Wpf.Helpers;
 using YasGMP.Services;
 
 // Alias to the AppCore POCO so the signature matches the MAUI ViewModel.
@@ -257,17 +258,7 @@ public class AuditLogViewModel : ObservableObject
     }
 
     private static void NotifyCanExecuteChanged(ICommand? command)
-    {
-        switch (command)
-        {
-            case IAsyncRelayCommand asyncRelay:
-                asyncRelay.NotifyCanExecuteChanged();
-                break;
-            case IRelayCommand relay:
-                relay.NotifyCanExecuteChanged();
-                break;
-        }
-    }
+        => UiCommandHelper.NotifyCanExecuteOnUi(command);
 
     private static void ReplaceCollection(ObservableCollection<SystemEvent> collection, IEnumerable<SystemEvent> items)
     {
