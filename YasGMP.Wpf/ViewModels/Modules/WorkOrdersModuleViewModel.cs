@@ -81,8 +81,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_WorkOrders_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
-        return workOrders.Select(ToRecord).ToList();
+        var result = await Database.GetAllWorkOrdersWithProvenanceAsync();
+        SetProvenance($"source: work_orders, variant: {result.Variant}");
+        return result.Items.Select(ToRecord).ToList();
     }
 
     /// <summary>Provides design-time sample data for the Work Orders designer experience.</summary>
@@ -560,7 +561,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     private static ModuleRecord ToRecord(WorkOrder workOrder)
     {

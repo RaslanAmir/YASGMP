@@ -599,7 +599,9 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     partial void OnEditorChanging(CapaEditor value)
     {

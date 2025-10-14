@@ -561,7 +561,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     private void UpdateStockHealth()
     {

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using YasGMP.Wpf.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Wpf.Services;
@@ -452,15 +453,16 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             dispatcher.BeginInvoke(new Action(RefreshCommandStates));
             return;
         }
-        EnterFindModeCommand.NotifyCanExecuteChanged();
-        EnterAddModeCommand.NotifyCanExecuteChanged();
-        EnterViewModeCommand.NotifyCanExecuteChanged();
-        EnterUpdateModeCommand.NotifyCanExecuteChanged();
-        SaveCommand.NotifyCanExecuteChanged();
-        CancelCommand.NotifyCanExecuteChanged();
-        RefreshCommand.NotifyCanExecuteChanged();
-        ShowCflCommand.NotifyCanExecuteChanged();
-        GoldenArrowCommand.NotifyCanExecuteChanged();
+        UiCommandHelper.NotifyManyOnUi(
+            EnterFindModeCommand,
+            EnterAddModeCommand,
+            EnterViewModeCommand,
+            EnterUpdateModeCommand,
+            SaveCommand,
+            CancelCommand,
+            RefreshCommand,
+            ShowCflCommand,
+            GoldenArrowCommand);
     }
 
     /// <summary>Allows derived classes to react when the selection changes.</summary>

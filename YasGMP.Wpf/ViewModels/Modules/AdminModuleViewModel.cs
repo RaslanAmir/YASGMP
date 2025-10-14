@@ -36,8 +36,9 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Admin_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var settings = await Database.GetAllSettingsFullAsync().ConfigureAwait(false);
-        return settings.Select(ToRecord).ToList();
+        var result = await Database.GetAllSettingsWithProvenanceAsync();
+        SetProvenance($"source: {result.Source}, order: {result.OrderBy}");
+        return result.Items.Select(ToRecord).ToList();
     }
 
     /// <summary>Provides design-time sample data for the Administration designer experience.</summary>

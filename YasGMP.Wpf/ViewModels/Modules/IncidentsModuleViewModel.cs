@@ -609,7 +609,9 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachEvidenceCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachEvidenceCommand);
+    }
 
     partial void OnEditorChanging(IncidentEditor value)
     {

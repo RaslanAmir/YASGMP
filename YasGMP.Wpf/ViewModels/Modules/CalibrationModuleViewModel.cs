@@ -624,7 +624,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     public sealed partial class CalibrationEditor : ObservableObject
     {

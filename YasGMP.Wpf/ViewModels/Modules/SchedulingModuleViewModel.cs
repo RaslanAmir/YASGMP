@@ -577,9 +577,10 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
     private void UpdateActionStates()
     {
-        AttachDocumentCommand.NotifyCanExecuteChanged();
-        ExecuteJobCommand.NotifyCanExecuteChanged();
-        AcknowledgeJobCommand.NotifyCanExecuteChanged();
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyManyOnUi(
+            AttachDocumentCommand,
+            ExecuteJobCommand,
+            AcknowledgeJobCommand);
     }
 
     private static ModuleRecord ToRecord(ScheduledJob job)

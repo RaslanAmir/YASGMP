@@ -525,10 +525,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     private void UpdateAttachmentCommandState()
     {
-        if (AttachDocumentCommand is AsyncRelayCommand command)
-        {
-            command.NotifyCanExecuteChanged();
-        }
+        var app = System.Windows.Application.Current;
+        void Invoke() { if (AttachDocumentCommand is AsyncRelayCommand c) c.NotifyCanExecuteChanged(); }
+        if (app?.Dispatcher?.CheckAccess() == true) Invoke();
+        else app?.Dispatcher?.BeginInvoke(new Action(Invoke));
     }
 
     private async Task AttachDocumentAsync()

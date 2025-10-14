@@ -542,7 +542,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     private static ModuleRecord ToRecord(Warehouse warehouse)
     {

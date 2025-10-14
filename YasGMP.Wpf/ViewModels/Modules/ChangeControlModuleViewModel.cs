@@ -553,7 +553,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     public sealed partial class ChangeControlEditor : ObservableObject
     {

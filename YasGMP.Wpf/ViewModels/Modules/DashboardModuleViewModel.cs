@@ -39,6 +39,7 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var events = await Database.GetRecentDashboardEventsAsync(25).ConfigureAwait(false);
+        SetProvenance("source: system_event_log, order: event_time desc, limit: 25");
         return events.Select(ToRecord).ToList();
     }
 
