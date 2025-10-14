@@ -39,8 +39,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="CFL" Command="{Binding ShowCflCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <Button Content="CFL" Command="{Binding ShowCflCommand}" AutomationProperties.AutomationId="CflButton" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" AutomationProperties.AutomationId="GoldenArrowButton" />
             <Separator />
             <Button Content="Export PDF"
                     Command="{Binding ExportToPdfCommand}"

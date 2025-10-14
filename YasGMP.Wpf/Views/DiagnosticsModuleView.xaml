@@ -28,7 +28,9 @@
             </ItemsControl>
             <Separator />
             <Button Content="Refresh" Command="{Binding RefreshCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                       Margin="8,0,0,0"
+                                       AutomationProperties.AutomationId="GoldenArrowButton" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>

@@ -29,14 +29,16 @@
             <Separator />
             <Button Content="{DynamicResource Button_CFL}"
                     ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}"
-                    Command="{Binding ShowCflCommand}" />
+                    Command="{Binding ShowCflCommand}"
+                    AutomationProperties.AutomationId="CflButton" />
             <Button Content="{DynamicResource Button_Attach}"
                     ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}"
                     Command="{Binding AttachDocumentCommand}"
                     Margin="8,0,0,0" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
                                         ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}"
-                                        Margin="8,0,0,0" />
+                                        Margin="8,0,0,0"
+                                        AutomationProperties.AutomationId="GoldenArrowButton" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>

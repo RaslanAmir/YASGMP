@@ -43,8 +43,11 @@
             </ItemsControl>
             <Separator />
             <Button Content="CFL"
-                    Command="{Binding ShowCflCommand}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" />
+                    Command="{Binding ShowCflCommand}"
+                    AutomationProperties.AutomationId="CflButton" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                       Margin="8,0,0,0"
+                                       AutomationProperties.AutomationId="GoldenArrowButton" />
             <Separator />
             <Button Content="Apply Filters"
                     Command="{Binding ApplyFilterCommand}"

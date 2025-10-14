@@ -11,7 +11,7 @@
              ToolTipService.ToolTip="{DynamicResource Module_Attachments_Tooltip}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <Style x:Key="WorkflowVisibleElementStyle" TargetType="UIElement">
+        <Style x:Key="WorkflowVisibleElementStyle" TargetType="FrameworkElement">
             <Setter Property="Visibility" Value="Collapsed" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding DataContext.HasAttachmentWorkflow, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -48,11 +48,13 @@
             <Button Content="{DynamicResource Button_CFL}"
                     Command="{Binding ShowCflCommand}"
                     ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}"
-                    AutomationProperties.Name="ChooseFromListButton" />
+                    AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    AutomationProperties.AutomationId="CflButton" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
                                        Margin="8,0,0,0"
                                        ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}"
-                                       AutomationProperties.Name="GoldenArrowButton" />
+                                       AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                                       AutomationProperties.AutomationId="GoldenArrowButton" />
         </ToolBar>
 
         <Grid Margin="8">
@@ -180,31 +182,31 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Display Name:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="1" Grid.Column="0" Text="File Name:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FileName}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FileName, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Label_Status}" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Status}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Status, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Label_Entity}" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EntityDisplayName}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EntityDisplayName, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource Label_FileType}" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding FileType}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding FileType, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="5" Grid.Column="0" Text="File Size:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding FileSizeDisplay}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding FileSizeDisplay, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="6" Grid.Column="0" Text="SHA-256:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Sha256}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Sha256, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="7" Grid.Column="0" Text="Notes:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Notes, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="8" Grid.Column="0" Text="Retention Policy:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding RetentionPolicyName}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding RetentionPolicyName, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="9" Grid.Column="0" Text="Retain Until:" Margin="0,0,8,4" />
-                                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding RetainUntil}" IsReadOnly="True" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding RetainUntil, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,4" />
                                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Retention Flags:" Margin="0,0,8,4" />
                                     <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Vertical" Margin="0,0,0,4">
                                         <CheckBox Content="Legal Hold" IsChecked="{Binding RetentionLegalHold}" IsEnabled="False" Margin="0,0,0,4" />
                                         <CheckBox Content="Review Required" IsChecked="{Binding RetentionReviewRequired}" IsEnabled="False" Margin="0,0,0,4" />
                                         <TextBlock Text="Retention Notes" FontWeight="SemiBold" Margin="0,8,0,4" />
-                                        <TextBox Text="{Binding RetentionNotes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40" />
+                                        <TextBox Text="{Binding RetentionNotes, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40" />
                                     </StackPanel>
                                 </Grid>
                                 <Separator />

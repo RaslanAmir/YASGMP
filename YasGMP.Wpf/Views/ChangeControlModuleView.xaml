@@ -29,8 +29,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" />
-            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}" Margin="8,0,0,0" />
+            <Button Content="{DynamicResource Button_CFL}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}" AutomationProperties.AutomationId="CflButton" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_GoldenArrow}" Margin="8,0,0,0" AutomationProperties.AutomationId="GoldenArrowButton" />
             <Button Content="{DynamicResource Button_Attach}" Command="{Binding AttachDocumentCommand}" ToolTipService.ToolTip="{DynamicResource Tooltip_Attach}" Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">

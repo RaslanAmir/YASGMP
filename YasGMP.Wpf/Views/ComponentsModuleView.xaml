@@ -36,10 +36,12 @@
             <Separator />
             <Button Content="CFL"
                     AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    AutomationProperties.AutomationId="CflButton"
                     ToolTip="{DynamicResource Tooltip_CFL}"
                     Command="{Binding ShowCflCommand}" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
                                        AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                                       AutomationProperties.AutomationId="GoldenArrowButton"
                                        ToolTip="{DynamicResource Tooltip_GoldenArrow}"
                                        Margin="8,0,0,0" />
         </ToolBar>

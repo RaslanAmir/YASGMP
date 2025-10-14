@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:conv="clr-namespace:YasGMP.Wpf.Converters"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="900"
              AutomationProperties.Name="{DynamicResource Module_Incidents_Title}"
              ToolTipService.ToolTip="{DynamicResource Module_Incidents_Tooltip}">
+    <UserControl.Resources>
+        <conv:ResourceStringConverter x:Key="ResourceString" />
+    </UserControl.Resources>
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <ItemsControl ItemsSource="{Binding Toolbar}">
@@ -34,6 +38,7 @@
             <Separator />
             <Button Content="CFL"
                     AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    AutomationProperties.AutomationId="CflButton"
                     ToolTip="{DynamicResource Tooltip_CFL}"
                     Command="{Binding ShowCflCommand}" />
             <Button Content="{DynamicResource Button_Attach}"
@@ -42,9 +47,10 @@
                     Command="{Binding AttachEvidenceCommand}"
                     Margin="8,0,0,0" />
             <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
-                                        AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
-                                        ToolTip="{DynamicResource Tooltip_GoldenArrow}"
-                                        Margin="8,0,0,0" />
+                                       AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                                       AutomationProperties.AutomationId="GoldenArrowButton"
+                                       ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                                       Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
