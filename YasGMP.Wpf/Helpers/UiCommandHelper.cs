@@ -37,6 +37,14 @@ namespace YasGMP.Wpf.Helpers
                 dispatcher.BeginInvoke(new Action(Invoke));
             }
         }
+
+        public static void NotifyManyOnUi(params ICommand?[] commands)
+        {
+            if (commands == null || commands.Length == 0) return;
+            foreach (var cmd in commands)
+            {
+                NotifyCanExecuteOnUi(cmd);
+            }
+        }
     }
 }
-

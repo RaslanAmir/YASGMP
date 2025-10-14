@@ -560,7 +560,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        var app = System.Windows.Application.Current;
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     private static ModuleRecord ToRecord(Machine machine)
     {

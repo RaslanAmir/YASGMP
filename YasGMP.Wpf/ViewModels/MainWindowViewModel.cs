@@ -170,7 +170,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (!_smokeTestService.IsEnabled)
         {
             StatusText = $"Smoke test disabled. Set {DebugSmokeTestService.EnvironmentToggleName}=1 to enable.";
-            RunSmokeTestCommand.NotifyCanExecuteChanged();
+            YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(RunSmokeTestCommand);
             return;
         }
 
@@ -186,7 +186,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         finally
         {
-            RunSmokeTestCommand.NotifyCanExecuteChanged();
+            YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(RunSmokeTestCommand);
         }
     }
 

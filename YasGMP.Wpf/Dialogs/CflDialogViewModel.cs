@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.Helpers;
 
 namespace YasGMP.Wpf.Dialogs;
 
@@ -38,7 +39,7 @@ public partial class CflDialogViewModel : ObservableObject
 
     partial void OnSelectedItemChanged(CflItem? value)
     {
-        ConfirmCommand.NotifyCanExecuteChanged();
+        UiCommandHelper.NotifyCanExecuteOnUi(ConfirmCommand);
     }
 }
 
