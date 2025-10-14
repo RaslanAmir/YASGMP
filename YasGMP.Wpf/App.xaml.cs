@@ -220,8 +220,22 @@ namespace YasGMP.Wpf
 
             _host.Start();
 
-            var window = _host.Services.GetRequiredService<MainWindow>();
-            window.Show();
+            try
+            {
+                var window = _host.Services.GetRequiredService<MainWindow>();
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                var path = WriteCrashLog("MainWindow.Show", ex);
+                try
+                {
+                    MessageBox.Show($"Startup error: {ex.Message}\nDetails: {path}", "YasGMP WPF", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch { }
+                Shutdown(-1);
+                return;
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -343,7 +357,7 @@ namespace YasGMP.Wpf
             }
         }
 
-        private static void WriteCrashLog(string source, Exception? ex)
+        private static string WriteCrashLog(string source, Exception? ex)
         {
             try
             {
@@ -362,10 +376,12 @@ namespace YasGMP.Wpf
                     sw.WriteLine("(no exception instance available)");
                 }
                 sw.Flush();
+                return file;
             }
             catch
             {
                 // As a last resort, do nothing if logging fails.
+                return string.Empty;
             }
         }
 
