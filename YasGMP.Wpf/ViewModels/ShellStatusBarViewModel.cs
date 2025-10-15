@@ -13,7 +13,6 @@ namespace YasGMP.Wpf.ViewModels;
 /// <summary>Status bar view-model displayed along the bottom edge of the shell.</summary>
 public partial class ShellStatusBarViewModel : ObservableObject
 {
-    private const string ReadyStatusKey = "Shell.Status.Ready";
     private const string CompanyFallbackKey = "Shell.StatusBar.Company.Default";
     private const string EnvironmentFallbackKey = "Shell.StatusBar.Environment.Default";
     private const string ServerFallbackKey = "Shell.StatusBar.Server.Default";
@@ -27,6 +26,7 @@ public partial class ShellStatusBarViewModel : ObservableObject
     private readonly IHostEnvironment _hostEnvironment;
     private readonly IUserSession _userSession;
     private readonly ILocalizationService _localization;
+    private readonly ISignalRClientService _realtime;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ShellStatusBarViewModel"/> class.
@@ -37,7 +37,8 @@ public partial class ShellStatusBarViewModel : ObservableObject
         DatabaseOptions databaseOptions,
         IHostEnvironment hostEnvironment,
         IUserSession userSession,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        ISignalRClientService realtime)
     {
         _timeProvider = timeProvider;
         _configuration = configuration;
@@ -45,12 +46,14 @@ public partial class ShellStatusBarViewModel : ObservableObject
         _hostEnvironment = hostEnvironment;
         _userSession = userSession;
         _localization = localization;
+        _realtime = realtime ?? throw new ArgumentNullException(nameof(realtime));
 
         _localization.LanguageChanged += OnLanguageChanged;
+        _realtime.ConnectionStateChanged += OnRealtimeStateChanged;
 
         RefreshMetadata();
         UtcTime = FormatUtc(_timeProvider.GetUtcNow());
-        StatusText = _localization.GetString(ReadyStatusKey);
+        StatusText = FormatRealtimeStatus(_realtime.ConnectionState, _realtime.LastError, _realtime.NextRetryUtc);
 
         _utcTimer = new DispatcherTimer
         {
@@ -179,5 +182,28 @@ public partial class ShellStatusBarViewModel : ObservableObject
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         RefreshMetadata();
+        StatusText = FormatRealtimeStatus(_realtime.ConnectionState, _realtime.LastError, _realtime.NextRetryUtc);
+    }
+
+    private void OnRealtimeStateChanged(object? sender, ConnectionStateChangedEventArgs e)
+    {
+        StatusText = FormatRealtimeStatus(e.State, e.Message, e.NextRetryUtc);
+    }
+
+    private string FormatRealtimeStatus(RealtimeConnectionState state, string? message, DateTimeOffset? nextRetry)
+    {
+        return state switch
+        {
+            RealtimeConnectionState.Connecting => _localization.GetString("Shell.Status.SignalR.Connecting"),
+            RealtimeConnectionState.Connected => _localization.GetString("Shell.Status.SignalR.Connected"),
+            RealtimeConnectionState.Retrying when nextRetry.HasValue =>
+                _localization.GetString(
+                    "Shell.Status.SignalR.Retrying",
+                    nextRetry.Value.ToString("HH:mm:ss 'UTC'", CultureInfo.InvariantCulture)),
+            RealtimeConnectionState.Retrying => _localization.GetString("Shell.Status.SignalR.RetryingShort"),
+            _ when !string.IsNullOrWhiteSpace(message) =>
+                _localization.GetString("Shell.Status.SignalR.DisconnectedWithError", message!),
+            _ => _localization.GetString("Shell.Status.SignalR.Disconnected")
+        };
     }
 }
