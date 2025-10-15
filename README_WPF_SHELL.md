@@ -7,8 +7,8 @@ The YasGMP WPF shell hosts the desktop docking workspace used to surface cockpit
 - **Supported OS:** The WPF project targets `net9.0-windows10.0.19041.0`, so the shell requires Windows 10 build 19041 or later.
 - **.NET SDK:** Install the .NET SDK pinned in `global.json` (`9.0.100`) to match the repo’s toolset.【F:global.json†L1-L6】
 - **Configuration:** The shell reads configuration from `appsettings.json`. Override the defaults for per-user layouts and database access via:
-  - `Shell:UserId` – numeric user identifier (defaults to `1`).【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
-  - `Shell:Username` – display name used when persisting layouts (defaults to `"wpf-shell"`).【F:YasGMP.Wpf/Services/UserSession.cs†L12-L22】
+  - `Shell:UserId` – numeric user identifier (defaults to `1`).【F:YasGMP.Wpf/Services/UserSession.cs†L17-L41】
+  - `Shell:Username` / `Shell:FullName` – fall-back identity values surfaced before login succeeds (default user is `"wpf-shell"`).【F:YasGMP.Wpf/Services/UserSession.cs†L17-L41】
   - `ConnectionStrings:MySqlDb` / `MySqlDb` – MySQL connection string consumed during host bootstrapping. When absent the app falls back to the hard-coded development string defined in `App.xaml.cs`.【F:YasGMP.Wpf/App.xaml.cs†L23-L55】
 - **UI automation surface:** FlaUI smoke tests require an interactive desktop. On GitHub-hosted runners (`windows-latest`) the job starts with an unlocked desktop, but self-hosted agents must enable auto-logon for the service account, disable screen savers/lock (`powercfg /change standby-timeout-ac 0` and `rundll32 user32.dll,LockWorkStation /disable` policies), and ensure the `UIAutomationCore` components are present so FlaUI can drive the WPF window.
 
@@ -29,6 +29,12 @@ dotnet publish YasGMP.Wpf -c Release -r win-x64
 ```
 
 Visual Studio and MSBuild follow the same steps: open `yasgmp.sln`, set **YasGMP.Wpf** as the startup project, and use **Build → Build Solution** (or `msbuild YasGMP.Wpf/YasGMP.Wpf.csproj /t:Build`).【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L1-L28】
+
+## Authentication and re-authentication
+
+- **Startup gating:** The WPF shell now displays a modal [LoginView](YasGMP.Wpf/Views/LoginView.xaml) before AvalonDock initialises. The dialog is driven by [LoginViewModel](YasGMP.Wpf/ViewModels/LoginViewModel.cs) which authenticates through [AuthenticationDialogService](YasGMP.Wpf/Services/AuthenticationDialogService.cs) and the shared [AuthService](YasGMP.AppCore/Services/AuthService.cs). Successful sign-in applies the operator to the shared [UserSession](YasGMP.Wpf/Services/UserSession.cs) and refreshes the status bar via `MainWindowViewModel.RefreshShellContext`.【F:YasGMP.Wpf/App.xaml.cs†L117-L137】【F:YasGMP.Wpf/ViewModels/LoginViewModel.cs†L13-L86】
+- **Session-aware context:** `UserSession` now tracks the authenticated user, exposes a `SessionChanged` event, and feeds `WpfAuthContext` so downstream services (audit logging, signature capture, layout persistence) receive the correct user/session/device metadata.【F:YasGMP.Wpf/Services/UserSession.cs†L17-L59】【F:YasGMP.Wpf/Services/WpfAuthContext.cs†L11-L47】
+- **Re-authentication prompt:** Sensitive flows can call `AuthenticationDialogService.PromptReauthentication()` to display the WPF [ReauthenticationDialog](YasGMP.Wpf/Views/Dialogs/ReauthenticationDialog.xaml). The dialog mirrors MAUI’s credential capture (username, password, optional MFA, GMP reason codes) via [ReauthenticationDialogViewModel](YasGMP.Wpf/ViewModels/Dialogs/ReauthenticationDialogViewModel.cs).【F:YasGMP.Wpf/Services/AuthenticationDialogService.cs†L11-L66】【F:YasGMP.Wpf/ViewModels/Dialogs/ReauthenticationDialogViewModel.cs†L1-L113】
 
 ## Continuous integration
 
