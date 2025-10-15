@@ -57,8 +57,10 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<UserService>();
                         svc.AddSingleton<IUserService>(sp => sp.GetRequiredService<UserService>());
                         svc.AddSingleton<AuthService>();
+                        svc.AddSingleton<IAuthenticator, AuthServiceAuthenticator>();
                         svc.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
                         svc.AddSingleton<IDialogService, WpfDialogService>();
+                        svc.AddSingleton<IAuthenticationDialogService, AuthenticationDialogService>();
                         svc.AddSingleton<ILocalizationService, LocalizationService>();
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();
                         svc.AddSingleton<IAttachmentService, AttachmentService>();
@@ -103,6 +105,8 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
                         svc.AddSingleton<DebugSmokeTestService>();
+                        svc.AddTransient<LoginViewModel>();
+                        svc.AddTransient<ReauthenticationDialogViewModel>();
                         svc.AddTransient<DigitalSignatureViewModel>();
                         svc.AddTransient<ElectronicSignatureDialogViewModel>();
                         svc.AddTransient<AuditLogViewModel>(sp =>
@@ -187,6 +191,16 @@ namespace YasGMP.Wpf
             ServiceLocator.Initialize(_host.Services);
 
             _host.Start();
+
+            var authDialogs = _host.Services.GetRequiredService<IAuthenticationDialogService>();
+            if (!authDialogs.EnsureAuthenticated())
+            {
+                Shutdown();
+                return;
+            }
+
+            var shellViewModel = _host.Services.GetRequiredService<MainWindowViewModel>();
+            shellViewModel.RefreshShellContext();
 
             var window = _host.Services.GetRequiredService<MainWindow>();
             window.Show();

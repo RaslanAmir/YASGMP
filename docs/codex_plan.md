@@ -18,15 +18,18 @@
   - 2025-10-10T11:24Z: `dotnet restore yasgmp.sln` (with `EnableWindowsTargeting=true`) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; full solution restore remains Windows-host only.
   - 2025-10-10T10:07Z: `dotnet restore -p:EnableWindowsTargeting=true` exits with NETSDK1147 (maui-tizen workload) after `dotnet workload install maui` reports the workload is unsupported on Linux.
   - 2025-10-10T06:40Z: `dotnet restore` now launches but aborts with NETSDK1100 (EnableWindowsTargeting) and NETSDK1147 (missing maui-tizen workload) because Windows SDK/workloads are unavailable on this host.
+  - 2026-04-08T00:00Z: `dotnet restore yasgmp.sln` retried for the authentication-gating batch; container still returns `bash: command not found: dotnet` so restore remains Windows-host only.
 - [ ] MAUI builds *(blocked on Windows workloads; historical attempts failed before CLI install and the latest 2025-10-10 run surfaced NETSDK1147 requiring maui-tizen workload on Windows.)*
   - 2025-10-13T11:00Z: `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried after retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2026-04-04T09:12Z: `dotnet build yasgmp.csproj -c Release -p:EnableWindowsTargeting=true` retried; command still fails with `bash: command not found: dotnet` inside the container.
+  - 2026-04-08T00:00Z: `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried while wiring the login dialog; command still exits with `bash: command not found: dotnet` because the CLI is absent on Linux.
 - [ ] WPF builds *(restore now runs but the 2025-10-10 Release builds failed on cross-targeted AppCore references — YasGMP.Helpers/Diagnostics namespaces and signature DTOs are unresolved until Windows desktop dependencies are available on a Windows host.)*
   - 2025-10-13T11:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2025-10-10T11:25Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` still fails — AppCore compilation reports missing YasGMP.Helpers/Diagnostics namespaces and SignatureMetadata DTOs during the Release build.
   - 2026-04-04T09:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` retried; container still reports `bash: command not found: dotnet`.
   - 2025-10-10T10:11Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restores but fails with dozens of CS0234/CS0246/CS0535 errors because YasGMP.AppCore expects Helpers/Diagnostics projects and signature DTO types that are unavailable without the Windows solution build.
   - 2025-10-10T06:42Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true` restored packages but failed with unresolved YasGMP.Helpers/Diagnostics namespaces and missing SignatureMetadataDto/WorkOrderSignaturePersistRequest types — requires building on Windows with full solution references.
+  - 2026-04-08T00:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` rerun after adding the login/reauth dialogs; CLI remains unavailable (`bash: command not found: dotnet`).
 
 
 ## Increment 2025-10-13 — Baseline Revalidation
@@ -367,3 +370,4 @@
 - 2026-01-22: Module dialogs and every module view grid/toolbar label now bind through ShellStrings resx keys with shared ToolTip/Automation metadata so UIA stays localized; dotnet restore/build/smoke remain blocked without the CLI.
 - 2026-04-06: Assets module list/editor controls now expose localized ToolTips and automation identifiers across the search box, grid, form fields, and validation feed; `dotnet` CLI is still unavailable so restore/build/smoke reruns remain blocked in-container (env_guard=static-analysis).
 - 2026-04-07: Signature metadata view, cockpit dashboard shell, and the audit log document now source headings, tooltips, and automation identifiers from ShellStrings (EN/HR) with unit coverage verifying localization switches while dotnet restore/build/smoke remain blocked by the missing CLI (env_guard=static-analysis).
+- 2026-04-08: Added a modal WPF login dialog plus authentication dialog service that blocks shell startup until AuthService validates credentials, refreshed UserSession/WpfAuthContext to surface the signed-in operator across status bars/audit trails, introduced a desktop reauthentication dialog for signature flows, and updated WPF mapping/README docs; `dotnet restore`/`dotnet build` retries still fail with `bash: command not found: dotnet` without the CLI.
