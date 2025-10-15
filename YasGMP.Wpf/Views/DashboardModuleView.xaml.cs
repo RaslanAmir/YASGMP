@@ -1,3 +1,5 @@
+using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace YasGMP.Wpf.Views;
@@ -13,5 +15,16 @@ public partial class DashboardModuleView : UserControl
     public DashboardModuleView()
     {
         InitializeComponent();
+        Unloaded += OnUnloaded;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        Unloaded -= OnUnloaded;
     }
 }
