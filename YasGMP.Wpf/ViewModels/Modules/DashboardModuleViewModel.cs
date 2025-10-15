@@ -12,7 +12,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// Represents the Dashboard Module View Model.
 /// </summary>
 
-public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel, IDisposable
 {
     /// <summary>
     /// Represents the module key value.
@@ -93,6 +93,7 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
             evt.RelatedRecordId);
     }
 
+    private bool _disposed;
     private readonly ISignalRClientService _signalRClient;
 
     private async void OnAuditReceived(object? sender, AuditEventArgs e)
@@ -105,5 +106,17 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
         {
             // Best-effort refresh – real-time failures should not crash the dashboard.
         }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _signalRClient.AuditReceived -= OnAuditReceived;
+        _disposed = true;
     }
 }
