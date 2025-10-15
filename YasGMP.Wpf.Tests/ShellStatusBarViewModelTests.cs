@@ -168,6 +168,36 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ShellStatusBarViewModel_RealtimeUpdates_RefreshStatusText()
+    {
+        await RunOnStaThread(async () =>
+        {
+            EnsureApplicationResources();
+
+            var realtime = new StubRealtimeService();
+            var viewModel = CreateViewModel(realtime: realtime);
+
+            var expectedConnected = _localizationService.GetString("Shell.Status.SignalR.Connected");
+            Assert.Equal(expectedConnected, viewModel.StatusText);
+
+            var retryAt = DateTimeOffset.UtcNow.AddMinutes(5);
+            realtime.RaiseState(RealtimeConnectionState.Retrying, null, retryAt);
+            var expectedRetry = _localizationService.GetString(
+                "Shell.Status.SignalR.Retrying",
+                retryAt.ToString("HH:mm:ss 'UTC'", CultureInfo.InvariantCulture));
+            Assert.Equal(expectedRetry, viewModel.StatusText);
+
+            realtime.RaiseState(RealtimeConnectionState.Disconnected, "network down", null);
+            var expectedDisconnected = _localizationService.GetString(
+                "Shell.Status.SignalR.DisconnectedWithError",
+                "network down");
+            Assert.Equal(expectedDisconnected, viewModel.StatusText);
+
+            await Task.CompletedTask;
+        });
+    }
+
+    [Fact]
     public async Task ShellStatusBarControl_LanguageToggle_UpdatesActiveLabel()
     {
         await RunOnStaThread(async () =>
@@ -376,7 +406,8 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
         DatabaseOptions? databaseOptions = null,
         StubUserSession? userSession = null,
         string? environmentName = null,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        ISignalRClientService? realtime = null)
     {
         var builder = new ConfigurationBuilder();
         if (configurationValues != null)
@@ -393,6 +424,7 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
 
         var session = userSession ?? new StubUserSession();
         var localizationService = localization ?? _localizationService;
+        var realtimeService = realtime ?? new StubRealtimeService();
 
         return new ShellStatusBarViewModel(
             TimeProvider.System,
@@ -400,7 +432,8 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
             options,
             hostEnvironment,
             session,
-            localizationService);
+            localizationService,
+            realtimeService);
     }
 
     private static void EnsureApplicationResources()
@@ -521,5 +554,29 @@ public sealed class ShellStatusBarViewModelTests : IDisposable
         public string? UsernameValue { get; set; }
 
         public string? FullNameValue { get; set; }
+    }
+
+    private sealed class StubRealtimeService : ISignalRClientService
+    {
+        public event EventHandler<AuditEventArgs>? AuditReceived;
+        public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
+
+        public RealtimeConnectionState ConnectionState { get; set; } = RealtimeConnectionState.Connected;
+
+        public string? LastError { get; set; }
+
+        public DateTimeOffset? NextRetryUtc { get; set; }
+
+        public void Start()
+        {
+        }
+
+        public void RaiseState(RealtimeConnectionState state, string? message = null, DateTimeOffset? nextRetry = null)
+        {
+            ConnectionState = state;
+            LastError = message;
+            NextRetryUtc = nextRetry;
+            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(state, message, nextRetry));
+        }
     }
 }

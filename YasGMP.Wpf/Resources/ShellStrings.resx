@@ -771,6 +771,24 @@
   <data name="Shell.Status.Smoke.Result.LogFailure" xml:space="preserve">
     <value>{0}/{1} smoke checks succeeded. Failed to persist log: {2}</value>
   </data>
+  <data name="Shell.Status.SignalR.Connecting" xml:space="preserve">
+    <value>Connecting to live updates…</value>
+  </data>
+  <data name="Shell.Status.SignalR.Connected" xml:space="preserve">
+    <value>Live updates online; background jobs active.</value>
+  </data>
+  <data name="Shell.Status.SignalR.Retrying" xml:space="preserve">
+    <value>Reconnecting to live updates (next attempt {0}).</value>
+  </data>
+  <data name="Shell.Status.SignalR.RetryingShort" xml:space="preserve">
+    <value>Reconnecting to live updates…</value>
+  </data>
+  <data name="Shell.Status.SignalR.Disconnected" xml:space="preserve">
+    <value>Live updates offline; background jobs continue locally.</value>
+  </data>
+  <data name="Shell.Status.SignalR.DisconnectedWithError" xml:space="preserve">
+    <value>Live updates offline ({0}). Background jobs continue locally.</value>
+  </data>
   <data name="Shell.StatusBar.Company.Default" xml:space="preserve">
     <value>YasGMP</value>
   </data>

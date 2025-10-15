@@ -28,9 +28,12 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        ISignalRClientService signalRClient)
         : base(ModuleKey, localization.GetString("Module.Title.Dashboard"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
+        _signalRClient = signalRClient ?? throw new ArgumentNullException(nameof(signalRClient));
+        _signalRClient.AuditReceived += OnAuditReceived;
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
@@ -88,5 +91,19 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
             fields,
             evt.RelatedModule,
             evt.RelatedRecordId);
+    }
+
+    private readonly ISignalRClientService _signalRClient;
+
+    private async void OnAuditReceived(object? sender, AuditEventArgs e)
+    {
+        try
+        {
+            await RefreshAsync().ConfigureAwait(false);
+        }
+        catch
+        {
+            // Best-effort refresh – real-time failures should not crash the dashboard.
+        }
     }
 }

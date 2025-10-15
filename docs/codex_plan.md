@@ -198,6 +198,7 @@
     - 2026-01-07: Attachments editor now enforces retention rules during save/delete, shows busy overlays tied to IsBusy, and surfaces validation/status messaging while dotnet restore/build remain blocked by the missing CLI.
   - Dashboard/Reports — [~] in-progress *(dashboard cockpit now binds toolbar toggles, CFL/Golden Arrow commands, search label, and grid columns through the localization service with automation metadata for Accessibility Insights/FlaUI validation; module tree categories/nodes now surface localized captions/tooltips across EN↔HR switches.)*
     - 2026-04-08: Documented DashboardModuleView + ModulesPane coverage in `docs/WPF_MAPPING.md` so parity matrix reflects localized KPIs and navigation metadata; `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were retried and each still fail immediately with `bash: command not found: dotnet` while the CLI remains unavailable in this container.
+    - 2026-04-09: Introduced a WPF SignalRClientService that wraps AppCore SignalRService + BackgroundScheduler via the dispatcher, wired DashboardModuleViewModel to refresh on audit pushes, localized status bar connection states, and added backoff/reconnect unit coverage; dotnet CLI remains unavailable so execution stays static-analysis only.
   - Settings/Admin — [ ] todo
 
 - **Open Issues / Blockers**

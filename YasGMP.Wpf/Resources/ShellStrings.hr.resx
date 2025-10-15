@@ -777,6 +777,24 @@
   <data name="Shell.Status.Smoke.Result.LogFailure" xml:space="preserve">
     <value>{0}/{1} provjera dima je uspješno završilo. Spremanje zapisa nije uspjelo: {2}</value>
   </data>
+  <data name="Shell.Status.SignalR.Connecting" xml:space="preserve">
+    <value>Povezivanje na ažuriranja uživo…</value>
+  </data>
+  <data name="Shell.Status.SignalR.Connected" xml:space="preserve">
+    <value>Ažuriranja uživo dostupna; pozadinski poslovi aktivni.</value>
+  </data>
+  <data name="Shell.Status.SignalR.Retrying" xml:space="preserve">
+    <value>Ponovno povezivanje na ažuriranja uživo (sljedeći pokušaj {0}).</value>
+  </data>
+  <data name="Shell.Status.SignalR.RetryingShort" xml:space="preserve">
+    <value>Ponovno povezivanje na ažuriranja uživo…</value>
+  </data>
+  <data name="Shell.Status.SignalR.Disconnected" xml:space="preserve">
+    <value>Ažuriranja uživo nisu dostupna; pozadinski poslovi se nastavljaju lokalno.</value>
+  </data>
+  <data name="Shell.Status.SignalR.DisconnectedWithError" xml:space="preserve">
+    <value>Ažuriranja uživo nisu dostupna ({0}). Pozadinski poslovi se nastavljaju lokalno.</value>
+  </data>
   <data name="Shell.StatusBar.Company.Default" xml:space="preserve">
     <value>YasGMP</value>
   </data>

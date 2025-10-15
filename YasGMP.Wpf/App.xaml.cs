@@ -69,6 +69,9 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<IRBACService, RBACService>();
                         svc.AddSingleton<WorkOrderAuditService>();
+                        svc.AddSingleton<BackgroundScheduler>();
+                        svc.AddSingleton(sp => new Lazy<BackgroundScheduler>(() => sp.GetRequiredService<BackgroundScheduler>()));
+                        svc.AddSingleton<ISignalRClientService, SignalRClientService>();
                         svc.AddTransient<ICapaAuditService, CapaAuditService>();
                         svc.AddTransient<INotificationService, NotificationService>();
                         svc.AddTransient<WorkOrderService>();
@@ -198,6 +201,9 @@ namespace YasGMP.Wpf
                 Shutdown();
                 return;
             }
+
+            var realtime = _host.Services.GetRequiredService<ISignalRClientService>();
+            realtime.Start();
 
             var shellViewModel = _host.Services.GetRequiredService<MainWindowViewModel>();
             shellViewModel.RefreshShellContext();
