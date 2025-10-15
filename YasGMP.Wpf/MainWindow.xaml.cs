@@ -22,6 +22,7 @@ namespace YasGMP.Wpf
             _layoutController = layoutController;
             DataContext = _viewModel;
 
+            _layoutController.RegisterAnchorableContent(ModulesPaneContent, InspectorPaneContent);
             _viewModel.WindowCommands.SaveLayoutRequested += OnSaveLayoutRequested;
             _viewModel.WindowCommands.ResetLayoutRequested += OnResetLayoutRequested;
         }
@@ -29,6 +30,8 @@ namespace YasGMP.Wpf
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
             _layoutController.Attach(DockManager, _viewModel);
+            ModulesPaneContent.DataContext = _viewModel.ModulesPane;
+            InspectorPaneContent.DataContext = _viewModel.InspectorPane;
             _viewModel.InitializeWorkspace();
             _layoutController.CaptureDefaultLayout();
             await _layoutController.RestoreLayoutAsync(this);

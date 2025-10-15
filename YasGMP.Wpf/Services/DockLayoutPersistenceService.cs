@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
@@ -33,24 +34,32 @@ LIMIT 1;";
                 new MySqlParameter("@p", layoutKey)
             };
 
-            await using var conn = CreateConnection();
-            await conn.OpenAsync(token).ConfigureAwait(false);
-            await using var cmd = new MySqlCommand(sql, conn);
-            cmd.Parameters.AddRange(parameters);
-
-            await using var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false);
-            if (!await reader.ReadAsync(token).ConfigureAwait(false))
+            try
             {
+                await using var conn = CreateConnection();
+                await conn.OpenAsync(token).ConfigureAwait(false);
+                await using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddRange(parameters);
+
+                await using var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false);
+                if (!await reader.ReadAsync(token).ConfigureAwait(false))
+                {
+                    return null;
+                }
+
+                string layoutXml = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                double? posX = reader.IsDBNull(1) ? null : reader.GetDouble(1);
+                double? posY = reader.IsDBNull(2) ? null : reader.GetDouble(2);
+                double? width = reader.IsDBNull(3) ? null : reader.GetDouble(3);
+                double? height = reader.IsDBNull(4) ? null : reader.GetDouble(4);
+
+                return new LayoutSnapshot(layoutXml, posX, posY, width, height);
+            }
+            catch (MySqlException ex) when (IsSchemaMissing(ex))
+            {
+                Debug.WriteLine($"[DockLayoutPersistence] Layout table schema incomplete. Skipping restore for '{layoutKey}': {ex.Message}");
                 return null;
             }
-
-            string layoutXml = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-            double? posX = reader.IsDBNull(1) ? null : reader.GetDouble(1);
-            double? posY = reader.IsDBNull(2) ? null : reader.GetDouble(2);
-            double? width = reader.IsDBNull(3) ? null : reader.GetDouble(3);
-            double? height = reader.IsDBNull(4) ? null : reader.GetDouble(4);
-
-            return new LayoutSnapshot(layoutXml, posX, posY, width, height);
         }
 
         public async Task SaveAsync(string layoutKey, string layoutXml, WindowGeometry geometry, CancellationToken token = default)
@@ -77,14 +86,23 @@ saved_at=UTC_TIMESTAMP();";
                 new MySqlParameter("@h", geometry.Height.HasValue ? geometry.Height.Value : (object)DBNull.Value)
             };
 
-            await using var conn = CreateConnection();
-            await conn.OpenAsync(token).ConfigureAwait(false);
-            await using var cmd = new MySqlCommand(sql, conn);
-            cmd.Parameters.AddRange(parameters);
-            await cmd.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+            try
+            {
+                await using var conn = CreateConnection();
+                await conn.OpenAsync(token).ConfigureAwait(false);
+                await using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddRange(parameters);
+                await cmd.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (IsSchemaMissing(ex))
+            {
+                Debug.WriteLine($"[DockLayoutPersistence] Layout table schema incomplete. Skipping save for '{layoutKey}': {ex.Message}");
+            }
         }
 
         private MySqlConnection CreateConnection() => new(_connectionString);
+
+        private static bool IsSchemaMissing(MySqlException ex) => ex.Number == 1054 /* Unknown column */ || ex.Number == 1146 /* Table doesn't exist */;
     }
 
     public readonly record struct WindowGeometry(double? Left, double? Top, double? Width, double? Height);

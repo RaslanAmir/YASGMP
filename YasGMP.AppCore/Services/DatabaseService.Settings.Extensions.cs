@@ -11,16 +11,161 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    public sealed class SettingsFetchResult
+    {
+        public required List<Setting> Items { get; init; }
+        public required string Source { get; init; }
+        public required string OrderBy { get; init; }
+    }
+
     /// <summary>
     /// DatabaseService extensions that read and update system settings.
     /// </summary>
     public static class DatabaseServiceSettingsExtensions
     {
+        /// <summary>
+        /// Returns settings with provenance details (source table and order by expression).
+        /// Preserves legacy fallbacks for older schemas.
+        /// </summary>
+        public static async Task<SettingsFetchResult> GetAllSettingsWithProvenanceAsync(this DatabaseService db, CancellationToken token = default)
+        {
+            try
+            {
+                var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* ANALYZER_IGNORE: legacy table */ ORDER BY `key`", null, token).ConfigureAwait(false);
+                return new SettingsFetchResult
+                {
+                    Items = ToSettingsList(dt),
+                    Source = "settings",
+                    OrderBy = "`key`"
+                };
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                // Unknown column 'key' – older schema; order by id
+                var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* LEGACY ORDER */ ORDER BY id", null, token).ConfigureAwait(false);
+                return new SettingsFetchResult
+                {
+                    Items = ToSettingsList(dt),
+                    Source = "settings",
+                    OrderBy = "id"
+                };
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                // Table missing – map from system_parameters
+                const string sql = @"
+SELECT id,
+       param_name AS `key`,
+       param_value AS `value`,
+       NULL AS default_value,
+       NULL AS value_type,
+       NULL AS min_value,
+       NULL AS max_value,
+       note AS description,
+       'system' AS category,
+       NULL AS subcategory,
+       0 AS is_sensitive,
+       1 AS is_global,
+       NULL AS user_id,
+       NULL AS role_id,
+       NULL AS approved_by_id,
+       NULL AS approved_at,
+       digital_signature,
+       '' AS status,
+       updated_at,
+       NULL AS updated_by_id,
+       NULL AS expiry_date
+FROM system_parameters
+ORDER BY param_name;";
+                var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
+                return new SettingsFetchResult
+                {
+                    Items = ToSettingsList(dt),
+                    Source = "system_parameters",
+                    OrderBy = "param_name"
+                };
+            }
+        }
+
+        private static List<Setting> ToSettingsList(System.Data.DataTable dt)
+        {
+            var list = new List<Setting>(dt.Rows.Count);
+            foreach (System.Data.DataRow r in dt.Rows)
+            {
+                string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+                int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
+                DateTime? DN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
+
+                list.Add(new Setting
+                {
+                    Id = r.Table.Columns.Contains("id") && r["id"] != System.DBNull.Value ? Convert.ToInt32(r["id"]) : 0,
+                    Key = S("key"),
+                    Value = S("value"),
+                    DefaultValue = S("default_value"),
+                    ValueType = S("value_type"),
+                    MinValue = S("min_value"),
+                    MaxValue = S("max_value"),
+                    Description = S("description"),
+                    Category = S("category"),
+                    Subcategory = S("subcategory"),
+                    IsSensitive = r.Table.Columns.Contains("is_sensitive") && r["is_sensitive"] != System.DBNull.Value && Convert.ToBoolean(r["is_sensitive"]),
+                    IsGlobal = !(r.Table.Columns.Contains("is_global") && r["is_global"] != System.DBNull.Value) || Convert.ToBoolean(r["is_global"]),
+                    UserId = IN("user_id"),
+                    RoleId = IN("role_id"),
+                    ApprovedById = IN("approved_by_id"),
+                    ApprovedAt = DN("approved_at"),
+                    DigitalSignature = S("digital_signature"),
+                    Status = S("status"),
+                    UpdatedAt = DN("updated_at") ?? DateTime.UtcNow,
+                    UpdatedById = IN("updated_by_id"),
+                    ExpiryDate = DN("expiry_date")
+                });
+            }
+            return list;
+        }
         public static async Task<List<Setting>> GetAllSettingsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             try
             {
                 var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* ANALYZER_IGNORE: legacy table */ ORDER BY `key`", null, token).ConfigureAwait(false);
+                var list = new List<Setting>(dt.Rows.Count);
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+                    int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
+                    DateTime? DN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
+
+                    list.Add(new Setting
+                    {
+                        Id = Convert.ToInt32(r["id"]),
+                        Key = S("key"),
+                        Value = S("value"),
+                        DefaultValue = S("default_value"),
+                        ValueType = S("value_type"),
+                        MinValue = S("min_value"),
+                        MaxValue = S("max_value"),
+                        Description = S("description"),
+                        Category = S("category"),
+                        Subcategory = S("subcategory"),
+                        IsSensitive = r.Table.Columns.Contains("is_sensitive") && r["is_sensitive"] != System.DBNull.Value && Convert.ToBoolean(r["is_sensitive"]),
+                        IsGlobal = !(r.Table.Columns.Contains("is_global") && r["is_global"] != System.DBNull.Value) || Convert.ToBoolean(r["is_global"]),
+                        UserId = IN("user_id"),
+                        RoleId = IN("role_id"),
+                        ApprovedById = IN("approved_by_id"),
+                        ApprovedAt = DN("approved_at"),
+                        DigitalSignature = S("digital_signature"),
+                        Status = S("status"),
+                        UpdatedAt = DN("updated_at") ?? DateTime.UtcNow,
+                        UpdatedById = IN("updated_by_id"),
+                        ExpiryDate = DN("expiry_date")
+                    });
+                }
+                return list;
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                // Unknown column 'key' – fall back to ordering by id for older schemas
+                var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* LEGACY ORDER */ ORDER BY id", null, token).ConfigureAwait(false);
                 var list = new List<Setting>(dt.Rows.Count);
                 foreach (System.Data.DataRow r in dt.Rows)
                 {

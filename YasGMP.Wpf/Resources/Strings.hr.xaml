@@ -177,7 +177,6 @@
   <sys:String x:Key="Tooltip_Attach">Priloži dokument trenutnom zapisu.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigiraj na povezani zapis.</sys:String>
   <sys:String x:Key="Button_ApplyFilters">Primijeni filtre</sys:String>
-  <sys:String x:Key="Button_Refresh">Osvježi</sys:String>
   <sys:String x:Key="Button_ExportPdf">Izvoz PDF</sys:String>
   <sys:String x:Key="Button_ExportExcel">Izvoz Excel</sys:String>
 
@@ -241,7 +240,6 @@
   <sys:String x:Key="Label_ExtraNotes">Dodatne bilješke</sys:String>
   <sys:String x:Key="Label_Certificates">Certifikati</sys:String>
   <sys:String x:Key="Label_DigitalSignature">Digitalni potpis</sys:String>
-  <sys:String x:Key="Label_User">Korisnik</sys:String>
   <sys:String x:Key="Label_Action">Radnja</sys:String>
   <sys:String x:Key="Label_From">Od</sys:String>
   <sys:String x:Key="Label_To">Do</sys:String>
@@ -304,8 +302,6 @@
   <sys:String x:Key="Label_IpAddress">IP adresa</sys:String>
   <sys:String x:Key="Label_JobType">Vrsta posla</sys:String>
   <sys:String x:Key="Label_CronExpression">Cron izraz</sys:String>
-  <sys:String x:Key="Label_EntityType">Vrsta entiteta</sys:String>
-  <sys:String x:Key="Label_EntityId">ID entiteta</sys:String>
   <sys:String x:Key="Label_Recurrence">Učestalost</sys:String>
   
   <!-- Naslov detalja rasporeda -->
@@ -316,7 +312,6 @@
   <sys:String x:Key="Label_DisplayName">Prikazno ime</sys:String>
   <sys:String x:Key="Label_EmailAddress">E-pošta</sys:String>
   <sys:String x:Key="Label_Department">Odjel</sys:String>
-  <sys:String x:Key="Label_Active">Aktivan</sys:String>
   <sys:String x:Key="Label_Locked">Zaključan</sys:String>
   <sys:String x:Key="Label_TwoFactor">Dvofaktorska</sys:String>
   <sys:String x:Key="Label_NewPassword">Nova lozinka</sys:String>
@@ -527,7 +522,6 @@
   <sys:String x:Key="Label_CustomCode">Prilagođena šifra</sys:String>
   <sys:String x:Key="Tooltip_EnterPasswordPin">Unesite svoju YasGMP lozinku ili PIN.</sys:String>
   <sys:String x:Key="Button_Confirm">Potvrdi</sys:String>
-  <sys:String x:Key="Button_Cancel">Odustani</sys:String>
   <!-- Skladište oznake/stupci -->
   <sys:String x:Key="Label_Responsible">Odgovorna osoba</sys:String>
   <sys:String x:Key="Label_QRCode">QR kod</sys:String>

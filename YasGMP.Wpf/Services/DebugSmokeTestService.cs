@@ -141,7 +141,7 @@ public sealed class DebugSmokeTestService
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-                File.WriteAllText(logPath, logBuilder.ToString());
+                File.WriteAllText(logPath, logBuilder.ToString(), Encoding.UTF8);
                 var allPassed = steps.All(static s => s.Succeeded);
                 var summary = $"{passedSteps}/{steps.Count} smoke checks succeeded. Log written to {logPath}.";
                 return DebugSmokeTestResult.Completed(allPassed, summary, logPath, steps);
@@ -414,8 +414,17 @@ public sealed class DebugSmokeTestService
         }
 
         var directory = Path.Combine(localAppData, "YasGMP", "logs");
-        var fileName = $"smoke_{start:yyyyMMdd_HHmmss}.log";
-        return Path.Combine(directory, fileName);
+        var baseName = $"smoke-{start:yyyyMMdd-HHmm}";
+        var fileName = $"{baseName}.txt";
+        var path = Path.Combine(directory, fileName);
+        int suffix = 1;
+        while (File.Exists(path))
+        {
+            fileName = $"{baseName}_{suffix}.txt";
+            path = Path.Combine(directory, fileName);
+            suffix++;
+        }
+        return path;
     }
 
     private static bool IsToggleEnabled(string? value)

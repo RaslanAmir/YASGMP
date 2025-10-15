@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace YasGMP.Wpf.Services
         private MainWindowViewModel? _viewModel;
         private string? _defaultLayout;
         private const string LayoutKey = "YasGmp.Wpf.Shell";
+        private FrameworkElement? _modulesContent;
+        private FrameworkElement? _inspectorContent;
 
         public ShellLayoutController(DockLayoutPersistenceService persistence)
         {
@@ -27,6 +30,12 @@ namespace YasGMP.Wpf.Services
         {
             _dockManager = dockManager ?? throw new ArgumentNullException(nameof(dockManager));
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+        }
+
+        public void RegisterAnchorableContent(FrameworkElement modulesContent, FrameworkElement inspectorContent)
+        {
+            _modulesContent = modulesContent;
+            _inspectorContent = inspectorContent;
         }
 
         public void CaptureDefaultLayout()
@@ -49,23 +58,34 @@ namespace YasGMP.Wpf.Services
                 return;
             }
 
-            var snapshot = await _persistence.LoadAsync(LayoutKey, token).ConfigureAwait(false);
-            if (snapshot == null || string.IsNullOrWhiteSpace(snapshot.Value.LayoutXml))
+            try
             {
-                return;
+                var snapshot = await _persistence.LoadAsync(LayoutKey, token).ConfigureAwait(false);
+                if (snapshot == null || string.IsNullOrWhiteSpace(snapshot.Value.LayoutXml))
+                {
+                    return;
+                }
+
+                _viewModel?.PrepareForLayoutImport();
+                await window.Dispatcher.InvokeAsync(() =>
+                {
+                    var serializer = new XmlLayoutSerializer(_dockManager);
+                    serializer.LayoutSerializationCallback += OnLayoutSerializationCallback;
+                    using var reader = new StringReader(snapshot.Value.LayoutXml);
+                    serializer.Deserialize(reader);
+                    serializer.LayoutSerializationCallback -= OnLayoutSerializationCallback;
+                });
+
+                ApplyGeometry(window, snapshot.Value.Geometry);
             }
-
-            _viewModel?.PrepareForLayoutImport();
-            await window.Dispatcher.InvokeAsync(() =>
+            catch (Exception ex)
             {
-                var serializer = new XmlLayoutSerializer(_dockManager);
-                serializer.LayoutSerializationCallback += OnLayoutSerializationCallback;
-                using var reader = new StringReader(snapshot.Value.LayoutXml);
-                serializer.Deserialize(reader);
-                serializer.LayoutSerializationCallback -= OnLayoutSerializationCallback;
-            });
-
-            ApplyGeometry(window, snapshot.Value.Geometry);
+                Debug.WriteLine($"[ShellLayout] Restore failed: {ex}");
+                if (_viewModel != null)
+                {
+                    window.Dispatcher.Invoke(() => _viewModel.StatusText = $"Layout restore failed: {ex.Message}");
+                }
+            }
         }
 
         public async Task SaveLayoutAsync(Window window, CancellationToken token = default)
@@ -84,7 +104,18 @@ namespace YasGMP.Wpf.Services
             }
 
             var geometry = CaptureGeometry(window);
-            await _persistence.SaveAsync(LayoutKey, layoutXml, geometry, token).ConfigureAwait(false);
+            try
+            {
+                await _persistence.SaveAsync(LayoutKey, layoutXml, geometry, token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ShellLayout] Save failed: {ex}");
+                if (_viewModel != null)
+                {
+                    window.Dispatcher.Invoke(() => _viewModel.StatusText = $"Layout save failed: {ex.Message}");
+                }
+            }
         }
 
         public async Task ResetLayoutAsync(Window window, CancellationToken token = default)
@@ -121,10 +152,10 @@ namespace YasGMP.Wpf.Services
             switch (e.Model.ContentId)
             {
                 case "YasGmp.Shell.Modules":
-                    e.Content = _viewModel.ModulesPane;
+                    e.Content = (object?)_modulesContent ?? _viewModel?.ModulesPane;
                     break;
                 case "YasGmp.Shell.Inspector":
-                    e.Content = _viewModel.InspectorPane;
+                    e.Content = (object?)_inspectorContent ?? _viewModel?.InspectorPane;
                     break;
                 default:
                     if (!string.IsNullOrWhiteSpace(e.Model.ContentId))

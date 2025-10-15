@@ -177,7 +177,6 @@
   <sys:String x:Key="Tooltip_Attach">Attach a document to the current record.</sys:String>
   <sys:String x:Key="Tooltip_GoldenArrow">Navigate to the related record.</sys:String>
   <sys:String x:Key="Button_ApplyFilters">Apply Filters</sys:String>
-  <sys:String x:Key="Button_Refresh">Refresh</sys:String>
   <sys:String x:Key="Button_ExportPdf">Export PDF</sys:String>
   <sys:String x:Key="Button_ExportExcel">Export Excel</sys:String>
 
@@ -243,7 +242,6 @@
   <sys:String x:Key="Label_DigitalSignature">Digital Signature</sys:String>
   <sys:String x:Key="Label_Manufacturer">Manufacturer</sys:String>
   <sys:String x:Key="Label_Model">Model</sys:String>
-  <sys:String x:Key="Label_User">User</sys:String>
   <sys:String x:Key="Label_Action">Action</sys:String>
   <sys:String x:Key="Label_From">From</sys:String>
   <sys:String x:Key="Label_To">To</sys:String>
@@ -304,8 +302,6 @@
   <sys:String x:Key="Label_IpAddress">IP Address</sys:String>
   <sys:String x:Key="Label_JobType">Job Type</sys:String>
   <sys:String x:Key="Label_CronExpression">Cron Expression</sys:String>
-  <sys:String x:Key="Label_EntityType">Entity Type</sys:String>
-  <sys:String x:Key="Label_EntityId">Entity Id</sys:String>
   <sys:String x:Key="Label_Recurrence">Recurrence</sys:String>
 
   <!-- Scheduling Details Title -->
@@ -316,7 +312,6 @@
   <sys:String x:Key="Label_DisplayName">Display Name</sys:String>
   <sys:String x:Key="Label_EmailAddress">Email</sys:String>
   <sys:String x:Key="Label_Department">Department</sys:String>
-  <sys:String x:Key="Label_Active">Active</sys:String>
   <sys:String x:Key="Label_Locked">Locked</sys:String>
   <sys:String x:Key="Label_TwoFactor">Two Factor</sys:String>
   <sys:String x:Key="Label_NewPassword">New Password</sys:String>
@@ -527,7 +522,6 @@
   <sys:String x:Key="Label_CustomCode">Custom code</sys:String>
   <sys:String x:Key="Tooltip_EnterPasswordPin">Enter your YasGMP password or PIN.</sys:String>
   <sys:String x:Key="Button_Confirm">Confirm</sys:String>
-  <sys:String x:Key="Button_Cancel">Cancel</sys:String>
   <!-- Warehouse labels/columns -->
   <sys:String x:Key="Label_Responsible">Responsible</sys:String>
   <sys:String x:Key="Label_QRCode">QR Code</sys:String>
