@@ -9,13 +9,16 @@
                      xmlns:adControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
                      xmlns:adThemes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Metro"
                      xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+                     xmlns:viewModels="clr-namespace:YasGMP.Wpf.ViewModels"
+                     xmlns:services="clr-namespace:YasGMP.Wpf.Services"
                      Title="{DynamicResource Shell.MainWindow.Title.YasGMPCockpit}"
                      Width="1280"
                      Height="800"
                      Loaded="OnLoaded"
                      Closing="OnClosing"
                      mc:Ignorable="d">
-    <DockPanel>
+    <Grid>
+        <DockPanel>
         <fluent:Ribbon x:Name="ShellRibbon"
                        DockPanel.Dock="Top"
                        fluent:RibbonWindow.Ribbon="{Binding RelativeSource={RelativeSource Self}}"
@@ -320,5 +323,74 @@
                 </ad:DockingManager.Layout>
             </ad:DockingManager>
         </Grid>
-    </DockPanel>
+        </DockPanel>
+
+        <ItemsControl ItemsSource="{Binding Toasts}"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Top"
+                      Margin="0,16,16,0"
+                      Panel.ZIndex="99">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type viewModels:ToastNotificationViewModel}">
+                    <Border CornerRadius="6"
+                            Padding="12,10"
+                            Margin="0,0,0,8"
+                            Background="#DD2D2D30"
+                            BorderBrush="#552D2D30"
+                            BorderThickness="1"
+                            IsHitTestVisible="True">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#DD2D2D30" />
+                                <Setter Property="BorderBrush" Value="#552D2D30" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static services:AlertSeverity.Success}">
+                                        <Setter Property="Background" Value="#DD0F5132" />
+                                        <Setter Property="BorderBrush" Value="#991B6A44" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static services:AlertSeverity.Warning}">
+                                        <Setter Property="Background" Value="#DDA6801A" />
+                                        <Setter Property="BorderBrush" Value="#AAE0A800" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static services:AlertSeverity.Error}">
+                                        <Setter Property="Background" Value="#DDA82824" />
+                                        <Setter Property="BorderBrush" Value="#FFDC2F2F" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <DockPanel>
+                            <TextBlock Text="{Binding IconGlyph}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18"
+                                       Foreground="White"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Message}"
+                                       TextWrapping="Wrap"
+                                       Foreground="White"
+                                       FontWeight="SemiBold" />
+                            <Button Command="{Binding DismissCommand}"
+                                    Content="✕"
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Margin="12,0,0,0"
+                                    Padding="0"
+                                    Background="Transparent"
+                                    Foreground="White"
+                                    BorderBrush="Transparent"
+                                    IsHitTestVisible="True" />
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
 </fluent:RibbonWindow>

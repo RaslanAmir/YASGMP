@@ -2920,4 +2920,34 @@
   <data name="Audit.Progress.Loading.AutomationId" xml:space="preserve">
     <value>Audit.Progress.Loading</value>
   </data>
+  <data name="Module.Admin.NotificationPreferences.Header" xml:space="preserve">
+    <value>Postavke obavijesti</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusBar.Label" xml:space="preserve">
+    <value>Prikaži obavijesti u statusnoj traci</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusBar.ToolTip" xml:space="preserve">
+    <value>Zrcali skočne obavijesti u statusnoj traci sučelja.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.Toast.Label" xml:space="preserve">
+    <value>Omogući skočne obavijesti</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.Toast.ToolTip" xml:space="preserve">
+    <value>Prikaži kratke skočne obavijesti u gornjem desnom kutu.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.SaveButton" xml:space="preserve">
+    <value>Spremi postavke</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.SaveButton.ToolTip" xml:space="preserve">
+    <value>Spremi postavke obavijesti u zajedničku konfiguraciju.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusSaved" xml:space="preserve">
+    <value>Postavke obavijesti su spremljene.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusSaveFailed" xml:space="preserve">
+    <value>Spremanje postavki obavijesti nije uspjelo: {0}</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusLoadFailed" xml:space="preserve">
+    <value>Učitavanje postavki obavijesti nije uspjelo: {0}</value>
+  </data>
 </root>

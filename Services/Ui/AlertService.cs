@@ -6,15 +6,6 @@ using Microsoft.Maui.Controls;
 namespace YasGMP.Services.Ui
 {
     /// <summary>
-    /// Abstraction for prompting the user with alerts and confirmation dialogs on the UI thread.
-    /// </summary>
-    public interface IAlertService
-    {
-        Task AlertAsync(string title, string message, string cancel = "OK");
-        Task<bool> ConfirmAsync(string title, string message, string accept = "OK", string cancel = "Cancel");
-    }
-
-    /// <summary>
     /// Default implementation that routes alert and confirmation requests through MAUI's MainPage.
     /// </summary>
     public sealed class AlertService : IAlertService

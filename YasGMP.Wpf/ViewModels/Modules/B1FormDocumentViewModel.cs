@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.Common;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
@@ -31,6 +33,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     private readonly IShellInteractionService _shellInteraction;
     private readonly IModuleNavigationService _moduleNavigation;
     private readonly ILocalizationService _localization;
+    private readonly Lazy<IShellAlertService?> _alertService;
     private string _currentReadyStatus = string.Empty;
 
     protected B1FormDocumentViewModel(
@@ -48,6 +51,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         _cflDialogService = cflDialogService;
         _shellInteraction = shellInteraction;
         _moduleNavigation = moduleNavigation;
+        _alertService = new Lazy<IShellAlertService?>(ServiceLocator.GetService<IShellAlertService>);
 
         Records = new ObservableCollection<ModuleRecord>();
         RecordsView = CollectionViewSource.GetDefaultView(Records);
@@ -333,6 +337,11 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     partial void OnStatusMessageChanged(string value)
     {
         _shellInteraction.UpdateStatus(value);
+        var alertService = _alertService.Value;
+        if (alertService is not null && !string.IsNullOrWhiteSpace(value))
+        {
+            alertService.PublishStatus(value, DetermineSeverity(value));
+        }
     }
 
     private void OnLocalizationLanguageChanged(object? sender, EventArgs e)
@@ -665,6 +674,43 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     {
         OnPropertyChanged(nameof(HasValidationErrors));
         RefreshCommandStates();
+    }
+
+    private static AlertSeverity DetermineSeverity(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return AlertSeverity.Info;
+        }
+
+        var normalized = message.ToLower(CultureInfo.InvariantCulture);
+        if (normalized.Contains("error", StringComparison.Ordinal)
+            || normalized.Contains("failed", StringComparison.Ordinal)
+            || normalized.Contains("neusp", StringComparison.Ordinal)
+            || normalized.Contains("gre\u0161", StringComparison.Ordinal)
+            || normalized.Contains("gres", StringComparison.Ordinal))
+        {
+            return AlertSeverity.Error;
+        }
+
+        if (normalized.Contains("warning", StringComparison.Ordinal)
+            || normalized.Contains("validation", StringComparison.Ordinal)
+            || normalized.Contains("oprez", StringComparison.Ordinal)
+            || normalized.Contains("nije odabrano", StringComparison.Ordinal))
+        {
+            return AlertSeverity.Warning;
+        }
+
+        if (normalized.Contains("success", StringComparison.Ordinal)
+            || normalized.Contains("saved", StringComparison.Ordinal)
+            || normalized.Contains("captured", StringComparison.Ordinal)
+            || normalized.Contains("spreml", StringComparison.Ordinal)
+            || normalized.Contains("uspje", StringComparison.Ordinal))
+        {
+            return AlertSeverity.Success;
+        }
+
+        return AlertSeverity.Info;
     }
 
     /// <summary>

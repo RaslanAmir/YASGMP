@@ -57,6 +57,13 @@
 | `Services/DatabaseService` | Persistence gateway + layout/audit helpers | Choose-From-List lookups, attachments, signature capture | Hash-chain extension outlined below; implementation blocked on SDK validation | `Planned` |
 | `docs/` | Planning, mapping, parity matrices | Acceptance checklist cross-reference | codex_plan / progress synchronized each batch | `Current` |
 
+### Increment 2 Follow-up — Alerts & Notification Preferences (2026-04-10)
+
+- Added cross-platform alert abstractions (`IAlertService` in AppCore and WPF `AlertService`) so shell status updates and toast overlays mirror MAUI alerts while respecting persisted operator preferences; the Admin module now exposes status bar/toast toggles with a save workflow wired to the new service.
+- Introduced `NotificationPreferenceService` persistence, the shared `NotificationPreferences` model, and WPF unit tests covering alert propagation plus AdminModuleViewModel load/save/dirty states to guard the workflow.
+- Refreshed `README_WPF_SHELL.md` and `docs/WPF_MAPPING.md` with alert parity details, toast overlay documentation, and notification preference UI notes.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with `command not found` because the dotnet CLI is unavailable on this Linux host; rerun on a Windows machine with the Windows 10 SDK installed.
+
 #### Entity Traceability Map (Seed)
 
 | Entity | Database Source | Adapter / Service | ViewModel | View |
