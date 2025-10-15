@@ -51,6 +51,10 @@ namespace YasGMP.Wpf
                         svc.AddSingleton(TimeProvider.System);
                         svc.AddSingleton<AuditService>();
                         svc.AddSingleton<ExportService>();
+                        svc.AddSingleton<CodeGeneratorService>();
+                        svc.AddSingleton<ICodeGeneratorService, CodeGeneratorServiceAdapter>();
+                        svc.AddSingleton<QRCodeService>();
+                        svc.AddSingleton<IQRCodeService, QRCodeServiceAdapter>();
                         svc.AddSingleton<IUserSession, UserSession>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<WpfAuthContext>();

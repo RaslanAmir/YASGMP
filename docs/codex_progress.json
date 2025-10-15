@@ -173,8 +173,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: localize shell automation metadata",
+  "lastCommitSummary": "feat: add code/qr service adapters",
   "notes": [
+    "2026-04-09: WPF host now registers CodeGeneratorService/QRCodeService adapters that forward to the shared MAUI services so view-models can request code/QR helpers via DI; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-03-11: Modules pane styles now bind localized automation metadata from module templates, inspector fields reuse ShellStrings automation name/id/tooltip formats, and unit tests cover the localized fallbacks while dotnet restore/build/smoke remain blocked because the CLI is still absent.",
     "2026-03-10: DatabaseService layout helpers and DockLayoutPersistenceService now have null-row regression coverage to ensure empty result sets return null snapshots without throwing; dotnet restore/build/smoke remain blocked because the CLI is still absent.",
     "2026-02-06: Added regression tests for DatabaseService layout helpers, DockLayoutPersistenceService forwarding, and ShellLayoutController reset sequencing so SQL payloads stay covered while dotnet tooling remains unavailable.",
