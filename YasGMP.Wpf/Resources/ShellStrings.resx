@@ -2488,4 +2488,34 @@
   <data name="Module.Assets.Grid.ToolTip" xml:space="preserve">
     <value>Displays filtered assets.</value>
   </data>
+  <data name="Module.Admin.NotificationPreferences.Header" xml:space="preserve">
+    <value>Notification Preferences</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusBar.Label" xml:space="preserve">
+    <value>Show status bar alerts</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusBar.ToolTip" xml:space="preserve">
+    <value>Mirror toast notifications into the shell status bar.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.Toast.Label" xml:space="preserve">
+    <value>Enable toast pop-ups</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.Toast.ToolTip" xml:space="preserve">
+    <value>Display transient toast notifications in the top-right corner.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.SaveButton" xml:space="preserve">
+    <value>Save preferences</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.SaveButton.ToolTip" xml:space="preserve">
+    <value>Persist notification preferences to the shared settings catalog.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusSaved" xml:space="preserve">
+    <value>Notification preferences saved.</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusSaveFailed" xml:space="preserve">
+    <value>Failed to save notification preferences: {0}</value>
+  </data>
+  <data name="Module.Admin.NotificationPreferences.StatusLoadFailed" xml:space="preserve">
+    <value>Could not load notification preferences: {0}</value>
+  </data>
 </root>

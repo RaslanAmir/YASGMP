@@ -24,6 +24,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly ShellInteractionService _shellInteraction;
     private readonly DebugSmokeTestService _smokeTestService;
     private readonly ILocalizationService _localization;
+    private readonly IShellAlertService _alertService;
     private string _statusText = string.Empty;
     private string? _statusResourceKey;
     private object?[]? _statusResourceArguments;
@@ -41,18 +42,22 @@ public partial class MainWindowViewModel : ObservableObject
         ShellStatusBarViewModel statusBar,
         ShellInteractionService shellInteraction,
         DebugSmokeTestService smokeTestService,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        IShellAlertService alertService)
     {
         _moduleRegistry = moduleRegistry;
         _shellInteraction = shellInteraction;
         _smokeTestService = smokeTestService;
         _localization = localization;
+        _alertService = alertService;
         ModulesPane = modulesPane;
         InspectorPane = inspectorPane;
         StatusBar = statusBar;
         Documents = new ObservableCollection<DocumentViewModel>();
         WindowCommands = new WindowMenuViewModel(this);
         RunSmokeTestCommand = new AsyncRelayCommand(RunSmokeTestAsync, () => _smokeTestService.IsEnabled);
+        Toasts = alertService?.Toasts
+            ?? new ReadOnlyObservableCollection<ToastNotificationViewModel>(new ObservableCollection<ToastNotificationViewModel>());
 
         _localization.LanguageChanged += OnLanguageChanged;
 
@@ -78,6 +83,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     /// <summary>Runs the debug smoke test harness surfaced on the Tools ribbon tab.</summary>
     public IAsyncRelayCommand RunSmokeTestCommand { get; }
+
+    /// <summary>Toast notifications rendered in the top-right corner of the shell.</summary>
+    public ReadOnlyObservableCollection<ToastNotificationViewModel> Toasts { get; }
 
     /// <summary>Gets or sets the status text exposed for legacy bindings.</summary>
     public string StatusText

@@ -37,6 +37,7 @@
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -44,7 +45,20 @@
                 <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
-            <DataGrid Grid.Row="1"
+            <GroupBox Grid.Row="1" Header="{DynamicResource Module.Admin.NotificationPreferences.Header}" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="16">
+                    <CheckBox Content="{DynamicResource Module.Admin.NotificationPreferences.StatusBar.Label}"
+                              ToolTip="{DynamicResource Module.Admin.NotificationPreferences.StatusBar.ToolTip}"
+                              IsChecked="{Binding StatusBarAlertsEnabled, Mode=TwoWay}" />
+                    <CheckBox Content="{DynamicResource Module.Admin.NotificationPreferences.Toast.Label}"
+                              ToolTip="{DynamicResource Module.Admin.NotificationPreferences.Toast.ToolTip}"
+                              IsChecked="{Binding ToastAlertsEnabled, Mode=TwoWay}" />
+                    <Button Content="{DynamicResource Module.Admin.NotificationPreferences.SaveButton}"
+                            ToolTip="{DynamicResource Module.Admin.NotificationPreferences.SaveButton.ToolTip}"
+                            Command="{Binding SaveNotificationPreferencesCommand}" />
+                </StackPanel>
+            </GroupBox>
+            <DataGrid Grid.Row="2"
                       ItemsSource="{Binding RecordsView}"
                       SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
                       AutoGenerateColumns="False"
@@ -58,7 +72,7 @@
                     <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Description.Header}" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
         </Grid>
     </DockPanel>
 </UserControl>

@@ -7,6 +7,7 @@ using YasGMP.AppCore.DependencyInjection;
 using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+using YasGMP.Services.Ui;
 using YasGMP.ViewModels;
 using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
@@ -104,6 +105,9 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
                         svc.AddSingleton<IShellInteractionService>(sp => sp.GetRequiredService<ShellInteractionService>());
+                        svc.AddSingleton<INotificationPreferenceService, NotificationPreferenceService>();
+                        svc.AddSingleton<IShellAlertService, AlertService>();
+                        svc.AddSingleton<IAlertService>(sp => sp.GetRequiredService<IShellAlertService>());
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
