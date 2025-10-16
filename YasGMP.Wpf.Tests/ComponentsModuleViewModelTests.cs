@@ -18,8 +18,6 @@ public class ComponentsModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var audit = new AuditService(database);
-        var audit = new AuditService(database);
         const int adapterSignatureId = 9325;
         var componentAdapter = new FakeComponentCrudService
         {
@@ -27,7 +25,7 @@ public class ComponentsModuleViewModelTests
         };
         var machineAdapter = new FakeMachineCrudService();
 
-        _ = await machineAdapter.CreateAsync(new Machine
+        await machineAdapter.CreateAsync(new Machine
         {
             Id = 1,
             Code = "AST-001",
@@ -48,8 +46,17 @@ public class ComponentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, audit, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
-        await viewModel.InitializeAsync(null);
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation);
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
 
         viewModel.Mode = FormMode.Add;
         viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
@@ -62,7 +69,7 @@ public class ComponentsModuleViewModelTests
         viewModel.Editor.Supplier = "Contoso";
         viewModel.Editor.Comments = "Initial install";
 
-        var saved = await InvokeSaveAsync(viewModel);
+        var saved = await InvokeSaveAsync(viewModel).ConfigureAwait(false);
 
         Assert.True(saved);
         Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
@@ -95,10 +102,11 @@ public class ComponentsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_SignatureCancelled_LeavesEditorDirtyAndSkipsPersist()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var componentAdapter = new FakeComponentCrudService();
         var machineAdapter = new FakeMachineCrudService();
 
-        _ = await machineAdapter.CreateAsync(new Machine
+        await machineAdapter.CreateAsync(new Machine
         {
             Id = 1,
             Code = "AST-001",
@@ -120,8 +128,17 @@ public class ComponentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, audit, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
-        await viewModel.InitializeAsync(null);
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation);
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
 
         viewModel.Mode = FormMode.Add;
         viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
@@ -134,7 +151,7 @@ public class ComponentsModuleViewModelTests
         viewModel.Editor.Supplier = "Contoso";
         viewModel.Editor.Comments = "Initial install";
 
-        var saved = await InvokeSaveAsync(viewModel);
+        var saved = await InvokeSaveAsync(viewModel).ConfigureAwait(false);
 
         Assert.False(saved);
         Assert.Equal(FormMode.Add, viewModel.Mode);
@@ -147,10 +164,11 @@ public class ComponentsModuleViewModelTests
     public async Task OnSaveAsync_AddMode_SignatureCaptureThrows_SetsStatusAndSkipsPersist()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         var componentAdapter = new FakeComponentCrudService();
         var machineAdapter = new FakeMachineCrudService();
 
-        _ = await machineAdapter.CreateAsync(new Machine
+        await machineAdapter.CreateAsync(new Machine
         {
             Id = 1,
             Code = "AST-001",
@@ -172,8 +190,17 @@ public class ComponentsModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new ComponentsModuleViewModel(database, audit, componentAdapter, machineAdapter, auth, signatureDialog, dialog, shell, navigation);
-        await viewModel.InitializeAsync(null);
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation);
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
 
         viewModel.Mode = FormMode.Add;
         viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
@@ -186,7 +213,7 @@ public class ComponentsModuleViewModelTests
         viewModel.Editor.Supplier = "Contoso";
         viewModel.Editor.Comments = "Initial install";
 
-        var saved = await InvokeSaveAsync(viewModel);
+        var saved = await InvokeSaveAsync(viewModel).ConfigureAwait(false);
 
         Assert.False(saved);
         Assert.Equal(FormMode.Add, viewModel.Mode);
@@ -195,11 +222,78 @@ public class ComponentsModuleViewModelTests
         Assert.Empty(signatureDialog.PersistedResults);
     }
 
+    private static ComponentsModuleViewModel CreateViewModel(
+        DatabaseService database,
+        AuditService audit,
+        FakeComponentCrudService componentAdapter,
+        FakeMachineCrudService machineAdapter,
+        TestAuthContext auth,
+        TestElectronicSignatureDialogService signatureDialog,
+        TestCflDialogService dialog,
+        TestShellInteractionService shell,
+        TestModuleNavigationService navigation,
+        ILocalizationService? localization = null,
+        ICodeGeneratorService? codeGeneratorService = null,
+        IQRCodeService? qrCodeService = null,
+        IPlatformService? platformService = null)
+    {
+        localization ??= new StubLocalizationService();
+        codeGeneratorService ??= new StubCodeGeneratorService();
+        qrCodeService ??= new StubQrCodeService();
+        platformService ??= new StubPlatformService();
+
+        return new ComponentsModuleViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            localization,
+            codeGeneratorService,
+            qrCodeService,
+            platformService);
+    }
+
     private static Task<bool> InvokeSaveAsync(ComponentsModuleViewModel viewModel)
     {
         var method = typeof(ComponentsModuleViewModel)
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(ComponentsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+
+    private sealed class TestCflDialogService : ICflDialogService
+    {
+        public Task<CflResult?> ShowAsync(CflRequest request)
+            => Task.FromResult<CflResult?>(null);
+    }
+
+    private sealed class TestModuleNavigationService : IModuleNavigationService
+    {
+        public void Activate(ModuleDocumentViewModel document)
+        {
+        }
+
+        public ModuleDocumentViewModel OpenModule(string moduleKey, object? parameter = null)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class StubLocalizationService : ILocalizationService
+    {
+        public string CurrentLanguage { get; private set; } = "en";
+
+        public event EventHandler? LanguageChanged;
+
+        public string GetString(string key) => key;
+
+        public void SetLanguage(string language)
+        {
+            CurrentLanguage = language;
+            LanguageChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }
