@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -508,11 +509,31 @@ public class ComponentsModuleViewModelTests
 
     private sealed class StubLocalizationService : ILocalizationService
     {
+        private static readonly Dictionary<string, string> Resources = new()
+        {
+            ["Module.Status.Filtered"] = "Filtered {0} by \"{1}\".",
+            ["Module.Components.Status.ComponentNotFound"] = "Unable to locate component #{0}.",
+            ["Module.Components.Status.CodeAndQrGenerated"] = "Generated component code {0} and QR image at {1}.",
+            ["Module.Components.Status.QrGenerated"] = "QR generated at {0}.",
+            ["Module.Components.Status.QrPathUnavailable"] = "QR path unavailable.",
+            ["Module.Components.Status.QrGenerationFailed"] = "QR generation failed: {0}",
+            ["Module.Components.Status.SelectBeforeSave"] = "Select a component before saving.",
+            ["Module.Components.Status.SignatureFailed"] = "Electronic signature failed: {0}",
+            ["Module.Components.Status.SignatureCancelled"] = "Electronic signature cancelled. Save aborted.",
+            ["Module.Components.Status.SignatureNotCaptured"] = "Electronic signature was not captured.",
+            ["Module.Components.Status.SignaturePersistenceFailed"] = "Failed to persist electronic signature: {0}",
+            ["Module.Components.Status.SignatureCaptured"] = "Electronic signature captured ({0}).",
+            ["Module.Components.Status.SaveBeforeAttachment"] = "Save the component before adding attachments.",
+            ["Module.Components.Status.AttachmentCancelled"] = "Attachment upload cancelled.",
+            ["Module.Components.Status.AttachmentFailed"] = "Attachment upload failed: {0}"
+        };
+
         public string CurrentLanguage { get; private set; } = "en";
 
         public event EventHandler? LanguageChanged;
 
-        public string GetString(string key) => key;
+        public string GetString(string key)
+            => Resources.TryGetValue(key, out var value) ? value : key;
 
         public void SetLanguage(string language)
         {

@@ -552,6 +552,48 @@
   <data name="Module.Assets.Status.QrPathUnavailable" xml:space="preserve">
     <value>Putanja QR koda nije dostupna.</value>
   </data>
+  <data name="Module.Components.Status.ComponentNotFound" xml:space="preserve">
+    <value>Nije moguće pronaći komponentu #{0}.</value>
+  </data>
+  <data name="Module.Components.Status.CodeAndQrGenerated" xml:space="preserve">
+    <value>Generiran je kod komponente {0} i QR slika na {1}.</value>
+  </data>
+  <data name="Module.Components.Status.QrGenerated" xml:space="preserve">
+    <value>QR kod je generiran na {0}.</value>
+  </data>
+  <data name="Module.Components.Status.QrGenerationFailed" xml:space="preserve">
+    <value>Generiranje QR koda nije uspjelo: {0}</value>
+  </data>
+  <data name="Module.Components.Status.QrPathUnavailable" xml:space="preserve">
+    <value>Putanja QR koda nije dostupna.</value>
+  </data>
+  <data name="Module.Components.Status.SelectBeforeSave" xml:space="preserve">
+    <value>Odaberite komponentu prije spremanja.</value>
+  </data>
+  <data name="Module.Components.Status.SignatureFailed" xml:space="preserve">
+    <value>Elektronički potpis nije uspio: {0}</value>
+  </data>
+  <data name="Module.Components.Status.SignatureCancelled" xml:space="preserve">
+    <value>Elektronički potpis je otkazan. Spremanje je prekinuto.</value>
+  </data>
+  <data name="Module.Components.Status.SignatureNotCaptured" xml:space="preserve">
+    <value>Elektronički potpis nije zabilježen.</value>
+  </data>
+  <data name="Module.Components.Status.SignaturePersistenceFailed" xml:space="preserve">
+    <value>Spremanje elektroničkog potpisa nije uspjelo: {0}</value>
+  </data>
+  <data name="Module.Components.Status.SignatureCaptured" xml:space="preserve">
+    <value>Elektronički potpis zabilježen ({0}).</value>
+  </data>
+  <data name="Module.Components.Status.SaveBeforeAttachment" xml:space="preserve">
+    <value>Spremite komponentu prije dodavanja privitaka.</value>
+  </data>
+  <data name="Module.Components.Status.AttachmentCancelled" xml:space="preserve">
+    <value>Prijenos privitka je otkazan.</value>
+  </data>
+  <data name="Module.Components.Status.AttachmentFailed" xml:space="preserve">
+    <value>Prijenos privitka nije uspio: {0}</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>u kvalifikaciji</value>
   </data>
