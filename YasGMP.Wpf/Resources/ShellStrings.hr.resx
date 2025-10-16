@@ -495,6 +495,9 @@
   <data name="Module.Title.WorkOrders" xml:space="preserve">
     <value>Radni nalozi</value>
   </data>
+  <data name="Module.Title.PreventiveMaintenance" xml:space="preserve">
+    <value>Preventivno održavanje</value>
+  </data>
   <data name="Module.Assets.Status.Active" xml:space="preserve">
     <value>aktivan</value>
   </data>

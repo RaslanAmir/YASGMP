@@ -133,6 +133,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<WarehouseModuleViewModel>();
                         svc.AddTransient<WorkOrdersModuleViewModel>();
                         svc.AddTransient<CalibrationModuleViewModel>();
+                        svc.AddTransient<PreventiveMaintenanceModuleViewModel>();
                         svc.AddTransient<PartsModuleViewModel>();
                         svc.AddTransient<SuppliersModuleViewModel>();
                         svc.AddTransient<ExternalServicersModuleViewModel>();
@@ -172,6 +173,7 @@ namespace YasGMP.Wpf
                             registry.Register<ComponentsModuleViewModel>(ComponentsModuleViewModel.ModuleKey, "Components", "Maintenance", "Component hierarchy and lifecycle");
                             registry.Register<WarehouseModuleViewModel>(WarehouseModuleViewModel.ModuleKey, "Warehouse", "Maintenance", "Warehouse master data");
                             registry.Register<WorkOrdersModuleViewModel>(WorkOrdersModuleViewModel.ModuleKey, "Work Orders", "Maintenance", "Corrective and preventive jobs");
+                            registry.Register<PreventiveMaintenanceModuleViewModel>(PreventiveMaintenanceModuleViewModel.ModuleKey, "Preventive Maintenance", "Maintenance", "Preventive plans calendar and lifecycle");
                             registry.Register<CalibrationModuleViewModel>(CalibrationModuleViewModel.ModuleKey, "Calibration", "Maintenance", "Calibration records");
                             registry.Register<PartsModuleViewModel>(PartsModuleViewModel.ModuleKey, "Parts", "Maintenance", "Parts and spare stock");
                             registry.Register<SuppliersModuleViewModel>(SuppliersModuleViewModel.ModuleKey, "Suppliers", "Supply Chain", "Approved suppliers and contractors");
