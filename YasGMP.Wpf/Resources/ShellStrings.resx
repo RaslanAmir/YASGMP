@@ -549,6 +549,48 @@
   <data name="Module.Assets.Status.QrPathUnavailable" xml:space="preserve">
     <value>QR path unavailable.</value>
   </data>
+  <data name="Module.Components.Status.ComponentNotFound" xml:space="preserve">
+    <value>Unable to locate component #{0}.</value>
+  </data>
+  <data name="Module.Components.Status.CodeAndQrGenerated" xml:space="preserve">
+    <value>Generated component code {0} and QR image at {1}.</value>
+  </data>
+  <data name="Module.Components.Status.QrGenerated" xml:space="preserve">
+    <value>QR generated at {0}.</value>
+  </data>
+  <data name="Module.Components.Status.QrGenerationFailed" xml:space="preserve">
+    <value>QR generation failed: {0}</value>
+  </data>
+  <data name="Module.Components.Status.QrPathUnavailable" xml:space="preserve">
+    <value>QR path unavailable.</value>
+  </data>
+  <data name="Module.Components.Status.SelectBeforeSave" xml:space="preserve">
+    <value>Select a component before saving.</value>
+  </data>
+  <data name="Module.Components.Status.SignatureFailed" xml:space="preserve">
+    <value>Electronic signature failed: {0}</value>
+  </data>
+  <data name="Module.Components.Status.SignatureCancelled" xml:space="preserve">
+    <value>Electronic signature cancelled. Save aborted.</value>
+  </data>
+  <data name="Module.Components.Status.SignatureNotCaptured" xml:space="preserve">
+    <value>Electronic signature was not captured.</value>
+  </data>
+  <data name="Module.Components.Status.SignaturePersistenceFailed" xml:space="preserve">
+    <value>Failed to persist electronic signature: {0}</value>
+  </data>
+  <data name="Module.Components.Status.SignatureCaptured" xml:space="preserve">
+    <value>Electronic signature captured ({0}).</value>
+  </data>
+  <data name="Module.Components.Status.SaveBeforeAttachment" xml:space="preserve">
+    <value>Save the component before adding attachments.</value>
+  </data>
+  <data name="Module.Components.Status.AttachmentCancelled" xml:space="preserve">
+    <value>Attachment upload cancelled.</value>
+  </data>
+  <data name="Module.Components.Status.AttachmentFailed" xml:space="preserve">
+    <value>Attachment upload failed: {0}</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>in-qualification</value>
   </data>

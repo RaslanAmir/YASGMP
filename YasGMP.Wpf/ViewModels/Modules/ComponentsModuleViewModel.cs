@@ -45,6 +45,21 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         "other"
     };
 
+    private const string ComponentNotFoundStatusKey = "Module.Components.Status.ComponentNotFound";
+    private const string CodeAndQrGeneratedStatusKey = "Module.Components.Status.CodeAndQrGenerated";
+    private const string QrGeneratedStatusKey = "Module.Components.Status.QrGenerated";
+    private const string QrGenerationFailedStatusKey = "Module.Components.Status.QrGenerationFailed";
+    private const string QrPathUnavailableStatusKey = "Module.Components.Status.QrPathUnavailable";
+    private const string SelectBeforeSaveStatusKey = "Module.Components.Status.SelectBeforeSave";
+    private const string SignatureFailedStatusKey = "Module.Components.Status.SignatureFailed";
+    private const string SignatureCancelledStatusKey = "Module.Components.Status.SignatureCancelled";
+    private const string SignatureNotCapturedStatusKey = "Module.Components.Status.SignatureNotCaptured";
+    private const string SignaturePersistenceFailedStatusKey = "Module.Components.Status.SignaturePersistenceFailed";
+    private const string SignatureCapturedStatusKey = "Module.Components.Status.SignatureCaptured";
+    private const string SaveBeforeAttachmentStatusKey = "Module.Components.Status.SaveBeforeAttachment";
+    private const string AttachmentCancelledStatusKey = "Module.Components.Status.AttachmentCancelled";
+    private const string AttachmentFailedStatusKey = "Module.Components.Status.AttachmentFailed";
+
     private readonly IComponentCrudService _componentService;
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
@@ -52,6 +67,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly IShellInteractionService _shellInteraction;
+    private readonly ILocalizationService _localization;
     private readonly ICodeGeneratorService _codeGeneratorService;
     private readonly IQRCodeService _qrCodeService;
     private readonly IPlatformService _platformService;
@@ -89,6 +105,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _codeGeneratorService = codeGeneratorService ?? throw new ArgumentNullException(nameof(codeGeneratorService));
         _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
@@ -254,7 +271,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
 
         SearchText = search;
-        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
         return Task.CompletedTask;
     }
 
@@ -281,7 +298,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         var component = await _componentService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (component is null)
         {
-            StatusMessage = $"Unable to locate component #{id}.";
+            StatusMessage = _localization.GetString(ComponentNotFoundStatusKey, id);
             return;
         }
 
@@ -307,6 +324,10 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                     defaultMachineId,
                     defaultMachineName));
                 await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(Editor.Code) && !string.IsNullOrWhiteSpace(Editor.QrCode))
+                {
+                    StatusMessage = _localization.GetString(CodeAndQrGeneratedStatusKey, Editor.Code, Editor.QrCode);
+                }
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -325,8 +346,10 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         var errors = new List<string>();
         try
         {
+            EnsureEditorStatusNormalized(suppressDirty: true);
+            var code = EnsureEditorCode(force: false, suppressDirty: true);
+            EnsureEditorQrPayload(code, suppressDirty: true);
             var component = Editor.ToComponent(_loadedComponent);
-            component.Status = _componentService.NormalizeStatus(component.Status);
             component.MachineName = ResolveMachineName(component.MachineId);
             _componentService.Validate(component);
         }
@@ -345,12 +368,19 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     protected override async Task<bool> OnSaveAsync()
     {
         var component = Editor.ToComponent(_loadedComponent);
-        component.Status = _componentService.NormalizeStatus(component.Status);
-        component.MachineName = ResolveMachineName(component.MachineId);
+        try
+        {
+            await SynchronizeIdentifiersAsync(component, forceCode: false, suppressDirty: true).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
+            return false;
+        }
 
         if (Mode == FormMode.Update && _loadedComponent is null)
         {
-            StatusMessage = "Select a component before saving.";
+            StatusMessage = _localization.GetString(SelectBeforeSaveStatusKey);
             return false;
         }
 
@@ -364,25 +394,28 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = _localization.GetString(SignatureFailedStatusKey, ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = _localization.GetString(SignatureCancelledStatusKey);
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = _localization.GetString(SignatureNotCapturedStatusKey);
             return false;
         }
 
-        component.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
-        component.LastModified = DateTime.UtcNow;
-        component.LastModifiedById = _authContext.CurrentUser?.Id ?? component.LastModifiedById;
+        var signature = signatureResult.Signature;
+        component.DigitalSignature = signature.SignatureHash ?? string.Empty;
+        component.LastModified = signature.SignedAt ?? DateTime.UtcNow;
+        component.LastModifiedById = signature.UserId != 0
+            ? signature.UserId
+            : _authContext.CurrentUser?.Id ?? component.LastModifiedById;
         component.SourceIp = _authContext.CurrentIpAddress ?? component.SourceIp ?? string.Empty;
 
         var context = ComponentCrudContext.Create(
@@ -447,12 +480,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = _localization.GetString(SignaturePersistenceFailedStatusKey, ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = _localization.GetString(SignatureCapturedStatusKey, signatureResult.ReasonDisplay);
         UpdateCommandStates();
         return true;
     }
@@ -654,13 +687,14 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             var code = EnsureEditorCode(force: true, suppressDirty: false);
             var payload = EnsureEditorQrPayload(code, suppressDirty: false);
             var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty: false).ConfigureAwait(false);
-            StatusMessage = string.IsNullOrWhiteSpace(path)
-                ? $"Generated component code {code}, but QR path is unavailable."
-                : $"Generated component code {code} and QR image at {path}.";
+            StatusMessage = _localization.GetString(
+                CodeAndQrGeneratedStatusKey,
+                code,
+                string.IsNullOrWhiteSpace(path) ? _localization.GetString(QrPathUnavailableStatusKey) : path);
         }
         catch (Exception ex)
         {
-            StatusMessage = $"QR generation failed: {ex.Message}";
+            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
         }
         finally
         {
@@ -679,17 +713,19 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             var path = component.QrCode ?? Editor.QrCode;
             if (string.IsNullOrWhiteSpace(path))
             {
-                StatusMessage = "QR generation failed: QR path unavailable.";
+                StatusMessage = _localization.GetString(
+                    QrGenerationFailedStatusKey,
+                    _localization.GetString(QrPathUnavailableStatusKey));
             }
             else
             {
                 _shellInteraction.PreviewDocument(path);
-                StatusMessage = $"QR generated at {path}.";
+                StatusMessage = _localization.GetString(QrGeneratedStatusKey, path);
             }
         }
         catch (Exception ex)
         {
-            StatusMessage = $"QR generation failed: {ex.Message}";
+            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
         }
         finally
         {
@@ -702,7 +738,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     {
         if (_loadedComponent is null || _loadedComponent.Id <= 0)
         {
-            StatusMessage = "Save the component before adding attachments.";
+            StatusMessage = _localization.GetString(SaveBeforeAttachmentStatusKey);
             return;
         }
 
@@ -715,7 +751,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = _localization.GetString(AttachmentCancelledStatusKey);
                 return;
             }
 
@@ -751,7 +787,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = _localization.GetString(AttachmentFailedStatusKey, ex.Message);
         }
         finally
         {
@@ -779,7 +815,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"QR generation failed: {ex.Message}";
+            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
         }
     }
 
@@ -795,9 +831,21 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             return;
         }
 
+        var normalizedStatus = EnsureEditorStatusNormalized(suppressDirty);
         var code = EnsureEditorCode(forceCode, suppressDirty);
         var payload = EnsureEditorQrPayload(code, suppressDirty);
         var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty, cancellationToken).ConfigureAwait(false);
+
+        component.Status = normalizedStatus;
+        component.MachineName = ResolveMachineName(component.MachineId);
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.MachineName = component.MachineName);
+        }
+        else
+        {
+            Editor.MachineName = component.MachineName;
+        }
 
         component.Code = code;
         component.QrPayload = payload;
@@ -807,6 +855,26 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         {
             ResetDirty();
         }
+    }
+
+    private string EnsureEditorStatusNormalized(bool suppressDirty)
+    {
+        var normalized = _componentService.NormalizeStatus(Editor.Status);
+        if (string.Equals(Editor.Status, normalized, StringComparison.Ordinal))
+        {
+            return normalized;
+        }
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.Status = normalized);
+        }
+        else
+        {
+            Editor.Status = normalized;
+        }
+
+        return normalized;
     }
 
     private string EnsureEditorCode(bool force, bool suppressDirty)
