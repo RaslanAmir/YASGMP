@@ -492,6 +492,9 @@
   <data name="Module.Title.WorkOrders" xml:space="preserve">
     <value>Work Orders</value>
   </data>
+  <data name="Module.Title.PreventiveMaintenance" xml:space="preserve">
+    <value>Preventive Maintenance</value>
+  </data>
   <data name="Module.Assets.Status.Active" xml:space="preserve">
     <value>active</value>
   </data>
