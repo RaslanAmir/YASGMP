@@ -74,6 +74,12 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ICalibrationCertificateDialogService, CalibrationCertificateDialogService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<IRBACService, RBACService>();
+                        svc.AddTransient<ICalibrationAuditService, CalibrationAuditServiceAdapter>();
+                        svc.AddTransient<IPpmAuditService, PpmAuditServiceAdapter>();
+                        svc.AddTransient<PreventiveMaintenanceService>();
+                        svc.AddTransient<PreventiveMaintenancePlanService>();
+                        svc.AddTransient<IPreventiveMaintenanceService, PreventiveMaintenanceServiceAdapter>();
+                        svc.AddTransient<IPreventiveMaintenancePlanService, PreventiveMaintenancePlanServiceAdapter>();
                         svc.AddSingleton<WorkOrderAuditService>();
                         svc.AddSingleton<BackgroundScheduler>();
                         svc.AddSingleton(sp => new Lazy<BackgroundScheduler>(() => sp.GetRequiredService<BackgroundScheduler>()));
