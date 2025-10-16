@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -321,7 +322,8 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             return false;
         }
 
-        entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        var signature = signatureResult.Signature;
+        entity.DigitalSignature = signature.SignatureHash ?? string.Empty;
 
         var context = WorkOrderCrudContext.Create(
             userId.Value,
@@ -365,10 +367,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             adapterResult.DigitalSignatureId = signatureId;
         }
 
-        _loadedEntity = entity;
-        LoadEditor(entity);
-        UpdateAttachmentCommandState();
-
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
             tableName: "work_orders",
@@ -382,6 +380,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             fallbackDeviceInfo: context.DeviceInfo,
             fallbackIpAddress: context.Ip,
             fallbackSessionId: context.SessionId);
+
+        ApplySignatureMetadataToEntity(entity, signatureResult, context, saveResult.SignatureMetadata);
+
+        _loadedEntity = entity;
+        LoadEditor(entity);
+        UpdateAttachmentCommandState();
 
         try
         {
@@ -403,7 +407,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         var currentIp = _authContext.CurrentIpAddress ?? string.Empty;
         var currentDevice = _authContext.CurrentDeviceInfo ?? string.Empty;
         var currentSession = _authContext.CurrentSessionId ?? string.Empty;
-        var signature = signatureResult.Signature;
         var details = string.Join(", ", new[]
         {
             $"user={currentUserId}",
@@ -568,6 +571,179 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
 
+    private void ApplySignatureMetadataToEntity(
+        WorkOrder entity,
+        ElectronicSignatureDialogResult signatureResult,
+        WorkOrderCrudContext context,
+        SignatureMetadataDto? metadata)
+    {
+        if (entity is null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+
+        if (signatureResult is null)
+        {
+            throw new ArgumentNullException(nameof(signatureResult));
+        }
+
+        if (signatureResult.Signature is null)
+        {
+            throw new ArgumentException("Signature result is missing the captured signature payload.", nameof(signatureResult));
+        }
+
+        var signature = signatureResult.Signature;
+        var signerId = signature.UserId != 0 ? signature.UserId : context.UserId;
+        var fallbackName = _authContext.CurrentUser?.FullName
+            ?? _authContext.CurrentUser?.Username
+            ?? string.Empty;
+        var signerName = !string.IsNullOrWhiteSpace(signature.UserName)
+            ? signature.UserName!
+            : !string.IsNullOrWhiteSpace(fallbackName)
+                ? fallbackName
+                : entity.LastModifiedBy?.FullName
+                    ?? entity.LastModifiedBy?.Username
+                    ?? string.Empty;
+
+        var signatureHash = !string.IsNullOrWhiteSpace(signature.SignatureHash)
+            ? signature.SignatureHash!
+            : metadata?.Hash ?? entity.DigitalSignature ?? string.Empty;
+
+        entity.DigitalSignature = signatureHash;
+        var metadataId = metadata?.Id ?? (signature.Id > 0 ? signature.Id : (int?)null);
+        if (metadataId.HasValue)
+        {
+            entity.DigitalSignatureId = metadataId;
+        }
+
+        entity.LastModified = signature.SignedAt ?? DateTime.UtcNow;
+
+        if (signerId > 0)
+        {
+            entity.LastModifiedById = signerId;
+        }
+
+        var deviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
+            ? signature.DeviceInfo!
+            : metadata?.Device ?? context.DeviceInfo ?? entity.DeviceInfo ?? string.Empty;
+        var sourceIp = !string.IsNullOrWhiteSpace(signature.IpAddress)
+            ? signature.IpAddress!
+            : metadata?.IpAddress ?? context.Ip ?? entity.SourceIp ?? string.Empty;
+        var sessionId = !string.IsNullOrWhiteSpace(signature.SessionId)
+            ? signature.SessionId!
+            : metadata?.Session ?? context.SessionId ?? entity.SessionId ?? string.Empty;
+
+        entity.DeviceInfo = deviceInfo ?? string.Empty;
+        entity.SourceIp = sourceIp ?? string.Empty;
+        entity.SessionId = sessionId ?? string.Empty;
+
+        if (entity.LastModifiedBy is null && (!string.IsNullOrWhiteSpace(signerName) || signerId > 0))
+        {
+            entity.LastModifiedBy = new User
+            {
+                Id = signerId,
+                FullName = signerName,
+                Username = signerName
+            };
+        }
+        else if (entity.LastModifiedBy is not null)
+        {
+            if (signerId > 0)
+            {
+                entity.LastModifiedBy.Id = signerId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(signerName))
+            {
+                if (string.IsNullOrWhiteSpace(entity.LastModifiedBy.FullName))
+                {
+                    entity.LastModifiedBy.FullName = signerName;
+                }
+
+                if (string.IsNullOrWhiteSpace(entity.LastModifiedBy.Username))
+                {
+                    entity.LastModifiedBy.Username = signerName;
+                }
+            }
+        }
+
+        entity.Signatures ??= new List<WorkOrderSignature>();
+
+        var expectedId = metadataId;
+        var latestSignature = entity.Signatures
+            .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
+            .FirstOrDefault();
+
+        if (latestSignature is null || (expectedId.HasValue && expectedId.Value > 0 && latestSignature.Id != expectedId.Value))
+        {
+            latestSignature = new WorkOrderSignature();
+            entity.Signatures.Add(latestSignature);
+        }
+
+        latestSignature.WorkOrderId = entity.Id;
+        if (expectedId.HasValue && expectedId.Value > 0)
+        {
+            latestSignature.Id = expectedId.Value;
+        }
+
+        latestSignature.UserId = signerId;
+        latestSignature.SignatureHash = signatureHash;
+        latestSignature.SignedAt = signature.SignedAt ?? entity.LastModified;
+        latestSignature.Note = !string.IsNullOrWhiteSpace(signature.Note)
+            ? signature.Note
+            : metadata?.Note ?? context.SignatureNote ?? latestSignature.Note;
+
+        if (!string.IsNullOrWhiteSpace(signatureResult.ReasonDisplay))
+        {
+            latestSignature.ReasonDescription = signatureResult.ReasonDisplay;
+        }
+
+        if (!string.IsNullOrWhiteSpace(signatureResult.ReasonCode))
+        {
+            latestSignature.ReasonCode = signatureResult.ReasonCode;
+        }
+
+        latestSignature.DeviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
+            ? signature.DeviceInfo
+            : metadata?.Device ?? context.DeviceInfo ?? latestSignature.DeviceInfo;
+        latestSignature.IpAddress = !string.IsNullOrWhiteSpace(signature.IpAddress)
+            ? signature.IpAddress
+            : metadata?.IpAddress ?? context.Ip ?? latestSignature.IpAddress;
+        latestSignature.SessionId = !string.IsNullOrWhiteSpace(signature.SessionId)
+            ? signature.SessionId
+            : metadata?.Session ?? context.SessionId ?? latestSignature.SessionId;
+
+        if (latestSignature.User is null && (!string.IsNullOrWhiteSpace(signerName) || signerId > 0))
+        {
+            latestSignature.User = new User
+            {
+                Id = signerId,
+                FullName = signerName,
+                Username = signerName
+            };
+        }
+        else if (latestSignature.User is not null)
+        {
+            if (signerId > 0)
+            {
+                latestSignature.User.Id = signerId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(signerName))
+            {
+                if (string.IsNullOrWhiteSpace(latestSignature.User.FullName))
+                {
+                    latestSignature.User.FullName = signerName;
+                }
+
+                if (string.IsNullOrWhiteSpace(latestSignature.User.Username))
+                {
+                    latestSignature.User.Username = signerName;
+                }
+            }
+        }
+    }
+
     private ModuleRecord ToRecord(WorkOrder workOrder)
     {
         var fields = new List<InspectorField>
@@ -657,11 +833,65 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         [ObservableProperty]
         private string _notes = string.Empty;
+
+        [ObservableProperty]
+        private int? _digitalSignatureId;
+
+        [ObservableProperty]
+        private string _signatureHash = string.Empty;
+
+        [ObservableProperty]
+        private string _signatureReason = string.Empty;
+
+        [ObservableProperty]
+        private string _signatureNote = string.Empty;
+
+        [ObservableProperty]
+        private DateTime? _signatureTimestampUtc;
+
+        [ObservableProperty]
+        private int? _signerUserId;
+
+        [ObservableProperty]
+        private string _signerUserName = string.Empty;
+
+        [ObservableProperty]
+        private DateTime? _lastModifiedUtc;
+
+        [ObservableProperty]
+        private int? _lastModifiedById;
+
+        [ObservableProperty]
+        private string _lastModifiedByName = string.Empty;
+
+        [ObservableProperty]
+        private string _sourceIp = string.Empty;
+
+        [ObservableProperty]
+        private string _sessionId = string.Empty;
+
+        [ObservableProperty]
+        private string _deviceInfo = string.Empty;
         /// <summary>
         /// Executes the create empty operation.
         /// </summary>
 
-        public static WorkOrderEditor CreateEmpty() => new();
+        public static WorkOrderEditor CreateEmpty()
+            => new()
+            {
+                SignatureHash = string.Empty,
+                SignatureReason = string.Empty,
+                SignatureNote = string.Empty,
+                SignatureTimestampUtc = null,
+                SignerUserId = null,
+                SignerUserName = string.Empty,
+                LastModifiedUtc = null,
+                LastModifiedById = null,
+                LastModifiedByName = string.Empty,
+                SourceIp = string.Empty,
+                SessionId = string.Empty,
+                DeviceInfo = string.Empty
+            };
         /// <summary>
         /// Executes the create for new operation.
         /// </summary>
@@ -669,6 +899,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         public static WorkOrderEditor CreateForNew(IAuthContext authContext)
         {
             var userId = authContext.CurrentUser?.Id ?? 1;
+            var userName = authContext.CurrentUser?.FullName
+                ?? authContext.CurrentUser?.Username
+                ?? string.Empty;
             return new WorkOrderEditor
             {
                 Status = "OPEN",
@@ -679,7 +912,19 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 DateOpen = DateTime.UtcNow,
                 RequestedById = userId,
                 CreatedById = userId,
-                AssignedToId = userId
+                AssignedToId = userId,
+                LastModifiedUtc = DateTime.UtcNow,
+                LastModifiedById = userId,
+                LastModifiedByName = userName,
+                SignatureTimestampUtc = null,
+                SignerUserId = userId,
+                SignerUserName = userName,
+                SignatureHash = string.Empty,
+                SignatureReason = string.Empty,
+                SignatureNote = string.Empty,
+                SourceIp = authContext.CurrentIpAddress ?? string.Empty,
+                SessionId = authContext.CurrentSessionId ?? string.Empty,
+                DeviceInfo = authContext.CurrentDeviceInfo ?? string.Empty
             };
         }
         /// <summary>
@@ -688,6 +933,16 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         public static WorkOrderEditor FromEntity(WorkOrder entity)
         {
+            var latestSignature = entity.Signatures?
+                .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
+                .FirstOrDefault();
+
+            var signerName = latestSignature?.User?.FullName
+                              ?? latestSignature?.User?.Username
+                              ?? entity.LastModifiedBy?.FullName
+                              ?? entity.LastModifiedBy?.Username
+                              ?? string.Empty;
+
             return new WorkOrderEditor
             {
                 Id = entity.Id,
@@ -706,7 +961,20 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 MachineId = entity.MachineId,
                 ComponentId = entity.ComponentId,
                 Result = entity.Result,
-                Notes = entity.Notes
+                Notes = entity.Notes,
+                DigitalSignatureId = entity.DigitalSignatureId,
+                SignatureHash = entity.DigitalSignature ?? string.Empty,
+                SignatureReason = latestSignature?.ReasonDescription ?? string.Empty,
+                SignatureNote = latestSignature?.Note ?? string.Empty,
+                SignatureTimestampUtc = latestSignature?.SignedAt ?? entity.LastModified,
+                SignerUserId = latestSignature?.UserId ?? entity.LastModifiedById,
+                SignerUserName = signerName,
+                LastModifiedUtc = entity.LastModified,
+                LastModifiedById = entity.LastModifiedById,
+                LastModifiedByName = signerName,
+                SourceIp = entity.SourceIp ?? string.Empty,
+                SessionId = entity.SessionId ?? string.Empty,
+                DeviceInfo = entity.DeviceInfo ?? string.Empty
             };
         }
         /// <summary>
@@ -732,7 +1000,20 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 MachineId = MachineId,
                 ComponentId = ComponentId,
                 Result = Result,
-                Notes = Notes
+                Notes = Notes,
+                DigitalSignatureId = DigitalSignatureId,
+                SignatureHash = SignatureHash,
+                SignatureReason = SignatureReason,
+                SignatureNote = SignatureNote,
+                SignatureTimestampUtc = SignatureTimestampUtc,
+                SignerUserId = SignerUserId,
+                SignerUserName = SignerUserName,
+                LastModifiedUtc = LastModifiedUtc,
+                LastModifiedById = LastModifiedById,
+                LastModifiedByName = LastModifiedByName,
+                SourceIp = SourceIp,
+                SessionId = SessionId,
+                DeviceInfo = DeviceInfo
             };
         /// <summary>
         /// Executes the to entity operation.
@@ -758,6 +1039,69 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             entity.ComponentId = ComponentId;
             entity.Result = Result;
             entity.Notes = Notes;
+            entity.DigitalSignatureId = DigitalSignatureId;
+            entity.DigitalSignature = SignatureHash ?? string.Empty;
+            entity.LastModified = LastModifiedUtc ?? entity.LastModified;
+            entity.LastModifiedById = LastModifiedById ?? entity.LastModifiedById;
+            entity.DeviceInfo = string.IsNullOrWhiteSpace(DeviceInfo) ? entity.DeviceInfo : DeviceInfo;
+            entity.SourceIp = string.IsNullOrWhiteSpace(SourceIp) ? entity.SourceIp : SourceIp;
+            entity.SessionId = string.IsNullOrWhiteSpace(SessionId) ? entity.SessionId : SessionId;
+
+            if (!string.IsNullOrWhiteSpace(SignatureReason)
+                || !string.IsNullOrWhiteSpace(SignatureNote)
+                || SignatureTimestampUtc is not null
+                || SignerUserId is not null
+                || !string.IsNullOrWhiteSpace(SignerUserName))
+            {
+                entity.Signatures ??= new List<WorkOrderSignature>();
+                var latestSignature = entity.Signatures
+                    .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
+                    .FirstOrDefault();
+
+                if (latestSignature is null)
+                {
+                    latestSignature = new WorkOrderSignature { WorkOrderId = entity.Id };
+                    entity.Signatures.Add(latestSignature);
+                }
+
+                latestSignature.SignatureHash = string.IsNullOrWhiteSpace(SignatureHash)
+                    ? latestSignature.SignatureHash
+                    : SignatureHash;
+                latestSignature.ReasonDescription = SignatureReason ?? latestSignature.ReasonDescription;
+                latestSignature.Note = SignatureNote ?? latestSignature.Note;
+                latestSignature.SignedAt = SignatureTimestampUtc ?? latestSignature.SignedAt;
+
+                if (SignerUserId is > 0)
+                {
+                    latestSignature.UserId = SignerUserId.Value;
+                }
+
+                if (!string.IsNullOrWhiteSpace(SignerUserName))
+                {
+                    if (latestSignature.User is null)
+                    {
+                        latestSignature.User = new User
+                        {
+                            Id = SignerUserId ?? latestSignature.UserId,
+                            FullName = SignerUserName,
+                            Username = SignerUserName
+                        };
+                    }
+                    else
+                    {
+                        if (string.IsNullOrWhiteSpace(latestSignature.User.FullName))
+                        {
+                            latestSignature.User.FullName = SignerUserName;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(latestSignature.User.Username))
+                        {
+                            latestSignature.User.Username = SignerUserName;
+                        }
+                    }
+                }
+            }
+
             return entity;
         }
     }

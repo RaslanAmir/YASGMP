@@ -17,6 +17,7 @@
       "2025-10-09: dotnet --info still fails with 'command not found' inside the container; restore/build remain blocked.",
       "2025-10-11: dotnet --version/restore/build attempts still hit 'command not found' inside the container.",
       "2025-10-14: dotnet --info/restore/build attempted again; CLI remains unavailable in container.",
+      "2025-10-16: dotnet restore/build attempted while extending Work Orders signature metadata; CLI remains unavailable so each command exits with 'command not found'.",
       "2025-10-17: dotnet --info/restore/build retried; CLI still missing so commands exit with 'command not found'.",
       "2025-10-23: dotnet --info/restore/build attempted again; CLI remains unavailable in the container.",
       "2025-10-27: dotnet --info/restore/build/test retried; CLI still missing so commands exit with 'command not found'.",
@@ -181,8 +182,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: add code/qr service adapters",
+  "lastCommitSummary": "feat: extend work order signature metadata",
   "notes": [
+    "2025-10-16: WorkOrdersModuleViewModel now exposes signature/audit observables, rehydrates persisted metadata after saves, and mirrors inspector updates while dotnet restore/build/test remain blocked with 'command not found'.",
     "2026-04-11: AssetsModuleViewModel now auto-fills machine codes and QR payloads, persists PNG previews via IPlatformService, and adds GenerateCode/PreviewQr unit coverage plus localized status strings; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-04-10: AssetsModuleViewModel now resolves code generator, QR, and platform services via DI with supporting WPF test doubles; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-04-09: WPF host now registers CodeGeneratorService/QRCodeService adapters that forward to the shared MAUI services so view-models can request code/QR helpers via DI; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
