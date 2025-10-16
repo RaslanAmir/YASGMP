@@ -51,7 +51,25 @@ public class ModuleCflTests
         var attachments = new TestAttachmentService();
 
         var audit = new AuditService(db);
-        var viewModel = new AssetsModuleViewModel(db, audit, machineCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        var localization = new LocalizationService();
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+        var viewModel = new AssetsModuleViewModel(
+            db,
+            audit,
+            machineCrud,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         await viewModel.InitializeAsync(null);
         Assert.NotEmpty(viewModel.Records);
 
