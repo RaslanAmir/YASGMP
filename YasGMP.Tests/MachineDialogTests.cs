@@ -19,8 +19,7 @@ public class MachineDialogTests
     [Fact]
     public void MachineEditDialog_XamlContainsCodeAndQrElements()
     {
-        var path = Path.Combine("Views", "Dialogs", "MachineEditDialog.xaml");
-        Assert.True(File.Exists(path));
+        var path = LocateProjectFile("Views/Dialogs/MachineEditDialog.xaml");
 
         var document = XDocument.Load(path);
         XNamespace ns = "http://schemas.microsoft.com/dotnet/2021/maui";
@@ -86,6 +85,27 @@ public class MachineDialogTests
                 Directory.Delete(platform.Directory, recursive: true);
             }
         }
+    }
+
+    private static string LocateProjectFile(string relativePath)
+    {
+        var current = AppContext.BaseDirectory;
+        var normalizedRelativePath = relativePath
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\', Path.DirectorySeparatorChar);
+
+        for (var depth = 0; depth < 10 && !string.IsNullOrEmpty(current); depth++)
+        {
+            var candidate = Path.Combine(current, normalizedRelativePath);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            current = Directory.GetParent(current)?.FullName;
+        }
+
+        throw new FileNotFoundException($"Could not locate '{relativePath}' from '{AppContext.BaseDirectory}'.");
     }
 
     private sealed class TestPlatformService : IPlatformService
