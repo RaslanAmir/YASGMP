@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+             xmlns:shared="clr-namespace:YasGMP.Wpf.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="600">
@@ -172,6 +173,8 @@
                                      Text="{Binding Editor.Notes, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
                         </Grid>
+
+                        <shared:SignatureMetadataView DataContext="{Binding Editor}" />
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
