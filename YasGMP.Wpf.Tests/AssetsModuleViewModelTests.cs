@@ -68,6 +68,9 @@ public class AssetsModuleViewModelTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
         Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrCode));
         Assert.True(File.Exists(viewModel.Editor.QrCode));
+        var qrRoot = Path.GetFullPath(Path.Combine(platformService.GetAppDataDirectory(), "Assets", "QrCodes"));
+        var qrPath = Path.GetFullPath(viewModel.Editor.QrCode);
+        Assert.StartsWith(qrRoot, qrPath, StringComparison.OrdinalIgnoreCase);
 
         var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
         Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
@@ -135,6 +138,70 @@ public class AssetsModuleViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task EnterUpdateMode_WithMissingIdentifiers_GeneratesCodeAndQrImage()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 42,
+            Code = string.Empty,
+            Name = "Freeze Dryer",
+            Manufacturer = "Contoso",
+            QrPayload = string.Empty,
+            QrCode = string.Empty,
+            Status = "active"
+        });
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+        await viewModel.InitializeAsync(42);
+        await Task.Yield();
+
+        viewModel.Mode = FormMode.Update;
+        await Task.Delay(50);
+
+        Assert.Equal("Freeze Dryer", viewModel.Editor.Name);
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrCode));
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+        var qrRoot = Path.GetFullPath(Path.Combine(platformService.GetAppDataDirectory(), "Assets", "QrCodes"));
+        var qrPath = Path.GetFullPath(viewModel.Editor.QrCode);
+        Assert.StartsWith(qrRoot, qrPath, StringComparison.OrdinalIgnoreCase);
+
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        Assert.Equal(expectedPayload, qrCode.LastPayload);
+    }
+
+    [Fact]
     public async Task PreviewQrCommand_UsesExistingCodeAndUpdatesPayload()
     {
         var database = new DatabaseService();
@@ -169,20 +236,44 @@ public class AssetsModuleViewModelTests : IDisposable
             platformService);
         await viewModel.InitializeAsync(null);
 
+        Assert.False(viewModel.PreviewQrCommand.CanExecute(null));
+        var canExecuteRaised = 0;
+        viewModel.PreviewQrCommand.CanExecuteChanged += (_, _) => canExecuteRaised++;
+
         viewModel.Mode = FormMode.Add;
         await Task.Delay(50);
 
-        viewModel.Editor.Code = "AST-CUSTOM";
+        Assert.True(viewModel.PreviewQrCommand.CanExecute(null));
+        Assert.True(canExecuteRaised > 0);
+
+        canExecuteRaised = 0;
+        viewModel.Editor.Code = string.Empty;
         viewModel.Editor.QrPayload = string.Empty;
         viewModel.Editor.QrCode = string.Empty;
 
-        await viewModel.PreviewQrCommand.ExecuteAsync(null);
+        Assert.True(viewModel.IsDirty);
+        Assert.False(viewModel.PreviewQrCommand.CanExecute(null));
+        Assert.True(canExecuteRaised > 0);
 
-        Assert.Equal("AST-CUSTOM", viewModel.Editor.Code);
+        canExecuteRaised = 0;
+        await viewModel.GenerateCodeCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.IsDirty);
+        Assert.True(viewModel.PreviewQrCommand.CanExecute(null));
+        Assert.True(canExecuteRaised > 0);
         var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
         Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
         Assert.Equal(expectedPayload, qrCode.LastPayload);
         Assert.True(File.Exists(viewModel.Editor.QrCode));
+
+        canExecuteRaised = 0;
+        var previewTask = viewModel.PreviewQrCommand.ExecuteAsync(null);
+        await Task.Yield();
+        Assert.False(viewModel.PreviewQrCommand.CanExecute(null));
+        await previewTask;
+        Assert.True(viewModel.PreviewQrCommand.CanExecute(null));
+        Assert.True(canExecuteRaised >= 2);
+        Assert.True(viewModel.IsDirty);
         Assert.Single(shell.PreviewedDocuments);
         Assert.Equal(viewModel.Editor.QrCode, shell.PreviewedDocuments[0]);
 
