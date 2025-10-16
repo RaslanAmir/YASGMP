@@ -25,6 +25,24 @@
             </ItemsControl>
             <Separator />
             <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Toolbar.Button.Attach.Content}"
+                    Command="{Binding AttachDocumentCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.GenerateCode.Content}"
+                    Command="{Binding GenerateCodeCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.GenerateCode.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.GenerateCode.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.GenerateCode.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.PreviewQr.Content}"
+                    Command="{Binding PreviewQrCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.PreviewQr.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.PreviewQr.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.PreviewQr.AutomationId}" />
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
