@@ -71,6 +71,11 @@
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with `command not found` because the dotnet CLI is unavailable on this Linux host; rerun on a Windows machine with the Windows 10 SDK installed.
 - 2026-04-11: Assets module view-model now auto-generates machine codes and QR PNGs via new toolbar commands, persists previews into the platform app data directory, and extends localization/unit tests for the workflow; `dotnet restore`/`dotnet build` remain blocked with `bash: command not found: dotnet` in this container.
 
+### Increment 2 Follow-up — Machine dialog test resilience (2026-04-19)
+
+- Hardened `MachineDialogTests` so the MAUI dialog XAML is located by walking up from `AppContext.BaseDirectory`, preventing false negatives when the test assembly executes from `bin/<config>/<tfm>`.
+- No dotnet CLI validation executed for this batch; the container still returns `bash: command not found: dotnet` for restore/build/test (see status summary above).
+
 ### Increment 2 Follow-up — Assets module service parity (2026-04-10)
 
 - Injected `ICodeGeneratorService`, `IQRCodeService`, and `IPlatformService` into `AssetsModuleViewModel` so code/QR generation and platform metadata mirror the MAUI shell without resorting to service locator fallbacks.
