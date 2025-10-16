@@ -7207,6 +7207,8 @@ namespace YasGMP.Wpf.ViewModels.Modules
     {
         private readonly List<ScheduledJob> _store = new();
         private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _savedSnapshots = new();
+        private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _createdSnapshots = new();
+        private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _updatedSnapshots = new();
 
         public List<ScheduledJob> Saved => _store;
         public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> SavedWithContext => _savedSnapshots;
@@ -7215,9 +7217,19 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public IEnumerable<ScheduledJobCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
         public IEnumerable<ScheduledJob> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
+        public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> CreatedWithContext => _createdSnapshots;
+        public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> UpdatedWithContext => _updatedSnapshots;
+
+        public ScheduledJobCrudContext? LastCreatedContext => _createdSnapshots.Count == 0 ? null : _createdSnapshots[^1].Context;
+        public ScheduledJobCrudContext? LastUpdatedContext => _updatedSnapshots.Count == 0 ? null : _updatedSnapshots[^1].Context;
+
         public List<int> Executed { get; } = new();
 
         public List<int> Acknowledged { get; } = new();
+
+        public List<(int JobId, ScheduledJobCrudContext Context)> ExecutionLog { get; } = new();
+
+        public List<(int JobId, ScheduledJobCrudContext Context)> AcknowledgementLog { get; } = new();
 
         public void Seed(ScheduledJob job)
         {
@@ -7243,7 +7255,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(job));
-            TrackSnapshot(job, context);
+            TrackSnapshot(job, context, isUpdate: false);
             return Task.FromResult(job.Id);
         }
 
@@ -7259,13 +7271,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(job, existing);
             }
 
-            TrackSnapshot(job, context);
+            TrackSnapshot(job, context, isUpdate: true);
             return Task.CompletedTask;
         }
 
         public Task ExecuteAsync(int jobId, ScheduledJobCrudContext context)
         {
             Executed.Add(jobId);
+            ExecutionLog.Add((jobId, context));
             var job = _store.FirstOrDefault(j => j.Id == jobId);
             if (job is not null)
             {
@@ -7279,6 +7292,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task AcknowledgeAsync(int jobId, ScheduledJobCrudContext context)
         {
             Acknowledged.Add(jobId);
+            AcknowledgementLog.Add((jobId, context));
             var job = _store.FirstOrDefault(j => j.Id == jobId);
             if (job is not null)
             {
@@ -7303,8 +7317,19 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "scheduled" : status.Trim().ToLowerInvariant();
 
-        private void TrackSnapshot(ScheduledJob job, ScheduledJobCrudContext context)
-            => _savedSnapshots.Add((Clone(job), context));
+        private void TrackSnapshot(ScheduledJob job, ScheduledJobCrudContext context, bool isUpdate)
+        {
+            var snapshot = (Clone(job), context);
+            _savedSnapshots.Add(snapshot);
+            if (isUpdate)
+            {
+                _updatedSnapshots.Add(snapshot);
+            }
+            else
+            {
+                _createdSnapshots.Add(snapshot);
+            }
+        }
 
         private static ScheduledJob Clone(ScheduledJob source)
         {
