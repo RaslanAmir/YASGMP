@@ -49,7 +49,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -113,7 +131,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -155,7 +191,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -224,7 +278,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         navigation.Resolver = (moduleKey, parameter) =>
         {
             Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
@@ -290,7 +362,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         navigation.Resolver = (moduleKey, parameter) =>
         {
             Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
@@ -355,7 +445,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         navigation.Resolver = (moduleKey, parameter) =>
         {
             Assert.Equal(AssetsModuleViewModel.ModuleKey, moduleKey);
@@ -426,7 +534,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
 
         await viewModel.InitializeAsync(null);
         await Task.Yield();
@@ -477,7 +603,25 @@ public class AssetsModuleViewModelTests : IDisposable
             new PickedFile("hello.txt", "text/plain", () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)), bytes.Length)
         };
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
         await viewModel.InitializeAsync(null);
 
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
@@ -514,7 +658,25 @@ public class AssetsModuleViewModelTests : IDisposable
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
 
-        var viewModel = new AssetsModuleViewModel(database, audit, machineAdapter, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, _localization);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
 
         await viewModel.InitializeAsync(5);
         await Task.Yield();

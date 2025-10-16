@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
       "2025-10-13: dotnet --info/dotnet restore still return 'command not found' after retargeting MAUI/AppCore to .NET 9; Windows validation pending.",
       "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK",
       "2025-09-25: Batch 0 retry confirmed `dotnet --info` still returns 'command not found'.",
@@ -175,6 +176,7 @@
   },
   "lastCommitSummary": "feat: add code/qr service adapters",
   "notes": [
+    "2026-04-10: AssetsModuleViewModel now resolves code generator, QR, and platform services via DI with supporting WPF test doubles; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-04-09: WPF host now registers CodeGeneratorService/QRCodeService adapters that forward to the shared MAUI services so view-models can request code/QR helpers via DI; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-03-11: Modules pane styles now bind localized automation metadata from module templates, inspector fields reuse ShellStrings automation name/id/tooltip formats, and unit tests cover the localized fallbacks while dotnet restore/build/smoke remain blocked because the CLI is still absent.",
     "2026-03-10: DatabaseService layout helpers and DockLayoutPersistenceService now have null-row regression coverage to ensure empty result sets return null snapshots without throwing; dotnet restore/build/smoke remain blocked because the CLI is still absent.",

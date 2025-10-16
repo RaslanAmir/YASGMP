@@ -32,6 +32,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly ICodeGeneratorService _codeGeneratorService;
+    private readonly IQRCodeService _qrCodeService;
+    private readonly IPlatformService _platformService;
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -57,7 +60,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        ICodeGeneratorService codeGeneratorService,
+        IQRCodeService qrCodeService,
+        IPlatformService platformService)
         : base(ModuleKey, localization.GetString("Module.Title.Assets"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
@@ -66,6 +72,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _codeGeneratorService = codeGeneratorService ?? throw new ArgumentNullException(nameof(codeGeneratorService));
+        _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
+        _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
         Editor = AssetEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
