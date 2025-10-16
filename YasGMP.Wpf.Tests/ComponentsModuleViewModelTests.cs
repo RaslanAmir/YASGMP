@@ -465,6 +465,84 @@ public class ComponentsModuleViewModelTests
     }
 
     [Fact]
+    public async Task GenerateCodeCommand_AddMode_PersistsGeneratedIdentifiersOnSave()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var componentAdapter = new FakeComponentCrudService();
+        var machineAdapter = new FakeMachineCrudService();
+
+        await machineAdapter.CreateAsync(new Machine
+        {
+            Id = 15,
+            Name = "Lyophilizer",
+            Manufacturer = "Fabrikam"
+        }, MachineCrudContext.Create(5, "127.0.0.1", "TestRig", "unit"));
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 3, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.44"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCodeService = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            filePicker,
+            attachments,
+            localization: new StubLocalizationService(),
+            codeGeneratorService: codeGenerator,
+            qrCodeService: qrCodeService,
+            platformService: platformService);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Yield();
+
+        viewModel.Editor.Name = "Temp Probe";
+        viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
+        viewModel.Editor.Code = string.Empty;
+        viewModel.Editor.QrPayload = string.Empty;
+        viewModel.Editor.QrCode = string.Empty;
+
+        await viewModel.GenerateCodeCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.IsDirty);
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+
+        var saved = await InvokeSaveAsync(viewModel).ConfigureAwait(false);
+
+        Assert.True(saved);
+        var persisted = Assert.Single(componentAdapter.Saved);
+        Assert.Equal(viewModel.Editor.Code, persisted.Code);
+        Assert.Equal(viewModel.Editor.QrPayload, persisted.QrPayload);
+        Assert.Equal(viewModel.Editor.QrCode, persisted.QrCode);
+        var expectedPayload = $"yasgmp://component/{Uri.EscapeDataString(persisted.Code)}?machine={persisted.MachineId}";
+        Assert.Equal(expectedPayload, persisted.QrPayload);
+    }
+
+    [Fact]
     public async Task PreviewQrCommand_PreviewsGeneratedImage()
     {
         var database = new DatabaseService();

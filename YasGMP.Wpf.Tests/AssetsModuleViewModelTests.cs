@@ -138,6 +138,73 @@ public class AssetsModuleViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task GenerateCodeCommand_AddMode_PersistsGeneratedIdentifiersOnSave()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 9, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.30"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Yield();
+
+        viewModel.Editor.Name = "Freeze Dryer";
+        viewModel.Editor.Manufacturer = "Contoso";
+        viewModel.Editor.Code = string.Empty;
+        viewModel.Editor.QrPayload = string.Empty;
+        viewModel.Editor.QrCode = string.Empty;
+
+        await viewModel.GenerateCodeCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.IsDirty);
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+
+        var saved = await InvokeSaveAsync(viewModel);
+
+        Assert.True(saved);
+        var persisted = Assert.Single(machineAdapter.Saved);
+        Assert.Equal(viewModel.Editor.Code, persisted.Code);
+        Assert.Equal(viewModel.Editor.QrPayload, persisted.QrPayload);
+        Assert.Equal(viewModel.Editor.QrCode, persisted.QrCode);
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(persisted.Code)}";
+        Assert.Equal(expectedPayload, persisted.QrPayload);
+    }
+
+    [Fact]
     public async Task EnterUpdateMode_WithMissingIdentifiers_GeneratesCodeAndQrImage()
     {
         var database = new DatabaseService();
