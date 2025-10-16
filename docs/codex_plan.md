@@ -77,6 +77,7 @@
 - Added dedicated WPF test doubles for the new services and refreshed `AssetsModuleViewModelTests`/`ModuleCflTests` to wire the dependencies explicitly, keeping regression coverage intact.
 - `dotnet restore yasgmp.sln` was rerun to validate the batch but continues to exit with `bash: command not found: dotnet`; Windows-host verification remains required.
 - 2026-04-11: Asset editor now surfaces `QrCode`/`QrPayload` observable properties, copies them across create/clone/save flows, and updates machine cloning so WPF persistence mirrors the MAUI shell; dotnet restore/build still fail with `bash: command not found: dotnet` until run on Windows.
+- 2026-04-12: Added localized toolbar actions for QR generation/preview in `AssetsModuleView`, routed preview execution through `IShellInteractionService.PreviewDocument`, refreshed EN/HR shell resources, and extended Assets module tests to assert shell preview invocation; dotnet restore/build remain blocked with `bash: command not found: dotnet` in this container.
 
 #### Entity Traceability Map (Seed)
 

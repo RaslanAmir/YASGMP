@@ -69,6 +69,8 @@
     <sys:String x:Key="Module.Toolbar.Button.Cfl.AutomationId">Toolbar.Button.CFL</sys:String>
     <sys:String x:Key="Module.Toolbar.Button.Attach.AutomationId">Toolbar.Button.Attach</sys:String>
     <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationId">Toolbar.Button.GoldenArrow</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.GenerateCode.AutomationId">Toolbar.Button.GenerateCode</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.PreviewQr.AutomationId">Toolbar.Button.PreviewQr</sys:String>
 
     <sys:String x:Key="Dashboard.Toolbar.AutomationId">Dashboard.Toolbar</sys:String>
     <sys:String x:Key="Dashboard.Search.AutomationId">Dashboard.Search</sys:String>

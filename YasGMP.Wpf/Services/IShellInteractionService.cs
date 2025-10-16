@@ -33,6 +33,15 @@ public interface IShellInteractionService
     /// the shell service so bound dependency properties remain thread-affine.
     /// </param>
     void UpdateInspector(InspectorContext context);
+
+    /// <summary>
+    /// Launches a shell preview for the supplied document or asset path so modules can surface generated artifacts.
+    /// </summary>
+    /// <param name="path">Absolute file system path that should be opened with the registered handler.</param>
+    void PreviewDocument(string path)
+    {
+        // Default implementations may ignore the request; concrete shells can override to launch external viewers.
+    }
 }
 
 /// <summary>

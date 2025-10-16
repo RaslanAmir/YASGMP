@@ -38,6 +38,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly ICodeGeneratorService _codeGeneratorService;
     private readonly IQRCodeService _qrCodeService;
     private readonly IPlatformService _platformService;
+    private readonly IShellInteractionService _shellInteraction;
     private Machine? _loadedMachine;
     private AssetEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -78,6 +79,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _codeGeneratorService = codeGeneratorService ?? throw new ArgumentNullException(nameof(codeGeneratorService));
         _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
+        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
         Editor = AssetEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
@@ -1323,6 +1325,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             }
             else
             {
+                _shellInteraction.PreviewDocument(path);
                 StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerated", path);
             }
         }

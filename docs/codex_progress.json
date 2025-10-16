@@ -142,7 +142,8 @@
         "2026-01-30: Electronic signature dialog service/interface XML documentation now details dispatcher usage, localization hooks, audit de-duplication, and cancellation guidance so WPF stays aligned with MAUI while CLI access remains blocked.",
         "2025-10-07: CRUD service adapters/interfaces now document WPF module to MAUI service call flow, dispatcher marshalling, localization, and audit expectations; dotnet CLI remains missing so validation is limited to static analysis.",
         "2026-02-02: CRUD context XML comments now cross-link CrudSaveResult.SignatureMetadata and SignatureMetadataDto with WPF/MAUI compliance guidance while dotnet CLI access remains unavailable.",
-        "2026-04-07: Captured outstanding B2 follow-ups (module audit panes, attachment preview/download parity, and hybrid signature prompts) to guide post-CLI validation work."
+        "2026-04-07: Captured outstanding B2 follow-ups (module audit panes, attachment preview/download parity, and hybrid signature prompts) to guide post-CLI validation work.",
+        "2026-04-12: Assets module toolbar now exposes localized Generate Code/Preview QR buttons wired to shell preview interactions with refreshed EN/HR resources and extended unit coverage while CLI validation remains blocked."
       ]
     },
     {
@@ -395,6 +396,7 @@
     "2026-04-08: Introduced a WPF login dialog + authentication service that blocks shell startup until AuthService succeeds, refreshed UserSession/WpfAuthContext to surface the signed-in operator, added a reauthentication dialog/view-model for credential renewal, and documented the flow in README_WPF_SHELL.md/WPF_MAPPING.md; dotnet restore/build/test still fail with 'command not found' until the CLI is provisioned.",
     "2026-04-09: Added a WPF SignalRClientService wrapping AppCore SignalRService + BackgroundScheduler with dispatcher marshalling, hooked DashboardModuleViewModel + status bar to live updates, and introduced retry/backoff unit fakes; dotnet CLI remains unavailable so validation stays static-analysis only.",
     "2026-04-10: Introduced WPF alert/toast infrastructure with persisted notification preferences plus AdminModuleViewModel unit tests covering load/save/dirty flows; dotnet restore/build/test continue to fail with 'command not found' because the CLI is absent in this container.",
-    "2026-04-11: Asset editor QR parity updates retried dotnet restore/build for MAUI and WPF targets; CLI remains unavailable so every command exits with 'command not found'."
+    "2026-04-11: Asset editor QR parity updates retried dotnet restore/build for MAUI and WPF targets; CLI remains unavailable so every command exits with 'command not found'.",
+    "2026-04-12: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried after wiring Assets QR toolbar preview; CLI still missing so each command exits with 'command not found'."
   ]
 }
