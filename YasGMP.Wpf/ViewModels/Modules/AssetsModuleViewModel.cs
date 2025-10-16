@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -86,6 +89,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         });
 
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        GenerateCodeCommand = new AsyncRelayCommand(GenerateCodeAsync, CanGenerateCode);
+        PreviewQrCommand = new AsyncRelayCommand(PreviewQrAsync, CanPreviewQr);
     }
 
     /// <summary>Editor payload bound to the form fields.</summary>
@@ -101,6 +106,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     /// <summary>Command exposed to the toolbar for uploading attachments.</summary>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>Generates a machine code/QR payload using the shared code generator service.</summary>
+    public IAsyncRelayCommand GenerateCodeCommand { get; }
+
+    /// <summary>Persists the QR payload to disk and surfaces the generated PNG path for preview.</summary>
+    public IAsyncRelayCommand PreviewQrCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -954,7 +965,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             _loadedMachine = null;
             SetEditor(AssetEditor.CreateEmpty());
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
             return;
         }
 
@@ -977,10 +988,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         _loadedMachine = machine;
         LoadEditor(machine);
-        UpdateAttachmentCommandState();
+        await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
+        UpdateCommandStates();
     }
 
-    protected override Task OnModeChangedAsync(FormMode mode)
+    protected override async Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
 
@@ -990,17 +1002,22 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 _snapshot = null;
                 _loadedMachine = null;
                 SetEditor(AssetEditor.CreateForNew(_machineService.NormalizeStatus("active")));
+                await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(Editor.Code) && !string.IsNullOrWhiteSpace(Editor.QrCode))
+                {
+                    StatusMessage = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", Editor.Code, Editor.QrCode);
+                }
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
+                await InitializeEditorIdentifiersAsync().ConfigureAwait(false);
                 break;
             case FormMode.View:
                 _snapshot = null;
                 break;
         }
 
-        UpdateAttachmentCommandState();
-        return Task.CompletedTask;
+        UpdateCommandStates();
     }
 
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
@@ -1008,6 +1025,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         var errors = new List<string>();
         try
         {
+            EnsureEditorCode(force: false, suppressDirty: true);
+            EnsureEditorQrPayload(Editor.Code, suppressDirty: true);
             var machine = Editor.ToMachine(_loadedMachine);
             machine.Status = _machineService.NormalizeStatus(machine.Status);
             _machineService.Validate(machine);
@@ -1021,12 +1040,21 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             errors.Add($"Unexpected validation failure: {ex.Message}");
         }
 
-        return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
+        return errors;
     }
 
     protected override async Task<bool> OnSaveAsync()
     {
         var machine = Editor.ToMachine(_loadedMachine);
+        try
+        {
+            await SynchronizeIdentifiersAsync(machine, forceCode: false, suppressDirty: true).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", ex.Message);
+            return false;
+        }
         machine.Status = _machineService.NormalizeStatus(machine.Status);
 
         if (Mode == FormMode.Update && _loadedMachine is null)
@@ -1129,7 +1157,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         _loadedMachine = machine;
         LoadEditor(machine);
-        UpdateAttachmentCommandState();
+        UpdateCommandStates();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
@@ -1180,7 +1208,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             SetEditor(_snapshot.Clone());
         }
 
-        UpdateAttachmentCommandState();
+        UpdateCommandStates();
     }
 
     partial void OnEditorChanging(AssetEditor value)
@@ -1209,7 +1237,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
         {
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
@@ -1224,6 +1252,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             MarkDirty();
         }
+
+        UpdateCommandStates();
     }
 
     private void LoadEditor(Machine machine)
@@ -1232,7 +1262,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         Editor = AssetEditor.FromMachine(machine, _machineService.NormalizeStatus);
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
-        UpdateAttachmentCommandState();
+        UpdateCommandStates();
     }
 
     private void SetEditor(AssetEditor editor)
@@ -1241,7 +1271,70 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
-        UpdateAttachmentCommandState();
+        UpdateCommandStates();
+    }
+
+    private bool CanGenerateCode()
+        => !IsBusy && IsInEditMode;
+
+    private bool CanPreviewQr()
+        => !IsBusy && Editor is not null && !string.IsNullOrWhiteSpace(Editor.QrPayload);
+
+    private async Task GenerateCodeAsync()
+    {
+        if (!IsInEditMode)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var code = EnsureEditorCode(force: true, suppressDirty: false);
+            var payload = EnsureEditorQrPayload(code, suppressDirty: false);
+            var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty: false).ConfigureAwait(false);
+            StatusMessage = _localization.GetString(
+                "Module.Assets.Status.CodeAndQrGenerated",
+                code,
+                string.IsNullOrWhiteSpace(path) ? _localization.GetString("Module.Assets.Status.QrPathUnavailable") : path);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private async Task PreviewQrAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            var machine = Editor.ToMachine(_loadedMachine);
+            await SynchronizeIdentifiersAsync(machine, forceCode: false, suppressDirty: false).ConfigureAwait(false);
+            var path = machine.QrCode ?? Editor.QrCode;
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", _localization.GetString("Module.Assets.Status.QrPathUnavailable"));
+            }
+            else
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerated", path);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
     }
 
     private bool CanAttachDocument()
@@ -1308,12 +1401,202 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         finally
         {
             IsBusy = false;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
-    private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    private async Task InitializeEditorIdentifiersAsync(bool resetDirty = false)
+    {
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var machine = Editor.ToMachine(_loadedMachine);
+        try
+        {
+            await SynchronizeIdentifiersAsync(
+                    machine,
+                    forceCode: false,
+                    suppressDirty: true,
+                    resetDirtyAfter: resetDirty)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", ex.Message);
+        }
+    }
+
+    private async Task SynchronizeIdentifiersAsync(
+        Machine machine,
+        bool forceCode,
+        bool suppressDirty,
+        bool resetDirtyAfter = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (machine is null)
+        {
+            return;
+        }
+
+        var code = EnsureEditorCode(forceCode, suppressDirty);
+        var payload = EnsureEditorQrPayload(code, suppressDirty);
+        var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty, cancellationToken).ConfigureAwait(false);
+
+        machine.Code = code;
+        machine.QrPayload = payload;
+        machine.QrCode = path;
+
+        if (resetDirtyAfter)
+        {
+            ResetDirty();
+        }
+    }
+
+    private string EnsureEditorCode(bool force, bool suppressDirty)
+    {
+        if (!force && !string.IsNullOrWhiteSpace(Editor.Code))
+        {
+            return Editor.Code;
+        }
+
+        var generated = _codeGeneratorService.GenerateMachineCode(
+            string.IsNullOrWhiteSpace(Editor.Name) ? null : Editor.Name,
+            string.IsNullOrWhiteSpace(Editor.Manufacturer) ? null : Editor.Manufacturer);
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.Code = generated);
+        }
+        else
+        {
+            Editor.Code = generated;
+        }
+
+        return Editor.Code;
+    }
+
+    private string EnsureEditorQrPayload(string code, bool suppressDirty)
+    {
+        var payload = BuildQrPayload(code);
+        if (string.Equals(Editor.QrPayload, payload, StringComparison.Ordinal))
+        {
+            return payload;
+        }
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.QrPayload = payload);
+        }
+        else
+        {
+            Editor.QrPayload = payload;
+        }
+
+        return payload;
+    }
+
+    private async Task<string> EnsureEditorQrImageAsync(
+        string payload,
+        string code,
+        bool suppressDirty,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            throw new InvalidOperationException("QR payload is required before generating an image.");
+        }
+
+        var path = await SaveQrImageAsync(payload, code, Editor.Id, cancellationToken).ConfigureAwait(false);
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.QrCode = path);
+        }
+        else
+        {
+            Editor.QrCode = path;
+        }
+
+        return path;
+    }
+
+    private static string BuildQrPayload(string code)
+    {
+        var identifier = string.IsNullOrWhiteSpace(code)
+            ? "pending"
+            : Uri.EscapeDataString(code.Trim());
+        return $"yasgmp://machine/{identifier}";
+    }
+
+    private async Task<string> SaveQrImageAsync(
+        string payload,
+        string code,
+        int editorId,
+        CancellationToken cancellationToken)
+    {
+        var appData = _platformService.GetAppDataDirectory();
+        var qrDirectory = Path.Combine(appData, "Assets", "QrCodes");
+        Directory.CreateDirectory(qrDirectory);
+
+        var hint = !string.IsNullOrWhiteSpace(code)
+            ? code
+            : editorId > 0
+                ? editorId.ToString(CultureInfo.InvariantCulture)
+                : Guid.NewGuid().ToString("N");
+        var fileName = $"{SanitizeFileName(hint)}.png";
+        var path = Path.Combine(qrDirectory, fileName);
+
+        using var pngStream = _qrCodeService.GeneratePng(payload);
+        if (pngStream.CanSeek)
+        {
+            pngStream.Position = 0;
+        }
+        await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
+        await pngStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+        await fileStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+
+        return path;
+    }
+
+    private static string SanitizeFileName(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "asset";
+        }
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var builder = new StringBuilder(value.Length);
+        foreach (var ch in value)
+        {
+            builder.Append(Array.IndexOf(invalid, ch) >= 0 ? '_' : ch);
+        }
+
+        return builder.ToString();
+    }
+
+    private void ExecuteWithDirtySuppression(Action action)
+    {
+        var previous = _suppressEditorDirtyNotifications;
+        _suppressEditorDirtyNotifications = true;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _suppressEditorDirtyNotifications = previous;
+        }
+    }
+
+    private void UpdateCommandStates()
+    {
+        AttachDocumentCommand.NotifyCanExecuteChanged();
+        GenerateCodeCommand.NotifyCanExecuteChanged();
+        PreviewQrCommand.NotifyCanExecuteChanged();
+    }
 
     private static ModuleRecord ToRecord(Machine machine)
     {

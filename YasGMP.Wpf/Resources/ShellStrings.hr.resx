@@ -540,6 +540,18 @@
   <data name="Module.Assets.Status.AttachmentFailed" xml:space="preserve">
     <value>Učitavanje privitka nije uspjelo: {0}</value>
   </data>
+  <data name="Module.Assets.Status.CodeAndQrGenerated" xml:space="preserve">
+    <value>Generirana šifra opreme {0} i spremljen QR kod u {1}.</value>
+  </data>
+  <data name="Module.Assets.Status.QrGenerated" xml:space="preserve">
+    <value>QR kod spremljen u {0}.</value>
+  </data>
+  <data name="Module.Assets.Status.QrGenerationFailed" xml:space="preserve">
+    <value>Neuspjelo generiranje QR koda: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.QrPathUnavailable" xml:space="preserve">
+    <value>Putanja QR koda nije dostupna.</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>u kvalifikaciji</value>
   </data>

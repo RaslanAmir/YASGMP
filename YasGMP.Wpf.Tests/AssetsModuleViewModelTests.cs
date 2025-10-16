@@ -27,6 +27,168 @@ public class AssetsModuleViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task EnterAddMode_AutoGeneratesIdentifiers()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Delay(50);
+
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrCode));
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        Assert.Equal(expectedPayload, qrCode.LastPayload);
+        var expectedStatus = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", viewModel.Editor.Code, viewModel.Editor.QrCode);
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task GenerateCodeCommand_RegeneratesIdentifiersAndMarksDirty()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Delay(50);
+        var originalCode = viewModel.Editor.Code;
+
+        viewModel.Editor.Name = "Lyophilizer";
+        viewModel.Editor.Manufacturer = "Contoso";
+
+        await viewModel.GenerateCodeCommand.ExecuteAsync(null);
+
+        Assert.NotEqual(originalCode, viewModel.Editor.Code);
+        Assert.True(viewModel.IsDirty);
+        Assert.Equal("Lyophilizer", codeGenerator.LastName);
+        Assert.Equal("Contoso", codeGenerator.LastManufacturer);
+
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        Assert.Equal(expectedPayload, qrCode.LastPayload);
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+
+        var expectedStatus = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", viewModel.Editor.Code, viewModel.Editor.QrCode);
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task PreviewQrCommand_UsesExistingCodeAndUpdatesPayload()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Delay(50);
+
+        viewModel.Editor.Code = "AST-CUSTOM";
+        viewModel.Editor.QrPayload = string.Empty;
+        viewModel.Editor.QrCode = string.Empty;
+
+        await viewModel.PreviewQrCommand.ExecuteAsync(null);
+
+        Assert.Equal("AST-CUSTOM", viewModel.Editor.Code);
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        Assert.Equal(expectedPayload, qrCode.LastPayload);
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+
+        var expectedStatus = _localization.GetString("Module.Assets.Status.QrGenerated", viewModel.Editor.QrCode);
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
+    }
+
+    [Fact]
     public async Task OnSaveAsync_AddMode_PersistsMachineThroughAdapter()
     {
         var database = new DatabaseService();

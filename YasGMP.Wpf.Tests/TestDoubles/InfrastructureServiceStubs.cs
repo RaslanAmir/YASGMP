@@ -45,4 +45,11 @@ internal sealed class StubPlatformService : IPlatformService
     public string GetHostName() => "UnitTestHost";
 
     public string GetUserName() => "UnitTester";
+
+    public string GetAppDataDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "YasGMP", "Tests");
+        Directory.CreateDirectory(path);
+        return path;
+    }
 }

@@ -540,6 +540,18 @@
   <data name="Module.Assets.Status.AttachmentFailed" xml:space="preserve">
     <value>Attachment upload failed: {0}</value>
   </data>
+  <data name="Module.Assets.Status.CodeAndQrGenerated" xml:space="preserve">
+    <value>Generated equipment code {0} and saved QR image to {1}.</value>
+  </data>
+  <data name="Module.Assets.Status.QrGenerated" xml:space="preserve">
+    <value>QR code saved to {0}.</value>
+  </data>
+  <data name="Module.Assets.Status.QrGenerationFailed" xml:space="preserve">
+    <value>Failed to generate QR code: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.QrPathUnavailable" xml:space="preserve">
+    <value>QR path unavailable.</value>
+  </data>
   <data name="Module.Warehouse.Status.InQualification" xml:space="preserve">
     <value>in-qualification</value>
   </data>

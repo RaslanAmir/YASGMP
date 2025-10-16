@@ -69,6 +69,7 @@
 - Introduced `NotificationPreferenceService` persistence, the shared `NotificationPreferences` model, and WPF unit tests covering alert propagation plus AdminModuleViewModel load/save/dirty states to guard the workflow.
 - Refreshed `README_WPF_SHELL.md` and `docs/WPF_MAPPING.md` with alert parity details, toast overlay documentation, and notification preference UI notes.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with `command not found` because the dotnet CLI is unavailable on this Linux host; rerun on a Windows machine with the Windows 10 SDK installed.
+- 2026-04-11: Assets module view-model now auto-generates machine codes and QR PNGs via new toolbar commands, persists previews into the platform app data directory, and extends localization/unit tests for the workflow; `dotnet restore`/`dotnet build` remain blocked with `bash: command not found: dotnet` in this container.
 
 ### Increment 2 Follow-up — Assets module service parity (2026-04-10)
 
