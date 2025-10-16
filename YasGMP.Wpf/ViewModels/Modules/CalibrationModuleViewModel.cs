@@ -31,12 +31,15 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ICalibrationCertificateDialogService _certificateDialog;
 
     private Calibration? _loadedCalibration;
     private CalibrationEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Component> _components = Array.Empty<Component>();
     private IReadOnlyList<Supplier> _suppliers = Array.Empty<Supplier>();
+    private CalibrationCertificateDialogResult? _pendingCertificate;
+    private int? _pendingAttachmentRemoval;
     /// <summary>
     /// Initializes a new instance of the CalibrationModuleViewModel class.
     /// </summary>
@@ -50,6 +53,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
         IElectronicSignatureDialogService signatureDialog,
+        ICalibrationCertificateDialogService certificateDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
@@ -62,12 +66,15 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _certificateDialog = certificateDialog ?? throw new ArgumentNullException(nameof(certificateDialog));
 
         Editor = CalibrationEditor.CreateEmpty();
         ComponentOptions = new ObservableCollection<ComponentOption>();
         SupplierOptions = new ObservableCollection<SupplierOption>();
 
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        ManageCertificateCommand = new AsyncRelayCommand(ManageCertificateAsync, CanManageCertificate);
+        ClearCertificateCommand = new RelayCommand(ClearCertificate, CanClearCertificate);
     }
 
     [ObservableProperty]
@@ -75,6 +82,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+
+    partial void OnIsEditorEnabledChanged(bool value)
+        => UpdateCertificateCommandState();
     /// <summary>
     /// Gets or sets the component options.
     /// </summary>
@@ -90,6 +100,12 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>Gets the command that opens the calibration certificate dialog.</summary>
+    public IAsyncRelayCommand ManageCertificateCommand { get; }
+
+    /// <summary>Gets the command that clears the staged certificate metadata.</summary>
+    public IRelayCommand ClearCertificateCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -197,6 +213,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             _loadedCalibration = null;
             SetEditor(CalibrationEditor.CreateEmpty());
             UpdateAttachmentCommandState();
+            _pendingCertificate = null;
+            _pendingAttachmentRemoval = null;
+            UpdateCertificateCommandState();
             return;
         }
 
@@ -218,8 +237,11 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         _loadedCalibration = calibration;
+        _pendingCertificate = null;
+        _pendingAttachmentRemoval = null;
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
+        UpdateCertificateCommandState();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -233,6 +255,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 _loadedCalibration = null;
                 SetEditor(CalibrationEditor.CreateForNew());
                 ApplyDefaultLookupSelections();
+                _pendingCertificate = null;
+                _pendingAttachmentRemoval = null;
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -243,6 +267,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         UpdateAttachmentCommandState();
+        UpdateCertificateCommandState();
 
         return Task.CompletedTask;
     }
@@ -343,8 +368,17 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         _loadedCalibration = calibration;
+
+        var (certificateSnapshot, certificateMessage) = await HandlePendingCertificateAsync(adapterResult).ConfigureAwait(false);
+
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
+
+        if (certificateSnapshot is not null)
+        {
+            Editor.Certificate = certificateSnapshot;
+            Editor.CertDoc = certificateSnapshot.DisplayName;
+        }
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
@@ -373,7 +407,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = string.IsNullOrWhiteSpace(certificateMessage)
+            ? $"Electronic signature captured ({signatureResult.ReasonDisplay})."
+            : $"Electronic signature captured ({signatureResult.ReasonDisplay}). {certificateMessage}";
         return true;
     }
 
@@ -385,6 +421,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 ? CalibrationEditor.CreateEmpty()
                 : CalibrationEditor.FromCalibration(_loadedCalibration, FindComponentName, FindSupplierName));
             UpdateAttachmentCommandState();
+            _pendingCertificate = null;
+            _pendingAttachmentRemoval = null;
+            UpdateCertificateCommandState();
             return;
         }
 
@@ -392,6 +431,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         {
             SetEditor(_snapshot.Clone());
             UpdateAttachmentCommandState();
+            _pendingCertificate = null;
+            _pendingAttachmentRemoval = null;
+            UpdateCertificateCommandState();
             return;
         }
 
@@ -401,6 +443,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         UpdateAttachmentCommandState();
+        _pendingCertificate = null;
+        _pendingAttachmentRemoval = null;
+        UpdateCertificateCommandState();
     }
 
     partial void OnEditorChanging(CalibrationEditor value)
@@ -438,6 +483,10 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         {
             Editor.SupplierName = FindSupplierName(Editor.SupplierId) ?? string.Empty;
         }
+        else if (e.PropertyName == nameof(CalibrationEditor.Certificate))
+        {
+            UpdateCertificateCommandState();
+        }
 
         if (IsInEditMode)
         {
@@ -465,6 +514,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateAttachmentCommandState();
+        UpdateCertificateCommandState();
     }
 
     private void SetEditor(CalibrationEditor editor)
@@ -474,6 +524,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateAttachmentCommandState();
+        UpdateCertificateCommandState();
     }
 
     private void RefreshComponentOptions(IEnumerable<Component> components)
@@ -605,6 +656,222 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
+
+    private bool CanManageCertificate()
+        => IsEditorEnabled;
+
+    private bool CanClearCertificate()
+        => IsEditorEnabled && Editor.Certificate is not null;
+
+    private async Task ManageCertificateAsync()
+    {
+        if (!CanManageCertificate())
+        {
+            return;
+        }
+
+        var request = new CalibrationCertificateDialogRequest(
+            Editor.Certificate,
+            BuildCertificateDialogCaption(),
+            AllowFileSelection: true);
+
+        CalibrationCertificateDialogResult? result;
+        try
+        {
+            result = await _certificateDialog
+                .ShowAsync(request)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Certificate dialog failed: {ex.Message}";
+            return;
+        }
+
+        if (result is null)
+        {
+            StatusMessage = "Certificate update cancelled.";
+            return;
+        }
+
+        ApplyCertificateSelection(result);
+        StatusMessage = "Certificate metadata staged.";
+    }
+
+    private void ClearCertificate()
+    {
+        if (!CanClearCertificate())
+        {
+            return;
+        }
+
+        _pendingCertificate = null;
+        _pendingAttachmentRemoval = Editor.Certificate?.AttachmentId;
+
+        Editor.Certificate = null;
+        Editor.CertDoc = string.Empty;
+
+        if (IsInEditMode)
+        {
+            MarkDirty();
+        }
+
+        UpdateCertificateCommandState();
+        UpdateAttachmentCommandState();
+        StatusMessage = "Certificate metadata cleared.";
+    }
+
+    private void ApplyCertificateSelection(CalibrationCertificateDialogResult result)
+    {
+        _pendingCertificate = result;
+        _pendingAttachmentRemoval = result.FileCleared ? result.RemovedAttachmentId : null;
+
+        Editor.Certificate = result.Certificate;
+        Editor.CertDoc = result.Certificate.DisplayName;
+
+        if (IsInEditMode)
+        {
+            MarkDirty();
+        }
+
+        UpdateCertificateCommandState();
+        UpdateAttachmentCommandState();
+    }
+
+    private string? BuildCertificateDialogCaption()
+    {
+        if (_loadedCalibration is { Id: > 0 } calibration)
+        {
+            return $"Calibration #{calibration.Id}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(Editor.ComponentName))
+        {
+            return Editor.ComponentName;
+        }
+
+        return null;
+    }
+
+    private void UpdateCertificateCommandState()
+    {
+        ManageCertificateCommand.NotifyCanExecuteChanged();
+        ClearCertificateCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task<(CalibrationCertificateSnapshot? Snapshot, string? Message)> HandlePendingCertificateAsync(Calibration calibration)
+    {
+        if (calibration is null || calibration.Id <= 0)
+        {
+            _pendingCertificate = null;
+            _pendingAttachmentRemoval = null;
+            return (null, null);
+        }
+
+        var messages = new List<string>();
+        CalibrationCertificateSnapshot? snapshot = null;
+
+        if (_pendingAttachmentRemoval is int removeId && removeId > 0)
+        {
+            try
+            {
+                await _attachmentWorkflow
+                    .RemoveLinkAsync("calibrations", calibration.Id, removeId)
+                    .ConfigureAwait(false);
+                messages.Add($"Removed certificate attachment #{removeId}.");
+            }
+            catch (Exception ex)
+            {
+                _pendingAttachmentRemoval = null;
+                return (null, $"Certificate attachment removal failed: {ex.Message}");
+            }
+
+            _pendingAttachmentRemoval = null;
+        }
+
+        if (_pendingCertificate is { File: not null } pendingFile)
+        {
+            try
+            {
+                await using var stream = await pendingFile.File.OpenReadAsync().ConfigureAwait(false);
+                var request = new AttachmentUploadRequest
+                {
+                    FileName = pendingFile.File.FileName,
+                    ContentType = pendingFile.File.ContentType,
+                    EntityType = "calibrations",
+                    EntityId = calibration.Id,
+                    UploadedById = _authContext.CurrentUser?.Id,
+                    DisplayName = pendingFile.Certificate.DisplayName,
+                    RetainUntil = pendingFile.Certificate.ExpiresOn,
+                    Reason = $"calibration-cert:{calibration.Id}",
+                    SourceIp = _authContext.CurrentIpAddress,
+                    SourceHost = _authContext.CurrentDeviceInfo,
+                    Notes = BuildCertificateNotes(pendingFile.Certificate)
+                };
+
+                var uploadResult = await _attachmentWorkflow
+                    .UploadAsync(stream, request)
+                    .ConfigureAwait(false);
+
+                var attachment = uploadResult.Attachment;
+                var updatedCertificate = pendingFile.Certificate with
+                {
+                    AttachmentId = attachment.Id,
+                    FileName = attachment.FileName,
+                    FileSize = attachment.FileSize,
+                    ContentType = attachment.FileType,
+                    Sha256 = attachment.Sha256
+                };
+
+                snapshot = updatedCertificate;
+                messages.Add($"Uploaded certificate '{attachment.FileName}'.");
+            }
+            catch (Exception ex)
+            {
+                return (snapshot, $"Certificate upload failed: {ex.Message}");
+            }
+        }
+        else if (_pendingCertificate is { File: null } pendingSnapshot)
+        {
+            snapshot = pendingSnapshot.Certificate;
+        }
+
+        _pendingCertificate = null;
+        var message = messages.Count > 0 ? string.Join(" ", messages) : null;
+        return (snapshot, message);
+    }
+
+    private static string? BuildCertificateNotes(CalibrationCertificateSnapshot certificate)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(certificate.CertificateNumber))
+        {
+            parts.Add($"number={certificate.CertificateNumber}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(certificate.Issuer))
+        {
+            parts.Add($"issuer={certificate.Issuer}");
+        }
+
+        if (certificate.IssuedOn.HasValue)
+        {
+            parts.Add($"issued={certificate.IssuedOn:yyyy-MM-dd}");
+        }
+
+        if (certificate.ExpiresOn.HasValue)
+        {
+            parts.Add($"expires={certificate.ExpiresOn:yyyy-MM-dd}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(certificate.Notes))
+        {
+            parts.Add($"notes={certificate.Notes}");
+        }
+
+        return parts.Count == 0 ? null : string.Join("; ", parts);
+    }
     /// <summary>
     /// Represents the calibration editor value.
     /// </summary>
@@ -640,6 +907,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
 
         [ObservableProperty]
         private string _comment = string.Empty;
+
+        [ObservableProperty]
+        private CalibrationCertificateSnapshot? _certificate;
         /// <summary>
         /// Executes the create empty operation.
         /// </summary>
@@ -669,6 +939,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 CalibrationDate = calibration.CalibrationDate,
                 NextDue = calibration.NextDue,
                 CertDoc = calibration.CertDoc ?? string.Empty,
+                Certificate = string.IsNullOrWhiteSpace(calibration.CertDoc)
+                    ? null
+                    : new CalibrationCertificateSnapshot(calibration.CertDoc!, FileName: calibration.CertDoc),
                 Result = calibration.Result ?? string.Empty,
                 Comment = calibration.Comment ?? string.Empty
             };
@@ -685,7 +958,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             calibration.SupplierId = SupplierId;
             calibration.CalibrationDate = CalibrationDate;
             calibration.NextDue = NextDue;
-            calibration.CertDoc = CertDoc;
+            calibration.CertDoc = Certificate?.DisplayName ?? CertDoc;
             calibration.Result = Result;
             calibration.Comment = Comment;
             return calibration;
@@ -705,6 +978,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 CalibrationDate = CalibrationDate,
                 NextDue = NextDue,
                 CertDoc = CertDoc,
+                Certificate = Certificate,
                 Result = Result,
                 Comment = Comment
             };

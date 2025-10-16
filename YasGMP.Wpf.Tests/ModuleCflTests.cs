@@ -31,6 +31,7 @@ public class ModuleCflTests
         });
 
         var signatureDialog = new TestElectronicSignatureDialogService();
+        var certificateDialog = new TestCalibrationCertificateDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -182,6 +183,7 @@ public class ModuleCflTests
             filePicker,
             attachmentService,
             signatureDialog,
+            certificateDialog,
             dialog,
             shell,
             navigation);

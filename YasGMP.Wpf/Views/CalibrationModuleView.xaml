@@ -124,11 +124,124 @@
                                      Text="{Binding Editor.Result, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Calibration.Text.Certificate}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="5"
-                                     Grid.Column="1"
-                                     Text="{Binding Editor.CertDoc, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}" />
+                            <TextBlock Text="{DynamicResource Module.Calibration.Text.Certificate}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                            <StackPanel Grid.Row="5"
+                                        Grid.Column="1"
+                                        Margin="0,0,0,6">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Manage certificate..."
+                                            Command="{Binding ManageCertificateCommand}"
+                                            Margin="0,0,8,0"
+                                            Width="160" />
+                                    <Button Content="Clear"
+                                            Command="{Binding ClearCertificateCommand}"
+                                            Width="80" />
+                                </StackPanel>
+                                <Border Margin="0,8,0,0"
+                                        Padding="8"
+                                        BorderBrush="#FFCCCCCC"
+                                        BorderThickness="1"
+                                        Background="#FFF7F7F7">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Row="0"
+                                                   Grid.Column="0"
+                                                   Text="Document"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="0"
+                                                   Grid.Column="1"
+                                                   Text="{Binding Editor.Certificate.DisplayName}"
+                                                   TextWrapping="Wrap"
+                                                   FontWeight="SemiBold" />
+
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.Column="0"
+                                                   Text="Certificate #"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.Column="1"
+                                                   Text="{Binding Editor.Certificate.CertificateNumber}"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBlock Grid.Row="2"
+                                                   Grid.Column="0"
+                                                   Text="Issuer"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="2"
+                                                   Grid.Column="1"
+                                                   Text="{Binding Editor.Certificate.Issuer}"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBlock Grid.Row="3"
+                                                   Grid.Column="0"
+                                                   Text="Issued"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="3"
+                                                   Grid.Column="1"
+                                                   Text="{Binding Editor.Certificate.IssuedOn, StringFormat={}{0:d}}" />
+
+                                        <TextBlock Grid.Row="4"
+                                                   Grid.Column="0"
+                                                   Text="Expires"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="4"
+                                                   Grid.Column="1"
+                                                   Text="{Binding Editor.Certificate.ExpiresOn, StringFormat={}{0:d}}" />
+
+                                        <TextBlock Grid.Row="5"
+                                                   Grid.Column="0"
+                                                   Text="File"
+                                                   Margin="0,0,8,4" />
+                                        <StackPanel Grid.Row="5"
+                                                    Grid.Column="1"
+                                                    Orientation="Vertical">
+                                            <TextBlock Text="{Binding Editor.Certificate.FileName}" />
+                                            <TextBlock Text="{Binding Editor.Certificate.FileSizeDisplay}"
+                                                       Foreground="Gray" />
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Row="6"
+                                                   Grid.Column="0"
+                                                   Text="Notes"
+                                                   Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="6"
+                                                   Grid.Column="1"
+                                                   Text="{Binding Editor.Certificate.Notes}"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBlock Grid.RowSpan="7"
+                                                   Grid.ColumnSpan="2"
+                                                   Text="No certificate selected."
+                                                   Foreground="Gray"
+                                                   FontStyle="Italic">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Editor.Certificate}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
 
                             <TextBlock Text="{DynamicResource Module.Calibration.Text.Comments}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" />
                             <TextBox Grid.Row="6"
