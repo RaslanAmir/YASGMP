@@ -71,6 +71,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IAttachmentService, AttachmentService>();
                         svc.AddSingleton<IAttachmentWorkflowService, AttachmentWorkflowService>();
                         svc.AddSingleton<IElectronicSignatureDialogService, ElectronicSignatureDialogService>();
+                        svc.AddSingleton<ICalibrationCertificateDialogService, CalibrationCertificateDialogService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
                         svc.AddSingleton<IRBACService, RBACService>();
                         svc.AddSingleton<WorkOrderAuditService>();
