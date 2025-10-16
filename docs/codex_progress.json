@@ -133,7 +133,7 @@
       "notes": [
         "ComponentService persistence now threads adapter-supplied signature hash/IP/device/session context through ComponentSaveContext and DatabaseService.ComponentOverloads so machine_components keeps the adapter hash intact; CLI validation still blocked.",
         "Change Control persistence now stores digital signature hash/IP/session/device metadata via new columns and service plumbing; schema + CRUD helpers updated while CLI validation remains blocked.",
-        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters and AppCore services propagate optional signature metadata through to persistence with legacy hash fallback when metadata is absent; audit surfacing still pending until SDK access returns",
+        "Electronic signature capture now enforced across Assets, Work Orders, Calibration, Suppliers, and Parts; WPF adapters and AppCore services propagate optional signature metadata through to persistence with legacy hash fallback when metadata is absent, and the Work Orders inspector now surfaces chronological audit entries plus captured signature manifests even while other modules await SDK-backed UI validation",
         "Audit logging now includes signature id/hash metadata with graceful fallbacks and unit coverage for both modern and legacy schemas.",
         "DataDrivenModuleDocumentViewModel exposes a shared AuditService hook and Work Orders now logs CREATE/UPDATE audit entries with signature, user, IP, device, and session context immediately after successful persistence.",
         "WPF test harness now uses a RecordingAuditService spy so Work Orders save and attachment flows assert audit payloads with signer context while the dotnet CLI remains unavailable.",
@@ -232,7 +232,7 @@
     "2025-12-01: dotnet restore/build/smoke harness attempts blocked by missing CLI while validating Change Control signature metadata persistence; rerun once .NET 9 SDK installed.",
     "Need to restore/install dotnet 9 SDK to proceed with Batch 0 validation steps.",
     "tests/fixtures/hello.txt seeded for smoke harness bootstrap",
-    "Work Orders editor now surfaces CRUD via adapter with attachments and mandatory e-signature capture; audit surfacing still pending Batch B2",
+    "Work Orders editor now surfaces CRUD via adapter with attachments and mandatory e-signature capture, and its inspector timeline now renders audit history alongside captured signature manifests",
     "Calibration editor now exposes CRUD with supplier/component lookups, attachment uploads, and mandatory e-signature capture; audit work remains queued for Batch B2",
     "Assets module now uploads attachments via AttachmentService from the WPF shell and enforces electronic signatures before save; audit surfacing remains pending.",
     "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module.",
