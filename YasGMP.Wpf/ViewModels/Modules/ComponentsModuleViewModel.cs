@@ -45,6 +45,9 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly ICodeGeneratorService _codeGeneratorService;
+    private readonly IQRCodeService _qrCodeService;
+    private readonly IPlatformService _platformService;
 
     private Component? _loadedComponent;
     private ComponentEditor? _snapshot;
@@ -64,13 +67,23 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        ICodeGeneratorService codeGeneratorService,
+        IQRCodeService qrCodeService,
+        IPlatformService platformService)
         : base(ModuleKey, localization.GetString("Module.Title.Components"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _codeGeneratorService = codeGeneratorService ?? throw new ArgumentNullException(nameof(codeGeneratorService));
+        _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
+        _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
+
+        _ = _codeGeneratorService;
+        _ = _qrCodeService;
+        _ = _platformService;
 
         Editor = ComponentEditor.CreateEmpty();
         StatusOptions = Array.AsReadOnly(DefaultStatuses);
