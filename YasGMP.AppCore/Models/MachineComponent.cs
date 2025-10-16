@@ -115,6 +115,26 @@ namespace YasGMP.Models
         [Display(Name = "Dobavljač/proizvođač")]
         public string? Supplier { get; set; }
 
+        /// <summary>QR image path associated with this component.</summary>
+        [StringLength(128)]
+        [Column("qr_code")]
+        [Display(Name = "QR kod")]
+        public string? QrCode { get; set; }
+
+        /// <summary>Canonical QR payload used for scanning workflows.</summary>
+        [StringLength(256)]
+        [Column("qr_payload")]
+        [Display(Name = "QR payload")]
+        public string? QrPayload { get; set; }
+
+        /// <summary>Optional override that allows operators to diverge from generated codes.</summary>
+        [NotMapped]
+        public string? CodeOverride { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether <see cref="CodeOverride"/> should be applied.</summary>
+        [NotMapped]
+        public bool IsCodeOverrideEnabled { get; set; }
+
         /// <summary>
         /// RFID/NFC tag code for physical tracking.
         /// </summary>

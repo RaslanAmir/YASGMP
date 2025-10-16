@@ -140,16 +140,20 @@ namespace YasGMP.Services
 
             string sql = !update
                 ? @"INSERT INTO machine_components
-                       (machine_id, code, name, type, sop_doc, status, install_date, last_modified_by_id,
+                       (machine_id, code, name, type, sop_doc, status, documents, qr_code, qr_payload, install_date, last_modified_by_id,
                         digital_signature, last_modified, source_ip, device_info, session_id)
                     VALUES
-                       (@mid,@code,@name,@type,@sop,@status,@install,@modby,@sig,@last,@ip,@device,@session)"
+                       (@mid,@code,@name,@type,@sop,@status,@docs,@qrcode,@qrpayload,@install,@modby,@sig,@last,@ip,@device,@session)"
                 : @"UPDATE machine_components SET
                        machine_id=@mid, code=@code, name=@name, type=@type, sop_doc=@sop, status=@status,
+                       documents=@docs, qr_code=@qrcode, qr_payload=@qrpayload,
                        install_date=@install, last_modified_by_id=@modby, digital_signature=@sig,
                        last_modified=@last, source_ip=@ip, device_info=@device, session_id=@session
                    WHERE id=@id";
 
+            var documentsRaw = TryGetString(c, "DocumentsRaw");
+            var qrCode = TryGetString(c, "QrCode");
+            var qrPayload = TryGetString(c, "QrPayload");
             var pars = new List<MySqlParameter>
             {
                 new("@mid",     (object?)TryGet<int>(c, "MachineId") ?? DBNull.Value),
@@ -158,6 +162,9 @@ namespace YasGMP.Services
                 new("@type",    (object?)TryGetString(c, "Type")     ?? DBNull.Value),
                 new("@sop",     (object?)TryGetString(c, "SopDoc")   ?? DBNull.Value),
                 new("@status",  (object?)TryGetString(c, "Status")   ?? DBNull.Value),
+                new("@docs",    string.IsNullOrWhiteSpace(documentsRaw) ? (object)DBNull.Value : documentsRaw),
+                new("@qrcode",  string.IsNullOrWhiteSpace(qrCode) ? (object)DBNull.Value : qrCode),
+                new("@qrpayload", string.IsNullOrWhiteSpace(qrPayload) ? (object)DBNull.Value : qrPayload),
                 new("@install", (object?)TryGet<DateTime>(c, "InstallDate") ?? DBNull.Value),
                 new("@modby",   actorUserId),
                 new("@sig",     (object?)signature ?? DBNull.Value),

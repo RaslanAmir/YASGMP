@@ -401,6 +401,7 @@
     "2026-04-11: Asset editor QR parity updates retried dotnet restore/build for MAUI and WPF targets; CLI remains unavailable so every command exits with 'command not found'.",
     "2026-04-12: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried after wiring Assets QR toolbar preview; CLI still missing so each command exits with 'command not found'.",
     "2026-04-13: Assets module unit tests now validate add/update code generation, preview command enablement, and PNG path persistence via platform adapters; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned.",
-    "2026-04-14: ComponentsModuleViewModel now injects code generator, QR, and platform services aligned with Assets plus updated unit coverage; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned."
+    "2026-04-14: ComponentsModuleViewModel now injects code generator, QR, and platform services aligned with Assets plus updated unit coverage; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned.",
+    "2026-04-16: Component editor now exposes code override toggles, QR payload/path bindings, and linked document collections; Component/MachineComponent models and DatabaseService insert/update/query paths persist QR metadata and attachment references. dotnet restore/build/test continue to exit with 'command not found' because the CLI is unavailable in this container."
   ]
 }

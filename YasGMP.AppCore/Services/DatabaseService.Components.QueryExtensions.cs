@@ -23,11 +23,12 @@ namespace YasGMP.Services
             this DatabaseService db,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT 
+            const string sql = @"SELECT
     id, machine_id, code, name, type, model, install_date, purchase_date,
     warranty_until, warranty_expiry, status, serial_number, supplier, rfid_tag,
-    io_tdevice_id AS iot_device_id, sop_doc, last_modified, last_modified_by_id,
-    source_ip, is_critical, note, digital_signature, notes, lifecycle_phase
+    io_tdevice_id AS iot_device_id, sop_doc, documents, qr_code, qr_payload,
+    last_modified, last_modified_by_id, source_ip, is_critical, note,
+    digital_signature, notes, lifecycle_phase
 FROM machine_components ORDER BY id DESC";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
             var list = new List<MachineComponent>(dt.Rows.Count);
@@ -41,11 +42,12 @@ FROM machine_components ORDER BY id DESC";
             int id,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT 
+            const string sql = @"SELECT
     id, machine_id, code, name, type, model, install_date, purchase_date,
     warranty_until, warranty_expiry, status, serial_number, supplier, rfid_tag,
-    io_tdevice_id AS iot_device_id, sop_doc, last_modified, last_modified_by_id,
-    source_ip, is_critical, note, digital_signature, notes, lifecycle_phase
+    io_tdevice_id AS iot_device_id, sop_doc, documents, qr_code, qr_payload,
+    last_modified, last_modified_by_id, source_ip, is_critical, note,
+    digital_signature, notes, lifecycle_phase
 FROM machine_components WHERE id=@id LIMIT 1";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 1 ? Parse(dt.Rows[0]) : null;
@@ -89,6 +91,10 @@ FROM machine_components WHERE id=@id LIMIT 1";
                 LifecyclePhase = GetString("lifecycle_phase")
             };
 
+            m.DocumentsRaw = GetString("documents");
+            m.QrCode = GetString("qr_code");
+            m.QrPayload = GetString("qr_payload");
+
             return m;
         }
 
@@ -98,11 +104,12 @@ FROM machine_components WHERE id=@id LIMIT 1";
             int machineId,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT 
+            const string sql = @"SELECT
     id, machine_id, code, name, type, model, install_date, purchase_date,
     warranty_until, warranty_expiry, status, serial_number, supplier, rfid_tag,
-    io_tdevice_id AS iot_device_id, sop_doc, last_modified, last_modified_by_id,
-    source_ip, is_critical, note, digital_signature, notes, lifecycle_phase
+    io_tdevice_id AS iot_device_id, sop_doc, documents, qr_code, qr_payload,
+    last_modified, last_modified_by_id, source_ip, is_critical, note,
+    digital_signature, notes, lifecycle_phase
 FROM machine_components WHERE machine_id=@mid ORDER BY name, id";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@mid", machineId) }, token).ConfigureAwait(false);
             var list = new List<MachineComponent>(dt.Rows.Count);
@@ -115,11 +122,12 @@ FROM machine_components WHERE machine_id=@mid ORDER BY name, id";
             this DatabaseService db,
             CancellationToken token = default)
         {
-            const string sql = @"SELECT 
+            const string sql = @"SELECT
     id, machine_id, code, name, type, model, install_date, purchase_date,
     warranty_until, warranty_expiry, status, serial_number, supplier, rfid_tag,
-    io_tdevice_id AS iot_device_id, sop_doc, last_modified, last_modified_by_id,
-    source_ip, is_critical, note, digital_signature, notes, lifecycle_phase
+    io_tdevice_id AS iot_device_id, sop_doc, documents, qr_code, qr_payload,
+    last_modified, last_modified_by_id, source_ip, is_critical, note,
+    digital_signature, notes, lifecycle_phase
 FROM machine_components WHERE machine_id IS NULL OR machine_id=0 ORDER BY name, id";
             var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
             var list = new List<MachineComponent>(dt.Rows.Count);
