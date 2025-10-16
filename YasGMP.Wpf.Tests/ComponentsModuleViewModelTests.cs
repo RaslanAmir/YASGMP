@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models;
@@ -222,6 +224,210 @@ public class ComponentsModuleViewModelTests
         Assert.Empty(signatureDialog.PersistedResults);
     }
 
+    [Fact]
+    public async Task GenerateCodeCommand_RegeneratesIdentifiers_WhenExecuted()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var componentAdapter = new FakeComponentCrudService();
+        var machineAdapter = new FakeMachineCrudService();
+
+        await machineAdapter.CreateAsync(new Machine
+        {
+            Id = 1,
+            Name = "Autoclave",
+            Manufacturer = "Steris"
+        }, MachineCrudContext.Create(1, "127.0.0.1", "TestRig", "unit"));
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCodeService = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            filePicker,
+            attachments,
+            localization: new StubLocalizationService(),
+            codeGeneratorService: codeGenerator,
+            qrCodeService: qrCodeService,
+            platformService: platformService);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Yield();
+
+        viewModel.Editor.Name = "Temperature Probe";
+        viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
+        viewModel.Editor.Code = string.Empty;
+        viewModel.Editor.QrPayload = string.Empty;
+        viewModel.Editor.QrCode = string.Empty;
+
+        Assert.True(viewModel.GenerateCodeCommand.CanExecute(null));
+        await viewModel.GenerateCodeCommand.ExecuteAsync(null);
+
+        Assert.Equal("Temperature Probe", codeGenerator.LastName);
+        Assert.Equal("Autoclave", codeGenerator.LastManufacturer);
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
+        var expectedPayload = $"yasgmp://component/{Uri.EscapeDataString(viewModel.Editor.Code)}?machine={viewModel.Editor.MachineId}";
+        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        Assert.True(File.Exists(viewModel.Editor.QrCode));
+    }
+
+    [Fact]
+    public async Task PreviewQrCommand_PreviewsGeneratedImage()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var componentAdapter = new FakeComponentCrudService();
+        var machineAdapter = new FakeMachineCrudService();
+
+        await machineAdapter.CreateAsync(new Machine
+        {
+            Id = 11,
+            Name = "Filling Line",
+            Manufacturer = "Fabrikam"
+        }, MachineCrudContext.Create(2, "127.0.0.1", "TestRig", "unit"));
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCodeService = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            filePicker,
+            attachments,
+            localization: new StubLocalizationService(),
+            codeGeneratorService: codeGenerator,
+            qrCodeService: qrCodeService,
+            platformService: platformService);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Yield();
+
+        viewModel.Editor.Name = "Flow Meter";
+        viewModel.Editor.MachineId = machineAdapter.Saved[0].Id;
+
+        await viewModel.GenerateCodeCommand.ExecuteAsync(null);
+        var expectedPath = viewModel.Editor.QrCode;
+        shell.PreviewedDocuments.Clear();
+
+        Assert.True(viewModel.PreviewQrCommand.CanExecute(null));
+        await viewModel.PreviewQrCommand.ExecuteAsync(null);
+
+        Assert.Contains(expectedPath, shell.PreviewedDocuments);
+        Assert.Equal($"QR generated at {expectedPath}.", viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task AttachDocumentCommand_UploadsAttachmentViaWorkflow()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var componentAdapter = new FakeComponentCrudService();
+        var machineAdapter = new FakeMachineCrudService();
+
+        await machineAdapter.CreateAsync(new Machine
+        {
+            Id = 21,
+            Name = "Mixer",
+            Manufacturer = "Contoso"
+        }, MachineCrudContext.Create(3, "127.0.0.1", "TestRig", "unit"));
+
+        componentAdapter.Saved.Add(new Component
+        {
+            Id = 5,
+            MachineId = machineAdapter.Saved[0].Id,
+            Name = "Pressure Sensor",
+            Code = "CMP-500",
+            SopDoc = "SOP-CMP-500",
+            Status = "active"
+        });
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 17, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.42"
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
+
+        var viewModel = CreateViewModel(
+            database,
+            audit,
+            componentAdapter,
+            machineAdapter,
+            auth,
+            signatureDialog,
+            dialog,
+            shell,
+            navigation,
+            filePicker,
+            attachments);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+        var record = Assert.Single(viewModel.Records);
+        await InvokeRecordSelectedAsync(viewModel, record).ConfigureAwait(false);
+
+        var bytes = Encoding.UTF8.GetBytes("component attachment");
+        filePicker.Files = new[]
+        {
+            new PickedFile(
+                "component.txt",
+                "text/plain",
+                () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)),
+                bytes.Length)
+        };
+
+        Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
+        await viewModel.AttachDocumentCommand.ExecuteAsync(null);
+
+        var upload = Assert.Single(attachmentService.Uploads);
+        Assert.Equal("components", upload.EntityType);
+        Assert.Equal(componentAdapter.Saved[0].Id, upload.EntityId);
+        Assert.Equal($"component:{componentAdapter.Saved[0].Id}", upload.Reason);
+    }
+
     private static ComponentsModuleViewModel CreateViewModel(
         DatabaseService database,
         AuditService audit,
@@ -232,15 +438,23 @@ public class ComponentsModuleViewModelTests
         TestCflDialogService dialog,
         TestShellInteractionService shell,
         TestModuleNavigationService navigation,
+        IFilePicker? filePicker = null,
+        IAttachmentWorkflowService? attachmentWorkflow = null,
         ILocalizationService? localization = null,
         ICodeGeneratorService? codeGeneratorService = null,
         IQRCodeService? qrCodeService = null,
         IPlatformService? platformService = null)
     {
         localization ??= new StubLocalizationService();
+        filePicker ??= new TestFilePicker();
         codeGeneratorService ??= new StubCodeGeneratorService();
         qrCodeService ??= new StubQrCodeService();
         platformService ??= new StubPlatformService();
+        attachmentWorkflow ??= new AttachmentWorkflowService(
+            new TestAttachmentService(),
+            database,
+            new AttachmentEncryptionOptions(),
+            audit);
 
         return new ComponentsModuleViewModel(
             database,
@@ -248,6 +462,8 @@ public class ComponentsModuleViewModelTests
             componentAdapter,
             machineAdapter,
             auth,
+            filePicker,
+            attachmentWorkflow,
             signatureDialog,
             dialog,
             shell,
@@ -264,6 +480,14 @@ public class ComponentsModuleViewModelTests
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(ComponentsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+
+    private static Task InvokeRecordSelectedAsync(ComponentsModuleViewModel viewModel, ModuleRecord? record)
+    {
+        var method = typeof(ComponentsModuleViewModel)
+            .GetMethod("OnRecordSelectedAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingMethodException(nameof(ComponentsModuleViewModel), "OnRecordSelectedAsync");
+        return (Task)method.Invoke(viewModel, new object?[] { record })!;
     }
 
     private sealed class TestCflDialogService : ICflDialogService

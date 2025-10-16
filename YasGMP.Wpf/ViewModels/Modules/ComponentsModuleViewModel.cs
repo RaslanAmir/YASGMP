@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -44,7 +48,10 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
     private readonly IComponentCrudService _componentService;
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
+    private readonly IFilePicker _filePicker;
+    private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly IShellInteractionService _shellInteraction;
     private readonly ICodeGeneratorService _codeGeneratorService;
     private readonly IQRCodeService _qrCodeService;
     private readonly IPlatformService _platformService;
@@ -63,6 +70,8 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         IComponentCrudService componentService,
         IMachineCrudService machineService,
         IAuthContext authContext,
+        IFilePicker filePicker,
+        IAttachmentWorkflowService attachmentWorkflow,
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
@@ -76,19 +85,22 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
+        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
+        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
         _codeGeneratorService = codeGeneratorService ?? throw new ArgumentNullException(nameof(codeGeneratorService));
         _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
-
-        _ = _codeGeneratorService;
-        _ = _qrCodeService;
-        _ = _platformService;
 
         Editor = ComponentEditor.CreateEmpty();
         StatusOptions = Array.AsReadOnly(DefaultStatuses);
         TypeOptions = Array.AsReadOnly(DefaultTypes);
         MachineOptions = new ObservableCollection<MachineOption>();
+
+        AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        GenerateCodeCommand = new AsyncRelayCommand(GenerateCodeAsync, CanGenerateCode);
+        PreviewQrCommand = new AsyncRelayCommand(PreviewQrAsync, CanPreviewQr);
     }
 
     [ObservableProperty]
@@ -96,6 +108,21 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
     [ObservableProperty]
     private bool _isEditorEnabled;
+    /// <summary>
+    /// Command exposed to the toolbar for uploading attachments.
+    /// </summary>
+
+    public IAsyncRelayCommand AttachDocumentCommand { get; }
+    /// <summary>
+    /// Generates a component code and QR payload.
+    /// </summary>
+
+    public IAsyncRelayCommand GenerateCodeCommand { get; }
+    /// <summary>
+    /// Persists and previews the QR image for the current component.
+    /// </summary>
+
+    public IAsyncRelayCommand PreviewQrCommand { get; }
     /// <summary>
     /// Gets or sets the machine options.
     /// </summary>
@@ -237,6 +264,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         {
             _loadedComponent = null;
             SetEditor(ComponentEditor.CreateEmpty());
+            UpdateCommandStates();
             return;
         }
 
@@ -259,9 +287,11 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
         _loadedComponent = component;
         LoadEditor(component);
+        await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
+        UpdateCommandStates();
     }
 
-    protected override Task OnModeChangedAsync(FormMode mode)
+    protected override async Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
 
@@ -276,16 +306,18 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                     _componentService.NormalizeStatus("active"),
                     defaultMachineId,
                     defaultMachineName));
+                await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
+                await InitializeEditorIdentifiersAsync().ConfigureAwait(false);
                 break;
             case FormMode.View:
                 _snapshot = null;
                 break;
         }
 
-        return Task.CompletedTask;
+        UpdateCommandStates();
     }
 
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
@@ -421,6 +453,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
 
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        UpdateCommandStates();
         return true;
     }
 
@@ -441,6 +474,8 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         {
             SetEditor(_snapshot.Clone());
         }
+
+        UpdateCommandStates();
     }
 
     partial void OnEditorChanging(ComponentEditor value)
@@ -481,6 +516,8 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         {
             MarkDirty();
         }
+
+        UpdateCommandStates();
     }
 
     private void LoadEditor(Component component)
@@ -489,6 +526,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         Editor = ComponentEditor.FromComponent(component, _componentService.NormalizeStatus, ResolveMachineName);
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+        UpdateCommandStates();
     }
 
     private void SetEditor(ComponentEditor editor)
@@ -497,6 +535,17 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+        UpdateCommandStates();
+    }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
+        {
+            UpdateCommandStates();
+        }
     }
 
     private void RefreshMachineOptions(IEnumerable<Machine> machines)
@@ -579,6 +628,359 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             inspector,
             AssetsModuleViewModel.ModuleKey,
             component.MachineId);
+    }
+
+    private bool CanGenerateCode()
+        => !IsBusy && IsInEditMode;
+
+    private bool CanPreviewQr()
+        => !IsBusy && Editor is not null && !string.IsNullOrWhiteSpace(Editor.QrPayload);
+
+    private bool CanAttachDocument()
+        => !IsBusy
+           && !IsEditorEnabled
+           && _loadedComponent is { Id: > 0 };
+
+    private async Task GenerateCodeAsync()
+    {
+        if (!IsInEditMode)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var code = EnsureEditorCode(force: true, suppressDirty: false);
+            var payload = EnsureEditorQrPayload(code, suppressDirty: false);
+            var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty: false).ConfigureAwait(false);
+            StatusMessage = string.IsNullOrWhiteSpace(path)
+                ? $"Generated component code {code}, but QR path is unavailable."
+                : $"Generated component code {code} and QR image at {path}.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"QR generation failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private async Task PreviewQrAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            var component = Editor.ToComponent(_loadedComponent);
+            await SynchronizeIdentifiersAsync(component, forceCode: false, suppressDirty: false).ConfigureAwait(false);
+            var path = component.QrCode ?? Editor.QrCode;
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                StatusMessage = "QR generation failed: QR path unavailable.";
+            }
+            else
+            {
+                _shellInteraction.PreviewDocument(path);
+                StatusMessage = $"QR generated at {path}.";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"QR generation failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private async Task AttachDocumentAsync()
+    {
+        if (_loadedComponent is null || _loadedComponent.Id <= 0)
+        {
+            StatusMessage = "Save the component before adding attachments.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var files = await _filePicker
+                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to component #{_loadedComponent.Id}"))
+                .ConfigureAwait(false);
+
+            if (files is null || files.Count == 0)
+            {
+                StatusMessage = "Attachment upload cancelled.";
+                return;
+            }
+
+            var processed = 0;
+            var deduplicated = 0;
+            var uploadedBy = _authContext.CurrentUser?.Id;
+
+            foreach (var file in files)
+            {
+                await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
+                var request = new AttachmentUploadRequest
+                {
+                    FileName = file.FileName,
+                    ContentType = file.ContentType,
+                    EntityType = "components",
+                    EntityId = _loadedComponent.Id,
+                    UploadedById = uploadedBy,
+                    Reason = $"component:{_loadedComponent.Id}",
+                    SourceIp = _authContext.CurrentIpAddress,
+                    SourceHost = _authContext.CurrentDeviceInfo,
+                    Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
+                };
+
+                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
+                processed++;
+                if (result.Deduplicated)
+                {
+                    deduplicated++;
+                }
+            }
+
+            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Attachment upload failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private async Task InitializeEditorIdentifiersAsync(bool resetDirty = false)
+    {
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var component = Editor.ToComponent(_loadedComponent);
+        try
+        {
+            await SynchronizeIdentifiersAsync(
+                    component,
+                    forceCode: false,
+                    suppressDirty: true,
+                    resetDirtyAfter: resetDirty)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"QR generation failed: {ex.Message}";
+        }
+    }
+
+    private async Task SynchronizeIdentifiersAsync(
+        Component component,
+        bool forceCode,
+        bool suppressDirty,
+        bool resetDirtyAfter = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (component is null)
+        {
+            return;
+        }
+
+        var code = EnsureEditorCode(forceCode, suppressDirty);
+        var payload = EnsureEditorQrPayload(code, suppressDirty);
+        var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty, cancellationToken).ConfigureAwait(false);
+
+        component.Code = code;
+        component.QrPayload = payload;
+        component.QrCode = path;
+
+        if (resetDirtyAfter)
+        {
+            ResetDirty();
+        }
+    }
+
+    private string EnsureEditorCode(bool force, bool suppressDirty)
+    {
+        if (Editor.IsCodeOverrideEnabled && !string.IsNullOrWhiteSpace(Editor.CodeOverride))
+        {
+            var overrideValue = Editor.CodeOverride.Trim();
+            if (suppressDirty)
+            {
+                ExecuteWithDirtySuppression(() => Editor.Code = overrideValue);
+            }
+            else
+            {
+                Editor.Code = overrideValue;
+            }
+
+            return Editor.Code;
+        }
+
+        if (!force && !string.IsNullOrWhiteSpace(Editor.Code))
+        {
+            return Editor.Code;
+        }
+
+        var machineName = ResolveMachineName(Editor.MachineId);
+        var generated = _codeGeneratorService.GenerateMachineCode(Editor.Name, machineName);
+
+        if (string.IsNullOrWhiteSpace(generated))
+        {
+            throw new InvalidOperationException("Unable to generate a component code.");
+        }
+
+        if (Editor.IsCodeOverrideEnabled)
+        {
+            ExecuteWithDirtySuppression(() =>
+            {
+                Editor.IsCodeOverrideEnabled = false;
+                Editor.CodeOverride = string.Empty;
+            });
+        }
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.Code = generated);
+        }
+        else
+        {
+            Editor.Code = generated;
+        }
+
+        return Editor.Code;
+    }
+
+    private string EnsureEditorQrPayload(string code, bool suppressDirty)
+    {
+        var payload = BuildQrPayload(code, Editor.MachineId);
+        if (string.Equals(Editor.QrPayload, payload, StringComparison.Ordinal))
+        {
+            return payload;
+        }
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.QrPayload = payload);
+        }
+        else
+        {
+            Editor.QrPayload = payload;
+        }
+
+        return payload;
+    }
+
+    private async Task<string> EnsureEditorQrImageAsync(
+        string payload,
+        string code,
+        bool suppressDirty,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            throw new InvalidOperationException("QR payload is required before generating an image.");
+        }
+
+        var path = await SaveQrImageAsync(payload, code, Editor.Id, cancellationToken).ConfigureAwait(false);
+
+        if (suppressDirty)
+        {
+            ExecuteWithDirtySuppression(() => Editor.QrCode = path);
+        }
+        else
+        {
+            Editor.QrCode = path;
+        }
+
+        return path;
+    }
+
+    private static string BuildQrPayload(string code, int machineId)
+    {
+        var identifier = string.IsNullOrWhiteSpace(code)
+            ? "pending"
+            : Uri.EscapeDataString(code.Trim());
+        var machineSegment = machineId > 0 ? $"?machine={machineId}" : string.Empty;
+        return $"yasgmp://component/{identifier}{machineSegment}";
+    }
+
+    private async Task<string> SaveQrImageAsync(
+        string payload,
+        string code,
+        int editorId,
+        CancellationToken cancellationToken)
+    {
+        var appData = _platformService.GetAppDataDirectory();
+        var qrDirectory = Path.Combine(appData, "Components", "QrCodes");
+        Directory.CreateDirectory(qrDirectory);
+
+        var hint = !string.IsNullOrWhiteSpace(code)
+            ? code
+            : editorId > 0
+                ? editorId.ToString(CultureInfo.InvariantCulture)
+                : Guid.NewGuid().ToString("N");
+        var fileName = $"{SanitizeFileName(hint)}.png";
+        var path = Path.Combine(qrDirectory, fileName);
+
+        using var pngStream = _qrCodeService.GeneratePng(payload);
+        if (pngStream.CanSeek)
+        {
+            pngStream.Position = 0;
+        }
+
+        await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
+        await pngStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+        await fileStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+
+        return path;
+    }
+
+    private static string SanitizeFileName(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "component";
+        }
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var builder = new StringBuilder(value.Length);
+        foreach (var ch in value)
+        {
+            builder.Append(Array.IndexOf(invalid, ch) >= 0 ? '_' : ch);
+        }
+
+        return builder.ToString();
+    }
+
+    private void ExecuteWithDirtySuppression(Action action)
+    {
+        var previous = _suppressEditorDirtyNotifications;
+        _suppressEditorDirtyNotifications = true;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _suppressEditorDirtyNotifications = previous;
+        }
+    }
+
+    private void UpdateCommandStates()
+    {
+        AttachDocumentCommand.NotifyCanExecuteChanged();
+        GenerateCodeCommand.NotifyCanExecuteChanged();
+        PreviewQrCommand.NotifyCanExecuteChanged();
     }
     /// <summary>
     /// Represents the component editor value.
