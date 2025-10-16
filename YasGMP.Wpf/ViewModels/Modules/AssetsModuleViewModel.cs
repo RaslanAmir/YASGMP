@@ -1389,6 +1389,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         [ObservableProperty]
         private string _notes = string.Empty;
+
+        [ObservableProperty]
+        private string _qrCode = string.Empty;
+
+        [ObservableProperty]
+        private string _qrPayload = string.Empty;
         /// <summary>
         /// Executes the create empty operation.
         /// </summary>
@@ -1398,6 +1404,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             LastModifiedUtc = null,
             LastModifiedById = null,
             LastModifiedByName = string.Empty,
+            QrCode = string.Empty,
+            QrPayload = string.Empty,
             SignatureHash = string.Empty,
             SignatureReason = string.Empty,
             SignatureNote = string.Empty,
@@ -1419,6 +1427,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 LastModifiedUtc = DateTime.UtcNow,
                 LastModifiedById = null,
                 LastModifiedByName = string.Empty,
+                QrCode = string.Empty,
+                QrPayload = string.Empty,
                 SignatureHash = string.Empty,
                 SignatureReason = string.Empty,
                 SignatureNote = string.Empty,
@@ -1453,6 +1463,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 SerialNumber = machine.SerialNumber ?? string.Empty,
                 LifecyclePhase = machine.LifecyclePhase ?? string.Empty,
                 Notes = machine.Note ?? string.Empty,
+                QrCode = machine.QrCode ?? string.Empty,
+                QrPayload = machine.QrPayload ?? string.Empty,
                 SignatureHash = machine.DigitalSignature ?? string.Empty,
                 LastModifiedUtc = machine.LastModified,
                 LastModifiedById = machine.LastModifiedById,
@@ -1485,6 +1497,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             machine.SerialNumber = string.IsNullOrWhiteSpace(SerialNumber) ? machine.SerialNumber : SerialNumber;
             machine.LifecyclePhase = LifecyclePhase;
             machine.Note = Notes;
+            machine.QrCode = string.IsNullOrWhiteSpace(QrCode) ? null : QrCode.Trim();
+            machine.QrPayload = string.IsNullOrWhiteSpace(QrPayload) ? null : QrPayload.Trim();
             machine.DigitalSignature = SignatureHash;
             machine.LastModified = LastModifiedUtc ?? DateTime.UtcNow;
             machine.LastModifiedById = LastModifiedById ?? machine.LastModifiedById;
@@ -1513,6 +1527,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 SerialNumber = SerialNumber,
                 LifecyclePhase = LifecyclePhase,
                 Notes = Notes,
+                QrCode = QrCode,
+                QrPayload = QrPayload,
                 SignatureHash = SignatureHash,
                 SignatureReason = SignatureReason,
                 SignatureNote = SignatureNote,
@@ -1546,7 +1562,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload
             };
         }
     }
