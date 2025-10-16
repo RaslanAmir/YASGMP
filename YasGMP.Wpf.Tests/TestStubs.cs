@@ -76,6 +76,11 @@ namespace YasGMP.Models
         public DateTime? WarrantyUntil { get; set; }
         public string? Comments { get; set; }
         public string? LifecycleState { get; set; }
+        public string? QrCode { get; set; }
+        public string? QrPayload { get; set; }
+        public string? CodeOverride { get; set; }
+        public bool IsCodeOverrideEnabled { get; set; }
+        public List<string> LinkedDocuments { get; set; } = new();
     }
 
     public class WorkOrder

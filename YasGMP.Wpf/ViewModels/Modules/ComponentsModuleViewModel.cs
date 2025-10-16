@@ -627,11 +627,33 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
 
         [ObservableProperty]
         private string _lifecycleState = string.Empty;
+
+        [ObservableProperty]
+        private string _qrCode = string.Empty;
+
+        [ObservableProperty]
+        private string _qrPayload = string.Empty;
+
+        [ObservableProperty]
+        private string _codeOverride = string.Empty;
+
+        [ObservableProperty]
+        private bool _isCodeOverrideEnabled;
+
+        [ObservableProperty]
+        private ObservableCollection<string> _linkedDocuments = new();
         /// <summary>
         /// Executes the create empty operation.
         /// </summary>
 
-        public static ComponentEditor CreateEmpty() => new();
+        public static ComponentEditor CreateEmpty() => new()
+        {
+            QrCode = string.Empty,
+            QrPayload = string.Empty,
+            CodeOverride = string.Empty,
+            IsCodeOverrideEnabled = false,
+            LinkedDocuments = new ObservableCollection<string>()
+        };
         /// <summary>
         /// Executes the create for new operation.
         /// </summary>
@@ -641,7 +663,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             {
                 Status = normalizedStatus,
                 MachineId = machineId,
-                MachineName = machineName
+                MachineName = machineName,
+                QrCode = string.Empty,
+                QrPayload = string.Empty,
+                CodeOverride = string.Empty,
+                IsCodeOverrideEnabled = false,
+                LinkedDocuments = new ObservableCollection<string>()
             };
         /// <summary>
         /// Executes the from component operation.
@@ -669,7 +696,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 Supplier = component.Supplier ?? string.Empty,
                 WarrantyUntil = component.WarrantyUntil,
                 Comments = component.Comments ?? string.Empty,
-                LifecycleState = component.LifecycleState ?? string.Empty
+                LifecycleState = component.LifecycleState ?? string.Empty,
+                QrCode = component.QrCode ?? string.Empty,
+                QrPayload = component.QrPayload ?? string.Empty,
+                CodeOverride = component.CodeOverride ?? string.Empty,
+                IsCodeOverrideEnabled = component.IsCodeOverrideEnabled,
+                LinkedDocuments = new ObservableCollection<string>(component.LinkedDocuments ?? new List<string>())
             };
         }
         /// <summary>
@@ -693,6 +725,11 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             component.WarrantyUntil = WarrantyUntil;
             component.Comments = Comments;
             component.LifecycleState = LifecycleState;
+            component.QrCode = string.IsNullOrWhiteSpace(QrCode) ? string.Empty : QrCode.Trim();
+            component.QrPayload = string.IsNullOrWhiteSpace(QrPayload) ? string.Empty : QrPayload.Trim();
+            component.CodeOverride = CodeOverride ?? string.Empty;
+            component.IsCodeOverrideEnabled = IsCodeOverrideEnabled;
+            component.LinkedDocuments = LinkedDocuments?.ToList() ?? new List<string>();
             return component;
         }
         /// <summary>
@@ -715,7 +752,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 Supplier = Supplier,
                 WarrantyUntil = WarrantyUntil,
                 Comments = Comments,
-                LifecycleState = LifecycleState
+                LifecycleState = LifecycleState,
+                QrCode = QrCode,
+                QrPayload = QrPayload,
+                CodeOverride = CodeOverride,
+                IsCodeOverrideEnabled = IsCodeOverrideEnabled,
+                LinkedDocuments = new ObservableCollection<string>(LinkedDocuments)
             };
 
         private static Component CloneComponent(Component source)
@@ -735,7 +777,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 Supplier = source.Supplier,
                 WarrantyUntil = source.WarrantyUntil,
                 Comments = source.Comments,
-                LifecycleState = source.LifecycleState
+                LifecycleState = source.LifecycleState,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                CodeOverride = source.CodeOverride,
+                IsCodeOverrideEnabled = source.IsCodeOverrideEnabled,
+                LinkedDocuments = new List<string>(source.LinkedDocuments)
             };
         }
     }
