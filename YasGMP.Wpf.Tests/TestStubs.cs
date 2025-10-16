@@ -734,7 +734,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -755,6 +758,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -1041,7 +1047,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -1062,6 +1071,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -1253,7 +1265,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -1379,6 +1394,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -1772,7 +1790,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -1793,6 +1814,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -2253,7 +2277,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -2274,6 +2301,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -2754,7 +2784,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -2775,6 +2808,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -3250,7 +3286,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -3271,6 +3310,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -4353,7 +4395,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -4374,6 +4419,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -5143,7 +5191,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -5164,6 +5215,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -5915,7 +5969,10 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note
+                Note = source.Note,
+                QrCode = source.QrCode,
+                QrPayload = source.QrPayload,
+                DigitalSignature = source.DigitalSignature
             };
         }
 
@@ -5936,6 +5993,9 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
+            destination.QrCode = source.QrCode;
+            destination.QrPayload = source.QrPayload;
+            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
