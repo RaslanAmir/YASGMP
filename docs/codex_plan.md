@@ -16,6 +16,7 @@
 - 2026-04-09T00:00Z: `dotnet restore yasgmp.sln` and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` remain blocked with `bash: command not found: dotnet` after introducing WPF adapters for shared code/QR utilities; Windows host validation is still required.
 - 2026-04-10T09:45Z: `dotnet restore yasgmp.sln` retried during the Assets module service injection batch; container still returns `bash: command not found: dotnet`, so validation remains Windows-host only.
 - 2026-04-11T00:00Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried after wiring WPF asset editor QR fields; each command still fails with `bash: command not found: dotnet` until a Windows host is available.
+- 2026-04-20T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried while documenting code/QR parity; CLI remains unavailable in this container (`bash: command not found: dotnet`).
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
   - 2025-10-13T10:59Z: `dotnet restore yasgmp.sln` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2025-10-10T11:24Z: `dotnet restore yasgmp.sln` (with `EnableWindowsTargeting=true`) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; full solution restore remains Windows-host only.
@@ -69,6 +70,12 @@
 - Introduced `NotificationPreferenceService` persistence, the shared `NotificationPreferences` model, and WPF unit tests covering alert propagation plus AdminModuleViewModel load/save/dirty states to guard the workflow.
 - Refreshed `README_WPF_SHELL.md` and `docs/WPF_MAPPING.md` with alert parity details, toast overlay documentation, and notification preference UI notes.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with `command not found` because the dotnet CLI is unavailable on this Linux host; rerun on a Windows machine with the Windows 10 SDK installed.
+
+### Increment 2 Follow-up — Code & QR Adapter Documentation (2026-04-20)
+
+- Marked the code and QR helper parity rows in `docs/WPF_MAPPING.md` as complete now that WPF registers `CodeGeneratorServiceAdapter`/`QRCodeServiceAdapter` and exposes toolbar commands mirroring MAUI automation.
+- Added operator guidance noting the Generate Code and Preview QR buttons in the Assets/Components toolbars so shell users know where to trigger auto-identifiers and label previews.
+- Re-ran restore/build commands listed above; each continues to exit with `bash: command not found: dotnet` pending a Windows host.
 - 2026-04-11: Assets module view-model now auto-generates machine codes and QR PNGs via new toolbar commands, persists previews into the platform app data directory, and extends localization/unit tests for the workflow; `dotnet restore`/`dotnet build` remain blocked with `bash: command not found: dotnet` in this container.
 
 ### Increment 2 Follow-up — Assets module service parity (2026-04-10)
