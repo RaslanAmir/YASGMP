@@ -25,13 +25,15 @@ namespace YasGMP.Wpf.Services;
 public sealed class ScheduledJobCrudServiceAdapter : IScheduledJobCrudService
 {
     private readonly DatabaseService _database;
+    private readonly IPreventiveMaintenanceService? _preventiveMaintenanceService;
     /// <summary>
     /// Initializes a new instance of the ScheduledJobCrudServiceAdapter class.
     /// </summary>
 
-    public ScheduledJobCrudServiceAdapter(DatabaseService database)
+    public ScheduledJobCrudServiceAdapter(DatabaseService database, IPreventiveMaintenanceService? preventiveMaintenanceService = null)
     {
         _database = database ?? throw new ArgumentNullException(nameof(database));
+        _preventiveMaintenanceService = preventiveMaintenanceService;
     }
     /// <summary>
     /// Executes the try get by id async operation.
@@ -161,6 +163,8 @@ WHERE id=@id";
         await _database.ExecuteNonQueryAsync(sql, parameters).ConfigureAwait(false);
         await _database.LogScheduledJobAuditAsync(new ScheduledJob { Id = jobId }, "EXECUTE", context.Ip, context.DeviceInfo, context.SessionId, $"user={context.UserId}")
             .ConfigureAwait(false);
+
+        await TryAdvancePreventiveMaintenanceAsync(jobId, context).ConfigureAwait(false);
     }
     /// <summary>
     /// Executes the acknowledge async operation.
@@ -188,6 +192,32 @@ WHERE id=@id";
         await _database.LogScheduledJobAuditAsync(new ScheduledJob { Id = jobId }, "ACK", context.Ip, context.DeviceInfo, context.SessionId, $"user={context.UserId}")
             .ConfigureAwait(false);
     }
+
+    private async Task TryAdvancePreventiveMaintenanceAsync(int jobId, ScheduledJobCrudContext context)
+    {
+        if (_preventiveMaintenanceService is null || context.UserId <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var job = await TryGetByIdAsync(jobId).ConfigureAwait(false);
+            if (job?.EntityId is int planId && !string.IsNullOrWhiteSpace(job.EntityType) && IsPreventiveMaintenanceEntity(job.EntityType))
+            {
+                await _preventiveMaintenanceService.MarkExecutedAsync(planId, context.UserId).ConfigureAwait(false);
+            }
+        }
+        catch
+        {
+            // Swallow failures so scheduler persistence remains resilient; audit trail already captures the execute attempt.
+        }
+    }
+
+    private static bool IsPreventiveMaintenanceEntity(string entityType)
+        => entityType.Equals("ppm_plan", StringComparison.OrdinalIgnoreCase)
+            || entityType.Equals("preventive_maintenance_plan", StringComparison.OrdinalIgnoreCase)
+            || entityType.Equals("preventive_maintenance", StringComparison.OrdinalIgnoreCase);
     /// <summary>
     /// Executes the validate operation.
     /// </summary>
