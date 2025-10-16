@@ -183,6 +183,8 @@ public class AssetsModuleViewModelTests : IDisposable
         Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
         Assert.Equal(expectedPayload, qrCode.LastPayload);
         Assert.True(File.Exists(viewModel.Editor.QrCode));
+        Assert.Single(shell.PreviewedDocuments);
+        Assert.Equal(viewModel.Editor.QrCode, shell.PreviewedDocuments[0]);
 
         var expectedStatus = _localization.GetString("Module.Assets.Status.QrGenerated", viewModel.Editor.QrCode);
         Assert.Equal(expectedStatus, viewModel.StatusMessage);

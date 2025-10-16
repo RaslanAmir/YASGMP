@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Services;
@@ -99,5 +101,26 @@ public sealed class ShellInteractionService : IShellInteractionService, IModuleN
         }
 
         _inspectorUpdater(context);
+    }
+
+    /// <inheritdoc />
+    public void PreviewDocument(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("Preview path must be provided.", nameof(path));
+        }
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Preview document was not found.", path);
+        }
+
+        var startInfo = new ProcessStartInfo(path)
+        {
+            UseShellExecute = true
+        };
+
+        Process.Start(startInfo);
     }
 }

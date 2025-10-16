@@ -2274,6 +2274,24 @@
   <data name="Module.Toolbar.Button.Attach.AutomationName" xml:space="preserve">
     <value>Attach supporting document command</value>
   </data>
+  <data name="Module.Toolbar.Button.GenerateCode.Content" xml:space="preserve">
+    <value>Generate Code</value>
+  </data>
+  <data name="Module.Toolbar.Button.GenerateCode.ToolTip" xml:space="preserve">
+    <value>Generate a new asset identifier and QR payload.</value>
+  </data>
+  <data name="Module.Toolbar.Button.GenerateCode.AutomationName" xml:space="preserve">
+    <value>Generate asset code command</value>
+  </data>
+  <data name="Module.Toolbar.Button.PreviewQr.Content" xml:space="preserve">
+    <value>Preview QR</value>
+  </data>
+  <data name="Module.Toolbar.Button.PreviewQr.ToolTip" xml:space="preserve">
+    <value>Open the generated QR code PNG in the default viewer.</value>
+  </data>
+  <data name="Module.Toolbar.Button.PreviewQr.AutomationName" xml:space="preserve">
+    <value>Preview asset QR code command</value>
+  </data>
   <data name="Dialog.Cfl.AutomationName.OK" xml:space="preserve">
     <value>Confirm choose-from-list selection</value>
   </data>
