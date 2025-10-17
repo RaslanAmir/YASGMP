@@ -104,6 +104,7 @@
 - Replaced the nested `AssetEditor` class in `AssetsModuleViewModel`, rewired property-changed dirty tracking, and funneled toolbar commands/QR helpers through the injected singleton.
 - Updated `AssetsModuleView` bindings plus `AssetsModuleViewModelTests` to target `AssetViewModel`, keeping code/QR generation and signature coverage intact.
 - 2026-04-21: Synced `AssetsModuleViewModel` dock records with `AssetViewModel.FilteredAssets`, exposed pass-through search/filter properties, and re-bound the Assets grid to the shared collection so shell search inputs update both the dock list and inspector.
+- 2026-04-22: Navigation + CFL flows now resolve selections through `AssetViewModel.FilteredAssets`, synchronize `_assetViewModel.SelectedAsset`/`_loadedMachine`, and rebuild inspector payloads from the shared asset snapshot instead of re-querying `IMachineCrudService`.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)

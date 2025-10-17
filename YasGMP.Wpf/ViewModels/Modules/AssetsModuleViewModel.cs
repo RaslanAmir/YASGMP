@@ -222,12 +222,21 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return false;
         }
 
-        var key = target.Id.ToString(CultureInfo.InvariantCulture);
+        var asset = FindAssetForMachine(target);
+        if (asset is null)
+        {
+            return false;
+        }
+
+        var key = asset.Id.ToString(CultureInfo.InvariantCulture);
         var match = source.FirstOrDefault(record => string.Equals(record.Key, key, StringComparison.Ordinal));
         if (match is null)
         {
             return false;
         }
+
+        UpdateSelectedAsset(asset);
+        _loadedMachine = BuildLoadedMachineFromAsset(asset, target);
 
         var search = ResolveNavigationSearchText(match, searchOverride);
         ApplyNavigationHighlight(match, search, queueReselect: queueReselect);
@@ -248,10 +257,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             }
 
             SelectedRecord = record;
+            UpdateSelectedAssetFromRecord(record);
         }
         else if (clearSelection)
         {
             SelectedRecord = null;
+            UpdateSelectedAsset(null);
         }
 
         if (string.IsNullOrWhiteSpace(search))
@@ -310,6 +321,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         SelectedRecord = match;
+        UpdateSelectedAssetFromRecord(match);
     }
 
     protected override string FormatLoadedStatus(int count)
@@ -969,6 +981,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             SelectedRecord = match;
             search = match.Title;
+            UpdateSelectedAssetFromRecord(match);
         }
 
         AssetSearchTerm = search;
@@ -989,28 +1002,33 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         UpdateSelectedAssetFromRecord(record);
 
+        var asset = _assetViewModel.SelectedAsset;
+        if (asset is null)
+        {
+            _loadedMachine = null;
+            ResetAsset();
+
+            if (int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var missingId))
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.AssetNotFound", missingId);
+            }
+            else
+            {
+                var descriptor = record.Title ?? record.Key ?? string.Empty;
+                StatusMessage = _localization.GetString("Module.Assets.Status.AssetNotFound", descriptor);
+            }
+
+            UpdateCommandStates();
+            return;
+        }
+
         if (IsInEditMode)
         {
             return;
         }
 
-        if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
-        {
-            return;
-        }
-
-        if (_loadedMachine is not null && _loadedMachine.Id == id)
-        {
-            return;
-        }
-
-        var machine = await _machineService.TryGetByIdAsync(id).ConfigureAwait(false);
-        if (machine is null)
-        {
-            StatusMessage = _localization.GetString("Module.Assets.Status.AssetNotFound", id);
-            return;
-        }
-
+        var fallback = _loadedMachine is not null && _loadedMachine.Id == asset.Id ? _loadedMachine : null;
+        var machine = BuildLoadedMachineFromAsset(asset, fallback);
         _loadedMachine = machine;
         LoadAsset(machine);
         await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
@@ -1424,6 +1442,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         if (_isSynchronizingSelection)
         {
             _assetViewModel.SelectedAsset = asset;
+            if (asset is null)
+            {
+                _loadedMachine = null;
+            }
             return;
         }
 
@@ -1436,6 +1458,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             }
 
             _assetViewModel.SelectedAsset = asset;
+            if (asset is null)
+            {
+                _loadedMachine = null;
+            }
         }
         finally
         {
@@ -1453,6 +1479,32 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         var asset = FindAssetForRecord(record);
         UpdateSelectedAsset(asset);
+    }
+
+    private Asset? FindAssetForMachine(Machine machine)
+    {
+        if (machine.Id > 0)
+        {
+            var idMatch = _assetViewModel.FilteredAssets
+                .FirstOrDefault(asset => asset.Id == machine.Id);
+            if (idMatch is not null)
+            {
+                return idMatch;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(machine.Code))
+        {
+            var code = machine.Code;
+            var codeMatch = _assetViewModel.FilteredAssets
+                .FirstOrDefault(asset => string.Equals(asset.AssetCode, code, StringComparison.OrdinalIgnoreCase));
+            if (codeMatch is not null)
+            {
+                return codeMatch;
+            }
+        }
+
+        return null;
     }
 
     private void SyncSelectedRecordWithAsset()
@@ -1481,6 +1533,49 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             _isSynchronizingSelection = false;
         }
+    }
+
+    private Machine BuildLoadedMachineFromAsset(Asset asset, Machine? fallback)
+    {
+        if (asset is null)
+        {
+            throw new ArgumentNullException(nameof(asset));
+        }
+
+        var machine = new Machine
+        {
+            Id = asset.Id,
+            Code = !string.IsNullOrWhiteSpace(asset.AssetCode)
+                ? asset.AssetCode
+                : fallback?.Code ?? string.Empty,
+            Name = !string.IsNullOrWhiteSpace(asset.AssetName)
+                ? asset.AssetName
+                : fallback?.Name ?? string.Empty,
+            Description = asset.Description ?? fallback?.Description,
+            Model = asset.Model ?? fallback?.Model,
+            Manufacturer = asset.Manufacturer ?? fallback?.Manufacturer,
+            Location = asset.Location ?? fallback?.Location,
+            Status = asset.Status ?? fallback?.Status,
+            UrsDoc = asset.UrsDoc ?? fallback?.UrsDoc,
+            InstallDate = asset.InstallDate ?? fallback?.InstallDate,
+            ProcurementDate = asset.ProcurementDate ?? fallback?.ProcurementDate,
+            WarrantyUntil = asset.WarrantyUntil ?? fallback?.WarrantyUntil,
+            IsCritical = fallback?.IsCritical ?? false,
+            SerialNumber = fallback?.SerialNumber,
+            LifecyclePhase = fallback?.LifecyclePhase,
+            Note = asset.Notes ?? fallback?.Note,
+            QrCode = fallback?.QrCode,
+            QrPayload = fallback?.QrPayload,
+            DigitalSignature = asset.DigitalSignature ?? fallback?.DigitalSignature,
+            LastModified = asset.LastModified ?? fallback?.LastModified ?? DateTime.UtcNow,
+            LastModifiedById = fallback?.LastModifiedById,
+            LastModifiedBy = fallback?.LastModifiedBy,
+            DigitalSignatureId = fallback?.DigitalSignatureId
+        };
+
+        machine.Status = _machineService.NormalizeStatus(machine.Status);
+
+        return machine;
     }
 
     private Asset? FindAssetForRecord(ModuleRecord record)
