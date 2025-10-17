@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Modules;
@@ -10,6 +11,8 @@ namespace YasGMP.Wpf.ViewModels;
 /// </summary>
 public sealed partial class AssetViewModel : SignatureAwareEditor
 {
+    public event EventHandler? EditorChanged;
+
     [ObservableProperty]
     private int _id;
 
@@ -63,6 +66,53 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
 
     [ObservableProperty]
     private string _qrPayload = string.Empty;
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.PropertyName is null)
+        {
+            return;
+        }
+
+        if (ShouldRaiseEditorChanged(e.PropertyName))
+        {
+            EditorChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private static bool ShouldRaiseEditorChanged(string propertyName)
+        => propertyName is nameof(Id)
+            or nameof(Code)
+            or nameof(Name)
+            or nameof(Description)
+            or nameof(Model)
+            or nameof(Manufacturer)
+            or nameof(Location)
+            or nameof(Status)
+            or nameof(UrsDoc)
+            or nameof(InstallDate)
+            or nameof(ProcurementDate)
+            or nameof(WarrantyUntil)
+            or nameof(IsCritical)
+            or nameof(SerialNumber)
+            or nameof(LifecyclePhase)
+            or nameof(Notes)
+            or nameof(QrCode)
+            or nameof(QrPayload)
+            or nameof(SignatureHash)
+            or nameof(SignatureReason)
+            or nameof(SignatureNote)
+            or nameof(SignatureTimestampUtc)
+            or nameof(SignerUserId)
+            or nameof(SignerUserName)
+            or nameof(LastModifiedUtc)
+            or nameof(LastModifiedById)
+            or nameof(LastModifiedByName)
+            or nameof(SourceIp)
+            or nameof(SessionId)
+            or nameof(DeviceInfo);
 
     /// <summary>
     /// Clears all fields to their neutral defaults.
