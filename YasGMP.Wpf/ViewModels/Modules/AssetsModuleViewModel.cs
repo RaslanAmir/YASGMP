@@ -15,6 +15,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
@@ -39,9 +40,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IQRCodeService _qrCodeService;
     private readonly IPlatformService _platformService;
     private readonly IShellInteractionService _shellInteraction;
+    private readonly AssetViewModel _assetViewModel;
     private Machine? _loadedMachine;
-    private AssetEditor? _snapshot;
-    private bool _suppressEditorDirtyNotifications;
     private string? _pendingNavigationStatusMessage;
     private string? _pendingNavigationSelectionKey;
 
@@ -63,6 +63,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
+        AssetViewModel assetViewModel,
         IModuleNavigationService navigation,
         ILocalizationService localization,
         ICodeGeneratorService codeGeneratorService,
@@ -80,7 +81,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
         _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
-        Editor = AssetEditor.CreateEmpty();
+        _assetViewModel = assetViewModel ?? throw new ArgumentNullException(nameof(assetViewModel));
+        _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+        ResetAsset();
+        UpdateCommandStates();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
             _localization.GetString("Module.Assets.Status.Active"),
@@ -95,9 +99,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         PreviewQrCommand = new AsyncRelayCommand(PreviewQrAsync, CanPreviewQr);
     }
 
-    /// <summary>Editor payload bound to the form fields.</summary>
-    [ObservableProperty]
-    private AssetEditor _editor;
+    /// <summary>Shared asset editor payload bound to the form fields.</summary>
+    public AssetViewModel Asset => _assetViewModel;
 
     /// <summary>Indicates whether form controls are writable (Add/Update modes).</summary>
     [ObservableProperty]
@@ -966,7 +969,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         if (record is null)
         {
             _loadedMachine = null;
-            SetEditor(AssetEditor.CreateEmpty());
+            ResetAsset();
             UpdateCommandStates();
             return;
         }
@@ -989,7 +992,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         _loadedMachine = machine;
-        LoadEditor(machine);
+        LoadAsset(machine);
         await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
         UpdateCommandStates();
     }
@@ -1001,21 +1004,27 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         switch (mode)
         {
             case FormMode.Add:
-                _snapshot = null;
                 _loadedMachine = null;
-                SetEditor(AssetEditor.CreateForNew(_machineService.NormalizeStatus("active")));
-                await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(Editor.Code) && !string.IsNullOrWhiteSpace(Editor.QrCode))
+                UpdateAssetWithoutDirty(() =>
                 {
-                    StatusMessage = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", Editor.Code, Editor.QrCode);
+                    var normalized = _machineService.NormalizeStatus("active");
+                    _assetViewModel.InitializeForNew(normalized);
+                });
+                await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(_assetViewModel.Code) && !string.IsNullOrWhiteSpace(_assetViewModel.QrCode))
+                {
+                    StatusMessage = _localization.GetString(
+                        "Module.Assets.Status.CodeAndQrGenerated",
+                        _assetViewModel.Code,
+                        _assetViewModel.QrCode);
                 }
                 break;
             case FormMode.Update:
-                _snapshot = Editor.Clone();
+                if (_loadedMachine is not null)
+                {
+                    LoadAsset(_loadedMachine);
+                }
                 await InitializeEditorIdentifiersAsync().ConfigureAwait(false);
-                break;
-            case FormMode.View:
-                _snapshot = null;
                 break;
         }
 
@@ -1027,9 +1036,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         var errors = new List<string>();
         try
         {
-            EnsureEditorCode(force: false, suppressDirty: true);
-            EnsureEditorQrPayload(Editor.Code, suppressDirty: true);
-            var machine = Editor.ToMachine(_loadedMachine);
+            var code = EnsureEditorCode(force: false, suppressDirty: true);
+            EnsureEditorQrPayload(code, suppressDirty: true);
+            var machine = _assetViewModel.ToMachine(_loadedMachine);
             machine.Status = _machineService.NormalizeStatus(machine.Status);
             _machineService.Validate(machine);
         }
@@ -1047,7 +1056,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<bool> OnSaveAsync()
     {
-        var machine = Editor.ToMachine(_loadedMachine);
+        var machine = _assetViewModel.ToMachine(_loadedMachine);
         try
         {
             await SynchronizeIdentifiersAsync(machine, forceCode: false, suppressDirty: true).ConfigureAwait(false);
@@ -1111,20 +1120,20 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             _authContext.CurrentSessionId,
             signatureResult);
 
-        Editor.SignatureHash = machine.DigitalSignature;
-        Editor.SignatureReason = signatureResult.ReasonDisplay;
-        Editor.SignatureNote = signature.Note ?? string.Empty;
-        Editor.SignatureTimestampUtc = signature.SignedAt;
-        Editor.SignerUserId = signature.UserId == 0 ? _authContext.CurrentUser?.Id : signature.UserId;
-        Editor.SignerUserName = string.IsNullOrWhiteSpace(signature.UserName)
+        _assetViewModel.SignatureHash = machine.DigitalSignature;
+        _assetViewModel.SignatureReason = signatureResult.ReasonDisplay;
+        _assetViewModel.SignatureNote = signature.Note ?? string.Empty;
+        _assetViewModel.SignatureTimestampUtc = signature.SignedAt;
+        _assetViewModel.SignerUserId = signature.UserId == 0 ? _authContext.CurrentUser?.Id : signature.UserId;
+        _assetViewModel.SignerUserName = string.IsNullOrWhiteSpace(signature.UserName)
             ? signerDisplayName ?? string.Empty
             : signature.UserName;
-        Editor.LastModifiedUtc = machine.LastModified;
-        Editor.LastModifiedById = machine.LastModifiedById;
-        Editor.LastModifiedByName = Editor.SignerUserName;
-        Editor.SourceIp = signature.IpAddress ?? _authContext.CurrentIpAddress ?? string.Empty;
-        Editor.SessionId = signature.SessionId ?? _authContext.CurrentSessionId ?? string.Empty;
-        Editor.DeviceInfo = signature.DeviceInfo ?? _authContext.CurrentDeviceInfo ?? string.Empty;
+        _assetViewModel.LastModifiedUtc = machine.LastModified;
+        _assetViewModel.LastModifiedById = machine.LastModifiedById;
+        _assetViewModel.LastModifiedByName = _assetViewModel.SignerUserName;
+        _assetViewModel.SourceIp = signature.IpAddress ?? _authContext.CurrentIpAddress ?? string.Empty;
+        _assetViewModel.SessionId = signature.SessionId ?? _authContext.CurrentSessionId ?? string.Empty;
+        _assetViewModel.DeviceInfo = signature.DeviceInfo ?? _authContext.CurrentDeviceInfo ?? string.Empty;
 
         Machine adapterResult;
         CrudSaveResult saveResult;
@@ -1158,7 +1167,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         _loadedMachine = machine;
-        LoadEditor(machine);
+        LoadAsset(machine);
         UpdateCommandStates();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
@@ -1198,39 +1207,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             if (_loadedMachine is not null)
             {
-                LoadEditor(_loadedMachine);
+                LoadAsset(_loadedMachine);
             }
             else
             {
-                SetEditor(AssetEditor.CreateEmpty());
+                ResetAsset();
             }
         }
-        else if (Mode == FormMode.Update && _snapshot is not null)
+        else if (Mode == FormMode.Update && _loadedMachine is not null)
         {
-            SetEditor(_snapshot.Clone());
+            LoadAsset(_loadedMachine);
         }
 
         UpdateCommandStates();
-    }
-
-    partial void OnEditorChanging(AssetEditor value)
-    {
-        if (value is null)
-        {
-            return;
-        }
-
-        value.PropertyChanged -= OnEditorPropertyChanged;
-    }
-
-    partial void OnEditorChanged(AssetEditor value)
-    {
-        if (value is null)
-        {
-            return;
-        }
-
-        value.PropertyChanged += OnEditorPropertyChanged;
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -1243,13 +1232,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
     }
 
-    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnAssetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (_suppressEditorDirtyNotifications)
-        {
-            return;
-        }
-
         if (IsInEditMode)
         {
             MarkDirty();
@@ -1258,29 +1242,49 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         UpdateCommandStates();
     }
 
-    private void LoadEditor(Machine machine)
+    private void ResetAsset()
     {
-        _suppressEditorDirtyNotifications = true;
-        Editor = AssetEditor.FromMachine(machine, _machineService.NormalizeStatus);
-        _suppressEditorDirtyNotifications = false;
+        UpdateAssetWithoutDirty(() => _assetViewModel.Reset());
         ResetDirty();
-        UpdateCommandStates();
     }
 
-    private void SetEditor(AssetEditor editor)
+    private void LoadAsset(Machine machine)
     {
-        _suppressEditorDirtyNotifications = true;
-        Editor = editor;
-        _suppressEditorDirtyNotifications = false;
+        UpdateAssetWithoutDirty(() => _assetViewModel.LoadFromMachine(machine, _machineService.NormalizeStatus));
         ResetDirty();
-        UpdateCommandStates();
+    }
+
+    private void UpdateAssetWithoutDirty(Action updateAction)
+    {
+        _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
+        try
+        {
+            updateAction();
+        }
+        finally
+        {
+            _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+        }
+    }
+
+    private T UpdateAssetWithoutDirty<T>(Func<T> updateAction)
+    {
+        _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
+        try
+        {
+            return updateAction();
+        }
+        finally
+        {
+            _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+        }
     }
 
     private bool CanGenerateCode()
         => !IsBusy && IsInEditMode;
 
     private bool CanPreviewQr()
-        => !IsBusy && Editor is not null && !string.IsNullOrWhiteSpace(Editor.QrPayload);
+        => !IsBusy && !string.IsNullOrWhiteSpace(_assetViewModel.QrPayload);
 
     private async Task GenerateCodeAsync()
     {
@@ -1316,9 +1320,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         try
         {
             IsBusy = true;
-            var machine = Editor.ToMachine(_loadedMachine);
+            var machine = _assetViewModel.ToMachine(_loadedMachine);
             await SynchronizeIdentifiersAsync(machine, forceCode: false, suppressDirty: false).ConfigureAwait(false);
-            var path = machine.QrCode ?? Editor.QrCode;
+            var path = machine.QrCode ?? _assetViewModel.QrCode;
             if (string.IsNullOrWhiteSpace(path))
             {
                 StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", _localization.GetString("Module.Assets.Status.QrPathUnavailable"));
@@ -1410,12 +1414,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     private async Task InitializeEditorIdentifiersAsync(bool resetDirty = false)
     {
-        if (Editor is null)
-        {
-            return;
-        }
-
-        var machine = Editor.ToMachine(_loadedMachine);
+        var machine = _assetViewModel.ToMachine(_loadedMachine);
         try
         {
             await SynchronizeIdentifiersAsync(
@@ -1459,42 +1458,48 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     private string EnsureEditorCode(bool force, bool suppressDirty)
     {
-        if (!force && !string.IsNullOrWhiteSpace(Editor.Code))
+        if (!force && !string.IsNullOrWhiteSpace(_assetViewModel.Code))
         {
-            return Editor.Code;
+            return _assetViewModel.Code;
         }
 
         var generated = _codeGeneratorService.GenerateMachineCode(
-            string.IsNullOrWhiteSpace(Editor.Name) ? null : Editor.Name,
-            string.IsNullOrWhiteSpace(Editor.Manufacturer) ? null : Editor.Manufacturer);
+            string.IsNullOrWhiteSpace(_assetViewModel.Name) ? null : _assetViewModel.Name,
+            string.IsNullOrWhiteSpace(_assetViewModel.Manufacturer) ? null : _assetViewModel.Manufacturer);
 
         if (suppressDirty)
         {
-            ExecuteWithDirtySuppression(() => Editor.Code = generated);
+            UpdateAssetWithoutDirty(() =>
+            {
+                _assetViewModel.Code = generated;
+            });
         }
         else
         {
-            Editor.Code = generated;
+            _assetViewModel.Code = generated;
         }
 
-        return Editor.Code;
+        return _assetViewModel.Code;
     }
 
     private string EnsureEditorQrPayload(string code, bool suppressDirty)
     {
         var payload = BuildQrPayload(code);
-        if (string.Equals(Editor.QrPayload, payload, StringComparison.Ordinal))
+        if (string.Equals(_assetViewModel.QrPayload, payload, StringComparison.Ordinal))
         {
             return payload;
         }
 
         if (suppressDirty)
         {
-            ExecuteWithDirtySuppression(() => Editor.QrPayload = payload);
+            UpdateAssetWithoutDirty(() =>
+            {
+                _assetViewModel.QrPayload = payload;
+            });
         }
         else
         {
-            Editor.QrPayload = payload;
+            _assetViewModel.QrPayload = payload;
         }
 
         return payload;
@@ -1511,15 +1516,18 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             throw new InvalidOperationException("QR payload is required before generating an image.");
         }
 
-        var path = await SaveQrImageAsync(payload, code, Editor.Id, cancellationToken).ConfigureAwait(false);
+        var path = await SaveQrImageAsync(payload, code, _assetViewModel.Id, cancellationToken).ConfigureAwait(false);
 
         if (suppressDirty)
         {
-            ExecuteWithDirtySuppression(() => Editor.QrCode = path);
+            UpdateAssetWithoutDirty(() =>
+            {
+                _assetViewModel.QrCode = path;
+            });
         }
         else
         {
-            Editor.QrCode = path;
+            _assetViewModel.QrCode = path;
         }
 
         return path;
@@ -1580,20 +1588,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return builder.ToString();
     }
 
-    private void ExecuteWithDirtySuppression(Action action)
-    {
-        var previous = _suppressEditorDirtyNotifications;
-        _suppressEditorDirtyNotifications = true;
-        try
-        {
-            action();
-        }
-        finally
-        {
-            _suppressEditorDirtyNotifications = previous;
-        }
-    }
-
     private void UpdateCommandStates()
     {
         AttachDocumentCommand.NotifyCanExecuteChanged();
@@ -1621,237 +1615,5 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             fields,
             WorkOrdersModuleViewModel.ModuleKey,
             machine.Id);
-    }
-    /// <summary>
-    /// Represents the asset editor value.
-    /// </summary>
-
-    public sealed partial class AssetEditor : SignatureAwareEditor
-    {
-        [ObservableProperty]
-        private int _id;
-
-        [ObservableProperty]
-        private string _code = string.Empty;
-
-        [ObservableProperty]
-        private string _name = string.Empty;
-
-        [ObservableProperty]
-        private string _description = string.Empty;
-
-        [ObservableProperty]
-        private string _model = string.Empty;
-
-        [ObservableProperty]
-        private string _manufacturer = string.Empty;
-
-        [ObservableProperty]
-        private string _location = string.Empty;
-
-        [ObservableProperty]
-        private string _status = "active";
-
-        [ObservableProperty]
-        private string _ursDoc = string.Empty;
-
-        [ObservableProperty]
-        private DateTime? _installDate = DateTime.UtcNow.Date;
-
-        [ObservableProperty]
-        private DateTime? _procurementDate;
-
-        [ObservableProperty]
-        private DateTime? _warrantyUntil;
-
-        [ObservableProperty]
-        private bool _isCritical;
-
-        [ObservableProperty]
-        private string _serialNumber = string.Empty;
-
-        [ObservableProperty]
-        private string _lifecyclePhase = string.Empty;
-
-        [ObservableProperty]
-        private string _notes = string.Empty;
-
-        [ObservableProperty]
-        private string _qrCode = string.Empty;
-
-        [ObservableProperty]
-        private string _qrPayload = string.Empty;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
-
-        public static AssetEditor CreateEmpty() => new()
-        {
-            LastModifiedUtc = null,
-            LastModifiedById = null,
-            LastModifiedByName = string.Empty,
-            QrCode = string.Empty,
-            QrPayload = string.Empty,
-            SignatureHash = string.Empty,
-            SignatureReason = string.Empty,
-            SignatureNote = string.Empty,
-            SignatureTimestampUtc = null,
-            SignerUserId = null,
-            SignerUserName = string.Empty,
-            SourceIp = string.Empty,
-            SessionId = string.Empty,
-            DeviceInfo = string.Empty
-        };
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
-
-        public static AssetEditor CreateForNew(string normalizedStatus)
-            => new()
-            {
-                Status = normalizedStatus,
-                LastModifiedUtc = DateTime.UtcNow,
-                LastModifiedById = null,
-                LastModifiedByName = string.Empty,
-                QrCode = string.Empty,
-                QrPayload = string.Empty,
-                SignatureHash = string.Empty,
-                SignatureReason = string.Empty,
-                SignatureNote = string.Empty,
-                SignatureTimestampUtc = null,
-                SignerUserId = null,
-                SignerUserName = string.Empty,
-                SourceIp = string.Empty,
-                SessionId = string.Empty,
-                DeviceInfo = string.Empty
-            };
-        /// <summary>
-        /// Executes the from machine operation.
-        /// </summary>
-
-        public static AssetEditor FromMachine(Machine machine, Func<string?, string> normalizer)
-        {
-            return new AssetEditor
-            {
-                Id = machine.Id,
-                Code = machine.Code ?? string.Empty,
-                Name = machine.Name ?? string.Empty,
-                Description = machine.Description ?? string.Empty,
-                Model = machine.Model ?? string.Empty,
-                Manufacturer = machine.Manufacturer ?? string.Empty,
-                Location = machine.Location ?? string.Empty,
-                Status = normalizer(machine.Status),
-                UrsDoc = machine.UrsDoc ?? string.Empty,
-                InstallDate = machine.InstallDate,
-                ProcurementDate = machine.ProcurementDate,
-                WarrantyUntil = machine.WarrantyUntil,
-                IsCritical = machine.IsCritical,
-                SerialNumber = machine.SerialNumber ?? string.Empty,
-                LifecyclePhase = machine.LifecyclePhase ?? string.Empty,
-                Notes = machine.Note ?? string.Empty,
-                QrCode = machine.QrCode ?? string.Empty,
-                QrPayload = machine.QrPayload ?? string.Empty,
-                SignatureHash = machine.DigitalSignature ?? string.Empty,
-                LastModifiedUtc = machine.LastModified,
-                LastModifiedById = machine.LastModifiedById,
-                LastModifiedByName = machine.LastModifiedBy?.FullName ?? string.Empty,
-                SignatureTimestampUtc = machine.LastModified,
-                SignerUserId = machine.LastModifiedById,
-                SignerUserName = machine.LastModifiedBy?.FullName ?? string.Empty
-            };
-        }
-        /// <summary>
-        /// Executes the to machine operation.
-        /// </summary>
-
-        public Machine ToMachine(Machine? existing)
-        {
-            var machine = existing is null ? new Machine() : CloneMachine(existing);
-            machine.Id = Id;
-            machine.Code = Code;
-            machine.Name = Name;
-            machine.Description = Description;
-            machine.Model = Model;
-            machine.Manufacturer = Manufacturer;
-            machine.Location = Location;
-            machine.Status = Status;
-            machine.UrsDoc = UrsDoc;
-            machine.InstallDate = InstallDate;
-            machine.ProcurementDate = ProcurementDate;
-            machine.WarrantyUntil = WarrantyUntil;
-            machine.IsCritical = IsCritical;
-            machine.SerialNumber = string.IsNullOrWhiteSpace(SerialNumber) ? machine.SerialNumber : SerialNumber;
-            machine.LifecyclePhase = LifecyclePhase;
-            machine.Note = Notes;
-            machine.QrCode = string.IsNullOrWhiteSpace(QrCode) ? null : QrCode.Trim();
-            machine.QrPayload = string.IsNullOrWhiteSpace(QrPayload) ? null : QrPayload.Trim();
-            machine.DigitalSignature = SignatureHash;
-            machine.LastModified = LastModifiedUtc ?? DateTime.UtcNow;
-            machine.LastModifiedById = LastModifiedById ?? machine.LastModifiedById;
-            return machine;
-        }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
-
-        public AssetEditor Clone()
-            => new()
-            {
-                Id = Id,
-                Code = Code,
-                Name = Name,
-                Description = Description,
-                Model = Model,
-                Manufacturer = Manufacturer,
-                Location = Location,
-                Status = Status,
-                UrsDoc = UrsDoc,
-                InstallDate = InstallDate,
-                ProcurementDate = ProcurementDate,
-                WarrantyUntil = WarrantyUntil,
-                IsCritical = IsCritical,
-                SerialNumber = SerialNumber,
-                LifecyclePhase = LifecyclePhase,
-                Notes = Notes,
-                QrCode = QrCode,
-                QrPayload = QrPayload,
-                SignatureHash = SignatureHash,
-                SignatureReason = SignatureReason,
-                SignatureNote = SignatureNote,
-                SignatureTimestampUtc = SignatureTimestampUtc,
-                SignerUserId = SignerUserId,
-                SignerUserName = SignerUserName,
-                LastModifiedUtc = LastModifiedUtc,
-                LastModifiedById = LastModifiedById,
-                LastModifiedByName = LastModifiedByName,
-                SourceIp = SourceIp,
-                SessionId = SessionId,
-                DeviceInfo = DeviceInfo
-            };
-
-        private static Machine CloneMachine(Machine source)
-        {
-            return new Machine
-            {
-                Id = source.Id,
-                Code = source.Code,
-                Name = source.Name,
-                Description = source.Description,
-                Model = source.Model,
-                Manufacturer = source.Manufacturer,
-                Location = source.Location,
-                Status = source.Status,
-                UrsDoc = source.UrsDoc,
-                InstallDate = source.InstallDate,
-                ProcurementDate = source.ProcurementDate,
-                WarrantyUntil = source.WarrantyUntil,
-                IsCritical = source.IsCritical,
-                SerialNumber = source.SerialNumber,
-                LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload
-            };
-        }
     }
 }

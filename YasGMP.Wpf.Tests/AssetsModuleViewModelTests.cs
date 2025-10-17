@@ -11,6 +11,7 @@ using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.Tests.TestDoubles;
+using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -43,6 +44,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -54,6 +56,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -64,18 +67,18 @@ public class AssetsModuleViewModelTests : IDisposable
         viewModel.Mode = FormMode.Add;
         await Task.Delay(50);
 
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrCode));
-        Assert.True(File.Exists(viewModel.Editor.QrCode));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.QrPayload));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.QrCode));
+        Assert.True(File.Exists(viewModel.Asset.QrCode));
         var qrRoot = Path.GetFullPath(Path.Combine(platformService.GetAppDataDirectory(), "Assets", "QrCodes"));
-        var qrPath = Path.GetFullPath(viewModel.Editor.QrCode);
+        var qrPath = Path.GetFullPath(viewModel.Asset.QrCode);
         Assert.StartsWith(qrRoot, qrPath, StringComparison.OrdinalIgnoreCase);
 
-        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
-        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Asset.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Asset.QrPayload);
         Assert.Equal(expectedPayload, qrCode.LastPayload);
-        var expectedStatus = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", viewModel.Editor.Code, viewModel.Editor.QrCode);
+        var expectedStatus = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", viewModel.Asset.Code, viewModel.Asset.QrCode);
         Assert.Equal(expectedStatus, viewModel.StatusMessage);
     }
 
@@ -96,6 +99,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -107,6 +111,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -116,24 +121,24 @@ public class AssetsModuleViewModelTests : IDisposable
 
         viewModel.Mode = FormMode.Add;
         await Task.Delay(50);
-        var originalCode = viewModel.Editor.Code;
+        var originalCode = viewModel.Asset.Code;
 
-        viewModel.Editor.Name = "Lyophilizer";
-        viewModel.Editor.Manufacturer = "Contoso";
+        viewModel.Asset.Name = "Lyophilizer";
+        viewModel.Asset.Manufacturer = "Contoso";
 
         await viewModel.GenerateCodeCommand.ExecuteAsync(null);
 
-        Assert.NotEqual(originalCode, viewModel.Editor.Code);
+        Assert.NotEqual(originalCode, viewModel.Asset.Code);
         Assert.True(viewModel.IsDirty);
         Assert.Equal("Lyophilizer", codeGenerator.LastName);
         Assert.Equal("Contoso", codeGenerator.LastManufacturer);
 
-        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
-        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Asset.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Asset.QrPayload);
         Assert.Equal(expectedPayload, qrCode.LastPayload);
-        Assert.True(File.Exists(viewModel.Editor.QrCode));
+        Assert.True(File.Exists(viewModel.Asset.QrCode));
 
-        var expectedStatus = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", viewModel.Editor.Code, viewModel.Editor.QrCode);
+        var expectedStatus = _localization.GetString("Module.Assets.Status.CodeAndQrGenerated", viewModel.Asset.Code, viewModel.Asset.QrCode);
         Assert.Equal(expectedStatus, viewModel.StatusMessage);
     }
 
@@ -159,6 +164,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -170,6 +176,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -180,26 +187,26 @@ public class AssetsModuleViewModelTests : IDisposable
         viewModel.Mode = FormMode.Add;
         await Task.Yield();
 
-        viewModel.Editor.Name = "Freeze Dryer";
-        viewModel.Editor.Manufacturer = "Contoso";
-        viewModel.Editor.Code = string.Empty;
-        viewModel.Editor.QrPayload = string.Empty;
-        viewModel.Editor.QrCode = string.Empty;
+        viewModel.Asset.Name = "Freeze Dryer";
+        viewModel.Asset.Manufacturer = "Contoso";
+        viewModel.Asset.Code = string.Empty;
+        viewModel.Asset.QrPayload = string.Empty;
+        viewModel.Asset.QrCode = string.Empty;
 
         await viewModel.GenerateCodeCommand.ExecuteAsync(null);
 
         Assert.True(viewModel.IsDirty);
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
-        Assert.True(File.Exists(viewModel.Editor.QrCode));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.QrPayload));
+        Assert.True(File.Exists(viewModel.Asset.QrCode));
 
         var saved = await InvokeSaveAsync(viewModel);
 
         Assert.True(saved);
         var persisted = Assert.Single(machineAdapter.Saved);
-        Assert.Equal(viewModel.Editor.Code, persisted.Code);
-        Assert.Equal(viewModel.Editor.QrPayload, persisted.QrPayload);
-        Assert.Equal(viewModel.Editor.QrCode, persisted.QrCode);
+        Assert.Equal(viewModel.Asset.Code, persisted.Code);
+        Assert.Equal(viewModel.Asset.QrPayload, persisted.QrPayload);
+        Assert.Equal(viewModel.Asset.QrCode, persisted.QrCode);
         var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(persisted.Code)}";
         Assert.Equal(expectedPayload, persisted.QrPayload);
     }
@@ -232,6 +239,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -243,6 +251,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -254,17 +263,17 @@ public class AssetsModuleViewModelTests : IDisposable
         viewModel.Mode = FormMode.Update;
         await Task.Delay(50);
 
-        Assert.Equal("Freeze Dryer", viewModel.Editor.Name);
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.Code));
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrPayload));
-        Assert.False(string.IsNullOrWhiteSpace(viewModel.Editor.QrCode));
-        Assert.True(File.Exists(viewModel.Editor.QrCode));
+        Assert.Equal("Freeze Dryer", viewModel.Asset.Name);
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.Code));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.QrPayload));
+        Assert.False(string.IsNullOrWhiteSpace(viewModel.Asset.QrCode));
+        Assert.True(File.Exists(viewModel.Asset.QrCode));
         var qrRoot = Path.GetFullPath(Path.Combine(platformService.GetAppDataDirectory(), "Assets", "QrCodes"));
-        var qrPath = Path.GetFullPath(viewModel.Editor.QrCode);
+        var qrPath = Path.GetFullPath(viewModel.Asset.QrCode);
         Assert.StartsWith(qrRoot, qrPath, StringComparison.OrdinalIgnoreCase);
 
-        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
-        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Asset.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Asset.QrPayload);
         Assert.Equal(expectedPayload, qrCode.LastPayload);
     }
 
@@ -285,6 +294,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -296,6 +306,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -314,9 +325,9 @@ public class AssetsModuleViewModelTests : IDisposable
         Assert.True(canExecuteRaised > 0);
 
         canExecuteRaised = 0;
-        viewModel.Editor.Code = string.Empty;
-        viewModel.Editor.QrPayload = string.Empty;
-        viewModel.Editor.QrCode = string.Empty;
+        viewModel.Asset.Code = string.Empty;
+        viewModel.Asset.QrPayload = string.Empty;
+        viewModel.Asset.QrCode = string.Empty;
 
         Assert.True(viewModel.IsDirty);
         Assert.False(viewModel.PreviewQrCommand.CanExecute(null));
@@ -328,10 +339,10 @@ public class AssetsModuleViewModelTests : IDisposable
         Assert.True(viewModel.IsDirty);
         Assert.True(viewModel.PreviewQrCommand.CanExecute(null));
         Assert.True(canExecuteRaised > 0);
-        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Editor.Code)}";
-        Assert.Equal(expectedPayload, viewModel.Editor.QrPayload);
+        var expectedPayload = $"yasgmp://machine/{Uri.EscapeDataString(viewModel.Asset.Code)}";
+        Assert.Equal(expectedPayload, viewModel.Asset.QrPayload);
         Assert.Equal(expectedPayload, qrCode.LastPayload);
-        Assert.True(File.Exists(viewModel.Editor.QrCode));
+        Assert.True(File.Exists(viewModel.Asset.QrCode));
 
         canExecuteRaised = 0;
         var previewTask = viewModel.PreviewQrCommand.ExecuteAsync(null);
@@ -342,9 +353,9 @@ public class AssetsModuleViewModelTests : IDisposable
         Assert.True(canExecuteRaised >= 2);
         Assert.True(viewModel.IsDirty);
         Assert.Single(shell.PreviewedDocuments);
-        Assert.Equal(viewModel.Editor.QrCode, shell.PreviewedDocuments[0]);
+        Assert.Equal(viewModel.Asset.QrCode, shell.PreviewedDocuments[0]);
 
-        var expectedStatus = _localization.GetString("Module.Assets.Status.QrGenerated", viewModel.Editor.QrCode);
+        var expectedStatus = _localization.GetString("Module.Assets.Status.QrGenerated", viewModel.Asset.QrCode);
         Assert.Equal(expectedStatus, viewModel.StatusMessage);
     }
 
@@ -374,6 +385,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -385,6 +397,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -393,14 +406,14 @@ public class AssetsModuleViewModelTests : IDisposable
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
-        viewModel.Editor.Code = "AST-500";
-        viewModel.Editor.Name = "Lyophilizer";
-        viewModel.Editor.Description = "Freeze dryer";
-        viewModel.Editor.Manufacturer = "Contoso";
-        viewModel.Editor.Model = "LX-10";
-        viewModel.Editor.Location = "Suite A";
-        viewModel.Editor.Status = "maintenance";
-        viewModel.Editor.UrsDoc = "URS-LYO-01";
+        viewModel.Asset.Code = "AST-500";
+        viewModel.Asset.Name = "Lyophilizer";
+        viewModel.Asset.Description = "Freeze dryer";
+        viewModel.Asset.Manufacturer = "Contoso";
+        viewModel.Asset.Model = "LX-10";
+        viewModel.Asset.Location = "Suite A";
+        viewModel.Asset.Status = "maintenance";
+        viewModel.Asset.UrsDoc = "URS-LYO-01";
 
         var saved = await InvokeSaveAsync(viewModel);
 
@@ -456,6 +469,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -467,6 +481,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -475,14 +490,14 @@ public class AssetsModuleViewModelTests : IDisposable
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
-        viewModel.Editor.Code = "AST-500";
-        viewModel.Editor.Name = "Lyophilizer";
-        viewModel.Editor.Description = "Freeze dryer";
-        viewModel.Editor.Manufacturer = "Contoso";
-        viewModel.Editor.Model = "LX-10";
-        viewModel.Editor.Location = "Suite A";
-        viewModel.Editor.Status = "maintenance";
-        viewModel.Editor.UrsDoc = "URS-LYO-01";
+        viewModel.Asset.Code = "AST-500";
+        viewModel.Asset.Name = "Lyophilizer";
+        viewModel.Asset.Description = "Freeze dryer";
+        viewModel.Asset.Manufacturer = "Contoso";
+        viewModel.Asset.Model = "LX-10";
+        viewModel.Asset.Location = "Suite A";
+        viewModel.Asset.Status = "maintenance";
+        viewModel.Asset.UrsDoc = "URS-LYO-01";
 
         var saved = await InvokeSaveAsync(viewModel);
 
@@ -516,6 +531,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -527,6 +543,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -535,14 +552,14 @@ public class AssetsModuleViewModelTests : IDisposable
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
-        viewModel.Editor.Code = "AST-500";
-        viewModel.Editor.Name = "Lyophilizer";
-        viewModel.Editor.Description = "Freeze dryer";
-        viewModel.Editor.Manufacturer = "Contoso";
-        viewModel.Editor.Model = "LX-10";
-        viewModel.Editor.Location = "Suite A";
-        viewModel.Editor.Status = "maintenance";
-        viewModel.Editor.UrsDoc = "URS-LYO-01";
+        viewModel.Asset.Code = "AST-500";
+        viewModel.Asset.Name = "Lyophilizer";
+        viewModel.Asset.Description = "Freeze dryer";
+        viewModel.Asset.Manufacturer = "Contoso";
+        viewModel.Asset.Model = "LX-10";
+        viewModel.Asset.Location = "Suite A";
+        viewModel.Asset.Status = "maintenance";
+        viewModel.Asset.UrsDoc = "URS-LYO-01";
 
         var saved = await InvokeSaveAsync(viewModel);
 
@@ -603,6 +620,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -614,6 +632,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -687,6 +706,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -698,6 +718,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -770,6 +791,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -781,6 +803,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -859,6 +882,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -870,6 +894,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -928,6 +953,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -939,6 +965,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -983,6 +1010,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
+        var assetViewModel = new AssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -994,6 +1022,7 @@ public class AssetsModuleViewModelTests : IDisposable
             signatureDialog,
             dialog,
             shell,
+            assetViewModel,
             navigation,
             _localization,
             codeGenerator,
@@ -1003,7 +1032,7 @@ public class AssetsModuleViewModelTests : IDisposable
         await viewModel.InitializeAsync(5);
         await Task.Yield();
 
-        Assert.Equal("Mixer", viewModel.Editor.Name);
+        Assert.Equal("Mixer", viewModel.Asset.Name);
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
 
         var canExecuteRaised = 0;
@@ -1023,8 +1052,8 @@ public class AssetsModuleViewModelTests : IDisposable
 
         Assert.Equal(FormMode.View, viewModel.Mode);
         Assert.False(viewModel.IsEditorEnabled);
-        Assert.Equal("Mixer Reloaded", viewModel.Editor.Name);
-        Assert.Equal("Suite 9", viewModel.Editor.Location);
+        Assert.Equal("Mixer Reloaded", viewModel.Asset.Name);
+        Assert.Equal("Suite 9", viewModel.Asset.Location);
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
         Assert.True(canExecuteRaised > 0);
     }
