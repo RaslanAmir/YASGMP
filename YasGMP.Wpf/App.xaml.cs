@@ -119,6 +119,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<INotificationPreferenceService, NotificationPreferenceService>();
                         svc.AddSingleton<IShellAlertService, AlertService>();
                         svc.AddSingleton<IAlertService>(sp => sp.GetRequiredService<IShellAlertService>());
+                        svc.AddSingleton<YasGMP.Wpf.ViewModels.AssetViewModel>();
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
