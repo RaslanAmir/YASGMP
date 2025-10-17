@@ -24,7 +24,7 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 /// Represents the assets module view model value.
 /// </summary>
 
-public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel
+public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentViewModel, IDisposable
 {
     /// <summary>
     /// Represents the module key value.
@@ -43,6 +43,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IShellInteractionService _shellInteraction;
     private readonly AssetViewModel _assetViewModel;
     private INotifyCollectionChanged? _filteredAssetsSubscription;
+    private bool _suppressFilteredAssetsCollectionNotifications;
     private bool _isSynchronizingRecords;
     private bool _isSynchronizingSelection;
     private Machine? _loadedMachine;
@@ -115,6 +116,16 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     {
         get => _assetViewModel.SelectedAsset;
         set => UpdateSelectedAsset(value);
+    }
+
+    public void Dispose()
+    {
+        _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
+        if (_filteredAssetsSubscription is not null)
+        {
+            _filteredAssetsSubscription.CollectionChanged -= OnFilteredAssetsCollectionChanged;
+            _filteredAssetsSubscription = null;
+        }
     }
 
     /// <summary>Search term forwarded from the shell search box.</summary>
@@ -1324,28 +1335,38 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     }
 
     private void UpdateAssetWithoutDirty(Action updateAction)
-    {
-        _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
-        try
+        => ExecuteWithSuppressedAssetNotifications<object?>(() =>
         {
             updateAction();
-        }
-        finally
-        {
-            _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
-        }
-    }
+            return null;
+        });
 
     private T UpdateAssetWithoutDirty<T>(Func<T> updateAction)
+        => ExecuteWithSuppressedAssetNotifications(updateAction);
+
+    private T ExecuteWithSuppressedAssetNotifications<T>(Func<T> updateAction)
     {
+        if (updateAction is null)
+        {
+            throw new ArgumentNullException(nameof(updateAction));
+        }
+
         _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
+        if (_filteredAssetsSubscription is not null)
+        {
+            _filteredAssetsSubscription.CollectionChanged -= OnFilteredAssetsCollectionChanged;
+        }
+
+        _suppressFilteredAssetsCollectionNotifications = true;
         try
         {
             return updateAction();
         }
         finally
         {
+            ObserveFilteredAssets(_assetViewModel.FilteredAssets, skipImmediateSync: true);
             _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+            _suppressFilteredAssetsCollectionNotifications = false;
         }
     }
 
@@ -1364,12 +1385,51 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (!skipImmediateSync)
         {
-            SyncRecordsWithFilteredAssets();
+            HandleFilteredAssetsProjectionChanged();
         }
     }
 
     private void OnFilteredAssetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        => SyncRecordsWithFilteredAssets();
+    {
+        if (_suppressFilteredAssetsCollectionNotifications)
+        {
+            return;
+        }
+
+        HandleFilteredAssetsProjectionChanged();
+    }
+
+    private void HandleFilteredAssetsProjectionChanged()
+    {
+        SyncRecordsWithFilteredAssets();
+        EnsurePendingNavigationSelection();
+
+        var searchTerm = _assetViewModel.SearchTerm;
+        if (!string.Equals(SearchText, searchTerm, StringComparison.Ordinal))
+        {
+            SearchText = searchTerm;
+        }
+
+        var assetStatus = _assetViewModel.StatusMessage;
+        if (!string.IsNullOrWhiteSpace(assetStatus))
+        {
+            StatusMessage = assetStatus!;
+        }
+        else
+        {
+            var trimmedSearch = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm!.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                StatusMessage = _localization.GetString("Module.Status.Filtered", Title, trimmedSearch);
+            }
+            else
+            {
+                StatusMessage = FormatLoadedStatus(Records.Count);
+            }
+        }
+
+        UpdateCommandStates();
+    }
 
     private void SyncRecordsWithFilteredAssets()
     {
