@@ -17,6 +17,7 @@
 - 2026-04-10T09:45Z: `dotnet restore yasgmp.sln` retried during the Assets module service injection batch; container still returns `bash: command not found: dotnet`, so validation remains Windows-host only.
 - 2026-04-11T00:00Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried after wiring WPF asset editor QR fields; each command still fails with `bash: command not found: dotnet` until a Windows host is available.
 - 2026-04-19T12:00Z: `dotnet --version` retried while addressing MachineDialogTests resource loading; command still returns `bash: command not found: dotnet`, so validation remains static-analysis only.
+- 2026-04-20T09:05Z: MachineDialogTests updated to load `MachineEditDialog.xaml` via manifest resources; unable to execute `dotnet test` in-container because the CLI remains unavailable (`command not found`).
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
   - 2025-10-13T10:59Z: `dotnet restore yasgmp.sln` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
   - 2025-10-10T11:24Z: `dotnet restore yasgmp.sln` (with `EnableWindowsTargeting=true`) fails with NETSDK1147 because the maui-tizen workload is unavailable on Linux; full solution restore remains Windows-host only.
