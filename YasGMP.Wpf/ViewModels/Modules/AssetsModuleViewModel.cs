@@ -1028,7 +1028,21 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         var fallback = _loadedMachine is not null && _loadedMachine.Id == asset.Id ? _loadedMachine : null;
-        var machine = BuildLoadedMachineFromAsset(asset, fallback);
+        Machine? machine = null;
+
+        if (asset.Id > 0)
+        {
+            machine = await _machineService.TryGetByIdAsync(asset.Id).ConfigureAwait(false);
+        }
+
+        if (machine is null)
+        {
+            machine = BuildLoadedMachineFromAsset(asset, fallback);
+        }
+        else
+        {
+            machine.Status = _machineService.NormalizeStatus(machine.Status);
+        }
         _loadedMachine = machine;
         LoadAsset(machine);
         await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
