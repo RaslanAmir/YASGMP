@@ -383,6 +383,8 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             fallbackIpAddress: context.Ip,
             fallbackSessionId: context.SessionId);
 
+        ApplySignatureMetadataToEditor(signatureResult, saveResult, context);
+
         try
         {
             await SignaturePersistenceHelper
@@ -444,6 +446,105 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
 
         UpdateAttachmentCommandState();
+    }
+
+    private void ApplySignatureMetadataToEditor(
+        ElectronicSignatureDialogResult signatureResult,
+        CrudSaveResult saveResult,
+        WorkOrderCrudContext context)
+    {
+        if (Editor is null || signatureResult?.Signature is null)
+        {
+            return;
+        }
+
+        var signature = signatureResult.Signature;
+
+        if (!string.IsNullOrWhiteSpace(signature.SignatureHash))
+        {
+            Editor.SignatureHash = signature.SignatureHash!;
+        }
+        else if (!string.IsNullOrWhiteSpace(saveResult.SignatureMetadata?.Hash))
+        {
+            Editor.SignatureHash = saveResult.SignatureMetadata!.Hash!;
+        }
+
+        if (!string.IsNullOrWhiteSpace(signatureResult.ReasonDisplay))
+        {
+            Editor.SignatureReason = signatureResult.ReasonDisplay;
+        }
+
+        var resolvedNote = !string.IsNullOrWhiteSpace(signature.Note)
+            ? signature.Note
+            : !string.IsNullOrWhiteSpace(saveResult.SignatureMetadata?.Note)
+                ? saveResult.SignatureMetadata!.Note
+                : signatureResult.ReasonDetail;
+        if (!string.IsNullOrWhiteSpace(resolvedNote))
+        {
+            Editor.SignatureNote = resolvedNote!;
+        }
+
+        if (signature.UserId > 0)
+        {
+            Editor.SignerUserId = signature.UserId;
+            Editor.LastModifiedById = signature.UserId;
+        }
+        else if (context.UserId > 0)
+        {
+            Editor.SignerUserId = context.UserId;
+            Editor.LastModifiedById = context.UserId;
+        }
+
+        var signerName = !string.IsNullOrWhiteSpace(signature.UserName)
+            ? signature.UserName
+            : _authContext.CurrentUser?.FullName;
+        if (!string.IsNullOrWhiteSpace(signerName))
+        {
+            Editor.SignerUserName = signerName!;
+            Editor.LastModifiedByName = signerName!;
+        }
+
+        Editor.SignatureTimestampUtc = signature.SignedAt ?? Editor.SignatureTimestampUtc ?? DateTime.UtcNow;
+        Editor.LastModifiedUtc = Editor.LastModifiedUtc ?? signature.SignedAt ?? DateTime.UtcNow;
+
+        if (!string.IsNullOrWhiteSpace(signature.DeviceInfo))
+        {
+            Editor.DeviceInfo = signature.DeviceInfo!;
+        }
+        else if (!string.IsNullOrWhiteSpace(saveResult.SignatureMetadata?.Device))
+        {
+            Editor.DeviceInfo = saveResult.SignatureMetadata!.Device!;
+        }
+        else if (!string.IsNullOrWhiteSpace(context.DeviceInfo))
+        {
+            Editor.DeviceInfo = context.DeviceInfo;
+        }
+
+        if (!string.IsNullOrWhiteSpace(signature.IpAddress))
+        {
+            Editor.SourceIp = signature.IpAddress!;
+        }
+        else if (!string.IsNullOrWhiteSpace(saveResult.SignatureMetadata?.IpAddress))
+        {
+            Editor.SourceIp = saveResult.SignatureMetadata!.IpAddress!;
+        }
+        else if (!string.IsNullOrWhiteSpace(context.Ip))
+        {
+            Editor.SourceIp = context.Ip;
+        }
+
+        if (!string.IsNullOrWhiteSpace(signature.SessionId))
+        {
+            Editor.SessionId = signature.SessionId!;
+        }
+        else if (!string.IsNullOrWhiteSpace(saveResult.SignatureMetadata?.Session))
+        {
+            Editor.SessionId = saveResult.SignatureMetadata!.Session!;
+        }
+        else if (!string.IsNullOrWhiteSpace(context.SessionId))
+        {
+            Editor.SessionId = context.SessionId!;
+        }
     }
 
     partial void OnEditorChanging(WorkOrderEditor value)
@@ -605,7 +706,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     /// Represents the work order editor value.
     /// </summary>
 
-    public sealed partial class WorkOrderEditor : ObservableObject
+    public sealed partial class WorkOrderEditor : SignatureAwareEditor
     {
         [ObservableProperty]
         private int _id;
@@ -661,7 +762,21 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         /// Executes the create empty operation.
         /// </summary>
 
-        public static WorkOrderEditor CreateEmpty() => new();
+        public static WorkOrderEditor CreateEmpty() => new()
+        {
+            SignatureHash = string.Empty,
+            SignatureReason = string.Empty,
+            SignatureNote = string.Empty,
+            SignatureTimestampUtc = null,
+            SignerUserId = null,
+            SignerUserName = string.Empty,
+            LastModifiedUtc = null,
+            LastModifiedById = null,
+            LastModifiedByName = string.Empty,
+            SourceIp = string.Empty,
+            SessionId = string.Empty,
+            DeviceInfo = string.Empty
+        };
         /// <summary>
         /// Executes the create for new operation.
         /// </summary>
@@ -669,6 +784,10 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         public static WorkOrderEditor CreateForNew(IAuthContext authContext)
         {
             var userId = authContext.CurrentUser?.Id ?? 1;
+            var currentUser = authContext.CurrentUser;
+            var currentUserId = currentUser?.Id ?? userId;
+            var currentUserName = currentUser?.FullName ?? string.Empty;
+
             return new WorkOrderEditor
             {
                 Status = "OPEN",
@@ -679,7 +798,19 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 DateOpen = DateTime.UtcNow,
                 RequestedById = userId,
                 CreatedById = userId,
-                AssignedToId = userId
+                AssignedToId = userId,
+                LastModifiedUtc = DateTime.UtcNow,
+                LastModifiedById = currentUserId,
+                LastModifiedByName = currentUserName,
+                SignerUserId = currentUserId,
+                SignerUserName = currentUserName,
+                SignatureHash = string.Empty,
+                SignatureReason = string.Empty,
+                SignatureNote = string.Empty,
+                SignatureTimestampUtc = null,
+                SourceIp = authContext.CurrentIpAddress ?? string.Empty,
+                SessionId = authContext.CurrentSessionId ?? string.Empty,
+                DeviceInfo = authContext.CurrentDeviceInfo ?? string.Empty
             };
         }
         /// <summary>
@@ -688,7 +819,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         public static WorkOrderEditor FromEntity(WorkOrder entity)
         {
-            return new WorkOrderEditor
+            var editor = new WorkOrderEditor
             {
                 Id = entity.Id,
                 Title = entity.Title,
@@ -706,8 +837,44 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 MachineId = entity.MachineId,
                 ComponentId = entity.ComponentId,
                 Result = entity.Result,
-                Notes = entity.Notes
+                Notes = entity.Notes,
+                SignatureHash = entity.DigitalSignature ?? string.Empty,
+                SignatureReason = string.Empty,
+                SignatureNote = string.Empty,
+                SignatureTimestampUtc = entity.LastModified,
+                SignerUserId = entity.LastModifiedById,
+                SignerUserName = entity.LastModifiedBy?.FullName ?? string.Empty,
+                LastModifiedUtc = entity.LastModified,
+                LastModifiedById = entity.LastModifiedById,
+                LastModifiedByName = entity.LastModifiedBy?.FullName ?? string.Empty,
+                SourceIp = entity.SourceIp ?? string.Empty,
+                SessionId = entity.SessionId ?? string.Empty,
+                DeviceInfo = entity.DeviceInfo ?? string.Empty
             };
+
+            if (entity.Signatures is { Count: > 0 })
+            {
+                var latestSignature = entity.Signatures
+                    .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
+                    .ThenByDescending(s => s.UpdatedAt ?? s.CreatedAt ?? DateTime.MinValue)
+                    .FirstOrDefault();
+
+                if (latestSignature is not null)
+                {
+                    editor.SignatureReason = !string.IsNullOrWhiteSpace(latestSignature.ReasonDescription)
+                        ? latestSignature.ReasonDescription!
+                        : latestSignature.ReasonCode;
+                    editor.SignatureNote = latestSignature.Note ?? editor.SignatureNote;
+                    editor.SignatureTimestampUtc = latestSignature.SignedAt ?? editor.SignatureTimestampUtc;
+                    editor.SignerUserId = latestSignature.UserId;
+                    editor.SignerUserName = latestSignature.User?.FullName ?? editor.SignerUserName;
+                    editor.SourceIp = latestSignature.IpAddress ?? editor.SourceIp;
+                    editor.SessionId = latestSignature.SessionId ?? editor.SessionId;
+                    editor.DeviceInfo = latestSignature.DeviceInfo ?? editor.DeviceInfo;
+                }
+            }
+
+            return editor;
         }
         /// <summary>
         /// Executes the clone operation.
@@ -732,7 +899,19 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 MachineId = MachineId,
                 ComponentId = ComponentId,
                 Result = Result,
-                Notes = Notes
+                Notes = Notes,
+                SignatureHash = SignatureHash,
+                SignatureReason = SignatureReason,
+                SignatureNote = SignatureNote,
+                SignatureTimestampUtc = SignatureTimestampUtc,
+                SignerUserId = SignerUserId,
+                SignerUserName = SignerUserName,
+                LastModifiedUtc = LastModifiedUtc,
+                LastModifiedById = LastModifiedById,
+                LastModifiedByName = LastModifiedByName,
+                SourceIp = SourceIp,
+                SessionId = SessionId,
+                DeviceInfo = DeviceInfo
             };
         /// <summary>
         /// Executes the to entity operation.
@@ -758,6 +937,21 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             entity.ComponentId = ComponentId;
             entity.Result = Result;
             entity.Notes = Notes;
+            entity.DigitalSignature = SignatureHash ?? entity.DigitalSignature;
+
+            if (LastModifiedUtc.HasValue)
+            {
+                entity.LastModified = LastModifiedUtc.Value;
+            }
+
+            if (LastModifiedById.HasValue)
+            {
+                entity.LastModifiedById = LastModifiedById.Value;
+            }
+
+            entity.DeviceInfo = DeviceInfo ?? entity.DeviceInfo;
+            entity.SourceIp = SourceIp ?? entity.SourceIp;
+            entity.SessionId = SessionId ?? entity.SessionId;
             return entity;
         }
     }
