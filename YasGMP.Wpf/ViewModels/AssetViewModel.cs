@@ -183,7 +183,7 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
     /// </summary>
     public async Task LoadAssetsAsync(CancellationToken cancellationToken = default)
     {
-        await _loadSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await _loadSemaphore.WaitAsync(cancellationToken);
 
         try
         {
@@ -197,7 +197,7 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
             IReadOnlyList<Machine> machines;
             try
             {
-                machines = await _machineService.GetAllAsync().ConfigureAwait(false);
+                machines = await _machineService.GetAllAsync();
             }
             catch (Exception ex)
             {
@@ -249,7 +249,7 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
 
         try
         {
-            var machine = await _machineService.TryGetByIdAsync(id.Value).ConfigureAwait(false);
+            var machine = await _machineService.TryGetByIdAsync(id.Value);
             if (machine is null)
             {
                 return null;
