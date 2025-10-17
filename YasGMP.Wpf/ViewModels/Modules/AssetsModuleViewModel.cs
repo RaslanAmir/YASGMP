@@ -1028,16 +1028,21 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         var fallback = _loadedMachine is not null && _loadedMachine.Id == asset.Id ? _loadedMachine : null;
+        var requestedAsset = asset;
         Machine? machine = null;
 
-        if (asset.Id > 0)
+        if (requestedAsset.Id > 0)
         {
-            machine = await _machineService.TryGetByIdAsync(asset.Id).ConfigureAwait(false);
+            machine = await _machineService.TryGetByIdAsync(requestedAsset.Id).ConfigureAwait(false);
+            if (!AreSameAsset(_assetViewModel.SelectedAsset, requestedAsset))
+            {
+                return;
+            }
         }
 
         if (machine is null)
         {
-            machine = BuildLoadedMachineFromAsset(asset, fallback);
+            machine = BuildLoadedMachineFromAsset(requestedAsset, fallback);
         }
         else
         {
