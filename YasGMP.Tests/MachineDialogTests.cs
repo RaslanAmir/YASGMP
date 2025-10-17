@@ -88,44 +88,37 @@ public class MachineDialogTests
 
     private static XDocument LoadMachineEditDialogXaml()
     {
-        var assembly = typeof(MachineEditDialog).GetTypeInfo().Assembly;
-        var resourceName = assembly
+        var mauiAssembly = typeof(MachineEditDialog).GetTypeInfo().Assembly;
+        var resourceName = mauiAssembly
             .GetManifestResourceNames()
             .FirstOrDefault(name => name.EndsWith("MachineEditDialog.xaml", StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrEmpty(resourceName))
         {
-            using var stream = assembly.GetManifestResourceStream(resourceName);
+            using var stream = mauiAssembly.GetManifestResourceStream(resourceName);
             if (stream is not null)
             {
                 return XDocument.Load(stream);
             }
         }
 
-        var path = LocateProjectFile("Views/Dialogs/MachineEditDialog.xaml");
-        return XDocument.Load(path);
-    }
+        var testAssembly = typeof(MachineDialogTests).GetTypeInfo().Assembly;
+        var linkedResourceName = testAssembly
+            .GetManifestResourceNames()
+            .FirstOrDefault(name => name.EndsWith("Views.Dialogs.MachineEditDialog.xaml", StringComparison.OrdinalIgnoreCase));
 
-    private static string LocateProjectFile(string relativePath)
-    {
-        var current = AppContext.BaseDirectory;
-        var normalizedRelativePath = relativePath
-            .Replace('/', Path.DirectorySeparatorChar)
-            .Replace('\', Path.DirectorySeparatorChar);
-
-        for (var depth = 0; depth < 10 && !string.IsNullOrEmpty(current); depth++)
+        if (!string.IsNullOrEmpty(linkedResourceName))
         {
-            var candidate = Path.Combine(current, normalizedRelativePath);
-            if (File.Exists(candidate))
+            using var stream = testAssembly.GetManifestResourceStream(linkedResourceName);
+            if (stream is not null)
             {
-                return candidate;
+                return XDocument.Load(stream);
             }
-
-            current = Directory.GetParent(current)?.FullName;
         }
 
-        throw new FileNotFoundException($"Could not locate '{relativePath}' from '{AppContext.BaseDirectory}'.");
+        throw new InvalidOperationException("MachineEditDialog.xaml could not be loaded from the MAUI or test assemblies.");
     }
+
 
     private sealed class TestPlatformService : IPlatformService
     {
