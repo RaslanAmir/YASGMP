@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -41,6 +42,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IPlatformService _platformService;
     private readonly IShellInteractionService _shellInteraction;
     private readonly AssetViewModel _assetViewModel;
+    private INotifyCollectionChanged? _filteredAssetsSubscription;
+    private bool _isSynchronizingRecords;
+    private bool _isSynchronizingSelection;
     private Machine? _loadedMachine;
     private string? _pendingNavigationStatusMessage;
     private string? _pendingNavigationSelectionKey;
@@ -83,6 +87,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
         _assetViewModel = assetViewModel ?? throw new ArgumentNullException(nameof(assetViewModel));
         _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+        ObserveFilteredAssets(_assetViewModel.FilteredAssets, skipImmediateSync: true);
         ResetAsset();
         UpdateCommandStates();
         StatusOptions = new ReadOnlyCollection<string>(new[]
@@ -102,6 +107,85 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     /// <summary>Shared asset editor payload bound to the form fields.</summary>
     public AssetViewModel Asset => _assetViewModel;
 
+    /// <summary>Mirrors the shared asset list surfaced by the shell.</summary>
+    public ObservableCollection<Asset> FilteredAssets => _assetViewModel.FilteredAssets;
+
+    /// <summary>Currently selected asset from the shared collection.</summary>
+    public Asset? SelectedAsset
+    {
+        get => _assetViewModel.SelectedAsset;
+        set => UpdateSelectedAsset(value);
+    }
+
+    /// <summary>Search term forwarded from the shell search box.</summary>
+    public string? AssetSearchTerm
+    {
+        get => _assetViewModel.SearchTerm;
+        set
+        {
+            if (string.Equals(_assetViewModel.SearchTerm, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _assetViewModel.SearchTerm = value;
+            if (!string.Equals(SearchText, value, StringComparison.Ordinal))
+            {
+                SearchText = value;
+            }
+
+            OnPropertyChanged(nameof(AssetSearchTerm));
+        }
+    }
+
+    /// <summary>Status filter forwarded from the shell filter controls.</summary>
+    public string? AssetStatusFilter
+    {
+        get => _assetViewModel.StatusFilter;
+        set
+        {
+            if (string.Equals(_assetViewModel.StatusFilter, value, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _assetViewModel.StatusFilter = value;
+            OnPropertyChanged(nameof(AssetStatusFilter));
+        }
+    }
+
+    /// <summary>Risk filter forwarded from the shell filter controls.</summary>
+    public string? AssetRiskFilter
+    {
+        get => _assetViewModel.RiskFilter;
+        set
+        {
+            if (string.Equals(_assetViewModel.RiskFilter, value, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _assetViewModel.RiskFilter = value;
+            OnPropertyChanged(nameof(AssetRiskFilter));
+        }
+    }
+
+    /// <summary>Type filter forwarded from the shell filter controls.</summary>
+    public string? AssetTypeFilter
+    {
+        get => _assetViewModel.TypeFilter;
+        set
+        {
+            if (string.Equals(_assetViewModel.TypeFilter, value, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _assetViewModel.TypeFilter = value;
+            OnPropertyChanged(nameof(AssetTypeFilter));
+        }
+    }
+
     /// <summary>Indicates whether form controls are writable (Add/Update modes).</summary>
     [ObservableProperty]
     private bool _isEditorEnabled;
@@ -120,82 +204,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        var navigation = TryCreateNavigationContext(parameter);
-        var (target, machines, filterActive, searchTerm) = await ResolveNavigationPayloadAsync(parameter).ConfigureAwait(false);
-        var effectiveSearch = !string.IsNullOrWhiteSpace(navigation?.SearchText)
-            ? navigation!.SearchText
-            : searchTerm;
-        var shouldFilter = filterActive || (navigation?.HasFilter ?? false);
-
-        IReadOnlyList<Machine> machineCandidates = machines;
-        if (!filterActive && navigation?.HasFilter == true && machines.Count > 0)
-        {
-            var filtered = FilterMachinesByNavigation(machines, navigation.Value);
-            if (filtered.Count > 0)
-            {
-                machineCandidates = filtered;
-            }
-        }
-
-        var records = new List<ModuleRecord>();
-        ModuleRecord? selectedRecord = null;
-
-        foreach (var machine in machineCandidates)
-        {
-            var record = ToRecord(machine);
-            records.Add(record);
-
-            if (target is not null && machine.Id == target.Id)
-            {
-                selectedRecord = record;
-            }
-        }
-
-        if (target is not null && selectedRecord is null)
-        {
-            selectedRecord = ToRecord(target);
-            records.Insert(0, selectedRecord);
-        }
-
-        if (target is not null && selectedRecord is not null)
-        {
-            var matchIndex = records.IndexOf(selectedRecord);
-            if (matchIndex > 0)
-            {
-                records.RemoveAt(matchIndex);
-                records.Insert(0, selectedRecord);
-            }
-        }
-
-        if (shouldFilter)
-        {
-            if (target is not null
-                && ApplyNavigationSelection(target, records, effectiveSearch, queueReselect: true))
-            {
-                return records;
-            }
-
-            if (selectedRecord is not null)
-            {
-                var search = string.IsNullOrWhiteSpace(effectiveSearch)
-                    ? ResolveNavigationSearchText(selectedRecord, searchTerm)
-                    : effectiveSearch!;
-                ApplyNavigationHighlight(selectedRecord, search, queueReselect: true);
-            }
-            else if (!string.IsNullOrWhiteSpace(effectiveSearch))
-            {
-                ApplyNavigationHighlight(null, effectiveSearch!, clearSelection: true, queueReselect: true);
-            }
-
-            return records;
-        }
-
-        if (target is not null)
-        {
-            ApplyNavigationSelection(target, records, effectiveSearch, queueReselect: true);
-        }
-
-        return records;
+        await _assetViewModel.LoadAssetsAsync().ConfigureAwait(false);
+        ObserveFilteredAssets(_assetViewModel.FilteredAssets, skipImmediateSync: !IsInitialized);
+        EnsureSelectedAssetFromCollection();
+        return ToReadOnlyList(_assetViewModel.FilteredAssets.Select(ToRecord));
     }
 
     private bool ApplyNavigationSelection(
@@ -247,7 +259,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             search = string.Empty;
         }
 
-        SearchText = search;
+        AssetSearchTerm = search;
 
         var status = _localization.GetString("Module.Status.Filtered", Title, search);
         StatusMessage = status;
@@ -882,7 +894,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             if (shouldFilter && !string.IsNullOrWhiteSpace(effectiveSearch))
             {
                 await RefreshAsync(parameter).ConfigureAwait(false);
-                SearchText = effectiveSearch;
+                AssetSearchTerm = effectiveSearch;
                 StatusMessage = _localization.GetString("Module.Status.Filtered", Title, effectiveSearch);
             }
 
@@ -909,7 +921,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         if (!ApplyNavigationSelection(target, searchOverride: effectiveSearch)
             && !string.IsNullOrWhiteSpace(effectiveSearch))
         {
-            SearchText = effectiveSearch;
+            AssetSearchTerm = effectiveSearch;
             StatusMessage = _localization.GetString("Module.Status.Filtered", Title, effectiveSearch);
         }
     }
@@ -959,7 +971,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             search = match.Title;
         }
 
-        SearchText = search;
+        AssetSearchTerm = search;
         StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
         return Task.CompletedTask;
     }
@@ -970,9 +982,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             _loadedMachine = null;
             ResetAsset();
+            UpdateSelectedAsset(null);
             UpdateCommandStates();
             return;
         }
+
+        UpdateSelectedAssetFromRecord(record);
 
         if (IsInEditMode)
         {
@@ -980,6 +995,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+        {
+            return;
+        }
+
+        if (_loadedMachine is not null && _loadedMachine.Id == id)
         {
             return;
         }
@@ -1234,7 +1254,38 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     private void OnAssetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (IsInEditMode)
+        switch (e.PropertyName)
+        {
+            case nameof(AssetViewModel.FilteredAssets):
+                OnPropertyChanged(nameof(FilteredAssets));
+                ObserveFilteredAssets(_assetViewModel.FilteredAssets);
+                break;
+            case nameof(AssetViewModel.SelectedAsset):
+                OnPropertyChanged(nameof(SelectedAsset));
+                if (!_isSynchronizingSelection)
+                {
+                    SyncSelectedRecordWithAsset();
+                }
+                break;
+            case nameof(AssetViewModel.SearchTerm):
+                OnPropertyChanged(nameof(AssetSearchTerm));
+                if (!string.Equals(SearchText, _assetViewModel.SearchTerm, StringComparison.Ordinal))
+                {
+                    SearchText = _assetViewModel.SearchTerm;
+                }
+                break;
+            case nameof(AssetViewModel.StatusFilter):
+                OnPropertyChanged(nameof(AssetStatusFilter));
+                break;
+            case nameof(AssetViewModel.RiskFilter):
+                OnPropertyChanged(nameof(AssetRiskFilter));
+                break;
+            case nameof(AssetViewModel.TypeFilter):
+                OnPropertyChanged(nameof(AssetTypeFilter));
+                break;
+        }
+
+        if (IsInEditMode && !ShouldSkipDirtyTracking(e.PropertyName))
         {
             MarkDirty();
         }
@@ -1279,6 +1330,207 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
         }
     }
+
+    private void ObserveFilteredAssets(ObservableCollection<Asset> assets, bool skipImmediateSync = false)
+    {
+        if (_filteredAssetsSubscription is not null)
+        {
+            _filteredAssetsSubscription.CollectionChanged -= OnFilteredAssetsCollectionChanged;
+        }
+
+        _filteredAssetsSubscription = assets;
+        if (_filteredAssetsSubscription is not null)
+        {
+            _filteredAssetsSubscription.CollectionChanged += OnFilteredAssetsCollectionChanged;
+        }
+
+        if (!skipImmediateSync)
+        {
+            SyncRecordsWithFilteredAssets();
+        }
+    }
+
+    private void OnFilteredAssetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        => SyncRecordsWithFilteredAssets();
+
+    private void SyncRecordsWithFilteredAssets()
+    {
+        if (_isSynchronizingRecords)
+        {
+            return;
+        }
+
+        try
+        {
+            _isSynchronizingRecords = true;
+            var selectedAssetId = _assetViewModel.SelectedAsset?.Id;
+            var previousKey = SelectedRecord?.Key;
+
+            Records.Clear();
+            foreach (var record in _assetViewModel.FilteredAssets.Select(ToRecord))
+            {
+                Records.Add(record);
+            }
+
+            RecordsView.Refresh();
+
+            ModuleRecord? nextSelection = null;
+            if (selectedAssetId.HasValue)
+            {
+                var idKey = selectedAssetId.Value.ToString(CultureInfo.InvariantCulture);
+                nextSelection = Records.FirstOrDefault(record => string.Equals(record.Key, idKey, StringComparison.Ordinal));
+            }
+
+            if (nextSelection is null && previousKey is not null)
+            {
+                nextSelection = Records.FirstOrDefault(record => string.Equals(record.Key, previousKey, StringComparison.Ordinal));
+            }
+
+            if (nextSelection is null && Records.Count > 0)
+            {
+                nextSelection = Records[0];
+            }
+
+            if (!ReferenceEquals(SelectedRecord, nextSelection))
+            {
+                SelectedRecord = nextSelection;
+            }
+        }
+        finally
+        {
+            _isSynchronizingRecords = false;
+        }
+    }
+
+    private void EnsureSelectedAssetFromCollection()
+    {
+        if (_assetViewModel.FilteredAssets.Count == 0)
+        {
+            UpdateSelectedAsset(null);
+            return;
+        }
+
+        var current = _assetViewModel.SelectedAsset;
+        if (current is not null && _assetViewModel.FilteredAssets.Any(asset => AreSameAsset(asset, current)))
+        {
+            return;
+        }
+
+        UpdateSelectedAsset(_assetViewModel.FilteredAssets[0]);
+    }
+
+    private void UpdateSelectedAsset(Asset? asset)
+    {
+        if (_isSynchronizingSelection)
+        {
+            _assetViewModel.SelectedAsset = asset;
+            return;
+        }
+
+        try
+        {
+            _isSynchronizingSelection = true;
+            if (AreSameAsset(_assetViewModel.SelectedAsset, asset))
+            {
+                return;
+            }
+
+            _assetViewModel.SelectedAsset = asset;
+        }
+        finally
+        {
+            _isSynchronizingSelection = false;
+        }
+    }
+
+    private void UpdateSelectedAssetFromRecord(ModuleRecord? record)
+    {
+        if (record is null)
+        {
+            UpdateSelectedAsset(null);
+            return;
+        }
+
+        var asset = FindAssetForRecord(record);
+        UpdateSelectedAsset(asset);
+    }
+
+    private void SyncSelectedRecordWithAsset()
+    {
+        if (_isSynchronizingSelection)
+        {
+            return;
+        }
+
+        try
+        {
+            _isSynchronizingSelection = true;
+            ModuleRecord? target = null;
+            if (_assetViewModel.SelectedAsset is { } asset)
+            {
+                var idKey = asset.Id.ToString(CultureInfo.InvariantCulture);
+                target = Records.FirstOrDefault(record => string.Equals(record.Key, idKey, StringComparison.Ordinal));
+            }
+
+            if (!ReferenceEquals(SelectedRecord, target))
+            {
+                SelectedRecord = target;
+            }
+        }
+        finally
+        {
+            _isSynchronizingSelection = false;
+        }
+    }
+
+    private Asset? FindAssetForRecord(ModuleRecord record)
+    {
+        if (int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+        {
+            return _assetViewModel.FilteredAssets.FirstOrDefault(asset => asset.Id == id)
+                ?? _assetViewModel.Assets.FirstOrDefault(asset => asset.Id == id);
+        }
+
+        if (!string.IsNullOrWhiteSpace(record.Code))
+        {
+            return _assetViewModel.FilteredAssets.FirstOrDefault(asset => string.Equals(asset.AssetCode, record.Code, StringComparison.OrdinalIgnoreCase))
+                ?? _assetViewModel.Assets.FirstOrDefault(asset => string.Equals(asset.AssetCode, record.Code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return null;
+    }
+
+    private static bool AreSameAsset(Asset? left, Asset? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left is null || right is null)
+        {
+            return false;
+        }
+
+        if (left.Id != 0 && right.Id != 0 && left.Id == right.Id)
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(left.AssetCode)
+            && !string.IsNullOrWhiteSpace(right.AssetCode)
+            && string.Equals(left.AssetCode, right.AssetCode, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool ShouldSkipDirtyTracking(string? propertyName)
+        => propertyName is nameof(AssetViewModel.FilteredAssets)
+            or nameof(AssetViewModel.SelectedAsset)
+            or nameof(AssetViewModel.SearchTerm)
+            or nameof(AssetViewModel.StatusFilter)
+            or nameof(AssetViewModel.RiskFilter)
+            or nameof(AssetViewModel.TypeFilter)
+            or nameof(AssetViewModel.IsBusy)
+            or nameof(AssetViewModel.StatusMessage);
 
     private bool CanGenerateCode()
         => !IsBusy && IsInEditMode;
@@ -1593,6 +1845,28 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         AttachDocumentCommand.NotifyCanExecuteChanged();
         GenerateCodeCommand.NotifyCanExecuteChanged();
         PreviewQrCommand.NotifyCanExecuteChanged();
+    }
+
+    private static ModuleRecord ToRecord(Asset asset)
+    {
+        var fields = new List<InspectorField>
+        {
+            new("Location", asset.Location ?? "-"),
+            new("Model", asset.Model ?? "-"),
+            new("Manufacturer", asset.Manufacturer ?? "-"),
+            new("Status", asset.Status ?? "-"),
+            new("Installed", asset.InstallDate?.ToString("d", CultureInfo.CurrentCulture) ?? "-")
+        };
+
+        return new ModuleRecord(
+            asset.Id.ToString(CultureInfo.InvariantCulture),
+            asset.AssetName,
+            asset.AssetCode,
+            asset.Status,
+            asset.Description,
+            fields,
+            WorkOrdersModuleViewModel.ModuleKey,
+            asset.Id);
     }
 
     private static ModuleRecord ToRecord(Machine machine)
