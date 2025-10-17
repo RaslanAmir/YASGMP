@@ -105,6 +105,7 @@
 - Updated `AssetsModuleView` bindings plus `AssetsModuleViewModelTests` to target `AssetViewModel`, keeping code/QR generation and signature coverage intact.
 - 2026-04-21: Synced `AssetsModuleViewModel` dock records with `AssetViewModel.FilteredAssets`, exposed pass-through search/filter properties, and re-bound the Assets grid to the shared collection so shell search inputs update both the dock list and inspector.
 - 2026-04-22: Navigation + CFL flows now resolve selections through `AssetViewModel.FilteredAssets`, synchronize `_assetViewModel.SelectedAsset`/`_loadedMachine`, and rebuild inspector payloads from the shared asset snapshot instead of re-querying `IMachineCrudService`.
+- 2026-04-23: Restored canonical machine reloads through `IMachineCrudService.TryGetByIdAsync` when selecting assets so serial numbers, lifecycle phase, criticality, and signature metadata remain intact; retained the shared asset snapshot as a fallback if the service call fails. CLI validation (`dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj`) still blocked with `command not found` in the Linux container.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)
