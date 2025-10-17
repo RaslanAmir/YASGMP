@@ -1055,6 +1055,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         switch (mode)
         {
             case FormMode.Add:
+                UpdateSelectedAsset(null);
                 _loadedMachine = null;
                 UpdateAssetWithoutDirty(() =>
                 {
