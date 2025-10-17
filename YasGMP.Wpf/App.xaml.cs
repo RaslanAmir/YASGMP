@@ -120,6 +120,9 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IShellAlertService, AlertService>();
                         svc.AddSingleton<IAlertService>(sp => sp.GetRequiredService<IShellAlertService>());
                         svc.AddSingleton<YasGMP.Wpf.ViewModels.AssetViewModel>();
+                        svc.AddSingleton<YasGMP.ViewModels.AssetViewModel>();
+                        svc.AddSingleton<IAssetListViewModel>(sp =>
+                            new SharedAssetListViewModelAdapter(sp.GetRequiredService<YasGMP.ViewModels.AssetViewModel>()));
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();

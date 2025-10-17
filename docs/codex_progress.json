@@ -88,7 +88,7 @@
       "2026-04-13: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj, and dotnet test YasGMP.Wpf.Tests retried during Assets QR regression expansion; CLI still missing so commands exit with 'command not found'.",
       "2026-04-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Debug, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried while wiring ComponentsModuleViewModel constructor; CLI remains unavailable so each command exits with 'command not found'.",
       "2026-04-20: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows retried during code/QR documentation refresh; CLI still missing so each command exits with 'command not found'.",
-      "2026-04-19: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried for the preventive maintenance workspace; all commands still exit with 'command not found' because the dotnet CLI is unavailable in this container."
+      "2026-04-21: Introduced IAssetListViewModel and a shared AssetViewModel adapter so the WPF Assets module can compile against the shared FilteredAssets collection while keeping MAUI synchronization intact; dotnet restore yasgmp.sln still exits with 'command not found' in this container."
     ],
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",

@@ -78,6 +78,7 @@
 - Introduced `NotificationPreferenceService` persistence, the shared `NotificationPreferences` model, and WPF unit tests covering alert propagation plus AdminModuleViewModel load/save/dirty states to guard the workflow.
 - Refreshed `README_WPF_SHELL.md` and `docs/WPF_MAPPING.md` with alert parity details, toast overlay documentation, and notification preference UI notes.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with `command not found` because the dotnet CLI is unavailable on this Linux host; rerun on a Windows machine with the Windows 10 SDK installed.
+- 2026-04-21: Added `IAssetListViewModel` plus a `SharedAssetListViewModelAdapter` so `AssetsModuleViewModel` can depend on the MAUI asset list without referencing editor-only fields, resolving the Codex compile regression while keeping search/filter synchronization intact.
 
 ### Increment 2 Follow-up — Code & QR Adapter Documentation (2026-04-20)
 
