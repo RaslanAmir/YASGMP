@@ -18,4 +18,9 @@
   <ItemGroup>
     <ProjectReference Include="..\yasgmp.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Views\Dialogs\MachineEditDialog.xaml" Link="Views/Dialogs/MachineEditDialog.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -11,6 +11,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.ViewModels;
+using YasGMP.Views.Dialogs;
 
 namespace YasGMP.Tests;
 
@@ -19,9 +20,7 @@ public class MachineDialogTests
     [Fact]
     public void MachineEditDialog_XamlContainsCodeAndQrElements()
     {
-        var path = LocateProjectFile("Views/Dialogs/MachineEditDialog.xaml");
-
-        var document = XDocument.Load(path);
+        var document = LoadMachineEditDialogXaml();
         XNamespace ns = "http://schemas.microsoft.com/dotnet/2021/maui";
 
         var codeEntry = document
@@ -85,6 +84,32 @@ public class MachineDialogTests
                 Directory.Delete(platform.Directory, recursive: true);
             }
         }
+    }
+
+    private static XDocument LoadMachineEditDialogXaml()
+    {
+        var outputPath = Path.Combine(AppContext.BaseDirectory, "Views", "Dialogs", "MachineEditDialog.xaml");
+        if (File.Exists(outputPath))
+        {
+            return XDocument.Load(outputPath);
+        }
+
+        var assembly = typeof(MachineEditDialog).GetTypeInfo().Assembly;
+        var resourceName = assembly
+            .GetManifestResourceNames()
+            .FirstOrDefault(name => name.EndsWith("MachineEditDialog.xaml", StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrEmpty(resourceName))
+        {
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream is not null)
+            {
+                return XDocument.Load(stream);
+            }
+        }
+
+        var path = LocateProjectFile("Views/Dialogs/MachineEditDialog.xaml");
+        return XDocument.Load(path);
     }
 
     private static string LocateProjectFile(string relativePath)
