@@ -172,6 +172,7 @@ public class ModuleCflTests
         var auth = new TestAuthContext();
         var filePicker = new TestFilePicker();
         var attachmentService = new TestAttachmentService();
+        var certificateDialog = new TestCalibrationCertificateDialogService();
         var audit = new AuditService(db);
 
         var viewModel = new CalibrationModuleViewModel(
