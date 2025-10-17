@@ -27,6 +27,9 @@ public class AssetsModuleViewModelTests : IDisposable
         _localization.SetLanguage("en");
     }
 
+    private static AssetViewModel CreateAssetViewModel()
+        => new(new FakeMachineCrudService());
+
     [Fact]
     public async Task EnterAddMode_AutoGeneratesIdentifiers()
     {
@@ -44,7 +47,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -99,7 +102,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -164,7 +167,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -239,7 +242,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -294,7 +297,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -385,7 +388,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -469,7 +472,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -531,7 +534,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -620,7 +623,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -706,7 +709,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -791,7 +794,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -882,7 +885,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -953,7 +956,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -1010,7 +1013,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var codeGenerator = new StubCodeGeneratorService();
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+        var assetViewModel = CreateAssetViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,

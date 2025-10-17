@@ -422,6 +422,7 @@
     "2026-04-21: AssetsModuleViewModel now mirrors AssetViewModel.FilteredAssets into ModuleRecords, exposes pass-through search/filter properties, rebinds the Assets grid to the shared collection, and dotnet restore yasgmp.sln continues to fail with 'command not found' in this container.",
     "2026-04-22: AssetsModuleViewModel navigation now resolves selection via AssetViewModel.FilteredAssets, syncs SelectedAsset/_loadedMachine, and rebuilds inspector records from shared asset data; dotnet restore/build/test remain blocked with 'command not found' on this host.",
     "2026-04-23: AssetsModuleViewModel subscribes to AssetViewModel.FilteredAssets.CollectionChanged with dirty-tracking suppression, re-syncs module records/selection/status/search when the shared list mutates, and dotnet restore/build/test still exit with 'command not found' in this Linux container.",
+    "2026-04-24: AssetViewModel now owns machine CRUD/load operations, AssetsModuleViewModel routes selection/save through the shared add/update APIs, and post-save refreshes keep shell status/messages aligned; dotnet restore/build/test continue to fail with 'command not found' in this environment.",
     "2026-04-24: Assets module QR/code generation, preview, attachments, and signature flows now update AssetViewModel.SelectedAsset, propagate QR payload/image paths back to the shared asset snapshot, raise dirty notifications via the editor event, and dotnet restore/build/test remain blocked with 'command not found' because the CLI is unavailable in this container."
   ]
 }
