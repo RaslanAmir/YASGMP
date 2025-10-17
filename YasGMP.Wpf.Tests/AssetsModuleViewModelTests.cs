@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using Xunit;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -45,6 +49,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -57,6 +62,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -97,9 +103,10 @@ public class AssetsModuleViewModelTests : IDisposable
         var attachments = new TestAttachmentService();
 
         var codeGenerator = new StubCodeGeneratorService();
-        var qrCode = new StubQrCodeService();
-        var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+       var qrCode = new StubQrCodeService();
+       var platformService = new StubPlatformService();
+       var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -112,6 +119,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -162,9 +170,10 @@ public class AssetsModuleViewModelTests : IDisposable
         var attachments = new TestAttachmentService();
 
         var codeGenerator = new StubCodeGeneratorService();
-        var qrCode = new StubQrCodeService();
-        var platformService = new StubPlatformService();
-        var assetViewModel = new AssetViewModel();
+       var qrCode = new StubQrCodeService();
+       var platformService = new StubPlatformService();
+       var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -177,6 +186,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -240,6 +250,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -252,6 +263,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -295,6 +307,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -307,6 +320,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -386,6 +400,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -398,6 +413,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -470,6 +486,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -482,6 +499,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -532,6 +550,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -544,6 +563,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -621,6 +641,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -633,6 +654,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -707,6 +729,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -719,6 +742,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -792,6 +816,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -804,6 +829,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -883,6 +909,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -895,6 +922,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -954,6 +982,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -966,6 +995,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -1011,6 +1041,7 @@ public class AssetsModuleViewModelTests : IDisposable
         var qrCode = new StubQrCodeService();
         var platformService = new StubPlatformService();
         var assetViewModel = new AssetViewModel();
+        var assetList = new StubAssetListViewModel();
 
         var viewModel = new AssetsModuleViewModel(
             database,
@@ -1023,6 +1054,7 @@ public class AssetsModuleViewModelTests : IDisposable
             dialog,
             shell,
             assetViewModel,
+            assetList,
             navigation,
             _localization,
             codeGenerator,
@@ -1066,6 +1098,180 @@ public class AssetsModuleViewModelTests : IDisposable
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(AssetsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+
+    private sealed class StubAssetListViewModel : IAssetListViewModel
+    {
+        private readonly ObservableCollection<Asset> _assets = new();
+        private readonly ObservableCollection<Asset> _filteredAssets = new();
+        private Asset? _selectedAsset;
+        private string? _searchTerm;
+        private string? _statusFilter;
+        private string? _riskFilter;
+        private string? _typeFilter;
+
+        public StubAssetListViewModel()
+        {
+            _assets.CollectionChanged += (_, _) => RefreshFiltered();
+        }
+
+        public ObservableCollection<Asset> Assets => _assets;
+
+        public ObservableCollection<Asset> FilteredAssets => _filteredAssets;
+
+        public Asset? SelectedAsset
+        {
+            get => _selectedAsset;
+            set
+            {
+                if (ReferenceEquals(_selectedAsset, value))
+                {
+                    return;
+                }
+
+                _selectedAsset = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string? SearchTerm
+        {
+            get => _searchTerm;
+            set
+            {
+                if (string.Equals(_searchTerm, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _searchTerm = value;
+                OnPropertyChanged();
+                RefreshFiltered();
+            }
+        }
+
+        public string? StatusFilter
+        {
+            get => _statusFilter;
+            set
+            {
+                if (string.Equals(_statusFilter, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                _statusFilter = value;
+                OnPropertyChanged();
+                RefreshFiltered();
+            }
+        }
+
+        public string? RiskFilter
+        {
+            get => _riskFilter;
+            set
+            {
+                if (string.Equals(_riskFilter, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                _riskFilter = value;
+                OnPropertyChanged();
+                RefreshFiltered();
+            }
+        }
+
+        public string? TypeFilter
+        {
+            get => _typeFilter;
+            set
+            {
+                if (string.Equals(_typeFilter, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                _typeFilter = value;
+                OnPropertyChanged();
+                RefreshFiltered();
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public Task LoadAssetsAsync()
+        {
+            RefreshFiltered();
+            return Task.CompletedTask;
+        }
+
+        private void RefreshFiltered()
+        {
+            var snapshot = ApplyFilters().ToList();
+            _filteredAssets.Clear();
+            foreach (var asset in snapshot)
+            {
+                _filteredAssets.Add(asset);
+            }
+            OnPropertyChanged(nameof(FilteredAssets));
+        }
+
+        private IEnumerable<Asset> ApplyFilters()
+        {
+            IEnumerable<Asset> source = _assets;
+
+            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                source = source.Where(asset => Matches(asset.AssetCode, _searchTerm)
+                    || Matches(asset.AssetName, _searchTerm)
+                    || Matches(asset.Name, _searchTerm)
+                    || Matches(asset.Code, _searchTerm));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_statusFilter))
+            {
+                source = source.Where(asset => EqualsIgnoreCase(asset.Status, _statusFilter));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_riskFilter))
+            {
+                source = source.Where(asset => EqualsIgnoreCase(GetPropertyValue(asset, "RiskCategory"), _riskFilter));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_typeFilter))
+            {
+                source = source.Where(asset => EqualsIgnoreCase(GetPropertyValue(asset, "Type"), _typeFilter));
+            }
+
+            return source;
+        }
+
+        private static bool Matches(string? value, string? term)
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(term))
+            {
+                return false;
+            }
+
+            return value.Contains(term, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool EqualsIgnoreCase(string? value, string? target)
+        {
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                return true;
+            }
+
+            return string.Equals(value, target, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string? GetPropertyValue(Asset asset, string propertyName)
+            => asset.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase)?.GetValue(asset) as string;
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private sealed class RecordingModuleNavigationService : IModuleNavigationService
