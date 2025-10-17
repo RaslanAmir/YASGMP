@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
@@ -33,7 +34,11 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
         : base(ModuleKey, localization.GetString("Module.Title.Dashboard"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _signalRClient = signalRClient ?? throw new ArgumentNullException(nameof(signalRClient));
-        _signalRClient.AuditReceived += OnAuditReceived;
+        WeakEventManager<ISignalRClientService, AuditEventArgs>.AddHandler(
+            _signalRClient,
+            nameof(ISignalRClientService.AuditReceived),
+            OnAuditReceived);
+        _isSubscribed = true;
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
@@ -95,6 +100,7 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
 
     private bool _disposed;
     private readonly ISignalRClientService _signalRClient;
+    private bool _isSubscribed;
 
     private async void OnAuditReceived(object? sender, AuditEventArgs e)
     {
@@ -116,7 +122,15 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
             return;
         }
 
-        _signalRClient.AuditReceived -= OnAuditReceived;
+        if (_isSubscribed)
+        {
+            WeakEventManager<ISignalRClientService, AuditEventArgs>.RemoveHandler(
+                _signalRClient,
+                nameof(ISignalRClientService.AuditReceived),
+                OnAuditReceived);
+            _isSubscribed = false;
+        }
+
         _disposed = true;
     }
 }
