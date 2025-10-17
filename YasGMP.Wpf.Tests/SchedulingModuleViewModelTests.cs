@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ public class SchedulingModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
+        var localization = CreateLocalizationService();
         const int adapterSignatureId = 9135;
         var crud = new FakeScheduledJobCrudService
         {
@@ -73,7 +74,7 @@ public class SchedulingModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
+        var localization = CreateLocalizationService();
         var crud = new FakeScheduledJobCrudService();
         var job = new ScheduledJob
         {
@@ -115,7 +116,7 @@ public class SchedulingModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
+        var localization = CreateLocalizationService();
         var crud = new FakeScheduledJobCrudService();
         var job = new ScheduledJob
         {
@@ -153,7 +154,7 @@ public class SchedulingModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
+        var localization = CreateLocalizationService();
         var job = new ScheduledJob
         {
             Id = 34,
@@ -226,7 +227,7 @@ public class SchedulingModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
+        var localization = CreateLocalizationService();
         var job = new ScheduledJob
         {
             Id = 48,
@@ -267,6 +268,17 @@ public class SchedulingModuleViewModelTests
         Assert.Equal("Temporarily disabled while equipment is offline", updateSnapshot.Entity.Comment);
         Assert.False(viewModel.IsDirty);
     }
+
+    private static FakeLocalizationService CreateLocalizationService()
+        => new(
+            new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["en"] = new(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Module.Title.ScheduledJobs"] = "Scheduled Jobs"
+                }
+            },
+            initialLanguage: "en");
 
     private static Task<bool> InvokeSaveAsync(SchedulingModuleViewModel viewModel)
     {
