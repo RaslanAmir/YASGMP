@@ -45,6 +45,7 @@
   - 2026-04-09T00:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried alongside MAUI code/QR parity changes; command still fails with `bash: command not found: dotnet` because the CLI is absent on Linux.
   - 2025-10-16T09:41Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` attempted for the Work Orders signature batch; container continues to report `bash: command not found: dotnet`.
 - 2026-04-11T00:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` rerun after adding asset editor QR parity; CLI remains unavailable so the command exits with `bash: command not found: dotnet`.
+- 2026-04-25T09:10Z: `dotnet --version` retried after addressing dispatcher marshalling in `AssetViewModel`; container still reports `bash: command not found: dotnet`, so validation stays Windows-host only.
 
 
 ## Increment 2025-10-13 — Baseline Revalidation
@@ -107,6 +108,7 @@
 - 2026-04-22: Navigation + CFL flows now resolve selections through `AssetViewModel.FilteredAssets`, synchronize `_assetViewModel.SelectedAsset`/`_loadedMachine`, and rebuild inspector payloads from the shared asset snapshot instead of re-querying `IMachineCrudService`.
 - 2026-04-23: AssetsModuleViewModel now listens for `FilteredAssets.CollectionChanged`, reprojects records/selection/status when the shared list mutates, propagates `AssetViewModel.StatusMessage`/search text to the shell, and reuses the dirty-tracking suppression around collection subscriptions; `dotnet restore/build/test` remain blocked with `bash: command not found: dotnet` in this container.
 - 2026-04-24: Asset view-model now fronts CRUD via `IMachineCrudService`, OnRecordSelected/OnSave flow through shared add/update routines, and post-save refreshes repopulate `_assetViewModel.FilteredAssets`/status so both shell panes stay synchronized; `dotnet restore/build/test` still fail with `bash: command not found: dotnet` inside this Linux container.
+- 2026-04-25: Removed `ConfigureAwait(false)` usage from `AssetViewModel` load/ensure flows so WPF collection updates stay on the dispatcher thread per Codex review; no functional delta beyond thread affinity fix. `dotnet --version` confirms the CLI remains unavailable in the container.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)
