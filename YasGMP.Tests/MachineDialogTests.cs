@@ -88,35 +88,26 @@ public class MachineDialogTests
 
     private static XDocument LoadMachineEditDialogXaml()
     {
-        var mauiAssembly = typeof(MachineEditDialog).GetTypeInfo().Assembly;
-        var resourceName = mauiAssembly
-            .GetManifestResourceNames()
-            .FirstOrDefault(name => name.EndsWith("MachineEditDialog.xaml", StringComparison.OrdinalIgnoreCase));
-
-        if (!string.IsNullOrEmpty(resourceName))
+        static XDocument? LoadFromAssembly(Assembly assembly, string suffix)
         {
-            using var stream = mauiAssembly.GetManifestResourceStream(resourceName);
-            if (stream is not null)
+            foreach (var resourceName in assembly.GetManifestResourceNames())
             {
-                return XDocument.Load(stream);
+                if (resourceName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    using var stream = assembly.GetManifestResourceStream(resourceName);
+                    if (stream is not null)
+                    {
+                        return XDocument.Load(stream);
+                    }
+                }
             }
+
+            return null;
         }
 
-        var testAssembly = typeof(MachineDialogTests).GetTypeInfo().Assembly;
-        var linkedResourceName = testAssembly
-            .GetManifestResourceNames()
-            .FirstOrDefault(name => name.EndsWith("Views.Dialogs.MachineEditDialog.xaml", StringComparison.OrdinalIgnoreCase));
-
-        if (!string.IsNullOrEmpty(linkedResourceName))
-        {
-            using var stream = testAssembly.GetManifestResourceStream(linkedResourceName);
-            if (stream is not null)
-            {
-                return XDocument.Load(stream);
-            }
-        }
-
-        throw new InvalidOperationException("MachineEditDialog.xaml could not be loaded from the MAUI or test assemblies.");
+        return LoadFromAssembly(typeof(MachineEditDialog).GetTypeInfo().Assembly, "MachineEditDialog.xaml")
+            ?? LoadFromAssembly(typeof(MachineDialogTests).GetTypeInfo().Assembly, "Views.Dialogs.MachineEditDialog.xaml")
+            ?? throw new InvalidOperationException("MachineEditDialog.xaml could not be loaded from the MAUI or test assemblies.");
     }
 
 
