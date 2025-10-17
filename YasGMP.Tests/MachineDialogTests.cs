@@ -88,12 +88,6 @@ public class MachineDialogTests
 
     private static XDocument LoadMachineEditDialogXaml()
     {
-        var outputPath = Path.Combine(AppContext.BaseDirectory, "Views", "Dialogs", "MachineEditDialog.xaml");
-        if (File.Exists(outputPath))
-        {
-            return XDocument.Load(outputPath);
-        }
-
         var assembly = typeof(MachineEditDialog).GetTypeInfo().Assembly;
         var resourceName = assembly
             .GetManifestResourceNames()
