@@ -18,7 +18,8 @@
   - 2026-04-11T09:20Z: `dotnet restore yasgmp.sln` rerun while migrating Assets to the shared view-model service; CLI remains unavailable (`bash: command not found: dotnet`).
 - 2026-04-11T00:00Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried after wiring WPF asset editor QR fields; each command still fails with `bash: command not found: dotnet` until a Windows host is available.
 - 2026-04-12T09:05Z: `dotnet restore yasgmp.sln` rerun while landing scheduling adapter regression tests; CLI remains unavailable (`bash: command not found: dotnet`), so validation stays pending on Windows.
-  - 2026-04-20T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried while documenting code/QR parity; CLI remains unavailable in this container (`bash: command not found: dotnet`).
+- 2026-04-20T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried while documenting code/QR parity; CLI remains unavailable in this container (`bash: command not found: dotnet`).
+- 2026-04-21T09:15Z: `dotnet restore` retried during the dock/asset synchronization batch; CLI still unavailable (`bash: command not found: dotnet`), so validation remains Windows-host only.
   - 2025-10-16T09:40Z: `dotnet restore yasgmp.sln` retried during Work Orders signature metadata wiring; environment still returns `bash: command not found: dotnet` so validation stays Windows-host only.
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
   - 2025-10-13T10:59Z: `dotnet restore yasgmp.sln` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
@@ -102,6 +103,7 @@
 - Registered the reusable `AssetViewModel` with the WPF container so module view-models consume the shared asset state instead of private payloads.
 - Replaced the nested `AssetEditor` class in `AssetsModuleViewModel`, rewired property-changed dirty tracking, and funneled toolbar commands/QR helpers through the injected singleton.
 - Updated `AssetsModuleView` bindings plus `AssetsModuleViewModelTests` to target `AssetViewModel`, keeping code/QR generation and signature coverage intact.
+- 2026-04-21: Synced `AssetsModuleViewModel` dock records with `AssetViewModel.FilteredAssets`, exposed pass-through search/filter properties, and re-bound the Assets grid to the shared collection so shell search inputs update both the dock list and inspector.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)

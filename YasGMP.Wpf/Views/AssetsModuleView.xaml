@@ -61,15 +61,15 @@
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
                 <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="220"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding AssetSearchTerm, UpdateSourceTrigger=PropertyChanged}"
                          ToolTipService.ToolTip="{DynamicResource Dashboard.Search.Label}"
                          AutomationProperties.Name="{DynamicResource Dashboard.Search.Label}"
                          AutomationProperties.AutomationId="{DynamicResource Module.Assets.Search.AutomationId}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
-                      ItemsSource="{Binding RecordsView}"
-                      SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
+                      ItemsSource="{Binding FilteredAssets}"
+                      SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       CanUserAddRows="False"
@@ -79,7 +79,7 @@
                       AutomationProperties.Name="{DynamicResource Module.Assets.Grid.ToolTip}"
                       AutomationProperties.AutomationId="{DynamicResource Module.Assets.Grid.AutomationId}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Code}" Width="120">
+                    <DataGridTextColumn Binding="{Binding AssetCode}" Width="120">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Code.Header}"
@@ -93,14 +93,14 @@
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Code.Header}" />
                                 <Setter Property="AutomationProperties.Name">
                                     <Setter.Value>
-                                        <Binding Path="Code" />
+                                        <Binding Path="AssetCode" />
                                     </Setter.Value>
                                 </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Code.Cell.AutomationId}" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Title}" Width="2*">
+                    <DataGridTextColumn Binding="{Binding AssetName}" Width="2*">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Title.Header}"
@@ -114,7 +114,7 @@
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.Grid.Column.Title.Header}" />
                                 <Setter Property="AutomationProperties.Name">
                                     <Setter.Value>
-                                        <Binding Path="Title" />
+                                        <Binding Path="AssetName" />
                                     </Setter.Value>
                                 </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Title.Cell.AutomationId}" />
@@ -142,7 +142,7 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding InspectorFields[0].Value}" Width="150">
+                    <DataGridTextColumn Binding="{Binding Location}" Width="150">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{DynamicResource Module.Assets.Header.Location}"
@@ -156,7 +156,7 @@
                                 <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Module.Assets.Header.Location}" />
                                 <Setter Property="AutomationProperties.Name">
                                     <Setter.Value>
-                                        <Binding Path="InspectorFields[0].Value" />
+                                        <Binding Path="Location" />
                                     </Setter.Value>
                                 </Setter>
                                 <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Module.Assets.Grid.Column.Location.Cell.AutomationId}" />
