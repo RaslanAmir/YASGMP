@@ -1008,18 +1008,17 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             _loadedMachine = null;
             ResetAsset();
-            UpdateSelectedAsset(null);
+            _assetViewModel.ClearSelection();
             UpdateCommandStates();
             return;
         }
 
-        UpdateSelectedAssetFromRecord(record);
-
-        var asset = _assetViewModel.SelectedAsset;
+        var asset = await ResolveAssetFromRecordAsync(record).ConfigureAwait(false);
         if (asset is null)
         {
             _loadedMachine = null;
             ResetAsset();
+            _assetViewModel.ClearSelection();
 
             if (int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var missingId))
             {
@@ -1059,7 +1058,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 UpdateAssetWithoutDirty(() =>
                 {
                     var normalized = _machineService.NormalizeStatus("active");
-                    _assetViewModel.InitializeForNew(normalized);
+                    _assetViewModel.PrepareForNew(normalized);
                 });
                 await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
                 if (!string.IsNullOrWhiteSpace(_assetViewModel.Code) && !string.IsNullOrWhiteSpace(_assetViewModel.QrCode))
@@ -1084,25 +1083,22 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
-        var errors = new List<string>();
         try
         {
             var code = EnsureEditorCode(force: false, suppressDirty: true);
             EnsureEditorQrPayload(code, suppressDirty: true);
             var machine = _assetViewModel.ToMachine(_loadedMachine);
             machine.Status = _machineService.NormalizeStatus(machine.Status);
-            _machineService.Validate(machine);
+            return _assetViewModel.ValidateMachine(machine);
         }
         catch (InvalidOperationException ex)
         {
-            errors.Add(ex.Message);
+            return new[] { ex.Message };
         }
         catch (Exception ex)
         {
-            errors.Add($"Unexpected validation failure: {ex.Message}");
+            return new[] { $"Unexpected validation failure: {ex.Message}" };
         }
-
-        return errors;
     }
 
     protected override async Task<bool> OnSaveAsync()
@@ -1188,21 +1184,18 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _assetViewModel.SessionId = signature.SessionId ?? _authContext.CurrentSessionId ?? string.Empty;
         _assetViewModel.DeviceInfo = signature.DeviceInfo ?? _authContext.CurrentDeviceInfo ?? string.Empty;
 
-        Machine adapterResult;
         CrudSaveResult saveResult;
         try
         {
             if (Mode == FormMode.Add)
             {
-                saveResult = await _machineService.CreateAsync(machine, context).ConfigureAwait(false);
+                saveResult = await _assetViewModel.AddAsync(machine, context).ConfigureAwait(false);
                 machine.Id = saveResult.Id;
-                adapterResult = machine;
             }
             else if (Mode == FormMode.Update)
             {
                 machine.Id = assetId;
-                saveResult = await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
-                adapterResult = machine;
+                saveResult = await _assetViewModel.UpdateAsync(machine, context).ConfigureAwait(false);
             }
             else
             {
@@ -1216,7 +1209,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         if (saveResult.SignatureMetadata?.Id is { } signatureId)
         {
-            adapterResult.DigitalSignatureId = signatureId;
+            machine.DigitalSignatureId = signatureId;
         }
 
         _loadedMachine = machine;
@@ -1226,9 +1219,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
             tableName: "machines",
-            recordId: adapterResult.Id,
+            recordId: machine.Id,
             metadata: saveResult.SignatureMetadata,
-            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackSignatureHash: machine.DigitalSignature,
             fallbackMethod: context.SignatureMethod,
             fallbackStatus: context.SignatureStatus,
             fallbackNote: context.SignatureNote,
@@ -1250,7 +1243,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return false;
         }
 
-        StatusMessage = _localization.GetString("Module.Assets.Status.SignatureCaptured", signatureResult.ReasonDisplay);
+        _assetViewModel.SyncSelectedAssetFromEditor();
+        await _assetViewModel.LoadAssetsAsync().ConfigureAwait(false);
+        await _assetViewModel.EnsureAssetAsync(machine.Id, machine.Code).ConfigureAwait(false);
+        _assetViewModel.StatusMessage = _localization.GetString("Module.Assets.Status.SignatureCaptured", signatureResult.ReasonDisplay);
+        StatusMessage = _assetViewModel.StatusMessage;
         return true;
     }
 
@@ -1334,14 +1331,17 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     private void ResetAsset()
     {
-        UpdateAssetWithoutDirty(() => _assetViewModel.Reset());
+        UpdateAssetWithoutDirty(() =>
+        {
+            _assetViewModel.Reset();
+            _assetViewModel.ClearSelection();
+        });
         ResetDirty();
     }
 
     private void LoadAsset(Machine machine)
     {
-        UpdateAssetWithoutDirty(() => _assetViewModel.LoadFromMachine(machine, _machineService.NormalizeStatus));
-        UpdateSelectedAssetSnapshot(machine);
+        UpdateAssetWithoutDirty(() => _assetViewModel.PrepareForExisting(machine, _machineService.NormalizeStatus));
         ResetDirty();
     }
 
@@ -1416,36 +1416,6 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
         UpdateAssetWithoutDirty(() => _assetViewModel.SelectedAsset = placeholder);
         return placeholder;
-    }
-
-    private void UpdateSelectedAssetSnapshot(Machine machine)
-    {
-        if (machine is null)
-        {
-            return;
-        }
-
-        var asset = EnsureSelectedAsset();
-        asset.Id = machine.Id;
-        asset.AssetCode = machine.Code ?? asset.AssetCode;
-        asset.AssetName = machine.Name ?? asset.AssetName;
-        asset.Description = machine.Description ?? asset.Description;
-        asset.Model = machine.Model ?? asset.Model;
-        asset.Manufacturer = machine.Manufacturer ?? asset.Manufacturer;
-        asset.Location = machine.Location ?? asset.Location;
-        asset.Status = machine.Status ?? asset.Status;
-        asset.UrsDoc = machine.UrsDoc ?? asset.UrsDoc;
-        asset.InstallDate = machine.InstallDate;
-        asset.ProcurementDate = machine.ProcurementDate;
-        asset.WarrantyUntil = machine.WarrantyUntil;
-        asset.IsCritical = machine.IsCritical;
-        asset.SerialNumber = machine.SerialNumber ?? asset.SerialNumber;
-        asset.LifecyclePhase = machine.LifecyclePhase ?? asset.LifecyclePhase;
-        asset.Notes = machine.Note ?? asset.Notes;
-        asset.QrCode = machine.QrCode ?? asset.QrCode;
-        asset.QrPayload = machine.QrPayload ?? asset.QrPayload;
-        asset.DigitalSignature = machine.DigitalSignature ?? asset.DigitalSignature;
-        asset.LastModified = machine.LastModified ?? asset.LastModified;
     }
 
     private void ObserveFilteredAssets(ObservableCollection<Asset> assets, bool skipImmediateSync = false)
@@ -1731,6 +1701,17 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         return null;
+    }
+
+    private async Task<Asset?> ResolveAssetFromRecordAsync(ModuleRecord record)
+    {
+        int? id = null;
+        if (int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+        {
+            id = parsed;
+        }
+
+        return await _assetViewModel.EnsureAssetAsync(id, record.Code).ConfigureAwait(false);
     }
 
     private static bool AreSameAsset(Asset? left, Asset? right)

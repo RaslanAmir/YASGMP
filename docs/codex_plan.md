@@ -106,6 +106,7 @@
 - 2026-04-21: Synced `AssetsModuleViewModel` dock records with `AssetViewModel.FilteredAssets`, exposed pass-through search/filter properties, and re-bound the Assets grid to the shared collection so shell search inputs update both the dock list and inspector.
 - 2026-04-22: Navigation + CFL flows now resolve selections through `AssetViewModel.FilteredAssets`, synchronize `_assetViewModel.SelectedAsset`/`_loadedMachine`, and rebuild inspector payloads from the shared asset snapshot instead of re-querying `IMachineCrudService`.
 - 2026-04-23: AssetsModuleViewModel now listens for `FilteredAssets.CollectionChanged`, reprojects records/selection/status when the shared list mutates, propagates `AssetViewModel.StatusMessage`/search text to the shell, and reuses the dirty-tracking suppression around collection subscriptions; `dotnet restore/build/test` remain blocked with `bash: command not found: dotnet` in this container.
+- 2026-04-24: Asset view-model now fronts CRUD via `IMachineCrudService`, OnRecordSelected/OnSave flow through shared add/update routines, and post-save refreshes repopulate `_assetViewModel.FilteredAssets`/status so both shell panes stay synchronized; `dotnet restore/build/test` still fail with `bash: command not found: dotnet` inside this Linux container.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)
