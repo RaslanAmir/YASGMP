@@ -187,6 +187,18 @@ namespace YasGMP.Models
         public string AssetType { get; set; } = "Equipment";
 
         /// <summary>
+        /// Generated QR code image path (not mapped / WPF shell).
+        /// </summary>
+        [NotMapped]
+        public string? QrCode { get; set; }
+
+        /// <summary>
+        /// QR payload encoded in the generated image (not mapped / WPF shell).
+        /// </summary>
+        [NotMapped]
+        public string? QrPayload { get; set; }
+
+        /// <summary>
         /// Last modified timestamp (not mapped).
         /// </summary>
         [NotMapped]

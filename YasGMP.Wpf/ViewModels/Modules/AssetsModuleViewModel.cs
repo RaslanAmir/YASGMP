@@ -88,6 +88,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
         _assetViewModel = assetViewModel ?? throw new ArgumentNullException(nameof(assetViewModel));
         _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+        _assetViewModel.EditorChanged += OnAssetEditorChanged;
         ObserveFilteredAssets(_assetViewModel.FilteredAssets, skipImmediateSync: true);
         ResetAsset();
         UpdateCommandStates();
@@ -121,6 +122,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     public void Dispose()
     {
         _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
+        _assetViewModel.EditorChanged -= OnAssetEditorChanged;
         if (_filteredAssetsSubscription is not null)
         {
             _filteredAssetsSubscription.CollectionChanged -= OnFilteredAssetsCollectionChanged;
@@ -1106,6 +1108,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     protected override async Task<bool> OnSaveAsync()
     {
         var machine = _assetViewModel.ToMachine(_loadedMachine);
+        var asset = EnsureSelectedAsset();
         try
         {
             await SynchronizeIdentifiersAsync(machine, forceCode: false, suppressDirty: true).ConfigureAwait(false);
@@ -1117,13 +1120,14 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
         machine.Status = _machineService.NormalizeStatus(machine.Status);
 
-        if (Mode == FormMode.Update && _loadedMachine is null)
+        if (Mode == FormMode.Update && asset.Id <= 0 && _loadedMachine is null)
         {
             StatusMessage = _localization.GetString("Module.Assets.Status.SelectBeforeSave");
             return false;
         }
 
-        var recordId = Mode == FormMode.Update ? _loadedMachine!.Id : 0;
+        var assetId = asset.Id > 0 ? asset.Id : _loadedMachine?.Id ?? 0;
+        var recordId = Mode == FormMode.Update ? assetId : 0;
         ElectronicSignatureDialogResult? signatureResult;
         try
         {
@@ -1196,7 +1200,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             }
             else if (Mode == FormMode.Update)
             {
-                machine.Id = _loadedMachine!.Id;
+                machine.Id = assetId;
                 saveResult = await _machineService.UpdateAsync(machine, context).ConfigureAwait(false);
                 adapterResult = machine;
             }
@@ -1314,11 +1318,17 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 break;
         }
 
-        if (IsInEditMode && !ShouldSkipDirtyTracking(e.PropertyName))
+        UpdateCommandStates();
+    }
+
+    private void OnAssetEditorChanged(object? sender, EventArgs e)
+    {
+        if (!IsInEditMode)
         {
-            MarkDirty();
+            return;
         }
 
+        MarkDirty();
         UpdateCommandStates();
     }
 
@@ -1331,6 +1341,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private void LoadAsset(Machine machine)
     {
         UpdateAssetWithoutDirty(() => _assetViewModel.LoadFromMachine(machine, _machineService.NormalizeStatus));
+        UpdateSelectedAssetSnapshot(machine);
         ResetDirty();
     }
 
@@ -1352,6 +1363,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
 
         _assetViewModel.PropertyChanged -= OnAssetViewModelPropertyChanged;
+        _assetViewModel.EditorChanged -= OnAssetEditorChanged;
         if (_filteredAssetsSubscription is not null)
         {
             _filteredAssetsSubscription.CollectionChanged -= OnFilteredAssetsCollectionChanged;
@@ -1366,8 +1378,74 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         {
             ObserveFilteredAssets(_assetViewModel.FilteredAssets, skipImmediateSync: true);
             _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
+            _assetViewModel.EditorChanged += OnAssetEditorChanged;
             _suppressFilteredAssetsCollectionNotifications = false;
         }
+    }
+
+    private Asset EnsureSelectedAsset()
+    {
+        if (_assetViewModel.SelectedAsset is { } asset)
+        {
+            return asset;
+        }
+
+        var placeholder = new Asset
+        {
+            Id = _assetViewModel.Id,
+            AssetCode = string.IsNullOrWhiteSpace(_assetViewModel.Code) ? string.Empty : _assetViewModel.Code,
+            AssetName = string.IsNullOrWhiteSpace(_assetViewModel.Name) ? string.Empty : _assetViewModel.Name,
+            Description = string.IsNullOrWhiteSpace(_assetViewModel.Description) ? null : _assetViewModel.Description,
+            Model = string.IsNullOrWhiteSpace(_assetViewModel.Model) ? null : _assetViewModel.Model,
+            Manufacturer = string.IsNullOrWhiteSpace(_assetViewModel.Manufacturer) ? null : _assetViewModel.Manufacturer,
+            Location = string.IsNullOrWhiteSpace(_assetViewModel.Location) ? null : _assetViewModel.Location,
+            Status = string.IsNullOrWhiteSpace(_assetViewModel.Status) ? null : _assetViewModel.Status,
+            UrsDoc = string.IsNullOrWhiteSpace(_assetViewModel.UrsDoc) ? null : _assetViewModel.UrsDoc,
+            InstallDate = _assetViewModel.InstallDate,
+            ProcurementDate = _assetViewModel.ProcurementDate,
+            WarrantyUntil = _assetViewModel.WarrantyUntil,
+            IsCritical = _assetViewModel.IsCritical,
+            SerialNumber = string.IsNullOrWhiteSpace(_assetViewModel.SerialNumber) ? null : _assetViewModel.SerialNumber,
+            LifecyclePhase = string.IsNullOrWhiteSpace(_assetViewModel.LifecyclePhase) ? null : _assetViewModel.LifecyclePhase,
+            Notes = string.IsNullOrWhiteSpace(_assetViewModel.Notes) ? null : _assetViewModel.Notes,
+            QrCode = string.IsNullOrWhiteSpace(_assetViewModel.QrCode) ? null : _assetViewModel.QrCode,
+            QrPayload = string.IsNullOrWhiteSpace(_assetViewModel.QrPayload) ? null : _assetViewModel.QrPayload,
+            DigitalSignature = string.IsNullOrWhiteSpace(_assetViewModel.SignatureHash) ? null : _assetViewModel.SignatureHash,
+            LastModified = _assetViewModel.LastModifiedUtc
+        };
+
+        UpdateAssetWithoutDirty(() => _assetViewModel.SelectedAsset = placeholder);
+        return placeholder;
+    }
+
+    private void UpdateSelectedAssetSnapshot(Machine machine)
+    {
+        if (machine is null)
+        {
+            return;
+        }
+
+        var asset = EnsureSelectedAsset();
+        asset.Id = machine.Id;
+        asset.AssetCode = machine.Code ?? asset.AssetCode;
+        asset.AssetName = machine.Name ?? asset.AssetName;
+        asset.Description = machine.Description ?? asset.Description;
+        asset.Model = machine.Model ?? asset.Model;
+        asset.Manufacturer = machine.Manufacturer ?? asset.Manufacturer;
+        asset.Location = machine.Location ?? asset.Location;
+        asset.Status = machine.Status ?? asset.Status;
+        asset.UrsDoc = machine.UrsDoc ?? asset.UrsDoc;
+        asset.InstallDate = machine.InstallDate;
+        asset.ProcurementDate = machine.ProcurementDate;
+        asset.WarrantyUntil = machine.WarrantyUntil;
+        asset.IsCritical = machine.IsCritical;
+        asset.SerialNumber = machine.SerialNumber ?? asset.SerialNumber;
+        asset.LifecyclePhase = machine.LifecyclePhase ?? asset.LifecyclePhase;
+        asset.Notes = machine.Note ?? asset.Notes;
+        asset.QrCode = machine.QrCode ?? asset.QrCode;
+        asset.QrPayload = machine.QrPayload ?? asset.QrPayload;
+        asset.DigitalSignature = machine.DigitalSignature ?? asset.DigitalSignature;
+        asset.LastModified = machine.LastModified ?? asset.LastModified;
     }
 
     private void ObserveFilteredAssets(ObservableCollection<Asset> assets, bool skipImmediateSync = false)
@@ -1677,21 +1755,21 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             && string.Equals(left.AssetCode, right.AssetCode, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool ShouldSkipDirtyTracking(string? propertyName)
-        => propertyName is nameof(AssetViewModel.FilteredAssets)
-            or nameof(AssetViewModel.SelectedAsset)
-            or nameof(AssetViewModel.SearchTerm)
-            or nameof(AssetViewModel.StatusFilter)
-            or nameof(AssetViewModel.RiskFilter)
-            or nameof(AssetViewModel.TypeFilter)
-            or nameof(AssetViewModel.IsBusy)
-            or nameof(AssetViewModel.StatusMessage);
-
     private bool CanGenerateCode()
         => !IsBusy && IsInEditMode;
 
     private bool CanPreviewQr()
-        => !IsBusy && !string.IsNullOrWhiteSpace(_assetViewModel.QrPayload);
+    {
+        if (IsBusy)
+        {
+            return false;
+        }
+
+        var asset = _assetViewModel.SelectedAsset;
+        var payload = asset?.QrPayload ?? _assetViewModel.QrPayload;
+
+        return !string.IsNullOrWhiteSpace(payload);
+    }
 
     private async Task GenerateCodeAsync()
     {
@@ -1703,13 +1781,19 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         try
         {
             IsBusy = true;
+            var asset = EnsureSelectedAsset();
             var code = EnsureEditorCode(force: true, suppressDirty: false);
             var payload = EnsureEditorQrPayload(code, suppressDirty: false);
             var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty: false).ConfigureAwait(false);
+            var displayCode = string.IsNullOrWhiteSpace(asset.AssetCode) ? code : asset.AssetCode;
+            var displayPath = string.IsNullOrWhiteSpace(asset.QrCode) ? path : asset.QrCode;
+            var resolvedPath = string.IsNullOrWhiteSpace(displayPath)
+                ? _localization.GetString("Module.Assets.Status.QrPathUnavailable")
+                : displayPath;
             StatusMessage = _localization.GetString(
                 "Module.Assets.Status.CodeAndQrGenerated",
-                code,
-                string.IsNullOrWhiteSpace(path) ? _localization.GetString("Module.Assets.Status.QrPathUnavailable") : path);
+                displayCode,
+                resolvedPath);
         }
         catch (Exception ex)
         {
@@ -1727,9 +1811,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         try
         {
             IsBusy = true;
+            var asset = EnsureSelectedAsset();
             var machine = _assetViewModel.ToMachine(_loadedMachine);
             await SynchronizeIdentifiersAsync(machine, forceCode: false, suppressDirty: false).ConfigureAwait(false);
-            var path = machine.QrCode ?? _assetViewModel.QrCode;
+            var path = string.IsNullOrWhiteSpace(asset.QrCode)
+                ? machine.QrCode ?? _assetViewModel.QrCode
+                : asset.QrCode;
             if (string.IsNullOrWhiteSpace(path))
             {
                 StatusMessage = _localization.GetString("Module.Assets.Status.QrGenerationFailed", _localization.GetString("Module.Assets.Status.QrPathUnavailable"));
@@ -1754,12 +1841,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private bool CanAttachDocument()
         => !IsBusy
            && !IsEditorEnabled
-           && _loadedMachine is not null
-           && _loadedMachine.Id > 0;
+           && _assetViewModel.SelectedAsset is { Id: > 0 };
 
     private async Task AttachDocumentAsync()
     {
-        if (_loadedMachine is null || _loadedMachine.Id <= 0)
+        var asset = _assetViewModel.SelectedAsset;
+        if (asset is null || asset.Id <= 0)
         {
             StatusMessage = _localization.GetString("Module.Assets.Status.SaveBeforeAttachment");
             return;
@@ -1768,8 +1855,11 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         try
         {
             IsBusy = true;
+            var displayName = !string.IsNullOrWhiteSpace(asset.AssetName)
+                ? asset.AssetName
+                : asset.Name;
             var files = await _filePicker.PickFilesAsync(
-                    new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to {_loadedMachine.Name}"))
+                    new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to {displayName}"))
                 .ConfigureAwait(false);
 
             if (files is null || files.Count == 0)
@@ -1790,9 +1880,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                     FileName = file.FileName,
                     ContentType = file.ContentType,
                     EntityType = "machines",
-                    EntityId = _loadedMachine.Id,
+                    EntityId = asset.Id,
                     UploadedById = uploadedBy,
-                    Reason = $"asset:{_loadedMachine.Id}",
+                    Reason = $"asset:{asset.Id}",
                     SourceIp = _authContext.CurrentIpAddress,
                     SourceHost = _authContext.CurrentDeviceInfo,
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
@@ -1849,6 +1939,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             return;
         }
 
+        var asset = EnsureSelectedAsset();
         var code = EnsureEditorCode(forceCode, suppressDirty);
         var payload = EnsureEditorQrPayload(code, suppressDirty);
         var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty, cancellationToken).ConfigureAwait(false);
@@ -1856,6 +1947,10 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         machine.Code = code;
         machine.QrPayload = payload;
         machine.QrCode = path;
+
+        asset.AssetCode = code;
+        asset.QrPayload = payload;
+        asset.QrCode = path;
 
         if (resetDirtyAfter)
         {
@@ -1865,34 +1960,67 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     private string EnsureEditorCode(bool force, bool suppressDirty)
     {
-        if (!force && !string.IsNullOrWhiteSpace(_assetViewModel.Code))
+        var asset = EnsureSelectedAsset();
+        var existing = asset.AssetCode;
+        if (string.IsNullOrWhiteSpace(existing))
         {
-            return _assetViewModel.Code;
+            existing = _assetViewModel.Code;
+        }
+
+        if (!force && !string.IsNullOrWhiteSpace(existing))
+        {
+            var normalized = existing.Trim();
+            if (!string.Equals(asset.AssetCode, normalized, StringComparison.Ordinal))
+            {
+                asset.AssetCode = normalized;
+            }
+
+            if (!string.Equals(_assetViewModel.Code, normalized, StringComparison.Ordinal))
+            {
+                if (suppressDirty)
+                {
+                    UpdateAssetWithoutDirty(() => _assetViewModel.Code = normalized);
+                }
+                else
+                {
+                    _assetViewModel.Code = normalized;
+                }
+            }
+
+            return normalized;
         }
 
         var generated = _codeGeneratorService.GenerateMachineCode(
-            string.IsNullOrWhiteSpace(_assetViewModel.Name) ? null : _assetViewModel.Name,
-            string.IsNullOrWhiteSpace(_assetViewModel.Manufacturer) ? null : _assetViewModel.Manufacturer);
+            string.IsNullOrWhiteSpace(asset.AssetName)
+                ? string.IsNullOrWhiteSpace(_assetViewModel.Name) ? null : _assetViewModel.Name
+                : asset.AssetName,
+            string.IsNullOrWhiteSpace(asset.Manufacturer)
+                ? string.IsNullOrWhiteSpace(_assetViewModel.Manufacturer) ? null : _assetViewModel.Manufacturer
+                : asset.Manufacturer);
 
         if (suppressDirty)
         {
             UpdateAssetWithoutDirty(() =>
             {
                 _assetViewModel.Code = generated;
+                asset.AssetCode = generated;
             });
         }
         else
         {
             _assetViewModel.Code = generated;
+            asset.AssetCode = generated;
         }
 
-        return _assetViewModel.Code;
+        return generated;
     }
 
     private string EnsureEditorQrPayload(string code, bool suppressDirty)
     {
+        var asset = EnsureSelectedAsset();
         var payload = BuildQrPayload(code);
-        if (string.Equals(_assetViewModel.QrPayload, payload, StringComparison.Ordinal))
+        if (string.Equals(asset.QrPayload, payload, StringComparison.Ordinal)
+            && string.Equals(_assetViewModel.QrPayload, payload, StringComparison.Ordinal))
         {
             return payload;
         }
@@ -1902,11 +2030,13 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             UpdateAssetWithoutDirty(() =>
             {
                 _assetViewModel.QrPayload = payload;
+                asset.QrPayload = payload;
             });
         }
         else
         {
             _assetViewModel.QrPayload = payload;
+            asset.QrPayload = payload;
         }
 
         return payload;
@@ -1923,6 +2053,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             throw new InvalidOperationException("QR payload is required before generating an image.");
         }
 
+        var asset = EnsureSelectedAsset();
         var path = await SaveQrImageAsync(payload, code, _assetViewModel.Id, cancellationToken).ConfigureAwait(false);
 
         if (suppressDirty)
@@ -1930,11 +2061,13 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
             UpdateAssetWithoutDirty(() =>
             {
                 _assetViewModel.QrCode = path;
+                asset.QrCode = path;
             });
         }
         else
         {
             _assetViewModel.QrCode = path;
+            asset.QrCode = path;
         }
 
         return path;
