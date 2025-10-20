@@ -1,4 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using YasGMP.Common;
@@ -32,7 +36,7 @@ internal static class LocalizationTestContext
 
     private sealed class TestLocalizationService : ILocalizationService
     {
-        private static readonly Lazy<ResourceDictionary> AutomationResources = new(CreateAutomationDictionary);
+        private static readonly Lazy<IReadOnlyDictionary<string, string>> AutomationResources = new(CreateAutomationDictionary);
 
         private readonly LocalizationService _inner = new();
 
@@ -53,7 +57,7 @@ internal static class LocalizationTestContext
             }
 
             var resources = AutomationResources.Value;
-            if (resources.Contains(key) && resources[key] is string automationId)
+            if (resources.TryGetValue(key, out var automationId))
             {
                 return automationId;
             }
@@ -63,17 +67,62 @@ internal static class LocalizationTestContext
 
         public void SetLanguage(string language) => _inner.SetLanguage(language);
 
-        private static ResourceDictionary CreateAutomationDictionary()
+        private static IReadOnlyDictionary<string, string> CreateAutomationDictionary()
+        {
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                return CreateAutomationDictionaryCore();
+            }
+
+            IReadOnlyDictionary<string, string>? automationStrings = null;
+            ExceptionDispatchInfo? captured = null;
+
+            var staThread = new Thread(() =>
+            {
+                try
+                {
+                    automationStrings = CreateAutomationDictionaryCore();
+                }
+                catch (Exception ex)
+                {
+                    captured = ExceptionDispatchInfo.Capture(ex);
+                }
+            })
+            {
+                IsBackground = true,
+            };
+
+            staThread.SetApartmentState(ApartmentState.STA);
+            staThread.Start();
+            staThread.Join();
+
+            captured?.Throw();
+
+            return automationStrings ?? throw new InvalidOperationException("Failed to load automation resource dictionary on STA thread.");
+        }
+
+        private static IReadOnlyDictionary<string, string> CreateAutomationDictionaryCore()
         {
             if (Application.ResourceAssembly is null)
             {
                 Application.ResourceAssembly = typeof(App).Assembly;
             }
 
-            return new ResourceDictionary
+            var resourceDictionary = new ResourceDictionary
             {
                 Source = new Uri("pack://application:,,,/YasGMP.Wpf;component/Resources/Strings.xaml", UriKind.Absolute),
             };
+
+            var automationStrings = new Dictionary<string, string>(resourceDictionary.Count, StringComparer.Ordinal);
+            foreach (DictionaryEntry entry in resourceDictionary)
+            {
+                if (entry.Key is string key && entry.Value is string value)
+                {
+                    automationStrings[key] = value;
+                }
+            }
+
+            return automationStrings;
         }
     }
 }

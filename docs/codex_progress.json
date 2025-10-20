@@ -128,7 +128,8 @@
         "2026-04-01: Split module toolbar UI tests into ModuleToolbarTests and moved FakeLocalizationService into shared test doubles so toolbar command/template fixtures share localization stubs; dotnet restore/build commands still fail with 'command not found' in the container.",
         "2026-04-07: Documented remaining B1 scope (Windows-host ribbon/status validation, DockLayoutPersistenceService round-trip check, and YasGMP.Wpf.Smoke execution) so the batch can close once CLI access is restored.",
         "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host.",
-        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host."
+        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host.",
+        "2026-04-27: Smoke localization fallback now marshals ResourceDictionary loading onto an STA thread so automation metadata resolves without crashing when smoke tests run on default MTA workers; dotnet restore/build/test still fail with 'command not found' in this container."
       ]
     },
     {
@@ -430,6 +431,7 @@
     "2026-04-24: AssetViewModel now owns machine CRUD/load operations, AssetsModuleViewModel routes selection/save through the shared add/update APIs, and post-save refreshes keep shell status/messages aligned; dotnet restore/build/test continue to fail with 'command not found' in this environment.",
     "2026-04-24: Assets module QR/code generation, preview, attachments, and signature flows now update AssetViewModel.SelectedAsset, propagate QR payload/image paths back to the shared asset snapshot, raise dirty notifications via the editor event, and dotnet restore/build/test remain blocked with 'command not found' because the CLI is unavailable in this container.",
     "2026-04-26: WPF shell now registers the shared AssetViewModel singleton, synchronizes the adapter with the MAUI payload, updates AssetsModuleView grid binding to SharedAsset.FilteredAssets, and dotnet restore/build/test remain blocked with 'command not found' because the CLI is unavailable in this container.",
-    "2026-04-27: Smoke automation fallback localization service now loads Resources/Strings.xaml and registers YasGMP.Wpf as the resource assembly so automation IDs resolve to runtime values; dotnet restore/build/test retries still exit with 'command not found' because the CLI is unavailable in this environment."
+    "2026-04-27: Smoke automation fallback localization service now loads Resources/Strings.xaml and registers YasGMP.Wpf as the resource assembly so automation IDs resolve to runtime values; dotnet restore/build/test retries still exit with 'command not found' because the CLI is unavailable in this environment.",
+    "2026-04-28: Smoke localization fallback now copies automation strings into a plain dictionary on the STA thread so MTA smoke tests can query automation IDs without dispatcher affinity; dotnet restore/build/test retries continue to exit with 'command not found' until the CLI is provisioned."
   ]
 }

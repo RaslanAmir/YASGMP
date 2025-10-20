@@ -148,6 +148,8 @@
 - Localized Assets module status messages through ShellStrings (neutral/en/hr) and routed AssetsModuleViewModel status surfaces through `ILocalizationService` so runtime language switches stay in sync.
 - Expanded Assets module unit coverage to assert localized status messaging via `LocalizationService`, noting that build/test execution still awaits dotnet CLI availability (env_guard=static-analysis).
 - Smoke harness localization context now loads `Resources/Strings.xaml` so automation IDs resolve to runtime values even without a WPF `Application`, preventing wait loops from searching for untranslated keys during Windows execution.
+- 2026-04-27: Smoke localization fallback now spins up an STA thread before instantiating the automation `ResourceDictionary`, preventing `InvalidOperationException` when tests run on the default MTA worker threads; `dotnet restore/build/test` remain blocked with `bash: command not found: dotnet` inside this container.
+- 2026-04-28: Smoke localization fallback now copies automation resources into an ordinal string dictionary on the STA thread before returning so MTA smoke tests can read automation IDs without dispatcher affinity; `dotnet restore/build/test` remain blocked with `bash: command not found: dotnet` inside this container.
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
