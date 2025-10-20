@@ -68,7 +68,7 @@
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
-                      ItemsSource="{Binding Asset.FilteredAssets}"
+                      ItemsSource="{Binding SharedAsset.FilteredAssets}"
                       SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"

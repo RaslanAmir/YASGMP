@@ -8,12 +8,13 @@ using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Services.Ui;
-using YasGMP.ViewModels;
 using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
+using CoreAssetViewModel = YasGMP.ViewModels.AssetViewModel;
+using WpfAssetViewModel = YasGMP.Wpf.ViewModels.AssetViewModel;
 
 namespace YasGMP.Wpf
 {
@@ -119,7 +120,13 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<INotificationPreferenceService, NotificationPreferenceService>();
                         svc.AddSingleton<IShellAlertService, AlertService>();
                         svc.AddSingleton<IAlertService>(sp => sp.GetRequiredService<IShellAlertService>());
-                        svc.AddSingleton<YasGMP.Wpf.ViewModels.AssetViewModel>();
+                        svc.AddSingleton<CoreAssetViewModel>();
+                        svc.AddSingleton<WpfAssetViewModel>(sp =>
+                        {
+                            var machineService = sp.GetRequiredService<IMachineCrudService>();
+                            var sharedAsset = sp.GetRequiredService<CoreAssetViewModel>();
+                            return new WpfAssetViewModel(machineService, sharedAsset);
+                        });
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
@@ -135,7 +142,12 @@ namespace YasGMP.Wpf
                         });
                         svc.AddTransient<AuditDashboardViewModel>();
                         svc.AddTransient<DashboardModuleViewModel>();
-                        svc.AddTransient<AssetsModuleViewModel>();
+                        svc.AddTransient<AssetsModuleViewModel>(sp =>
+                        {
+                            var adapter = sp.GetRequiredService<WpfAssetViewModel>();
+                            var shared = sp.GetRequiredService<CoreAssetViewModel>();
+                            return ActivatorUtilities.CreateInstance<AssetsModuleViewModel>(sp, adapter, shared);
+                        });
                         svc.AddTransient<ComponentsModuleViewModel>();
                         svc.AddTransient<WarehouseModuleViewModel>();
                         svc.AddTransient<WorkOrdersModuleViewModel>();

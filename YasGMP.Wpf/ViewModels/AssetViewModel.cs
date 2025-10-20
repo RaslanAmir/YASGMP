@@ -18,6 +18,9 @@ namespace YasGMP.Wpf.ViewModels;
 public sealed partial class AssetViewModel : SignatureAwareEditor
 {
     private readonly IMachineCrudService _machineService;
+    private readonly YasGMP.ViewModels.AssetViewModel _sharedAssetViewModel;
+
+    private bool _isSynchronizingWithShared;
 
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
 
@@ -48,9 +51,29 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
     [ObservableProperty]
     private string? _statusMessage;
 
-    public AssetViewModel(IMachineCrudService machineService)
+    /// <summary>
+    /// Shared asset view-model consumed by both MAUI and WPF shells.
+    /// </summary>
+    public YasGMP.ViewModels.AssetViewModel SharedAsset => _sharedAssetViewModel;
+
+    public AssetViewModel(IMachineCrudService machineService, YasGMP.ViewModels.AssetViewModel sharedAssetViewModel)
     {
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
+        _sharedAssetViewModel = sharedAssetViewModel ?? throw new ArgumentNullException(nameof(sharedAssetViewModel));
+
+        _isSynchronizingWithShared = true;
+        Assets = _sharedAssetViewModel.Assets;
+        FilteredAssets = _sharedAssetViewModel.FilteredAssets;
+        SelectedAsset = _sharedAssetViewModel.SelectedAsset;
+        SearchTerm = _sharedAssetViewModel.SearchTerm;
+        StatusFilter = _sharedAssetViewModel.StatusFilter;
+        RiskFilter = _sharedAssetViewModel.RiskFilter;
+        TypeFilter = _sharedAssetViewModel.TypeFilter;
+        IsBusy = _sharedAssetViewModel.IsBusy;
+        StatusMessage = _sharedAssetViewModel.StatusMessage;
+        _isSynchronizingWithShared = false;
+
+        _sharedAssetViewModel.PropertyChanged += OnSharedAssetPropertyChanged;
     }
 
     public event EventHandler? EditorChanged;
@@ -143,6 +166,181 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
         if (ShouldRaiseEditorChanged(e.PropertyName))
         {
             EditorChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        SynchronizeSharedFromLocal(e.PropertyName);
+    }
+
+    private void OnSharedAssetPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null)
+        {
+            return;
+        }
+
+        if (_isSynchronizingWithShared)
+        {
+            return;
+        }
+
+        _isSynchronizingWithShared = true;
+
+        try
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Assets):
+                    if (!ReferenceEquals(Assets, _sharedAssetViewModel.Assets))
+                    {
+                        Assets = _sharedAssetViewModel.Assets;
+                    }
+
+                    break;
+                case nameof(FilteredAssets):
+                    if (!ReferenceEquals(FilteredAssets, _sharedAssetViewModel.FilteredAssets))
+                    {
+                        FilteredAssets = _sharedAssetViewModel.FilteredAssets;
+                    }
+
+                    break;
+                case nameof(SelectedAsset):
+                    if (!ReferenceEquals(SelectedAsset, _sharedAssetViewModel.SelectedAsset))
+                    {
+                        SelectedAsset = _sharedAssetViewModel.SelectedAsset;
+                    }
+
+                    break;
+                case nameof(SearchTerm):
+                    if (!string.Equals(SearchTerm, _sharedAssetViewModel.SearchTerm, StringComparison.Ordinal))
+                    {
+                        SearchTerm = _sharedAssetViewModel.SearchTerm;
+                    }
+
+                    break;
+                case nameof(StatusFilter):
+                    if (!string.Equals(StatusFilter, _sharedAssetViewModel.StatusFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        StatusFilter = _sharedAssetViewModel.StatusFilter;
+                    }
+
+                    break;
+                case nameof(RiskFilter):
+                    if (!string.Equals(RiskFilter, _sharedAssetViewModel.RiskFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        RiskFilter = _sharedAssetViewModel.RiskFilter;
+                    }
+
+                    break;
+                case nameof(TypeFilter):
+                    if (!string.Equals(TypeFilter, _sharedAssetViewModel.TypeFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        TypeFilter = _sharedAssetViewModel.TypeFilter;
+                    }
+
+                    break;
+                case nameof(IsBusy):
+                    if (IsBusy != _sharedAssetViewModel.IsBusy)
+                    {
+                        IsBusy = _sharedAssetViewModel.IsBusy;
+                    }
+
+                    break;
+                case nameof(StatusMessage):
+                    if (!string.Equals(StatusMessage, _sharedAssetViewModel.StatusMessage, StringComparison.Ordinal))
+                    {
+                        StatusMessage = _sharedAssetViewModel.StatusMessage;
+                    }
+
+                    break;
+            }
+        }
+        finally
+        {
+            _isSynchronizingWithShared = false;
+        }
+    }
+
+    private void SynchronizeSharedFromLocal(string propertyName)
+    {
+        if (_isSynchronizingWithShared)
+        {
+            return;
+        }
+
+        _isSynchronizingWithShared = true;
+
+        try
+        {
+            switch (propertyName)
+            {
+                case nameof(Assets):
+                    if (!ReferenceEquals(_sharedAssetViewModel.Assets, Assets))
+                    {
+                        _sharedAssetViewModel.Assets = Assets;
+                    }
+
+                    break;
+                case nameof(FilteredAssets):
+                    if (!ReferenceEquals(_sharedAssetViewModel.FilteredAssets, FilteredAssets))
+                    {
+                        _sharedAssetViewModel.FilteredAssets = FilteredAssets;
+                    }
+
+                    break;
+                case nameof(SelectedAsset):
+                    if (!ReferenceEquals(_sharedAssetViewModel.SelectedAsset, SelectedAsset))
+                    {
+                        _sharedAssetViewModel.SelectedAsset = SelectedAsset;
+                    }
+
+                    break;
+                case nameof(SearchTerm):
+                    if (!string.Equals(_sharedAssetViewModel.SearchTerm, SearchTerm, StringComparison.Ordinal))
+                    {
+                        _sharedAssetViewModel.SearchTerm = SearchTerm;
+                    }
+
+                    break;
+                case nameof(StatusFilter):
+                    if (!string.Equals(_sharedAssetViewModel.StatusFilter, StatusFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sharedAssetViewModel.StatusFilter = StatusFilter;
+                    }
+
+                    break;
+                case nameof(RiskFilter):
+                    if (!string.Equals(_sharedAssetViewModel.RiskFilter, RiskFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sharedAssetViewModel.RiskFilter = RiskFilter;
+                    }
+
+                    break;
+                case nameof(TypeFilter):
+                    if (!string.Equals(_sharedAssetViewModel.TypeFilter, TypeFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sharedAssetViewModel.TypeFilter = TypeFilter;
+                    }
+
+                    break;
+                case nameof(IsBusy):
+                    if (_sharedAssetViewModel.IsBusy != IsBusy)
+                    {
+                        _sharedAssetViewModel.IsBusy = IsBusy;
+                    }
+
+                    break;
+                case nameof(StatusMessage):
+                    if (!string.Equals(_sharedAssetViewModel.StatusMessage, StatusMessage, StringComparison.Ordinal))
+                    {
+                        _sharedAssetViewModel.StatusMessage = StatusMessage;
+                    }
+
+                    break;
+            }
+        }
+        finally
+        {
+            _isSynchronizingWithShared = false;
         }
     }
 
