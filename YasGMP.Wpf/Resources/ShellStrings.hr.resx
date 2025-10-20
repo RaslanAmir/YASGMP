@@ -1782,6 +1782,99 @@
   <data name="Module.ExternalServicers.Text.Certificates" xml:space="preserve">
     <value>Certificates</value>
   </data>
+  <data name="Module.ExternalServicers.Oversight.Header" xml:space="preserve">
+    <value>Nadzor</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Header.AutomationName" xml:space="preserve">
+    <value>Nadzorni panel za vanjske izvođače</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Header.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.Content" xml:space="preserve">
+    <value>Osvježi</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.ToolTip" xml:space="preserve">
+    <value>Ponovno učitaj nadzorne metrike izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.AutomationName" xml:space="preserve">
+    <value>Osvježi nadzorne metrike izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Refresh</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.Content" xml:space="preserve">
+    <value>Otvori nadzornu ploču</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.ToolTip" xml:space="preserve">
+    <value>Otvori nadzornu ploču učinka izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.AutomationName" xml:space="preserve">
+    <value>Otvori nadzornu ploču nadzora izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.DrillIn</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.Header" xml:space="preserve">
+    <value>Ključne metrike</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.AutomationName" xml:space="preserve">
+    <value>Zaglavlje nadzornih metrika vanjskih izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Metrics.Header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.ToolTip" xml:space="preserve">
+    <value>Trenutni KPI pokazatelji za nadzor izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.Items.AutomationName" xml:space="preserve">
+    <value>KPI pločice vanjskih izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.Items.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Metrics.Items</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Header" xml:space="preserve">
+    <value>Nedavne intervencije</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.AutomationName" xml:space="preserve">
+    <value>Zaglavlje vremenske crte intervencija vanjskih izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Timeline.Header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.ToolTip" xml:space="preserve">
+    <value>Kronološki popis nedavnih intervencija izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Items.AutomationName" xml:space="preserve">
+    <value>Vremenska crta intervencija vanjskih izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Items.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Timeline.Items</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Header" xml:space="preserve">
+    <value>Analitika učinka</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.AutomationName" xml:space="preserve">
+    <value>Tablica analitike vanjskih izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Analytics.Table</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.ToolTip" xml:space="preserve">
+    <value>Agregirane metrike učinka izvođača</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Metric" xml:space="preserve">
+    <value>Metrika</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Value" xml:space="preserve">
+    <value>Vrijednost</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Target" xml:space="preserve">
+    <value>Cilj</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="Module.ExternalServicers.Text.Comment" xml:space="preserve">
     <value>Comment</value>
   </data>

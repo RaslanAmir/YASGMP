@@ -125,6 +125,12 @@
 - 2026-04-26: Registered the shared AssetViewModel singleton in the WPF host, synchronized the shell adapter with the MAUI payload, rebound the Assets grid to `SharedAsset.FilteredAssets`, and `dotnet restore/build/test` still exit with `bash: command not found: dotnet` pending Windows validation.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
+### Increment 2 Follow-up — External Servicers oversight workspace (2026-05-05)
+
+- Added a third column to `ExternalServicersModuleView` for a contractor oversight workspace with KPI tiles, intervention timeline, and analytics table surfaces bound to upcoming view-model collections.
+- Wired localized headers, tooltips, and automation metadata (EN/HR) for the oversight pane, including refresh/drill-in buttons targeting new `RefreshOversightCommand` and `DrillIntoOversightCommand` handlers on the module view-model.
+- CLI status: `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were retried; each still exits with `bash: command not found: dotnet` because the .NET SDK is unavailable in this Linux container. WPF smoke automation remains TODO pending Windows tooling.
+
 #### Entity Traceability Map (Seed)
 
 | Entity | Database Source | Adapter / Service | ViewModel | View |
