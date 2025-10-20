@@ -128,7 +128,7 @@ public partial class StockTransactionDialogViewModel : ObservableObject
         try
         {
             var context = new ElectronicSignatureContext("inventory_transactions", _partId);
-            var signature = await _signatureDialog.CaptureSignatureAsync(context).ConfigureAwait(false);
+            var signature = await _signatureDialog.CaptureSignatureAsync(context);
             if (signature is null)
             {
                 ErrorMessage = "Signature capture cancelled.";
@@ -141,7 +141,7 @@ public partial class StockTransactionDialogViewModel : ObservableObject
                 return;
             }
 
-            await _submitAsync(request.Value, signature).ConfigureAwait(false);
+            await _submitAsync(request.Value, signature);
 
             SubmittedRequest = request;
             SubmittedSignature = signature;
