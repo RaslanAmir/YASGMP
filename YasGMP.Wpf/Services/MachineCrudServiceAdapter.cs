@@ -86,6 +86,16 @@ namespace YasGMP.Wpf.Services
             machine.DigitalSignature = signature;
             return new CrudSaveResult(machine.Id, metadata);
         }
+
+        /// <summary>
+        /// Executes the delete async operation.
+        /// </summary>
+
+        public async Task DeleteAsync(int id, MachineCrudContext context)
+        {
+            await _inner.DeleteAsync(id, context.UserId, context.Ip, context.DeviceInfo, context.SessionId)
+                .ConfigureAwait(false);
+        }
         /// <summary>
         /// Executes the validate operation.
         /// </summary>

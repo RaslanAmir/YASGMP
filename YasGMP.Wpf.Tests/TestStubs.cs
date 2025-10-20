@@ -972,6 +972,7 @@ namespace YasGMP.Services.Interfaces
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
+        private readonly List<(int Id, MachineCrudContext Context)> _deletedSnapshots = new();
 
         public List<Machine> Saved => _store;
         public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
@@ -979,6 +980,8 @@ namespace YasGMP.Services.Interfaces
         public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
         public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
         public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
+        public IReadOnlyList<(int Id, MachineCrudContext Context)> DeletedWithContext => _deletedSnapshots;
+        public IEnumerable<MachineCrudContext> DeletedContexts => _deletedSnapshots.Select(tuple => tuple.Context);
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -1032,6 +1035,9 @@ namespace YasGMP.Services.Interfaces
 
         private void TrackSnapshot(Machine machine, MachineCrudContext context)
             => _savedSnapshots.Add((Clone(machine), context));
+
+        private void TrackDeletion(int id, MachineCrudContext context)
+            => _deletedSnapshots.Add((id, context));
 
         private static Machine Clone(Machine source)
         {

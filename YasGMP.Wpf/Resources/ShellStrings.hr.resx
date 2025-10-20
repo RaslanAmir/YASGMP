@@ -534,6 +534,15 @@
   <data name="Module.Assets.Status.SignatureCaptured" xml:space="preserve">
     <value>Elektronički potpis zabilježen ({0}).</value>
   </data>
+  <data name="Module.Assets.Status.SelectBeforeDelete" xml:space="preserve">
+    <value>Odaberite imovinu prije brisanja.</value>
+  </data>
+  <data name="Module.Assets.Status.DeleteFailed" xml:space="preserve">
+    <value>Brisanje nije uspjelo: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.DeleteSuccess" xml:space="preserve">
+    <value>Imovina '{0}' je obrisana.</value>
+  </data>
   <data name="Module.Assets.Status.SaveBeforeAttachment" xml:space="preserve">
     <value>Spremite imovinu prije dodavanja privitaka.</value>
   </data>
@@ -2339,6 +2348,24 @@
   </data>
   <data name="Module.Toolbar.Button.PreviewQr.AutomationName" xml:space="preserve">
     <value>Preview asset QR code command</value>
+  </data>
+  <data name="Module.Toolbar.Button.Update.Content" xml:space="preserve">
+    <value>Ažuriraj</value>
+  </data>
+  <data name="Module.Toolbar.Button.Update.ToolTip" xml:space="preserve">
+    <value>Primijeni promjene na odabrani stroj.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Update.AutomationName" xml:space="preserve">
+    <value>Naredba za ažuriranje stroja</value>
+  </data>
+  <data name="Module.Toolbar.Button.Delete.Content" xml:space="preserve">
+    <value>Obriši</value>
+  </data>
+  <data name="Module.Toolbar.Button.Delete.ToolTip" xml:space="preserve">
+    <value>Obriši odabrani stroj uz elektronički potpis.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Delete.AutomationName" xml:space="preserve">
+    <value>Naredba za brisanje stroja</value>
   </data>
   <data name="Dialog.Cfl.AutomationName.OK" xml:space="preserve">
     <value>Confirm choose-from-list selection</value>

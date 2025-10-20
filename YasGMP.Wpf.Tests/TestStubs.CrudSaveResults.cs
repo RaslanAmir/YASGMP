@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Wpf.Services;
@@ -19,6 +20,18 @@ namespace YasGMP.Models
         {
             await UpdateCoreAsync(machine, context).ConfigureAwait(false);
             return new CrudSaveResult(machine.Id, BuildMetadata(context, machine.DigitalSignature));
+        }
+
+        public Task DeleteAsync(int id, MachineCrudContext context)
+        {
+            var existing = _store.FirstOrDefault(machine => machine.Id == id);
+            if (existing is not null)
+            {
+                _store.Remove(existing);
+            }
+
+            TrackDeletion(id, context);
+            return Task.CompletedTask;
         }
 
         private SignatureMetadataDto BuildMetadata(MachineCrudContext context, string? signature)

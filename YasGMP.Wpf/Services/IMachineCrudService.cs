@@ -35,6 +35,11 @@ namespace YasGMP.Wpf.Services
         /// </summary>
         Task<CrudSaveResult> UpdateAsync(Machine machine, MachineCrudContext context);
 
+        /// <summary>
+        /// Deletes an existing machine record while capturing the signature context used to authorise the action.
+        /// </summary>
+        Task DeleteAsync(int id, MachineCrudContext context);
+
         void Validate(Machine machine);
 
         string NormalizeStatus(string? status);

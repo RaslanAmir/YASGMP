@@ -41,6 +41,18 @@
                     ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.PreviewQr.ToolTip}"
                     AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.PreviewQr.AutomationName}"
                     AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.PreviewQr.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Update.Content}"
+                    Command="{Binding UpdateAssetCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Update.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Update.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Update.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Delete.Content}"
+                    Command="{Binding DeleteAssetCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Delete.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Delete.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Delete.AutomationId}" />
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
