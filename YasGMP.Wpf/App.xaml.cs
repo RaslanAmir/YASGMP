@@ -103,6 +103,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IMachineCrudService, MachineCrudServiceAdapter>();
                         svc.AddTransient<IComponentCrudService, ComponentCrudServiceAdapter>();
                         svc.AddTransient<IPartCrudService, PartCrudServiceAdapter>();
+                        svc.AddTransient<IInventoryTransactionService, InventoryTransactionServiceAdapter>();
                         svc.AddTransient<IWarehouseCrudService, WarehouseCrudServiceAdapter>();
                         svc.AddTransient<ICalibrationCrudService, CalibrationCrudServiceAdapter>();
                         svc.AddTransient<IIncidentCrudService, IncidentCrudServiceAdapter>();
