@@ -523,6 +523,50 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
 
             return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
         }
+
+        public Func<List<Part>>? PartsFactory { get; set; }
+
+        public Func<Exception?>? PartsExceptionFactory { get; set; }
+
+        public Exception? PartsException { get; set; }
+
+        public Task<List<Part>> GetAllPartsAsync()
+        {
+            if (PartsExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (PartsException is not null)
+            {
+                throw PartsException;
+            }
+
+            if (PartsFactory is not null)
+            {
+                return Task.FromResult(PartsFactory());
+            }
+
+            return Task.FromResult(Parts.Select(ClonePart).ToList());
+        }
+
+        private static Part ClonePart(Part source)
+            => new()
+            {
+                Id = source.Id,
+                Code = source.Code,
+                Name = source.Name,
+                Description = source.Description,
+                Category = source.Category,
+                Status = source.Status,
+                Stock = source.Stock,
+                MinStockAlert = source.MinStockAlert,
+                Location = source.Location,
+                DefaultSupplierId = source.DefaultSupplierId,
+                DefaultSupplierName = source.DefaultSupplierName,
+                Sku = source.Sku,
+                Price = source.Price
+            };
     }
 
     public sealed class TestFilePicker : IFilePicker
