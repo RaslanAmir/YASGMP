@@ -1875,6 +1875,108 @@
   <data name="Module.ExternalServicers.Oversight.Analytics.Column.Status" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="Module.ExternalServicers.Oversight.Status.SelectServicer" xml:space="preserve">
+    <value>Odaberite vanjskog izvođača za pregled nadzora intervencija.</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Status.DrilledIn" xml:space="preserve">
+    <value>Otvoren je nadzor izvođača za {0}.</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Status.DrillFailed" xml:space="preserve">
+    <value>Nije moguće otvoriti nadzor izvođača: {0}</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Status.RefreshFailed" xml:space="preserve">
+    <value>Neuspjelo osvježavanje intervencija izvođača: {0}</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metric.Total" xml:space="preserve">
+    <value>Ukupno intervencija</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metric.Open" xml:space="preserve">
+    <value>Otvorene stavke</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metric.UpcomingExpirations" xml:space="preserve">
+    <value>Istječe &lt; 30d</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metric.AverageMttr" xml:space="preserve">
+    <value>Prosj. MTTR</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Trend.NoBacklog" xml:space="preserve">
+    <value>Nema zaostataka</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Trend.Backlog" xml:space="preserve">
+    <value>Postoji zaostatak</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Trend.ActionRequired" xml:space="preserve">
+    <value>Potrebna akcija</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Trend.OnTrack" xml:space="preserve">
+    <value>U skladu s planom</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Trend.InsufficientData" xml:space="preserve">
+    <value>Nedovoljno podataka</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Trend.Mttr" xml:space="preserve">
+    <value>Kotrljajući prosjek MTTR</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Value.NotAvailable" xml:space="preserve">
+    <value>N/A</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Value.UnknownType" xml:space="preserve">
+    <value>Nepoznata vrsta</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Value.UnknownStatus" xml:space="preserve">
+    <value>Nepoznato stanje</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Value.NoReason" xml:space="preserve">
+    <value>Razlog nije unesen</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Value.NoResult" xml:space="preserve">
+    <value>Rezultat nije unesen</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Summary" xml:space="preserve">
+    <value>{0} — {1}</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Detail" xml:space="preserve">
+    <value>{0} • {1}</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Metric.NoData" xml:space="preserve">
+    <value>Nema dostupnih intervencija izvođača.</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Status.Waiting" xml:space="preserve">
+    <value>Čeka aktivnost</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Metric.StatusDistribution" xml:space="preserve">
+    <value>Raspodjela statusa</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Target.Balanced" xml:space="preserve">
+    <value>Uravnotežena kombinacija</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Status.Info" xml:space="preserve">
+    <value>Informacija</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Metric.Compliance" xml:space="preserve">
+    <value>GMP usklađenost</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Target.Compliance" xml:space="preserve">
+    <value>≥ 90 %</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Status.OnTrack" xml:space="preserve">
+    <value>U skladu s planom</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Status.AtRisk" xml:space="preserve">
+    <value>U riziku</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Metric.BacklogAge" xml:space="preserve">
+    <value>Prosječna starost zaostatka</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Target.Age" xml:space="preserve">
+    <value>&lt;= 14 dana</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Metric.Mttr" xml:space="preserve">
+    <value>Prosječno vrijeme rješavanja</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Target.Mttr" xml:space="preserve">
+    <value>&lt;= 72 sata</value>
+  </data>
   <data name="Module.ExternalServicers.Text.Comment" xml:space="preserve">
     <value>Comment</value>
   </data>
