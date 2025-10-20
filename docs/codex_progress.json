@@ -91,7 +91,8 @@
       "2026-04-19: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried for the preventive maintenance workspace; all commands still exit with 'command not found' because the dotnet CLI is unavailable in this container.",
       "2026-04-22: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried while wiring the Assets smoke scenario; each command still fails with 'command not found' because the dotnet CLI is absent in this container.",
       "2026-04-24: AssetsModuleView.xaml now binds inspector fields to the shared AssetViewModel and the grid to AssetViewModel.FilteredAssets; dotnet restore yasgmp.sln still exits with 'command not found' in this container.",
-      "2026-04-27: Assets module adds Update/Delete commands via IMachineCrudService with WPF toolbar bindings and unit coverage; dotnet restore/build/test still fail with 'command not found' in this Linux container."
+      "2026-04-27: Assets module adds Update/Delete commands via IMachineCrudService with WPF toolbar bindings and unit coverage; dotnet restore/build/test still fail with 'command not found' in this Linux container.",
+      "2026-04-24: Parts module regression suite now seeds DatabaseService inventory stubs, records inventory transactions via the new RecordingInventoryTransactionService fake, and verifies zone filters/alerts/history refresh; dotnet restore/build attempts still exit with 'command not found' because the CLI is unavailable in this container."
     ],
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",
@@ -128,7 +129,7 @@
         "2026-04-01: Split module toolbar UI tests into ModuleToolbarTests and moved FakeLocalizationService into shared test doubles so toolbar command/template fixtures share localization stubs; dotnet restore/build commands still fail with 'command not found' in the container.",
         "2026-04-07: Documented remaining B1 scope (Windows-host ribbon/status validation, DockLayoutPersistenceService round-trip check, and YasGMP.Wpf.Smoke execution) so the batch can close once CLI access is restored.",
         "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host.",
-        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host."
+        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find\u2192Add\u2192Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host."
       ]
     },
     {
@@ -192,7 +193,7 @@
   "notes": [
     "2025-10-16: WorkOrdersModuleViewModel now exposes signature/audit observables, rehydrates persisted metadata after saves, and mirrors inspector updates while dotnet restore/build/test remain blocked with 'command not found'.",
     "2026-04-11: AssetsModuleViewModel now auto-fills machine codes and QR payloads, persists PNG previews via IPlatformService, and adds GenerateCode/PreviewQr unit coverage plus localized status strings; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
-    "2026-04-22: YasGMP.Wpf.Smoke now drives the Assets module through Find→Add→Update, attachment guardrails, and signature cancellation messaging to guard SAP B1 form behaviour; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
+    "2026-04-22: YasGMP.Wpf.Smoke now drives the Assets module through Find\u2192Add\u2192Update, attachment guardrails, and signature cancellation messaging to guard SAP B1 form behaviour; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-04-10: AssetsModuleViewModel now resolves code generator, QR, and platform services via DI with supporting WPF test doubles; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-04-09: WPF host now registers CodeGeneratorService/QRCodeService adapters that forward to the shared MAUI services so view-models can request code/QR helpers via DI; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-03-11: Modules pane styles now bind localized automation metadata from module templates, inspector fields reuse ShellStrings automation name/id/tooltip formats, and unit tests cover the localized fallbacks while dotnet restore/build/smoke remain blocked because the CLI is still absent.",

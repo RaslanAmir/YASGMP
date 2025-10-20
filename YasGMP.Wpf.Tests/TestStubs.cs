@@ -456,7 +456,7 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
         public List<Machine> Saved => _store;
 
 
-    public class DatabaseService
+    public partial class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -510,7 +510,19 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -1422,7 +1434,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
 
 
-    public class DatabaseService
+    public partial class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -1462,7 +1474,19 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -2041,7 +2065,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-    public class DatabaseService
+    public partial class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -2069,7 +2093,19 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -2539,7 +2575,7 @@ namespace YasGMP.Services.Interfaces
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
 
-    public class DatabaseService
+    public partial class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -2573,7 +2609,19 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -3134,7 +3182,7 @@ namespace YasGMP.Services.Interfaces
 
         public List<Machine> Saved => _store;
 
-    public class DatabaseService
+    public partial class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -3168,7 +3216,19 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -3809,7 +3869,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
-    public class DatabaseService
+    public partial class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -3845,7 +3905,19 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -4788,7 +4860,19 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-            => Task.FromResult(Warehouses);
+        {
+            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
+            {
+                throw dynamicException;
+            }
+
+            if (WarehousesException is not null)
+            {
+                throw WarehousesException;
+            }
+
+            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
+        }
     }
 
     public sealed class TestFilePicker : IFilePicker
