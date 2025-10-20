@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows;
@@ -32,9 +34,9 @@ internal static class LocalizationTestContext
         ServiceLocator.RegisterFallback(() => _fallbackProvider);
     }
 
-    private sealed class TestLocalizationService : ILocalizationService
-    {
-        private static readonly Lazy<ResourceDictionary> AutomationResources = new(CreateAutomationDictionary);
+        private sealed class TestLocalizationService : ILocalizationService
+        {
+            private static readonly Lazy<IReadOnlyDictionary<string, string>> AutomationResources = new(CreateAutomationDictionary);
 
         private readonly LocalizationService _inner = new();
 
@@ -55,7 +57,7 @@ internal static class LocalizationTestContext
             }
 
             var resources = AutomationResources.Value;
-            if (resources.Contains(key) && resources[key] is string automationId)
+            if (resources.TryGetValue(key, out var automationId))
             {
                 return automationId;
             }
@@ -65,14 +67,14 @@ internal static class LocalizationTestContext
 
         public void SetLanguage(string language) => _inner.SetLanguage(language);
 
-        private static ResourceDictionary CreateAutomationDictionary()
+        private static IReadOnlyDictionary<string, string> CreateAutomationDictionary()
         {
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
             {
                 return CreateAutomationDictionaryCore();
             }
 
-            ResourceDictionary? dictionary = null;
+            IReadOnlyDictionary<string, string>? dictionary = null;
             ExceptionDispatchInfo? captured = null;
 
             var staThread = new Thread(() =>
@@ -99,17 +101,28 @@ internal static class LocalizationTestContext
             return dictionary ?? throw new InvalidOperationException("Failed to load automation resource dictionary on STA thread.");
         }
 
-        private static ResourceDictionary CreateAutomationDictionaryCore()
+        private static IReadOnlyDictionary<string, string> CreateAutomationDictionaryCore()
         {
             if (Application.ResourceAssembly is null)
             {
                 Application.ResourceAssembly = typeof(App).Assembly;
             }
 
-            return new ResourceDictionary
+            var resourceDictionary = new ResourceDictionary
             {
                 Source = new Uri("pack://application:,,,/YasGMP.Wpf;component/Resources/Strings.xaml", UriKind.Absolute),
             };
+
+            var materialized = new Dictionary<string, string>(resourceDictionary.Count);
+            foreach (DictionaryEntry entry in resourceDictionary)
+            {
+                if (entry.Key is string key && entry.Value is string value)
+                {
+                    materialized[key] = value;
+                }
+            }
+
+            return materialized;
         }
     }
 }
