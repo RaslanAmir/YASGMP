@@ -125,7 +125,8 @@
         "2026-03-27: Module toolbar toggle buttons now share a centralized DataTemplate that binds captions, commands, tooltips, and automation metadata; every module/document view merges the resource dictionary and new WPF tests instantiate the template to verify localization updates while dotnet restore/build commands continue to fail with 'command not found'.",
         "2026-04-01: Split module toolbar UI tests into ModuleToolbarTests and moved FakeLocalizationService into shared test doubles so toolbar command/template fixtures share localization stubs; dotnet restore/build commands still fail with 'command not found' in the container.",
         "2026-04-07: Documented remaining B1 scope (Windows-host ribbon/status validation, DockLayoutPersistenceService round-trip check, and YasGMP.Wpf.Smoke execution) so the batch can close once CLI access is restored.",
-        "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host."
+        "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host.",
+        "2026-04-27: AssetViewModel synchronization now reapplies the shared FilteredAssets collection to the WPF adapter even when guarded mirroring is active so selection/state consumers keep a fresh reference; dotnet restore/build/test remain blocked in this Linux container ('command not found')."
       ]
     },
     {
