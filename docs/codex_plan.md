@@ -13,6 +13,7 @@
   - 2026-03-25T08:40Z: `dotnet --version` retried while tightening B1FormDocumentViewModel command refresh hooks; container again responds `bash: command not found: dotnet`.
   - 2026-04-04T09:10Z: `dotnet restore yasgmp.sln` retried after Assets drill-down updates; container still returns `bash: command not found: dotnet`.
 - 2026-04-07T09:20Z: `dotnet --version` retried ahead of the Assets status localization batch; command still returns `bash: command not found: dotnet`, so env_guard remains static-analysis.
+- 2026-04-30T09:10Z: `dotnet --version` retried while stabilizing the Warehouse module STA test harness; the container still reports `bash: command not found: dotnet`, so execution remains limited to static analysis pending a Windows host.
 - 2026-04-09T00:00Z: `dotnet restore yasgmp.sln` and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` remain blocked with `bash: command not found: dotnet` after introducing WPF adapters for shared code/QR utilities; Windows host validation is still required.
 - 2026-04-10T09:45Z: `dotnet restore yasgmp.sln` retried during the Assets module service injection batch; container still returns `bash: command not found: dotnet`, so validation remains Windows-host only.
   - 2026-04-11T09:20Z: `dotnet restore yasgmp.sln` rerun while migrating Assets to the shared view-model service; CLI remains unavailable (`bash: command not found: dotnet`).
@@ -110,6 +111,11 @@
 - Introduced a `RecordingInventoryTransactionService` fake that captures each request/context and can toggle simulated failures for command coverage.
 - Rewrote `PartsModuleViewModelTests` to drive receive/issue/adjust flows via reflection, assert shell status messaging, verify zone filter projections, and exercise the failure path that clears alerts/history.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` still exit with `bash: command not found: dotnet`; smoke harness remains blocked pending a Windows host.
+
+### Increment 2 Follow-up — Warehouse module STA harness stabilization (2026-04-30)
+
+- Reworked the WarehouseModuleViewModelTests STA helper to provision a single long-lived WPF Application/Dispatcher, close residual dialog windows between invocations, and unblock subsequent dispatcher operations for attachment/transaction tests.
+- `dotnet --version` retried to document this batch; the container continues to respond with `bash: command not found: dotnet`, keeping build/test execution deferred to a Windows host.
 
 ### Increment 2 Follow-up — Asset editor view-model consolidation (2026-04-11)
 

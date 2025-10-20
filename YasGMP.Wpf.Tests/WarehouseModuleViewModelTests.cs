@@ -112,6 +112,7 @@ public class WarehouseModuleViewModelTests
         var navigation = new TestModuleNavigationService();
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
+        var localization = CreateLocalizationService();
 
         var bytes = Encoding.UTF8.GetBytes("warehouse doc");
         filePicker.Files = new[]
@@ -486,6 +487,10 @@ public class WarehouseModuleViewModelTests
         return (Task)method.Invoke(viewModel, new object[] { id })!;
     }
 
+    private static readonly object StaInitLock = new();
+    private static Dispatcher? _staDispatcher;
+    private static Application? _staApplication;
+
     private static Task RunOnStaThreadAsync(Func<Task> action)
     {
         if (action is null)
@@ -493,61 +498,91 @@ public class WarehouseModuleViewModelTests
             throw new ArgumentNullException(nameof(action));
         }
 
-        var completion = new TaskCompletionSource<object?>();
-        var thread = new Thread(() =>
+        var dispatcher = EnsureStaDispatcher();
+
+        var operation = dispatcher.InvokeAsync(async () =>
         {
+            var previousContext = SynchronizationContext.Current;
+
             try
             {
-                EnsureWpfApplication();
-                action().GetAwaiter().GetResult();
-                ShutdownWpfApplication();
-                completion.SetResult(null);
+                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(dispatcher));
+                await action().ConfigureAwait(true);
             }
-            catch (Exception ex)
+            finally
             {
-                completion.SetException(ex);
+                try
+                {
+                    CloseAllWindows();
+                }
+                finally
+                {
+                    SynchronizationContext.SetSynchronizationContext(previousContext);
+                }
             }
-        })
-        {
-            IsBackground = true,
-            Name = "WarehouseModuleViewModelTests STA"
-        };
+        }, DispatcherPriority.Send);
 
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        return completion.Task;
+        return operation.Task.Unwrap();
     }
 
-    private static void EnsureWpfApplication()
+    private static Dispatcher EnsureStaDispatcher()
     {
-        if (Application.Current is null)
+        Task<Dispatcher>? dispatcherTask = null;
+
+        lock (StaInitLock)
         {
-            Application.ResourceAssembly = typeof(WarehouseModuleViewModel).Assembly;
-            var app = new Application
+            if (_staDispatcher is not null)
             {
-                ShutdownMode = ShutdownMode.OnExplicitShutdown
+                return _staDispatcher;
+            }
+
+            var ready = new TaskCompletionSource<Dispatcher>(TaskCreationOptions.RunContinuationsAsynchronously);
+            dispatcherTask = ready.Task;
+
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    Application.ResourceAssembly = typeof(WarehouseModuleViewModel).Assembly;
+                    _staApplication = new Application
+                    {
+                        ShutdownMode = ShutdownMode.OnExplicitShutdown
+                    };
+
+                    var dispatcher = _staApplication.Dispatcher;
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(dispatcher));
+                    _staDispatcher = dispatcher;
+                    ready.SetResult(dispatcher);
+                    Dispatcher.Run();
+                }
+                catch (Exception ex)
+                {
+                    ready.SetException(ex);
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "WarehouseModuleViewModelTests STA"
             };
-            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(app.Dispatcher));
+
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
         }
-        else
-        {
-            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Application.Current.Dispatcher));
-        }
+
+        return dispatcherTask!.GetAwaiter().GetResult();
     }
 
-    private static void ShutdownWpfApplication()
+    private static void CloseAllWindows()
     {
-        if (Application.Current is null)
+        if (_staApplication is null)
         {
             return;
         }
 
-        foreach (var window in Application.Current.Windows.OfType<Window>().ToArray())
+        foreach (var window in _staApplication.Windows.OfType<Window>().ToArray())
         {
             window.Close();
         }
-
-        Application.Current.Shutdown();
     }
 
     private static async Task SubmitTransactionAsync(
