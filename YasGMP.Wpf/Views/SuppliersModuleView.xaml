@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+             xmlns:shared="clr-namespace:YasGMP.Wpf.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="600"
              d:DesignWidth="900">
@@ -165,10 +166,32 @@
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.Suppliers.Text.ContractFile}" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="11"
-                                     Grid.Column="1"
-                                     Text="{Binding Editor.ContractFile, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}" />
+                            <Grid Grid.Row="11" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding Editor.ContractFile, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding IsEditorEnabled}" />
+                                <Button Grid.Column="1"
+                                        Margin="8,0,0,0"
+                                        Content="{DynamicResource Module.Suppliers.Button.PreviewContract.Content}"
+                                        Command="{Binding PreviewContractCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Module.Suppliers.Button.PreviewContract.ToolTip}"
+                                        ToolTipService.ShowOnDisabled="True"
+                                        AutomationProperties.Name="{DynamicResource Module.Suppliers.Button.PreviewContract.AutomationName}"
+                                        AutomationProperties.AutomationId="{DynamicResource Module.Suppliers.Button.PreviewContract.AutomationId}" />
+                                <Button Grid.Column="2"
+                                        Margin="8,0,0,0"
+                                        Content="{DynamicResource Module.Suppliers.Button.DownloadContract.Content}"
+                                        Command="{Binding DownloadContractCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Module.Suppliers.Button.DownloadContract.ToolTip}"
+                                        ToolTipService.ShowOnDisabled="True"
+                                        AutomationProperties.Name="{DynamicResource Module.Suppliers.Button.DownloadContract.AutomationName}"
+                                        AutomationProperties.AutomationId="{DynamicResource Module.Suppliers.Button.DownloadContract.AutomationId}" />
+                            </Grid>
 
                             <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.CooperationStart}" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="12"
@@ -211,6 +234,7 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <shared:SignatureMetadataView DataContext="{Binding Editor}" Margin="0,12,0,0" />
                     </StackPanel>
                 </ScrollViewer>
             </Border>
