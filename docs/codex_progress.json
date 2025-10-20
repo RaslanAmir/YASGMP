@@ -128,7 +128,8 @@
         "2026-04-01: Split module toolbar UI tests into ModuleToolbarTests and moved FakeLocalizationService into shared test doubles so toolbar command/template fixtures share localization stubs; dotnet restore/build commands still fail with 'command not found' in the container.",
         "2026-04-07: Documented remaining B1 scope (Windows-host ribbon/status validation, DockLayoutPersistenceService round-trip check, and YasGMP.Wpf.Smoke execution) so the batch can close once CLI access is restored.",
         "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host.",
-        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host."
+        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host.",
+        "2026-04-27: Smoke localization fallback now marshals ResourceDictionary loading onto an STA thread so automation metadata resolves without crashing when smoke tests run on default MTA workers; dotnet restore/build/test still fail with 'command not found' in this container."
       ]
     },
     {
