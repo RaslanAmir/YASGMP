@@ -284,6 +284,11 @@ public sealed partial class AssetViewModel : SignatureAwareEditor
                     if (!ReferenceEquals(_sharedAssetViewModel.FilteredAssets, FilteredAssets))
                     {
                         _sharedAssetViewModel.FilteredAssets = FilteredAssets;
+
+                        if (!ReferenceEquals(FilteredAssets, _sharedAssetViewModel.FilteredAssets))
+                        {
+                            FilteredAssets = _sharedAssetViewModel.FilteredAssets;
+                        }
                     }
 
                     break;
