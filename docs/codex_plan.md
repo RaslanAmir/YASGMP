@@ -104,6 +104,13 @@
 - 2026-04-18: Components module view now surfaces the attachment, code generation, and QR preview toolbar actions with localized content/tooltips/automation metadata matching the new commands; `dotnet restore`, `dotnet build`, and `dotnet test` continue to exit with `bash: command not found: dotnet` inside this container.
 - 2026-04-19: Preventive maintenance workspace added to the WPF shell; `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still return `bash: command not found: dotnet` because the CLI is unavailable in the container.
 
+### Increment 2 Follow-up — Parts inventory transaction coverage (2026-04-24)
+
+- Extended the test-only `YasGMP.Services.DatabaseService` stub with configurable warehouse listings, per-part zone metrics, and inventory history hooks so Parts module refresh logic can run in isolation.
+- Introduced a `RecordingInventoryTransactionService` fake that captures each request/context and can toggle simulated failures for command coverage.
+- Rewrote `PartsModuleViewModelTests` to drive receive/issue/adjust flows via reflection, assert shell status messaging, verify zone filter projections, and exercise the failure path that clears alerts/history.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` still exit with `bash: command not found: dotnet`; smoke harness remains blocked pending a Windows host.
+
 ### Increment 2 Follow-up — Asset editor view-model consolidation (2026-04-11)
 
 - Registered the reusable `AssetViewModel` with the WPF container so module view-models consume the shared asset state instead of private payloads.
