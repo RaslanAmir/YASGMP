@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
 using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Services
 {
@@ -26,14 +29,16 @@ namespace YasGMP.Wpf.Services
     {
         private readonly DatabaseService _database;
         private readonly AuditService _auditService;
+        private readonly IElectronicSignatureDialogService _signatureDialog;
         /// <summary>
         /// Initializes a new instance of the WarehouseCrudServiceAdapter class.
         /// </summary>
 
-        public WarehouseCrudServiceAdapter(DatabaseService database, AuditService auditService)
+        public WarehouseCrudServiceAdapter(DatabaseService database, AuditService auditService, IElectronicSignatureDialogService signatureDialog)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+            _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         }
         /// <summary>
         /// Executes the get all async operation.
@@ -180,6 +185,127 @@ ORDER BY part_name, part_code";
             }
 
             return items;
+        }
+
+        public async Task<InventoryTransactionResult> ExecuteInventoryTransactionAsync(
+            InventoryTransactionRequest request,
+            WarehouseCrudContext context,
+            ElectronicSignatureDialogResult signatureResult,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(signatureResult);
+            ArgumentNullException.ThrowIfNull(signatureResult.Signature);
+
+            var userId = context.UserId <= 0 ? 1 : context.UserId;
+            var ip = string.IsNullOrWhiteSpace(context.Ip) ? "unknown" : context.Ip;
+            var device = string.IsNullOrWhiteSpace(context.DeviceInfo) ? "WPF" : context.DeviceInfo;
+            var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? Guid.NewGuid().ToString("N") : context.SessionId!;
+
+            switch (request.Type)
+            {
+                case InventoryTransactionType.Receive:
+                    await _database.ReceiveStockAsync(
+                        request.PartId,
+                        request.WarehouseId,
+                        request.Quantity,
+                        userId,
+                        request.Document,
+                        request.Note,
+                        ip,
+                        device,
+                        sessionId,
+                        cancellationToken).ConfigureAwait(false);
+                    break;
+                case InventoryTransactionType.Issue:
+                    await _database.IssueStockAsync(
+                        request.PartId,
+                        request.WarehouseId,
+                        request.Quantity,
+                        userId,
+                        request.Document,
+                        request.Note,
+                        ip,
+                        device,
+                        sessionId,
+                        cancellationToken).ConfigureAwait(false);
+                    break;
+                case InventoryTransactionType.Adjust:
+                    if (!request.AdjustmentDelta.HasValue)
+                    {
+                        throw new InvalidOperationException("Adjustment transactions require a delta value.");
+                    }
+
+                    var reason = string.IsNullOrWhiteSpace(request.AdjustmentReason)
+                        ? request.Note
+                        : request.AdjustmentReason;
+                    if (string.IsNullOrWhiteSpace(reason))
+                    {
+                        reason = "Manual adjustment";
+                    }
+
+                    await _database.AdjustStockAsync(
+                        request.PartId,
+                        request.WarehouseId,
+                        request.AdjustmentDelta.Value,
+                        reason!,
+                        userId,
+                        ip,
+                        device,
+                        sessionId,
+                        cancellationToken).ConfigureAwait(false);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(request.Type), request.Type, "Unsupported inventory transaction type.");
+            }
+
+            SignaturePersistenceHelper.ApplyEntityMetadata(
+                signatureResult,
+                tableName: "inventory_transactions",
+                recordId: request.PartId,
+                metadata: CreateMetadata(context, signatureResult.Signature!.SignatureHash),
+                fallbackSignatureHash: signatureResult.Signature!.SignatureHash,
+                fallbackMethod: signatureResult.Signature.Method,
+                fallbackStatus: signatureResult.Signature.Status,
+                fallbackNote: signatureResult.Signature.Note,
+                signedAt: signatureResult.Signature.SignedAt,
+                fallbackDeviceInfo: device,
+                fallbackIpAddress: ip,
+                fallbackSessionId: sessionId);
+
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult, cancellationToken)
+                .ConfigureAwait(false);
+
+            await _auditService.LogSystemEventAsync(
+                userId,
+                "STOCK_TRANSACTION_SIGNATURE",
+                "inventory_transactions",
+                "Inventory",
+                request.PartId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "type={0};warehouse={1};qty={2};doc={3}",
+                    request.Type,
+                    request.WarehouseId,
+                    request.Quantity,
+                    string.IsNullOrWhiteSpace(request.Document) ? "-" : request.Document),
+                ip,
+                "wpf",
+                device,
+                sessionId,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            return new InventoryTransactionResult
+            {
+                Type = request.Type,
+                PartId = request.PartId,
+                WarehouseId = request.WarehouseId,
+                Quantity = request.Quantity,
+                Document = request.Document,
+                Note = request.Note,
+                Signature = signatureResult
+            };
         }
 
         private async Task UpdateWarehouseDetailsAsync(Warehouse warehouse, WarehouseCrudContext context)

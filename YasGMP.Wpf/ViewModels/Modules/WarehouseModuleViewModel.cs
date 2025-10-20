@@ -5,11 +5,15 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+using YasGMP.Wpf.Dialogs;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -31,6 +35,11 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly ObservableCollection<WarehouseZoneSummaryItem> _zoneSummaries;
+    private readonly ObservableCollection<string> _transactionAlerts;
+    private readonly ICollectionView _zoneSummariesView;
+    private readonly Dictionary<ZoneClassification, string> _zoneLabels;
+    private readonly string _zoneAllLabel;
     private Warehouse? _loadedWarehouse;
     private WarehouseEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -59,6 +68,28 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
+        _zoneSummaries = new ObservableCollection<WarehouseZoneSummaryItem>();
+        _transactionAlerts = new ObservableCollection<string>();
+        _zoneLabels = new Dictionary<ZoneClassification, string>
+        {
+            [ZoneClassification.Critical] = GetZoneLabel("Module.Warehouse.ZoneFilter.Critical", "Critical"),
+            [ZoneClassification.Warning] = GetZoneLabel("Module.Warehouse.ZoneFilter.Warning", "Warning"),
+            [ZoneClassification.Healthy] = GetZoneLabel("Module.Warehouse.ZoneFilter.Healthy", "Healthy"),
+            [ZoneClassification.Overflow] = GetZoneLabel("Module.Warehouse.ZoneFilter.Overflow", "Overflow")
+        };
+        _zoneAllLabel = GetZoneLabel("Module.Warehouse.ZoneFilter.All", "All Zones");
+        ZoneFilters = new ObservableCollection<string>(new[]
+        {
+            _zoneAllLabel,
+            _zoneLabels[ZoneClassification.Critical],
+            _zoneLabels[ZoneClassification.Warning],
+            _zoneLabels[ZoneClassification.Healthy],
+            _zoneLabels[ZoneClassification.Overflow]
+        });
+        SelectedZoneFilter = _zoneAllLabel;
+        _zoneSummariesView = CollectionViewSource.GetDefaultView(_zoneSummaries);
+        _zoneSummariesView.Filter = FilterZoneSummary;
+
         Editor = WarehouseEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
@@ -68,6 +99,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             _localization.GetString("Module.Warehouse.Status.Inactive")
         });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        ReceiveStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Receive), CanExecuteInventoryTransaction);
+        IssueStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Issue), CanExecuteInventoryTransaction);
+        AdjustStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Adjust), CanExecuteInventoryTransaction);
     }
 
     [ObservableProperty]
@@ -84,6 +118,8 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
 
     [ObservableProperty]
     private bool _hasStockAlerts;
+    [ObservableProperty]
+    private string _selectedZoneFilter = string.Empty;
     /// <summary>
     /// Gets or sets the status options.
     /// </summary>
@@ -94,6 +130,20 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    public ObservableCollection<WarehouseZoneSummaryItem> ZoneSummaries => _zoneSummaries;
+
+    public ICollectionView ZoneSummariesView => _zoneSummariesView;
+
+    public ObservableCollection<string> TransactionAlerts => _transactionAlerts;
+
+    public ObservableCollection<string> ZoneFilters { get; }
+
+    public IAsyncRelayCommand ReceiveStockCommand { get; }
+
+    public IAsyncRelayCommand IssueStockCommand { get; }
+
+    public IAsyncRelayCommand AdjustStockCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -177,6 +227,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             SetEditor(WarehouseEditor.CreateEmpty());
             ClearInsights();
             UpdateAttachmentCommandState();
+            NotifyInventoryCommands();
             return;
         }
 
@@ -201,6 +252,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         LoadEditor(warehouse);
         await LoadInsightsAsync(id).ConfigureAwait(false);
         UpdateAttachmentCommandState();
+        NotifyInventoryCommands();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -231,6 +283,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         }
 
         UpdateAttachmentCommandState();
+        NotifyInventoryCommands();
         return Task.CompletedTask;
     }
 
@@ -392,6 +445,7 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
         {
             UpdateAttachmentCommandState();
+            NotifyInventoryCommands();
         }
     }
 
@@ -428,6 +482,33 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 
+    partial void OnSelectedZoneFilterChanged(string value)
+    {
+        _zoneSummariesView.Refresh();
+    }
+
+    private bool FilterZoneSummary(object obj)
+    {
+        if (obj is not WarehouseZoneSummaryItem item)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(SelectedZoneFilter)
+            || string.Equals(SelectedZoneFilter, _zoneAllLabel, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (string.Equals(item.ZoneLabel, SelectedZoneFilter, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        return _zoneLabels.TryGetValue(item.Classification, out var label)
+            && string.Equals(label, SelectedZoneFilter, StringComparison.Ordinal);
+    }
+
     private void LoadEditor(Warehouse warehouse)
     {
         _suppressEditorDirtyNotifications = true;
@@ -449,15 +530,64 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         try
         {
             var stock = await _warehouseService.GetStockSnapshotAsync(warehouseId).ConfigureAwait(false);
-            StockSnapshot = new ObservableCollection<WarehouseStockSnapshot>(stock);
+            var stockList = stock.ToList();
+            StockSnapshot = new ObservableCollection<WarehouseStockSnapshot>(stockList);
             HasStockAlerts = StockSnapshot.Any(s => s.IsBelowMinimum || s.IsAboveMaximum);
+
+            var alertCount = 0;
+            await RunOnUiThreadAsync(() =>
+            {
+                _zoneSummaries.Clear();
+                _transactionAlerts.Clear();
+
+                foreach (var entry in stockList)
+                {
+                    var netQuantity = entry.Quantity - entry.Reserved - entry.Blocked;
+                    var classification = ClassifyZone(netQuantity, entry.MinThreshold, entry.MaxThreshold);
+                    var zoneLabel = _zoneLabels.TryGetValue(classification, out var label)
+                        ? label
+                        : classification.ToString();
+
+                    _zoneSummaries.Add(new WarehouseZoneSummaryItem(
+                        entry.PartId,
+                        entry.PartName,
+                        entry.PartCode,
+                        zoneLabel,
+                        classification,
+                        netQuantity,
+                        entry.MinThreshold,
+                        entry.MaxThreshold));
+
+                    if (classification == ZoneClassification.Critical)
+                    {
+                        var minText = entry.MinThreshold.HasValue
+                            ? entry.MinThreshold.Value.ToString(CultureInfo.InvariantCulture)
+                            : "n/a";
+                        _transactionAlerts.Add($"{entry.PartName} below minimum ({netQuantity}/{minText}).");
+                    }
+                    else if (classification == ZoneClassification.Overflow)
+                    {
+                        var maxText = entry.MaxThreshold.HasValue
+                            ? entry.MaxThreshold.Value.ToString(CultureInfo.InvariantCulture)
+                            : "n/a";
+                        _transactionAlerts.Add($"{entry.PartName} above maximum ({netQuantity}/{maxText}).");
+                    }
+                }
+
+                alertCount = _transactionAlerts.Count;
+                _zoneSummariesView.Refresh();
+            }).ConfigureAwait(false);
 
             var movements = await _warehouseService.GetRecentMovementsAsync(warehouseId, 15).ConfigureAwait(false);
             RecentMovements = new ObservableCollection<InventoryMovementEntry>(movements);
 
-            StatusMessage = HasStockAlerts
+            var baseMessage = HasStockAlerts
                 ? $"{Title}: stock alerts detected for {StockSnapshot.Count(s => s.IsBelowMinimum)} item(s)."
                 : $"{Title}: stock overview refreshed ({StockSnapshot.Count} tracked parts).";
+
+            StatusMessage = alertCount > 0
+                ? $"{baseMessage} {alertCount} alert(s) highlighted."
+                : baseMessage;
         }
         catch (Exception ex)
         {
@@ -470,6 +600,9 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         StockSnapshot.Clear();
         RecentMovements.Clear();
         HasStockAlerts = false;
+        _zoneSummaries.Clear();
+        _transactionAlerts.Clear();
+        _zoneSummariesView.Refresh();
     }
 
     private bool CanAttachDocument()
@@ -524,6 +657,217 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
     }
 
+    private void NotifyInventoryCommands()
+    {
+        ReceiveStockCommand.NotifyCanExecuteChanged();
+        IssueStockCommand.NotifyCanExecuteChanged();
+        AdjustStockCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanExecuteInventoryTransaction()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedWarehouse is not null
+           && _loadedWarehouse.Id > 0;
+
+    private async Task ExecuteInventoryTransactionAsync(InventoryTransactionType type)
+    {
+        if (_loadedWarehouse is null || _loadedWarehouse.Id <= 0)
+        {
+            return;
+        }
+
+        List<Part> parts;
+        try
+        {
+            parts = await Database.GetAllPartsAsync().ConfigureAwait(false) ?? new List<Part>();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to load parts: {ex.Message}";
+            return;
+        }
+
+        var snapshotLookup = StockSnapshot.ToDictionary(s => s.PartId, s => s);
+
+        var partOptions = parts
+            .Select(part =>
+            {
+                snapshotLookup.TryGetValue(part.Id, out var snapshot);
+                var quantity = snapshot?.Quantity ?? 0;
+                var min = snapshot?.MinThreshold;
+                var max = snapshot?.MaxThreshold;
+                var display = string.IsNullOrWhiteSpace(part.Name)
+                    ? part.Code ?? $"Part #{part.Id}"
+                    : string.IsNullOrWhiteSpace(part.Code)
+                        ? part.Name
+                        : $"{part.Name} ({part.Code})";
+                return new WarehouseStockPartOption(
+                    part.Id,
+                    display ?? $"Part #{part.Id}",
+                    part.Code ?? string.Empty,
+                    quantity,
+                    min,
+                    max);
+            })
+            .OrderBy(option => option.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var snapshot in StockSnapshot)
+        {
+            if (partOptions.Any(option => option.PartId == snapshot.PartId))
+            {
+                continue;
+            }
+
+            var display = string.IsNullOrWhiteSpace(snapshot.PartName)
+                ? snapshot.PartCode
+                : string.IsNullOrWhiteSpace(snapshot.PartCode)
+                    ? snapshot.PartName
+                    : $"{snapshot.PartName} ({snapshot.PartCode})";
+
+            partOptions.Add(new WarehouseStockPartOption(
+                snapshot.PartId,
+                display ?? $"Part #{snapshot.PartId}",
+                snapshot.PartCode,
+                snapshot.Quantity - snapshot.Reserved - snapshot.Blocked,
+                snapshot.MinThreshold,
+                snapshot.MaxThreshold));
+        }
+
+        if (partOptions.Count == 0)
+        {
+            StatusMessage = "No parts available for inventory transaction.";
+            return;
+        }
+
+        InventoryTransactionRequest? submittedRequest = null;
+        ElectronicSignatureDialogResult? submittedSignature = null;
+
+        await RunOnUiThreadAsync(() =>
+        {
+            var warehouseName = string.IsNullOrWhiteSpace(_loadedWarehouse.Name)
+                ? $"Warehouse #{_loadedWarehouse.Id}"
+                : _loadedWarehouse.Name;
+
+            var dialogVm = new WarehouseStockTransactionDialogViewModel(
+                _loadedWarehouse.Id,
+                warehouseName ?? $"Warehouse #{_loadedWarehouse.Id}",
+                type,
+                _signatureDialog,
+                async (request, signature) =>
+                {
+                    var context = WarehouseCrudContext.Create(
+                        _authContext.CurrentUser?.Id ?? 0,
+                        _authContext.CurrentIpAddress,
+                        _authContext.CurrentDeviceInfo,
+                        _authContext.CurrentSessionId,
+                        signature);
+                    await _warehouseService.ExecuteInventoryTransactionAsync(request, context, signature)
+                        .ConfigureAwait(false);
+                });
+
+            dialogVm.LoadParts(partOptions);
+
+            var dialog = new WarehouseStockTransactionDialog
+            {
+                Owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)
+                    ?? Application.Current?.MainWindow,
+                DataContext = dialogVm
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == true)
+            {
+                submittedRequest = dialogVm.SubmittedRequest;
+                submittedSignature = dialogVm.SubmittedSignature;
+            }
+        }).ConfigureAwait(false);
+
+        if (submittedRequest is null || submittedSignature is null)
+        {
+            return;
+        }
+
+        await LoadInsightsAsync(_loadedWarehouse.Id).ConfigureAwait(false);
+
+        var delta = type switch
+        {
+            InventoryTransactionType.Adjust => submittedRequest.Value.AdjustmentDelta ?? 0,
+            InventoryTransactionType.Issue => -submittedRequest.Value.Quantity,
+            _ => submittedRequest.Value.Quantity
+        };
+
+        var verb = type switch
+        {
+            InventoryTransactionType.Receive => "received",
+            InventoryTransactionType.Issue => "issued",
+            InventoryTransactionType.Adjust => "adjusted",
+            _ => "processed"
+        };
+
+        var deltaDisplay = delta >= 0
+            ? $"+{delta}"
+            : delta.ToString(CultureInfo.InvariantCulture);
+
+        var warehouseLabel = string.IsNullOrWhiteSpace(_loadedWarehouse.Name)
+            ? $"warehouse #{_loadedWarehouse.Id}"
+            : _loadedWarehouse.Name;
+
+        var message = $"{verb} {deltaDisplay} units for {warehouseLabel}.";
+        StatusMessage = message;
+        _shellInteraction.UpdateStatus(message);
+
+        NotifyInventoryCommands();
+    }
+
+    private string GetZoneLabel(string resourceKey, string fallback)
+    {
+        var label = _localization.GetString(resourceKey);
+        return string.IsNullOrWhiteSpace(label) ? fallback : label;
+    }
+
+    private ZoneClassification ClassifyZone(int quantity, int? minimum, int? maximum)
+    {
+        if (minimum.HasValue && quantity < minimum.Value)
+        {
+            return ZoneClassification.Critical;
+        }
+
+        if (maximum.HasValue && quantity > maximum.Value)
+        {
+            return ZoneClassification.Overflow;
+        }
+
+        if (minimum.HasValue)
+        {
+            var warningThreshold = (int)Math.Ceiling(minimum.Value * 1.2);
+            if (quantity <= warningThreshold)
+            {
+                return ZoneClassification.Warning;
+            }
+        }
+
+        return ZoneClassification.Healthy;
+    }
+
+    private Task RunOnUiThreadAsync(Action action)
+    {
+        if (action is null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
+    }
+
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
 
@@ -551,6 +895,53 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
             fields,
             null,
             warehouse.Id);
+    }
+
+    public sealed class WarehouseZoneSummaryItem
+    {
+        public WarehouseZoneSummaryItem(
+            int partId,
+            string partName,
+            string partCode,
+            string zoneLabel,
+            ZoneClassification classification,
+            int quantity,
+            int? minimum,
+            int? maximum)
+        {
+            PartId = partId;
+            PartName = partName;
+            PartCode = partCode;
+            ZoneLabel = zoneLabel;
+            Classification = classification;
+            Quantity = quantity;
+            Minimum = minimum;
+            Maximum = maximum;
+        }
+
+        public int PartId { get; }
+
+        public string PartName { get; }
+
+        public string PartCode { get; }
+
+        public string ZoneLabel { get; }
+
+        public ZoneClassification Classification { get; }
+
+        public int Quantity { get; }
+
+        public int? Minimum { get; }
+
+        public int? Maximum { get; }
+    }
+
+    public enum ZoneClassification
+    {
+        Critical,
+        Warning,
+        Healthy,
+        Overflow
     }
     /// <summary>
     /// Represents the warehouse editor value.
