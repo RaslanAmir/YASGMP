@@ -1,4 +1,6 @@
 using System;
+using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using YasGMP.Common;
@@ -64,6 +66,40 @@ internal static class LocalizationTestContext
         public void SetLanguage(string language) => _inner.SetLanguage(language);
 
         private static ResourceDictionary CreateAutomationDictionary()
+        {
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                return CreateAutomationDictionaryCore();
+            }
+
+            ResourceDictionary? dictionary = null;
+            ExceptionDispatchInfo? captured = null;
+
+            var staThread = new Thread(() =>
+            {
+                try
+                {
+                    dictionary = CreateAutomationDictionaryCore();
+                }
+                catch (Exception ex)
+                {
+                    captured = ExceptionDispatchInfo.Capture(ex);
+                }
+            })
+            {
+                IsBackground = true,
+            };
+
+            staThread.SetApartmentState(ApartmentState.STA);
+            staThread.Start();
+            staThread.Join();
+
+            captured?.Throw();
+
+            return dictionary ?? throw new InvalidOperationException("Failed to load automation resource dictionary on STA thread.");
+        }
+
+        private static ResourceDictionary CreateAutomationDictionaryCore()
         {
             if (Application.ResourceAssembly is null)
             {
