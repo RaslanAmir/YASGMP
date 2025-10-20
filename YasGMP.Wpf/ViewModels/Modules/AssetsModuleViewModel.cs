@@ -18,6 +18,7 @@ using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using SharedAssetViewModel = YasGMP.ViewModels.AssetViewModel;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>
@@ -42,6 +43,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
     private readonly IPlatformService _platformService;
     private readonly IShellInteractionService _shellInteraction;
     private readonly AssetViewModel _assetViewModel;
+    private readonly SharedAssetViewModel _sharedAssetViewModel;
     private INotifyCollectionChanged? _filteredAssetsSubscription;
     private bool _suppressFilteredAssetsCollectionNotifications;
     private bool _isSynchronizingRecords;
@@ -69,6 +71,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         AssetViewModel assetViewModel,
+        SharedAssetViewModel sharedAssetViewModel,
         IModuleNavigationService navigation,
         ILocalizationService localization,
         ICodeGeneratorService codeGeneratorService,
@@ -87,6 +90,7 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
         _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
         _assetViewModel = assetViewModel ?? throw new ArgumentNullException(nameof(assetViewModel));
+        _sharedAssetViewModel = sharedAssetViewModel ?? throw new ArgumentNullException(nameof(sharedAssetViewModel));
         _assetViewModel.PropertyChanged += OnAssetViewModelPropertyChanged;
         _assetViewModel.EditorChanged += OnAssetEditorChanged;
         ObserveFilteredAssets(_assetViewModel.FilteredAssets, skipImmediateSync: true);
@@ -108,6 +112,9 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     /// <summary>Shared asset editor payload bound to the form fields.</summary>
     public AssetViewModel Asset => _assetViewModel;
+
+    /// <summary>Shared MAUI/WPF asset view-model exposed for shell composition.</summary>
+    public SharedAssetViewModel SharedAsset => _sharedAssetViewModel;
 
     /// <summary>Mirrors the shared asset list surfaced by the shell.</summary>
     public ObservableCollection<Asset> FilteredAssets => _assetViewModel.FilteredAssets;
