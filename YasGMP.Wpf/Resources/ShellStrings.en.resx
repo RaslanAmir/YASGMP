@@ -1779,6 +1779,99 @@
   <data name="Module.ExternalServicers.Text.Certificates" xml:space="preserve">
     <value>Certificates</value>
   </data>
+  <data name="Module.ExternalServicers.Oversight.Header" xml:space="preserve">
+    <value>Oversight</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Header.AutomationName" xml:space="preserve">
+    <value>External servicer oversight panel</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Header.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.ToolTip" xml:space="preserve">
+    <value>Reload contractor oversight metrics</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.AutomationName" xml:space="preserve">
+    <value>Refresh contractor oversight metrics</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Refresh.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Refresh</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.Content" xml:space="preserve">
+    <value>Open Dashboard</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.ToolTip" xml:space="preserve">
+    <value>Open the contractor performance dashboard</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.AutomationName" xml:space="preserve">
+    <value>Open contractor oversight dashboard</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.DrillIn.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.DrillIn</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.Header" xml:space="preserve">
+    <value>Key metrics</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.AutomationName" xml:space="preserve">
+    <value>External servicer oversight metrics header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Metrics.Header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.ToolTip" xml:space="preserve">
+    <value>Current KPI tiles for contractor oversight</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.Items.AutomationName" xml:space="preserve">
+    <value>External servicer KPI tiles</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Metrics.Items.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Metrics.Items</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Header" xml:space="preserve">
+    <value>Recent interventions</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.AutomationName" xml:space="preserve">
+    <value>External servicer intervention timeline header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Timeline.Header</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.ToolTip" xml:space="preserve">
+    <value>Chronological list of recent contractor interventions</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Items.AutomationName" xml:space="preserve">
+    <value>External servicer intervention timeline</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Timeline.Items.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Timeline.Items</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Header" xml:space="preserve">
+    <value>Performance analytics</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.AutomationName" xml:space="preserve">
+    <value>External servicer analytics table</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.AutomationId" xml:space="preserve">
+    <value>ExternalServicers.Oversight.Analytics.Table</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.ToolTip" xml:space="preserve">
+    <value>Aggregated contractor performance metrics</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Metric" xml:space="preserve">
+    <value>Metric</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="Module.ExternalServicers.Oversight.Analytics.Column.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="Module.ExternalServicers.Text.Comment" xml:space="preserve">
     <value>Comment</value>
   </data>

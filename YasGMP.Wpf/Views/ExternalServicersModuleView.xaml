@@ -43,8 +43,9 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2.5*" />
             </Grid.ColumnDefinitions>
-            <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
+            <DockPanel Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
                 <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="240" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
@@ -208,7 +209,125 @@
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-            <StatusBar Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,0">
+            <Border Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Padding="12"
+                    Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                    BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Header}"
+                                       FontWeight="Bold"
+                                       FontSize="14"
+                                       AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Header.AutomationName}"
+                                       AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Header.AutomationId}" />
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="{DynamicResource Module.ExternalServicers.Oversight.Refresh.Content}"
+                                        Command="{Binding RefreshOversightCommand}"
+                                        Margin="0,0,8,0"
+                                        Padding="12,4"
+                                        ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Refresh.ToolTip}"
+                                        AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Refresh.AutomationName}"
+                                        AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Refresh.AutomationId}" />
+                                <Button Content="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.Content}"
+                                        Command="{Binding DrillIntoOversightCommand}"
+                                        Padding="12,4"
+                                        ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.ToolTip}"
+                                        AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.AutomationName}"
+                                        AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.AutomationId}" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Metrics.Header}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"
+                                   AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Metrics.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Metrics.AutomationId}" />
+                        <ItemsControl ItemsSource="{Binding OversightMetrics}"
+                                      Margin="0,0,0,12"
+                                      ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Metrics.ToolTip}"
+                                      AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Metrics.Items.AutomationName}"
+                                      AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Metrics.Items.AutomationId}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemWidth="160" ItemHeight="Auto" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4"
+                                            Background="{Binding AccentBrush}"
+                                            Margin="0,0,8,8"
+                                            Padding="12"
+                                            MinWidth="150">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" Foreground="White" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding FormattedValue}" Foreground="White" FontSize="18" />
+                                            <TextBlock Text="{Binding TrendText}" Foreground="White" FontStyle="Italic" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Timeline.Header}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"
+                                   AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Timeline.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Timeline.AutomationId}" />
+                        <ItemsControl ItemsSource="{Binding InterventionTimeline}"
+                                      Margin="0,0,0,12"
+                                      ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Timeline.ToolTip}"
+                                      AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Timeline.Items.AutomationName}"
+                                      AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Timeline.Items.AutomationId}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="0,0,0,1"
+                                            BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                            Padding="0,4,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Timestamp, StringFormat={}{0:G}}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Summary}" />
+                                            <TextBlock Text="{Binding Details}" FontStyle="Italic" Foreground="Gray" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Header}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"
+                                   AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationId}" />
+                        <DataGrid ItemsSource="{Binding OversightAnalytics}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
+                                  ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Analytics.ToolTip}"
+                                  AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationName}"
+                                  AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationId}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Metric}"
+                                                    Binding="{Binding Metric}" Width="2*" />
+                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Value}"
+                                                    Binding="{Binding Value}" Width="*" />
+                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Target}"
+                                                    Binding="{Binding Target}" Width="*" />
+                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Status}"
+                                                    Binding="{Binding Status}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <StatusBar Grid.Row="2" Grid.ColumnSpan="3" Margin="0,8,0,0">
                 <StatusBarItem>
                     <TextBlock Text="{Binding StatusMessage}" />
                 </StatusBarItem>
