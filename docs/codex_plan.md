@@ -21,6 +21,7 @@
 - 2026-04-20T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried while documenting code/QR parity; CLI remains unavailable in this container (`bash: command not found: dotnet`).
 - 2026-04-21T09:15Z: `dotnet restore` retried during the dock/asset synchronization batch; CLI still unavailable (`bash: command not found: dotnet`), so validation remains Windows-host only.
 - 2026-04-22T09:45Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` retried while scripting the Assets smoke scenario; every command still fails with `bash: command not found: dotnet` because the CLI is absent on this host.
+- 2026-04-27T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` retried after updating the smoke localization fallback; each command still returns `bash: command not found: dotnet` because the CLI is unavailable in this container.
   - 2025-10-16T09:40Z: `dotnet restore yasgmp.sln` retried during Work Orders signature metadata wiring; environment still returns `bash: command not found: dotnet` so validation stays Windows-host only.
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
   - 2025-10-13T10:59Z: `dotnet restore yasgmp.sln` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
@@ -146,6 +147,7 @@
 ### Increment 2 Update — 2026-04-07 Localization Sweep
 - Localized Assets module status messages through ShellStrings (neutral/en/hr) and routed AssetsModuleViewModel status surfaces through `ILocalizationService` so runtime language switches stay in sync.
 - Expanded Assets module unit coverage to assert localized status messaging via `LocalizationService`, noting that build/test execution still awaits dotnet CLI availability (env_guard=static-analysis).
+- Smoke harness localization context now loads `Resources/Strings.xaml` so automation IDs resolve to runtime values even without a WPF `Application`, preventing wait loops from searching for untranslated keys during Windows execution.
 
 ## Decisions & Pins
 - Preferred WPF target: **net9.0-windows10.0.19041.0** (retain once .NET 9 SDK is installed).
