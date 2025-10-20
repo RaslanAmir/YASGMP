@@ -68,7 +68,7 @@
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
-                      ItemsSource="{Binding FilteredAssets}"
+                      ItemsSource="{Binding Asset.FilteredAssets}"
                       SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -173,163 +173,165 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="{DynamicResource Module.Assets.Text.AssetDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                        <StackPanel DataContext="{Binding Asset}">
+                            <TextBlock Text="{DynamicResource Module.Assets.Text.AssetDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Code.Header}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="0"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.Code, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Dashboard.Grid.Column.Code.Header}"
-                                     AutomationProperties.Name="{DynamicResource Dashboard.Grid.Column.Code.Header}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Code.AutomationId}" />
+                                <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Code.Header}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Dashboard.Grid.Column.Code.Header}"
+                                         AutomationProperties.Name="{DynamicResource Dashboard.Grid.Column.Code.Header}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Code.AutomationId}" />
 
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.Name}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="1"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.Name, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Name}"
-                                     AutomationProperties.Name="{DynamicResource Module.Assets.Text.Name}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Name.AutomationId}" />
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.Name}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Name}"
+                                         AutomationProperties.Name="{DynamicResource Module.Assets.Text.Name}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Name.AutomationId}" />
 
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Description.Header}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
-                            <TextBox Grid.Row="2"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.Description, UpdateSourceTrigger=PropertyChanged}"
+                                <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Description.Header}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True"
+                                         Height="60"
+                                         TextWrapping="Wrap"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Dashboard.Grid.Column.Description.Header}"
+                                         AutomationProperties.Name="{DynamicResource Dashboard.Grid.Column.Description.Header}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Description.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.Manufacturer}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="3"
+                                         Grid.Column="1"
+                                         Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Manufacturer}"
+                                         AutomationProperties.Name="{DynamicResource Module.Assets.Text.Manufacturer}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Manufacturer.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.Model}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="1"
+                                         Text="{Binding Model, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Model}"
+                                         AutomationProperties.Name="{DynamicResource Module.Assets.Text.Model}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Model.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Header.Location}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="5"
+                                         Grid.Column="1"
+                                         Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Assets.Header.Location}"
+                                         AutomationProperties.Name="{DynamicResource Module.Assets.Header.Location}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Location.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <ComboBox Grid.Row="6"
+                                          Grid.Column="1"
+                                          ItemsSource="{Binding DataContext.StatusOptions, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                          SelectedItem="{Binding Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                          ToolTipService.ToolTip="{DynamicResource Dashboard.Grid.Column.Status.Header}"
+                                          AutomationProperties.Name="{DynamicResource Dashboard.Grid.Column.Status.Header}"
+                                          AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Status.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.URSDocument}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="7"
+                                         Grid.Column="1"
+                                         Text="{Binding UrsDoc, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.URSDocument}"
+                                         AutomationProperties.Name="{DynamicResource Module.Assets.Text.URSDocument}"
+                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Urs.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.InstallDate}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <DatePicker Grid.Row="8"
+                                            Grid.Column="1"
+                                            SelectedDate="{Binding InstallDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.InstallDate}"
+                                            AutomationProperties.Name="{DynamicResource Module.Assets.Text.InstallDate}"
+                                            AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.InstallDate.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.ProcurementDate}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <DatePicker Grid.Row="9"
+                                            Grid.Column="1"
+                                            SelectedDate="{Binding ProcurementDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.ProcurementDate}"
+                                            AutomationProperties.Name="{DynamicResource Module.Assets.Text.ProcurementDate}"
+                                            AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.ProcurementDate.AutomationId}" />
+
+                                <TextBlock Text="{DynamicResource Module.Assets.Text.WarrantyUntil}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                                <DatePicker Grid.Row="10"
+                                            Grid.Column="1"
+                                            SelectedDate="{Binding WarrantyUntil, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.WarrantyUntil}"
+                                            AutomationProperties.Name="{DynamicResource Module.Assets.Text.WarrantyUntil}"
+                                            AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.WarrantyUntil.AutomationId}" />
+
+                                <StackPanel Grid.Row="11" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
+                                    <CheckBox Content="{DynamicResource Module.Assets.Content.CriticalAsset}"
+                                              IsChecked="{Binding IsCritical, Mode=TwoWay}"
+                                              IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                              ToolTipService.ToolTip="{DynamicResource Module.Assets.Content.CriticalAsset}"
+                                              AutomationProperties.Name="{DynamicResource Module.Assets.Content.CriticalAsset}"
+                                              AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.CriticalAsset.AutomationId}" />
+                                    <TextBlock Text="{DynamicResource Module.Assets.Text.SerialNo}" Margin="16,0,8,0" VerticalAlignment="Center" />
+                                    <TextBox Width="140"
+                                             Text="{Binding SerialNumber, UpdateSourceTrigger=PropertyChanged}"
+                                             IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                             ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.SerialNo}"
+                                             AutomationProperties.Name="{DynamicResource Module.Assets.Text.SerialNo}"
+                                             AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.SerialNumber.AutomationId}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="{DynamicResource Module.Assets.Text.LifecyclePhase}" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding LifecyclePhase, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.LifecyclePhase}"
+                                     AutomationProperties.Name="{DynamicResource Module.Assets.Text.LifecyclePhase}"
+                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.LifecyclePhase.AutomationId}" />
+
+                            <TextBlock Text="{DynamicResource Module.Assets.Text.Notes}" Margin="0,12,0,4" />
+                            <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="80"
                                      AcceptsReturn="True"
-                                     Height="60"
                                      TextWrapping="Wrap"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Dashboard.Grid.Column.Description.Header}"
-                                     AutomationProperties.Name="{DynamicResource Dashboard.Grid.Column.Description.Header}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Description.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.Manufacturer}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="3"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.Manufacturer, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Manufacturer}"
-                                     AutomationProperties.Name="{DynamicResource Module.Assets.Text.Manufacturer}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Manufacturer.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.Model}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="4"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.Model, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Model}"
-                                     AutomationProperties.Name="{DynamicResource Module.Assets.Text.Model}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Model.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Header.Location}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="5"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.Location, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Header.Location}"
-                                     AutomationProperties.Name="{DynamicResource Module.Assets.Header.Location}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Location.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <ComboBox Grid.Row="6"
-                                      Grid.Column="1"
-                                      ItemsSource="{Binding StatusOptions}"
-                                      SelectedItem="{Binding Asset.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsEditorEnabled}"
-                                      ToolTipService.ToolTip="{DynamicResource Dashboard.Grid.Column.Status.Header}"
-                                      AutomationProperties.Name="{DynamicResource Dashboard.Grid.Column.Status.Header}"
-                                      AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Status.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.URSDocument}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <TextBox Grid.Row="7"
-                                     Grid.Column="1"
-                                     Text="{Binding Asset.UrsDoc, UpdateSourceTrigger=PropertyChanged}"
-                                     IsEnabled="{Binding IsEditorEnabled}"
-                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.URSDocument}"
-                                     AutomationProperties.Name="{DynamicResource Module.Assets.Text.URSDocument}"
-                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Urs.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.InstallDate}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <DatePicker Grid.Row="8"
-                                        Grid.Column="1"
-                                        SelectedDate="{Binding Asset.InstallDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        IsEnabled="{Binding IsEditorEnabled}"
-                                        ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.InstallDate}"
-                                        AutomationProperties.Name="{DynamicResource Module.Assets.Text.InstallDate}"
-                                        AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.InstallDate.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.ProcurementDate}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <DatePicker Grid.Row="9"
-                                        Grid.Column="1"
-                                        SelectedDate="{Binding Asset.ProcurementDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        IsEnabled="{Binding IsEditorEnabled}"
-                                        ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.ProcurementDate}"
-                                        AutomationProperties.Name="{DynamicResource Module.Assets.Text.ProcurementDate}"
-                                        AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.ProcurementDate.AutomationId}" />
-
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.WarrantyUntil}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
-                            <DatePicker Grid.Row="10"
-                                        Grid.Column="1"
-                                        SelectedDate="{Binding Asset.WarrantyUntil, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        IsEnabled="{Binding IsEditorEnabled}"
-                                        ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.WarrantyUntil}"
-                                        AutomationProperties.Name="{DynamicResource Module.Assets.Text.WarrantyUntil}"
-                                        AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.WarrantyUntil.AutomationId}" />
-
-                            <StackPanel Grid.Row="11" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
-                                <CheckBox Content="{DynamicResource Module.Assets.Content.CriticalAsset}"
-                                          IsChecked="{Binding Asset.IsCritical, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsEditorEnabled}"
-                                          ToolTipService.ToolTip="{DynamicResource Module.Assets.Content.CriticalAsset}"
-                                          AutomationProperties.Name="{DynamicResource Module.Assets.Content.CriticalAsset}"
-                                          AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.CriticalAsset.AutomationId}" />
-                                <TextBlock Text="{DynamicResource Module.Assets.Text.SerialNo}" Margin="16,0,8,0" VerticalAlignment="Center" />
-                                <TextBox Width="140"
-                                         Text="{Binding Asset.SerialNumber, UpdateSourceTrigger=PropertyChanged}"
-                                         IsEnabled="{Binding IsEditorEnabled}"
-                                         ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.SerialNo}"
-                                         AutomationProperties.Name="{DynamicResource Module.Assets.Text.SerialNo}"
-                                         AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.SerialNumber.AutomationId}" />
-                            </StackPanel>
-                        </Grid>
-
-                        <TextBlock Text="{DynamicResource Module.Assets.Text.LifecyclePhase}" Margin="0,0,0,4" />
-                        <TextBox Text="{Binding Asset.LifecyclePhase, UpdateSourceTrigger=PropertyChanged}"
-                                 IsEnabled="{Binding IsEditorEnabled}"
-                                 ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.LifecyclePhase}"
-                                 AutomationProperties.Name="{DynamicResource Module.Assets.Text.LifecyclePhase}"
-                                 AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.LifecyclePhase.AutomationId}" />
-
-                        <TextBlock Text="{DynamicResource Module.Assets.Text.Notes}" Margin="0,12,0,4" />
-                        <TextBox Text="{Binding Asset.Notes, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="80"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 IsEnabled="{Binding IsEditorEnabled}"
-                                 ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Notes}"
-                                 AutomationProperties.Name="{DynamicResource Module.Assets.Text.Notes}"
-                                 AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Notes.AutomationId}" />
+                                     IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                     ToolTipService.ToolTip="{DynamicResource Module.Assets.Text.Notes}"
+                                     AutomationProperties.Name="{DynamicResource Module.Assets.Text.Notes}"
+                                     AutomationProperties.AutomationId="{DynamicResource Module.Assets.Form.Notes.AutomationId}" />
+                        </StackPanel>
 
                         <shared:SignatureMetadataView DataContext="{Binding Asset}" />
 
