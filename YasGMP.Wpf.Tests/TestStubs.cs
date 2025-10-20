@@ -7111,6 +7111,10 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public List<InventoryMovementEntry> Movements { get; } = new();
 
+        public List<InventoryTransactionRequest> ExecutedTransactions { get; } = new();
+
+        public List<ElectronicSignatureDialogResult> ExecutedSignatures { get; } = new();
+
         public Task<IReadOnlyList<Warehouse>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Warehouse>>(_store.ToList());
 
@@ -7171,6 +7175,26 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 .Take(take)
                 .ToList();
             return Task.FromResult<IReadOnlyList<InventoryMovementEntry>>(items);
+        }
+
+        public Task<InventoryTransactionResult> ExecuteInventoryTransactionAsync(
+            InventoryTransactionRequest request,
+            WarehouseCrudContext context,
+            ElectronicSignatureDialogResult signatureResult,
+            CancellationToken cancellationToken = default)
+        {
+            ExecutedTransactions.Add(request);
+            ExecutedSignatures.Add(signatureResult);
+            return Task.FromResult(new InventoryTransactionResult
+            {
+                Type = request.Type,
+                PartId = request.PartId,
+                WarehouseId = request.WarehouseId,
+                Quantity = request.Quantity,
+                Document = request.Document,
+                Note = request.Note,
+                Signature = signatureResult
+            });
         }
 
         private void TrackSnapshot(Warehouse warehouse, WarehouseCrudContext context)

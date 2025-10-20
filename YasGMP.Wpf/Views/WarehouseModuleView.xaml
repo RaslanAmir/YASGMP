@@ -165,6 +165,64 @@
                             </StackPanel>
                         </Border>
 
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="Receive Stock" Command="{Binding ReceiveStockCommand}" Width="120" Margin="0,0,8,0" />
+                            <Button Content="Issue Stock" Command="{Binding IssueStockCommand}" Width="120" Margin="0,0,8,0" />
+                            <Button Content="Adjust Stock" Command="{Binding AdjustStockCommand}" Width="120" />
+                        </StackPanel>
+
+                        <Border Padding="8"
+                                Margin="0,12,0,0"
+                                CornerRadius="4"
+                                Background="#FFFFF3CD"
+                                BorderBrush="#FFE6C200"
+                                BorderThickness="1">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TransactionAlerts.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="Inventory Alerts" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                <ItemsControl ItemsSource="{Binding TransactionAlerts}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Foreground="DarkRed" TextWrapping="Wrap" Margin="0,0,0,2" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <GroupBox Header="Zone Summary" Margin="0,16,0,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="Zone Filter:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <ComboBox ItemsSource="{Binding ZoneFilters}" SelectedItem="{Binding SelectedZoneFilter, Mode=TwoWay}" Width="200" />
+                                </StackPanel>
+                                <DataGrid ItemsSource="{Binding ZoneSummariesView}"
+                                          AutoGenerateColumns="False"
+                                          IsReadOnly="True"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          MinHeight="140">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Part" Binding="{Binding PartName}" Width="2*" />
+                                        <DataGridTextColumn Header="Code" Binding="{Binding PartCode}" Width="120" />
+                                        <DataGridTextColumn Header="Zone" Binding="{Binding ZoneLabel}" Width="140" />
+                                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="100" />
+                                        <DataGridTextColumn Header="Minimum" Binding="{Binding Minimum}" Width="100" />
+                                        <DataGridTextColumn Header="Maximum" Binding="{Binding Maximum}" Width="100" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </GroupBox>
+
                         <GroupBox Header="{DynamicResource Module.Warehouse.Header.StockSnapshot}" Margin="0,16,0,0">
                             <DataGrid ItemsSource="{Binding StockSnapshot}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" HeadersVisibility="Column" MinHeight="160">
                                 <DataGrid.RowStyle>
@@ -202,6 +260,7 @@
                                     <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Qty}" Binding="{Binding Quantity}" Width="70" />
                                     <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Document}" Binding="{Binding RelatedDocument}" Width="*" />
                                     <DataGridTextColumn Header="{DynamicResource Module.Warehouse.Header.Note}" Binding="{Binding Note}" Width="2*" />
+                                    <DataGridTextColumn Header="User" Binding="{Binding PerformedById}" Width="80" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </GroupBox>

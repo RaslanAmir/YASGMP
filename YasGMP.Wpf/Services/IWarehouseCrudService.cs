@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
@@ -42,6 +43,12 @@ namespace YasGMP.Wpf.Services
         Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId);
 
         Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10);
+
+        Task<InventoryTransactionResult> ExecuteInventoryTransactionAsync(
+            InventoryTransactionRequest request,
+            WarehouseCrudContext context,
+            ElectronicSignatureDialogResult signatureResult,
+            CancellationToken cancellationToken = default);
     }
 
     /// <summary>
