@@ -35,6 +35,22 @@
                 ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+            <Separator />
+            <Button Content="Stock In"
+                    Command="{Binding ReceiveStockCommand}"
+                    Margin="8,0,0,0"
+                    AutomationProperties.Name="Receive stock"
+                    AutomationProperties.AutomationId="Parts.ReceiveStock" />
+            <Button Content="Stock Out"
+                    Command="{Binding IssueStockCommand}"
+                    Margin="4,0,0,0"
+                    AutomationProperties.Name="Issue stock"
+                    AutomationProperties.AutomationId="Parts.IssueStock" />
+            <Button Content="Adjust"
+                    Command="{Binding AdjustStockCommand}"
+                    Margin="4,0,0,0"
+                    AutomationProperties.Name="Adjust stock"
+                    AutomationProperties.AutomationId="Parts.AdjustStock" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -206,6 +222,75 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <Border Padding="8"
+                                Margin="0,16,0,0"
+                                CornerRadius="4"
+                                Background="#FFFFF3CD"
+                                BorderBrush="#FFE6C200"
+                                BorderThickness="1">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TransactionAlerts.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="Inventory Alerts" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                <ItemsControl ItemsSource="{Binding TransactionAlerts}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Foreground="DarkRed" TextWrapping="Wrap" Margin="0,0,0,2" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBlock Text="Warehouse Zones" FontWeight="SemiBold" FontSize="14" />
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+                                <TextBlock Text="Zone Filter:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <ComboBox ItemsSource="{Binding ZoneFilters}"
+                                          SelectedItem="{Binding SelectedZoneFilter, Mode=TwoWay}"
+                                          Width="200" />
+                            </StackPanel>
+                            <DataGrid ItemsSource="{Binding ZoneSummariesView}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      Height="180">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Warehouse" Binding="{Binding Warehouse}" Width="2*" />
+                                    <DataGridTextColumn Header="Zone" Binding="{Binding ZoneLabel}" Width="120" />
+                                    <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="100" />
+                                    <DataGridTextColumn Header="Minimum" Binding="{Binding Minimum}" Width="100" />
+                                    <DataGridTextColumn Header="Maximum" Binding="{Binding Maximum}" Width="100" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+
+                        <TextBlock Text="Recent Transactions" FontWeight="SemiBold" FontSize="14" Margin="0,16,0,4" />
+                        <DataGrid ItemsSource="{Binding RecentTransactions}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  Height="220">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding TransactionDate, StringFormat={}{0:G}}" Width="170" />
+                                <DataGridTextColumn Header="Type" Binding="{Binding TransactionType}" Width="120" />
+                                <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="120" />
+                                <DataGridTextColumn Header="Warehouse" Binding="{Binding Warehouse}" Width="*" />
+                                <DataGridTextColumn Header="Document" Binding="{Binding Document}" Width="150" />
+                                <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

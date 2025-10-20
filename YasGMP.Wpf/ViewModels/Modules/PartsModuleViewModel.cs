@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
+using YasGMP.Wpf.Dialogs;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -26,11 +31,18 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     public new const string ModuleKey = "Parts";
 
     private readonly IPartCrudService _partService;
+    private readonly IInventoryTransactionService _inventoryService;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly ObservableCollection<ZoneSummaryItem> _zoneSummaries;
+    private readonly ObservableCollection<InventoryTransactionReportItem> _recentTransactions;
+    private readonly ObservableCollection<string> _transactionAlerts;
+    private readonly ICollectionView _zoneSummariesView;
+    private readonly string _zoneAllLabel;
+    private readonly Dictionary<ZoneClassification, string> _zoneLabels;
     private Part? _loadedPart;
     private PartEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
@@ -42,6 +54,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         DatabaseService databaseService,
         AuditService auditService,
         IPartCrudService partService,
+        IInventoryTransactionService inventoryService,
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
@@ -53,6 +66,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         : base(ModuleKey, localization.GetString("Module.Title.PartsStock"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
+        _inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
@@ -60,6 +74,28 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = PartEditor.CreateEmpty();
+        _zoneSummaries = new ObservableCollection<ZoneSummaryItem>();
+        _recentTransactions = new ObservableCollection<InventoryTransactionReportItem>();
+        _transactionAlerts = new ObservableCollection<string>();
+        _zoneLabels = new Dictionary<ZoneClassification, string>
+        {
+            [ZoneClassification.Critical] = GetZoneLabel("Module.Parts.ZoneFilter.Critical", "Critical"),
+            [ZoneClassification.Warning] = GetZoneLabel("Module.Parts.ZoneFilter.Warning", "Warning"),
+            [ZoneClassification.Healthy] = GetZoneLabel("Module.Parts.ZoneFilter.Healthy", "Healthy"),
+            [ZoneClassification.Overflow] = GetZoneLabel("Module.Parts.ZoneFilter.Overflow", "Overflow")
+        };
+        _zoneAllLabel = GetZoneLabel("Module.Parts.ZoneFilter.All", "All Zones");
+        ZoneFilters = new ObservableCollection<string>(new[]
+        {
+            _zoneAllLabel,
+            _zoneLabels[ZoneClassification.Critical],
+            _zoneLabels[ZoneClassification.Warning],
+            _zoneLabels[ZoneClassification.Healthy],
+            _zoneLabels[ZoneClassification.Overflow]
+        });
+        SelectedZoneFilter = _zoneAllLabel;
+        _zoneSummariesView = CollectionViewSource.GetDefaultView(_zoneSummaries);
+        _zoneSummariesView.Filter = FilterZoneSummary;
         StatusOptions = new ReadOnlyCollection<string>(new[]
         {
             _localization.GetString("Module.Parts.Status.Active"),
@@ -67,6 +103,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             _localization.GetString("Module.Parts.Status.Blocked")
         });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        ReceiveStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Receive), CanExecuteInventoryTransaction);
+        IssueStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Issue), CanExecuteInventoryTransaction);
+        AdjustStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Adjust), CanExecuteInventoryTransaction);
     }
 
     [ObservableProperty]
@@ -90,6 +129,25 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    public ObservableCollection<ZoneSummaryItem> ZoneSummaries => _zoneSummaries;
+
+    public ICollectionView ZoneSummariesView => _zoneSummariesView;
+
+    public ObservableCollection<InventoryTransactionReportItem> RecentTransactions => _recentTransactions;
+
+    public ObservableCollection<string> TransactionAlerts => _transactionAlerts;
+
+    public ObservableCollection<string> ZoneFilters { get; }
+
+    [ObservableProperty]
+    private string _selectedZoneFilter = string.Empty;
+
+    public IAsyncRelayCommand ReceiveStockCommand { get; }
+
+    public IAsyncRelayCommand IssueStockCommand { get; }
+
+    public IAsyncRelayCommand AdjustStockCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -194,6 +252,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             SetEditor(PartEditor.CreateEmpty());
             StockHealthMessage = string.Empty;
             UpdateAttachmentCommandState();
+            await ClearInventoryReportsAsync().ConfigureAwait(false);
             return;
         }
 
@@ -218,9 +277,10 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         LoadEditor(part);
         UpdateStockHealth();
         UpdateAttachmentCommandState();
+        await RefreshInventoryReportsAsync(part.Id).ConfigureAwait(false);
     }
 
-    protected override Task OnModeChangedAsync(FormMode mode)
+    protected override async Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
 
@@ -231,6 +291,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 _loadedPart = null;
                 SetEditor(PartEditor.CreateForNew(_partService.NormalizeStatus("active")));
                 StockHealthMessage = "";
+                await ClearInventoryReportsAsync().ConfigureAwait(false);
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -240,12 +301,12 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 {
                     LoadEditor(_loadedPart);
                     UpdateStockHealth();
+                    await RefreshInventoryReportsAsync(_loadedPart.Id).ConfigureAwait(false);
                 }
                 break;
         }
 
         UpdateAttachmentCommandState();
-        return Task.CompletedTask;
     }
 
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
@@ -417,6 +478,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
         {
             UpdateAttachmentCommandState();
+            NotifyInventoryCommands();
         }
     }
 
@@ -440,6 +502,246 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         value.PropertyChanged += OnEditorPropertyChanged;
     }
 
+    partial void OnSelectedZoneFilterChanged(string value)
+    {
+        _zoneSummariesView.Refresh();
+    }
+
+    private bool FilterZoneSummary(object obj)
+    {
+        if (obj is not ZoneSummaryItem item)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(SelectedZoneFilter) || string.Equals(SelectedZoneFilter, _zoneAllLabel, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (string.Equals(item.ZoneLabel, SelectedZoneFilter, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        return _zoneLabels.TryGetValue(item.Classification, out var label)
+            && string.Equals(label, SelectedZoneFilter, StringComparison.Ordinal);
+    }
+
+    private async Task RefreshInventoryReportsAsync(int partId)
+    {
+        List<(int warehouseId, string warehouseName, int quantity, int? min, int? max)> stockLevels;
+        try
+        {
+            stockLevels = await Database.GetStockLevelsForPartAsync(partId).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to load stock levels: {ex.Message}";
+            await ClearInventoryReportsAsync().ConfigureAwait(false);
+            return;
+        }
+
+        var warehouseLookup = stockLevels.ToDictionary(s => s.warehouseId, s => s.warehouseName);
+
+        await RunOnUiThreadAsync(() =>
+        {
+            _zoneSummaries.Clear();
+            _transactionAlerts.Clear();
+
+            foreach (var level in stockLevels)
+            {
+                var classification = ClassifyZone(level.quantity, level.min, level.max);
+                var zoneLabel = _zoneLabels.TryGetValue(classification, out var label)
+                    ? label
+                    : classification.ToString();
+
+                _zoneSummaries.Add(new ZoneSummaryItem(
+                    level.warehouseId,
+                    classification,
+                    zoneLabel,
+                    level.warehouseName,
+                    level.quantity,
+                    level.min,
+                    level.max));
+
+                if (classification == ZoneClassification.Critical)
+                {
+                    var minText = level.min.HasValue ? level.min.Value.ToString(CultureInfo.InvariantCulture) : "n/a";
+                    _transactionAlerts.Add($"{level.warehouseName} below minimum ({level.quantity}/{minText}).");
+                }
+                else if (classification == ZoneClassification.Overflow)
+                {
+                    var maxText = level.max.HasValue ? level.max.Value.ToString(CultureInfo.InvariantCulture) : "n/a";
+                    _transactionAlerts.Add($"{level.warehouseName} above maximum ({level.quantity}/{maxText}).");
+                }
+            }
+
+            _zoneSummariesView.Refresh();
+        }).ConfigureAwait(false);
+
+        DataTable history;
+        try
+        {
+            history = await Database.GetInventoryTransactionsForPartAsync(partId, 50).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to load inventory history: {ex.Message}";
+            await RunOnUiThreadAsync(() => _recentTransactions.Clear()).ConfigureAwait(false);
+            return;
+        }
+
+        await RunOnUiThreadAsync(() =>
+        {
+            _recentTransactions.Clear();
+
+            foreach (DataRow row in history.Rows)
+            {
+                var dateValue = row["transaction_date"];
+                var transactionDate = dateValue switch
+                {
+                    DateTime dt => dt,
+                    _ => DateTime.TryParse(dateValue?.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
+                        ? parsed
+                        : DateTime.MinValue
+                };
+
+                var typeValue = row.Table.Columns.Contains("transaction_type")
+                    ? row["transaction_type"]?.ToString() ?? string.Empty
+                    : string.Empty;
+
+                var quantityValue = row.Table.Columns.Contains("quantity") && row["quantity"] != DBNull.Value
+                    ? Convert.ToInt32(row["quantity"])
+                    : 0;
+
+                var warehouseId = row.Table.Columns.Contains("warehouse_id") && row["warehouse_id"] != DBNull.Value
+                    ? Convert.ToInt32(row["warehouse_id"])
+                    : 0;
+
+                var warehouseName = warehouseLookup.TryGetValue(warehouseId, out var name)
+                    ? name
+                    : $"WH-{warehouseId}";
+
+                var document = row.Table.Columns.Contains("related_document") && row["related_document"] != DBNull.Value
+                    ? row["related_document"]?.ToString()
+                    : null;
+
+                var note = row.Table.Columns.Contains("note") && row["note"] != DBNull.Value
+                    ? row["note"]?.ToString()
+                    : null;
+
+                int? performedBy = row.Table.Columns.Contains("performed_by_id") && row["performed_by_id"] != DBNull.Value
+                    ? Convert.ToInt32(row["performed_by_id"])
+                    : null;
+
+                _recentTransactions.Add(new InventoryTransactionReportItem(
+                    transactionDate,
+                    typeValue,
+                    quantityValue,
+                    warehouseName,
+                    document,
+                    note,
+                    performedBy));
+            }
+        }).ConfigureAwait(false);
+    }
+
+    private Task ClearInventoryReportsAsync()
+        => RunOnUiThreadAsync(() =>
+        {
+            _zoneSummaries.Clear();
+            _recentTransactions.Clear();
+            _transactionAlerts.Clear();
+            _zoneSummariesView.Refresh();
+        });
+
+    private ZoneClassification ClassifyZone(int quantity, int? minimum, int? maximum)
+    {
+        if (minimum.HasValue && quantity < minimum.Value)
+        {
+            return ZoneClassification.Critical;
+        }
+
+        if (maximum.HasValue && quantity > maximum.Value)
+        {
+            return ZoneClassification.Overflow;
+        }
+
+        if (minimum.HasValue)
+        {
+            var warningThreshold = (int)Math.Ceiling(minimum.Value * 1.2);
+            if (quantity <= warningThreshold)
+            {
+                return ZoneClassification.Warning;
+            }
+        }
+
+        return ZoneClassification.Healthy;
+    }
+
+    private Task RunOnUiThreadAsync(Action action)
+    {
+        if (action is null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
+    }
+
+    public sealed class ZoneSummaryItem
+    {
+        public ZoneSummaryItem(int warehouseId, ZoneClassification classification, string zoneLabel, string warehouse, int quantity, int? minimum, int? maximum)
+        {
+            WarehouseId = warehouseId;
+            Classification = classification;
+            ZoneLabel = zoneLabel;
+            Warehouse = warehouse;
+            Quantity = quantity;
+            Minimum = minimum;
+            Maximum = maximum;
+        }
+
+        public int WarehouseId { get; }
+
+        public ZoneClassification Classification { get; }
+
+        public string ZoneLabel { get; }
+
+        public string Warehouse { get; }
+
+        public int Quantity { get; }
+
+        public int? Minimum { get; }
+
+        public int? Maximum { get; }
+    }
+
+    public sealed record InventoryTransactionReportItem(
+        DateTime TransactionDate,
+        string TransactionType,
+        int Quantity,
+        string Warehouse,
+        string? Document,
+        string? Note,
+        int? PerformedById);
+
+    public enum ZoneClassification
+    {
+        Critical,
+        Warning,
+        Healthy,
+        Overflow
+    }
+
     private async Task EnsureSuppliersAsync()
     {
         if (SupplierOptions.Count > 0)
@@ -449,6 +751,21 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
         var suppliers = await Database.GetAllSuppliersAsync().ConfigureAwait(false) ?? new List<Supplier>();
         SupplierOptions = new ReadOnlyCollection<Supplier>(suppliers);
+    }
+
+    private string GetZoneLabel(string resourceKey, string fallback)
+    {
+        try
+        {
+            var value = _localization.GetString(resourceKey);
+            return string.IsNullOrWhiteSpace(value) || string.Equals(value, resourceKey, StringComparison.Ordinal)
+                ? fallback
+                : value;
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 
     private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -479,6 +796,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateStockHealth();
+        NotifyInventoryCommands();
     }
 
     private void SetEditor(PartEditor editor)
@@ -488,6 +806,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateStockHealth();
+        NotifyInventoryCommands();
     }
 
     private bool CanAttachDocument()
@@ -495,6 +814,12 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
            && !IsEditorEnabled
            && _loadedPart is not null
            && _loadedPart.Id > 0;
+
+    private bool CanExecuteInventoryTransaction()
+        => !IsBusy
+           && !IsEditorEnabled
+           && _loadedPart is { Id: > 0 }
+           && Mode is FormMode.View;
 
     private async Task AttachDocumentAsync()
     {
@@ -561,6 +886,147 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         {
             StockHealthMessage = string.Empty;
         }
+    }
+
+    private void NotifyInventoryCommands()
+    {
+        ReceiveStockCommand.NotifyCanExecuteChanged();
+        IssueStockCommand.NotifyCanExecuteChanged();
+        AdjustStockCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task ExecuteInventoryTransactionAsync(InventoryTransactionType type)
+    {
+        if (_loadedPart is null)
+        {
+            return;
+        }
+
+        List<Warehouse> warehouses;
+        try
+        {
+            warehouses = await Database.GetWarehousesAsync().ConfigureAwait(false) ?? new List<Warehouse>();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to load warehouses: {ex.Message}";
+            return;
+        }
+
+        if (warehouses.Count == 0)
+        {
+            StatusMessage = "No warehouses available for stock transaction.";
+            return;
+        }
+
+        InventoryTransactionRequest? submittedRequest = null;
+        ElectronicSignatureDialogResult? submittedSignature = null;
+
+        await RunOnUiThreadAsync(() =>
+        {
+            var displayName = string.IsNullOrWhiteSpace(_loadedPart.Name)
+                ? _loadedPart.Code ?? $"Part #{_loadedPart.Id}"
+                : $"{_loadedPart.Name} ({_loadedPart.Code})";
+
+            var dialogVm = new StockTransactionDialogViewModel(
+                _loadedPart.Id,
+                displayName ?? $"Part #{_loadedPart.Id}",
+                type,
+                _signatureDialog,
+                async (request, signature) =>
+                {
+                    var context = CreateInventoryContext(signature);
+                    await _inventoryService.ExecuteAsync(request, context).ConfigureAwait(false);
+                });
+
+            dialogVm.LoadWarehouses(warehouses);
+
+            var dialog = new StockTransactionDialog
+            {
+                Owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current?.MainWindow,
+                DataContext = dialogVm
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == true)
+            {
+                submittedRequest = dialogVm.SubmittedRequest;
+                submittedSignature = dialogVm.SubmittedSignature;
+            }
+        }).ConfigureAwait(false);
+
+        if (submittedRequest is null || submittedSignature is null)
+        {
+            return;
+        }
+
+        var selectedWarehouseName = warehouses
+            .FirstOrDefault(w => w.Id == submittedRequest.Value.WarehouseId)?.Name
+            ?? $"WH-{submittedRequest.Value.WarehouseId}";
+
+        await RefreshInventoryStateAsync(type, submittedRequest.Value, selectedWarehouseName).ConfigureAwait(false);
+    }
+
+    private InventoryTransactionContext CreateInventoryContext(ElectronicSignatureDialogResult signature)
+    {
+        var userId = _authContext.CurrentUser?.Id ?? 0;
+        return new InventoryTransactionContext(
+            userId,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            signature);
+    }
+
+    private async Task RefreshInventoryStateAsync(
+        InventoryTransactionType type,
+        InventoryTransactionRequest request,
+        string warehouseName)
+    {
+        try
+        {
+            var part = await _partService.TryGetByIdAsync(request.PartId).ConfigureAwait(false);
+            if (part is not null)
+            {
+                _loadedPart = part;
+                await RunOnUiThreadAsync(() =>
+                {
+                    LoadEditor(part);
+                    UpdateAttachmentCommandState();
+                }).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to reload part: {ex.Message}";
+        }
+
+        await RefreshInventoryReportsAsync(request.PartId).ConfigureAwait(false);
+
+        var delta = type switch
+        {
+            InventoryTransactionType.Adjust => request.AdjustmentDelta ?? 0,
+            InventoryTransactionType.Issue => -request.Quantity,
+            _ => request.Quantity
+        };
+
+        var verb = type switch
+        {
+            InventoryTransactionType.Receive => "received",
+            InventoryTransactionType.Issue => "issued",
+            InventoryTransactionType.Adjust => "adjusted",
+            _ => "processed"
+        };
+
+        var deltaDisplay = delta >= 0
+            ? $"+{delta}"
+            : delta.ToString(CultureInfo.InvariantCulture);
+
+        var message = $"{verb} {deltaDisplay} units at {warehouseName}.";
+        StatusMessage = message;
+        _shellInteraction.UpdateStatus(message);
+
+        NotifyInventoryCommands();
     }
 
     private ModuleRecord ToRecord(Part part)
