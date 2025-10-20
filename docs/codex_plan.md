@@ -129,6 +129,8 @@
 
 - Added a third column to `ExternalServicersModuleView` for a contractor oversight workspace with KPI tiles, intervention timeline, and analytics table surfaces bound to upcoming view-model collections.
 - Wired localized headers, tooltips, and automation metadata (EN/HR) for the oversight pane, including refresh/drill-in buttons targeting new `RefreshOversightCommand` and `DrillIntoOversightCommand` handlers on the module view-model.
+- Injected `DatabaseService` into `ExternalServicersModuleViewModel` to hydrate contractor interventions, compute KPI/timeline/analytics aggregates on the UI dispatcher, and expose new observable collections/commands consumed by the oversight pane with EN/HR localization and unit coverage for the dispatcher/DatabaseService override path.
+- 2026-05-06: Recalibrated the oversight refresh pipeline so `LoadAsync`, selection changes, and the explicit refresh command all call `DatabaseService.GetAllContractorInterventionsAsync`, rebuild KPI/timeline/analytics projections, marshal updates onto the dispatcher, and surface failures through `StatusMessage`.
 - CLI status: `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were retried; each still exits with `bash: command not found: dotnet` because the .NET SDK is unavailable in this Linux container. WPF smoke automation remains TODO pending Windows tooling.
 
 #### Entity Traceability Map (Seed)

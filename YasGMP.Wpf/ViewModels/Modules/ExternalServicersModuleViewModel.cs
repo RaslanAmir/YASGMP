@@ -5,8 +5,13 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
@@ -23,20 +28,24 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
     /// </summary>
     public const string ModuleKey = "ExternalServicers";
 
+    private readonly DatabaseService _databaseService;
     private readonly IExternalServicerCrudService _servicerService;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly IModuleNavigationService _navigation;
 
     private ExternalServicer? _loadedServicer;
     private ExternalServicerEditor? _snapshot;
     private bool _suppressDirtyNotifications;
     private int? _lastSavedServicerId;
+    private List<ContractorIntervention> _interventions = new();
     /// <summary>
     /// Initializes a new instance of the ExternalServicersModuleViewModel class.
     /// </summary>
 
     public ExternalServicersModuleViewModel(
+        DatabaseService databaseService,
         IExternalServicerCrudService servicerService,
         IAuthContext authContext,
         IElectronicSignatureDialogService signatureDialog,
@@ -46,10 +55,12 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         ILocalizationService localization)
         : base(ModuleKey, localization.GetString("Module.Title.ExternalServicers"), localization, cflDialogService, shellInteraction, navigation)
     {
+        _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _servicerService = servicerService ?? throw new ArgumentNullException(nameof(servicerService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
 
         Editor = ExternalServicerEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
@@ -71,6 +82,13 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             _localization.GetString("Module.ExternalServicers.ServiceType.ItServices"),
             _localization.GetString("Module.ExternalServicers.ServiceType.Logistics")
         });
+
+        OversightMetrics = new ObservableCollection<ContractorOversightMetric>();
+        InterventionTimeline = new ObservableCollection<ContractorInterventionTimelineItem>();
+        OversightAnalytics = new ObservableCollection<ContractorOversightAnalyticsRow>();
+
+        RefreshOversightCommand = new AsyncRelayCommand(ExecuteRefreshOversightAsync, () => !IsOversightBusy);
+        DrillIntoOversightCommand = new RelayCommand(DrillIntoOversight, CanDrillIntoOversight);
     }
 
     [ObservableProperty]
@@ -85,6 +103,22 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
     [ObservableProperty]
     private IReadOnlyList<string> _serviceTypeOptions;
 
+    [ObservableProperty]
+    private ObservableCollection<ContractorOversightMetric> _oversightMetrics;
+
+    [ObservableProperty]
+    private ObservableCollection<ContractorInterventionTimelineItem> _interventionTimeline;
+
+    [ObservableProperty]
+    private ObservableCollection<ContractorOversightAnalyticsRow> _oversightAnalytics;
+
+    [ObservableProperty]
+    private bool _isOversightBusy;
+
+    public IAsyncRelayCommand RefreshOversightCommand { get; }
+
+    public IRelayCommand DrillIntoOversightCommand { get; }
+
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var servicers = await _servicerService.GetAllAsync().ConfigureAwait(false);
@@ -93,6 +127,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             .ThenBy(s => s.Id)
             .Select(ToRecord)
             .ToList();
+
+        await UpdateOversightMetricsAsync(reloadData: true).ConfigureAwait(false);
 
         if (_lastSavedServicerId.HasValue)
         {
@@ -109,6 +145,37 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         }
 
         return ordered;
+    }
+
+    private List<ContractorIntervention> FilterInterventionsForSelection(List<ContractorIntervention> interventions)
+    {
+        if (SelectedRecord is null || !int.TryParse(SelectedRecord.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+        {
+            return interventions;
+        }
+
+        return interventions.Where(i => i.ContractorId == id).ToList();
+    }
+
+    private static void ReplaceCollection<T>(ObservableCollection<T> target, IEnumerable<T> items)
+    {
+        target.Clear();
+        foreach (var item in items)
+        {
+            target.Add(item);
+        }
+    }
+
+    private static Task RunOnDispatcherAsync(Action action)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
     }
 
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
@@ -180,16 +247,21 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         {
             _loadedServicer = null;
             SetEditor(ExternalServicerEditor.CreateEmpty());
+            await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
+            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
         if (IsInEditMode)
         {
+            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
         if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
         {
+            await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
+            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
@@ -197,11 +269,15 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         if (entity is null)
         {
             StatusMessage = $"External servicer #{id} could not be located.";
+            await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
+            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
         _loadedServicer = entity;
         LoadEditor(entity);
+        await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
+        DrillIntoOversightCommand.NotifyCanExecuteChanged();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -228,6 +304,12 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         }
 
         return Task.CompletedTask;
+    }
+
+    partial void OnIsOversightBusyChanged(bool value)
+    {
+        RefreshOversightCommand.NotifyCanExecuteChanged();
+        DrillIntoOversightCommand.NotifyCanExecuteChanged();
     }
 
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
@@ -412,6 +494,283 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         return new CflRequest("Select External Servicer", items);
     }
 
+    private Task ExecuteRefreshOversightAsync()
+        => UpdateOversightMetricsAsync(reloadData: true);
+
+    private bool CanDrillIntoOversight()
+        => !IsOversightBusy && SelectedRecord is not null;
+
+    private void DrillIntoOversight()
+    {
+        if (SelectedRecord is null)
+        {
+            StatusMessage = _localization.GetString("Module.ExternalServicers.Oversight.Status.SelectServicer");
+            return;
+        }
+
+        try
+        {
+            var document = _navigation.OpenModule(SchedulingModuleViewModel.ModuleKey, SelectedRecord.Key);
+            _navigation.Activate(document);
+            StatusMessage = string.Format(
+                CultureInfo.CurrentCulture,
+                _localization.GetString("Module.ExternalServicers.Oversight.Status.DrilledIn"),
+                SelectedRecord.Title);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = string.Format(
+                CultureInfo.CurrentCulture,
+                _localization.GetString("Module.ExternalServicers.Oversight.Status.DrillFailed"),
+                ex.Message);
+        }
+    }
+
+    private async Task UpdateOversightMetricsAsync(bool reloadData)
+    {
+        try
+        {
+            if (IsOversightBusy)
+            {
+                return;
+            }
+
+            IsOversightBusy = true;
+
+            if (reloadData || _interventions.Count == 0)
+            {
+                var data = await _databaseService
+                    .GetAllContractorInterventionsAsync()
+                    .ConfigureAwait(false);
+                _interventions = data ?? new List<ContractorIntervention>();
+            }
+
+            var scoped = FilterInterventionsForSelection(_interventions);
+
+            var now = DateTime.UtcNow;
+            var currentStart = now.AddDays(-30);
+            var previousStart = now.AddDays(-60);
+            var currentWindow = scoped.Where(i => i.InterventionDate >= currentStart).ToList();
+            var previousWindow = scoped
+                .Where(i => i.InterventionDate >= previousStart && i.InterventionDate < currentStart)
+                .ToList();
+
+            var metrics = BuildMetrics(scoped, currentWindow.Count, previousWindow.Count);
+            var timeline = BuildTimeline(scoped);
+            var analytics = BuildAnalytics(scoped);
+
+            await RunOnDispatcherAsync(() =>
+            {
+                ReplaceCollection(OversightMetrics, metrics);
+                ReplaceCollection(InterventionTimeline, timeline);
+                ReplaceCollection(OversightAnalytics, analytics);
+            }).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = string.Format(
+                CultureInfo.CurrentCulture,
+                _localization.GetString("Module.ExternalServicers.Oversight.Status.RefreshFailed"),
+                ex.Message);
+        }
+        finally
+        {
+            IsOversightBusy = false;
+        }
+    }
+
+    private IReadOnlyList<ContractorOversightMetric> BuildMetrics(
+        IReadOnlyCollection<ContractorIntervention> scoped,
+        int currentWindowCount,
+        int previousWindowCount)
+    {
+        var culture = CultureInfo.CurrentCulture;
+        var metrics = new List<ContractorOversightMetric>
+        {
+            new(
+                _localization.GetString("Module.ExternalServicers.Oversight.Metric.Total"),
+                scoped.Count.ToString("N0", culture),
+                BuildTrendText(currentWindowCount, previousWindowCount),
+                Brushes.SlateBlue)
+        };
+
+        var openStatuses = scoped
+            .Count(i => !string.IsNullOrWhiteSpace(i.Status) && !IsClosedStatus(i.Status));
+        metrics.Add(new ContractorOversightMetric(
+            _localization.GetString("Module.ExternalServicers.Oversight.Metric.Open"),
+            openStatuses.ToString("N0", culture),
+            _localization.GetString(openStatuses == 0
+                ? "Module.ExternalServicers.Oversight.Trend.NoBacklog"
+                : "Module.ExternalServicers.Oversight.Trend.Backlog"),
+            Brushes.Teal));
+
+        var upcomingThreshold = DateTime.UtcNow.AddDays(30);
+        var upcoming = scoped.Count(i => i.EndDate is { } end && end <= upcomingThreshold && end >= DateTime.UtcNow);
+        metrics.Add(new ContractorOversightMetric(
+            _localization.GetString("Module.ExternalServicers.Oversight.Metric.UpcomingExpirations"),
+            upcoming.ToString("N0", culture),
+            upcoming > 0
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Trend.ActionRequired")
+                : _localization.GetString("Module.ExternalServicers.Oversight.Trend.OnTrack"),
+            Brushes.Orange));
+
+        var mttr = CalculateAverageDuration(scoped);
+        metrics.Add(new ContractorOversightMetric(
+            _localization.GetString("Module.ExternalServicers.Oversight.Metric.AverageMttr"),
+            mttr is null
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
+                : FormatDuration(mttr.Value, culture),
+            mttr is null
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Trend.InsufficientData")
+                : _localization.GetString("Module.ExternalServicers.Oversight.Trend.Mttr"),
+            Brushes.MediumPurple));
+
+        return metrics;
+    }
+
+    private IReadOnlyList<ContractorOversightAnalyticsRow> BuildAnalytics(IReadOnlyCollection<ContractorIntervention> scoped)
+    {
+        var culture = CultureInfo.CurrentCulture;
+        var analytics = new List<ContractorOversightAnalyticsRow>();
+
+        if (scoped.Count == 0)
+        {
+            analytics.Add(new ContractorOversightAnalyticsRow(
+                _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.NoData"),
+                _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable"),
+                "-",
+                _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.Waiting")));
+            return analytics;
+        }
+
+        var statusGroups = scoped
+            .Where(i => !string.IsNullOrWhiteSpace(i.Status))
+            .GroupBy(i => i.Status!.Trim())
+            .Select(g => $"{g.Key}: {g.Count():N0}")
+            .ToList();
+
+        analytics.Add(new ContractorOversightAnalyticsRow(
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.StatusDistribution"),
+            statusGroups.Count == 0
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
+                : string.Join(" | ", statusGroups),
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Balanced"),
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.Info")));
+
+        var complianceCount = scoped.Count(i => i.GmpCompliance);
+        var complianceRate = scoped.Count == 0 ? 0 : (double)complianceCount / scoped.Count;
+        analytics.Add(new ContractorOversightAnalyticsRow(
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.Compliance"),
+            complianceRate.ToString("P0", culture),
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Compliance"),
+            complianceRate >= 0.9
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.OnTrack")
+                : _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.AtRisk")));
+
+        var activeAges = scoped
+            .Where(i => !string.IsNullOrWhiteSpace(i.Status) && !IsClosedStatus(i.Status))
+            .Select(i => (DateTime.UtcNow - i.InterventionDate).TotalDays)
+            .Where(days => days >= 0)
+            .ToList();
+
+        var averageAge = activeAges.Count == 0 ? 0 : activeAges.Average();
+        analytics.Add(new ContractorOversightAnalyticsRow(
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.BacklogAge"),
+            averageAge == 0
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
+                : string.Format(culture, "{0:F1} d", averageAge),
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Age"),
+            averageAge <= 14
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.OnTrack")
+                : _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.AtRisk")));
+
+        var mttr = CalculateAverageDuration(scoped);
+        analytics.Add(new ContractorOversightAnalyticsRow(
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.Mttr"),
+            mttr is null
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
+                : FormatDuration(mttr.Value, culture),
+            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Mttr"),
+            mttr is not null && mttr.Value.TotalHours <= 72
+                ? _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.OnTrack")
+                : _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.AtRisk")));
+
+        return analytics;
+    }
+
+    private static string BuildTrendText(int currentCount, int previousCount)
+    {
+        if (previousCount == 0 && currentCount == 0)
+        {
+            return "▬ 0";
+        }
+
+        if (previousCount == 0)
+        {
+            return $"▲ {currentCount}";
+        }
+
+        var delta = currentCount - previousCount;
+        if (delta == 0)
+        {
+            return "▬ 0";
+        }
+
+        var symbol = delta > 0 ? "▲" : "▼";
+        return $"{symbol} {Math.Abs(delta)}";
+    }
+
+    private static bool IsClosedStatus(string status)
+    {
+        var normalized = status.Trim().ToLowerInvariant();
+        return normalized is "closed" or "completed" or "done" or "resolved" or "archived";
+    }
+
+    private static TimeSpan? CalculateAverageDuration(IEnumerable<ContractorIntervention> scoped)
+    {
+        var durations = scoped
+            .Where(i => i.StartDate.HasValue && i.EndDate.HasValue && i.EndDate >= i.StartDate)
+            .Select(i => i.EndDate!.Value - i.StartDate!.Value)
+            .Where(duration => duration.TotalMinutes >= 0)
+            .ToList();
+
+        if (durations.Count == 0)
+        {
+            return null;
+        }
+
+        var averageTicks = Convert.ToInt64(durations.Average(d => d.Ticks));
+        return new TimeSpan(averageTicks);
+    }
+
+    private static string FormatDuration(TimeSpan duration, CultureInfo culture)
+    {
+        if (duration.TotalHours < 24)
+        {
+            return string.Format(culture, "{0:F1} h", duration.TotalHours);
+        }
+
+        return string.Format(culture, "{0:F1} d", duration.TotalDays);
+    }
+
+    private IReadOnlyList<ContractorInterventionTimelineItem> BuildTimeline(IEnumerable<ContractorIntervention> scoped)
+        => scoped
+            .OrderByDescending(i => i.InterventionDate)
+            .Take(15)
+            .Select(i => new ContractorInterventionTimelineItem(
+                i.InterventionDate,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    _localization.GetString("Module.ExternalServicers.Oversight.Timeline.Summary"),
+                    string.IsNullOrWhiteSpace(i.InterventionType) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.UnknownType") : i.InterventionType,
+                    string.IsNullOrWhiteSpace(i.Status) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.UnknownStatus") : i.Status),
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    _localization.GetString("Module.ExternalServicers.Oversight.Timeline.Detail"),
+                    string.IsNullOrWhiteSpace(i.Reason) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NoReason") : i.Reason,
+                    string.IsNullOrWhiteSpace(i.Result) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NoResult") : i.Result)))
+            .ToList();
+
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -513,6 +872,60 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             SuppliersModuleViewModel.ModuleKey,
             relatedParameter);
     }
+}
+
+public sealed class ContractorOversightMetric
+{
+    public ContractorOversightMetric(string title, string formattedValue, string trendText, Brush accentBrush)
+    {
+        Title = title;
+        FormattedValue = formattedValue;
+        TrendText = trendText;
+        AccentBrush = accentBrush;
+    }
+
+    public string Title { get; }
+
+    public string FormattedValue { get; }
+
+    public string TrendText { get; }
+
+    public Brush AccentBrush { get; }
+}
+
+public sealed class ContractorInterventionTimelineItem
+{
+    public ContractorInterventionTimelineItem(DateTime timestamp, string summary, string details)
+    {
+        Timestamp = timestamp;
+        Summary = summary;
+        Details = details;
+    }
+
+    public DateTime Timestamp { get; }
+
+    public string Summary { get; }
+
+    public string Details { get; }
+}
+
+public sealed class ContractorOversightAnalyticsRow
+{
+    public ContractorOversightAnalyticsRow(string metric, string value, string target, string status)
+    {
+        Metric = metric;
+        Value = value;
+        Target = target;
+        Status = status;
+    }
+
+    public string Metric { get; }
+
+    public string Value { get; }
+
+    public string Target { get; }
+
+    public string Status { get; }
 }
 /// <summary>
 /// Represents the external servicer editor value.
