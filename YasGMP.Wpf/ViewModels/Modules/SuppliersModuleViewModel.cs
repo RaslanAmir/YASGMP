@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
+using YasGMP.AppCore.Models.Signatures;
+using YasGMP.AppCore.Services;
 using YasGMP.Models;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
@@ -31,6 +36,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly IShellInteractionService _shellInteraction;
     private Supplier? _loadedSupplier;
     private SupplierEditor? _snapshot;
     private bool _suppressDirtyNotifications;
@@ -59,6 +65,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
 
         Editor = SupplierEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
@@ -83,7 +90,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             _localization.GetString("Module.Suppliers.Risk.High"),
             _localization.GetString("Module.Suppliers.Risk.Critical")
         });
+        AuditTimeline = new ObservableCollection<AuditEntryDto>();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        PreviewContractCommand = new AsyncRelayCommand(PreviewContractAsync, CanPreviewContract);
+        DownloadContractCommand = new AsyncRelayCommand(DownloadContractAsync, CanDownloadContract);
     }
 
     [ObservableProperty]
@@ -97,11 +107,24 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     [ObservableProperty]
     private IReadOnlyList<string> _riskOptions;
+
+    [ObservableProperty]
+    private ObservableCollection<AuditEntryDto> _auditTimeline;
     /// <summary>
     /// Gets or sets the attach document command.
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>
+    /// Gets the command that previews the configured supplier contract.
+    /// </summary>
+    public IAsyncRelayCommand PreviewContractCommand { get; }
+
+    /// <summary>
+    /// Gets the command that downloads the configured supplier contract.
+    /// </summary>
+    public IAsyncRelayCommand DownloadContractCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -168,6 +191,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         {
             _loadedSupplier = null;
             SetEditor(SupplierEditor.CreateEmpty());
+            AuditTimeline.Clear();
             UpdateAttachmentCommandState();
             return;
         }
@@ -189,13 +213,9 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             return;
         }
 
-        if (saveResult.SignatureMetadata?.Id is { } signatureId)
-        {
-            adapterResult.DigitalSignatureId = signatureId;
-        }
-
         _loadedSupplier = supplier;
         LoadEditor(supplier);
+        await LoadAuditTimelineAsync(supplier.Id).ConfigureAwait(false);
         UpdateAttachmentCommandState();
     }
 
@@ -208,7 +228,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             case FormMode.Add:
                 _snapshot = null;
                 _loadedSupplier = null;
-                SetEditor(SupplierEditor.CreateForNew());
+                SetEditor(SupplierEditor.CreateForNew(_authContext));
+                AuditTimeline.Clear();
                 break;
             case FormMode.Update:
                 if (_loadedSupplier is not null)
@@ -323,6 +344,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         _lastSavedSupplierId = supplier.Id;
 
         LoadEditor(supplier);
+        ApplySignatureMetadataToSupplier(supplier, signatureResult, context, saveResult.SignatureMetadata);
+        await LoadAuditTimelineAsync(supplier.Id).ConfigureAwait(false);
         UpdateAttachmentCommandState();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
@@ -363,10 +386,12 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             if (_loadedSupplier is not null)
             {
                 LoadEditor(_loadedSupplier);
+                _ = LoadAuditTimelineAsync(_loadedSupplier.Id);
             }
             else
             {
                 SetEditor(SupplierEditor.CreateEmpty());
+                AuditTimeline.Clear();
             }
         }
         else if (Mode == FormMode.Update && _snapshot is not null)
@@ -497,9 +522,19 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     private void UpdateAttachmentCommandState()
     {
-        if (AttachDocumentCommand is AsyncRelayCommand command)
+        if (AttachDocumentCommand is AsyncRelayCommand attach)
         {
-            command.NotifyCanExecuteChanged();
+            attach.NotifyCanExecuteChanged();
+        }
+
+        if (PreviewContractCommand is AsyncRelayCommand preview)
+        {
+            preview.NotifyCanExecuteChanged();
+        }
+
+        if (DownloadContractCommand is AsyncRelayCommand download)
+        {
+            download.NotifyCanExecuteChanged();
         }
     }
 
@@ -547,6 +582,323 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         }
 
         StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
+    }
+
+    private bool CanPreviewContract()
+        => !IsBusy
+           && !IsEditorEnabled
+           && _loadedSupplier is { Id: > 0 }
+           && !string.IsNullOrWhiteSpace(Editor?.ContractFile);
+
+    private async Task PreviewContractAsync()
+    {
+        if (!CanPreviewContract())
+        {
+            return;
+        }
+
+        var contractName = Editor.ContractFile?.Trim();
+        if (string.IsNullOrWhiteSpace(contractName))
+        {
+            StatusMessage = "Contract file name is not specified.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommandState();
+
+            var attachment = await FindContractAttachmentAsync(contractName).ConfigureAwait(false);
+            if (attachment is null)
+            {
+                StatusMessage = $"Contract '{contractName}' not found for the selected supplier.";
+                return;
+            }
+
+            var tempDirectory = Path.Combine(Path.GetTempPath(), $"YasGMP.Supplier.{_loadedSupplier!.Id}.{Guid.NewGuid():N}");
+            Directory.CreateDirectory(tempDirectory);
+            var tempPath = Path.Combine(tempDirectory, attachment.Attachment.FileName);
+
+            await using (var destination = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.Read, 128 * 1024, useAsync: true))
+            {
+                var request = new AttachmentReadRequest
+                {
+                    RequestedById = _authContext.CurrentUser?.Id,
+                    Reason = $"wpf:{ModuleKey}:preview",
+                    SourceHost = Environment.MachineName,
+                    SourceIp = _authContext.CurrentIpAddress
+                };
+
+                await _attachmentWorkflow
+                    .DownloadAsync(attachment.Attachment.Id, destination, request)
+                    .ConfigureAwait(false);
+            }
+
+            _shellInteraction.PreviewDocument(tempPath);
+            StatusMessage = $"Previewing contract '{attachment.Attachment.FileName}'.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to preview contract: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+    }
+
+    private bool CanDownloadContract()
+        => !IsBusy
+           && !IsEditorEnabled
+           && _loadedSupplier is { Id: > 0 }
+           && !string.IsNullOrWhiteSpace(Editor?.ContractFile);
+
+    private async Task DownloadContractAsync()
+    {
+        if (!CanDownloadContract())
+        {
+            return;
+        }
+
+        var contractName = Editor.ContractFile?.Trim();
+        if (string.IsNullOrWhiteSpace(contractName))
+        {
+            StatusMessage = "Contract file name is not specified.";
+            return;
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            FileName = contractName,
+            Title = $"Save {contractName}",
+            Filter = "All files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            StatusMessage = "Download cancelled.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommandState();
+
+            var attachment = await FindContractAttachmentAsync(contractName).ConfigureAwait(false);
+            if (attachment is null)
+            {
+                StatusMessage = $"Contract '{contractName}' not found for the selected supplier.";
+                return;
+            }
+
+            await using (var destination = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.None, 128 * 1024, useAsync: true))
+            {
+                var request = new AttachmentReadRequest
+                {
+                    RequestedById = _authContext.CurrentUser?.Id,
+                    Reason = $"wpf:{ModuleKey}:download",
+                    SourceHost = Environment.MachineName,
+                    SourceIp = _authContext.CurrentIpAddress
+                };
+
+                var result = await _attachmentWorkflow
+                    .DownloadAsync(attachment.Attachment.Id, destination, request)
+                    .ConfigureAwait(false);
+
+                StatusMessage = $"Downloaded {result.BytesWritten:N0} byte(s) to '{dialog.FileName}'.";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to download contract: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+    }
+
+    private async Task<AttachmentLinkWithAttachment?> FindContractAttachmentAsync(string contractName)
+    {
+        if (_loadedSupplier is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var links = await _attachmentWorkflow
+                .GetLinksForEntityAsync("suppliers", _loadedSupplier.Id)
+                .ConfigureAwait(false);
+
+            return links.FirstOrDefault(link
+                => string.Equals(link.Attachment.FileName, contractName, StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(link.Attachment.Name, contractName, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to query supplier attachments: {ex.Message}";
+            return null;
+        }
+    }
+
+    private async Task LoadAuditTimelineAsync(int supplierId)
+    {
+        if (Audit is null)
+        {
+            AuditTimeline.Clear();
+            return;
+        }
+
+        try
+        {
+            var from = DateTime.UtcNow.AddYears(-5);
+            var to = DateTime.UtcNow.AddDays(1);
+            var audits = await Audit
+                .GetFilteredAudits(string.Empty, "suppliers", string.Empty, from, to)
+                .ConfigureAwait(false);
+
+            var filtered = audits
+                .Where(entry => string.Equals(entry.Entity, "suppliers", StringComparison.OrdinalIgnoreCase))
+                .Where(entry => int.TryParse(entry.EntityId, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedId)
+                                 && parsedId == supplierId)
+                .OrderBy(entry => entry.Timestamp)
+                .ToList();
+
+            AuditTimeline.Clear();
+            foreach (var entry in filtered)
+            {
+                AuditTimeline.Add(entry);
+            }
+        }
+        catch (Exception ex)
+        {
+            AuditTimeline.Clear();
+            StatusMessage = $"Failed to load supplier audit timeline: {ex.Message}";
+        }
+    }
+
+    private void ApplySignatureMetadataToSupplier(
+        Supplier supplier,
+        ElectronicSignatureDialogResult signatureResult,
+        SupplierCrudContext context,
+        SignatureMetadataDto? metadata)
+    {
+        if (supplier is null)
+        {
+            throw new ArgumentNullException(nameof(supplier));
+        }
+
+        if (signatureResult is null)
+        {
+            throw new ArgumentNullException(nameof(signatureResult));
+        }
+
+        if (signatureResult.Signature is null)
+        {
+            throw new ArgumentException("Signature result is missing the captured signature payload.", nameof(signatureResult));
+        }
+
+        var signature = signatureResult.Signature;
+        var signerId = signature.UserId != 0 ? signature.UserId : context.UserId;
+        var fallbackName = _authContext.CurrentUser?.FullName
+            ?? _authContext.CurrentUser?.Username
+            ?? string.Empty;
+        var signerName = !string.IsNullOrWhiteSpace(signature.UserName)
+            ? signature.UserName!
+            : supplier.LastModifiedBy?.FullName
+                ?? supplier.LastModifiedBy?.Username
+                ?? fallbackName;
+
+        var signatureHash = !string.IsNullOrWhiteSpace(signature.SignatureHash)
+            ? signature.SignatureHash!
+            : metadata?.Hash
+              ?? context.SignatureHash
+              ?? supplier.DigitalSignature
+              ?? string.Empty;
+
+        supplier.DigitalSignature = signatureHash;
+        var metadataId = metadata?.Id ?? (signature.Id > 0 ? signature.Id : supplier.DigitalSignatureId);
+        supplier.DigitalSignatureId = metadataId;
+
+        var signedAt = signature.SignedAt ?? DateTime.UtcNow;
+        supplier.LastModified = signedAt;
+
+        if (signerId > 0)
+        {
+            supplier.LastModifiedById = signerId;
+        }
+
+        supplier.SourceIp = !string.IsNullOrWhiteSpace(signature.IpAddress)
+            ? signature.IpAddress!
+            : metadata?.IpAddress
+              ?? context.Ip
+              ?? supplier.SourceIp;
+
+        supplier.SessionId = !string.IsNullOrWhiteSpace(signature.SessionId)
+            ? signature.SessionId!
+            : metadata?.Session
+              ?? context.SessionId
+              ?? supplier.SessionId;
+
+        if (supplier.LastModifiedBy is null && (!string.IsNullOrWhiteSpace(signerName) || signerId > 0))
+        {
+            supplier.LastModifiedBy = new User
+            {
+                Id = signerId,
+                FullName = signerName,
+                Username = signerName
+            };
+        }
+        else if (supplier.LastModifiedBy is not null)
+        {
+            if (signerId > 0)
+            {
+                supplier.LastModifiedBy.Id = signerId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(signerName))
+            {
+                if (string.IsNullOrWhiteSpace(supplier.LastModifiedBy.FullName))
+                {
+                    supplier.LastModifiedBy.FullName = signerName;
+                }
+
+                if (string.IsNullOrWhiteSpace(supplier.LastModifiedBy.Username))
+                {
+                    supplier.LastModifiedBy.Username = signerName;
+                }
+            }
+        }
+
+        Editor.DigitalSignatureId = supplier.DigitalSignatureId;
+        Editor.DigitalSignature = supplier.DigitalSignature ?? string.Empty;
+        Editor.SignatureHash = supplier.DigitalSignature;
+        Editor.SignatureReason = signatureResult.ReasonDisplay ?? string.Empty;
+        var note = !string.IsNullOrWhiteSpace(signature.Note)
+            ? signature.Note!
+            : metadata?.Note
+              ?? context.SignatureNote
+              ?? string.Empty;
+        Editor.SignatureNote = note;
+        Editor.SignatureTimestampUtc = signedAt;
+        Editor.SignerUserId = supplier.LastModifiedById;
+        Editor.SignerUserName = signerName;
+        Editor.LastModifiedUtc = supplier.LastModified;
+        Editor.LastModifiedById = supplier.LastModifiedById;
+        Editor.LastModifiedByName = signerName;
+        Editor.SourceIp = supplier.SourceIp ?? string.Empty;
+        Editor.SessionId = supplier.SessionId ?? string.Empty;
+        var deviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
+            ? signature.DeviceInfo!
+            : metadata?.Device
+              ?? context.DeviceInfo
+              ?? string.Empty;
+        Editor.DeviceInfo = deviceInfo;
     }
 
     private static ModuleRecord ToRecord(Supplier supplier)
@@ -634,6 +986,45 @@ public sealed partial class SupplierEditor : ObservableObject
 
     [ObservableProperty]
     private string _digitalSignature = string.Empty;
+
+    [ObservableProperty]
+    private int? _digitalSignatureId;
+
+    [ObservableProperty]
+    private string _signatureHash = string.Empty;
+
+    [ObservableProperty]
+    private string _signatureReason = string.Empty;
+
+    [ObservableProperty]
+    private string _signatureNote = string.Empty;
+
+    [ObservableProperty]
+    private DateTime? _signatureTimestampUtc;
+
+    [ObservableProperty]
+    private int? _signerUserId;
+
+    [ObservableProperty]
+    private string _signerUserName = string.Empty;
+
+    [ObservableProperty]
+    private DateTime? _lastModifiedUtc;
+
+    [ObservableProperty]
+    private int? _lastModifiedById;
+
+    [ObservableProperty]
+    private string _lastModifiedByName = string.Empty;
+
+    [ObservableProperty]
+    private string _sourceIp = string.Empty;
+
+    [ObservableProperty]
+    private string _sessionId = string.Empty;
+
+    [ObservableProperty]
+    private string _deviceInfo = string.Empty;
     /// <summary>
     /// Executes the create empty operation.
     /// </summary>
@@ -643,13 +1034,37 @@ public sealed partial class SupplierEditor : ObservableObject
     /// Executes the create for new operation.
     /// </summary>
 
-    public static SupplierEditor CreateForNew()
-        => new()
+    public static SupplierEditor CreateForNew(IAuthContext authContext)
+    {
+        if (authContext is null)
+        {
+            throw new ArgumentNullException(nameof(authContext));
+        }
+
+        var userId = authContext.CurrentUser?.Id;
+        var userName = authContext.CurrentUser?.FullName
+            ?? authContext.CurrentUser?.Username
+            ?? string.Empty;
+
+        return new SupplierEditor
         {
             Status = "Active",
             RiskLevel = "Low",
-            CooperationStart = DateTime.UtcNow.Date
+            CooperationStart = DateTime.UtcNow.Date,
+            SignatureHash = string.Empty,
+            SignatureReason = string.Empty,
+            SignatureNote = string.Empty,
+            SignatureTimestampUtc = DateTime.UtcNow,
+            SignerUserId = userId,
+            SignerUserName = userName,
+            LastModifiedUtc = DateTime.UtcNow,
+            LastModifiedById = userId,
+            LastModifiedByName = userName,
+            SourceIp = authContext.CurrentIpAddress ?? string.Empty,
+            SessionId = authContext.CurrentSessionId ?? string.Empty,
+            DeviceInfo = authContext.CurrentDeviceInfo ?? string.Empty
         };
+    }
     /// <summary>
     /// Executes the from supplier operation.
     /// </summary>
@@ -678,7 +1093,24 @@ public sealed partial class SupplierEditor : ObservableObject
             CooperationStart = supplier.CooperationStart,
             CooperationEnd = supplier.CooperationEnd,
             RegisteredAuthorities = supplier.RegisteredAuthorities ?? string.Empty,
-            DigitalSignature = supplier.DigitalSignature ?? string.Empty
+            DigitalSignature = supplier.DigitalSignature ?? string.Empty,
+            DigitalSignatureId = supplier.DigitalSignatureId,
+            SignatureHash = supplier.DigitalSignature ?? string.Empty,
+            SignatureReason = string.Empty,
+            SignatureNote = string.Empty,
+            SignatureTimestampUtc = supplier.LastModified,
+            SignerUserId = supplier.LastModifiedById,
+            SignerUserName = supplier.LastModifiedBy?.FullName
+                ?? supplier.LastModifiedBy?.Username
+                ?? string.Empty,
+            LastModifiedUtc = supplier.LastModified,
+            LastModifiedById = supplier.LastModifiedById,
+            LastModifiedByName = supplier.LastModifiedBy?.FullName
+                ?? supplier.LastModifiedBy?.Username
+                ?? string.Empty,
+            SourceIp = supplier.SourceIp ?? string.Empty,
+            SessionId = supplier.SessionId ?? string.Empty,
+            DeviceInfo = string.Empty
         };
     }
     /// <summary>
@@ -707,7 +1139,20 @@ public sealed partial class SupplierEditor : ObservableObject
             CooperationStart = CooperationStart,
             CooperationEnd = CooperationEnd,
             RegisteredAuthorities = RegisteredAuthorities,
-            DigitalSignature = DigitalSignature
+            DigitalSignature = DigitalSignature,
+            DigitalSignatureId = DigitalSignatureId,
+            SignatureHash = SignatureHash,
+            SignatureReason = SignatureReason,
+            SignatureNote = SignatureNote,
+            SignatureTimestampUtc = SignatureTimestampUtc,
+            SignerUserId = SignerUserId,
+            SignerUserName = SignerUserName,
+            LastModifiedUtc = LastModifiedUtc,
+            LastModifiedById = LastModifiedById,
+            LastModifiedByName = LastModifiedByName,
+            SourceIp = SourceIp,
+            SessionId = SessionId,
+            DeviceInfo = DeviceInfo
         };
     }
     /// <summary>
@@ -735,7 +1180,14 @@ public sealed partial class SupplierEditor : ObservableObject
         supplier.CooperationStart = CooperationStart;
         supplier.CooperationEnd = CooperationEnd;
         supplier.RegisteredAuthorities = RegisteredAuthorities?.Trim() ?? string.Empty;
-        supplier.DigitalSignature = DigitalSignature ?? existing?.DigitalSignature ?? string.Empty;
+        supplier.DigitalSignatureId = DigitalSignatureId;
+        supplier.DigitalSignature = !string.IsNullOrWhiteSpace(SignatureHash)
+            ? SignatureHash!
+            : DigitalSignature ?? existing?.DigitalSignature ?? string.Empty;
+        supplier.LastModified = LastModifiedUtc ?? supplier.LastModified;
+        supplier.LastModifiedById = LastModifiedById ?? supplier.LastModifiedById;
+        supplier.SourceIp = string.IsNullOrWhiteSpace(SourceIp) ? supplier.SourceIp : SourceIp;
+        supplier.SessionId = string.IsNullOrWhiteSpace(SessionId) ? supplier.SessionId : SessionId;
         return supplier;
     }
 }
