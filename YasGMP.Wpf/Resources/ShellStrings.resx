@@ -2070,6 +2070,30 @@
   <data name="Module.Suppliers.Text.ContractFile" xml:space="preserve">
     <value>Contract File</value>
   </data>
+  <data name="Module.Suppliers.Button.PreviewContract.Content" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Module.Suppliers.Button.PreviewContract.ToolTip" xml:space="preserve">
+    <value>Preview the supplier contract in-app</value>
+  </data>
+  <data name="Module.Suppliers.Button.PreviewContract.AutomationName" xml:space="preserve">
+    <value>Preview Contract</value>
+  </data>
+  <data name="Module.Suppliers.Button.PreviewContract.AutomationId" xml:space="preserve">
+    <value>SuppliersPreviewContractButton</value>
+  </data>
+  <data name="Module.Suppliers.Button.DownloadContract.Content" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Module.Suppliers.Button.DownloadContract.ToolTip" xml:space="preserve">
+    <value>Download the supplier contract file</value>
+  </data>
+  <data name="Module.Suppliers.Button.DownloadContract.AutomationName" xml:space="preserve">
+    <value>Download Contract</value>
+  </data>
+  <data name="Module.Suppliers.Button.DownloadContract.AutomationId" xml:space="preserve">
+    <value>SuppliersDownloadContractButton</value>
+  </data>
   <data name="Module.Suppliers.Text.CooperationEnd" xml:space="preserve">
     <value>Cooperation End</value>
   </data>
