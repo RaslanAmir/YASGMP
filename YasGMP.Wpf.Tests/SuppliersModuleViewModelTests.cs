@@ -80,6 +80,66 @@ public class SuppliersModuleViewModelTests
     }
 
     [Fact]
+    public async Task OnSaveAsync_AddMode_AppliesSignatureMetadataToEditor()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        const int metadataId = 90210;
+        var supplierAdapter = new FakeSupplierCrudService
+        {
+            SignatureMetadataIdSource = _ => metadataId
+        };
+        const string sessionId = "session-test";
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 7, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "127.0.0.1",
+            CurrentSessionId = sessionId
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        viewModel.Editor.Name = "Contoso";
+        viewModel.Editor.SupplierType = "Calibration";
+        viewModel.Editor.Status = "Active";
+        viewModel.Editor.VatNumber = "HR123";
+        viewModel.Editor.Email = "info@contoso.example";
+        viewModel.Editor.Phone = "+385 91 000 111";
+        viewModel.Editor.Country = "Croatia";
+
+        var beforeSave = DateTime.UtcNow;
+        var saved = await InvokeSaveAsync(viewModel);
+        var afterSave = DateTime.UtcNow;
+
+        Assert.True(saved);
+        var editor = Assert.IsType<SupplierEditor>(viewModel.Editor);
+        Assert.Equal(metadataId, editor.DigitalSignatureId);
+        Assert.Equal("test-signature", editor.DigitalSignature);
+        Assert.Equal("test-signature", editor.SignatureHash);
+        Assert.Equal("QA Reason", editor.SignatureReason);
+        Assert.Equal("Automated test", editor.SignatureNote);
+        var timestamp = Assert.NotNull(editor.SignatureTimestampUtc);
+        Assert.InRange(timestamp, beforeSave.AddSeconds(-5), afterSave.AddSeconds(5));
+        Assert.Equal(7, editor.SignerUserId);
+        Assert.Equal("QA", editor.SignerUserName);
+        Assert.Equal(7, editor.LastModifiedById);
+        Assert.Equal("QA", editor.LastModifiedByName);
+        Assert.Equal("127.0.0.1", editor.SourceIp);
+        Assert.Equal(sessionId, editor.SessionId);
+        Assert.Equal("UnitTest", editor.DeviceInfo);
+        Assert.False(viewModel.IsDirty);
+    }
+
+    [Fact]
     public async Task OnSaveAsync_AddMode_CancelledSignatureAbortsWithoutPersistence()
     {
         var database = new DatabaseService();
