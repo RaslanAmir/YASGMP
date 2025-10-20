@@ -239,7 +239,7 @@
     "Work Orders editor now surfaces CRUD via adapter with attachments and mandatory e-signature capture, and its inspector timeline now renders audit history alongside captured signature manifests",
     "Calibration editor now exposes CRUD with supplier/component lookups, attachment uploads, and mandatory e-signature capture; audit work remains queued for Batch B2",
     "Assets module now uploads attachments via AttachmentService from the WPF shell and enforces electronic signatures before save; audit surfacing remains pending.",
-    "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module.",
+    "2025-09-24 & 2025-09-26: Batch 0 retries confirmed dotnet CLI still unavailable (`dotnet --info/restore/build` all fail). Awaiting host SDK install before expanding CRUD refactors to Assets module (since completed with AssetsModuleView attachment + signature parity).",
     "2025-09-25: Batch 0 retry again hit 'command not found' for dotnet --info/restore/build in container.",
     "2025-09-27: Batch 0 still blocked in container; dotnet CLI absent so restore/build/smoke cannot execute.",
     "2025-09-29: dotnet --info/restore/build retried; container still lacks CLI so Batch 0 remains blocked.",
