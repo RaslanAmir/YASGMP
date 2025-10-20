@@ -109,6 +109,7 @@
 - 2026-04-24: Asset view-model now fronts CRUD via `IMachineCrudService`, OnRecordSelected/OnSave flow through shared add/update routines, and post-save refreshes repopulate `_assetViewModel.FilteredAssets`/status so both shell panes stay synchronized; `dotnet restore/build/test` still fail with `bash: command not found: dotnet` inside this Linux container.
 - 2026-04-24: AssetsModuleView.xaml now binds the grid to `AssetViewModel.FilteredAssets`, scopes inspector controls to the shared editor payload, and reaffirms signature metadata bindings; `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet` until run on Windows.
 - 2026-04-26: Registered the shared AssetViewModel singleton in the WPF host, synchronized the shell adapter with the MAUI payload, rebound the Assets grid to `SharedAsset.FilteredAssets`, and `dotnet restore/build/test` still exit with `bash: command not found: dotnet` pending Windows validation.
+- 2026-04-27: Assets delete workflow now applies entity metadata to captured signatures before persistence so audit records retain table/record linkage; `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests --filter AssetsModuleViewModelTests` continue to fail with `bash: command not found: dotnet` in this container.
 - CLI status: `dotnet restore yasgmp.sln` remains blocked with `bash: command not found: dotnet`; Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)
