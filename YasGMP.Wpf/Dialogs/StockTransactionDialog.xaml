@@ -59,7 +59,6 @@
                             <Trigger Property="Text" Value="{x:Null}">
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </Trigger>
-                            <Setter Property="Visibility" Value="Visible" />
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
