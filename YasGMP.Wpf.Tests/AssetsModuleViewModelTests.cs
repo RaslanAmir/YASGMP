@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -1059,6 +1060,228 @@ public class AssetsModuleViewModelTests : IDisposable
         Assert.Equal("Suite 9", viewModel.Asset.Location);
         Assert.True(viewModel.AttachDocumentCommand.CanExecute(null));
         Assert.True(canExecuteRaised > 0);
+    }
+
+    [Fact]
+    public async Task UpdateAssetCommand_PersistsChangesThroughCrudService()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 12,
+            Code = "AST-012",
+            Name = "Autoclave",
+            Manufacturer = "Steris",
+            Location = "Suite 1",
+            Status = "active",
+            UrsDoc = "URS-AUTO-01"
+        });
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 15, FullName = "QA Operator" },
+            CurrentDeviceInfo = "UnitTestRig",
+            CurrentIpAddress = "10.0.0.40"
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+        var assetViewModel = CreateAssetViewModel();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            assetViewModel,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+
+        await viewModel.InitializeAsync(null);
+        await Task.Yield();
+
+        Assert.NotNull(viewModel.SelectedAsset);
+
+        viewModel.Mode = FormMode.Update;
+        await Task.Delay(50);
+
+        viewModel.Asset.Location = "Suite 2";
+        viewModel.Asset.UrsDoc = "URS-AUTO-02";
+
+        Assert.True(viewModel.UpdateAssetCommand.CanExecute(null));
+
+        await viewModel.UpdateAssetCommand.ExecuteAsync(null);
+
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.False(viewModel.IsDirty);
+        var status = _localization.GetString("Module.Assets.Status.SignatureCaptured", "QA Reason");
+        Assert.Equal(status, viewModel.StatusMessage);
+
+        var snapshot = Assert.Single(machineAdapter.SavedWithContext);
+        Assert.Equal(12, snapshot.Entity.Id);
+        Assert.Equal("Suite 2", snapshot.Entity.Location);
+        Assert.Equal("URS-AUTO-02", snapshot.Entity.UrsDoc);
+        Assert.Equal("test-signature", snapshot.Context.SignatureHash);
+        Assert.Equal("password", snapshot.Context.SignatureMethod);
+        Assert.Equal("valid", snapshot.Context.SignatureStatus);
+        Assert.Equal(auth.CurrentUser?.Id, snapshot.Context.UserId);
+        Assert.Equal(auth.CurrentIpAddress, snapshot.Context.Ip);
+        Assert.Equal(auth.CurrentDeviceInfo, snapshot.Context.DeviceInfo);
+
+        var stored = Assert.Single(machineAdapter.Saved);
+        Assert.Equal("Suite 2", stored.Location);
+        Assert.Equal("URS-AUTO-02", stored.UrsDoc);
+
+        Assert.True(signatureDialog.PersistInvocationCount > 0);
+    }
+
+    [Fact]
+    public async Task DeleteAssetCommand_SignatureCancelled_DoesNotDelete()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 21,
+            Code = "AST-021",
+            Name = "Mixer",
+            Manufacturer = "Contoso",
+            Location = "Suite 4",
+            Status = "active",
+            UrsDoc = "URS-MIX-01"
+        });
+
+        var auth = new TestAuthContext();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCancelled();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+        var assetViewModel = CreateAssetViewModel();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            assetViewModel,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+
+        await viewModel.InitializeAsync(null);
+        await Task.Yield();
+
+        Assert.True(viewModel.DeleteAssetCommand.CanExecute(null));
+
+        await viewModel.DeleteAssetCommand.ExecuteAsync(null);
+
+        var expectedStatus = _localization.GetString("Module.Assets.Status.SignatureCancelled");
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
+        Assert.Empty(machineAdapter.DeletedWithContext);
+        Assert.Single(machineAdapter.Saved); // record remains
+    }
+
+    [Fact]
+    public async Task DeleteAssetCommand_RemovesAssetAndPersistsSignature()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var machineAdapter = new FakeMachineCrudService();
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 30,
+            Code = "AST-030",
+            Name = "Filler",
+            Manufacturer = "Globex",
+            Location = "Suite 7",
+            Status = "active",
+            UrsDoc = "URS-FIL-01"
+        });
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 25, FullName = "QA" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "10.0.0.45"
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+        var assetViewModel = CreateAssetViewModel();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            assetViewModel,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+
+        await viewModel.InitializeAsync(null);
+        await Task.Yield();
+
+        Assert.True(viewModel.DeleteAssetCommand.CanExecute(null));
+
+        await viewModel.DeleteAssetCommand.ExecuteAsync(null);
+
+        var deletion = Assert.Single(machineAdapter.DeletedWithContext);
+        Assert.Equal(30, deletion.Id);
+        Assert.Equal("test-signature", deletion.Context.SignatureHash);
+        Assert.Equal("password", deletion.Context.SignatureMethod);
+        Assert.Equal(auth.CurrentDeviceInfo, deletion.Context.DeviceInfo);
+        Assert.Equal(auth.CurrentIpAddress, deletion.Context.Ip);
+        Assert.True(signatureDialog.PersistInvocationCount > 0);
+
+        var expectedStatus = _localization.GetString("Module.Assets.Status.DeleteSuccess", "Filler");
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
+        Assert.Empty(machineAdapter.Saved); // store refreshed via LoadAssetsAsync
     }
 
     public void Dispose() => _localization.SetLanguage(_originalLanguage);

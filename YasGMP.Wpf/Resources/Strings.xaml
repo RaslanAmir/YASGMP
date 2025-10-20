@@ -71,6 +71,8 @@
     <sys:String x:Key="Module.Toolbar.Button.GoldenArrow.AutomationId">Toolbar.Button.GoldenArrow</sys:String>
     <sys:String x:Key="Module.Toolbar.Button.GenerateCode.AutomationId">Toolbar.Button.GenerateCode</sys:String>
     <sys:String x:Key="Module.Toolbar.Button.PreviewQr.AutomationId">Toolbar.Button.PreviewQr</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Update.AutomationId">Toolbar.Button.Update</sys:String>
+    <sys:String x:Key="Module.Toolbar.Button.Delete.AutomationId">Toolbar.Button.Delete</sys:String>
 
     <sys:String x:Key="Dashboard.Toolbar.AutomationId">Dashboard.Toolbar</sys:String>
     <sys:String x:Key="Dashboard.Search.AutomationId">Dashboard.Search</sys:String>

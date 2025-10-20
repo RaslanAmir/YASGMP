@@ -108,6 +108,8 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
         GenerateCodeCommand = new AsyncRelayCommand(GenerateCodeAsync, CanGenerateCode);
         PreviewQrCommand = new AsyncRelayCommand(PreviewQrAsync, CanPreviewQr);
+        UpdateAssetCommand = new AsyncRelayCommand(UpdateAssetAsync, CanUpdateAsset);
+        DeleteAssetCommand = new AsyncRelayCommand(DeleteAssetAsync, CanDeleteAsset);
     }
 
     /// <summary>Shared asset editor payload bound to the form fields.</summary>
@@ -221,6 +223,12 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
 
     /// <summary>Persists the QR payload to disk and surfaces the generated PNG path for preview.</summary>
     public IAsyncRelayCommand PreviewQrCommand { get; }
+
+    /// <summary>Routes update requests through the shared save pipeline so signature capture remains enforced.</summary>
+    public IAsyncRelayCommand UpdateAssetCommand { get; }
+
+    /// <summary>Deletes the selected asset after capturing the required electronic signature.</summary>
+    public IAsyncRelayCommand DeleteAssetCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -1826,6 +1834,125 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         }
     }
 
+    private bool CanUpdateAsset()
+        => !IsBusy
+           && Mode == FormMode.Update
+           && ResolveSelectedMachineId() > 0;
+
+    private Task UpdateAssetAsync()
+    {
+        if (!CanUpdateAsset())
+        {
+            return Task.CompletedTask;
+        }
+
+        return SaveCommand.ExecuteAsync(null);
+    }
+
+    private bool CanDeleteAsset()
+        => !IsBusy
+           && !IsInEditMode
+           && ResolveSelectedMachineId() > 0;
+
+    private async Task DeleteAssetAsync()
+    {
+        if (!CanDeleteAsset())
+        {
+            return;
+        }
+
+        var machineId = ResolveSelectedMachineId();
+        if (machineId <= 0)
+        {
+            StatusMessage = _localization.GetString("Module.Assets.Status.SelectBeforeDelete");
+            return;
+        }
+
+        var assetSnapshot = EnsureSelectedAsset();
+        var assetLabel = ResolveAssetLabel(assetSnapshot, machineId);
+        var successMessage = string.Empty;
+        var deleted = false;
+
+        try
+        {
+            IsBusy = true;
+            UpdateCommandStates();
+
+            ElectronicSignatureDialogResult? signatureResult;
+            try
+            {
+                signatureResult = await _signatureDialog
+                    .CaptureSignatureAsync(new ElectronicSignatureContext("machines", machineId))
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.SignatureFailed", ex.Message);
+                return;
+            }
+
+            if (signatureResult is null)
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.SignatureCancelled");
+                return;
+            }
+
+            if (signatureResult.Signature is null)
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.SignatureNotCaptured");
+                return;
+            }
+
+            var context = MachineCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId,
+                signatureResult);
+
+            try
+            {
+                await _machineService.DeleteAsync(machineId, context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.DeleteFailed", ex.Message);
+                return;
+            }
+
+            try
+            {
+                await SignaturePersistenceHelper
+                    .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = _localization.GetString("Module.Assets.Status.SignaturePersistenceFailed", ex.Message);
+                return;
+            }
+
+            deleted = true;
+            _loadedMachine = null;
+            _assetViewModel.ClearSelection();
+            await _assetViewModel.LoadAssetsAsync().ConfigureAwait(false);
+            ResetDirty();
+            Mode = FormMode.View;
+            successMessage = _localization.GetString("Module.Assets.Status.DeleteSuccess", assetLabel);
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+
+        if (deleted)
+        {
+            await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+            StatusMessage = successMessage;
+        }
+    }
+
     private bool CanAttachDocument()
         => !IsBusy
            && !IsEditorEnabled
@@ -2116,11 +2243,53 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
         return builder.ToString();
     }
 
+    private int ResolveSelectedMachineId()
+    {
+        if (_assetViewModel.SelectedAsset is { Id: > 0 } asset)
+        {
+            return asset.Id;
+        }
+
+        if (_loadedMachine is { Id: > 0 } machine)
+        {
+            return machine.Id;
+        }
+
+        if (int.TryParse(SelectedRecord?.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+        {
+            return id;
+        }
+
+        return 0;
+    }
+
+    private static string ResolveAssetLabel(Asset asset, int fallbackId)
+    {
+        if (!string.IsNullOrWhiteSpace(asset.AssetName))
+        {
+            return asset.AssetName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(asset.Name))
+        {
+            return asset.Name;
+        }
+
+        if (!string.IsNullOrWhiteSpace(asset.AssetCode))
+        {
+            return asset.AssetCode;
+        }
+
+        return fallbackId.ToString(CultureInfo.InvariantCulture);
+    }
+
     private void UpdateCommandStates()
     {
         AttachDocumentCommand.NotifyCanExecuteChanged();
         GenerateCodeCommand.NotifyCanExecuteChanged();
         PreviewQrCommand.NotifyCanExecuteChanged();
+        UpdateAssetCommand.NotifyCanExecuteChanged();
+        DeleteAssetCommand.NotifyCanExecuteChanged();
     }
 
     private static ModuleRecord ToRecord(Asset asset)

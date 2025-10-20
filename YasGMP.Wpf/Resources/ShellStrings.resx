@@ -531,6 +531,15 @@
   <data name="Module.Assets.Status.SignatureCaptured" xml:space="preserve">
     <value>Electronic signature captured ({0}).</value>
   </data>
+  <data name="Module.Assets.Status.SelectBeforeDelete" xml:space="preserve">
+    <value>Select an asset before deleting it.</value>
+  </data>
+  <data name="Module.Assets.Status.DeleteFailed" xml:space="preserve">
+    <value>Delete failed: {0}</value>
+  </data>
+  <data name="Module.Assets.Status.DeleteSuccess" xml:space="preserve">
+    <value>Asset '{0}' deleted.</value>
+  </data>
   <data name="Module.Assets.Status.SaveBeforeAttachment" xml:space="preserve">
     <value>Save the asset before adding attachments.</value>
   </data>
@@ -2333,6 +2342,24 @@
   </data>
   <data name="Module.Toolbar.Button.PreviewQr.AutomationName" xml:space="preserve">
     <value>Preview asset QR code command</value>
+  </data>
+  <data name="Module.Toolbar.Button.Update.Content" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Module.Toolbar.Button.Update.ToolTip" xml:space="preserve">
+    <value>Apply pending changes to the selected asset.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Update.AutomationName" xml:space="preserve">
+    <value>Update asset command</value>
+  </data>
+  <data name="Module.Toolbar.Button.Delete.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Module.Toolbar.Button.Delete.ToolTip" xml:space="preserve">
+    <value>Delete the selected asset after capturing a signature.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Delete.AutomationName" xml:space="preserve">
+    <value>Delete asset command</value>
   </data>
   <data name="Dialog.Cfl.AutomationName.OK" xml:space="preserve">
     <value>Confirm choose-from-list selection</value>
