@@ -1920,6 +1920,20 @@ public sealed partial class AssetsModuleViewModel : DataDrivenModuleDocumentView
                 return;
             }
 
+            SignaturePersistenceHelper.ApplyEntityMetadata(
+                signatureResult,
+                tableName: "machines",
+                recordId: machineId,
+                metadata: null,
+                fallbackSignatureHash: context.SignatureHash,
+                fallbackMethod: context.SignatureMethod,
+                fallbackStatus: context.SignatureStatus,
+                fallbackNote: context.SignatureNote,
+                signedAt: signatureResult.Signature.SignedAt,
+                fallbackDeviceInfo: context.DeviceInfo,
+                fallbackIpAddress: context.Ip,
+                fallbackSessionId: context.SessionId);
+
             try
             {
                 await SignaturePersistenceHelper
