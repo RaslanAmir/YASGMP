@@ -22,6 +22,7 @@
 - 2026-04-21T09:15Z: `dotnet restore` retried during the dock/asset synchronization batch; CLI still unavailable (`bash: command not found: dotnet`), so validation remains Windows-host only.
 - 2026-04-22T09:45Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` retried while scripting the Assets smoke scenario; every command still fails with `bash: command not found: dotnet` because the CLI is absent on this host.
 - 2026-04-23T09:20Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried after extending Suppliers signature metadata coverage; each command still returns `bash: command not found: dotnet` inside this container.
+- 2026-05-07T09:10Z: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried while documenting external servicer oversight; all continue to fail with `bash: command not found: dotnet` so smoke automation remains blocked on Windows tooling.
   - 2025-10-16T09:40Z: `dotnet restore yasgmp.sln` retried during Work Orders signature metadata wiring; environment still returns `bash: command not found: dotnet` so validation stays Windows-host only.
 - [ ] Solution restores *(blocked on Windows-targeting prerequisites; historical attempts below hit missing CLI and the latest 2025-10-10 runs failed with NETSDK1100/NETSDK1147 because Windows 10 SDK and MAUI workloads are absent on linux.)*
   - 2025-10-13T10:59Z: `dotnet restore yasgmp.sln` retried post-retarget; CLI still missing so the command exits with `bash: command not found: dotnet`.
@@ -132,6 +133,7 @@
 - Injected `DatabaseService` into `ExternalServicersModuleViewModel` to hydrate contractor interventions, compute KPI/timeline/analytics aggregates on the UI dispatcher, and expose new observable collections/commands consumed by the oversight pane with EN/HR localization and unit coverage for the dispatcher/DatabaseService override path.
 - 2026-05-06: Recalibrated the oversight refresh pipeline so `LoadAsync`, selection changes, and the explicit refresh command all call `DatabaseService.GetAllContractorInterventionsAsync`, rebuild KPI/timeline/analytics projections, marshal updates onto the dispatcher, and surface failures through `StatusMessage`.
 - CLI status: `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were retried; each still exits with `bash: command not found: dotnet` because the .NET SDK is unavailable in this Linux container. WPF smoke automation remains TODO pending Windows tooling.
+- 2026-05-07: Documented the delivered oversight pane and contractor dashboards in `docs/WPF_MAPPING.md`, replacing the external servicer TODO callouts with the live data sources.
 
 #### Entity Traceability Map (Seed)
 
