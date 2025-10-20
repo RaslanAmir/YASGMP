@@ -340,11 +340,13 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             throw new InvalidOperationException($"Failed to persist supplier: {ex.Message}", ex);
         }
 
+        var editorState = ApplySignatureMetadataToSupplier(supplier, signatureResult, context, saveResult.SignatureMetadata);
+
         _loadedSupplier = supplier;
         _lastSavedSupplierId = supplier.Id;
 
         LoadEditor(supplier);
-        ApplySignatureMetadataToSupplier(supplier, signatureResult, context, saveResult.SignatureMetadata);
+        ApplySignatureMetadataToEditor(editorState);
         await LoadAuditTimelineAsync(supplier.Id).ConfigureAwait(false);
         UpdateAttachmentCommandState();
 
@@ -782,7 +784,23 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 
-    private void ApplySignatureMetadataToSupplier(
+    private sealed record SupplierSignatureEditorState(
+        int? DigitalSignatureId,
+        string DigitalSignature,
+        string SignatureHash,
+        string SignatureReason,
+        string SignatureNote,
+        DateTime? SignatureTimestampUtc,
+        int? SignerUserId,
+        string SignerUserName,
+        DateTime? LastModifiedUtc,
+        int? LastModifiedById,
+        string LastModifiedByName,
+        string SourceIp,
+        string SessionId,
+        string DeviceInfo);
+
+    private SupplierSignatureEditorState ApplySignatureMetadataToSupplier(
         Supplier supplier,
         ElectronicSignatureDialogResult signatureResult,
         SupplierCrudContext context,
@@ -875,30 +893,74 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             }
         }
 
-        Editor.DigitalSignatureId = supplier.DigitalSignatureId;
-        Editor.DigitalSignature = supplier.DigitalSignature ?? string.Empty;
-        Editor.SignatureHash = supplier.DigitalSignature;
-        Editor.SignatureReason = signatureResult.ReasonDisplay ?? string.Empty;
+        var reason = signatureResult.ReasonDisplay ?? string.Empty;
         var note = !string.IsNullOrWhiteSpace(signature.Note)
             ? signature.Note!
             : metadata?.Note
               ?? context.SignatureNote
               ?? string.Empty;
-        Editor.SignatureNote = note;
-        Editor.SignatureTimestampUtc = signedAt;
-        Editor.SignerUserId = supplier.LastModifiedById;
-        Editor.SignerUserName = signerName;
-        Editor.LastModifiedUtc = supplier.LastModified;
-        Editor.LastModifiedById = supplier.LastModifiedById;
-        Editor.LastModifiedByName = signerName;
-        Editor.SourceIp = supplier.SourceIp ?? string.Empty;
-        Editor.SessionId = supplier.SessionId ?? string.Empty;
         var deviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
             ? signature.DeviceInfo!
             : metadata?.Device
               ?? context.DeviceInfo
               ?? string.Empty;
-        Editor.DeviceInfo = deviceInfo;
+        var lastModifiedName = supplier.LastModifiedBy?.FullName
+            ?? supplier.LastModifiedBy?.Username
+            ?? signerName;
+        var digitalSignature = supplier.DigitalSignature ?? string.Empty;
+        var sourceIp = supplier.SourceIp ?? string.Empty;
+        var sessionId = supplier.SessionId ?? string.Empty;
+
+        return new SupplierSignatureEditorState(
+            supplier.DigitalSignatureId,
+            digitalSignature,
+            digitalSignature,
+            reason,
+            note,
+            signedAt,
+            supplier.LastModifiedById,
+            signerName,
+            supplier.LastModified,
+            supplier.LastModifiedById,
+            lastModifiedName,
+            sourceIp,
+            sessionId,
+            deviceInfo);
+    }
+
+    private void ApplySignatureMetadataToEditor(SupplierSignatureEditorState editorState)
+    {
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var previous = _suppressDirtyNotifications;
+        _suppressDirtyNotifications = true;
+
+        try
+        {
+            Editor.DigitalSignatureId = editorState.DigitalSignatureId;
+            Editor.DigitalSignature = editorState.DigitalSignature;
+            Editor.SignatureHash = editorState.SignatureHash;
+            Editor.SignatureReason = editorState.SignatureReason;
+            Editor.SignatureNote = editorState.SignatureNote;
+            Editor.SignatureTimestampUtc = editorState.SignatureTimestampUtc;
+            Editor.SignerUserId = editorState.SignerUserId;
+            Editor.SignerUserName = editorState.SignerUserName;
+            Editor.LastModifiedUtc = editorState.LastModifiedUtc;
+            Editor.LastModifiedById = editorState.LastModifiedById;
+            Editor.LastModifiedByName = editorState.LastModifiedByName;
+            Editor.SourceIp = editorState.SourceIp;
+            Editor.SessionId = editorState.SessionId;
+            Editor.DeviceInfo = editorState.DeviceInfo;
+        }
+        finally
+        {
+            _suppressDirtyNotifications = previous;
+        }
+
+        ResetDirty();
     }
 
     private static ModuleRecord ToRecord(Supplier supplier)
