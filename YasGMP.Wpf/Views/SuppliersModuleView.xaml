@@ -45,8 +45,9 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2.5*" />
             </Grid.ColumnDefinitions>
-            <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
+            <DockPanel Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
                 <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Width="240" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
@@ -238,8 +239,95 @@
                     </StackPanel>
                 </ScrollViewer>
             </Border>
+            <Border Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Padding="12"
+                    Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                    BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource Module.Suppliers.AuditTimeline.Header}"
+                                   FontWeight="Bold"
+                                   FontSize="14"
+                                   Margin="0,0,0,12"
+                                   ToolTipService.ToolTip="{DynamicResource Module.Suppliers.AuditTimeline.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Module.Suppliers.AuditTimeline.AutomationName}"
+                                   AutomationProperties.AutomationId="{DynamicResource Module.Suppliers.AuditTimeline.AutomationId}" />
+                        <ItemsControl ItemsSource="{Binding AuditTimeline}"
+                                      ToolTipService.ToolTip="{DynamicResource Module.Suppliers.AuditTimeline.ToolTip}"
+                                      AutomationProperties.Name="{DynamicResource Module.Suppliers.AuditTimeline.Items.AutomationName}"
+                                      AutomationProperties.AutomationId="{DynamicResource Module.Suppliers.AuditTimeline.Items.AutomationId}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="0,0,0,1"
+                                            BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                            Padding="0,4,0,8"
+                                            Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Timestamp, StringFormat={}{0:G}}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock TextWrapping="Wrap">
+                                                <Run Text="{DynamicResource Audit.Grid.Column.Action.Header}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding Action}" />
+                                            </TextBlock>
+                                            <TextBlock>
+                                                <Run Text="{DynamicResource Audit.Grid.Column.User.Header}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding Username, TargetNullValue=-}" />
+                                            </TextBlock>
+                                            <TextBlock TextWrapping="Wrap" Margin="0,2,0,0">
+                                                <Run Text="{DynamicResource Audit.Grid.Column.Description.Header}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding Note, TargetNullValue=-}" />
+                                            </TextBlock>
+                                            <TextBlock Margin="0,2,0,0">
+                                                <Run Text="{DynamicResource Audit.Grid.Column.IpAddress.Header}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding IpAddress, TargetNullValue=-}" />
+                                                <Run Text="  " />
+                                                <Run Text="{DynamicResource Audit.Grid.Column.Device.Header}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding DeviceInfo, TargetNullValue=-}" />
+                                            </TextBlock>
+                                            <TextBlock Margin="0,2,0,0">
+                                                <Run Text="{DynamicResource SignatureMetadata.Field.SessionId.Label}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding SessionId, TargetNullValue=-}" />
+                                            </TextBlock>
+                                            <TextBlock Margin="0,2,0,0" FontFamily="Consolas" FontSize="11">
+                                                <Run Text="{DynamicResource Module.Audit.Header.SignatureHash}" FontWeight="SemiBold" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding SignatureHash, TargetNullValue=-}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{DynamicResource Module.Suppliers.AuditTimeline.Empty}"
+                                   Foreground="Gray"
+                                   FontStyle="Italic"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,12,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AuditTimeline.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
             <TextBlock Grid.Row="2"
-                       Grid.ColumnSpan="2"
+                       Grid.ColumnSpan="3"
                        Text="{Binding StatusMessage}"
                        FontStyle="Italic"
                        Foreground="Gray"

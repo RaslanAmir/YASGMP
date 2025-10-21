@@ -135,6 +135,46 @@ public class ExternalServicersModuleViewModelTests
     }
 
     [Fact]
+    public async Task InitializeAsync_PopulatesOversightDashboard()
+    {
+        var interventions = new[]
+        {
+            new ContractorIntervention
+            {
+                Id = 1,
+                ContractorId = 5,
+                InterventionDate = DateTime.UtcNow.AddDays(-2),
+                Status = "Open",
+                GmpCompliance = true,
+                Result = "Pending"
+            }
+        };
+
+        var database = CreateDatabaseService(interventions);
+        var service = new FakeExternalServicerCrudService();
+        service.Saved.Add(new ExternalServicer
+        {
+            Id = 5,
+            Name = "Contoso Calibration",
+            Email = "calibration@contoso.example",
+            Status = "Active"
+        });
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new ExternalServicersModuleViewModel(database, service, auth, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        Assert.NotEmpty(viewModel.OversightMetrics);
+        Assert.NotEmpty(viewModel.InterventionTimeline);
+        Assert.NotEmpty(viewModel.OversightAnalytics);
+    }
+
+    [Fact]
     public async Task RefreshOversight_PopulatesMetricsForSelectedServicer()
     {
         var interventions = new[]

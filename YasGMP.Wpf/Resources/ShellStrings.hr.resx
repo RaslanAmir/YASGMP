@@ -2295,6 +2295,27 @@
   <data name="Module.Suppliers.Button.DownloadContract.AutomationId" xml:space="preserve">
     <value>SuppliersDownloadContractButton</value>
   </data>
+  <data name="Module.Suppliers.AuditTimeline.Header" xml:space="preserve">
+    <value>Vremenska crta audita</value>
+  </data>
+  <data name="Module.Suppliers.AuditTimeline.ToolTip" xml:space="preserve">
+    <value>Kronološki popis audit događaja za odabranog dobavljača</value>
+  </data>
+  <data name="Module.Suppliers.AuditTimeline.AutomationName" xml:space="preserve">
+    <value>Zaglavlje vremenske crte audita dobavljača</value>
+  </data>
+  <data name="Module.Suppliers.AuditTimeline.AutomationId" xml:space="preserve">
+    <value>Suppliers.AuditTimeline.Header</value>
+  </data>
+  <data name="Module.Suppliers.AuditTimeline.Items.AutomationName" xml:space="preserve">
+    <value>Stavke vremenske crte audita dobavljača</value>
+  </data>
+  <data name="Module.Suppliers.AuditTimeline.Items.AutomationId" xml:space="preserve">
+    <value>Suppliers.AuditTimeline.Items</value>
+  </data>
+  <data name="Module.Suppliers.AuditTimeline.Empty" xml:space="preserve">
+    <value>Za ovog dobavljača nema audit zapisa.</value>
+  </data>
   <data name="Module.Suppliers.Text.CooperationEnd" xml:space="preserve">
     <value>Cooperation End</value>
   </data>
