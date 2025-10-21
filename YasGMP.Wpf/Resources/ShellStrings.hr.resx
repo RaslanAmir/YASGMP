@@ -3373,4 +3373,64 @@
   <data name="Module.Admin.NotificationPreferences.StatusLoadFailed" xml:space="preserve">
     <value>Učitavanje postavki obavijesti nije uspjelo: {0}</value>
   </data>
+  <data name="Module.Admin.Restore.Button.Content" xml:space="preserve">
+    <value>Vrati zadanu vrijednost</value>
+  </data>
+  <data name="Module.Admin.Restore.Button.ToolTip" xml:space="preserve">
+    <value>Vrati odabranu postavku na zadanu vrijednost (zahtijeva elektronički potpis).</value>
+  </data>
+  <data name="Module.Admin.Restore.Button.AutomationName" xml:space="preserve">
+    <value>Vrati postavku</value>
+  </data>
+  <data name="Module.Admin.Restore.Button.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Restore.Button</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Title" xml:space="preserve">
+    <value>Vraćanje postavke</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Message" xml:space="preserve">
+    <value>Želite li vratiti &quot;{0}&quot; na zadanu vrijednost?</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Accept" xml:space="preserve">
+    <value>Vrati</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Cancel" xml:space="preserve">
+    <value>Odustani</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.NoSelection" xml:space="preserve">
+    <value>Odaberite postavku za vraćanje.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.NotFound" xml:space="preserve">
+    <value>Odabrana postavka nije pronađena.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.ConfirmationDeclined" xml:space="preserve">
+    <value>Vraćanje je preskočeno za &quot;{0}&quot;.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureFailed" xml:space="preserve">
+    <value>Neuspjelo hvatanje elektroničkog potpisa: {0}</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureCancelled" xml:space="preserve">
+    <value>Elektronički potpis je otkazan.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureMissing" xml:space="preserve">
+    <value>Elektronički potpis nije zabilježen.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignaturePersistFailed" xml:space="preserve">
+    <value>Spremanje elektroničkog potpisa nije uspjelo: {0}</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureCaptured" xml:space="preserve">
+    <value>Elektronički potpis zabilježen ({0}).</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureCaptured.Unknown" xml:space="preserve">
+    <value>neodređen razlog</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.Success" xml:space="preserve">
+    <value>Postavka &quot;{0}&quot; vraćena je na zadanu vrijednost.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.Failure" xml:space="preserve">
+    <value>Neuspješno vraćanje &quot;{0}&quot;: {1}</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.AuditFailed" xml:space="preserve">
+    <value>Neuspješno zapisivanje audita vraćanja.</value>
+  </data>
 </root>

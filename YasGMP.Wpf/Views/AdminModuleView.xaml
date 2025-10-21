@@ -33,6 +33,27 @@
                 ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+            <Button
+                Margin="8,0,0,0"
+                Content="{DynamicResource Module.Admin.Restore.Button.Content}"
+                Command="{Binding RestoreSettingCommand}"
+                ToolTipService.ToolTip="{DynamicResource Module.Admin.Restore.Button.ToolTip}"
+                AutomationProperties.Name="{DynamicResource Module.Admin.Restore.Button.AutomationName}"
+                AutomationProperties.AutomationId="{DynamicResource Module.Admin.Restore.Button.AutomationId}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="True" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                <Setter Property="IsEnabled" Value="False" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SelectedRecord}" Value="{x:Null}">
+                                <Setter Property="IsEnabled" Value="False" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -72,7 +93,24 @@
                     <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Description.Header}" Binding="{Binding Description}" Width="2*" />
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <StackPanel Grid.Row="3" Margin="0,8,0,0">
+                <TextBlock Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" />
+                <TextBlock Text="{Binding LastSignatureStatus}" Margin="0,4,0,0" Foreground="DarkSlateBlue" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding LastSignatureStatus}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding LastSignatureStatus}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
         </Grid>
     </DockPanel>
 </UserControl>

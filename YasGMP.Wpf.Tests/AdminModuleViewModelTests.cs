@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Xunit;
 using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Services.Ui;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.Tests.TestDoubles;
@@ -23,9 +25,12 @@ public class AdminModuleViewModelTests
     [Fact]
     public async Task InitializeAsync_LoadsPreferencesAndRecords()
     {
-        var provider = RegisterAlertService(out var alertService);
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
         try
         {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
             var database = CreateDatabaseService(
                 new Setting { Id = 1, Key = "cfg.locale", Value = "hr-HR", Description = "Default locale", Category = "system", UpdatedAt = DateTime.UtcNow },
                 new Setting { Id = 2, Key = "maintenance.window", Value = "Sunday", Description = "Weekly downtime", Category = "system", UpdatedAt = DateTime.UtcNow.AddDays(-1) });
@@ -41,6 +46,9 @@ public class AdminModuleViewModelTests
             var viewModel = new AdminModuleViewModel(
                 database,
                 audit,
+                signatureService,
+                dialogService,
+                authContext,
                 new StubCflDialogService(),
                 new StubShellInteractionService(),
                 new StubModuleNavigationService(),
@@ -68,9 +76,12 @@ public class AdminModuleViewModelTests
     [Fact]
     public async Task InitializeAsync_WhenPreferencesFail_SetsWarningStatus()
     {
-        var provider = RegisterAlertService(out var alertService);
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
         try
         {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
             var database = CreateDatabaseService();
             var audit = new AuditService(database);
             var localization = new TestLocalizationService();
@@ -82,6 +93,9 @@ public class AdminModuleViewModelTests
             var viewModel = new AdminModuleViewModel(
                 database,
                 audit,
+                signatureService,
+                dialogService,
+                authContext,
                 new StubCflDialogService(),
                 new StubShellInteractionService(),
                 new StubModuleNavigationService(),
@@ -105,9 +119,12 @@ public class AdminModuleViewModelTests
     [Fact]
     public async Task SaveNotificationPreferencesCommand_SavesAndPublishesSuccess()
     {
-        var provider = RegisterAlertService(out var alertService);
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
         try
         {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
             var database = CreateDatabaseService();
             var audit = new AuditService(database);
             var localization = new TestLocalizationService();
@@ -121,6 +138,9 @@ public class AdminModuleViewModelTests
             var viewModel = new AdminModuleViewModel(
                 database,
                 audit,
+                signatureService,
+                dialogService,
+                authContext,
                 new StubCflDialogService(),
                 new StubShellInteractionService(),
                 new StubModuleNavigationService(),
@@ -155,9 +175,12 @@ public class AdminModuleViewModelTests
     [Fact]
     public async Task SaveNotificationPreferencesCommand_WhenServiceThrows_KeepsDirtyState()
     {
-        var provider = RegisterAlertService(out var alertService);
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
         try
         {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
             var database = CreateDatabaseService();
             var audit = new AuditService(database);
             var localization = new TestLocalizationService();
@@ -174,6 +197,9 @@ public class AdminModuleViewModelTests
             var viewModel = new AdminModuleViewModel(
                 database,
                 audit,
+                signatureService,
+                dialogService,
+                authContext,
                 new StubCflDialogService(),
                 new StubShellInteractionService(),
                 new StubModuleNavigationService(),
@@ -199,21 +225,331 @@ public class AdminModuleViewModelTests
         }
     }
 
-    private static ServiceProvider RegisterAlertService(out CapturingAlertService alertService)
+    [Fact]
+    public async Task RestoreSettingCommand_WhenConfirmedAndSignatureCaptured_RestoresSetting()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService { ConfirmationResult = true };
+            var database = CreateDatabaseService(
+                out var table,
+                new Setting { Id = 1, Key = "cfg.locale", Value = "hr-HR", Description = "Default locale", Category = "system", UpdatedAt = DateTime.UtcNow });
+
+            var selectCallCount = 0;
+            var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) =>
+            {
+                selectCallCount++;
+                return Task.FromResult(table.Copy());
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, selectOverride);
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            Assert.Equal(1, selectCallCount);
+
+            var nonQueryCalls = 0;
+            string? lastSql = null;
+            var nonQueryOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>)((sql, _, _) =>
+            {
+                nonQueryCalls++;
+                lastSql = sql;
+                return Task.FromResult(1);
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteNonQueryOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, nonQueryOverride);
+            typeof(DatabaseService)
+                .GetProperty("ExecuteScalarOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>)((_, _, _) => Task.FromResult<object?>(0)));
+
+            await viewModel.RestoreSettingCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            Assert.Equal(2, selectCallCount);
+            Assert.True(nonQueryCalls > 0);
+            Assert.NotNull(lastSql);
+            Assert.Contains("settings", lastSql!, StringComparison.OrdinalIgnoreCase);
+
+            var expectedStatus = string.Format(CultureInfo.CurrentCulture, localization.GetString("Module.Admin.Restore.Status.Success"), "cfg.locale");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Success, alertService.LastSeverity);
+
+            var expectedSignatureStatus = string.Format(CultureInfo.CurrentCulture, localization.GetString("Module.Admin.Restore.Status.SignatureCaptured"), "QA Reason");
+            Assert.Equal(expectedSignatureStatus, viewModel.LastSignatureStatus);
+
+            Assert.True(signatureService.WasPersistInvoked);
+            var request = Assert.Single(signatureService.Requests);
+            Assert.Equal("settings", request.TableName);
+            Assert.Equal(1, request.RecordId);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task RestoreSettingCommand_WhenRecordKeyMissing_UsesCodeLookup()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService { ConfirmationResult = true };
+            var database = CreateDatabaseService(
+                out var table,
+                new Setting { Id = 1, Key = "cfg.locale", Value = "hr-HR", Description = "Default locale", Category = "system", UpdatedAt = DateTime.UtcNow });
+
+            var selectCallCount = 0;
+            var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) =>
+            {
+                selectCallCount++;
+                return Task.FromResult(table.Copy());
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, selectOverride);
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            Assert.Equal(1, selectCallCount);
+
+            viewModel.SelectedRecord = new ModuleRecord("stale-key", "Locale Display", "cfg.locale");
+
+            var nonQueryCalls = 0;
+            string? lastSql = null;
+            var nonQueryOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>)((sql, _, _) =>
+            {
+                nonQueryCalls++;
+                lastSql = sql;
+                return Task.FromResult(1);
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteNonQueryOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, nonQueryOverride);
+            typeof(DatabaseService)
+                .GetProperty("ExecuteScalarOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>)((_, _, _) => Task.FromResult<object?>(0)));
+
+            await viewModel.RestoreSettingCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            Assert.Equal(2, selectCallCount);
+            Assert.True(nonQueryCalls > 0);
+            Assert.NotNull(lastSql);
+            Assert.Contains("settings", lastSql!, StringComparison.OrdinalIgnoreCase);
+
+            var expectedStatus = string.Format(CultureInfo.CurrentCulture, localization.GetString("Module.Admin.Restore.Status.Success"), "Locale Display");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Success, alertService.LastSeverity);
+
+            var expectedSignatureStatus = string.Format(CultureInfo.CurrentCulture, localization.GetString("Module.Admin.Restore.Status.SignatureCaptured"), "QA Reason");
+            Assert.Equal(expectedSignatureStatus, viewModel.LastSignatureStatus);
+
+            Assert.True(signatureService.WasPersistInvoked);
+            var request = Assert.Single(signatureService.Requests);
+            Assert.Equal("settings", request.TableName);
+            Assert.Equal(1, request.RecordId);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task RestoreSettingCommand_WhenConfirmationDeclined_SkipsOperation()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService { ConfirmationResult = false };
+            var database = CreateDatabaseService(
+                out var table,
+                new Setting { Id = 1, Key = "cfg.locale", Value = "hr-HR", Description = "Default locale", Category = "system", UpdatedAt = DateTime.UtcNow });
+
+            var selectCallCount = 0;
+            var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) =>
+            {
+                selectCallCount++;
+                return Task.FromResult(table.Copy());
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, selectOverride);
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            Assert.Equal(1, selectCallCount);
+
+            await viewModel.RestoreSettingCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            Assert.Equal(1, selectCallCount);
+            Assert.Empty(signatureService.Requests);
+
+            var expectedStatus = string.Format(CultureInfo.CurrentCulture, localization.GetString("Module.Admin.Restore.Status.ConfirmationDeclined"), "cfg.locale");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Info, alertService.LastSeverity);
+            Assert.Null(viewModel.LastSignatureStatus);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task RestoreSettingCommand_WhenRollbackFails_SurfacesError()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService { ConfirmationResult = true };
+            var database = CreateDatabaseService(
+                out var table,
+                new Setting { Id = 1, Key = "cfg.locale", Value = "hr-HR", Description = "Default locale", Category = "system", UpdatedAt = DateTime.UtcNow });
+
+            var selectCallCount = 0;
+            var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) =>
+            {
+                selectCallCount++;
+                return Task.FromResult(table.Copy());
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, selectOverride);
+
+            var nonQueryOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>)((sql, _, _) =>
+            {
+                if (sql.Contains("UPDATE settings", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("update failed");
+                }
+
+                return Task.FromResult(1);
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteNonQueryOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, nonQueryOverride);
+            typeof(DatabaseService)
+                .GetProperty("ExecuteScalarOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>)((_, _, _) => Task.FromResult<object?>(0)));
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            Assert.Equal(1, selectCallCount);
+
+            await viewModel.RestoreSettingCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            Assert.Equal(1, selectCallCount);
+            Assert.False(signatureService.WasPersistInvoked);
+            Assert.Single(signatureService.Requests);
+
+            var expectedStatus = string.Format(CultureInfo.CurrentCulture, localization.GetString("Module.Admin.Restore.Status.Failure"), "cfg.locale", "update failed");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Error, alertService.LastSeverity);
+            Assert.Null(viewModel.LastSignatureStatus);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    private static ServiceProvider RegisterAlertService(out CapturingAlertService alertService, IAuthContext? authContext = null)
     {
         var services = new ServiceCollection();
         alertService = new CapturingAlertService();
         services.AddSingleton<IShellAlertService>(alertService);
         services.AddSingleton<IAlertService>(alertService);
+        if (authContext is not null)
+        {
+            services.AddSingleton(authContext);
+        }
         var provider = services.BuildServiceProvider();
         ServiceLocator.RegisterFallback(() => provider);
         return provider;
     }
 
     private static DatabaseService CreateDatabaseService(params Setting[] settings)
+        => CreateDatabaseService(out _, settings);
+
+    private static DatabaseService CreateDatabaseService(out DataTable table, params Setting[] settings)
     {
         var database = new DatabaseService("Server=stub;Database=stub;Uid=stub;Pwd=stub;");
-        var table = new DataTable();
+        table = new DataTable();
         table.Columns.Add("id", typeof(int));
         table.Columns.Add("key", typeof(string));
         table.Columns.Add("value", typeof(string));
@@ -342,6 +678,22 @@ public class AdminModuleViewModelTests
             ["Module.Admin.NotificationPreferences.StatusLoadFailed"] = "Failed to load notification preferences: {0}",
             ["Module.Admin.NotificationPreferences.StatusSaved"] = "Notification preferences saved.",
             ["Module.Admin.NotificationPreferences.StatusSaveFailed"] = "Failed to save notification preferences: {0}",
+            ["Module.Admin.Restore.Status.NoSelection"] = "Select a setting to restore.",
+            ["Module.Admin.Restore.Status.NotFound"] = "Unable to resolve the selected setting.",
+            ["Module.Admin.Restore.Status.ConfirmationDeclined"] = "Restore skipped for \"{0}\".",
+            ["Module.Admin.Restore.Status.SignatureFailed"] = "Electronic signature capture failed: {0}",
+            ["Module.Admin.Restore.Status.SignatureCancelled"] = "Electronic signature cancelled.",
+            ["Module.Admin.Restore.Status.SignatureMissing"] = "Electronic signature not captured.",
+            ["Module.Admin.Restore.Status.SignaturePersistFailed"] = "Failed to persist electronic signature: {0}",
+            ["Module.Admin.Restore.Status.SignatureCaptured"] = "Electronic signature captured ({0}).",
+            ["Module.Admin.Restore.Status.SignatureCaptured.Unknown"] = "unspecified reason",
+            ["Module.Admin.Restore.Status.Success"] = "Setting \"{0}\" restored to default.",
+            ["Module.Admin.Restore.Status.Failure"] = "Failed to restore \"{0}\": {1}",
+            ["Module.Admin.Restore.Status.AuditFailed"] = "Failed to log restore audit.",
+            ["Module.Admin.Restore.Confirm.Title"] = "Restore Setting",
+            ["Module.Admin.Restore.Confirm.Message"] = "Restore \"{0}\" to its default value?",
+            ["Module.Admin.Restore.Confirm.Accept"] = "Restore",
+            ["Module.Admin.Restore.Confirm.Cancel"] = "Cancel",
         };
 
         public string CurrentLanguage => "en";
@@ -358,5 +710,51 @@ public class AdminModuleViewModelTests
         public void SetLanguage(string language)
         {
         }
+    }
+
+    private sealed class StubDialogService : IDialogService
+    {
+        public bool ConfirmationResult { get; set; } = true;
+
+        public Exception? ConfirmationException { get; set; }
+            = null;
+
+        public Task ShowAlertAsync(string title, string message, string cancel)
+            => Task.CompletedTask;
+
+        public Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
+        {
+            if (ConfirmationException is not null)
+            {
+                throw ConfirmationException;
+            }
+
+            return Task.FromResult(ConfirmationResult);
+        }
+
+        public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
+            => Task.FromResult<string?>(null);
+
+        public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
+            => Task.FromResult<T?>(default);
+    }
+
+    private sealed class StubAuthContext : IAuthContext
+    {
+        public StubAuthContext()
+        {
+            CurrentUser = new User { Id = 7, Username = "tester" };
+            CurrentSessionId = "session-123";
+            CurrentDeviceInfo = "UNITTEST";
+            CurrentIpAddress = "127.0.0.1";
+        }
+
+        public User? CurrentUser { get; set; }
+
+        public string CurrentSessionId { get; set; }
+
+        public string CurrentDeviceInfo { get; set; }
+
+        public string CurrentIpAddress { get; set; }
     }
 }
