@@ -100,6 +100,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IIncidentAuditService, IncidentAuditService>();
                         svc.AddTransient<IncidentService>();
                         svc.AddTransient<CAPAService>();
+                        svc.AddTransient<DeviationService>();
                         svc.AddTransient<IMachineCrudService, MachineCrudServiceAdapter>();
                         svc.AddTransient<IComponentCrudService, ComponentCrudServiceAdapter>();
                         svc.AddTransient<IPartCrudService, PartCrudServiceAdapter>();
@@ -107,6 +108,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<IWarehouseCrudService, WarehouseCrudServiceAdapter>();
                         svc.AddTransient<ICalibrationCrudService, CalibrationCrudServiceAdapter>();
                         svc.AddTransient<IIncidentCrudService, IncidentCrudServiceAdapter>();
+                        svc.AddTransient<IDeviationCrudService, DeviationCrudServiceAdapter>();
                         svc.AddTransient<ICapaCrudService, CapaCrudServiceAdapter>();
                         svc.AddTransient<IChangeControlCrudService, ChangeControlCrudServiceAdapter>();
                         svc.AddTransient<IValidationCrudService, ValidationCrudServiceAdapter>();

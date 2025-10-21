@@ -1,12 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using YasGMP.AppCore.DependencyInjection;
 using YasGMP.Services;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
+using YasGMP.Models;
+using YasGMP.Models.Enums;
 
 namespace YasGMP.Wpf.Tests;
 
@@ -89,6 +93,32 @@ public class ServiceRegistrationTests
         Assert.NotNull(viewModel);
     }
 
+    [Fact]
+    public void WpfShellServices_ResolveDeviationServices()
+    {
+        const string connection = "Server=localhost;Database=unit_test;Uid=test;Pwd=test;";
+        var services = new ServiceCollection();
+
+        services.AddYasGmpCoreServices(core =>
+        {
+            core.UseConnectionString(connection);
+            core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
+
+            var svc = core.Services;
+            svc.AddSingleton<IDeviationAuditService, StubDeviationAuditService>();
+            svc.AddTransient<DeviationService>();
+            svc.AddTransient<IDeviationCrudService, DeviationCrudServiceAdapter>();
+        });
+
+        using var provider = services.BuildServiceProvider();
+
+        var deviationService = provider.GetRequiredService<DeviationService>();
+        Assert.NotNull(deviationService);
+
+        var deviationCrudService = provider.GetRequiredService<IDeviationCrudService>();
+        Assert.NotNull(deviationCrudService);
+    }
+
     private sealed class StubCflDialogService : ICflDialogService
     {
         public Task<CflResult?> ShowAsync(CflRequest request) => Task.FromResult<CflResult?>(null);
@@ -107,5 +137,35 @@ public class ServiceRegistrationTests
             => throw new NotSupportedException();
 
         public void Activate(ModuleDocumentViewModel document) { }
+    }
+
+    private sealed class StubDeviationAuditService : IDeviationAuditService
+    {
+        public Task CreateAsync(DeviationAudit audit) => Task.CompletedTask;
+
+        public Task UpdateAsync(DeviationAudit audit) => Task.CompletedTask;
+
+        public Task DeleteAsync(int id) => Task.CompletedTask;
+
+        public Task<DeviationAudit> GetByIdAsync(int id) => Task.FromResult(new DeviationAudit());
+
+        public Task<IReadOnlyList<DeviationAudit>> GetByDeviationIdAsync(int deviationId)
+            => Task.FromResult<IReadOnlyList<DeviationAudit>>(Array.Empty<DeviationAudit>());
+
+        public Task<IReadOnlyList<DeviationAudit>> GetByUserIdAsync(int userId)
+            => Task.FromResult<IReadOnlyList<DeviationAudit>>(Array.Empty<DeviationAudit>());
+
+        public Task<IReadOnlyList<DeviationAudit>> GetByActionTypeAsync(DeviationActionType actionType)
+            => Task.FromResult<IReadOnlyList<DeviationAudit>>(Array.Empty<DeviationAudit>());
+
+        public Task<IReadOnlyList<DeviationAudit>> GetByDateRangeAsync(DateTime from, DateTime to)
+            => Task.FromResult<IReadOnlyList<DeviationAudit>>(Array.Empty<DeviationAudit>());
+
+        public bool ValidateIntegrity(DeviationAudit audit) => true;
+
+        public Task<string> ExportAuditLogsAsync(int deviationId, string format = "pdf")
+            => Task.FromResult(string.Empty);
+
+        public Task<double> AnalyzeAnomalyAsync(int deviationId) => Task.FromResult(0d);
     }
 }
