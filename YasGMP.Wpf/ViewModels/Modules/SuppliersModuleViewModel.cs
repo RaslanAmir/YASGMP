@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -31,6 +33,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly IShellInteractionService _shellInteraction;
     private Supplier? _loadedSupplier;
     private SupplierEditor? _snapshot;
     private bool _suppressDirtyNotifications;
@@ -59,6 +62,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
 
         Editor = SupplierEditor.CreateEmpty();
         StatusOptions = new ReadOnlyCollection<string>(new[]
@@ -84,6 +88,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             _localization.GetString("Module.Suppliers.Risk.Critical")
         });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        PreviewContractCommand = new AsyncRelayCommand(PreviewContractAsync, CanPreviewContract);
+        DownloadContractCommand = new AsyncRelayCommand(DownloadContractAsync, CanDownloadContract);
     }
 
     [ObservableProperty]
@@ -102,6 +108,18 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>
+    /// Gets the preview contract command.
+    /// </summary>
+
+    public IAsyncRelayCommand PreviewContractCommand { get; }
+
+    /// <summary>
+    /// Gets the download contract command.
+    /// </summary>
+
+    public IAsyncRelayCommand DownloadContractCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -495,11 +513,27 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
     private bool CanAttachDocument()
         => !IsBusy && !IsEditorEnabled && _loadedSupplier is not null && _loadedSupplier.Id > 0;
 
+    private bool CanPreviewContract()
+        => !IsBusy && !IsEditorEnabled && TryResolveContractPath(out var path) && File.Exists(path);
+
+    private bool CanDownloadContract()
+        => CanPreviewContract();
+
     private void UpdateAttachmentCommandState()
     {
         if (AttachDocumentCommand is AsyncRelayCommand command)
         {
             command.NotifyCanExecuteChanged();
+        }
+
+        if (PreviewContractCommand is AsyncRelayCommand preview)
+        {
+            preview.NotifyCanExecuteChanged();
+        }
+
+        if (DownloadContractCommand is AsyncRelayCommand download)
+        {
+            download.NotifyCanExecuteChanged();
         }
     }
 
@@ -547,6 +581,108 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         }
 
         StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
+    }
+
+    private bool TryResolveContractPath(out string fullPath)
+    {
+        fullPath = string.Empty;
+        var contract = Editor?.ContractFile?.Trim();
+        if (string.IsNullOrWhiteSpace(contract))
+        {
+            return false;
+        }
+
+        try
+        {
+            fullPath = Path.GetFullPath(contract);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        return !string.IsNullOrWhiteSpace(fullPath);
+    }
+
+    private Task PreviewContractAsync()
+    {
+        if (!TryResolveContractPath(out var path))
+        {
+            StatusMessage = "Supplier contract path is unavailable.";
+            return Task.CompletedTask;
+        }
+
+        if (!File.Exists(path))
+        {
+            StatusMessage = $"Contract file '{path}' was not found.";
+            UpdateAttachmentCommandState();
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            IsBusy = true;
+            _shellInteraction.PreviewDocument(path);
+            StatusMessage = $"Launching preview for '{Path.GetFileName(path)}'.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to preview contract: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task DownloadContractAsync()
+    {
+        if (!TryResolveContractPath(out var path))
+        {
+            StatusMessage = "Supplier contract path is unavailable.";
+            return;
+        }
+
+        if (!File.Exists(path))
+        {
+            StatusMessage = $"Contract file '{path}' was not found.";
+            UpdateAttachmentCommandState();
+            return;
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            FileName = Path.GetFileName(path),
+            Filter = "All files (*.*)|*.*",
+            Title = $"Save {Path.GetFileName(path)}"
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            StatusMessage = "Contract download cancelled.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            await using var source = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 128 * 1024, useAsync: true);
+            await using var destination = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.None, 128 * 1024, useAsync: true);
+            await source.CopyToAsync(destination).ConfigureAwait(false);
+            StatusMessage = $"Contract saved to '{dialog.FileName}'.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to download contract: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
     }
 
     private static ModuleRecord ToRecord(Supplier supplier)
