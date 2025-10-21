@@ -450,6 +450,9 @@
   <data name="Module.Title.Capa" xml:space="preserve">
     <value>CAPA</value>
   </data>
+  <data name="Module.Title.Deviations" xml:space="preserve">
+    <value>Deviations</value>
+  </data>
   <data name="Module.Title.Calibration" xml:space="preserve">
     <value>Calibration</value>
   </data>
@@ -3000,5 +3003,140 @@
   </data>
   <data name="Module.Admin.Restore.Status.AuditFailed" xml:space="preserve">
     <value>Failed to log restore audit.</value>
+  </data>
+  <data name="Module.Deviations.Status.Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Module.Deviations.Status.Investigation" xml:space="preserve">
+    <value>Investigation</value>
+  </data>
+  <data name="Module.Deviations.Status.CapaLinked" xml:space="preserve">
+    <value>Linked to CAPA</value>
+  </data>
+  <data name="Module.Deviations.Status.Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Module.Deviations.Severity.Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Module.Deviations.Severity.Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="Module.Deviations.Severity.High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="Module.Deviations.Severity.Critical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+  <data name="Module.Deviations.Severity.Gmp" xml:space="preserve">
+    <value>GMP Critical</value>
+  </data>
+  <data name="Module.Deviations.Status.LoadFailed" xml:space="preserve">
+    <value>Unable to load {0}.</value>
+  </data>
+  <data name="Module.Deviations.Status.ValidationFailed" xml:space="preserve">
+    <value>Unexpected validation failure: {0}</value>
+  </data>
+  <data name="Module.Deviations.Status.CflUnavailable" xml:space="preserve">
+    <value>Choose-From-List is only available while editing a deviation.</value>
+  </data>
+  <data name="Module.Deviations.Cfl.Priority" xml:space="preserve">
+    <value>Priority: {0}</value>
+  </data>
+  <data name="Module.Deviations.Status.NoCapaOptions" xml:space="preserve">
+    <value>No CAPA cases available for linking.</value>
+  </data>
+  <data name="Module.Deviations.Cfl.Title" xml:space="preserve">
+    <value>Select related CAPA</value>
+  </data>
+  <data name="Module.Deviations.Status.CflFailed" xml:space="preserve">
+    <value>Unable to load CAPA choices: {0}</value>
+  </data>
+  <data name="Module.Deviations.Status.CapaLinked" xml:space="preserve">
+    <value>Linked CAPA {0}.</value>
+  </data>
+  <data name="Module.Deviations.Status.SelectBeforeSave" xml:space="preserve">
+    <value>Select a deviation before saving.</value>
+  </data>
+  <data name="Module.Deviations.Status.SignatureFailed" xml:space="preserve">
+    <value>Electronic signature failed: {0}</value>
+  </data>
+  <data name="Module.Deviations.Status.SignatureCancelled" xml:space="preserve">
+    <value>Electronic signature cancelled. Save aborted.</value>
+  </data>
+  <data name="Module.Deviations.Status.SignatureMissing" xml:space="preserve">
+    <value>Electronic signature was not captured.</value>
+  </data>
+  <data name="Module.Deviations.Status.SaveFailed" xml:space="preserve">
+    <value>Failed to persist deviation: {0}</value>
+  </data>
+  <data name="Module.Deviations.Status.SignaturePersistFailed" xml:space="preserve">
+    <value>Failed to persist electronic signature: {0}</value>
+  </data>
+  <data name="Module.Deviations.Status.SignatureCaptured" xml:space="preserve">
+    <value>Electronic signature captured ({0}).</value>
+  </data>
+  <data name="Module.Deviations.Attachments.DialogTitle" xml:space="preserve">
+    <value>Select deviation evidence</value>
+  </data>
+  <data name="Module.Deviations.Status.NoFilesSelected" xml:space="preserve">
+    <value>No files selected.</value>
+  </data>
+  <data name="Module.Deviations.Status.AttachmentFailed" xml:space="preserve">
+    <value>Attachment upload failed: {0}</value>
+  </data>
+  <data name="Module.Deviations.Grid.Column.Severity.Header" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+  <data name="Module.Deviations.Grid.Column.Risk.Header" xml:space="preserve">
+    <value>Risk</value>
+  </data>
+  <data name="Module.Deviations.Text.DetailHeader" xml:space="preserve">
+    <value>Deviation Details</value>
+  </data>
+  <data name="Module.Deviations.Text.Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Module.Deviations.Text.Severity" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+  <data name="Module.Deviations.Text.IsCritical" xml:space="preserve">
+    <value>GMP Critical</value>
+  </data>
+  <data name="Module.Deviations.Text.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.Deviations.Text.ReportedAt" xml:space="preserve">
+    <value>Reported At</value>
+  </data>
+  <data name="Module.Deviations.Text.ReportedBy" xml:space="preserve">
+    <value>Reported By (Id)</value>
+  </data>
+  <data name="Module.Deviations.Text.InvestigatorId" xml:space="preserve">
+    <value>Investigator (Id)</value>
+  </data>
+  <data name="Module.Deviations.Text.InvestigatorName" xml:space="preserve">
+    <value>Investigator Name</value>
+  </data>
+  <data name="Module.Deviations.Text.InvestigationStarted" xml:space="preserve">
+    <value>Investigation Started</value>
+  </data>
+  <data name="Module.Deviations.Text.LinkedCapa" xml:space="preserve">
+    <value>Linked CAPA</value>
+  </data>
+  <data name="Module.Deviations.Text.ClosureComment" xml:space="preserve">
+    <value>Closure Comment</value>
+  </data>
+  <data name="Module.Deviations.Text.ClosedAt" xml:space="preserve">
+    <value>Closed At</value>
+  </data>
+  <data name="Module.Deviations.Text.RiskScore" xml:space="preserve">
+    <value>Risk Score</value>
+  </data>
+  <data name="Module.Deviations.Text.AnomalyScore" xml:space="preserve">
+    <value>Anomaly Score</value>
+  </data>
+  <data name="Module.Deviations.Text.AuditNote" xml:space="preserve">
+    <value>Audit Note</value>
   </data>
 </root>

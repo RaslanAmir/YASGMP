@@ -160,6 +160,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<SuppliersModuleViewModel>();
                         svc.AddTransient<ExternalServicersModuleViewModel>();
                         svc.AddTransient<CapaModuleViewModel>();
+                        svc.AddTransient<DeviationModuleViewModel>();
                         svc.AddTransient<IncidentsModuleViewModel>();
                         svc.AddTransient<ChangeControlModuleViewModel>();
                         svc.AddTransient<ValidationsModuleViewModel>();
@@ -202,6 +203,7 @@ namespace YasGMP.Wpf
                             registry.Register<SuppliersModuleViewModel>(SuppliersModuleViewModel.ModuleKey, "Suppliers", "Supply Chain", "Approved suppliers and contractors");
                             registry.Register<ExternalServicersModuleViewModel>(ExternalServicersModuleViewModel.ModuleKey, "External Servicers", "Supply Chain", "Accredited laboratories and service partners");
                             registry.Register<CapaModuleViewModel>(CapaModuleViewModel.ModuleKey, "CAPA", "Quality", "Corrective actions and preventive plans");
+                            registry.Register<DeviationModuleViewModel>(DeviationModuleViewModel.ModuleKey, "Deviations", "Quality", "Deviation intake, investigation, and CAPA linkage");
                             registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
                             registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
                             registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");

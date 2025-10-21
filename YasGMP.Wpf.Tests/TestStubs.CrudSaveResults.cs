@@ -150,6 +150,39 @@ namespace YasGMP.Models
             => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
+    public sealed partial class FakeDeviationCrudService
+    {
+        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
+
+        public async Task<CrudSaveResult> CreateAsync(Deviation deviation, DeviationCrudContext context)
+        {
+            var id = await CreateCoreAsync(deviation, context).ConfigureAwait(false);
+            return new CrudSaveResult(id, BuildMetadata(context, deviation.DigitalSignature));
+        }
+
+        public async Task<CrudSaveResult> UpdateAsync(Deviation deviation, DeviationCrudContext context)
+        {
+            await UpdateCoreAsync(deviation, context).ConfigureAwait(false);
+            return new CrudSaveResult(deviation.Id, BuildMetadata(context, deviation.DigitalSignature));
+        }
+
+        private SignatureMetadataDto BuildMetadata(DeviationCrudContext context, string? signature)
+            => new()
+            {
+                Id = ResolveMetadataId(context.SignatureId),
+                Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
+                Method = context.SignatureMethod,
+                Status = context.SignatureStatus,
+                Note = context.SignatureNote,
+                Session = context.SessionId,
+                Device = context.DeviceInfo,
+                IpAddress = context.Ip
+            };
+
+        private int? ResolveMetadataId(int? contextSignatureId)
+            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
+    }
+
     public sealed partial class FakeChangeControlCrudService
     {
         public Func<int?, int?>? SignatureMetadataIdSource { get; set; }

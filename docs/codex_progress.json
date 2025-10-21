@@ -460,5 +460,6 @@
     "2026-05-13: Added RollbackPreviewDocumentViewModel unit tests that assert signature validation, status messaging, and rollback success/failure handling via DatabaseService test hooks, extended AdminModuleViewModel tests to cover electronic signature cancellation warnings, and refreshed README_WPF_SHELL.md/docs/WPF_MAPPING.md to document the rollback workflows; dotnet restore/build/test continue to fail with 'command not found: dotnet' pending Windows tooling.",
     "2026-05-14: Added IDeviationCrudService and DeviationCrudContext so WPF adapters can capture signature metadata consistent with the MAUI DeviationService/AuditService pipeline; dotnet restore/build/test still fail with 'command not found: dotnet' until Windows tooling is available.",
     "2026-05-16: WPF host now registers DeviationService alongside the IDeviationCrudService adapter, and service registration tests assert both resolve; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container so smoke automation remains pending on Windows tooling."
+    ,"2026-05-17: Added Deviation module view model/view with attachment workflow, CFL integration, and unit coverage to mirror incident/change-control saves; dotnet restore/build/test still fail with 'command not found: dotnet' in this container."
   ]
 }
