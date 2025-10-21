@@ -257,7 +257,9 @@
                                 <TextBlock Text="Zone Filter:" VerticalAlignment="Center" Margin="0,0,8,0" />
                                 <ComboBox ItemsSource="{Binding ZoneFilters}"
                                           SelectedItem="{Binding SelectedZoneFilter, Mode=TwoWay}"
-                                          Width="200" />
+                                          Width="200"
+                                          AutomationProperties.Name="Zone filter"
+                                          AutomationProperties.AutomationId="Parts.ZoneFilter" />
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding ZoneSummariesView}"
                                       AutoGenerateColumns="False"

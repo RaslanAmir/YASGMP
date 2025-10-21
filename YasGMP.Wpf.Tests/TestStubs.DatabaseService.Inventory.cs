@@ -30,6 +30,18 @@ public partial class DatabaseService
 
     public Exception? InventoryHistoryException { get; set; }
 
+    public Func<int, DataTable>? InventoryZoneDashboardProvider { get; set; }
+
+    public DataTable? InventoryZoneDashboardTable { get; set; }
+
+    public Exception? InventoryZoneDashboardException { get; set; }
+
+    public Func<int?, int?, int, DataTable>? InventoryMovementPreviewProvider { get; set; }
+
+    public DataTable? InventoryMovementPreviewTable { get; set; }
+
+    public Exception? InventoryMovementPreviewException { get; set; }
+
     public Task EnsureInventorySchemaAsync(CancellationToken token = default)
         => Task.CompletedTask;
 
@@ -95,6 +107,52 @@ public partial class DatabaseService
         return Task.FromResult(CreateEmptyInventoryHistory());
     }
 
+    public Task<DataTable> GetInventoryZoneDashboardAsync(int take = 25, CancellationToken token = default)
+    {
+        if (InventoryZoneDashboardException is not null)
+        {
+            throw InventoryZoneDashboardException;
+        }
+
+        if (InventoryZoneDashboardProvider is not null)
+        {
+            var provided = InventoryZoneDashboardProvider(take) ?? CreateEmptyInventoryZoneDashboard();
+            return Task.FromResult(provided.Copy());
+        }
+
+        if (InventoryZoneDashboardTable is not null)
+        {
+            return Task.FromResult(InventoryZoneDashboardTable.Copy());
+        }
+
+        return Task.FromResult(CreateEmptyInventoryZoneDashboard());
+    }
+
+    public Task<DataTable> GetInventoryMovementPreviewAsync(
+        int? warehouseId,
+        int? partId,
+        int take = 20,
+        CancellationToken token = default)
+    {
+        if (InventoryMovementPreviewException is not null)
+        {
+            throw InventoryMovementPreviewException;
+        }
+
+        if (InventoryMovementPreviewProvider is not null)
+        {
+            var provided = InventoryMovementPreviewProvider(warehouseId, partId, take) ?? CreateEmptyInventoryHistory();
+            return Task.FromResult(provided.Copy());
+        }
+
+        if (InventoryMovementPreviewTable is not null)
+        {
+            return Task.FromResult(InventoryMovementPreviewTable.Copy());
+        }
+
+        return Task.FromResult(CreateEmptyInventoryHistory());
+    }
+
     private static List<(int warehouseId, string warehouseName, int quantity, int? min, int? max)> CloneStockLevels(
         IEnumerable<(int warehouseId, string warehouseName, int quantity, int? min, int? max)> source)
         => source.Select(level => (level.warehouseId, level.warehouseName, level.quantity, level.min, level.max)).ToList();
@@ -109,6 +167,21 @@ public partial class DatabaseService
         table.Columns.Add("performed_by_id", typeof(int));
         table.Columns.Add("related_document", typeof(string));
         table.Columns.Add("note", typeof(string));
+        return table;
+    }
+
+    private static DataTable CreateEmptyInventoryZoneDashboard()
+    {
+        var table = new DataTable();
+        table.Columns.Add("part_id", typeof(int));
+        table.Columns.Add("part_name", typeof(string));
+        table.Columns.Add("part_code", typeof(string));
+        table.Columns.Add("warehouse_id", typeof(int));
+        table.Columns.Add("warehouse_name", typeof(string));
+        table.Columns.Add("quantity", typeof(int));
+        table.Columns.Add("min_threshold", typeof(int));
+        table.Columns.Add("max_threshold", typeof(int));
+        table.Columns.Add("zone", typeof(string));
         return table;
     }
 

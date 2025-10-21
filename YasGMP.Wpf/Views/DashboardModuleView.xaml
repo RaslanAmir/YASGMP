@@ -43,7 +43,8 @@
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
@@ -128,7 +129,51 @@
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <Grid Grid.Row="2" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <GroupBox Header="Inventory Alerts" Grid.Column="0" Margin="0,0,8,0">
+                    <DataGrid ItemsSource="{Binding InventoryAlerts}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              MinHeight="160">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Warehouse" Binding="{Binding WarehouseName}" Width="2*" />
+                            <DataGridTextColumn Header="Part" Binding="{Binding PartName}" Width="2*" />
+                            <DataGridTextColumn Header="Code" Binding="{Binding PartCode}" Width="120" />
+                            <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Width="120" />
+                            <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="90" />
+                            <DataGridTextColumn Header="Min" Binding="{Binding Minimum}" Width="80" />
+                            <DataGridTextColumn Header="Max" Binding="{Binding Maximum}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
+                <GroupBox Header="Recent Movements" Grid.Column="1" Margin="8,0,0,0">
+                    <DataGrid ItemsSource="{Binding InventoryMovements}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              MinHeight="160">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="When" Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="160" />
+                            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" />
+                            <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="90" />
+                            <DataGridTextColumn Header="Document" Binding="{Binding Document}" Width="*" />
+                            <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" />
+                            <DataGridTextColumn Header="User" Binding="{Binding PerformedById}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+            </Grid>
+
+            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
         </Grid>
     </DockPanel>
 </UserControl>

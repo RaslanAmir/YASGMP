@@ -578,6 +578,58 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
     }
 }
 
+namespace YasGMP.Services
+{
+    using System.Linq;
+    using YasGMP.Models;
+
+    public partial class DatabaseService
+    {
+        public List<DashboardEvent> DashboardEvents { get; } = new();
+
+        public Exception? DashboardEventsException { get; set; }
+
+        public Task<List<DashboardEvent>> GetRecentDashboardEventsAsync(int take, CancellationToken cancellationToken = default)
+        {
+            if (DashboardEventsException is not null)
+            {
+                throw DashboardEventsException;
+            }
+
+            if (take <= 0)
+            {
+                take = 1;
+            }
+
+            var ordered = DashboardEvents
+                .OrderByDescending(evt => evt.Timestamp)
+                .ThenByDescending(evt => evt.Id)
+                .Take(take)
+                .Select(CloneDashboardEvent)
+                .ToList();
+
+            return Task.FromResult(ordered);
+        }
+
+        private static DashboardEvent CloneDashboardEvent(DashboardEvent source)
+            => new()
+            {
+                Id = source.Id,
+                EventType = source.EventType,
+                Description = source.Description,
+                Timestamp = source.Timestamp,
+                Severity = source.Severity,
+                UserId = source.UserId,
+                RelatedModule = source.RelatedModule,
+                RelatedRecordId = source.RelatedRecordId,
+                Icon = source.Icon,
+                IsUnread = source.IsUnread,
+                DrilldownKey = source.DrilldownKey,
+                Note = source.Note
+            };
+    }
+}
+
 namespace YasGMP.Services.Interfaces
 {
     using System;
