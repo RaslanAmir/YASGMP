@@ -453,6 +453,66 @@ public class AdminModuleViewModelTests
     }
 
     [Fact]
+    public async Task RestoreSettingCommand_WhenSignatureCancelled_SetsWarningStatus()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateCancelled();
+            var dialogService = new StubDialogService { ConfirmationResult = true };
+            var database = CreateDatabaseService(
+                out var table,
+                new Setting { Id = 1, Key = "cfg.locale", Value = "hr-HR", Description = "Default locale", Category = "system", UpdatedAt = DateTime.UtcNow });
+
+            var selectCallCount = 0;
+            var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) =>
+            {
+                selectCallCount++;
+                return Task.FromResult(table.Copy());
+            });
+            typeof(DatabaseService)
+                .GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(database, selectOverride);
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            Assert.Equal(1, selectCallCount);
+
+            await viewModel.RestoreSettingCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            Assert.Equal(1, selectCallCount);
+            Assert.Single(signatureService.Requests);
+            Assert.False(signatureService.WasPersistInvoked);
+
+            var expectedStatus = localization.GetString("Module.Admin.Restore.Status.SignatureCancelled");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, viewModel.LastSignatureStatus);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Warning, alertService.LastSeverity);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
     public async Task RestoreSettingCommand_WhenRollbackFails_SurfacesError()
     {
         var authContext = new StubAuthContext();
