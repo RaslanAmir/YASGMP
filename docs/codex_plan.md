@@ -145,6 +145,7 @@
 - 2026-05-08: Extended External Servicers oversight tests to assert KPI/timeline/analytics projections and drill-in navigation targets via recording module navigation fakes; CLI remains unavailable so Windows-host validation is still required.
 - 2026-05-09: Audit module now launches a rollback preview document that renders old/new JSON, signature verification, and rollback commands through the WPF shell; localization resources and toolbar automation ids were added while CLI validation remains blocked in the container.
 - 2026-05-16: Registered `DeviationService` and the `IDeviationCrudService` adapter with the WPF host so deviation editors can route persistence through the shared AppCore service, and extended the WPF service registration tests to assert both registrations resolve. `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` were retried for this batch; each still fails with `bash: command not found: dotnet`, so smoke automation remains TODO pending Windows tooling.
+- 2026-05-21: Added `DeviationCrudServiceAdapterTests` covering create/update flows, ensuring DatabaseService overrides capture signature/IP/session/device metadata for deviation persistence and system event log entries while `CrudSaveResult` returns the provided signature manifest; `dotnet restore yasgmp.sln` still exits with `bash: command not found: dotnet`, so Windows-host validation remains required.
 
 #### Entity Traceability Map (Seed)
 
