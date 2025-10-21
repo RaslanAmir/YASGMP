@@ -1,3 +1,4 @@
+using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Services;
@@ -24,6 +25,21 @@ public interface IShellInteractionService
     /// </summary>
     /// <param name="message">Localized status string composed from <c>ShellStrings</c> resources.</param>
     void UpdateStatus(string message);
+
+    /// <summary>
+    /// Adds an ad-hoc document (non-module) to the docking workspace and optionally activates it.
+    /// </summary>
+    /// <param name="document">Document view-model to surface inside the document pane.</param>
+    /// <param name="activate">
+    /// When <see langword="true"/> the document becomes the active tab immediately after being added.
+    /// </param>
+    DocumentViewModel OpenDocument(DocumentViewModel document, bool activate = true);
+
+    /// <summary>
+    /// Removes an ad-hoc document from the docking workspace.
+    /// </summary>
+    /// <param name="document">Document previously returned by <see cref="OpenDocument(DocumentViewModel, bool)"/>.</param>
+    void CloseDocument(DocumentViewModel document);
 
     /// <summary>
     /// Updates the inspector panel with module-specific metadata, audit trails, or Golden Arrow primers.

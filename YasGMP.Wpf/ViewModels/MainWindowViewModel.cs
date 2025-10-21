@@ -61,7 +61,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _localization.LanguageChanged += OnLanguageChanged;
 
-        _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update);
+        _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update, OpenDocumentInternal, CloseDocumentInternal);
         RefreshShellContext();
         SetStatusFromResource(ReadyStatusKey);
     }
@@ -202,10 +202,60 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
-    private void ActivateInternal(ModuleDocumentViewModel document)
+    private void ActivateInternal(DocumentViewModel document)
     {
         ActiveDocument = document;
         StatusBar.ActiveModule = document.Title;
+    }
+
+    private DocumentViewModel OpenDocumentInternal(DocumentViewModel document, bool activate)
+    {
+        if (document is null)
+        {
+            throw new ArgumentNullException(nameof(document));
+        }
+
+        var existing = Documents.FirstOrDefault(d => string.Equals(d.ContentId, document.ContentId, StringComparison.Ordinal));
+        if (existing is null)
+        {
+            Documents.Add(document);
+            existing = document;
+        }
+
+        if (activate)
+        {
+            ActivateInternal(existing);
+        }
+
+        return existing;
+    }
+
+    private void CloseDocumentInternal(DocumentViewModel document)
+    {
+        if (document is null)
+        {
+            throw new ArgumentNullException(nameof(document));
+        }
+
+        var wasActive = ReferenceEquals(ActiveDocument, document);
+        if (!Documents.Remove(document))
+        {
+            return;
+        }
+
+        if (wasActive)
+        {
+            var fallback = Documents.LastOrDefault();
+            if (fallback is not null)
+            {
+                ActivateInternal(fallback);
+            }
+            else
+            {
+                ActiveDocument = null;
+                StatusBar.ActiveModule = string.Empty;
+            }
+        }
     }
 
     private void UpdateStatusInternal(string message)

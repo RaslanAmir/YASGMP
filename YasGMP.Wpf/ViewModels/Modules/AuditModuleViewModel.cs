@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
@@ -31,12 +32,15 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        IServiceProvider serviceProvider)
         : base(ModuleKey, localization.GetString("Module.Title.AuditTrail"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         ActionOptions = new[]
         {
@@ -51,6 +55,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
         _exportToPdfCommand = new AsyncRelayCommand(ExportToPdfAsync, CanExecuteExport);
         _exportToExcelCommand = new AsyncRelayCommand(ExportToExcelAsync, CanExecuteExport);
+        _rollbackPreviewCommand = new AsyncRelayCommand(ExecuteRollbackPreviewAsync, CanExecuteRollbackPreview);
 
         FilterFrom = DateTime.Today.AddDays(-30);
         FilterTo = DateTime.Today;
@@ -66,6 +71,11 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     /// </summary>
 
     public IAsyncRelayCommand ExportToExcelCommand => _exportToExcelCommand;
+    /// <summary>
+    /// Gets the command that opens the rollback preview document.
+    /// </summary>
+
+    public IAsyncRelayCommand RollbackPreviewCommand => _rollbackPreviewCommand;
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -88,6 +98,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
                 normalizedRange.QueryTo).ConfigureAwait(false);
 
             var auditEntries = audits?.ToList() ?? new List<AuditEntryDto>();
+            _auditEntryLookup = auditEntries.ToDictionary(GetRecordKey, entry => entry, StringComparer.Ordinal);
             _lastAuditEntries = auditEntries;
             _lastFilterDescription = FormatFilterDescription(
                 FilterUser,
@@ -187,10 +198,14 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     private readonly AuditService _auditService;
     private readonly ILocalizationService _localization;
     private readonly ExportService _exportService;
+    private readonly IShellInteractionService _shellInteraction;
+    private readonly IServiceProvider _serviceProvider;
     private readonly AsyncRelayCommand _exportToPdfCommand;
     private readonly AsyncRelayCommand _exportToExcelCommand;
+    private readonly AsyncRelayCommand _rollbackPreviewCommand;
     private IReadOnlyList<AuditEntryDto>? _lastAuditEntries;
     private string? _lastFilterDescription;
+    private Dictionary<string, AuditEntryDto> _auditEntryLookup = new(StringComparer.Ordinal);
 
     private void TriggerRefreshForFilterChange()
     {
@@ -241,6 +256,12 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
            || record.InspectorFields.Any(field =>
                field.Value?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
 
+    protected override Task OnRecordSelectedAsync(ModuleRecord? record)
+    {
+        _rollbackPreviewCommand.NotifyCanExecuteChanged();
+        return Task.CompletedTask;
+    }
+
     partial void OnHasResultsChanged(bool value) => UpdateExportCommandStates();
 
     partial void OnIsBusyChanged(bool value) => UpdateExportCommandStates();
@@ -283,8 +304,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             new("Reason", entry.Note ?? string.Empty)
         };
 
-        var key = entry.Id?.ToString(CultureInfo.InvariantCulture)
-            ?? $"{entry.Timestamp:O}|{entry.Entity}|{entry.Action}";
+        var key = GetRecordKey(entry);
 
         return new ModuleRecord(
             key,
@@ -353,6 +373,47 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     {
         _exportToPdfCommand.NotifyCanExecuteChanged();
         _exportToExcelCommand.NotifyCanExecuteChanged();
+        _rollbackPreviewCommand.NotifyCanExecuteChanged();
+    }
+
+    private static string GetRecordKey(AuditEntryDto entry)
+        => entry.Id?.ToString(CultureInfo.InvariantCulture)
+           ?? $"{entry.Timestamp:O}|{entry.Entity}|{entry.Action}";
+
+    private bool CanExecuteRollbackPreview()
+        => !IsBusy
+           && SelectedRecord is not null
+           && _auditEntryLookup.ContainsKey(SelectedRecord.Key);
+
+    private Task ExecuteRollbackPreviewAsync()
+    {
+        if (SelectedRecord is null)
+        {
+            StatusMessage = _localization.GetString("Audit.Rollback.Status.NoSelection") ?? "Select an audit entry to preview.";
+            return Task.CompletedTask;
+        }
+
+        if (!_auditEntryLookup.TryGetValue(SelectedRecord.Key, out var entry))
+        {
+            StatusMessage = _localization.GetString("Audit.Rollback.Status.MissingSnapshot") ?? "Rollback payloads are unavailable for the selected entry.";
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            var document = ActivatorUtilities.CreateInstance<RollbackPreviewDocumentViewModel>(_serviceProvider, entry);
+            _shellInteraction.OpenDocument(document);
+            var openedFormat = _localization.GetString("Audit.Rollback.Status.Opened") ?? "Rollback preview opened for {0}.";
+            var label = entry.EntityName ?? entry.Entity ?? "record";
+            StatusMessage = string.Format(CultureInfo.CurrentCulture, openedFormat, label);
+        }
+        catch (Exception ex)
+        {
+            var failureFormat = _localization.GetString("Audit.Rollback.Status.OpenError") ?? "Failed to open rollback preview: {0}";
+            StatusMessage = string.Format(CultureInfo.CurrentCulture, failureFormat, ex.Message);
+        }
+
+        return Task.CompletedTask;
     }
 
     private static string FormatFilterDescription(

@@ -44,9 +44,15 @@
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
             <Separator />
+            <Button Content="{DynamicResource Audit.Toolbar.Command.RollbackPreview.Content}"
+                    Command="{Binding RollbackPreviewCommand}"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.RollbackPreview.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.RollbackPreview.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.RollbackPreview.AutomationId}" />
             <Button Content="{DynamicResource Audit.Toolbar.Command.ExportPdf.Content}"
                     Command="{Binding ExportToPdfCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" 
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ExportPdf.ToolTip}"
                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ExportPdf.AutomationName}"
                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ExportPdf.AutomationId}"/>
