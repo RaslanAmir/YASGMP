@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -200,6 +201,154 @@ public class ExternalServicersModuleViewModelTests
         Assert.Contains(viewModel.OversightMetrics, metric => metric.Title.Contains("Total", StringComparison.OrdinalIgnoreCase));
         Assert.NotEmpty(viewModel.InterventionTimeline);
         Assert.NotEmpty(viewModel.OversightAnalytics);
+    }
+
+    [Fact]
+    public async Task RefreshOversight_ComputesDetailedMetricsAndAnalytics()
+    {
+        var now = DateTime.UtcNow;
+        var interventions = new[]
+        {
+            new ContractorIntervention
+            {
+                Id = 1,
+                ContractorId = 42,
+                InterventionDate = now.AddDays(-2),
+                Status = "Open",
+                GmpCompliance = true,
+                InterventionType = "Calibration",
+                Reason = "Annual",
+                Result = "Scheduled",
+                StartDate = now.AddDays(-3),
+                EndDate = now.AddDays(5)
+            },
+            new ContractorIntervention
+            {
+                Id = 2,
+                ContractorId = 42,
+                InterventionDate = now.AddDays(-10),
+                Status = "Pending",
+                GmpCompliance = false,
+                InterventionType = "Audit",
+                Reason = "Investigation",
+                StartDate = now.AddDays(-11)
+            },
+            new ContractorIntervention
+            {
+                Id = 3,
+                ContractorId = 42,
+                InterventionDate = now.AddDays(-20),
+                Status = "Closed",
+                GmpCompliance = true,
+                InterventionType = "Repair",
+                Reason = "Breakdown",
+                Result = "Completed",
+                StartDate = now.AddDays(-22),
+                EndDate = now.AddDays(-19)
+            },
+            new ContractorIntervention
+            {
+                Id = 4,
+                ContractorId = 99,
+                InterventionDate = now.AddDays(-1),
+                Status = "Open"
+            }
+        };
+
+        var database = CreateDatabaseService(interventions);
+        var service = new FakeExternalServicerCrudService();
+        service.Saved.Add(new ExternalServicer
+        {
+            Id = 42,
+            Name = "Precision Oversight",
+            Email = "precision@example.com",
+            Status = "Active"
+        });
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new YasGMP.Wpf.Tests.TestDoubles.TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new ExternalServicersModuleViewModel(database, service, auth, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == "42");
+        await Task.Delay(10);
+
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            await viewModel.RefreshOversightCommand.ExecuteAsync(null);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
+
+        Assert.Equal(4, viewModel.OversightMetrics.Count);
+        Assert.Equal("3", viewModel.OversightMetrics[0].FormattedValue);
+        Assert.Equal("2", viewModel.OversightMetrics[1].FormattedValue);
+        Assert.Equal("1", viewModel.OversightMetrics[2].FormattedValue);
+        Assert.StartsWith("5.5", viewModel.OversightMetrics[3].FormattedValue, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Equal(3, viewModel.InterventionTimeline.Count);
+        Assert.Equal(interventions[0].InterventionDate, viewModel.InterventionTimeline[0].Timestamp);
+        Assert.Contains("Calibration", viewModel.InterventionTimeline[0].Summary, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Equal(4, viewModel.OversightAnalytics.Count);
+        Assert.Contains("Open", viewModel.OversightAnalytics[0].Value, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("67", viewModel.OversightAnalytics[1].Value, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("6.0", viewModel.OversightAnalytics[2].Value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task DrillIntoOversightCommand_NavigatesToScheduling()
+    {
+        var interventions = new[]
+        {
+            new ContractorIntervention
+            {
+                Id = 1,
+                ContractorId = 7,
+                InterventionDate = DateTime.UtcNow.AddDays(-1),
+                Status = "Open"
+            }
+        };
+
+        var database = CreateDatabaseService(interventions);
+        var service = new FakeExternalServicerCrudService();
+        service.Saved.Add(new ExternalServicer
+        {
+            Id = 7,
+            Name = "Field Ops",
+            Email = "field@example.com",
+            Status = "Active"
+        });
+
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new YasGMP.Wpf.Tests.TestDoubles.TestShellInteractionService();
+        var navigation = new RecordingModuleNavigationService();
+
+        var viewModel = new ExternalServicersModuleViewModel(database, service, auth, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == "7");
+        await Task.Delay(10);
+        await viewModel.RefreshOversightCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.DrillIntoOversightCommand.CanExecute(null));
+        viewModel.DrillIntoOversightCommand.Execute(null);
+
+        var opened = Assert.Single(navigation.OpenedModules);
+        Assert.Equal(SchedulingModuleViewModel.ModuleKey, opened.ModuleKey);
+        Assert.Equal("7", opened.Parameter);
+        Assert.NotNull(navigation.LastActivated);
+        Assert.Contains(viewModel.SelectedRecord.Title, viewModel.StatusMessage);
     }
 
     private static Task<bool> InvokeSaveAsync(ExternalServicersModuleViewModel viewModel)

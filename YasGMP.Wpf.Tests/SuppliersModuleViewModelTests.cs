@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -303,6 +304,148 @@ public class SuppliersModuleViewModelTests
         viewModel.CancelCommand.Execute(null);
 
         Assert.Equal(originalName, viewModel.Editor.Name);
+    }
+
+    [Fact]
+    public async Task SelectingRecord_LoadsAuditTimelineForSupplier()
+    {
+        var database = new DatabaseService();
+        var audit = new StubAuditService(database);
+        var now = DateTime.UtcNow;
+        audit.FilteredAudits.AddRange(new[]
+        {
+            new AuditEntryDto
+            {
+                Id = 1,
+                Entity = "suppliers",
+                EntityId = "12",
+                Action = "Created",
+                Timestamp = now.AddMinutes(-30),
+                Username = "qa"
+            },
+            new AuditEntryDto
+            {
+                Id = 2,
+                Entity = "Suppliers",
+                EntityId = "12",
+                Action = "ContractUpload",
+                Timestamp = now.AddMinutes(-10),
+                Username = "qa"
+            },
+            new AuditEntryDto
+            {
+                Id = 3,
+                Entity = "suppliers",
+                EntityId = "99",
+                Action = "Irrelevant",
+                Timestamp = now
+            }
+        });
+
+        var supplierAdapter = new FakeSupplierCrudService();
+        supplierAdapter.Saved.Add(new Supplier
+        {
+            Id = 12,
+            Name = "Precision Labs",
+            SupplierType = "Calibration",
+            Status = "Active",
+            Email = "precision@example.com",
+            VatNumber = "VAT-12",
+            ContractFile = "precision.pdf"
+        });
+
+        var attachments = new ConfigurableAttachmentWorkflowService();
+        var filePicker = new TestFilePicker();
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new StubCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth,
+            signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == "12");
+        await Task.Delay(10);
+
+        Assert.Equal("suppliers", audit.LastFilter?.Entity);
+        Assert.Equal(2, viewModel.AuditTimeline.Count);
+        Assert.All(viewModel.AuditTimeline, entry =>
+        {
+            Assert.Equal("12", entry.EntityId);
+            Assert.True(string.Equals("suppliers", entry.Entity, StringComparison.OrdinalIgnoreCase));
+        });
+        Assert.True(viewModel.AuditTimeline[0].Timestamp <= viewModel.AuditTimeline[^1].Timestamp);
+    }
+
+    [Fact]
+    public async Task PreviewContractCommand_DownloadsAndPreviewsContract()
+    {
+        var database = new DatabaseService();
+        var audit = new StubAuditService(database);
+        var supplierAdapter = new FakeSupplierCrudService();
+        supplierAdapter.Saved.Add(new Supplier
+        {
+            Id = 3,
+            Name = "Contoso Calibration",
+            SupplierType = "Calibration",
+            Status = "Active",
+            Email = "contoso@example.com",
+            VatNumber = "VAT-3",
+            ContractFile = "master-contract.pdf"
+        });
+
+        var attachmentWorkflow = new ConfigurableAttachmentWorkflowService();
+        var contractAttachment = new Attachment
+        {
+            Id = 42,
+            FileName = "master-contract.pdf",
+            Name = "Master Contract",
+            EntityTable = "suppliers",
+            EntityId = 3
+        };
+        attachmentWorkflow.Links[("suppliers", 3)] = new List<AttachmentLinkWithAttachment>
+        {
+            new(
+                new AttachmentLink
+                {
+                    Id = 100,
+                    EntityType = "suppliers",
+                    EntityId = 3,
+                    AttachmentId = contractAttachment.Id
+                },
+                contractAttachment)
+        };
+        attachmentWorkflow.DownloadStreamFactory = _
+            => new MemoryStream(Encoding.UTF8.GetBytes("contract"), writable: false);
+
+        var filePicker = new TestFilePicker();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 7, FullName = "QA" }
+        };
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new StubCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachmentWorkflow, filePicker, auth,
+            signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == "3");
+        await Task.Delay(10);
+
+        Assert.True(viewModel.PreviewContractCommand.CanExecute(null));
+        await viewModel.PreviewContractCommand.ExecuteAsync(null);
+
+        var download = Assert.Single(attachmentWorkflow.DownloadRequests);
+        Assert.Equal(contractAttachment.Id, download.AttachmentId);
+        Assert.Equal(auth.CurrentUser?.Id, download.Request?.RequestedById);
+        var preview = Assert.Single(shell.PreviewedDocuments);
+        Assert.Contains("master-contract.pdf", preview, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Previewing contract", viewModel.StatusMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     private static Task<bool> InvokeSaveAsync(SuppliersModuleViewModel viewModel)

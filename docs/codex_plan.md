@@ -134,6 +134,8 @@
 - 2026-05-06: Recalibrated the oversight refresh pipeline so `LoadAsync`, selection changes, and the explicit refresh command all call `DatabaseService.GetAllContractorInterventionsAsync`, rebuild KPI/timeline/analytics projections, marshal updates onto the dispatcher, and surface failures through `StatusMessage`.
 - CLI status: `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were retried; each still exits with `bash: command not found: dotnet` because the .NET SDK is unavailable in this Linux container. WPF smoke automation remains TODO pending Windows tooling.
 - 2026-05-07: Documented the delivered oversight pane and contractor dashboards in `docs/WPF_MAPPING.md`, replacing the external servicer TODO callouts with the live data sources.
+- 2026-05-08: Added regression tests for Suppliers audit timeline loading and contract preview flows using configurable audit/attachment stubs; `dotnet restore/build/test` still return `bash: command not found: dotnet` in this container.
+- 2026-05-08: Extended External Servicers oversight tests to assert KPI/timeline/analytics projections and drill-in navigation targets via recording module navigation fakes; CLI remains unavailable so Windows-host validation is still required.
 
 #### Entity Traceability Map (Seed)
 
