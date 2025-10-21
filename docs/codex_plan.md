@@ -85,6 +85,7 @@
 - Updated `AdminModuleView.xaml` with a localized restore button, automation metadata, and a QA-facing signature status indicator; ShellStrings (EN/HR) gained confirmation/status copy, and AdminModuleViewModel unit tests now cover confirmation decline, rollback failure, and success paths via stubbed dialog/auth services. Restore/build/test commands remain blocked with `command not found: dotnet` inside this container.
 - Added regression coverage for stale selections: `RestoreSettingCommand_WhenRecordKeyMissing_UsesCodeLookup` verifies code-based fallback restores succeed after lookup mismatches.
 - 2026-05-13: Authored RollbackPreviewDocumentViewModel unit tests that validate signature status, status-bar messaging, and rollback success/failure handling through the DatabaseService test hooks, and extended AdminModuleViewModel coverage to assert the electronic signature cancellation warning path; dotnet restore/build/test still fail with `command not found: dotnet` until Windows tooling is available.
+- 2026-05-14: Introduced a WPF-facing `IDeviationCrudService` contract plus `DeviationCrudContext` helpers so deviation adapters can capture signature metadata and reuse MAUI localization/audit services; `dotnet restore`/`dotnet build`/`dotnet test` still fail with `bash: command not found: dotnet` in this container.
 
 ### Increment 2 Follow-up — Assets Smoke Automation (2026-04-22)
 
