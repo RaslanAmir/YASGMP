@@ -84,6 +84,7 @@
 - Added a settings restore workflow: AdminModuleViewModel now consumes the electronic signature dialog, dialog service, and auth/session context so the new `RestoreSettingCommand` enforces confirmation prompts, signature capture/persistence, busy gating, audit logging, and triggers `RefreshCommand` after successful rollbacks while surfacing localized status/alert messages.
 - Updated `AdminModuleView.xaml` with a localized restore button, automation metadata, and a QA-facing signature status indicator; ShellStrings (EN/HR) gained confirmation/status copy, and AdminModuleViewModel unit tests now cover confirmation decline, rollback failure, and success paths via stubbed dialog/auth services. Restore/build/test commands remain blocked with `command not found: dotnet` inside this container.
 - Added regression coverage for stale selections: `RestoreSettingCommand_WhenRecordKeyMissing_UsesCodeLookup` verifies code-based fallback restores succeed after lookup mismatches.
+- 2026-05-13: Authored RollbackPreviewDocumentViewModel unit tests that validate signature status, status-bar messaging, and rollback success/failure handling through the DatabaseService test hooks, and extended AdminModuleViewModel coverage to assert the electronic signature cancellation warning path; dotnet restore/build/test still fail with `command not found: dotnet` until Windows tooling is available.
 
 ### Increment 2 Follow-up — Assets Smoke Automation (2026-04-22)
 
