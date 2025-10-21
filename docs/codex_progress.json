@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "2026-05-21: dotnet restore yasgmp.sln retried while landing Deviation CRUD adapter regression tests; CLI still missing so the command exits with 'command not found'.",
       "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
       "2025-10-13: dotnet --info/dotnet restore still return 'command not found' after retargeting MAUI/AppCore to .NET 9; Windows validation pending.",
       "Run scripts/bootstrap-dotnet9.ps1 on a Windows host to install/verify .NET 9 + Windows SDK",
