@@ -780,6 +780,87 @@
   <data name="Module.Audit.Action.Export" xml:space="preserve">
     <value>EXPORT</value>
   </data>
+  <data name="Audit.Rollback.Document.Title" xml:space="preserve">
+    <value>Rollback Preview</value>
+  </data>
+  <data name="Audit.Rollback.Status.Ready" xml:space="preserve">
+    <value>Review the JSON diff before requesting a rollback.</value>
+  </data>
+  <data name="Audit.Rollback.Status.MissingData" xml:space="preserve">
+    <value>This audit entry does not expose the data required for a rollback.</value>
+  </data>
+  <data name="Audit.Rollback.Status.Success" xml:space="preserve">
+    <value>Rollback requested for {0}.</value>
+  </data>
+  <data name="Audit.Rollback.Status.Failure" xml:space="preserve">
+    <value>Rollback failed: {0}</value>
+  </data>
+  <data name="Audit.Rollback.Status.Submitting" xml:space="preserve">
+    <value>Submitting rollback request...</value>
+  </data>
+  <data name="Audit.Rollback.Status.NoSelection" xml:space="preserve">
+    <value>Select an audit entry to preview.</value>
+  </data>
+  <data name="Audit.Rollback.Status.MissingSnapshot" xml:space="preserve">
+    <value>Rollback payloads are unavailable for the selected entry.</value>
+  </data>
+  <data name="Audit.Rollback.Status.Opened" xml:space="preserve">
+    <value>Rollback preview opened for {0}.</value>
+  </data>
+  <data name="Audit.Rollback.Status.OpenError" xml:space="preserve">
+    <value>Failed to open rollback preview: {0}</value>
+  </data>
+  <data name="Audit.Rollback.Signature.Unknown" xml:space="preserve">
+    <value>Signature unavailable</value>
+  </data>
+  <data name="Audit.Rollback.Signature.Valid" xml:space="preserve">
+    <value>Signature valid</value>
+  </data>
+  <data name="Audit.Rollback.Signature.Invalid" xml:space="preserve">
+    <value>Signature invalid</value>
+  </data>
+  <data name="Audit.Rollback.Label.Entity" xml:space="preserve">
+    <value>Entity</value>
+  </data>
+  <data name="Audit.Rollback.Label.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Audit.Rollback.Label.Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="Audit.Rollback.Label.Signature" xml:space="preserve">
+    <value>Signature</value>
+  </data>
+  <data name="Audit.Rollback.Label.OldJson" xml:space="preserve">
+    <value>Previous JSON</value>
+  </data>
+  <data name="Audit.Rollback.Label.NewJson" xml:space="preserve">
+    <value>New JSON</value>
+  </data>
+  <data name="Audit.Rollback.Button.Rollback" xml:space="preserve">
+    <value>Request Rollback</value>
+  </data>
+  <data name="Audit.Rollback.Button.Rollback.ToolTip" xml:space="preserve">
+    <value>Queue a rollback using the selected audit snapshot.</value>
+  </data>
+  <data name="Audit.Rollback.Button.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Audit.Rollback.Button.Close.ToolTip" xml:space="preserve">
+    <value>Close the rollback preview document.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.Content" xml:space="preserve">
+    <value>Rollback Preview</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.ToolTip" xml:space="preserve">
+    <value>Open a JSON diff and signature verification for the selected audit entry.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.AutomationName" xml:space="preserve">
+    <value>Open rollback preview</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.AutomationId" xml:space="preserve">
+    <value>Audit.Toolbar.RollbackPreview</value>
+  </data>
   <data name="Module.Parts.Status.Active" xml:space="preserve">
     <value>active</value>
   </data>

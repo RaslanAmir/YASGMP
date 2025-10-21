@@ -137,6 +137,7 @@
 - 2026-05-07: Documented the delivered oversight pane and contractor dashboards in `docs/WPF_MAPPING.md`, replacing the external servicer TODO callouts with the live data sources.
 - 2026-05-08: Added regression tests for Suppliers audit timeline loading and contract preview flows using configurable audit/attachment stubs; `dotnet restore/build/test` still return `bash: command not found: dotnet` in this container.
 - 2026-05-08: Extended External Servicers oversight tests to assert KPI/timeline/analytics projections and drill-in navigation targets via recording module navigation fakes; CLI remains unavailable so Windows-host validation is still required.
+- 2026-05-09: Audit module now launches a rollback preview document that renders old/new JSON, signature verification, and rollback commands through the WPF shell; localization resources and toolbar automation ids were added while CLI validation remains blocked in the container.
 
 #### Entity Traceability Map (Seed)
 

@@ -786,6 +786,87 @@
   <data name="Module.Audit.Action.Export" xml:space="preserve">
     <value>EXPORT</value>
   </data>
+  <data name="Audit.Rollback.Document.Title" xml:space="preserve">
+    <value>Pregled povrata</value>
+  </data>
+  <data name="Audit.Rollback.Status.Ready" xml:space="preserve">
+    <value>Pregledajte JSON razlike prije zahtjeva za povrat.</value>
+  </data>
+  <data name="Audit.Rollback.Status.MissingData" xml:space="preserve">
+    <value>Ovaj zapis revizije nema potrebne podatke za povrat.</value>
+  </data>
+  <data name="Audit.Rollback.Status.Success" xml:space="preserve">
+    <value>Zahtjev za povrat poslan za {0}.</value>
+  </data>
+  <data name="Audit.Rollback.Status.Failure" xml:space="preserve">
+    <value>Povrat nije uspio: {0}</value>
+  </data>
+  <data name="Audit.Rollback.Status.Submitting" xml:space="preserve">
+    <value>Šaljem zahtjev za povrat...</value>
+  </data>
+  <data name="Audit.Rollback.Status.NoSelection" xml:space="preserve">
+    <value>Odaberite zapis revizije za pregled.</value>
+  </data>
+  <data name="Audit.Rollback.Status.MissingSnapshot" xml:space="preserve">
+    <value>Za odabrani zapis nema dostupnih podataka za povrat.</value>
+  </data>
+  <data name="Audit.Rollback.Status.Opened" xml:space="preserve">
+    <value>Pregled povrata otvoren za {0}.</value>
+  </data>
+  <data name="Audit.Rollback.Status.OpenError" xml:space="preserve">
+    <value>Otvaranje pregleda povrata nije uspjelo: {0}</value>
+  </data>
+  <data name="Audit.Rollback.Signature.Unknown" xml:space="preserve">
+    <value>Potpis nije dostupan</value>
+  </data>
+  <data name="Audit.Rollback.Signature.Valid" xml:space="preserve">
+    <value>Potpis valjan</value>
+  </data>
+  <data name="Audit.Rollback.Signature.Invalid" xml:space="preserve">
+    <value>Potpis nevaljan</value>
+  </data>
+  <data name="Audit.Rollback.Label.Entity" xml:space="preserve">
+    <value>Entitet</value>
+  </data>
+  <data name="Audit.Rollback.Label.User" xml:space="preserve">
+    <value>Korisnik</value>
+  </data>
+  <data name="Audit.Rollback.Label.Timestamp" xml:space="preserve">
+    <value>Vrijeme</value>
+  </data>
+  <data name="Audit.Rollback.Label.Signature" xml:space="preserve">
+    <value>Potpis</value>
+  </data>
+  <data name="Audit.Rollback.Label.OldJson" xml:space="preserve">
+    <value>Prethodni JSON</value>
+  </data>
+  <data name="Audit.Rollback.Label.NewJson" xml:space="preserve">
+    <value>Novi JSON</value>
+  </data>
+  <data name="Audit.Rollback.Button.Rollback" xml:space="preserve">
+    <value>Zatraži povrat</value>
+  </data>
+  <data name="Audit.Rollback.Button.Rollback.ToolTip" xml:space="preserve">
+    <value>Dodaj zahtjev za povrat koristeći odabrani zapis revizije.</value>
+  </data>
+  <data name="Audit.Rollback.Button.Close" xml:space="preserve">
+    <value>Zatvori</value>
+  </data>
+  <data name="Audit.Rollback.Button.Close.ToolTip" xml:space="preserve">
+    <value>Zatvori pregled povrata.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.Content" xml:space="preserve">
+    <value>Pregled povrata</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.ToolTip" xml:space="preserve">
+    <value>Otvori JSON usporedbu i provjeru potpisa za odabrani zapis revizije.</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.AutomationName" xml:space="preserve">
+    <value>Otvori pregled povrata</value>
+  </data>
+  <data name="Audit.Toolbar.Command.RollbackPreview.AutomationId" xml:space="preserve">
+    <value>Audit.Toolbar.RollbackPreview</value>
+  </data>
   <data name="Module.Parts.Status.Active" xml:space="preserve">
     <value>aktivan</value>
   </data>

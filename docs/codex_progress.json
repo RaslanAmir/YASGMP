@@ -159,7 +159,8 @@
         "2026-04-07: Captured outstanding B2 follow-ups (module audit panes, attachment preview/download parity, and hybrid signature prompts) to guide post-CLI validation work.",
         "2026-04-12: Assets module toolbar now exposes localized Generate Code/Preview QR buttons wired to shell preview interactions with refreshed EN/HR resources and extended unit coverage while CLI validation remains blocked.",
         "2026-04-19: Assets/Components regression suites now cover the generate code/preview QR commands end-to-end, asserting adapter persistence and localized status messaging, and MAUI dialog tests verify the Machine editor surfaces auto-code/QR actions with `{code}.png` QR outputs matching WPF expectations; dotnet restore/build/test remain blocked (command not found).",
-        "2026-04-24: Calibration certificate dialog service now supports metadata capture, staged uploads/removals, and CalibrationModuleViewModel synchronization while dotnet restore/build/test remain blocked with 'command not found'."
+        "2026-04-24: Calibration certificate dialog service now supports metadata capture, staged uploads/removals, and CalibrationModuleViewModel synchronization while dotnet restore/build/test remain blocked with 'command not found'.",
+        "2026-05-09: Shell interaction service now opens/closes ad-hoc documents and the audit rollback preview document reuses DatabaseService rollback extensions with localized status updates; dotnet restore/build/test remain blocked with 'command not found'."
       ]
     },
     {
@@ -191,7 +192,7 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: extend work order signature metadata",
+  "lastCommitSummary": "feat: add audit rollback preview document",
   "notes": [
     "2025-10-16: WorkOrdersModuleViewModel now exposes signature/audit observables, rehydrates persisted metadata after saves, and mirrors inspector updates while dotnet restore/build/test remain blocked with 'command not found'.",
     "2026-04-11: AssetsModuleViewModel now auto-fills machine codes and QR payloads, persists PNG previews via IPlatformService, and adds GenerateCode/PreviewQr unit coverage plus localized status strings; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
@@ -380,7 +381,8 @@
     "2026-04-11: Registered calibration audit and preventive maintenance adapters so WPF resolves shared AppCore services, updated scheduled job execution to mark plans executed through PreventiveMaintenanceService, and refreshed WPF mapping; dotnet restore/build commands still fail with 'command not found' because the CLI is absent in this environment.",
     "2026-05-08: Added Suppliers module tests covering audit timeline hydration and contract preview download/preview flows via configurable audit and attachment workflow doubles; dotnet restore/build/test remain blocked with 'command not found: dotnet'.",
     "2026-05-08: Extended External Servicers oversight tests to verify KPI/timeline/analytics projections and drill-in navigation using new recording module navigation stubs; CLI still unavailable so validation must run on a Windows host.",
-    "2026-05-09: Dashboard module now projects shared inventory alerts/movements via DatabaseService inventory helpers, updates Parts/Warehouse stock toolbars, and adds dashboard unit tests; dotnet restore/build for yasgmp.sln, YasGMP.Wpf net9.0-windows, and MAUI Windows targets still return 'command not found: dotnet' in this container."
+    "2026-05-09: Dashboard module now projects shared inventory alerts/movements via DatabaseService inventory helpers, updates Parts/Warehouse stock toolbars, and adds dashboard unit tests; dotnet restore/build for yasgmp.sln, YasGMP.Wpf net9.0-windows, and MAUI Windows targets still return 'command not found: dotnet' in this container.",
+    "2026-05-09: Audit module toolbar now opens a rollback preview document with before/after JSON, signature verification, and rollback command wiring through the shell document host; dotnet restore/build/test remain blocked with 'command not found' until Windows tooling is available."
   ],
   "progress": [
     "2025-10-13: MAUI shell retargeted to net9.0-windows10.0.19041.0 with EF Core 9.x, Pomelo 9.0.0, and AppCore multi-targeting net8/net9 via Directory.Build.props; build/test remain blocked without the dotnet CLI.",

@@ -172,6 +172,7 @@ namespace YasGMP.Wpf
                             sp.GetRequiredService<ICflDialogService>(),
                             sp.GetRequiredService<IShellInteractionService>(),
                             sp.GetRequiredService<IModuleNavigationService>()));
+                        svc.AddTransient<RollbackPreviewDocumentViewModel>();
                         svc.AddTransient<AuditDashboardDocumentViewModel>();
                         svc.AddTransient<ApiAuditModuleViewModel>();
                         svc.AddTransient<DiagnosticsModuleViewModel>();

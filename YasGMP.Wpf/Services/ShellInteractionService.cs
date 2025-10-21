@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Services;
@@ -33,9 +34,11 @@ namespace YasGMP.Wpf.Services;
 public sealed class ShellInteractionService : IShellInteractionService, IModuleNavigationService
 {
     private Func<string, object?, ModuleDocumentViewModel>? _openModule;
-    private Action<ModuleDocumentViewModel>? _activate;
+    private Action<DocumentViewModel>? _activate;
     private Action<string>? _statusUpdater;
     private Action<InspectorContext>? _inspectorUpdater;
+    private Func<DocumentViewModel, bool, DocumentViewModel>? _openDocument;
+    private Action<DocumentViewModel>? _closeDocument;
 
     /// <summary>
     /// Captures shell delegates for module creation/activation and status/inspector broadcasting; must be invoked during shell startup.
@@ -48,14 +51,18 @@ public sealed class ShellInteractionService : IShellInteractionService, IModuleN
     /// <param name="inspectorUpdater">Dispatcher-affine inspector update handler.</param>
     public void Configure(
         Func<string, object?, ModuleDocumentViewModel> openModule,
-        Action<ModuleDocumentViewModel> activate,
+        Action<DocumentViewModel> activate,
         Action<string> statusUpdater,
-        Action<InspectorContext> inspectorUpdater)
+        Action<InspectorContext> inspectorUpdater,
+        Func<DocumentViewModel, bool, DocumentViewModel> openDocument,
+        Action<DocumentViewModel> closeDocument)
     {
         _openModule = openModule ?? throw new ArgumentNullException(nameof(openModule));
         _activate = activate ?? throw new ArgumentNullException(nameof(activate));
         _statusUpdater = statusUpdater ?? throw new ArgumentNullException(nameof(statusUpdater));
         _inspectorUpdater = inspectorUpdater ?? throw new ArgumentNullException(nameof(inspectorUpdater));
+        _openDocument = openDocument ?? throw new ArgumentNullException(nameof(openDocument));
+        _closeDocument = closeDocument ?? throw new ArgumentNullException(nameof(closeDocument));
     }
 
     /// <inheritdoc />
@@ -101,6 +108,39 @@ public sealed class ShellInteractionService : IShellInteractionService, IModuleN
         }
 
         _inspectorUpdater(context);
+    }
+
+    /// <inheritdoc />
+    public DocumentViewModel OpenDocument(DocumentViewModel document, bool activate = true)
+    {
+        if (document is null)
+        {
+            throw new ArgumentNullException(nameof(document));
+        }
+
+        if (_openDocument is null)
+        {
+            throw new InvalidOperationException("Shell interaction service not configured.");
+        }
+
+        var added = _openDocument(document, activate);
+        return added;
+    }
+
+    /// <inheritdoc />
+    public void CloseDocument(DocumentViewModel document)
+    {
+        if (document is null)
+        {
+            throw new ArgumentNullException(nameof(document));
+        }
+
+        if (_closeDocument is null)
+        {
+            throw new InvalidOperationException("Shell interaction service not configured.");
+        }
+
+        _closeDocument(document);
     }
 
     /// <inheritdoc />
