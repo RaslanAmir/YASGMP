@@ -3370,4 +3370,64 @@
   <data name="Module.Admin.NotificationPreferences.StatusLoadFailed" xml:space="preserve">
     <value>Could not load notification preferences: {0}</value>
   </data>
+  <data name="Module.Admin.Restore.Button.Content" xml:space="preserve">
+    <value>Restore Default</value>
+  </data>
+  <data name="Module.Admin.Restore.Button.ToolTip" xml:space="preserve">
+    <value>Restore the selected setting to its default value (requires electronic signature).</value>
+  </data>
+  <data name="Module.Admin.Restore.Button.AutomationName" xml:space="preserve">
+    <value>Restore setting</value>
+  </data>
+  <data name="Module.Admin.Restore.Button.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Restore.Button</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Title" xml:space="preserve">
+    <value>Restore Setting</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Message" xml:space="preserve">
+    <value>Restore &quot;{0}&quot; to its default value?</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Accept" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Module.Admin.Restore.Confirm.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.NoSelection" xml:space="preserve">
+    <value>Select a setting to restore.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.NotFound" xml:space="preserve">
+    <value>Unable to resolve the selected setting.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.ConfirmationDeclined" xml:space="preserve">
+    <value>Restore skipped for &quot;{0}&quot;.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureFailed" xml:space="preserve">
+    <value>Electronic signature capture failed: {0}</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureCancelled" xml:space="preserve">
+    <value>Electronic signature cancelled.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureMissing" xml:space="preserve">
+    <value>Electronic signature not captured.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignaturePersistFailed" xml:space="preserve">
+    <value>Failed to persist electronic signature: {0}</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureCaptured" xml:space="preserve">
+    <value>Electronic signature captured ({0}).</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.SignatureCaptured.Unknown" xml:space="preserve">
+    <value>unspecified reason</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.Success" xml:space="preserve">
+    <value>Setting &quot;{0}&quot; restored to default.</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.Failure" xml:space="preserve">
+    <value>Failed to restore &quot;{0}&quot;: {1}</value>
+  </data>
+  <data name="Module.Admin.Restore.Status.AuditFailed" xml:space="preserve">
+    <value>Failed to log restore audit.</value>
+  </data>
 </root>

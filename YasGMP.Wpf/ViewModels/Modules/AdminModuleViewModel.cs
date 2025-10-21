@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
-using YasGMP.Common;
+using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 /// <summary>
@@ -25,6 +27,11 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     private readonly INotificationPreferenceService _notificationPreferences;
     private readonly IShellAlertService? _alerts;
     private readonly ILocalizationService _localizationService;
+    private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly IDialogService _dialogService;
+    private readonly IAuthContext _authContext;
+    private readonly Dictionary<string, Setting> _settingsByRecordKey = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Setting> _settingsByCode = new(StringComparer.OrdinalIgnoreCase);
 
     private bool _suppressPreferenceDirty;
     private bool _statusBarAlertsEnabled;
@@ -37,6 +44,9 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     public AdminModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
+        IElectronicSignatureDialogService signatureDialog,
+        IDialogService dialogService,
+        IAuthContext authContext,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
@@ -46,9 +56,13 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     {
         _notificationPreferences = notificationPreferences ?? throw new ArgumentNullException(nameof(notificationPreferences));
         _localizationService = localization ?? throw new ArgumentNullException(nameof(localization));
+        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _alerts = ServiceLocator.GetService<IShellAlertService>();
 
         SaveNotificationPreferencesCommand = new AsyncRelayCommand(SaveNotificationPreferencesAsync, CanSaveNotificationPreferences);
+        RestoreSettingCommand = new AsyncRelayCommand(RestoreSelectedSettingAsync, CanRestoreSetting);
         PropertyChanged += OnPropertyChanged;
     }
 
@@ -94,10 +108,36 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     /// <summary>Command that persists notification preference changes.</summary>
     public IAsyncRelayCommand SaveNotificationPreferencesCommand { get; }
 
+    /// <summary>Command that reverts the selected setting to its default value.</summary>
+    public IAsyncRelayCommand RestoreSettingCommand { get; }
+
+    private string? _lastSignatureStatus;
+
+    /// <summary>Gets the most recent electronic signature status surfaced to QA.</summary>
+    public string? LastSignatureStatus
+    {
+        get => _lastSignatureStatus;
+        private set => SetProperty(ref _lastSignatureStatus, value);
+    }
+
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         await LoadNotificationPreferencesAsync().ConfigureAwait(false);
         var settings = await Database.GetAllSettingsFullAsync().ConfigureAwait(false);
+        _settingsByRecordKey.Clear();
+        _settingsByCode.Clear();
+
+        foreach (var setting in settings)
+        {
+            var recordKey = setting.Id.ToString(CultureInfo.InvariantCulture);
+            _settingsByRecordKey[recordKey] = setting;
+
+            if (!string.IsNullOrWhiteSpace(setting.Key))
+            {
+                _settingsByCode[setting.Key!] = setting;
+            }
+        }
+
         return settings.Select(ToRecord).ToList();
     }
 
@@ -133,7 +173,7 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     private ModuleRecord ToRecord(Setting setting)
     {
         var recordKey = setting.Id.ToString();
-        var recordTitle = setting.Name ?? setting.Key ?? "Setting";
+        var recordTitle = string.IsNullOrWhiteSpace(setting.Key) ? "Setting" : setting.Key!;
 
         InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
 
@@ -211,6 +251,9 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     private bool CanSaveNotificationPreferences()
         => !IsBusy && IsNotificationPreferencesDirty;
 
+    private bool CanRestoreSetting()
+        => !IsBusy && SelectedRecord is not null;
+
     private void OnPreferenceChanged()
     {
         if (_suppressPreferenceDirty)
@@ -226,6 +269,214 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         if (string.Equals(e.PropertyName, nameof(IsBusy), StringComparison.Ordinal))
         {
             SaveNotificationPreferencesCommand.NotifyCanExecuteChanged();
+            RestoreSettingCommand.NotifyCanExecuteChanged();
+        }
+
+        if (string.Equals(e.PropertyName, nameof(SelectedRecord), StringComparison.Ordinal))
+        {
+            RestoreSettingCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    private async Task RestoreSelectedSettingAsync()
+    {
+        if (SelectedRecord is null)
+        {
+            var noSelection = _localizationService.GetString("Module.Admin.Restore.Status.NoSelection");
+            StatusMessage = noSelection;
+            _alerts?.PublishStatus(noSelection, AlertSeverity.Warning);
+            return;
+        }
+
+        if (!_settingsByRecordKey.TryGetValue(SelectedRecord.Key, out var setting) &&
+            !string.IsNullOrWhiteSpace(SelectedRecord.Code) &&
+            !_settingsByCode.TryGetValue(SelectedRecord.Code!, out setting))
+        {
+            var missing = _localizationService.GetString("Module.Admin.Restore.Status.NotFound");
+            StatusMessage = missing;
+            _alerts?.PublishStatus(missing, AlertSeverity.Error);
+            return;
+        }
+
+        var resolvedSetting = setting!;
+        var settingKey = !string.IsNullOrWhiteSpace(resolvedSetting.Key)
+            ? resolvedSetting.Key!
+            : SelectedRecord.Code ?? string.Empty;
+        var settingDisplayName = string.IsNullOrWhiteSpace(SelectedRecord.Title)
+            ? (string.IsNullOrWhiteSpace(settingKey) ? SelectedRecord.Key : settingKey)
+            : SelectedRecord.Title;
+
+        var confirmTitle = _localizationService.GetString("Module.Admin.Restore.Confirm.Title");
+        var confirmMessage = string.Format(
+            CultureInfo.CurrentCulture,
+            _localizationService.GetString("Module.Admin.Restore.Confirm.Message"),
+            settingDisplayName);
+        var confirmAccept = _localizationService.GetString("Module.Admin.Restore.Confirm.Accept");
+        var confirmCancel = _localizationService.GetString("Module.Admin.Restore.Confirm.Cancel");
+
+        bool confirmed;
+        try
+        {
+            confirmed = await _dialogService
+                .ShowConfirmationAsync(confirmTitle, confirmMessage, confirmAccept, confirmCancel)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            var dialogFailed = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Restore.Status.Failure"),
+                settingDisplayName,
+                ex.Message);
+            StatusMessage = dialogFailed;
+            _alerts?.PublishStatus(dialogFailed, AlertSeverity.Error);
+            return;
+        }
+
+        if (!confirmed)
+        {
+            var declined = _localizationService.GetString("Module.Admin.Restore.Status.ConfirmationDeclined");
+            StatusMessage = string.Format(CultureInfo.CurrentCulture, declined, settingDisplayName);
+            _alerts?.PublishStatus(StatusMessage, AlertSeverity.Info);
+            return;
+        }
+
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            var recordId = setting?.Id ?? 0;
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("settings", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            var failure = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Restore.Status.SignatureFailed"),
+                ex.Message);
+            LastSignatureStatus = failure;
+            StatusMessage = failure;
+            _alerts?.PublishStatus(failure, AlertSeverity.Error);
+            return;
+        }
+
+        if (signatureResult is null)
+        {
+            var cancelled = _localizationService.GetString("Module.Admin.Restore.Status.SignatureCancelled");
+            LastSignatureStatus = cancelled;
+            StatusMessage = cancelled;
+            _alerts?.PublishStatus(cancelled, AlertSeverity.Warning);
+            return;
+        }
+
+        if (signatureResult.Signature is null)
+        {
+            var missingSignature = _localizationService.GetString("Module.Admin.Restore.Status.SignatureMissing");
+            LastSignatureStatus = missingSignature;
+            StatusMessage = missingSignature;
+            _alerts?.PublishStatus(missingSignature, AlertSeverity.Error);
+            return;
+        }
+
+        var actorUserId = _authContext.CurrentUser?.Id ?? 0;
+        var actorIp = _authContext.CurrentIpAddress ?? string.Empty;
+        var actorDevice = _authContext.CurrentDeviceInfo ?? string.Empty;
+        var actorSession = _authContext.CurrentSessionId;
+
+        var restoreSucceeded = false;
+        try
+        {
+            IsBusy = true;
+            await Database.RollbackSettingByKeyAsync(
+                    settingKey,
+                    actorUserId,
+                    actorIp,
+                    actorDevice,
+                    actorSession)
+                .ConfigureAwait(false);
+
+            try
+            {
+                await SignaturePersistenceHelper
+                        .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                        .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                var persistFailed = string.Format(
+                    CultureInfo.CurrentCulture,
+                    _localizationService.GetString("Module.Admin.Restore.Status.SignaturePersistFailed"),
+                    ex.Message);
+                LastSignatureStatus = persistFailed;
+                StatusMessage = persistFailed;
+                _alerts?.PublishStatus(persistFailed, AlertSeverity.Error);
+                return;
+            }
+
+            var reasonDisplay = signatureResult.ReasonDisplay ?? signatureResult.Reason ?? string.Empty;
+            var fallbackReason = string.IsNullOrWhiteSpace(reasonDisplay)
+                ? _localizationService.GetString("Module.Admin.Restore.Status.SignatureCaptured.Unknown")
+                : reasonDisplay;
+            var signatureCaptured = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Restore.Status.SignatureCaptured"),
+                fallbackReason);
+            LastSignatureStatus = signatureCaptured;
+
+            var success = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Restore.Status.Success"),
+                settingDisplayName);
+            StatusMessage = success;
+            _alerts?.PublishStatus(success, AlertSeverity.Success);
+
+            var signature = signatureResult.Signature;
+            static string? FormatPart(string label, string? value)
+                => string.IsNullOrWhiteSpace(value) ? null : $"{label}={value}";
+
+            var detailsParts = new[]
+            {
+                FormatPart("key", settingKey),
+                FormatPart("reason", reasonDisplay),
+                FormatPart("signature", signature?.SignatureHash),
+                FormatPart("method", signature?.Method),
+                FormatPart("status", signature?.Status),
+                FormatPart("ip", actorIp),
+                FormatPart("device", actorDevice),
+                FormatPart("session", actorSession)
+            }
+            .Where(part => !string.IsNullOrWhiteSpace(part))
+            .Cast<string>();
+
+            var details = string.Join(", ", detailsParts);
+
+            await LogAuditAsync(
+                audit => audit.LogEntityAuditAsync("settings", resolvedSetting.Id, "ROLLBACK", details),
+                _localizationService.GetString("Module.Admin.Restore.Status.AuditFailed"))
+                .ConfigureAwait(false);
+
+            restoreSucceeded = true;
+        }
+        catch (Exception ex)
+        {
+            var failure = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Restore.Status.Failure"),
+                settingDisplayName,
+                ex.Message);
+            StatusMessage = failure;
+            _alerts?.PublishStatus(failure, AlertSeverity.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+            RestoreSettingCommand.NotifyCanExecuteChanged();
+        }
+
+        if (restoreSucceeded)
+        {
+            await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
         }
     }
 }

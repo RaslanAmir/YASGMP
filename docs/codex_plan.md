@@ -81,6 +81,9 @@
 - Introduced `NotificationPreferenceService` persistence, the shared `NotificationPreferences` model, and WPF unit tests covering alert propagation plus AdminModuleViewModel load/save/dirty states to guard the workflow.
 - Refreshed `README_WPF_SHELL.md` and `docs/WPF_MAPPING.md` with alert parity details, toast overlay documentation, and notification preference UI notes.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still fail with `command not found` because the dotnet CLI is unavailable on this Linux host; rerun on a Windows machine with the Windows 10 SDK installed.
+- Added a settings restore workflow: AdminModuleViewModel now consumes the electronic signature dialog, dialog service, and auth/session context so the new `RestoreSettingCommand` enforces confirmation prompts, signature capture/persistence, busy gating, audit logging, and triggers `RefreshCommand` after successful rollbacks while surfacing localized status/alert messages.
+- Updated `AdminModuleView.xaml` with a localized restore button, automation metadata, and a QA-facing signature status indicator; ShellStrings (EN/HR) gained confirmation/status copy, and AdminModuleViewModel unit tests now cover confirmation decline, rollback failure, and success paths via stubbed dialog/auth services. Restore/build/test commands remain blocked with `command not found: dotnet` inside this container.
+- Added regression coverage for stale selections: `RestoreSettingCommand_WhenRecordKeyMissing_UsesCodeLookup` verifies code-based fallback restores succeed after lookup mismatches.
 
 ### Increment 2 Follow-up — Assets Smoke Automation (2026-04-22)
 
