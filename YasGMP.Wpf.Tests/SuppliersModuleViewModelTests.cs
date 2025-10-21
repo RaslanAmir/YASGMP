@@ -380,6 +380,69 @@ public class SuppliersModuleViewModelTests
     }
 
     [Fact]
+    public async Task ClearingSelection_ClearsAuditTimeline()
+    {
+        var database = new DatabaseService();
+        var audit = new StubAuditService(database);
+        var now = DateTime.UtcNow;
+        audit.FilteredAudits.AddRange(new[]
+        {
+            new AuditEntryDto
+            {
+                Id = 1,
+                Entity = "suppliers",
+                EntityId = "12",
+                Action = "Created",
+                Timestamp = now.AddMinutes(-20),
+                Username = "qa"
+            },
+            new AuditEntryDto
+            {
+                Id = 2,
+                Entity = "suppliers",
+                EntityId = "12",
+                Action = "Updated",
+                Timestamp = now.AddMinutes(-5),
+                Username = "qa"
+            }
+        });
+
+        var supplierAdapter = new FakeSupplierCrudService();
+        supplierAdapter.Saved.Add(new Supplier
+        {
+            Id = 12,
+            Name = "Precision Labs",
+            SupplierType = "Calibration",
+            Status = "Active",
+            Email = "precision@example.com",
+            VatNumber = "VAT-12",
+            ContractFile = "precision.pdf"
+        });
+
+        var attachments = new ConfigurableAttachmentWorkflowService();
+        var filePicker = new TestFilePicker();
+        var auth = new TestAuthContext();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new StubCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new StubModuleNavigationService();
+
+        var viewModel = new SuppliersModuleViewModel(database, audit, supplierAdapter, attachments, filePicker, auth,
+            signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == "12");
+        await Task.Delay(10);
+
+        Assert.NotEmpty(viewModel.AuditTimeline);
+
+        viewModel.SelectedRecord = null;
+        await Task.Delay(10);
+
+        Assert.Empty(viewModel.AuditTimeline);
+    }
+
+    [Fact]
     public async Task PreviewContractCommand_DownloadsAndPreviewsContract()
     {
         var database = new DatabaseService();
