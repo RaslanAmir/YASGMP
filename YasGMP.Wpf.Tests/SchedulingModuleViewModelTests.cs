@@ -129,7 +129,13 @@ public class SchedulingModuleViewModelTests
         crud.Seed(job);
         database.ScheduledJobs.Add(job);
 
-        var auth = new TestAuthContext { CurrentUser = new User { Id = 9 } };
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 9, Username = "ops" },
+            CurrentDeviceInfo = "SchedulerTerm-01",
+            CurrentIpAddress = "10.10.1.25",
+            CurrentSessionId = "session-execute"
+        };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
         var signatureDialog = new TestElectronicSignatureDialogService();
@@ -146,6 +152,12 @@ public class SchedulingModuleViewModelTests
         await viewModel.ExecuteJobCommand.ExecuteAsync(null);
 
         Assert.Contains(21, crud.Executed);
+        var execution = Assert.Single(crud.ExecutionLog);
+        Assert.Equal(21, execution.JobId);
+        Assert.Equal(auth.CurrentUser!.Id, execution.Context.UserId);
+        Assert.Equal(auth.CurrentDeviceInfo, execution.Context.DeviceInfo);
+        Assert.Equal(auth.CurrentIpAddress, execution.Context.Ip);
+        Assert.Equal(auth.CurrentSessionId, execution.Context.SessionId);
     }
 
     [Fact]
@@ -202,9 +214,14 @@ public class SchedulingModuleViewModelTests
         Assert.True(saved);
         Assert.False(viewModel.IsDirty);
         Assert.True(signatureDialog.WasLogPersistInvoked);
+        Assert.Empty(signatureDialog.PersistedSignatureRecords);
         var loggedSignature = Assert.Single(signatureDialog.LoggedSignatureRecords);
         Assert.Equal(job.Id, loggedSignature.RecordId);
         Assert.Equal(adapterSignatureId, loggedSignature.SignatureId);
+        Assert.Equal("test-signature", loggedSignature.SignatureHash);
+        Assert.Equal("password", loggedSignature.Method);
+        Assert.Equal("valid", loggedSignature.Status);
+        Assert.Equal("Automated test", loggedSignature.Note);
 
         var updateSnapshot = Assert.Single(crud.UpdatedWithContext);
         Assert.Equal(job.Id, updateSnapshot.Entity.Id);
@@ -265,6 +282,24 @@ public class SchedulingModuleViewModelTests
         var updateSnapshot = Assert.Single(crud.UpdatedWithContext);
         Assert.Equal("disabled", updateSnapshot.Entity.Status);
         Assert.Equal("Temporarily disabled while equipment is offline", updateSnapshot.Entity.Comment);
+
+        var context = updateSnapshot.Context;
+        Assert.Equal(auth.CurrentUser!.Id, context.UserId);
+        Assert.Equal("test-signature", context.SignatureHash);
+        Assert.Equal("password", context.SignatureMethod);
+        Assert.Equal("valid", context.SignatureStatus);
+        Assert.Equal("Automated test", context.SignatureNote);
+
+        Assert.True(signatureDialog.WasPersistInvoked);
+        Assert.False(signatureDialog.WasLogPersistInvoked);
+        var persistedSignature = Assert.Single(signatureDialog.PersistedSignatureRecords);
+        Assert.Equal(job.Id, persistedSignature.RecordId);
+        Assert.True(persistedSignature.SignatureId > 0);
+        Assert.Equal("test-signature", persistedSignature.SignatureHash);
+        Assert.Equal("password", persistedSignature.Method);
+        Assert.Equal("valid", persistedSignature.Status);
+        Assert.Equal("Automated test", persistedSignature.Note);
+
         Assert.False(viewModel.IsDirty);
     }
 
