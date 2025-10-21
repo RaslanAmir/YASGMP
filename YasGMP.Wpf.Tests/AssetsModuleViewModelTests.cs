@@ -31,6 +31,22 @@ public class AssetsModuleViewModelTests : IDisposable
     private static AssetViewModel CreateAssetViewModel()
         => new(new FakeMachineCrudService());
 
+    private static AssetViewModel CreateAssetViewModel(out FakeMachineCrudService machineService)
+    {
+        var viewModel = CreateAssetViewModel();
+        machineService = ExtractMachineService(viewModel);
+        return viewModel;
+    }
+
+    private static FakeMachineCrudService ExtractMachineService(AssetViewModel assetViewModel)
+    {
+        var field = typeof(AssetViewModel)
+            .GetField("_machineService", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingFieldException(typeof(AssetViewModel).FullName, "_machineService");
+
+        return Assert.IsType<FakeMachineCrudService>(field.GetValue(assetViewModel));
+    }
+
     [Fact]
     public async Task EnterAddMode_AutoGeneratesIdentifiers()
     {
@@ -1282,6 +1298,163 @@ public class AssetsModuleViewModelTests : IDisposable
         var expectedStatus = _localization.GetString("Module.Assets.Status.DeleteSuccess", "Filler");
         Assert.Equal(expectedStatus, viewModel.StatusMessage);
         Assert.Empty(machineAdapter.Saved); // store refreshed via LoadAssetsAsync
+    }
+
+    [Fact]
+    public async Task SaveCommand_AddMode_PersistsMachineAndSignatureMetadata()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var assetViewModel = CreateAssetViewModel(out var machineAdapter);
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 11, FullName = "QA Analyst" },
+            CurrentDeviceInfo = "UnitTestRig",
+            CurrentIpAddress = "10.0.0.11",
+            CurrentSessionId = "session-add"
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            assetViewModel,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Add;
+        await Task.Delay(50);
+
+        viewModel.Asset.Name = "Qualification Freezer";
+        viewModel.Asset.Manufacturer = "Northwind Labs";
+        viewModel.Asset.Location = "Suite QA";
+        viewModel.Asset.UrsDoc = "URS-QF-001";
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(machineAdapter.SavedWithContext);
+        Assert.True(saved.Entity.Id > 0);
+        Assert.Equal(viewModel.Asset.Id, saved.Entity.Id);
+        Assert.Equal("Qualification Freezer", saved.Entity.Name);
+        Assert.Equal("Northwind Labs", saved.Entity.Manufacturer);
+        Assert.Equal(auth.CurrentUser!.Id, saved.Context.UserId);
+        Assert.Equal(auth.CurrentDeviceInfo, saved.Context.DeviceInfo);
+        Assert.Equal(auth.CurrentIpAddress, saved.Context.Ip);
+        Assert.Equal(auth.CurrentSessionId, saved.Context.SessionId);
+
+        Assert.Equal("test-signature", viewModel.Asset.SignatureHash);
+        Assert.Equal(auth.CurrentUser.Id, viewModel.Asset.SignerUserId);
+        Assert.Equal(signatureDialog.DefaultResult.ReasonDisplay, viewModel.Asset.SignatureReason);
+        Assert.True(signatureDialog.PersistInvocationCount > 0);
+
+        var expectedStatus = _localization.GetString(
+            "Module.Assets.Status.SignatureCaptured",
+            signatureDialog.DefaultResult.ReasonDisplay);
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task SaveCommand_UpdateMode_RefreshesSignatureMetadata()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var assetViewModel = CreateAssetViewModel(out var machineAdapter);
+        machineAdapter.Saved.Add(new Machine
+        {
+            Id = 41,
+            Code = "AST-041",
+            Name = "Depyrogenation Oven",
+            Manufacturer = "Globex",
+            Location = "Line 1",
+            Status = "active",
+            UrsDoc = "URS-OVN-01",
+            DigitalSignature = "previous-signature"
+        });
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 22, FullName = "QA Supervisor" },
+            CurrentDeviceInfo = "QA-WS",
+            CurrentIpAddress = "10.0.0.22",
+            CurrentSessionId = "session-update"
+        };
+
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var codeGenerator = new StubCodeGeneratorService();
+        var qrCode = new StubQrCodeService();
+        var platformService = new StubPlatformService();
+
+        var viewModel = new AssetsModuleViewModel(
+            database,
+            audit,
+            machineAdapter,
+            auth,
+            filePicker,
+            attachments,
+            signatureDialog,
+            dialog,
+            shell,
+            assetViewModel,
+            navigation,
+            _localization,
+            codeGenerator,
+            qrCode,
+            platformService);
+
+        await viewModel.InitializeAsync(null);
+        await Task.Yield();
+
+        Assert.NotNull(viewModel.SelectedAsset);
+        viewModel.Mode = FormMode.Update;
+        await Task.Delay(50);
+
+        viewModel.Asset.Location = "Line 2";
+        viewModel.Asset.Notes = "Updated during qualification";
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(machineAdapter.SavedWithContext);
+        Assert.Equal(41, saved.Entity.Id);
+        Assert.Equal("Line 2", saved.Entity.Location);
+        Assert.Equal("Updated during qualification", saved.Entity.Note);
+        Assert.Equal(auth.CurrentUser!.Id, saved.Context.UserId);
+        Assert.Equal(auth.CurrentDeviceInfo, saved.Context.DeviceInfo);
+        Assert.Equal(auth.CurrentIpAddress, saved.Context.Ip);
+        Assert.True(signatureDialog.PersistInvocationCount > 0);
+
+        Assert.Equal("test-signature", viewModel.Asset.SignatureHash);
+        Assert.Equal(auth.CurrentUser.Id, viewModel.Asset.SignerUserId);
+        Assert.Equal(signatureDialog.DefaultResult.ReasonDisplay, viewModel.Asset.SignatureReason);
+
+        var expectedStatus = _localization.GetString(
+            "Module.Assets.Status.SignatureCaptured",
+            signatureDialog.DefaultResult.ReasonDisplay);
+        Assert.Equal(expectedStatus, viewModel.StatusMessage);
     }
 
     public void Dispose() => _localization.SetLanguage(_originalLanguage);
