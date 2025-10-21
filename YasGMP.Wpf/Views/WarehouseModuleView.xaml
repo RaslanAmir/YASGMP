@@ -35,6 +35,22 @@
                 ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+            <Separator />
+            <Button Content="Stock In"
+                    Command="{Binding ReceiveStockCommand}"
+                    Margin="8,0,0,0"
+                    AutomationProperties.Name="Receive stock"
+                    AutomationProperties.AutomationId="Warehouse.ReceiveStock" />
+            <Button Content="Stock Out"
+                    Command="{Binding IssueStockCommand}"
+                    Margin="4,0,0,0"
+                    AutomationProperties.Name="Issue stock"
+                    AutomationProperties.AutomationId="Warehouse.IssueStock" />
+            <Button Content="Adjust"
+                    Command="{Binding AdjustStockCommand}"
+                    Margin="4,0,0,0"
+                    AutomationProperties.Name="Adjust stock"
+                    AutomationProperties.AutomationId="Warehouse.AdjustStock" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -166,9 +182,23 @@
                         </Border>
 
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="Receive Stock" Command="{Binding ReceiveStockCommand}" Width="120" Margin="0,0,8,0" />
-                            <Button Content="Issue Stock" Command="{Binding IssueStockCommand}" Width="120" Margin="0,0,8,0" />
-                            <Button Content="Adjust Stock" Command="{Binding AdjustStockCommand}" Width="120" />
+                            <Button Content="Receive Stock"
+                                    Command="{Binding ReceiveStockCommand}"
+                                    Width="120"
+                                    Margin="0,0,8,0"
+                                    AutomationProperties.Name="Receive stock"
+                                    AutomationProperties.AutomationId="Warehouse.ReceiveStock.Detail" />
+                            <Button Content="Issue Stock"
+                                    Command="{Binding IssueStockCommand}"
+                                    Width="120"
+                                    Margin="0,0,8,0"
+                                    AutomationProperties.Name="Issue stock"
+                                    AutomationProperties.AutomationId="Warehouse.IssueStock.Detail" />
+                            <Button Content="Adjust Stock"
+                                    Command="{Binding AdjustStockCommand}"
+                                    Width="120"
+                                    AutomationProperties.Name="Adjust stock"
+                                    AutomationProperties.AutomationId="Warehouse.AdjustStock.Detail" />
                         </StackPanel>
 
                         <Border Padding="8"

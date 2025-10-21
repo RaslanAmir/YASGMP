@@ -270,6 +270,56 @@ ORDER BY wname, sl.warehouse_id";
         /// Executes the get inventory movement preview async operation.
         /// </summary>
 
+        public static async Task<System.Data.DataTable> GetInventoryZoneDashboardAsync(
+            this DatabaseService db,
+            int take = 25,
+            CancellationToken token = default)
+        {
+            await db.EnsureInventorySchemaAsync(token).ConfigureAwait(false);
+
+            if (take <= 0)
+            {
+                take = 25;
+            }
+            else if (take > 500)
+            {
+                take = 500;
+            }
+
+            const string sql = @"SELECT
+    sl.part_id,
+    COALESCE(p.name, CONCAT('Part #', sl.part_id)) AS part_name,
+    COALESCE(p.code, CONCAT('PRT-', sl.part_id)) AS part_code,
+    sl.warehouse_id,
+    COALESCE(w.name, CONCAT('WH-', sl.warehouse_id)) AS warehouse_name,
+    sl.quantity,
+    sl.min_threshold,
+    sl.max_threshold,
+    CASE
+        WHEN sl.min_threshold IS NOT NULL AND sl.quantity < sl.min_threshold THEN 'Critical'
+        WHEN sl.max_threshold IS NOT NULL AND sl.quantity > sl.max_threshold THEN 'Overflow'
+        WHEN sl.min_threshold IS NOT NULL AND sl.quantity <= CEIL(sl.min_threshold * 1.2) THEN 'Warning'
+        ELSE 'Healthy'
+    END AS zone
+FROM stock_levels sl
+LEFT JOIN parts p ON p.id = sl.part_id
+LEFT JOIN warehouses w ON w.id = sl.warehouse_id
+ORDER BY
+    CASE
+        WHEN sl.min_threshold IS NOT NULL AND sl.quantity < sl.min_threshold THEN 0
+        WHEN sl.max_threshold IS NOT NULL AND sl.quantity > sl.max_threshold THEN 1
+        WHEN sl.min_threshold IS NOT NULL AND sl.quantity <= CEIL(sl.min_threshold * 1.2) THEN 2
+        ELSE 3
+    END,
+    sl.quantity,
+    sl.part_id,
+    sl.warehouse_id
+LIMIT @take";
+
+            return await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@take", take) }, token)
+                .ConfigureAwait(false);
+        }
+
         public static async Task<System.Data.DataTable> GetInventoryMovementPreviewAsync(
             this DatabaseService db,
             int? warehouseId,

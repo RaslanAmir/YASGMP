@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
@@ -34,11 +38,14 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
     {
         _signalRClient = signalRClient ?? throw new ArgumentNullException(nameof(signalRClient));
         _signalRClient.AuditReceived += OnAuditReceived;
+        _inventoryAlerts = new ObservableCollection<InventoryAlertRow>();
+        _inventoryMovements = new ObservableCollection<InventoryMovementRow>();
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var events = await Database.GetRecentDashboardEventsAsync(25).ConfigureAwait(false);
+        await LoadInventoryInsightsAsync().ConfigureAwait(false);
         return events.Select(ToRecord).ToList();
     }
 
@@ -94,6 +101,8 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
     }
 
     private readonly ISignalRClientService _signalRClient;
+    private readonly ObservableCollection<InventoryAlertRow> _inventoryAlerts;
+    private readonly ObservableCollection<InventoryMovementRow> _inventoryMovements;
 
     private async void OnAuditReceived(object? sender, AuditEventArgs e)
     {
@@ -106,4 +115,151 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
             // Best-effort refresh – real-time failures should not crash the dashboard.
         }
     }
+
+    public ObservableCollection<InventoryAlertRow> InventoryAlerts => _inventoryAlerts;
+
+    public ObservableCollection<InventoryMovementRow> InventoryMovements => _inventoryMovements;
+
+    private async Task LoadInventoryInsightsAsync()
+    {
+        DataTable? zoneTable = null;
+        DataTable? movementTable = null;
+        var alertsError = false;
+        var movementsError = false;
+
+        try
+        {
+            zoneTable = await Database.GetInventoryZoneDashboardAsync(25).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            alertsError = true;
+            StatusMessage = $"Unable to load inventory alerts: {ex.Message}";
+        }
+
+        try
+        {
+            movementTable = await Database.GetInventoryMovementPreviewAsync(null, null, 15).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            movementsError = true;
+            StatusMessage = $"Unable to load inventory movements: {ex.Message}";
+        }
+
+        await RunOnUiThreadAsync(() =>
+        {
+            _inventoryAlerts.Clear();
+            if (zoneTable is not null)
+            {
+                foreach (DataRow row in zoneTable.Rows)
+                {
+                    _inventoryAlerts.Add(new InventoryAlertRow(
+                        SafeInt(row, "part_id"),
+                        row["part_name"]?.ToString() ?? string.Empty,
+                        row["part_code"]?.ToString() ?? string.Empty,
+                        SafeInt(row, "warehouse_id"),
+                        row["warehouse_name"]?.ToString() ?? string.Empty,
+                        row["zone"]?.ToString() ?? string.Empty,
+                        SafeInt(row, "quantity"),
+                        SafeNullableInt(row, "min_threshold"),
+                        SafeNullableInt(row, "max_threshold")));
+                }
+            }
+
+            _inventoryMovements.Clear();
+            if (movementTable is not null)
+            {
+                foreach (DataRow row in movementTable.Rows)
+                {
+                    _inventoryMovements.Add(new InventoryMovementRow(
+                        SafeDate(row, "transaction_date"),
+                        row["transaction_type"]?.ToString() ?? string.Empty,
+                        SafeInt(row, "quantity"),
+                        row.Table.Columns.Contains("related_document") ? row["related_document"]?.ToString() : null,
+                        row.Table.Columns.Contains("note") ? row["note"]?.ToString() : null,
+                        SafeNullableInt(row, "performed_by_id")));
+                }
+            }
+
+            if (!alertsError && !movementsError)
+            {
+                StatusMessage = $"{Title}: inventory insights refreshed ({_inventoryAlerts.Count} alert(s), {_inventoryMovements.Count} movement(s)).";
+            }
+        }).ConfigureAwait(false);
+    }
+
+    private static Task RunOnUiThreadAsync(Action action)
+    {
+        if (action is null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
+    }
+
+    private static int SafeInt(DataRow row, string column)
+    {
+        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value)
+        {
+            return Convert.ToInt32(row[column], CultureInfo.InvariantCulture);
+        }
+
+        return 0;
+    }
+
+    private static int? SafeNullableInt(DataRow row, string column)
+    {
+        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value)
+        {
+            return Convert.ToInt32(row[column], CultureInfo.InvariantCulture);
+        }
+
+        return null;
+    }
+
+    private static DateTime SafeDate(DataRow row, string column)
+    {
+        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value)
+        {
+            if (row[column] is DateTime dt)
+            {
+                return dt;
+            }
+
+            if (DateTime.TryParse(row[column]?.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
+            {
+                return parsed;
+            }
+        }
+
+        return DateTime.UtcNow;
+    }
+
+    public sealed record InventoryAlertRow(
+        int PartId,
+        string PartName,
+        string PartCode,
+        int WarehouseId,
+        string WarehouseName,
+        string Zone,
+        int Quantity,
+        int? Minimum,
+        int? Maximum);
+
+    public sealed record InventoryMovementRow(
+        DateTime Timestamp,
+        string Type,
+        int Quantity,
+        string? Document,
+        string? Note,
+        int? PerformedById);
 }
