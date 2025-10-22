@@ -60,6 +60,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
 
         StatusOptions = Enum.GetNames(typeof(ChangeControlStatus));
+        ChangeTimeline = new ObservableCollection<ModuleTimelineEntry>();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
         AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
         ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
@@ -79,6 +80,11 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     /// </summary>
 
     public IReadOnlyList<string> StatusOptions { get; }
+
+    /// <summary>
+    /// Gets the change control timeline entries.
+    /// </summary>
+    public ObservableCollection<ModuleTimelineEntry> ChangeTimeline { get; }
     /// <summary>
     /// Gets or sets the attach document command.
     /// </summary>
@@ -154,6 +160,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         {
             _loadedEntity = null;
             SetEditor(ChangeControlEditor.CreateEmpty());
+            ChangeTimeline.Clear();
             UpdateAttachmentCommandState();
             return;
         }
@@ -172,12 +179,14 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         if (entity is null)
         {
             StatusMessage = $"Unable to load {record.Title}.";
+            ChangeTimeline.Clear();
             return;
         }
 
         entity.StatusRaw = _changeControlService.NormalizeStatus(entity.StatusRaw);
         _loadedEntity = entity;
         LoadEditor(entity);
+        PopulateChangeTimeline(entity);
         UpdateWorkflowCommandState();
     }
 
@@ -191,6 +200,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 _snapshot = null;
                 _loadedEntity = null;
                 SetEditor(ChangeControlEditor.CreateForNew(_authContext));
+                ChangeTimeline.Clear();
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -586,6 +596,62 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         CloseCommand.NotifyCanExecuteChanged();
     }
 
+    private void PopulateChangeTimeline(ChangeControl entity)
+    {
+        if (entity is null)
+        {
+            return;
+        }
+
+        ChangeTimeline.Clear();
+
+        if (entity.DateRequested is { } requested)
+        {
+            ChangeTimeline.Add(new ModuleTimelineEntry(
+                requested,
+                "Requested",
+                entity.RequestedById.HasValue
+                    ? $"Requested by user {entity.RequestedById.Value}."
+                    : "Change control requested."));
+        }
+
+        if (entity.DateAssigned is { } assigned)
+        {
+            ChangeTimeline.Add(new ModuleTimelineEntry(
+                assigned,
+                "Assigned",
+                entity.AssignedToId.HasValue
+                    ? $"Assigned to user {entity.AssignedToId.Value}."
+                    : "Assignment recorded."));
+        }
+
+        if (entity.LastModified is { } modified)
+        {
+            ChangeTimeline.Add(new ModuleTimelineEntry(
+                modified,
+                "Last Modified",
+                entity.LastModifiedById.HasValue
+                    ? $"Updated by user {entity.LastModifiedById.Value}."
+                    : "Change control updated."));
+        }
+
+        if (entity.UpdatedAt is { } updated)
+        {
+            ChangeTimeline.Add(new ModuleTimelineEntry(
+                updated,
+                "Updated",
+                "Change control timeline refreshed."));
+        }
+
+        if (entity.CreatedAt is { } created)
+        {
+            ChangeTimeline.Add(new ModuleTimelineEntry(
+                created,
+                "Created",
+                "Record created."));
+        }
+    }
+
     private async Task AddAsync()
     {
         if (!CanAdd())
@@ -616,6 +682,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
             _loadedEntity = entity;
             LoadEditor(entity);
+            PopulateChangeTimeline(entity);
             var record = UpsertRecord(entity);
             SelectedRecord = record;
             Mode = FormMode.View;
@@ -688,6 +755,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
             _loadedEntity = entity;
             LoadEditor(entity);
+            PopulateChangeTimeline(entity);
             var record = UpsertRecord(entity);
             SelectedRecord = record;
             Mode = FormMode.View;
