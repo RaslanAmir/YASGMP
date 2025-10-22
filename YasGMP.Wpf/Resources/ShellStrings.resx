@@ -2661,6 +2661,33 @@
   <data name="Module.Toolbar.Button.Attach.ToolTip" xml:space="preserve">
     <value>Attach supporting documents to the record.</value>
   </data>
+  <data name="Module.Toolbar.Button.Approve.Content" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Module.Toolbar.Button.Approve.ToolTip" xml:space="preserve">
+    <value>Approve the selected document.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Approve.AutomationName" xml:space="preserve">
+    <value>Approve document command</value>
+  </data>
+  <data name="Module.Toolbar.Button.Publish.Content" xml:space="preserve">
+    <value>Publish</value>
+  </data>
+  <data name="Module.Toolbar.Button.Publish.ToolTip" xml:space="preserve">
+    <value>Publish the selected document.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Publish.AutomationName" xml:space="preserve">
+    <value>Publish document command</value>
+  </data>
+  <data name="Module.Toolbar.Button.Expire.Content" xml:space="preserve">
+    <value>Expire</value>
+  </data>
+  <data name="Module.Toolbar.Button.Expire.ToolTip" xml:space="preserve">
+    <value>Expire or retire the selected document.</value>
+  </data>
+  <data name="Module.Toolbar.Button.Expire.AutomationName" xml:space="preserve">
+    <value>Expire document command</value>
+  </data>
   <data name="Module.Attachments.ToolTip.PickFiles" xml:space="preserve">
     <value>Pick files to stage for upload before saving.</value>
   </data>

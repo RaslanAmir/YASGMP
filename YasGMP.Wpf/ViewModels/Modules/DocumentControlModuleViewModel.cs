@@ -30,6 +30,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     private readonly DocumentControlViewModel _documentControl;
     private readonly ILocalizationService _localization;
     private readonly IDocumentControlService _documentControlService;
+    private readonly Func<Task> _reloadDocumentsAsync;
 
     private ObservableCollection<SopDocument>? _filteredDocuments;
     private bool _suppressSelectionSync;
@@ -45,7 +46,8 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        IDocumentControlService documentControlService)
+        IDocumentControlService documentControlService,
+        Func<Task>? reloadDocumentsAsync = null)
         : base(ModuleKey, localization.GetString("Module.Title.DocumentControl"), localization, cflDialogService, shellInteraction, navigation)
     {
         _documentControl = documentControl ?? throw new ArgumentNullException(nameof(documentControl));
@@ -53,10 +55,14 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         _documentControlService = documentControlService ?? throw new ArgumentNullException(nameof(documentControlService));
 
         DocumentControl = _documentControl;
+        _reloadDocumentsAsync = reloadDocumentsAsync ?? (() => _documentControl.LoadDocumentsAsync());
 
         AttachDocumentCommand = new AsyncRelayCommand(ExecuteAttachDocumentAsync, CanAttachDocument);
         LinkChangeControlCommand = new AsyncRelayCommand(ExecuteLinkChangeControlAsync, CanLinkChangeControl);
         ExportDocumentsCommand = new AsyncRelayCommand(ExecuteExportDocumentsAsync, CanExportDocuments);
+        ApproveDocumentCommand = new AsyncRelayCommand(ExecuteApproveDocumentAsync, CanApproveDocument);
+        PublishDocumentCommand = new AsyncRelayCommand(ExecutePublishDocumentAsync, CanPublishDocument);
+        ExpireDocumentCommand = new AsyncRelayCommand(ExecuteExpireDocumentAsync, CanExpireDocument);
 
         Editor = DocumentControlEditor.CreateEmpty();
         IsEditorEnabled = false;
@@ -88,6 +94,15 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
 
     /// <summary>Command that exports the current filtered document list.</summary>
     public IAsyncRelayCommand ExportDocumentsCommand { get; }
+
+    /// <summary>Command that approves the selected document.</summary>
+    public IAsyncRelayCommand ApproveDocumentCommand { get; }
+
+    /// <summary>Command that publishes the selected document.</summary>
+    public IAsyncRelayCommand PublishDocumentCommand { get; }
+
+    /// <summary>Command that expires the selected document.</summary>
+    public IAsyncRelayCommand ExpireDocumentCommand { get; }
 
     /// <summary>Available status values propagated from the shared view-model.</summary>
     public string[] StatusOptions => DocumentControl.AvailableStatuses;
@@ -154,7 +169,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     /// <inheritdoc />
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
+        await _reloadDocumentsAsync().ConfigureAwait(false);
         HookFilteredDocuments(DocumentControl.FilteredDocuments);
         return ProjectRecords();
     }
@@ -225,7 +240,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
                 break;
         }
 
-        UpdateAttachmentCommandState();
+        UpdateCommandStates();
         return Task.CompletedTask;
     }
 
@@ -245,7 +260,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
                 return false;
             }
 
-            await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
+            await _reloadDocumentsAsync().ConfigureAwait(false);
             ProjectRecordsIntoShell();
             return true;
         }
@@ -272,7 +287,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
                 return false;
             }
 
-            await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
+            await _reloadDocumentsAsync().ConfigureAwait(false);
             ProjectRecordsIntoShell();
             return true;
         }
@@ -354,7 +369,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         finally
         {
             _suppressSelectionSync = false;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
 
         return Task.CompletedTask;
@@ -397,7 +412,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         }
         else if (e.PropertyName == nameof(IsBusy))
         {
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
@@ -480,7 +495,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
                 break;
             case nameof(DocumentControlViewModel.SelectedChangeControlForLink):
                 OnPropertyChanged(nameof(SelectedChangeControlForLink));
-                UpdateAttachmentCommandState();
+                UpdateCommandStates();
                 break;
         }
     }
@@ -517,7 +532,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         finally
         {
             _suppressSelectionSync = false;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
@@ -561,7 +576,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
             }
         }
 
-        UpdateAttachmentCommandState();
+        UpdateCommandStates();
     }
 
     private IReadOnlyList<ModuleRecord> ProjectRecords()
@@ -640,6 +655,15 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     private bool CanExportDocuments()
         => !IsBusy;
 
+    private bool CanApproveDocument()
+        => !IsBusy && DocumentControl.SelectedDocument is not null;
+
+    private bool CanPublishDocument()
+        => !IsBusy && DocumentControl.SelectedDocument is not null;
+
+    private bool CanExpireDocument()
+        => !IsBusy && DocumentControl.SelectedDocument is not null;
+
     private async Task ExecuteAttachDocumentAsync()
     {
         if (DocumentControl.SelectedDocument is null)
@@ -663,7 +687,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         try
         {
             IsBusy = true;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
 
             var uploads = dialog.FileNames
                 .Select(DocumentAttachmentUpload.FromFile)
@@ -683,7 +707,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         finally
         {
             IsBusy = false;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
@@ -704,7 +728,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         try
         {
             IsBusy = true;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
 
             var result = await _documentControlService
                 .LinkChangeControlAsync(DocumentControl.SelectedDocument, DocumentControl.SelectedChangeControlForLink)
@@ -714,7 +738,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
             if (result.Success)
             {
                 DocumentControl.CancelChangeControlPickerCommand.Execute(null);
-                await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
+                await _reloadDocumentsAsync().ConfigureAwait(false);
                 ProjectRecordsIntoShell();
             }
         }
@@ -725,7 +749,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         finally
         {
             IsBusy = false;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
@@ -734,7 +758,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         try
         {
             IsBusy = true;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
 
             var documents = DocumentControl.FilteredDocuments?.ToList() ?? new List<SopDocument>();
             var result = await _documentControlService
@@ -750,15 +774,123 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         finally
         {
             IsBusy = false;
-            UpdateAttachmentCommandState();
+            UpdateCommandStates();
         }
     }
 
-    private void UpdateAttachmentCommandState()
+    private async Task ExecuteApproveDocumentAsync()
+    {
+        if (DocumentControl.SelectedDocument is null)
+        {
+            StatusMessage = "Select a document before approving.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateCommandStates();
+
+            var result = await _documentControlService
+                .ApproveDocumentAsync(DocumentControl.SelectedDocument)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+            if (result.Success)
+            {
+                await _reloadDocumentsAsync().ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Approval failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private async Task ExecutePublishDocumentAsync()
+    {
+        if (DocumentControl.SelectedDocument is null)
+        {
+            StatusMessage = "Select a document before publishing.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateCommandStates();
+
+            var result = await _documentControlService
+                .PublishDocumentAsync(DocumentControl.SelectedDocument)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+            if (result.Success)
+            {
+                await _reloadDocumentsAsync().ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Publishing failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private async Task ExecuteExpireDocumentAsync()
+    {
+        if (DocumentControl.SelectedDocument is null)
+        {
+            StatusMessage = "Select a document before expiring.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateCommandStates();
+
+            var result = await _documentControlService
+                .ExpireDocumentAsync(DocumentControl.SelectedDocument)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+            if (result.Success)
+            {
+                await _reloadDocumentsAsync().ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Expiration failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateCommandStates();
+        }
+    }
+
+    private void UpdateCommandStates()
     {
         AttachDocumentCommand.NotifyCanExecuteChanged();
         LinkChangeControlCommand.NotifyCanExecuteChanged();
         ExportDocumentsCommand.NotifyCanExecuteChanged();
+        ApproveDocumentCommand.NotifyCanExecuteChanged();
+        PublishDocumentCommand.NotifyCanExecuteChanged();
+        ExpireDocumentCommand.NotifyCanExecuteChanged();
     }
 
     private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)

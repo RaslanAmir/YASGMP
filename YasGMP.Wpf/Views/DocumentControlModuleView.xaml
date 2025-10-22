@@ -44,6 +44,24 @@
                     ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}"
                     AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}"
                     AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Approve.Content}"
+                    Command="{Binding ApproveDocumentCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Approve.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Approve.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Approve.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Publish.Content}"
+                    Command="{Binding PublishDocumentCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Publish.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Publish.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Publish.AutomationId}" />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Expire.Content}"
+                    Command="{Binding ExpireDocumentCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Expire.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Expire.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Expire.AutomationId}" />
         </ToolBar>
 
         <Grid Margin="8">
