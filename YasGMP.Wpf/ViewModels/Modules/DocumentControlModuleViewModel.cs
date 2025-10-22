@@ -31,6 +31,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     private readonly ILocalizationService _localization;
     private readonly IDocumentControlService _documentControlService;
     private readonly Func<Task> _reloadDocumentsAsync;
+    private readonly Func<(bool Accepted, IReadOnlyList<string> Files)> _pickAttachmentFiles;
 
     private ObservableCollection<SopDocument>? _filteredDocuments;
     private bool _suppressSelectionSync;
@@ -47,7 +48,8 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         IDocumentControlService documentControlService,
-        Func<Task>? reloadDocumentsAsync = null)
+        Func<Task>? reloadDocumentsAsync = null,
+        Func<(bool Accepted, IReadOnlyList<string> Files)>? pickAttachmentFiles = null)
         : base(ModuleKey, localization.GetString("Module.Title.DocumentControl"), localization, cflDialogService, shellInteraction, navigation)
     {
         _documentControl = documentControl ?? throw new ArgumentNullException(nameof(documentControl));
@@ -56,6 +58,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
 
         DocumentControl = _documentControl;
         _reloadDocumentsAsync = reloadDocumentsAsync ?? (() => _documentControl.LoadDocumentsAsync());
+        _pickAttachmentFiles = pickAttachmentFiles ?? PickAttachmentFiles;
 
         AttachDocumentCommand = new AsyncRelayCommand(ExecuteAttachDocumentAsync, CanAttachDocument);
         LinkChangeControlCommand = new AsyncRelayCommand(ExecuteLinkChangeControlAsync, CanLinkChangeControl);
@@ -672,13 +675,8 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        var dialog = new OpenFileDialog
-        {
-            Title = _localization.GetString("Module.Toolbar.Button.Attach.ToolTip") ?? "Attach Files",
-            Multiselect = true
-        };
-
-        if (dialog.ShowDialog() != true || dialog.FileNames.Length == 0)
+        var selection = _pickAttachmentFiles();
+        if (!selection.Accepted || selection.Files.Count == 0)
         {
             StatusMessage = "Attachment upload cancelled.";
             return;
@@ -689,7 +687,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
             IsBusy = true;
             UpdateCommandStates();
 
-            var uploads = dialog.FileNames
+            var uploads = selection.Files
                 .Select(DocumentAttachmentUpload.FromFile)
                 .ToList();
 
@@ -709,6 +707,19 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
             IsBusy = false;
             UpdateCommandStates();
         }
+    }
+
+    private (bool Accepted, IReadOnlyList<string> Files) PickAttachmentFiles()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = _localization.GetString("Module.Toolbar.Button.Attach.ToolTip") ?? "Attach Files",
+            Multiselect = true
+        };
+
+        return dialog.ShowDialog() == true
+            ? (true, dialog.FileNames)
+            : (false, Array.Empty<string>());
     }
 
     private async Task ExecuteLinkChangeControlAsync()
