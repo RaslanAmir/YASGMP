@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "2026-05-22: dotnet restore yasgmp.sln retried while fixing Deviation status binding persistence; CLI still missing so the command exits with 'command not found'.",
       "2026-05-21: dotnet restore yasgmp.sln retried while landing Deviation CRUD adapter regression tests; CLI still missing so the command exits with 'command not found'.",
       "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
       "2025-10-13: dotnet --info/dotnet restore still return 'command not found' after retargeting MAUI/AppCore to .NET 9; Windows validation pending.",
@@ -459,7 +460,8 @@
     "2026-05-12: Extended AdminModuleViewModelTests with RestoreSettingCommand_WhenRecordKeyMissing_UsesCodeLookup to cover stale selection fallback through the code lookup before invoking DatabaseService rollback; dotnet restore/build/test remain blocked with 'command not found: dotnet' until run on a Windows host.",
     "2026-05-13: Added RollbackPreviewDocumentViewModel unit tests that assert signature validation, status messaging, and rollback success/failure handling via DatabaseService test hooks, extended AdminModuleViewModel tests to cover electronic signature cancellation warnings, and refreshed README_WPF_SHELL.md/docs/WPF_MAPPING.md to document the rollback workflows; dotnet restore/build/test continue to fail with 'command not found: dotnet' pending Windows tooling.",
     "2026-05-14: Added IDeviationCrudService and DeviationCrudContext so WPF adapters can capture signature metadata consistent with the MAUI DeviationService/AuditService pipeline; dotnet restore/build/test still fail with 'command not found: dotnet' until Windows tooling is available.",
-    "2026-05-16: WPF host now registers DeviationService alongside the IDeviationCrudService adapter, and service registration tests assert both resolve; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container so smoke automation remains pending on Windows tooling."
-    ,"2026-05-17: Added Deviation module view model/view with attachment workflow, CFL integration, and unit coverage to mirror incident/change-control saves; dotnet restore/build/test still fail with 'command not found: dotnet' in this container."
+    "2026-05-16: WPF host now registers DeviationService alongside the IDeviationCrudService adapter, and service registration tests assert both resolve; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container so smoke automation remains pending on Windows tooling.",
+    "2026-05-17: Added Deviation module view model/view with attachment workflow, CFL integration, and unit coverage to mirror incident/change-control saves; dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
+    "2026-05-22: DeviationModuleViewModel now binds status combos via localized display + canonical codes so selections persist canonical values; dotnet restore/build/test remain blocked with 'command not found: dotnet' until the CLI is provisioned on a Windows host."
   ]
 }

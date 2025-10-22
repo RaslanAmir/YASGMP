@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using YasGMP.Models.Enums;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
@@ -34,6 +35,7 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly ILocalizationService _localization;
+    private readonly Dictionary<string, StatusOption> _statusLookup;
 
     private Deviation? _loadedDeviation;
     private DeviationEditor? _snapshot;
@@ -42,7 +44,12 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
     /// <summary>
     /// Gets the localized status options.
     /// </summary>
-    public ObservableCollection<string> StatusOptions { get; }
+    public ObservableCollection<StatusOption> StatusOptions { get; }
+
+    /// <summary>
+    /// Represents a selectable status entry.
+    /// </summary>
+    public sealed record StatusOption(string Code, string Display);
 
     /// <summary>
     /// Gets the localized severity options.
@@ -86,13 +93,16 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
 
         Editor = DeviationEditor.CreateEmpty();
 
-        StatusOptions = new ObservableCollection<string>(new[]
+        var statusOptions = new[]
         {
-            _localization.GetString("Module.Deviations.Status.Open"),
-            _localization.GetString("Module.Deviations.Status.Investigation"),
-            _localization.GetString("Module.Deviations.Status.CapaLinked"),
-            _localization.GetString("Module.Deviations.Status.Closed")
-        });
+            new StatusOption(DeviationStatus.OPEN.ToString(), _localization.GetString("Module.Deviations.Status.Open")),
+            new StatusOption(DeviationStatus.INVESTIGATION.ToString(), _localization.GetString("Module.Deviations.Status.Investigation")),
+            new StatusOption(DeviationStatus.CAPA_LINKED.ToString(), _localization.GetString("Module.Deviations.Status.CapaLinked")),
+            new StatusOption(DeviationStatus.CLOSED.ToString(), _localization.GetString("Module.Deviations.Status.Closed"))
+        };
+
+        _statusLookup = statusOptions.ToDictionary(option => option.Code, StringComparer.OrdinalIgnoreCase);
+        StatusOptions = new ObservableCollection<StatusOption>(statusOptions);
 
         SeverityOptions = new ObservableCollection<string>(new[]
         {
@@ -126,7 +136,7 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
                 "101",
                 "Temperature excursion",
                 "DEV-2024-101",
-                StatusOptions[1],
+                StatusOptions[1].Display,
                 "Refrigerator deviated outside the qualified range",
                 new[]
                 {
@@ -141,7 +151,7 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
                 "102",
                 "Label mix-up",
                 "DEV-2024-102",
-                StatusOptions[0],
+                StatusOptions[0].Display,
                 "Incorrect lot labels discovered during final packaging",
                 new[]
                 {
@@ -573,7 +583,23 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 
-    private static ModuleRecord ToRecord(Deviation deviation)
+    private string GetStatusDisplay(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            return StatusOptions.Count > 0 ? StatusOptions[0].Display : string.Empty;
+        }
+
+        if (_statusLookup.TryGetValue(status, out var option))
+        {
+            return option.Display;
+        }
+
+        var normalized = _deviationService.NormalizeStatus(status);
+        return _statusLookup.TryGetValue(normalized, out option) ? option.Display : normalized;
+    }
+
+    private ModuleRecord ToRecord(Deviation deviation)
     {
         var fields = new List<InspectorField>
         {
@@ -599,7 +625,7 @@ public sealed partial class DeviationModuleViewModel : DataDrivenModuleDocumentV
             deviation.Id.ToString(CultureInfo.InvariantCulture),
             string.IsNullOrWhiteSpace(deviation.Title) ? "-" : deviation.Title,
             string.IsNullOrWhiteSpace(deviation.Code) ? deviation.Id.ToString(CultureInfo.InvariantCulture) : deviation.Code,
-            deviation.Status,
+            GetStatusDisplay(deviation.Status),
             string.IsNullOrWhiteSpace(deviation.Description) ? string.Empty : deviation.Description,
             fields,
             relatedModule,

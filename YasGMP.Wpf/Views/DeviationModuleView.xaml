@@ -176,7 +176,9 @@
                                            VerticalAlignment="Center" />
                                 <ComboBox Width="150"
                                           ItemsSource="{Binding StatusOptions}"
-                                          SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          DisplayMemberPath="Display"
+                                          SelectedValuePath="Code"
+                                          SelectedValue="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                           IsEnabled="{Binding IsEditorEnabled}" />
                             </StackPanel>
 
