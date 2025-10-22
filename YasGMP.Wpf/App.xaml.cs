@@ -124,6 +124,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<INotificationPreferenceService, NotificationPreferenceService>();
                         svc.AddSingleton<IShellAlertService, AlertService>();
                         svc.AddSingleton<IAlertService>(sp => sp.GetRequiredService<IShellAlertService>());
+                        svc.AddTransient<IDocumentControlService, DocumentControlServiceAdapter>();
                         svc.AddSingleton<CoreAssetViewModel>();
                         svc.AddSingleton<WpfAssetViewModel>(sp =>
                         {
