@@ -55,7 +55,15 @@
 - 2026-05-25T09:30Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried with the Document Control navigation wiring; CLI still missing so the command exits with `bash: command not found: dotnet`.
 - 2026-06-01T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried while extending Document Control module regression tests; each command still fails with `bash: command not found: dotnet`, keeping validation limited to static analysis.
 - 2026-06-02T09:40Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried after promoting the shared Document Control recording stub; all commands still exit with `bash: command not found: dotnet` inside this container.
+- 2026-06-03T09:55Z: `dotnet --version` retried while documenting the Document Control milestone wrap-up; CLI remains unavailable so the command exits with `bash: command not found: dotnet`, leaving restore/build/test pending Windows tooling.
 
+
+### Increment 3 — Document Control milestone wrap-up (2026-06-03)
+
+- Declared the desktop Document Control milestone complete: the WPF module hosts [DocumentControlModuleView](../YasGMP.Wpf/Views/DocumentControlModuleView.xaml) driven by [DocumentControlModuleViewModel](../YasGMP.Wpf/ViewModels/Modules/DocumentControlModuleViewModel.cs), mirroring MAUI initiate/revise/approve/publish/expire flows with inspector/status refresh parity.
+- `DocumentControlServiceAdapter` now composes `DatabaseService` helpers, the attachment workflow service, and e-signature dialog plumbing so save/link/export commands capture manifests, enforce retention, and surface signature prompts inline with change-control linking.
+- Updated `docs/WPF_MAPPING.md` to record the live WPF document/adapters and attachment + signature coverage, ensuring the parity map reflects the production desktop workflow.
+- Smoke validation remains pending: `dotnet --version` (2026-06-03T09:55Z) still returns `bash: command not found: dotnet`, so WPF smoke harness execution is deferred until a Windows host with the .NET SDK is available.
 
 ## Increment 2025-10-13 — Baseline Revalidation
 - Confirmed the Linux container still lacks the `dotnet` CLI; documented env_guard for Increment 1 and kept execution static-analysis only.
