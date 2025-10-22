@@ -466,6 +466,7 @@
     ,"2026-05-19: Added regression tests selecting seeded CAPA, Change Control, and Incident records to assert inspector field projections and new timeline collections hydrate/refresh after navigation-driven reloads; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container.",
     "2026-05-20: CAPA, Change Control, and Incidents unit suites now cover electronic signature cancellations/exceptions, adapter-thrown validation errors, and Save/transition guardrails using updated fake CRUD hooks while dotnet restore/build for solution and WPF/MAUI targets still exit with 'command not found: dotnet' inside this container.",
     "2026-05-22: Documented CAPA/Change Control/Incident WPF parity, expanded FlaUI smoke coverage for those modules, and updated DebugSmokeTestService to log the quality workflows; dotnet restore/build attempts continue to exit with 'command not found: dotnet' in this container.",
+    "2026-04-10: DocumentControlModuleViewModel now adapts the MAUI workflow into the WPF shell, keeps SAP B1 mode/state/inspector views synchronized, and routes attachment uploads plus electronic signature capture through the shared shell services; dotnet restore/build for the solution and WPF project were retried but still fail with 'command not found: dotnet' on this host.",
     "2025-10-22: Document Control module view scaffolded with WPF toolbar bindings, search/type filters, change-control picker overlay, and signature metadata so the desktop shell mirrors the MAUI workflow."
   ]
 }

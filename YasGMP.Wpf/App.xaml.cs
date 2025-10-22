@@ -163,6 +163,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<DeviationModuleViewModel>();
                         svc.AddTransient<IncidentsModuleViewModel>();
                         svc.AddTransient<ChangeControlModuleViewModel>();
+                        svc.AddTransient<DocumentControlModuleViewModel>();
                         svc.AddTransient<ValidationsModuleViewModel>();
                         svc.AddTransient<SchedulingModuleViewModel>();
                         svc.AddTransient<SecurityModuleViewModel>();
@@ -206,6 +207,7 @@ namespace YasGMP.Wpf
                             registry.Register<DeviationModuleViewModel>(DeviationModuleViewModel.ModuleKey, "Deviations", "Quality", "Deviation intake, investigation, and CAPA linkage");
                             registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
                             registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
+                            registry.Register<DocumentControlModuleViewModel>(DocumentControlModuleViewModel.ModuleKey, "Document Control", "Quality", "SOP lifecycle and document governance");
                             registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
