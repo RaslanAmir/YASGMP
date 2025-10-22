@@ -11,6 +11,7 @@ using Xunit;
 using Xunit.Sdk;
 using YasGMP.Wpf.Smoke.Helpers;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Wpf.Smoke.Tests;
 
