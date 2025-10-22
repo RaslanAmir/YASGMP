@@ -13,6 +13,7 @@
     <sys:String x:Key="Backstage.Button.SaveLayout.AutomationId">Backstage.Button.SaveLayout</sys:String>
     <sys:String x:Key="Backstage.Button.ResetLayout.AutomationId">Backstage.Button.ResetLayout</sys:String>
     <sys:String x:Key="Backstage.Button.AuditTrail.AutomationId">Backstage.Button.AuditTrail</sys:String>
+    <sys:String x:Key="Backstage.Button.DocumentControl.AutomationId">Backstage.Button.DocumentControl</sys:String>
     <sys:String x:Key="Backstage.Button.AuditDashboard.AutomationId">Backstage.Button.AuditDashboard</sys:String>
     <sys:String x:Key="Backstage.Button.ApiAuditTrail.AutomationId">Backstage.Button.ApiAuditTrail</sys:String>
 
@@ -40,6 +41,7 @@
     <sys:String x:Key="Ribbon.Button.Capa.AutomationId">Ribbon.Button.CAPA</sys:String>
     <sys:String x:Key="Ribbon.Button.Incidents.AutomationId">Ribbon.Button.Incidents</sys:String>
     <sys:String x:Key="Ribbon.Button.ChangeControl.AutomationId">Ribbon.Button.ChangeControl</sys:String>
+    <sys:String x:Key="Ribbon.Button.DocumentControl.AutomationId">Ribbon.Button.DocumentControl</sys:String>
     <sys:String x:Key="Ribbon.Button.Validations.AutomationId">Ribbon.Button.Validations</sys:String>
     <sys:String x:Key="Ribbon.Button.AuditTrail.AutomationId">Ribbon.Button.AuditTrail</sys:String>
     <sys:String x:Key="Ribbon.Button.AuditDashboard.AutomationId">Ribbon.Button.AuditDashboard</sys:String>
