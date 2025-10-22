@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -209,6 +211,63 @@ public class ChangeControlModuleViewModelTests
         Assert.Equal("change_controls", request.EntityType);
         Assert.Equal(21, request.EntityId);
         Assert.Equal("impact.txt", request.FileName);
+    }
+
+    [Fact]
+    public async Task SelectingRecord_PopulatesInspectorFieldsAndTimeline()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var crud = new FakeChangeControlCrudService();
+
+        var requested = new DateTime(2025, 1, 9, 10, 0, 0, DateTimeKind.Utc);
+
+        crud.Seed(new ChangeControl
+        {
+            Id = 58,
+            Code = "CC-2025-058",
+            Title = "Upgrade HVAC monitoring",
+            StatusRaw = ChangeControlStatus.UnderReview.ToString(),
+            Description = "Evaluate sensor upgrade path.",
+            DateRequested = requested,
+            AssignedToId = 42
+        });
+
+        var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new ChangeControlModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        var record = Assert.Single(viewModel.Records);
+        viewModel.SelectedRecord = record;
+
+        Assert.Collection(
+            record.InspectorFields,
+            field =>
+            {
+                Assert.Equal("Status", field.Label);
+                Assert.Equal(ChangeControlStatus.UnderReview.ToString(), field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Requested", field.Label);
+                Assert.Equal(requested.ToString("d", CultureInfo.CurrentCulture), field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Assigned To", field.Label);
+                Assert.Equal("42", field.Value);
+            });
+
+        var timelineEntries = TimelineTestHelper.GetTimelineEntries(viewModel);
+        Assert.NotEmpty(timelineEntries);
+        Assert.Contains(timelineEntries, entry => TimelineTestHelper.GetTimestamp(entry) == requested);
     }
 
     private static Task<bool> InvokeSaveAsync(ChangeControlModuleViewModel viewModel)

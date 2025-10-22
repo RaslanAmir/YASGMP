@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -201,6 +203,83 @@ public class CapaModuleViewModelTests
         Assert.Equal("capa_cases", upload.EntityType);
         Assert.Equal(100, upload.EntityId);
         Assert.Equal("plan.txt", upload.FileName);
+    }
+
+    [Fact]
+    public async Task SelectingRecord_PopulatesInspectorFieldsAndTimeline()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var capaCrud = new FakeCapaCrudService();
+        var componentCrud = new FakeComponentCrudService();
+        componentCrud.Saved.Add(new Component
+        {
+            Id = 12,
+            Code = "CMP-012",
+            Name = "Filling Pump"
+        });
+
+        var assignedUser = new User { Id = 7, FullName = "QA Lead" };
+        var openedAt = new DateTime(2025, 3, 15, 8, 30, 0, DateTimeKind.Utc);
+
+        capaCrud.Seed(new CapaCase
+        {
+            Id = 41,
+            Title = "Supplier deviation response",
+            Description = "Coordinate actions for supplier deviation.",
+            ComponentId = 12,
+            Priority = "High",
+            Status = "INVESTIGATION",
+            AssignedToId = assignedUser.Id,
+            AssignedTo = assignedUser,
+            DateOpen = openedAt
+        });
+
+        var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        var record = Assert.Single(viewModel.Records);
+        viewModel.SelectedRecord = record;
+
+        Assert.Collection(
+            record.InspectorFields,
+            field =>
+            {
+                Assert.Equal("Priority", field.Label);
+                Assert.Equal("High", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Status", field.Label);
+                Assert.Equal("INVESTIGATION", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Opened", field.Label);
+                Assert.Equal(openedAt.ToString("d", CultureInfo.CurrentCulture), field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Assigned To", field.Label);
+                Assert.Equal("QA Lead", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Component", field.Label);
+                Assert.Equal("12", field.Value);
+            });
+
+        var timelineEntries = TimelineTestHelper.GetTimelineEntries(viewModel);
+        Assert.NotEmpty(timelineEntries);
+        Assert.Contains(timelineEntries, entry => TimelineTestHelper.GetTimestamp(entry) == openedAt);
     }
 
     private static Task<bool> InvokeSaveAsync(CapaModuleViewModel viewModel)

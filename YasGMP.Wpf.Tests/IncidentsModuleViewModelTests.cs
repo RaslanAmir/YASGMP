@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -192,6 +194,167 @@ public class IncidentsModuleViewModelTests
         Assert.Equal("incidents", upload.EntityType);
         Assert.Equal(3, upload.EntityId);
         Assert.Equal("evidence.txt", upload.FileName);
+    }
+
+    [Fact]
+    public async Task SelectingRecord_PopulatesInspectorFieldsAndTimelineWithNavigationUpdates()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService();
+
+        var detected = new DateTime(2025, 2, 20, 6, 45, 0, DateTimeKind.Utc);
+
+        var incidentEntity = new Incident
+        {
+            Id = 301,
+            Title = "Temperature excursion",
+            Description = "Cold room exceeded limits.",
+            Type = "Deviation",
+            Priority = "High",
+            DetectedAt = detected,
+            Status = "INVESTIGATION",
+            AssignedInvestigator = "QA Ops",
+            Classification = "Major",
+            LinkedCapaId = 91,
+            WorkOrderId = 27
+        };
+
+        database.Incidents.Add(new Incident
+        {
+            Id = incidentEntity.Id,
+            Title = incidentEntity.Title,
+            Description = incidentEntity.Description,
+            Type = incidentEntity.Type,
+            Priority = incidentEntity.Priority,
+            DetectedAt = incidentEntity.DetectedAt,
+            Status = incidentEntity.Status,
+            AssignedInvestigator = incidentEntity.AssignedInvestigator,
+            Classification = incidentEntity.Classification,
+            LinkedCapaId = incidentEntity.LinkedCapaId,
+            WorkOrderId = incidentEntity.WorkOrderId
+        });
+
+        incidents.Saved.Add(incidentEntity);
+
+        var auth = new TestAuthContext();
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new RecordingModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        var record = Assert.Single(viewModel.Records);
+        viewModel.SelectedRecord = record;
+
+        Assert.Collection(
+            record.InspectorFields,
+            field =>
+            {
+                Assert.Equal("Type", field.Label);
+                Assert.Equal("Deviation", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Priority", field.Label);
+                Assert.Equal("High", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Detected", field.Label);
+                Assert.Equal(detected.ToString("g", CultureInfo.CurrentCulture), field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Investigator", field.Label);
+                Assert.Equal("QA Ops", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Classification", field.Label);
+                Assert.Equal("Major", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Linked CAPA", field.Label);
+                Assert.Equal("91", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Work Order", field.Label);
+                Assert.Equal("27", field.Value);
+            });
+
+        var timelineEntries = TimelineTestHelper.GetTimelineEntries(viewModel);
+        Assert.NotEmpty(timelineEntries);
+        Assert.Contains(timelineEntries, entry => TimelineTestHelper.GetTimestamp(entry) == detected);
+
+        viewModel.GoldenArrowCommand.Execute(null);
+        Assert.Contains(navigation.OpenedModules, item => item.ModuleKey == CapaModuleViewModel.ModuleKey && Equals(item.Parameter, 91));
+
+        var updatedDetected = detected.AddHours(3);
+        incidentEntity.LinkedCapaId = null;
+        incidentEntity.WorkOrderId = 42;
+        incidentEntity.AssignedInvestigator = "Manufacturing";
+        incidentEntity.Classification = "Minor";
+        incidentEntity.Status = "CAPA_LINKED";
+        incidentEntity.DetectedAt = updatedDetected;
+
+        var databaseIncident = database.Incidents.Single(i => i.Id == incidentEntity.Id);
+        databaseIncident.LinkedCapaId = incidentEntity.LinkedCapaId;
+        databaseIncident.WorkOrderId = incidentEntity.WorkOrderId;
+        databaseIncident.AssignedInvestigator = incidentEntity.AssignedInvestigator;
+        databaseIncident.Classification = incidentEntity.Classification;
+        databaseIncident.Status = incidentEntity.Status;
+        databaseIncident.DetectedAt = incidentEntity.DetectedAt;
+
+        await viewModel.RefreshCommand.ExecuteAsync(null);
+
+        viewModel.SelectedRecord = viewModel.Records.First();
+
+        var refreshed = viewModel.Records.First();
+        Assert.Collection(
+            refreshed.InspectorFields,
+            field =>
+            {
+                Assert.Equal("Type", field.Label);
+                Assert.Equal("Deviation", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Priority", field.Label);
+                Assert.Equal("High", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Detected", field.Label);
+                Assert.Equal(updatedDetected.ToString("g", CultureInfo.CurrentCulture), field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Investigator", field.Label);
+                Assert.Equal("Manufacturing", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Classification", field.Label);
+                Assert.Equal("Minor", field.Value);
+            },
+            field =>
+            {
+                Assert.Equal("Work Order", field.Label);
+                Assert.Equal("42", field.Value);
+            });
+
+        Assert.DoesNotContain(refreshed.InspectorFields, field => field.Label == "Linked CAPA");
+
+        var refreshedTimeline = TimelineTestHelper.GetTimelineEntries(viewModel);
+        Assert.Contains(refreshedTimeline, entry => TimelineTestHelper.GetTimestamp(entry) == updatedDetected);
+        Assert.DoesNotContain(refreshedTimeline, entry => TimelineTestHelper.GetTimestamp(entry) == detected);
     }
 
     [Fact]
