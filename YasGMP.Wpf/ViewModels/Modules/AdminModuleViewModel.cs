@@ -385,6 +385,7 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         var actorSession = _authContext.CurrentSessionId;
 
         var restoreSucceeded = false;
+        var refreshRecords = false;
         try
         {
             IsBusy = true;
@@ -396,6 +397,9 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
                     actorSession)
                 .ConfigureAwait(false);
 
+            refreshRecords = true;
+
+            var persistenceFailed = false;
             try
             {
                 await SignaturePersistenceHelper
@@ -411,52 +415,55 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
                 LastSignatureStatus = persistFailed;
                 StatusMessage = persistFailed;
                 _alerts?.PublishStatus(persistFailed, AlertSeverity.Error);
-                return;
+                persistenceFailed = true;
             }
 
-            var reasonDisplay = signatureResult.ReasonDisplay ?? signatureResult.Reason ?? string.Empty;
-            var fallbackReason = string.IsNullOrWhiteSpace(reasonDisplay)
-                ? _localizationService.GetString("Module.Admin.Restore.Status.SignatureCaptured.Unknown")
-                : reasonDisplay;
-            var signatureCaptured = string.Format(
-                CultureInfo.CurrentCulture,
-                _localizationService.GetString("Module.Admin.Restore.Status.SignatureCaptured"),
-                fallbackReason);
-            LastSignatureStatus = signatureCaptured;
-
-            var success = string.Format(
-                CultureInfo.CurrentCulture,
-                _localizationService.GetString("Module.Admin.Restore.Status.Success"),
-                settingDisplayName);
-            StatusMessage = success;
-            _alerts?.PublishStatus(success, AlertSeverity.Success);
-
-            var signature = signatureResult.Signature;
-            static string? FormatPart(string label, string? value)
-                => string.IsNullOrWhiteSpace(value) ? null : $"{label}={value}";
-
-            var detailsParts = new[]
+            if (!persistenceFailed)
             {
-                FormatPart("key", settingKey),
-                FormatPart("reason", reasonDisplay),
-                FormatPart("signature", signature?.SignatureHash),
-                FormatPart("method", signature?.Method),
-                FormatPart("status", signature?.Status),
-                FormatPart("ip", actorIp),
-                FormatPart("device", actorDevice),
-                FormatPart("session", actorSession)
+                var reasonDisplay = signatureResult.ReasonDisplay ?? signatureResult.Reason ?? string.Empty;
+                var fallbackReason = string.IsNullOrWhiteSpace(reasonDisplay)
+                    ? _localizationService.GetString("Module.Admin.Restore.Status.SignatureCaptured.Unknown")
+                    : reasonDisplay;
+                var signatureCaptured = string.Format(
+                    CultureInfo.CurrentCulture,
+                    _localizationService.GetString("Module.Admin.Restore.Status.SignatureCaptured"),
+                    fallbackReason);
+                LastSignatureStatus = signatureCaptured;
+
+                var success = string.Format(
+                    CultureInfo.CurrentCulture,
+                    _localizationService.GetString("Module.Admin.Restore.Status.Success"),
+                    settingDisplayName);
+                StatusMessage = success;
+                _alerts?.PublishStatus(success, AlertSeverity.Success);
+
+                var signature = signatureResult.Signature;
+                static string? FormatPart(string label, string? value)
+                    => string.IsNullOrWhiteSpace(value) ? null : $"{label}={value}";
+
+                var detailsParts = new[]
+                {
+                    FormatPart("key", settingKey),
+                    FormatPart("reason", reasonDisplay),
+                    FormatPart("signature", signature?.SignatureHash),
+                    FormatPart("method", signature?.Method),
+                    FormatPart("status", signature?.Status),
+                    FormatPart("ip", actorIp),
+                    FormatPart("device", actorDevice),
+                    FormatPart("session", actorSession)
+                }
+                .Where(part => !string.IsNullOrWhiteSpace(part))
+                .Cast<string>();
+
+                var details = string.Join(", ", detailsParts);
+
+                await LogAuditAsync(
+                    audit => audit.LogEntityAuditAsync("settings", resolvedSetting.Id, "ROLLBACK", details),
+                    _localizationService.GetString("Module.Admin.Restore.Status.AuditFailed"))
+                    .ConfigureAwait(false);
+
+                restoreSucceeded = true;
             }
-            .Where(part => !string.IsNullOrWhiteSpace(part))
-            .Cast<string>();
-
-            var details = string.Join(", ", detailsParts);
-
-            await LogAuditAsync(
-                audit => audit.LogEntityAuditAsync("settings", resolvedSetting.Id, "ROLLBACK", details),
-                _localizationService.GetString("Module.Admin.Restore.Status.AuditFailed"))
-                .ConfigureAwait(false);
-
-            restoreSucceeded = true;
         }
         catch (Exception ex)
         {
@@ -474,7 +481,7 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
             RestoreSettingCommand.NotifyCanExecuteChanged();
         }
 
-        if (restoreSucceeded)
+        if (refreshRecords || restoreSucceeded)
         {
             await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
         }
