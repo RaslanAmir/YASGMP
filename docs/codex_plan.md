@@ -53,6 +53,7 @@
   - 2025-10-16T09:41Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` attempted for the Work Orders signature batch; container continues to report `bash: command not found: dotnet`.
 - 2026-04-11T00:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` rerun after adding asset editor QR parity; CLI remains unavailable so the command exits with `bash: command not found: dotnet`.
 - 2026-05-25T09:30Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried with the Document Control navigation wiring; CLI still missing so the command exits with `bash: command not found: dotnet`.
+- 2026-06-01T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried while extending Document Control module regression tests; each command still fails with `bash: command not found: dotnet`, keeping validation limited to static analysis.
 
 
 ## Increment 2025-10-13 — Baseline Revalidation
@@ -187,6 +188,10 @@
 3. **DatabaseService Extensions:** Add `AppendAuditHashAsync(entityKey, auditPayload, signatureMetadata)` which calculates SHA-256 of serialized audit payload + previous hash, stores both the audit row and hash envelope transactionally, and returns the persisted hash token to the caller for UI confirmation.
 4. **ViewModel Surfacing:** Extend module view-models to surface the latest hash token, enabling the inspector/status bar to display verification cues and emit correlation identifiers for smoke automation.
 5. **Verification Workflow:** Outline periodic verification routines (scheduled job + manual command) that recompute hash chains per entity, flag tampering anomalies, and surface the status through the dashboard/reporting modules.
+
+### 2026-06-01 — Document Control Regression Coverage
+
+- Expanded `DocumentControlModuleViewModel` unit fixtures to drive initialization, attachment uploads, change-control linking, exports, and lifecycle saves (initiate/revise) across success, failure, and exception paths. Tests assert busy gating, localized status messaging, document reload triggers, and attachment manifest projections using a controllable `DocumentControlViewModel` test double that raises `PropertyChanged` for selection and filtered-document updates.
 
 ### Increment 2 Update — 2026-04-07 Localization Sweep
 - Localized Assets module status messages through ShellStrings (neutral/en/hr) and routed AssetsModuleViewModel status surfaces through `ILocalizationService` so runtime language switches stay in sync.

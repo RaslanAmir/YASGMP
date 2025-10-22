@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "2026-06-01: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried during Document Control module regression coverage; each command still exits with 'command not found'.",
       "2026-05-21: dotnet restore yasgmp.sln retried while landing Deviation CRUD adapter regression tests; CLI still missing so the command exits with 'command not found'.",
       "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
       "2025-10-13: dotnet --info/dotnet restore still return 'command not found' after retargeting MAUI/AppCore to .NET 9; Windows validation pending.",
@@ -195,8 +196,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: add audit rollback preview document",
+  "lastCommitSummary": "chore: expand document control module tests",
   "notes": [
+    "2026-06-01: DocumentControlModuleViewModel regression tests now cover initialization, attachments, change-control linking, exports, and initiate/revise saves across success/failure/exception paths with busy/status assertions; dotnet restore/build/test remain blocked with 'command not found' in this container.",
     "2025-10-16: WorkOrdersModuleViewModel now exposes signature/audit observables, rehydrates persisted metadata after saves, and mirrors inspector updates while dotnet restore/build/test remain blocked with 'command not found'.",
     "2026-04-11: AssetsModuleViewModel now auto-fills machine codes and QR payloads, persists PNG previews via IPlatformService, and adds GenerateCode/PreviewQr unit coverage plus localized status strings; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
     "2026-04-22: YasGMP.Wpf.Smoke now drives the Assets module through Find\u2192Add\u2192Update, attachment guardrails, and signature cancellation messaging to guard SAP B1 form behaviour; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
