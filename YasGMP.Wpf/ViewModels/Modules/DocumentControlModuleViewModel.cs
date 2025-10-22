@@ -11,7 +11,6 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Models.DTO;
 using YasGMP.Services.Interfaces;
@@ -30,8 +29,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
 
     private readonly DocumentControlViewModel _documentControl;
     private readonly ILocalizationService _localization;
-    private readonly IAttachmentWorkflowService _attachmentWorkflow;
-    private readonly IElectronicSignatureDialogService _signatureDialog;
+    private readonly IDocumentControlService _documentControlService;
 
     private ObservableCollection<SopDocument>? _filteredDocuments;
     private bool _suppressSelectionSync;
@@ -47,18 +45,18 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        IAttachmentWorkflowService attachmentWorkflow,
-        IElectronicSignatureDialogService signatureDialog)
+        IDocumentControlService documentControlService)
         : base(ModuleKey, localization.GetString("Module.Title.DocumentControl"), localization, cflDialogService, shellInteraction, navigation)
     {
         _documentControl = documentControl ?? throw new ArgumentNullException(nameof(documentControl));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
-        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
-        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
+        _documentControlService = documentControlService ?? throw new ArgumentNullException(nameof(documentControlService));
 
         DocumentControl = _documentControl;
 
         AttachDocumentCommand = new AsyncRelayCommand(ExecuteAttachDocumentAsync, CanAttachDocument);
+        LinkChangeControlCommand = new AsyncRelayCommand(ExecuteLinkChangeControlAsync, CanLinkChangeControl);
+        ExportDocumentsCommand = new AsyncRelayCommand(ExecuteExportDocumentsAsync, CanExportDocuments);
 
         Editor = DocumentControlEditor.CreateEmpty();
         IsEditorEnabled = false;
@@ -78,8 +76,18 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     [ObservableProperty]
     private bool _isEditorEnabled;
 
+    /// <summary>Latest attachment manifest returned from the document control service.</summary>
+    [ObservableProperty]
+    private IReadOnlyList<AttachmentLinkWithAttachment> _attachmentManifest = Array.Empty<AttachmentLinkWithAttachment>();
+
     /// <summary>Toolbar command surfaced for attachment uploads.</summary>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>Command that links the selected change control to the current document.</summary>
+    public IAsyncRelayCommand LinkChangeControlCommand { get; }
+
+    /// <summary>Command that exports the current filtered document list.</summary>
+    public IAsyncRelayCommand ExportDocumentsCommand { get; }
 
     /// <summary>Available status values propagated from the shared view-model.</summary>
     public string[] StatusOptions => DocumentControl.AvailableStatuses;
@@ -140,14 +148,8 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     /// <summary>Command that opens the change control picker overlay.</summary>
     public ICommand OpenChangeControlPickerCommand => DocumentControl.OpenChangeControlPickerCommand;
 
-    /// <summary>Command that links the selected change control.</summary>
-    public ICommand LinkChangeControlCommand => DocumentControl.LinkChangeControlCommand;
-
     /// <summary>Command that cancels the change control picker.</summary>
     public ICommand CancelChangeControlPickerCommand => DocumentControl.CancelChangeControlPickerCommand;
-
-    /// <summary>Command that exports the current filtered list.</summary>
-    public ICommand ExportDocumentsCommand => DocumentControl.ExportDocumentsCommand;
 
     /// <inheritdoc />
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
@@ -232,7 +234,18 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     {
         if (Mode == FormMode.Add)
         {
-            await _documentControl.InitiateDocumentAsync().ConfigureAwait(false);
+            var draft = Editor.ToEntity();
+            var result = await _documentControlService
+                .InitiateDocumentAsync(draft)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+            if (!result.Success)
+            {
+                return false;
+            }
+
+            await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
             ProjectRecordsIntoShell();
             return true;
         }
@@ -246,30 +259,20 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
                 return false;
             }
 
-            ElectronicSignatureDialogResult? signatureResult;
-            try
-            {
-                signatureResult = await _signatureDialog
-                    .CaptureSignatureAsync(new ElectronicSignatureContext("sop_documents", document.Id))
-                    .ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Electronic signature failed: {ex.Message}";
-                return false;
-            }
+            var revision = Editor.ToEntity();
+            revision.Id = document.Id;
 
-            if (signatureResult is null || signatureResult.Signature is null)
-            {
-                StatusMessage = "Electronic signature cancelled.";
-                return false;
-            }
-
-            await _documentControl.ReviseDocumentAsync().ConfigureAwait(false);
-            await SignaturePersistenceHelper
-                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+            var result = await _documentControlService
+                .ReviseDocumentAsync(document, revision)
                 .ConfigureAwait(false);
 
+            StatusMessage = result.Message;
+            if (!result.Success)
+            {
+                return false;
+            }
+
+            await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
             ProjectRecordsIntoShell();
             return true;
         }
@@ -477,6 +480,7 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
                 break;
             case nameof(DocumentControlViewModel.SelectedChangeControlForLink):
                 OnPropertyChanged(nameof(SelectedChangeControlForLink));
+                UpdateAttachmentCommandState();
                 break;
         }
     }
@@ -630,6 +634,12 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
     private bool CanAttachDocument()
         => !IsBusy && DocumentControl.SelectedDocument is not null;
 
+    private bool CanLinkChangeControl()
+        => !IsBusy && DocumentControl.SelectedDocument is not null && DocumentControl.SelectedChangeControlForLink is not null;
+
+    private bool CanExportDocuments()
+        => !IsBusy;
+
     private async Task ExecuteAttachDocumentAsync()
     {
         if (DocumentControl.SelectedDocument is null)
@@ -650,35 +660,21 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        var processed = 0;
-        var deduplicated = 0;
-
         try
         {
             IsBusy = true;
-            foreach (var file in dialog.FileNames)
-            {
-                await using var stream = File.OpenRead(file);
-                var request = new AttachmentUploadRequest
-                {
-                    FileName = Path.GetFileName(file),
-                    ContentType = "application/octet-stream",
-                    EntityType = "sop_documents",
-                    EntityId = DocumentControl.SelectedDocument.Id,
-                    Reason = $"documentcontrol:{DocumentControl.SelectedDocument.Id}",
-                    SourceHost = Environment.MachineName,
-                    Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
-                };
+            UpdateAttachmentCommandState();
 
-                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
-                processed++;
-                if (result.Deduplicated)
-                {
-                    deduplicated++;
-                }
-            }
+            var uploads = dialog.FileNames
+                .Select(DocumentAttachmentUpload.FromFile)
+                .ToList();
 
-            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
+            var result = await _documentControlService
+                .UploadAttachmentsAsync(DocumentControl.SelectedDocument, uploads)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+            AttachmentManifest = result.Manifest;
         }
         catch (Exception ex)
         {
@@ -691,8 +687,79 @@ public sealed partial class DocumentControlModuleViewModel : ModuleDocumentViewM
         }
     }
 
+    private async Task ExecuteLinkChangeControlAsync()
+    {
+        if (DocumentControl.SelectedDocument is null)
+        {
+            StatusMessage = "Select a document before linking a change control.";
+            return;
+        }
+
+        if (DocumentControl.SelectedChangeControlForLink is null)
+        {
+            StatusMessage = "Select a change control to link.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommandState();
+
+            var result = await _documentControlService
+                .LinkChangeControlAsync(DocumentControl.SelectedDocument, DocumentControl.SelectedChangeControlForLink)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+            if (result.Success)
+            {
+                DocumentControl.CancelChangeControlPickerCommand.Execute(null);
+                await _documentControl.LoadDocumentsAsync().ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Linking failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+    }
+
+    private async Task ExecuteExportDocumentsAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            UpdateAttachmentCommandState();
+
+            var documents = DocumentControl.FilteredDocuments?.ToList() ?? new List<SopDocument>();
+            var result = await _documentControlService
+                .ExportDocumentsAsync(documents, "zip")
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+        }
+    }
+
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        AttachDocumentCommand.NotifyCanExecuteChanged();
+        LinkChangeControlCommand.NotifyCanExecuteChanged();
+        ExportDocumentsCommand.NotifyCanExecuteChanged();
+    }
 
     private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
