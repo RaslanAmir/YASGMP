@@ -53,7 +53,17 @@ FROM deviations WHERE id=@id LIMIT 1";
         /// Executes the insert or update deviation async operation.
         /// </summary>
 
-        public static async Task<int> InsertOrUpdateDeviationAsync(this DatabaseService db, Deviation d, bool update, int actorUserId, string? ip = null, string? device = null, string? sessionId = null, CancellationToken token = default)
+        public static async Task<int> InsertOrUpdateDeviationAsync(
+            this DatabaseService db,
+            Deviation d,
+            bool update,
+            int actorUserId,
+            string? ip = null,
+            string? device = null,
+            string? sessionId = null,
+            int? signatureId = null,
+            string? signatureHash = null,
+            CancellationToken token = default)
         {
             if (d == null) throw new ArgumentNullException(nameof(d));
             string insert = @"INSERT INTO deviations (code, title, description, reported_at, reported_by_id, severity, is_critical, status, assigned_investigator_id, assigned_investigator_name, investigation_started_at, root_cause, linked_capa_id, closure_comment, closed_at, digital_signature, risk_score, anomaly_score, last_modified, last_modified_by_id, source_ip, audit_note)
@@ -97,7 +107,22 @@ FROM deviations WHERE id=@id LIMIT 1";
                 await db.ExecuteNonQueryAsync(updateSql, pars, token).ConfigureAwait(false);
             }
 
-            await db.LogSystemEventAsync(actorUserId, update ? "DEVIATION_UPDATE" : "DEVIATION_CREATE", "deviations", "DeviationModule", d.Id, d.Title, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
+            var eventSignature = string.IsNullOrWhiteSpace(signatureHash) ? d.DigitalSignature : signatureHash;
+
+            await db.LogSystemEventAsync(
+                    actorUserId,
+                    update ? "DEVIATION_UPDATE" : "DEVIATION_CREATE",
+                    "deviations",
+                    "DeviationModule",
+                    d.Id,
+                    d.Title,
+                    ip,
+                    "audit",
+                    device,
+                    sessionId,
+                    signatureId: signatureId,
+                    signatureHash: eventSignature)
+                .ConfigureAwait(false);
             return d.Id;
         }
         /// <summary>
