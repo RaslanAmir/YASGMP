@@ -764,6 +764,11 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
                 .GetFilteredAudits(string.Empty, "suppliers", string.Empty, from, to)
                 .ConfigureAwait(false);
 
+            if (_loadedSupplier is null || _loadedSupplier.Id != supplierId)
+            {
+                return;
+            }
+
             var filtered = audits
                 .Where(entry => string.Equals(entry.Entity, "suppliers", StringComparison.OrdinalIgnoreCase))
                 .Where(entry => int.TryParse(entry.EntityId, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedId)
@@ -779,8 +784,11 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         }
         catch (Exception ex)
         {
-            AuditTimeline.Clear();
-            StatusMessage = $"Failed to load supplier audit timeline: {ex.Message}";
+            if (_loadedSupplier is not null && _loadedSupplier.Id == supplierId)
+            {
+                AuditTimeline.Clear();
+                StatusMessage = $"Failed to load supplier audit timeline: {ex.Message}";
+            }
         }
     }
 
