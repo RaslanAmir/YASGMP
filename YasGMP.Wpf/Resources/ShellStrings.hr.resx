@@ -81,6 +81,12 @@
   <data name="Backstage.Button.AuditTrail.ToolTip" xml:space="preserve">
     <value>Otvori preglednik neizmjenjivog dnevnika audita.</value>
   </data>
+  <data name="Backstage.Button.DocumentControl.Header" xml:space="preserve">
+    <value>Kontrola dokumenata</value>
+  </data>
+  <data name="Backstage.Button.DocumentControl.ToolTip" xml:space="preserve">
+    <value>Pokreni radni prostor za kontrolirane dokumente i revizije SOP-a.</value>
+  </data>
   <data name="Backstage.Button.AuditDashboard.Header" xml:space="preserve">
     <value>Nadzorna ploča audita</value>
   </data>
@@ -215,6 +221,12 @@
   </data>
   <data name="Ribbon.Button.ChangeControl.ToolTip" xml:space="preserve">
     <value>Upravljaj zahtjevima za promjene i odobrenjima.</value>
+  </data>
+  <data name="Ribbon.Button.DocumentControl.Header" xml:space="preserve">
+    <value>Kontrola dokumenata</value>
+  </data>
+  <data name="Ribbon.Button.DocumentControl.ToolTip" xml:space="preserve">
+    <value>Upravljaj kontroliranim dokumentima i revizijama SOP-a.</value>
   </data>
   <data name="Ribbon.Button.Validations.Header" xml:space="preserve">
     <value>Validacije</value>
@@ -2630,6 +2642,9 @@
   </data>
   <data name="Shell.MainWindow.Text.XE81C2" xml:space="preserve">
     <value>&amp;#xE81C;</value>
+  </data>
+  <data name="Shell.MainWindow.Text.XE8A5" xml:space="preserve">
+    <value>&amp;#xE8A5;</value>
   </data>
   <data name="Shell.MainWindow.Text.XE9D2" xml:space="preserve">
     <value>&amp;#xE9D2;</value>

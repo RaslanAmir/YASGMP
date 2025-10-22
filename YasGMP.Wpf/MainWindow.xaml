@@ -62,6 +62,19 @@
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
                                 </fluent:Button>
+                                <fluent:Button Header="{DynamicResource Backstage.Button.DocumentControl.Header}"
+                                               ToolTipService.ToolTip="{DynamicResource Backstage.Button.DocumentControl.ToolTip}"
+                                               AutomationProperties.Name="{DynamicResource Backstage.Button.DocumentControl.Header}"
+                                               AutomationProperties.AutomationId="{DynamicResource Backstage.Button.DocumentControl.AutomationId}"
+                                               Width="220"
+                                               Margin="0,0,0,8"
+                                               Command="{Binding WindowCommands.OpenDocumentControlCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE8A5}"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>
+                                </fluent:Button>
                                 <fluent:Button Header="{DynamicResource Backstage.Button.AuditDashboard.Header}"
                                                ToolTipService.ToolTip="{DynamicResource Backstage.Button.AuditDashboard.ToolTip}"
                                                AutomationProperties.Name="{DynamicResource Backstage.Button.AuditDashboard.Header}"
@@ -155,6 +168,11 @@
                                    AutomationProperties.Name="{DynamicResource Ribbon.Button.ChangeControl.Header}"
                                    AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.ChangeControl.AutomationId}"
                                    Command="{Binding WindowCommands.OpenChangeControlCommand}" />
+                    <fluent:Button Header="{DynamicResource Ribbon.Button.DocumentControl.Header}"
+                                   ToolTipService.ToolTip="{DynamicResource Ribbon.Button.DocumentControl.ToolTip}"
+                                   AutomationProperties.Name="{DynamicResource Ribbon.Button.DocumentControl.Header}"
+                                   AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.DocumentControl.AutomationId}"
+                                   Command="{Binding WindowCommands.OpenDocumentControlCommand}" />
                     <fluent:Button Header="{DynamicResource Ribbon.Button.Validations.Header}"
                                    ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Validations.ToolTip}"
                                    AutomationProperties.Name="{DynamicResource Ribbon.Button.Validations.Header}"
