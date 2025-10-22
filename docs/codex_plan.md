@@ -155,6 +155,7 @@
 - Extended `YasGMP.Wpf.Smoke` with FlaUI scenarios that open each quality module, exercise find/add/update/view mode transitions, and assert inspector timeline fields populate for seeded records.
 - Updated `DebugSmokeTestService` to include Incidents, CAPA, and Change Control in the harness navigation/log output so the Tools → Smoke ribbon command records these workflows in the run summary.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were attempted for this batch; each still fails with `bash: command not found: dotnet` inside the Linux container, so Windows validation remains pending.
+- 2026-05-23: Added the missing `YasGMP.Wpf.ViewModels` import to the quality FlaUI smoke tests so `AutomationIdSanitizer.Normalize` resolves; `dotnet restore` was retried afterwards but the container again returned `bash: command not found: dotnet`.
 
 #### Entity Traceability Map (Seed)
 
