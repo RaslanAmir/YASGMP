@@ -14,6 +14,7 @@ using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
 using CoreAssetViewModel = YasGMP.ViewModels.AssetViewModel;
+using DocumentControlViewModel = YasGMP.ViewModels.DocumentControlViewModel;
 using WpfAssetViewModel = YasGMP.Wpf.ViewModels.AssetViewModel;
 
 namespace YasGMP.Wpf
@@ -134,6 +135,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
                         svc.AddSingleton<DebugSmokeTestService>();
+                        svc.AddTransient<DocumentControlViewModel>();
                         svc.AddTransient<LoginViewModel>();
                         svc.AddTransient<ReauthenticationDialogViewModel>();
                         svc.AddTransient<DigitalSignatureViewModel>();
@@ -193,6 +195,7 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<ModuleRegistry>(sp =>
                         {
                             var registry = new ModuleRegistry(sp);
+                            var localization = sp.GetRequiredService<ILocalizationService>();
                             registry.Register<DashboardModuleViewModel>(DashboardModuleViewModel.ModuleKey, "Dashboard", "Cockpit", "Operations overview and KPIs");
                             registry.Register<AssetsModuleViewModel>(AssetsModuleViewModel.ModuleKey, "Assets", "Maintenance", "Asset register and lifecycle");
                             registry.Register<ComponentsModuleViewModel>(ComponentsModuleViewModel.ModuleKey, "Components", "Maintenance", "Component hierarchy and lifecycle");
@@ -207,7 +210,11 @@ namespace YasGMP.Wpf
                             registry.Register<DeviationModuleViewModel>(DeviationModuleViewModel.ModuleKey, "Deviations", "Quality", "Deviation intake, investigation, and CAPA linkage");
                             registry.Register<IncidentsModuleViewModel>(IncidentsModuleViewModel.ModuleKey, "Incidents", "Quality", "Incident intake and investigations");
                             registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
-                            registry.Register<DocumentControlModuleViewModel>(DocumentControlModuleViewModel.ModuleKey, "Document Control", "Quality", "SOP lifecycle and document governance");
+                            registry.Register<DocumentControlModuleViewModel>(
+                                DocumentControlModuleViewModel.ModuleKey,
+                                "DocumentControl",
+                                "Quality",
+                                localization.GetString("Module.Description.DocumentControl"));
                             registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");

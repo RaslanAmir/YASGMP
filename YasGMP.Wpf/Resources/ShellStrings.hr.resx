@@ -471,6 +471,9 @@
   <data name="Module.Title.Diagnostics" xml:space="preserve">
     <value>Dijagnostika</value>
   </data>
+  <data name="Module.Title.DocumentControl" xml:space="preserve">
+    <value>Kontrola dokumenata</value>
+  </data>
   <data name="Module.Title.ExternalServicers" xml:space="preserve">
     <value>Vanjski serviseri</value>
   </data>
@@ -500,6 +503,9 @@
   </data>
   <data name="Module.Title.PreventiveMaintenance" xml:space="preserve">
     <value>Preventivno održavanje</value>
+  </data>
+  <data name="Module.Description.DocumentControl" xml:space="preserve">
+    <value>Životni ciklus SOP-a i upravljanje dokumentima.</value>
   </data>
   <data name="Module.Assets.Status.Active" xml:space="preserve">
     <value>aktivan</value>
@@ -1364,6 +1370,18 @@
   </data>
   <data name="ModuleTree.Node.Quality.ChangeControl.AutomationId" xml:space="preserve">
     <value>ModuleTree.Node.Quality.ChangeControl</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.Title" xml:space="preserve">
+    <value>Kontrola dokumenata</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.ToolTip" xml:space="preserve">
+    <value>Životni ciklus SOP-a i upravljanje dokumentima.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.AutomationName" xml:space="preserve">
+    <value>Čvor modula Kontrola dokumenata</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.DocumentControl.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.DocumentControl</value>
   </data>
   <data name="ModuleTree.Node.Quality.Validations.Title" xml:space="preserve">
     <value>Validacije</value>
