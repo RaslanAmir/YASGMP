@@ -62,7 +62,9 @@ public sealed class DeviationCrudServiceAdapter : IDeviationCrudService
                 context.UserId,
                 context.Ip,
                 context.DeviceInfo,
-                context.SessionId)
+                context.SessionId,
+                context.SignatureId,
+                signature)
             .ConfigureAwait(false);
         deviation.Id = id;
         return new CrudSaveResult(id, metadata);
@@ -86,7 +88,9 @@ public sealed class DeviationCrudServiceAdapter : IDeviationCrudService
                 context.UserId,
                 context.Ip,
                 context.DeviceInfo,
-                context.SessionId)
+                context.SessionId,
+                context.SignatureId,
+                signature)
             .ConfigureAwait(false);
         return new CrudSaveResult(deviation.Id, metadata);
     }

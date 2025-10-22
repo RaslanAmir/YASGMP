@@ -45,32 +45,64 @@ namespace YasGMP.Services
         /// <param name="ip">Source IP.</param>
         /// <param name="deviceInfo">Device information.</param>
         /// <param name="sessionId">Session id.</param>
-        public async Task<int> CreateAsync(Deviation dev, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
+        /// <param name="signatureId">Optional electronic signature identifier captured by the shell.</param>
+        /// <param name="signatureHash">Optional signature hash captured alongside the identifier.</param>
+        public async Task<int> CreateAsync(
+            Deviation dev,
+            int userId,
+            string ip = "system",
+            string deviceInfo = "server",
+            string? sessionId = null,
+            int? signatureId = null,
+            string? signatureHash = null)
         {
             if (dev is null) throw new ArgumentNullException(nameof(dev));
 
             if (string.IsNullOrWhiteSpace(dev.Status))
                 dev.Status = DeviationStatus.OPEN.ToString();
 
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            var signatureToPersist = EnsureDigitalSignature(dev, signatureHash);
 
-            var id = await _db.InsertOrUpdateDeviationAsync(dev, update: false, actorUserId: userId, ip: ip, device: deviceInfo, sessionId: sessionId)
-                              .ConfigureAwait(false);
+            var id = await _db.InsertOrUpdateDeviationAsync(
+                    dev,
+                    update: false,
+                    actorUserId: userId,
+                    ip: ip,
+                    device: deviceInfo,
+                    sessionId: sessionId,
+                    signatureId: signatureId,
+                    signatureHash: signatureToPersist)
+                .ConfigureAwait(false);
 
             await LogAudit(id, userId, DeviationActionType.CREATE, $"Created deviation #{id}").ConfigureAwait(false);
             return id;
         }
 
         /// <summary>Updates an existing deviation and logs an audit entry.</summary>
-        public async Task UpdateAsync(Deviation dev, int userId, string ip = "system", string deviceInfo = "server", string? sessionId = null)
+        public async Task UpdateAsync(
+            Deviation dev,
+            int userId,
+            string ip = "system",
+            string deviceInfo = "server",
+            string? sessionId = null,
+            int? signatureId = null,
+            string? signatureHash = null)
         {
             if (dev is null) throw new ArgumentNullException(nameof(dev));
             if (dev.Id <= 0) throw new ArgumentException("Deviation Id must be set for update.", nameof(dev));
 
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            var signatureToPersist = EnsureDigitalSignature(dev, signatureHash);
 
-            await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: userId, ip: ip, device: deviceInfo, sessionId: sessionId)
-                     .ConfigureAwait(false);
+            await _db.InsertOrUpdateDeviationAsync(
+                    dev,
+                    update: true,
+                    actorUserId: userId,
+                    ip: ip,
+                    device: deviceInfo,
+                    sessionId: sessionId,
+                    signatureId: signatureId,
+                    signatureHash: signatureToPersist)
+                .ConfigureAwait(false);
 
             await LogAudit(dev.Id, userId, DeviationActionType.UPDATE, $"Updated deviation #{dev.Id}").ConfigureAwait(false);
         }
@@ -103,7 +135,7 @@ namespace YasGMP.Services
             // not AssignedToUserId. We store the name here to avoid User navigation assignment.
             dev.AssignedInvestigatorName = investigator;
 
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            EnsureDigitalSignature(dev, null);
 
             await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: userId).ConfigureAwait(false);
             await LogAudit(dev.Id, userId, DeviationActionType.INVESTIGATION_START,
@@ -118,7 +150,7 @@ namespace YasGMP.Services
 
             dev.RootCause = rootCause;
             dev.Status = DeviationStatus.ROOT_CAUSE.ToString();
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            EnsureDigitalSignature(dev, null);
 
             await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: userId).ConfigureAwait(false);
             await LogAudit(dev.Id, userId, DeviationActionType.ROOT_CAUSE_DEFINED,
@@ -133,7 +165,7 @@ namespace YasGMP.Services
 
             dev.LinkedCapaId = capaId;
             dev.Status = DeviationStatus.CAPA_LINKED.ToString();
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            EnsureDigitalSignature(dev, null);
 
             await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: userId).ConfigureAwait(false);
             await LogAudit(dev.Id, userId, DeviationActionType.CAPA_LINKED,
@@ -149,7 +181,7 @@ namespace YasGMP.Services
             dev.Status = DeviationStatus.CLOSED.ToString();
             dev.ClosureComment = closureComment;
             dev.ClosedAt = DateTime.UtcNow;
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            EnsureDigitalSignature(dev, null);
 
             await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: userId).ConfigureAwait(false);
             await LogAudit(dev.Id, userId, DeviationActionType.CLOSE,
@@ -166,7 +198,7 @@ namespace YasGMP.Services
                       ?? throw new InvalidOperationException("Deviation not found.");
 
             dev.AssignedInvestigatorId = assigneeUserId; // FIX: match your model
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            EnsureDigitalSignature(dev, null);
 
             await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: actorUserId).ConfigureAwait(false);
             await LogAudit(dev.Id, actorUserId, DeviationActionType.UPDATE,
@@ -179,7 +211,7 @@ namespace YasGMP.Services
             var dev = await _db.GetDeviationByIdAsync(deviationId)
                       ?? throw new InvalidOperationException("Deviation not found.");
 
-            dev.DigitalSignature = GenerateDigitalSignature(dev);
+            EnsureDigitalSignature(dev, null);
 
             await _db.InsertOrUpdateDeviationAsync(dev, update: true, actorUserId: actorUserId).ConfigureAwait(false);
             await LogAudit(dev.Id, actorUserId, DeviationActionType.UPDATE,
@@ -241,6 +273,21 @@ namespace YasGMP.Services
         // ============================================================================
         // SIGNATURE
         // ============================================================================
+
+        private static string EnsureDigitalSignature(Deviation deviation, string? providedSignatureHash)
+        {
+            ArgumentNullException.ThrowIfNull(deviation);
+
+            if (!string.IsNullOrWhiteSpace(providedSignatureHash))
+            {
+                deviation.DigitalSignature = providedSignatureHash;
+                return providedSignatureHash;
+            }
+
+            var generated = GenerateDigitalSignature(deviation);
+            deviation.DigitalSignature = generated;
+            return generated;
+        }
 
         /// <summary>Creates a deterministic SHA-256 signature string for audit purposes.</summary>
         private static string GenerateDigitalSignature(object? obj)
