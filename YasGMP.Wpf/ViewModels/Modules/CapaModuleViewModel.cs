@@ -85,6 +85,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         StatusOptions = Array.AsReadOnly(DefaultStatuses);
         PriorityOptions = Array.AsReadOnly(DefaultPriorities);
         ComponentOptions = new ObservableCollection<ComponentOption>();
+        CaseTimeline = new ObservableCollection<ModuleTimelineEntry>();
 
         Editor = CapaEditor.CreateEmpty();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
@@ -106,6 +107,11 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     /// </summary>
 
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
+
+    /// <summary>
+    /// Gets the CAPA case timeline entries surfaced in the inspector panel.
+    /// </summary>
+    public ObservableCollection<ModuleTimelineEntry> CaseTimeline { get; }
     /// <summary>
     /// Gets or sets the status options.
     /// </summary>
@@ -227,6 +233,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         {
             _loadedCapa = null;
             SetEditor(CapaEditor.CreateEmpty());
+            CaseTimeline.Clear();
             UpdateAttachmentCommandState();
             return;
         }
@@ -252,6 +259,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         capa.Priority = _capaService.NormalizePriority(capa.Priority);
         _loadedCapa = capa;
         LoadEditor(capa);
+        PopulateCaseTimeline(capa);
         UpdateAttachmentCommandState();
         UpdateWorkflowCommandState();
     }
@@ -266,6 +274,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
                 _snapshot = null;
                 SetEditor(CapaEditor.CreateForNew(_authContext));
                 ApplyRelatedDefaults();
+                CaseTimeline.Clear();
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -621,6 +630,34 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         CloseCommand.NotifyCanExecuteChanged();
     }
 
+    private void PopulateCaseTimeline(CapaCase capa)
+    {
+        if (capa is null)
+        {
+            return;
+        }
+
+        CaseTimeline.Clear();
+
+        if (capa.DateOpen != default)
+        {
+            CaseTimeline.Add(new ModuleTimelineEntry(
+                capa.DateOpen,
+                "Opened",
+                string.IsNullOrWhiteSpace(capa.Status)
+                    ? "CAPA opened."
+                    : $"CAPA opened with status {capa.Status}."));
+        }
+
+        if (capa.DateClose is { } closed && closed != default)
+        {
+            CaseTimeline.Add(new ModuleTimelineEntry(
+                closed,
+                "Closed",
+                "CAPA closed."));
+        }
+    }
+
     private async Task AddAsync()
     {
         if (!CanAdd())
@@ -652,6 +689,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
             _loadedCapa = capa;
             LoadEditor(capa);
+            PopulateCaseTimeline(capa);
             var record = UpsertRecord(capa);
             SelectedRecord = record;
             Mode = FormMode.View;
@@ -723,6 +761,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
             _loadedCapa = capa;
             LoadEditor(capa);
+            PopulateCaseTimeline(capa);
             var record = UpsertRecord(capa);
             SelectedRecord = record;
             Mode = FormMode.View;

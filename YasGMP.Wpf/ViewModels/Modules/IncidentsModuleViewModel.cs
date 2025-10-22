@@ -89,6 +89,11 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     /// </summary>
 
     public IAsyncRelayCommand CloseCommand { get; }
+
+    /// <summary>
+    /// Gets the incident timeline entries exposed to the inspector.
+    /// </summary>
+    public ObservableCollection<ModuleTimelineEntry> IncidentTimeline { get; }
     /// <summary>
     /// Initializes a new instance of the IncidentsModuleViewModel class.
     /// </summary>
@@ -140,6 +145,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             _localization.GetString("Module.Incidents.Type.It"),
             _localization.GetString("Module.Incidents.Type.Maintenance")
         });
+        IncidentTimeline = new ObservableCollection<ModuleTimelineEntry>();
         AttachEvidenceCommand = new AsyncRelayCommand(AttachEvidenceAsync, CanAttachEvidence);
         AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
         ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
@@ -201,6 +207,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         {
             _loadedIncident = null;
             SetEditor(IncidentEditor.CreateEmpty());
+            IncidentTimeline.Clear();
             UpdateAttachmentCommandState();
             return;
         }
@@ -219,12 +226,14 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         if (incident is null)
         {
             StatusMessage = $"Unable to load {record.Title}.";
+            IncidentTimeline.Clear();
             return;
         }
 
         incident.Status = _incidentService.NormalizeStatus(incident.Status);
         _loadedIncident = incident;
         LoadEditor(incident);
+        PopulateIncidentTimeline(incident);
         UpdateAttachmentCommandState();
         UpdateWorkflowCommandState();
     }
@@ -249,6 +258,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
                         Editor.CapaCaseId = relatedId;
                     }
                 }
+                IncidentTimeline.Clear();
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -636,6 +646,46 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         CloseCommand.NotifyCanExecuteChanged();
     }
 
+    private void PopulateIncidentTimeline(Incident incident)
+    {
+        if (incident is null)
+        {
+            return;
+        }
+
+        IncidentTimeline.Clear();
+
+        if (incident.DetectedAt != default)
+        {
+            IncidentTimeline.Add(new ModuleTimelineEntry(
+                incident.DetectedAt,
+                "Detected",
+                string.IsNullOrWhiteSpace(incident.Type)
+                    ? "Incident detected."
+                    : $"Detected as {incident.Type}."));
+        }
+
+        if (incident.ReportedAt is { } reported)
+        {
+            IncidentTimeline.Add(new ModuleTimelineEntry(
+                reported,
+                "Reported",
+                incident.ReportedById.HasValue
+                    ? $"Reported by user {incident.ReportedById.Value}."
+                    : "Incident reported."));
+        }
+
+        if (incident.ClosedAt is { } closed)
+        {
+            IncidentTimeline.Add(new ModuleTimelineEntry(
+                closed,
+                "Closed",
+                incident.ClosedById.HasValue
+                    ? $"Closed by user {incident.ClosedById.Value}."
+                    : "Incident closed."));
+        }
+    }
+
     private async Task AddAsync()
     {
         if (!CanAdd())
@@ -669,6 +719,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
             _loadedIncident = incident;
             LoadEditor(incident);
+            PopulateIncidentTimeline(incident);
             var record = UpsertRecord(incident);
             SelectedRecord = record;
             Mode = FormMode.View;
@@ -747,6 +798,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
 
             _loadedIncident = incident;
             LoadEditor(incident);
+            PopulateIncidentTimeline(incident);
             var record = UpsertRecord(incident);
             SelectedRecord = record;
             Mode = FormMode.View;
