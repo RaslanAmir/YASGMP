@@ -61,7 +61,12 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
         StatusOptions = Enum.GetNames(typeof(ChangeControlStatus));
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
+        ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
+        ExecuteCommand = new AsyncRelayCommand(ExecuteAsync, CanExecute);
+        CloseCommand = new AsyncRelayCommand(CloseAsync, CanClose);
         SetEditor(ChangeControlEditor.CreateEmpty());
+        UpdateWorkflowCommandState();
     }
 
     [ObservableProperty]
@@ -79,6 +84,30 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>
+    /// Gets the command that persists a new change control record.
+    /// </summary>
+
+    public IAsyncRelayCommand AddCommand { get; }
+
+    /// <summary>
+    /// Gets the command that approves the change control.
+    /// </summary>
+
+    public IAsyncRelayCommand ApproveCommand { get; }
+
+    /// <summary>
+    /// Gets the command that executes the change control.
+    /// </summary>
+
+    public IAsyncRelayCommand ExecuteCommand { get; }
+
+    /// <summary>
+    /// Gets the command that closes the change control.
+    /// </summary>
+
+    public IAsyncRelayCommand CloseCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -149,6 +178,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         entity.StatusRaw = _changeControlService.NormalizeStatus(entity.StatusRaw);
         _loadedEntity = entity;
         LoadEditor(entity);
+        UpdateWorkflowCommandState();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -175,6 +205,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         }
 
         UpdateAttachmentCommandState();
+        UpdateWorkflowCommandState();
         return Task.CompletedTask;
     }
 
@@ -457,6 +488,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         _suppressDirtyNotifications = false;
         ResetDirty();
         UpdateAttachmentCommandState();
+        UpdateWorkflowCommandState();
     }
 
     private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -464,6 +496,11 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         if (_suppressDirtyNotifications)
         {
             return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(ChangeControlEditor.Status), StringComparison.Ordinal))
+        {
+            UpdateWorkflowCommandState();
         }
 
         if (Mode is FormMode.Add or FormMode.Update)
@@ -540,6 +577,170 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
+
+    private void UpdateWorkflowCommandState()
+    {
+        AddCommand.NotifyCanExecuteChanged();
+        ApproveCommand.NotifyCanExecuteChanged();
+        ExecuteCommand.NotifyCanExecuteChanged();
+        CloseCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task AddAsync()
+    {
+        if (!CanAdd())
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var entity = Editor.ToEntity();
+            entity.StatusRaw = _changeControlService.NormalizeStatus(ChangeControlStatus.Submitted.ToString());
+            entity.DateRequested ??= DateTime.UtcNow;
+
+            _changeControlService.Validate(entity);
+
+            var context = ChangeControlCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId);
+
+            var result = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
+            if (entity.Id == 0 && result.Id > 0)
+            {
+                entity.Id = result.Id;
+            }
+
+            _loadedEntity = entity;
+            LoadEditor(entity);
+            var record = UpsertRecord(entity);
+            SelectedRecord = record;
+            Mode = FormMode.View;
+            StatusMessage = $"Change control {entity.Code ?? entity.Id.ToString(CultureInfo.InvariantCulture)} submitted.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to add change control: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+            UpdateWorkflowCommandState();
+        }
+    }
+
+    private async Task ApproveAsync()
+    {
+        if (!CanApprove() || _loadedEntity is null)
+        {
+            return;
+        }
+
+        await TransitionAsync(ChangeControlStatus.Approved, "Change control approved.").ConfigureAwait(false);
+    }
+
+    private async Task ExecuteAsync()
+    {
+        if (!CanExecute() || _loadedEntity is null)
+        {
+            return;
+        }
+
+        await TransitionAsync(ChangeControlStatus.Implemented, "Change control implemented.").ConfigureAwait(false);
+    }
+
+    private async Task CloseAsync()
+    {
+        if (!CanClose() || _loadedEntity is null)
+        {
+            return;
+        }
+
+        await TransitionAsync(ChangeControlStatus.Closed, "Change control closed.", updateTimestamp: true).ConfigureAwait(false);
+    }
+
+    private async Task TransitionAsync(ChangeControlStatus targetStatus, string successMessage, bool updateTimestamp = false)
+    {
+        try
+        {
+            IsBusy = true;
+            var entity = Editor.ToEntity(_loadedEntity);
+            entity.StatusRaw = _changeControlService.NormalizeStatus(targetStatus.ToString());
+
+            if (updateTimestamp)
+            {
+                entity.UpdatedAt = DateTime.UtcNow;
+            }
+
+            _changeControlService.Validate(entity);
+
+            var context = ChangeControlCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId);
+
+            await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
+
+            _loadedEntity = entity;
+            LoadEditor(entity);
+            var record = UpsertRecord(entity);
+            SelectedRecord = record;
+            Mode = FormMode.View;
+            StatusMessage = successMessage;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to update change control: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+            UpdateWorkflowCommandState();
+        }
+    }
+
+    private ModuleRecord UpsertRecord(ChangeControl entity)
+    {
+        var record = ToRecord(entity);
+        for (var i = 0; i < Records.Count; i++)
+        {
+            if (Records[i].Key == record.Key)
+            {
+                Records[i] = record;
+                return record;
+            }
+        }
+
+        Records.Add(record);
+        return record;
+    }
+
+    private bool CanAdd()
+        => !IsBusy && Mode == FormMode.Add;
+
+    private bool CanApprove()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedEntity is not null
+           && string.Equals(Editor.Status, ChangeControlStatus.Submitted.ToString(), StringComparison.OrdinalIgnoreCase);
+
+    private bool CanExecute()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedEntity is not null
+           && string.Equals(Editor.Status, ChangeControlStatus.Approved.ToString(), StringComparison.OrdinalIgnoreCase);
+
+    private bool CanClose()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedEntity is not null
+           && string.Equals(Editor.Status, ChangeControlStatus.Implemented.ToString(), StringComparison.OrdinalIgnoreCase);
     /// <summary>
     /// Represents the change control editor value.
     /// </summary>

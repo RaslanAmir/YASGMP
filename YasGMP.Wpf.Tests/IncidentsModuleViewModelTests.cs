@@ -21,9 +21,6 @@ public class IncidentsModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var audit = new AuditService(database);
-        var audit = new AuditService(database);
-        var audit = new AuditService(database);
         const int adapterSignatureId = 9087;
         var incidents = new FakeIncidentCrudService
         {
@@ -74,6 +71,69 @@ public class IncidentsModuleViewModelTests
         Assert.Empty(signatureDialog.PersistedResults);
         Assert.Equal(0, signatureDialog.PersistInvocationCount);
         Assert.False(viewModel.IsDirty);
+    }
+
+    [Fact]
+    public async Task WorkflowCommands_SynchronizeStatusAndLinks()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 15, FullName = "QA Investigator" },
+            CurrentIpAddress = "10.0.0.40",
+            CurrentDeviceInfo = "UnitTest"
+        };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Line pressure deviation";
+        viewModel.Editor.Description = "Pressure exceeded limits";
+        viewModel.Editor.Type = "Deviation";
+        viewModel.Editor.Priority = "High";
+        viewModel.Editor.AssignedInvestigator = "QA";
+
+        await viewModel.AddCommand.ExecuteAsync(null);
+
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal("INVESTIGATION", viewModel.Editor.Status);
+        var creation = Assert.Single(incidents.TransitionHistory);
+        Assert.Equal("Create", creation.Operation);
+        Assert.Equal("INVESTIGATION", creation.Entity.Status);
+
+        await viewModel.ApproveCommand.ExecuteAsync(null);
+        Assert.Equal("CLASSIFIED", viewModel.Editor.Status);
+        Assert.Equal("CLASSIFIED", incidents.TransitionHistory[1].Entity.Status);
+
+        viewModel.Editor.CapaCaseId = 42;
+        viewModel.Editor.WorkOrderId = 9;
+        await viewModel.ExecuteCommand.ExecuteAsync(null);
+        Assert.Equal("CAPA_LINKED", viewModel.Editor.Status);
+        Assert.Equal(42, viewModel.Editor.LinkedCapaId);
+        Assert.Equal("CAPA_LINKED", incidents.TransitionHistory[2].Entity.Status);
+
+        await viewModel.CloseCommand.ExecuteAsync(null);
+        Assert.Equal("CLOSED", viewModel.Editor.Status);
+        Assert.Equal("Incident closed.", viewModel.StatusMessage);
+
+        Assert.Collection(incidents.TransitionHistory,
+            entry => Assert.Equal("INVESTIGATION", entry.Entity.Status),
+            entry => Assert.Equal("CLASSIFIED", entry.Entity.Status),
+            entry => Assert.Equal("CAPA_LINKED", entry.Entity.Status),
+            entry => Assert.Equal("CLOSED", entry.Entity.Status));
+
+        var record = Assert.Single(viewModel.Records);
+        Assert.Equal("CLOSED", record.Status);
+        Assert.Equal(record.Key, viewModel.SelectedRecord?.Key);
     }
 
     [Fact]
