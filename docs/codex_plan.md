@@ -54,6 +54,7 @@
 - 2026-04-11T00:00Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` rerun after adding asset editor QR parity; CLI remains unavailable so the command exits with `bash: command not found: dotnet`.
 - 2026-05-25T09:30Z: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` retried with the Document Control navigation wiring; CLI still missing so the command exits with `bash: command not found: dotnet`.
 - 2026-06-01T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried while extending Document Control module regression tests; each command still fails with `bash: command not found: dotnet`, keeping validation limited to static analysis.
+- 2026-06-02T09:40Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried after promoting the shared Document Control recording stub; all commands still exit with `bash: command not found: dotnet` inside this container.
 
 
 ## Increment 2025-10-13 — Baseline Revalidation
@@ -192,6 +193,10 @@
 ### 2026-06-01 — Document Control Regression Coverage
 
 - Expanded `DocumentControlModuleViewModel` unit fixtures to drive initialization, attachment uploads, change-control linking, exports, and lifecycle saves (initiate/revise) across success, failure, and exception paths. Tests assert busy gating, localized status messaging, document reload triggers, and attachment manifest projections using a controllable `DocumentControlViewModel` test double that raises `PropertyChanged` for selection and filtered-document updates.
+
+### 2026-06-02 — Document Control Recording Stub Promotion
+
+- Promoted the `RecordingDocumentControlService` into `TestStubs` so all WPF suites can configure lifecycle, export, attachment, and manifest responses while capturing the last inputs for assertions. Added hooks to inject exceptions per operation and seeded manifest payloads to validate attachment and reload behaviour. Document Control module tests now exercise approve/publish/expire commands across success, failure, and exception outcomes using the shared stub, tightening coverage around busy gating, status messaging, and reload triggers.
 
 ### Increment 2 Update — 2026-04-07 Localization Sweep
 - Localized Assets module status messages through ShellStrings (neutral/en/hr) and routed AssetsModuleViewModel status surfaces through `ILocalizationService` so runtime language switches stay in sync.

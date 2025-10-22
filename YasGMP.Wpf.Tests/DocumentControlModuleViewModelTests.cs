@@ -13,6 +13,7 @@ using YasGMP.Models;
 using YasGMP.Models.DTO;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.Tests.TestDoubles;
+using YasGMP.Wpf.Tests.TestStubs;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -428,6 +429,213 @@ public class DocumentControlModuleViewModelTests
         Assert.Equal(FormMode.Update, context.ViewModel.Mode);
     }
 
+    [Fact]
+    public async Task ApproveDocumentCommand_Success_ReloadsDocuments()
+    {
+        var document = new SopDocument { Id = 30, Code = "DOC-030", Name = "Approve" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        var expectedMessage = "Approved.";
+        context.Service.SetLifecycleResult(DocumentLifecycleOperation.Approve, new DocumentLifecycleResult(true, expectedMessage));
+
+        await context.ViewModel.ApproveDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.ApproveCallCount);
+        Assert.Equal(document, context.Service.LastApprovedDocument);
+        Assert.Equal(expectedMessage, context.ViewModel.StatusMessage);
+        Assert.Equal(1, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task ApproveDocumentCommand_Failure_DoesNotReload()
+    {
+        var document = new SopDocument { Id = 31, Code = "DOC-031", Name = "Approve" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        var expectedMessage = "Approval blocked.";
+        context.Service.SetLifecycleResult(DocumentLifecycleOperation.Approve, new DocumentLifecycleResult(false, expectedMessage));
+
+        await context.ViewModel.ApproveDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.ApproveCallCount);
+        Assert.Equal(expectedMessage, context.ViewModel.StatusMessage);
+        Assert.Equal(0, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task ApproveDocumentCommand_Exception_SurfacesError()
+    {
+        var document = new SopDocument { Id = 32, Code = "DOC-032", Name = "Approve" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        context.Service.SetLifecycleException(DocumentLifecycleOperation.Approve, new InvalidOperationException("signature"));
+
+        await context.ViewModel.ApproveDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.ApproveCallCount);
+        Assert.Equal("Approval failed: signature", context.ViewModel.StatusMessage);
+        Assert.Equal(0, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task PublishDocumentCommand_Success_ReloadsDocuments()
+    {
+        var document = new SopDocument { Id = 33, Code = "DOC-033", Name = "Publish" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        var expectedMessage = "Published.";
+        context.Service.SetLifecycleResult(DocumentLifecycleOperation.Publish, new DocumentLifecycleResult(true, expectedMessage));
+
+        await context.ViewModel.PublishDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.PublishCallCount);
+        Assert.Equal(document, context.Service.LastPublishedDocument);
+        Assert.Equal(expectedMessage, context.ViewModel.StatusMessage);
+        Assert.Equal(1, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task PublishDocumentCommand_Failure_DoesNotReload()
+    {
+        var document = new SopDocument { Id = 34, Code = "DOC-034", Name = "Publish" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        var expectedMessage = "Publish denied.";
+        context.Service.SetLifecycleResult(DocumentLifecycleOperation.Publish, new DocumentLifecycleResult(false, expectedMessage));
+
+        await context.ViewModel.PublishDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.PublishCallCount);
+        Assert.Equal(expectedMessage, context.ViewModel.StatusMessage);
+        Assert.Equal(0, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task PublishDocumentCommand_Exception_SurfacesError()
+    {
+        var document = new SopDocument { Id = 35, Code = "DOC-035", Name = "Publish" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        context.Service.SetLifecycleException(DocumentLifecycleOperation.Publish, new InvalidOperationException("routing"));
+
+        await context.ViewModel.PublishDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.PublishCallCount);
+        Assert.Equal("Publishing failed: routing", context.ViewModel.StatusMessage);
+        Assert.Equal(0, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task ExpireDocumentCommand_Success_ReloadsDocuments()
+    {
+        var document = new SopDocument { Id = 36, Code = "DOC-036", Name = "Expire" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        var expectedMessage = "Expired.";
+        context.Service.SetLifecycleResult(DocumentLifecycleOperation.Expire, new DocumentLifecycleResult(true, expectedMessage));
+
+        await context.ViewModel.ExpireDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.ExpireCallCount);
+        Assert.Equal(document, context.Service.LastExpiredDocument);
+        Assert.Equal(expectedMessage, context.ViewModel.StatusMessage);
+        Assert.Equal(1, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task ExpireDocumentCommand_Failure_DoesNotReload()
+    {
+        var document = new SopDocument { Id = 37, Code = "DOC-037", Name = "Expire" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        var expectedMessage = "Expiration blocked.";
+        context.Service.SetLifecycleResult(DocumentLifecycleOperation.Expire, new DocumentLifecycleResult(false, expectedMessage));
+
+        await context.ViewModel.ExpireDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.ExpireCallCount);
+        Assert.Equal(expectedMessage, context.ViewModel.StatusMessage);
+        Assert.Equal(0, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
+    [Fact]
+    public async Task ExpireDocumentCommand_Exception_SurfacesError()
+    {
+        var document = new SopDocument { Id = 38, Code = "DOC-038", Name = "Expire" };
+        var context = CreateContext(control =>
+        {
+            control.SetDocuments(document);
+            control.ReplaceFilteredDocuments(document);
+            control.SelectDocument(document);
+        });
+
+        context.Service.SetLifecycleException(DocumentLifecycleOperation.Expire, new InvalidOperationException("policy"));
+
+        await context.ViewModel.ExpireDocumentCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.Service.ExpireCallCount);
+        Assert.Equal("Expiration failed: policy", context.ViewModel.StatusMessage);
+        Assert.Equal(0, context.ReloadTracker.Count);
+        Assert.Contains(true, context.BusyTransitions);
+        Assert.False(context.ViewModel.IsBusy);
+    }
+
     private static DocumentControlModuleTestContext CreateContext(
         Action<ControlledDocumentControlViewModel>? configureControl = null,
         Func<(bool Accepted, IReadOnlyList<string> Files)>? filePicker = null)
@@ -608,175 +816,4 @@ public class DocumentControlModuleViewModelTests
         }
     }
 
-    private enum DocumentLifecycleOperation
-    {
-        Initiate,
-        Revise,
-        Approve,
-        Publish,
-        Expire,
-        Link
-    }
-
-    private sealed class RecordingDocumentControlService : IDocumentControlService
-    {
-        private Func<SopDocument, Task<DocumentLifecycleResult>> _initiateHandler = _ => Task.FromResult(new DocumentLifecycleResult(true, "Initiated."));
-        private Func<SopDocument, SopDocument, Task<DocumentLifecycleResult>> _reviseHandler = (_, _) => Task.FromResult(new DocumentLifecycleResult(true, "Revised."));
-        private Func<SopDocument, Task<DocumentLifecycleResult>> _approveHandler = _ => Task.FromResult(new DocumentLifecycleResult(true, "Approved."));
-        private Func<SopDocument, Task<DocumentLifecycleResult>> _publishHandler = _ => Task.FromResult(new DocumentLifecycleResult(true, "Published."));
-        private Func<SopDocument, Task<DocumentLifecycleResult>> _expireHandler = _ => Task.FromResult(new DocumentLifecycleResult(true, "Expired."));
-        private Func<SopDocument, ChangeControlSummaryDto, Task<DocumentLifecycleResult>> _linkHandler = (_, _) => Task.FromResult(new DocumentLifecycleResult(true, "Linked."));
-        private Func<IReadOnlyCollection<SopDocument>, string, Task<DocumentExportResult>> _exportHandler = (docs, _) => Task.FromResult(new DocumentExportResult(true, "Exported.", null));
-        private Func<SopDocument, IEnumerable<DocumentAttachmentUpload>, Task<DocumentAttachmentUploadResult>> _uploadHandler
-            = (_, uploads) => Task.FromResult(new DocumentAttachmentUploadResult(true, "Uploaded.", uploads.Count(), 0, Array.Empty<AttachmentLinkWithAttachment>()));
-        private Func<int, Task<IReadOnlyList<AttachmentLinkWithAttachment>>> _manifestHandler = _ => Task.FromResult<IReadOnlyList<AttachmentLinkWithAttachment>>(Array.Empty<AttachmentLinkWithAttachment>());
-
-        public int InitiateCallCount { get; private set; }
-        public int ReviseCallCount { get; private set; }
-        public int ApproveCallCount { get; private set; }
-        public int PublishCallCount { get; private set; }
-        public int ExpireCallCount { get; private set; }
-        public int LinkCallCount { get; private set; }
-        public int ExportCallCount { get; private set; }
-        public int UploadCallCount { get; private set; }
-
-        public IReadOnlyList<string> LastUploadedFileNames { get; private set; } = Array.Empty<string>();
-
-        public void SetLifecycleResult(DocumentLifecycleOperation operation, DocumentLifecycleResult result)
-        {
-            switch (operation)
-            {
-                case DocumentLifecycleOperation.Initiate:
-                    _initiateHandler = _ => Task.FromResult(result);
-                    break;
-                case DocumentLifecycleOperation.Revise:
-                    _reviseHandler = (_, _) => Task.FromResult(result);
-                    break;
-                case DocumentLifecycleOperation.Approve:
-                    _approveHandler = _ => Task.FromResult(result);
-                    break;
-                case DocumentLifecycleOperation.Publish:
-                    _publishHandler = _ => Task.FromResult(result);
-                    break;
-                case DocumentLifecycleOperation.Expire:
-                    _expireHandler = _ => Task.FromResult(result);
-                    break;
-                case DocumentLifecycleOperation.Link:
-                    _linkHandler = (_, _) => Task.FromResult(result);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
-            }
-        }
-
-        public void SetLifecycleException(DocumentLifecycleOperation operation, Exception exception)
-        {
-            if (exception is null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            switch (operation)
-            {
-                case DocumentLifecycleOperation.Initiate:
-                    _initiateHandler = _ => Task.FromException<DocumentLifecycleResult>(exception);
-                    break;
-                case DocumentLifecycleOperation.Revise:
-                    _reviseHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                    break;
-                case DocumentLifecycleOperation.Approve:
-                    _approveHandler = _ => Task.FromException<DocumentLifecycleResult>(exception);
-                    break;
-                case DocumentLifecycleOperation.Publish:
-                    _publishHandler = _ => Task.FromException<DocumentLifecycleResult>(exception);
-                    break;
-                case DocumentLifecycleOperation.Expire:
-                    _expireHandler = _ => Task.FromException<DocumentLifecycleResult>(exception);
-                    break;
-                case DocumentLifecycleOperation.Link:
-                    _linkHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
-            }
-        }
-
-        public void SetExportResult(DocumentExportResult result)
-        {
-            _exportHandler = (docs, _) => Task.FromResult(result);
-        }
-
-        public void SetExportException(Exception exception)
-        {
-            _exportHandler = (_, _) => Task.FromException<DocumentExportResult>(exception);
-        }
-
-        public void SetAttachmentResult(DocumentAttachmentUploadResult result)
-        {
-            _uploadHandler = (_, uploads) => Task.FromResult(result);
-        }
-
-        public void SetAttachmentException(Exception exception)
-        {
-            if (exception is null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            _uploadHandler = (_, _) => Task.FromException<DocumentAttachmentUploadResult>(exception);
-        }
-
-        public Task<DocumentLifecycleResult> InitiateDocumentAsync(SopDocument draft, CancellationToken cancellationToken = default)
-        {
-            InitiateCallCount++;
-            return _initiateHandler(draft);
-        }
-
-        public Task<DocumentLifecycleResult> ReviseDocumentAsync(SopDocument existing, SopDocument revision, CancellationToken cancellationToken = default)
-        {
-            ReviseCallCount++;
-            return _reviseHandler(existing, revision);
-        }
-
-        public Task<DocumentLifecycleResult> ApproveDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
-        {
-            ApproveCallCount++;
-            return _approveHandler(document);
-        }
-
-        public Task<DocumentLifecycleResult> PublishDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
-        {
-            PublishCallCount++;
-            return _publishHandler(document);
-        }
-
-        public Task<DocumentLifecycleResult> ExpireDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
-        {
-            ExpireCallCount++;
-            return _expireHandler(document);
-        }
-
-        public Task<DocumentLifecycleResult> LinkChangeControlAsync(SopDocument document, ChangeControlSummaryDto changeControl, CancellationToken cancellationToken = default)
-        {
-            LinkCallCount++;
-            return _linkHandler(document, changeControl);
-        }
-
-        public Task<DocumentExportResult> ExportDocumentsAsync(IReadOnlyCollection<SopDocument> documents, string format, CancellationToken cancellationToken = default)
-        {
-            ExportCallCount++;
-            return _exportHandler(documents, format);
-        }
-
-        public Task<DocumentAttachmentUploadResult> UploadAttachmentsAsync(SopDocument document, IEnumerable<DocumentAttachmentUpload> attachments, CancellationToken cancellationToken = default)
-        {
-            UploadCallCount++;
-            var list = attachments.ToList();
-            LastUploadedFileNames = list.Select(u => u.FileName).ToArray();
-            return _uploadHandler(document, list);
-        }
-
-        public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetAttachmentManifestAsync(int documentId, CancellationToken cancellationToken = default)
-            => _manifestHandler(documentId);
-    }
 }

@@ -450,6 +450,262 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
     }
 }
 
+namespace YasGMP.Wpf.Tests.TestStubs;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using YasGMP.Models;
+using YasGMP.Models.DTO;
+using YasGMP.Wpf.Services;
+
+public enum DocumentLifecycleOperation
+{
+    Initiate,
+    Revise,
+    Approve,
+    Publish,
+    Expire,
+    Link
+}
+
+/// <summary>
+/// Recording test double for <see cref="IDocumentControlService"/> that surfaces configurable responses.
+/// </summary>
+public sealed class RecordingDocumentControlService : IDocumentControlService
+{
+    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _initiateHandler =
+        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Initiated.", doc.Id));
+
+    private Func<SopDocument, SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _reviseHandler =
+        (_, _, _) => Task.FromResult(new DocumentLifecycleResult(true, "Revised."));
+
+    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _approveHandler =
+        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Approved.", doc.Id));
+
+    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _publishHandler =
+        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Published.", doc.Id));
+
+    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _expireHandler =
+        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Expired.", doc.Id));
+
+    private Func<SopDocument, ChangeControlSummaryDto, CancellationToken, Task<DocumentLifecycleResult>> _linkHandler =
+        (_, _, _) => Task.FromResult(new DocumentLifecycleResult(true, "Linked."));
+
+    private Func<IReadOnlyCollection<SopDocument>, string, CancellationToken, Task<DocumentExportResult>> _exportHandler =
+        (docs, _, _) => Task.FromResult(new DocumentExportResult(true, "Exported.", null));
+
+    private Func<SopDocument, IReadOnlyList<DocumentAttachmentUpload>, CancellationToken, Task<DocumentAttachmentUploadResult>> _uploadHandler =
+        (_, uploads, _) => Task.FromResult(new DocumentAttachmentUploadResult(true, "Uploaded.", uploads.Count, 0, Array.Empty<AttachmentLinkWithAttachment>()));
+
+    private Func<int, CancellationToken, Task<IReadOnlyList<AttachmentLinkWithAttachment>>> _manifestHandler =
+        (_, _) => Task.FromResult<IReadOnlyList<AttachmentLinkWithAttachment>>(Array.Empty<AttachmentLinkWithAttachment>());
+
+    public int InitiateCallCount { get; private set; }
+    public int ReviseCallCount { get; private set; }
+    public int ApproveCallCount { get; private set; }
+    public int PublishCallCount { get; private set; }
+    public int ExpireCallCount { get; private set; }
+    public int LinkCallCount { get; private set; }
+    public int ExportCallCount { get; private set; }
+    public int UploadCallCount { get; private set; }
+    public int ManifestCallCount { get; private set; }
+
+    public SopDocument? LastInitiatedDocument { get; private set; }
+    public (SopDocument Existing, SopDocument Revision)? LastRevisionDocuments { get; private set; }
+    public SopDocument? LastApprovedDocument { get; private set; }
+    public SopDocument? LastPublishedDocument { get; private set; }
+    public SopDocument? LastExpiredDocument { get; private set; }
+    public (SopDocument Document, ChangeControlSummaryDto ChangeControl)? LastLinkRequest { get; private set; }
+    public IReadOnlyList<SopDocument> LastExportedDocuments { get; private set; } = Array.Empty<SopDocument>();
+    public string? LastExportFormat { get; private set; }
+    public SopDocument? LastUploadedDocument { get; private set; }
+    public IReadOnlyList<DocumentAttachmentUpload> LastUploadedAttachments { get; private set; } = Array.Empty<DocumentAttachmentUpload>();
+    public IReadOnlyList<string> LastUploadedFileNames => LastUploadedAttachments.Select(a => a.FileName).ToArray();
+    public int? LastManifestDocumentId { get; private set; }
+
+    public void SetLifecycleResult(DocumentLifecycleOperation operation, DocumentLifecycleResult result)
+    {
+        switch (operation)
+        {
+            case DocumentLifecycleOperation.Initiate:
+                _initiateHandler = (_, _) => Task.FromResult(result);
+                break;
+            case DocumentLifecycleOperation.Revise:
+                _reviseHandler = (_, _, _) => Task.FromResult(result);
+                break;
+            case DocumentLifecycleOperation.Approve:
+                _approveHandler = (_, _) => Task.FromResult(result);
+                break;
+            case DocumentLifecycleOperation.Publish:
+                _publishHandler = (_, _) => Task.FromResult(result);
+                break;
+            case DocumentLifecycleOperation.Expire:
+                _expireHandler = (_, _) => Task.FromResult(result);
+                break;
+            case DocumentLifecycleOperation.Link:
+                _linkHandler = (_, _, _) => Task.FromResult(result);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
+        }
+    }
+
+    public void SetLifecycleException(DocumentLifecycleOperation operation, Exception exception)
+    {
+        if (exception is null)
+        {
+            throw new ArgumentNullException(nameof(exception));
+        }
+
+        switch (operation)
+        {
+            case DocumentLifecycleOperation.Initiate:
+                _initiateHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
+                break;
+            case DocumentLifecycleOperation.Revise:
+                _reviseHandler = (_, _, _) => Task.FromException<DocumentLifecycleResult>(exception);
+                break;
+            case DocumentLifecycleOperation.Approve:
+                _approveHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
+                break;
+            case DocumentLifecycleOperation.Publish:
+                _publishHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
+                break;
+            case DocumentLifecycleOperation.Expire:
+                _expireHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
+                break;
+            case DocumentLifecycleOperation.Link:
+                _linkHandler = (_, _, _) => Task.FromException<DocumentLifecycleResult>(exception);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
+        }
+    }
+
+    public void SetExportResult(DocumentExportResult result)
+    {
+        _exportHandler = (docs, format, _) => Task.FromResult(result);
+    }
+
+    public void SetExportException(Exception exception)
+    {
+        _exportHandler = (_, _, _) => Task.FromException<DocumentExportResult>(exception ?? throw new ArgumentNullException(nameof(exception)));
+    }
+
+    public void SetAttachmentResult(DocumentAttachmentUploadResult result)
+    {
+        _uploadHandler = (_, uploads, _) => Task.FromResult(result);
+    }
+
+    public void SetAttachmentException(Exception exception)
+    {
+        if (exception is null)
+        {
+            throw new ArgumentNullException(nameof(exception));
+        }
+
+        _uploadHandler = (_, _, _) => Task.FromException<DocumentAttachmentUploadResult>(exception);
+    }
+
+    public void SetAttachmentManifest(IReadOnlyList<AttachmentLinkWithAttachment> manifest)
+    {
+        _manifestHandler = (_, _) => Task.FromResult(manifest);
+    }
+
+    public void SetAttachmentManifestException(Exception exception)
+    {
+        if (exception is null)
+        {
+            throw new ArgumentNullException(nameof(exception));
+        }
+
+        _manifestHandler = (_, _) => Task.FromException<IReadOnlyList<AttachmentLinkWithAttachment>>(exception);
+    }
+
+    public Task<DocumentLifecycleResult> InitiateDocumentAsync(SopDocument draft, CancellationToken cancellationToken = default)
+    {
+        InitiateCallCount++;
+        LastInitiatedDocument = draft;
+        return _initiateHandler(draft, cancellationToken);
+    }
+
+    public Task<DocumentLifecycleResult> ReviseDocumentAsync(
+        SopDocument existing,
+        SopDocument revision,
+        CancellationToken cancellationToken = default)
+    {
+        ReviseCallCount++;
+        LastRevisionDocuments = (existing, revision);
+        return _reviseHandler(existing, revision, cancellationToken);
+    }
+
+    public Task<DocumentLifecycleResult> ApproveDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
+    {
+        ApproveCallCount++;
+        LastApprovedDocument = document;
+        return _approveHandler(document, cancellationToken);
+    }
+
+    public Task<DocumentLifecycleResult> PublishDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
+    {
+        PublishCallCount++;
+        LastPublishedDocument = document;
+        return _publishHandler(document, cancellationToken);
+    }
+
+    public Task<DocumentLifecycleResult> ExpireDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
+    {
+        ExpireCallCount++;
+        LastExpiredDocument = document;
+        return _expireHandler(document, cancellationToken);
+    }
+
+    public Task<DocumentLifecycleResult> LinkChangeControlAsync(
+        SopDocument document,
+        ChangeControlSummaryDto changeControl,
+        CancellationToken cancellationToken = default)
+    {
+        LinkCallCount++;
+        LastLinkRequest = (document, changeControl);
+        return _linkHandler(document, changeControl, cancellationToken);
+    }
+
+    public Task<DocumentExportResult> ExportDocumentsAsync(
+        IReadOnlyCollection<SopDocument> documents,
+        string format,
+        CancellationToken cancellationToken = default)
+    {
+        ExportCallCount++;
+        LastExportedDocuments = documents.ToList();
+        LastExportFormat = format;
+        return _exportHandler(documents, format, cancellationToken);
+    }
+
+    public Task<DocumentAttachmentUploadResult> UploadAttachmentsAsync(
+        SopDocument document,
+        IEnumerable<DocumentAttachmentUpload> attachments,
+        CancellationToken cancellationToken = default)
+    {
+        UploadCallCount++;
+        LastUploadedDocument = document;
+        var list = attachments.ToList();
+        LastUploadedAttachments = list;
+        return _uploadHandler(document, list, cancellationToken);
+    }
+
+    public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetAttachmentManifestAsync(
+        int documentId,
+        CancellationToken cancellationToken = default)
+    {
+        ManifestCallCount++;
+        LastManifestDocumentId = documentId;
+        return _manifestHandler(documentId, cancellationToken);
+    }
+}
+
         private readonly List<Machine> _store = new();
 
 
