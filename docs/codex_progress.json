@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "2026-06-03: dotnet --version retried while documenting the Document Control milestone wrap-up; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-06-01: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried during Document Control module regression coverage; each command still exits with 'command not found'.",
       "2026-05-21: dotnet restore yasgmp.sln retried while landing Deviation CRUD adapter regression tests; CLI still missing so the command exits with 'command not found'.",
       "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
@@ -472,11 +473,13 @@
     "2026-05-26: Document Control WPF module now delegates lifecycle saves, signature capture, exports, and attachment uploads to an IDocumentControlService adapter that composes DatabaseService document/signature helpers with attachment workflows, enabling headless tests while dotnet restore/build for solution + WPF/MAUI targets still exit with 'command not found: dotnet' in this container.",
     "2026-05-27: Service registration now wires IDocumentControlService through DocumentControlServiceAdapter via DatabaseService, attachment workflow/service, and electronic signature dialog dependencies, and DocumentControlModuleViewModel resolves the adapter through DI while dotnet --version/restore/build continue to fail with 'command not found: dotnet' in this Linux container.",
     "2026-05-28: Document Control toolbar now exposes approve/publish/expire commands with localized automation metadata, busy guards, service-backed lifecycle calls, and reload-aware unit tests covering success and failure flows; dotnet restore/build/test still exit with 'command not found: dotnet' in this container.",
+    "2026-06-03: Document Control milestone declared complete—WPF module hosts the desktop document view plus service adapter wiring for attachments, signatures, and change-control linking; docs/WPF_MAPPING.md refreshed; dotnet --version still reports 'command not found' so smoke validation waits on a Windows host.",
     "2026-05-22: Documented CAPA/Change Control/Incident WPF parity, expanded FlaUI smoke coverage for those modules, and updated DebugSmokeTestService to log the quality workflows; dotnet restore/build attempts continue to exit with 'command not found: dotnet' in this container.",
     "2026-04-10: DocumentControlModuleViewModel now adapts the MAUI workflow into the WPF shell, keeps SAP B1 mode/state/inspector views synchronized, and routes attachment uploads plus electronic signature capture through the shared shell services; dotnet restore/build for the solution and WPF project were retried but still fail with 'command not found: dotnet' on this host.",
     "2025-10-22: Document Control module view scaffolded with WPF toolbar bindings, search/type filters, change-control picker overlay, and signature metadata so the desktop shell mirrors the MAUI workflow."
   ],
   "updates": [
-    "2026-06-02: Promoted the RecordingDocumentControlService stub into TestStubs with configurable lifecycle/export/attachment hooks and expanded DocumentControlModuleViewModel tests to cover approve/publish/expire success, failure, and exception flows; dotnet restore/build/test still fail locally with 'command not found: dotnet'."
+    "2026-06-02: Promoted the RecordingDocumentControlService stub into TestStubs with configurable lifecycle/export/attachment hooks and expanded DocumentControlModuleViewModel tests to cover approve/publish/expire success, failure, and exception flows; dotnet restore/build/test still fail locally with 'command not found: dotnet'.",
+    "2026-06-03: Document Control milestone marked complete—desktop document view, adapter, and attachment/signature integration documented; dotnet --version continues to return 'command not found', so WPF smoke harness execution remains pending Windows tooling."
   ]
 }
