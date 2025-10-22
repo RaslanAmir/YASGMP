@@ -149,6 +149,13 @@
 - 2026-05-16: Registered `DeviationService` and the `IDeviationCrudService` adapter with the WPF host so deviation editors can route persistence through the shared AppCore service, and extended the WPF service registration tests to assert both registrations resolve. `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` were retried for this batch; each still fails with `bash: command not found: dotnet`, so smoke automation remains TODO pending Windows tooling.
 - 2026-05-21: Added `DeviationCrudServiceAdapterTests` covering create/update flows, ensuring DatabaseService overrides capture signature/IP/session/device metadata for deviation persistence and system event log entries while `CrudSaveResult` returns the provided signature manifest; `dotnet restore yasgmp.sln` still exits with `bash: command not found: dotnet`, so Windows-host validation remains required.
 
+### Increment 2 Follow-up — Quality workflow smoke coverage (2026-05-22)
+
+- Refreshed `docs/WPF_MAPPING.md` to describe the delivered Incident → CAPA → Change Control workflows, highlighting inspector timelines, attachment handling, and approval transitions now live in the WPF shell.
+- Extended `YasGMP.Wpf.Smoke` with FlaUI scenarios that open each quality module, exercise find/add/update/view mode transitions, and assert inspector timeline fields populate for seeded records.
+- Updated `DebugSmokeTestService` to include Incidents, CAPA, and Change Control in the harness navigation/log output so the Tools → Smoke ribbon command records these workflows in the run summary.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` were attempted for this batch; each still fails with `bash: command not found: dotnet` inside the Linux container, so Windows validation remains pending.
+
 #### Entity Traceability Map (Seed)
 
 | Entity | Database Source | Adapter / Service | ViewModel | View |
