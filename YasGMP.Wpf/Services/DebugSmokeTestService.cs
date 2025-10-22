@@ -42,6 +42,9 @@ public sealed class DebugSmokeTestService
         ComponentsModuleViewModel.ModuleKey,
         AttachmentsModuleViewModel.ModuleKey,
         ExternalServicersModuleViewModel.ModuleKey,
+        IncidentsModuleViewModel.ModuleKey,
+        CapaModuleViewModel.ModuleKey,
+        ChangeControlModuleViewModel.ModuleKey,
         WorkOrdersModuleViewModel.ModuleKey,
         AuditModuleViewModel.ModuleKey,
         ApiAuditModuleViewModel.ModuleKey,
@@ -139,6 +142,9 @@ public sealed class DebugSmokeTestService
             await AddStepAsync("Session bootstrap", token => Task.FromResult(BuildSessionMessage()));
             await AddStepAsync("Module navigation", NavigateModulesAsync);
             await AddStepAsync("External servicers mode cycle", token => ExerciseFormModesAsync(ExternalServicersModuleViewModel.ModuleKey, token));
+            await AddStepAsync("Incidents workflow transitions", token => ExerciseQualityWorkflowAsync(IncidentsModuleViewModel.ModuleKey, token));
+            await AddStepAsync("CAPA workflow transitions", token => ExerciseQualityWorkflowAsync(CapaModuleViewModel.ModuleKey, token));
+            await AddStepAsync("Change control workflow transitions", token => ExerciseQualityWorkflowAsync(ChangeControlModuleViewModel.ModuleKey, token));
             await AddStepAsync("Add/Find cycle", token => ExerciseFormModesAsync(WorkOrdersModuleViewModel.ModuleKey, token));
             await AddStepAsync("Attachments upload/download/delete", ExerciseAttachmentsWorkflowAsync);
             await AddStepAsync("Audit trail fetch", FetchAuditTrailAsync);
@@ -238,6 +244,34 @@ public sealed class DebugSmokeTestService
         document.CancelCommand.Execute(null);
 
         return $"Mode transitions: {string.Join(" -> ", transitions)}; Records={document.Records.Count}; Status='{document.StatusMessage}'";
+    }
+
+    private async Task<string> ExerciseQualityWorkflowAsync(string moduleKey, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var document = _moduleNavigation.OpenModule(moduleKey);
+        _moduleNavigation.Activate(document);
+        await document.InitializeAsync(null);
+
+        if (document.Records.Count > 0)
+        {
+            document.SelectedRecord = document.Records[0];
+        }
+
+        await document.EnterFindModeCommand.ExecuteAsync(null);
+        await document.EnterAddModeCommand.ExecuteAsync(null);
+        document.CancelCommand.Execute(null);
+        await document.EnterUpdateModeCommand.ExecuteAsync(null);
+        document.CancelCommand.Execute(null);
+        await document.EnterViewModeCommand.ExecuteAsync(null);
+
+        var inspectorFieldCounts = document.Records
+            .Select(record => record.InspectorFields.Count)
+            .ToArray();
+
+        return inspectorFieldCounts.Length == 0
+            ? $"Records=0; Mode={document.Mode}; Status='{document.StatusMessage}'"
+            : $"Records={document.Records.Count}; Inspector fields avg={inspectorFieldCounts.Average():F1}; Mode={document.Mode}";
     }
 
     private async Task<string> FetchAuditTrailAsync(CancellationToken cancellationToken)
