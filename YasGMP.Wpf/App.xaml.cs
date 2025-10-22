@@ -124,7 +124,14 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<INotificationPreferenceService, NotificationPreferenceService>();
                         svc.AddSingleton<IShellAlertService, AlertService>();
                         svc.AddSingleton<IAlertService>(sp => sp.GetRequiredService<IShellAlertService>());
-                        svc.AddTransient<IDocumentControlService, DocumentControlServiceAdapter>();
+                        svc.AddTransient<IDocumentControlService>(sp =>
+                            ActivatorUtilities.CreateInstance<DocumentControlServiceAdapter>(
+                                sp,
+                                sp.GetRequiredService<DatabaseService>(),
+                                sp.GetRequiredService<IAuthContext>(),
+                                sp.GetRequiredService<IAttachmentWorkflowService>(),
+                                sp.GetRequiredService<IAttachmentService>(),
+                                sp.GetRequiredService<IElectronicSignatureDialogService>()));
                         svc.AddSingleton<CoreAssetViewModel>();
                         svc.AddSingleton<WpfAssetViewModel>(sp =>
                         {
@@ -166,7 +173,15 @@ namespace YasGMP.Wpf
                         svc.AddTransient<DeviationModuleViewModel>();
                         svc.AddTransient<IncidentsModuleViewModel>();
                         svc.AddTransient<ChangeControlModuleViewModel>();
-                        svc.AddTransient<DocumentControlModuleViewModel>();
+                        svc.AddTransient<DocumentControlModuleViewModel>(sp =>
+                            ActivatorUtilities.CreateInstance<DocumentControlModuleViewModel>(
+                                sp,
+                                sp.GetRequiredService<DocumentControlViewModel>(),
+                                sp.GetRequiredService<ILocalizationService>(),
+                                sp.GetRequiredService<ICflDialogService>(),
+                                sp.GetRequiredService<IShellInteractionService>(),
+                                sp.GetRequiredService<IModuleNavigationService>(),
+                                sp.GetRequiredService<IDocumentControlService>()));
                         svc.AddTransient<ValidationsModuleViewModel>();
                         svc.AddTransient<SchedulingModuleViewModel>();
                         svc.AddTransient<SecurityModuleViewModel>();
