@@ -84,6 +84,157 @@ public class CapaModuleViewModelTests
     }
 
     [Fact]
+    public async Task SaveCommand_SignatureCancelled_ShowsWarningAndReenables()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var capaCrud = new FakeCapaCrudService();
+        var componentCrud = new FakeComponentCrudService();
+        componentCrud.Saved.Add(new Component { Id = 1, Code = "CMP-001", Name = "Autoclave Valve" });
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 32, FullName = "QA Approver" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCancelled();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Media filter replacement";
+        viewModel.Editor.Description = "Swap the sterilizing filter after deviation.";
+        viewModel.Editor.ComponentId = 1;
+        viewModel.Editor.Priority = "High";
+
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+
+        var saveTask = InvokeSaveCommandAsync(viewModel);
+        await Task.Yield();
+
+        Assert.False(viewModel.SaveCommand.CanExecute(null));
+
+        var saved = await saveTask;
+
+        Assert.False(saved);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+        Assert.Empty(capaCrud.Saved);
+    }
+
+    [Fact]
+    public async Task SaveCommand_SignatureFailure_ShowsErrorAndRestoresState()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var capaCrud = new FakeCapaCrudService();
+        var componentCrud = new FakeComponentCrudService();
+        componentCrud.Saved.Add(new Component { Id = 4, Code = "CMP-004", Name = "Sterile Tank" });
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 17, FullName = "QA Reviewer" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCaptureException(new InvalidOperationException("Credential rejected."));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Replace sterile tank";
+        viewModel.Editor.Description = "Swap tank after inspection.";
+        viewModel.Editor.ComponentId = 4;
+        viewModel.Editor.Priority = "Medium";
+
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+
+        var saveTask = InvokeSaveCommandAsync(viewModel);
+        await Task.Yield();
+
+        Assert.False(viewModel.SaveCommand.CanExecute(null));
+
+        var saved = await saveTask;
+
+        Assert.False(saved);
+        Assert.Equal("Electronic signature failed: Credential rejected.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+        Assert.Empty(capaCrud.Saved);
+    }
+
+    [Fact]
+    public async Task AddCommand_WhenValidationFails_ShowsErrorAndStaysInAddMode()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var capaCrud = new FakeCapaCrudService
+        {
+            NextValidationException = new InvalidOperationException("CAPA requires a defined component.")
+        };
+        var componentCrud = new FakeComponentCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 19, FullName = "QA Analyst" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Supplier audit";
+        viewModel.Editor.Description = "Schedule supplier on-site audit.";
+
+        Assert.True(viewModel.AddCommand.CanExecute(null));
+
+        await viewModel.AddCommand.ExecuteAsync(null);
+
+        Assert.Equal("Failed to add CAPA: CAPA requires a defined component.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.True(viewModel.AddCommand.CanExecute(null));
+        Assert.Empty(capaCrud.Saved);
+    }
+
+    [Fact]
+    public async Task SaveCommand_UpdateWithoutSelection_ShowsSelectionWarning()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var capaCrud = new FakeCapaCrudService();
+        var componentCrud = new FakeComponentCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 25, FullName = "QA Supervisor" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Update;
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+
+        var saveTask = InvokeSaveCommandAsync(viewModel);
+        await Task.Yield();
+
+        Assert.False(viewModel.SaveCommand.CanExecute(null));
+
+        var saved = await saveTask;
+
+        Assert.False(saved);
+        Assert.Equal("Select a CAPA case before saving.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Update, viewModel.Mode);
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+    }
+
+    [Fact]
     public async Task WorkflowCommands_AdvanceLifecycleAndUpdateRecords()
     {
         var database = new DatabaseService();
@@ -288,5 +439,13 @@ public class CapaModuleViewModelTests
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(CapaModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+
+    private static Task<bool> InvokeSaveCommandAsync(CapaModuleViewModel viewModel)
+    {
+        var method = typeof(B1FormDocumentViewModel)
+            .GetMethod("SaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingMethodException(nameof(B1FormDocumentViewModel), "SaveAsync");
+        return (Task<bool>)method.Invoke(viewModel, Array.Empty<object>())!;
     }
 }

@@ -76,6 +76,192 @@ public class IncidentsModuleViewModelTests
     }
 
     [Fact]
+    public async Task SaveCommand_SignatureCancelled_ShowsWarningAndReenables()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 61, FullName = "QA Manager" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCancelled();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "HVAC deviation";
+        viewModel.Editor.Description = "Room temperature exceeded limits.";
+        viewModel.Editor.Type = "Deviation";
+        viewModel.Editor.Priority = "High";
+        viewModel.Editor.AssignedInvestigator = "QA";
+
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+
+        var saveTask = InvokeSaveCommandAsync(viewModel);
+        await Task.Yield();
+
+        Assert.False(viewModel.SaveCommand.CanExecute(null));
+
+        var saved = await saveTask;
+
+        Assert.False(saved);
+        Assert.Equal("Electronic signature cancelled. Save aborted.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+        Assert.Empty(incidents.Saved);
+    }
+
+    [Fact]
+    public async Task SaveCommand_SignatureFailure_ShowsErrorAndRestoresState()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 52, FullName = "QA Investigator" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCaptureException(new InvalidOperationException("Investigator credentials rejected."));
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Audit trail alert";
+        viewModel.Editor.Description = "Multiple failed login attempts.";
+        viewModel.Editor.Type = "Security";
+        viewModel.Editor.Priority = "Medium";
+        viewModel.Editor.AssignedInvestigator = "QA";
+
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+
+        var saveTask = InvokeSaveCommandAsync(viewModel);
+        await Task.Yield();
+
+        Assert.False(viewModel.SaveCommand.CanExecute(null));
+
+        var saved = await saveTask;
+
+        Assert.False(saved);
+        Assert.Equal("Electronic signature failed: Investigator credentials rejected.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+        Assert.Empty(incidents.Saved);
+    }
+
+    [Fact]
+    public async Task AddCommand_WhenValidationFails_ShowsErrorAndStaysInAddMode()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService
+        {
+            NextValidationException = new InvalidOperationException("Incident requires a detailed description.")
+        };
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 71, FullName = "QA Reporter" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Unlabelled sample";
+
+        Assert.True(viewModel.AddCommand.CanExecute(null));
+
+        await viewModel.AddCommand.ExecuteAsync(null);
+
+        Assert.Equal("Failed to add incident: Incident requires a detailed description.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Add, viewModel.Mode);
+        Assert.True(viewModel.AddCommand.CanExecute(null));
+        Assert.Empty(incidents.Saved);
+    }
+
+    [Fact]
+    public async Task ExecuteCommand_WhenValidationFails_ShowsErrorAndKeepsStatus()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 81, FullName = "QA Approver" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Temperature excursion";
+        viewModel.Editor.Description = "Refrigerator above limit.";
+        viewModel.Editor.Type = "Deviation";
+        viewModel.Editor.Priority = "High";
+        viewModel.Editor.AssignedInvestigator = "QA";
+
+        await viewModel.AddCommand.ExecuteAsync(null);
+        await viewModel.ApproveCommand.ExecuteAsync(null);
+        Assert.Equal("CLASSIFIED", viewModel.Editor.Status);
+
+        incidents.NextValidationException = new InvalidOperationException("Link CAPA before execution.");
+
+        Assert.True(viewModel.ExecuteCommand.CanExecute(null));
+
+        await viewModel.ExecuteCommand.ExecuteAsync(null);
+
+        Assert.Equal("Failed to update incident: Link CAPA before execution.", viewModel.StatusMessage);
+        Assert.Equal("CLASSIFIED", viewModel.Editor.Status);
+        Assert.True(viewModel.ExecuteCommand.CanExecute(null));
+        Assert.Equal(2, incidents.TransitionHistory.Count);
+    }
+
+    [Fact]
+    public async Task SaveCommand_UpdateWithoutSelection_ShowsSelectionWarning()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var incidents = new FakeIncidentCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 91, FullName = "QA Supervisor" } };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new IncidentsModuleViewModel(database, audit, incidents, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+
+        viewModel.Mode = FormMode.Update;
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+
+        var saveTask = InvokeSaveCommandAsync(viewModel);
+        await Task.Yield();
+
+        Assert.False(viewModel.SaveCommand.CanExecute(null));
+
+        var saved = await saveTask;
+
+        Assert.False(saved);
+        Assert.Equal("Select an incident before saving.", viewModel.StatusMessage);
+        Assert.Equal(FormMode.Update, viewModel.Mode);
+        Assert.True(viewModel.SaveCommand.CanExecute(null));
+    }
+
+    [Fact]
     public async Task WorkflowCommands_SynchronizeStatusAndLinks()
     {
         var database = new DatabaseService();
@@ -433,6 +619,14 @@ public class IncidentsModuleViewModelTests
             .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new MissingMethodException(nameof(IncidentsModuleViewModel), "OnSaveAsync");
         return (Task<bool>)method.Invoke(viewModel, null)!;
+    }
+
+    private static Task<bool> InvokeSaveCommandAsync(IncidentsModuleViewModel viewModel)
+    {
+        var method = typeof(B1FormDocumentViewModel)
+            .GetMethod("SaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new MissingMethodException(nameof(B1FormDocumentViewModel), "SaveAsync");
+        return (Task<bool>)method.Invoke(viewModel, Array.Empty<object>())!;
     }
 
     private static Task<CflRequest?> InvokeCreateCflRequestAsync(IncidentsModuleViewModel viewModel)
