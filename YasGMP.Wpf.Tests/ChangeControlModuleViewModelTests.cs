@@ -11,6 +11,7 @@ using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.Tests.TestDoubles;
 using YasGMP.Wpf.ViewModels.Modules;
+using YasGMP.Models.Enums;
 
 namespace YasGMP.Wpf.Tests;
 
@@ -20,8 +21,6 @@ public class ChangeControlModuleViewModelTests
     public async Task OnSaveAsync_AddMode_PersistsChangeControl()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
-        var audit = new AuditService(database);
         var audit = new AuditService(database);
         const int adapterSignatureId = 7813;
         var crud = new FakeChangeControlCrudService
@@ -70,6 +69,63 @@ public class ChangeControlModuleViewModelTests
         Assert.Empty(signatureDialog.PersistedResults);
         Assert.Equal(0, signatureDialog.PersistInvocationCount);
         Assert.False(viewModel.IsDirty);
+    }
+
+    [Fact]
+    public async Task WorkflowCommands_ProgressLifecycleAndRefreshRecords()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var crud = new FakeChangeControlCrudService();
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 18, FullName = "QA Reviewer" },
+            CurrentIpAddress = "10.0.0.35",
+            CurrentDeviceInfo = "UnitTest"
+        };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new ChangeControlModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Supplier change";
+        viewModel.Editor.Code = "CC-2025-001";
+        viewModel.Editor.Description = "Evaluate alternative supplier";
+
+        await viewModel.AddCommand.ExecuteAsync(null);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal(ChangeControlStatus.Submitted.ToString(), viewModel.Editor.Status);
+        var creation = Assert.Single(crud.TransitionHistory);
+        Assert.Equal("Create", creation.Operation);
+        Assert.Equal(ChangeControlStatus.Submitted.ToString(), creation.Entity.StatusRaw);
+
+        await viewModel.ApproveCommand.ExecuteAsync(null);
+        Assert.Equal(ChangeControlStatus.Approved.ToString(), viewModel.Editor.Status);
+        Assert.Equal(ChangeControlStatus.Approved.ToString(), crud.TransitionHistory[1].Entity.StatusRaw);
+
+        await viewModel.ExecuteCommand.ExecuteAsync(null);
+        Assert.Equal(ChangeControlStatus.Implemented.ToString(), viewModel.Editor.Status);
+        Assert.Equal(ChangeControlStatus.Implemented.ToString(), crud.TransitionHistory[2].Entity.StatusRaw);
+
+        await viewModel.CloseCommand.ExecuteAsync(null);
+        Assert.Equal(ChangeControlStatus.Closed.ToString(), viewModel.Editor.Status);
+        Assert.Equal("Change control closed.", viewModel.StatusMessage);
+
+        Assert.Collection(crud.TransitionHistory,
+            entry => Assert.Equal(ChangeControlStatus.Submitted.ToString(), entry.Entity.StatusRaw),
+            entry => Assert.Equal(ChangeControlStatus.Approved.ToString(), entry.Entity.StatusRaw),
+            entry => Assert.Equal(ChangeControlStatus.Implemented.ToString(), entry.Entity.StatusRaw),
+            entry => Assert.Equal(ChangeControlStatus.Closed.ToString(), entry.Entity.StatusRaw));
+
+        var record = Assert.Single(viewModel.Records);
+        Assert.Equal(ChangeControlStatus.Closed.ToString(), record.Status);
+        Assert.Equal(record.Key, viewModel.SelectedRecord?.Key);
     }
 
     [Fact]

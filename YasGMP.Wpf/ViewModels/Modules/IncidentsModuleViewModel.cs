@@ -65,6 +65,30 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
     /// </summary>
 
     public IAsyncRelayCommand AttachEvidenceCommand { get; }
+
+    /// <summary>
+    /// Gets the command that persists a new incident.
+    /// </summary>
+
+    public IAsyncRelayCommand AddCommand { get; }
+
+    /// <summary>
+    /// Gets the command that advances the incident into the classified stage.
+    /// </summary>
+
+    public IAsyncRelayCommand ApproveCommand { get; }
+
+    /// <summary>
+    /// Gets the command that links follow-up work to the incident.
+    /// </summary>
+
+    public IAsyncRelayCommand ExecuteCommand { get; }
+
+    /// <summary>
+    /// Gets the command that closes the incident.
+    /// </summary>
+
+    public IAsyncRelayCommand CloseCommand { get; }
     /// <summary>
     /// Initializes a new instance of the IncidentsModuleViewModel class.
     /// </summary>
@@ -117,6 +141,11 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
             _localization.GetString("Module.Incidents.Type.Maintenance")
         });
         AttachEvidenceCommand = new AsyncRelayCommand(AttachEvidenceAsync, CanAttachEvidence);
+        AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
+        ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
+        ExecuteCommand = new AsyncRelayCommand(ExecuteAsync, CanExecute);
+        CloseCommand = new AsyncRelayCommand(CloseAsync, CanClose);
+        UpdateWorkflowCommandState();
     }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
@@ -197,6 +226,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         _loadedIncident = incident;
         LoadEditor(incident);
         UpdateAttachmentCommandState();
+        UpdateWorkflowCommandState();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -229,6 +259,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         }
 
         UpdateAttachmentCommandState();
+        UpdateWorkflowCommandState();
         return Task.CompletedTask;
     }
 
@@ -582,6 +613,7 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         Editor = IncidentEditor.FromIncident(incident, _incidentService.NormalizeStatus);
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+        UpdateWorkflowCommandState();
     }
 
     private void SetEditor(IncidentEditor editor)
@@ -590,10 +622,184 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
+        UpdateWorkflowCommandState();
     }
 
     private void UpdateAttachmentCommandState()
         => AttachEvidenceCommand.NotifyCanExecuteChanged();
+
+    private void UpdateWorkflowCommandState()
+    {
+        AddCommand.NotifyCanExecuteChanged();
+        ApproveCommand.NotifyCanExecuteChanged();
+        ExecuteCommand.NotifyCanExecuteChanged();
+        CloseCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task AddAsync()
+    {
+        if (!CanAdd())
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var incident = Editor.ToIncident(null);
+            incident.Status = _incidentService.NormalizeStatus("INVESTIGATION");
+            incident.DetectedAt = incident.DetectedAt == default ? DateTime.UtcNow : incident.DetectedAt;
+            incident.ReportedAt ??= DateTime.UtcNow;
+            incident.ReportedById ??= _authContext.CurrentUser?.Id;
+            incident.SourceIp ??= _authContext.CurrentIpAddress;
+
+            _incidentService.Validate(incident);
+
+            var context = IncidentCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId);
+
+            var result = await _incidentService.CreateAsync(incident, context).ConfigureAwait(false);
+            if (incident.Id == 0 && result.Id > 0)
+            {
+                incident.Id = result.Id;
+            }
+
+            _loadedIncident = incident;
+            LoadEditor(incident);
+            var record = UpsertRecord(incident);
+            SelectedRecord = record;
+            Mode = FormMode.View;
+            StatusMessage = $"Incident {incident.Id} logged.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to add incident: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+            UpdateWorkflowCommandState();
+        }
+    }
+
+    private async Task ApproveAsync()
+    {
+        if (!CanApprove() || _loadedIncident is null)
+        {
+            return;
+        }
+
+        await TransitionAsync("CLASSIFIED", "Incident classified.").ConfigureAwait(false);
+    }
+
+    private async Task ExecuteAsync()
+    {
+        if (!CanExecute() || _loadedIncident is null)
+        {
+            return;
+        }
+
+        await TransitionAsync("CAPA_LINKED", "Incident linked to follow-up.", ensureLinks: true).ConfigureAwait(false);
+    }
+
+    private async Task CloseAsync()
+    {
+        if (!CanClose() || _loadedIncident is null)
+        {
+            return;
+        }
+
+        await TransitionAsync("CLOSED", "Incident closed.", ensureLinks: true, closeIncident: true).ConfigureAwait(false);
+    }
+
+    private async Task TransitionAsync(string targetStatus, string successMessage, bool ensureLinks = false, bool closeIncident = false)
+    {
+        try
+        {
+            IsBusy = true;
+            var incident = Editor.ToIncident(_loadedIncident);
+            incident.Status = _incidentService.NormalizeStatus(targetStatus);
+
+            if (ensureLinks)
+            {
+                incident.LinkedCapaId = incident.CapaCaseId;
+            }
+
+            if (closeIncident)
+            {
+                incident.ClosedAt = DateTime.UtcNow;
+                incident.ClosedById ??= _authContext.CurrentUser?.Id;
+            }
+
+            _incidentService.Validate(incident);
+
+            var context = IncidentCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId);
+
+            await _incidentService.UpdateAsync(incident, context).ConfigureAwait(false);
+
+            _loadedIncident = incident;
+            LoadEditor(incident);
+            var record = UpsertRecord(incident);
+            SelectedRecord = record;
+            Mode = FormMode.View;
+            StatusMessage = successMessage;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to update incident: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+            UpdateWorkflowCommandState();
+        }
+    }
+
+    private ModuleRecord UpsertRecord(Incident incident)
+    {
+        var record = ToRecord(incident);
+        for (var i = 0; i < Records.Count; i++)
+        {
+            if (Records[i].Key == record.Key)
+            {
+                Records[i] = record;
+                return record;
+            }
+        }
+
+        Records.Add(record);
+        return record;
+    }
+
+    private bool CanAdd()
+        => !IsBusy && Mode == FormMode.Add;
+
+    private bool CanApprove()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedIncident is not null
+           && string.Equals(Editor.Status, _incidentService.NormalizeStatus("INVESTIGATION"), StringComparison.OrdinalIgnoreCase);
+
+    private bool CanExecute()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedIncident is not null
+           && string.Equals(Editor.Status, _incidentService.NormalizeStatus("CLASSIFIED"), StringComparison.OrdinalIgnoreCase);
+
+    private bool CanClose()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedIncident is not null
+           && string.Equals(Editor.Status, _incidentService.NormalizeStatus("CAPA_LINKED"), StringComparison.OrdinalIgnoreCase);
 
     partial void OnEditorChanging(IncidentEditor value)
     {
@@ -620,6 +826,11 @@ public sealed partial class IncidentsModuleViewModel : DataDrivenModuleDocumentV
         if (_suppressEditorDirtyNotifications)
         {
             return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(IncidentEditor.Status), StringComparison.Ordinal))
+        {
+            UpdateWorkflowCommandState();
         }
 
         if (IsInEditMode)

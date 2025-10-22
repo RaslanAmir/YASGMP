@@ -88,6 +88,12 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
         Editor = CapaEditor.CreateEmpty();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
+        ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
+        ExecuteCommand = new AsyncRelayCommand(ExecuteAsync, CanExecute);
+        CloseCommand = new AsyncRelayCommand(CloseAsync, CanClose);
+
+        UpdateWorkflowCommandState();
     }
 
     [ObservableProperty]
@@ -115,6 +121,30 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     /// </summary>
 
     public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>
+    /// Gets the command that persists a new CAPA case.
+    /// </summary>
+
+    public IAsyncRelayCommand AddCommand { get; }
+
+    /// <summary>
+    /// Gets the command that advances the CAPA case into the approved stage.
+    /// </summary>
+
+    public IAsyncRelayCommand ApproveCommand { get; }
+
+    /// <summary>
+    /// Gets the command that advances the CAPA case into the executed stage.
+    /// </summary>
+
+    public IAsyncRelayCommand ExecuteCommand { get; }
+
+    /// <summary>
+    /// Gets the command that closes the CAPA case.
+    /// </summary>
+
+    public IAsyncRelayCommand CloseCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -223,6 +253,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         _loadedCapa = capa;
         LoadEditor(capa);
         UpdateAttachmentCommandState();
+        UpdateWorkflowCommandState();
     }
 
     protected override Task OnModeChangedAsync(FormMode mode)
@@ -245,6 +276,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
 
         UpdateAttachmentCommandState();
+        UpdateWorkflowCommandState();
         return Task.CompletedTask;
     }
 
@@ -581,6 +613,170 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     private void UpdateAttachmentCommandState()
         => AttachDocumentCommand.NotifyCanExecuteChanged();
 
+    private void UpdateWorkflowCommandState()
+    {
+        AddCommand.NotifyCanExecuteChanged();
+        ApproveCommand.NotifyCanExecuteChanged();
+        ExecuteCommand.NotifyCanExecuteChanged();
+        CloseCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task AddAsync()
+    {
+        if (!CanAdd())
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var capa = Editor.ToCapaCase(null);
+            capa.Status = _capaService.NormalizeStatus("ACTION_DEFINED");
+            capa.Priority = _capaService.NormalizePriority(capa.Priority);
+            capa.DateOpen = DateTime.UtcNow;
+
+            _capaService.Validate(capa);
+
+            var context = CapaCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId);
+
+            var result = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
+            if (capa.Id == 0 && result.Id > 0)
+            {
+                capa.Id = result.Id;
+            }
+
+            _loadedCapa = capa;
+            LoadEditor(capa);
+            var record = UpsertRecord(capa);
+            SelectedRecord = record;
+            Mode = FormMode.View;
+            StatusMessage = $"CAPA {capa.Id} added.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to add CAPA: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+            UpdateWorkflowCommandState();
+        }
+    }
+
+    private async Task ApproveAsync()
+    {
+        if (!CanApprove() || _loadedCapa is null)
+        {
+            return;
+        }
+
+        await TransitionAsync("ACTION_APPROVED", "CAPA approved.", updateCloseDate: false).ConfigureAwait(false);
+    }
+
+    private async Task ExecuteAsync()
+    {
+        if (!CanExecute() || _loadedCapa is null)
+        {
+            return;
+        }
+
+        await TransitionAsync("ACTION_EXECUTED", "CAPA executed.", updateCloseDate: false).ConfigureAwait(false);
+    }
+
+    private async Task CloseAsync()
+    {
+        if (!CanClose() || _loadedCapa is null)
+        {
+            return;
+        }
+
+        await TransitionAsync("CLOSED", "CAPA closed.", updateCloseDate: true).ConfigureAwait(false);
+    }
+
+    private async Task TransitionAsync(string targetStatus, string successMessage, bool updateCloseDate)
+    {
+        try
+        {
+            IsBusy = true;
+            var capa = Editor.ToCapaCase(_loadedCapa);
+            capa.Status = _capaService.NormalizeStatus(targetStatus);
+            capa.Priority = _capaService.NormalizePriority(capa.Priority);
+
+            if (updateCloseDate)
+            {
+                capa.DateClose = DateTime.UtcNow;
+            }
+
+            var context = CapaCrudContext.Create(
+                _authContext.CurrentUser?.Id ?? 0,
+                _authContext.CurrentIpAddress,
+                _authContext.CurrentDeviceInfo,
+                _authContext.CurrentSessionId);
+
+            await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
+
+            _loadedCapa = capa;
+            LoadEditor(capa);
+            var record = UpsertRecord(capa);
+            SelectedRecord = record;
+            Mode = FormMode.View;
+            StatusMessage = successMessage;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to update CAPA: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            UpdateAttachmentCommandState();
+            UpdateWorkflowCommandState();
+        }
+    }
+
+    private ModuleRecord UpsertRecord(CapaCase capa)
+    {
+        var record = ToRecord(capa);
+        for (var i = 0; i < Records.Count; i++)
+        {
+            if (Records[i].Key == record.Key)
+            {
+                Records[i] = record;
+                return record;
+            }
+        }
+
+        Records.Add(record);
+        return record;
+    }
+
+    private bool CanAdd()
+        => !IsBusy && Mode == FormMode.Add;
+
+    private bool CanApprove()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedCapa is not null
+           && string.Equals(Editor.Status, "ACTION_DEFINED", StringComparison.OrdinalIgnoreCase);
+
+    private bool CanExecute()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedCapa is not null
+           && string.Equals(Editor.Status, "ACTION_APPROVED", StringComparison.OrdinalIgnoreCase);
+
+    private bool CanClose()
+        => !IsBusy
+           && Mode == FormMode.View
+           && _loadedCapa is not null
+           && string.Equals(Editor.Status, "ACTION_EXECUTED", StringComparison.OrdinalIgnoreCase);
+
     partial void OnEditorChanging(CapaEditor value)
     {
         if (value is null)
@@ -613,6 +809,11 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             _suppressDirtyNotifications = true;
             Editor.ComponentName = ResolveComponentName(Editor.ComponentId);
             _suppressDirtyNotifications = false;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(CapaEditor.Status), StringComparison.Ordinal))
+        {
+            UpdateWorkflowCommandState();
         }
 
         if (IsInEditMode)

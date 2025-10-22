@@ -3507,6 +3507,7 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(incident));
             TrackSnapshot(incident, context);
+            RecordTransition("Create", incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -3523,6 +3524,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             TrackSnapshot(incident, context);
+            RecordTransition("Update", incident, context);
             return Task.CompletedTask;
         }
 
@@ -4200,6 +4202,7 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(capa));
             TrackSnapshot(capa, context);
+            RecordTransition("Create", capa, context);
             return Task.FromResult(capa.Id);
         }
 
@@ -4216,6 +4219,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             TrackSnapshot(capa, context);
+            RecordTransition("Update", capa, context);
             return Task.CompletedTask;
         }
 
@@ -4750,6 +4754,7 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(changeControl));
             TrackSnapshot(changeControl, context);
+            RecordTransition("Create", changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -5559,6 +5564,7 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(changeControl));
             TrackSnapshot(changeControl, context);
+            RecordTransition("Create", changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -5575,6 +5581,7 @@ namespace YasGMP.Services.Interfaces
             }
 
             TrackSnapshot(changeControl, context);
+            RecordTransition("Update", changeControl, context);
             return Task.CompletedTask;
         }
 

@@ -21,7 +21,6 @@ public class CapaModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var audit = new AuditService(database);
         const int adapterSignatureId = 5120;
         var capaCrud = new FakeCapaCrudService
         {
@@ -80,6 +79,70 @@ public class CapaModuleViewModelTests
         Assert.Empty(signatureDialog.PersistedResults);
         Assert.Equal(0, signatureDialog.PersistInvocationCount);
         Assert.False(viewModel.IsDirty);
+    }
+
+    [Fact]
+    public async Task WorkflowCommands_AdvanceLifecycleAndUpdateRecords()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var capaCrud = new FakeCapaCrudService();
+        var componentCrud = new FakeComponentCrudService();
+        componentCrud.Saved.Add(new Component { Id = 1, Code = "CMP-001", Name = "Autoclave Valve" });
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 21, FullName = "QA Analyst" },
+            CurrentIpAddress = "10.0.0.25",
+            CurrentDeviceInfo = "UnitTest"
+        };
+        var filePicker = new TestFilePicker();
+        var attachments = new TestAttachmentService();
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var viewModel = new CapaModuleViewModel(database, audit, capaCrud, componentCrud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await viewModel.InitializeAsync(null);
+        await viewModel.EnterAddModeCommand.ExecuteAsync(null);
+
+        viewModel.Editor.Title = "Batch record review";
+        viewModel.Editor.Description = "Investigate batch deviation";
+        viewModel.Editor.ComponentId = 1;
+        viewModel.Editor.Priority = "High";
+
+        await viewModel.AddCommand.ExecuteAsync(null);
+
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal("ACTION_DEFINED", viewModel.Editor.Status);
+        var creation = Assert.Single(capaCrud.TransitionHistory);
+        Assert.Equal("Create", creation.Operation);
+        Assert.Equal("ACTION_DEFINED", creation.Entity.Status);
+
+        await viewModel.ApproveCommand.ExecuteAsync(null);
+        Assert.Equal("ACTION_APPROVED", viewModel.Editor.Status);
+        Assert.Equal(2, capaCrud.TransitionHistory.Count);
+        Assert.Equal("ACTION_APPROVED", capaCrud.TransitionHistory[1].Entity.Status);
+
+        await viewModel.ExecuteCommand.ExecuteAsync(null);
+        Assert.Equal("ACTION_EXECUTED", viewModel.Editor.Status);
+        Assert.Equal(3, capaCrud.TransitionHistory.Count);
+        Assert.Equal("ACTION_EXECUTED", capaCrud.TransitionHistory[2].Entity.Status);
+
+        await viewModel.CloseCommand.ExecuteAsync(null);
+        Assert.Equal("CLOSED", viewModel.Editor.Status);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal("CAPA closed.", viewModel.StatusMessage);
+
+        Assert.Collection(capaCrud.TransitionHistory,
+            entry => Assert.Equal("ACTION_DEFINED", entry.Entity.Status),
+            entry => Assert.Equal("ACTION_APPROVED", entry.Entity.Status),
+            entry => Assert.Equal("ACTION_EXECUTED", entry.Entity.Status),
+            entry => Assert.Equal("CLOSED", entry.Entity.Status));
+
+        var record = Assert.Single(viewModel.Records);
+        Assert.Equal("CLOSED", record.Status);
+        Assert.Equal(record.Key, viewModel.SelectedRecord?.Key);
     }
 
     [Fact]
