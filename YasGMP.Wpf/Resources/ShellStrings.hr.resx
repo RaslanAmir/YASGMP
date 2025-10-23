@@ -519,6 +519,252 @@
   <data name="Module.Description.DocumentControl" xml:space="preserve">
     <value>Životni ciklus SOP-a i upravljanje dokumentima.</value>
   </data>
+  <data name="Module.Title.TrainingRecords" xml:space="preserve">
+    <value>Evidencija obuka</value>
+  </data>
+  <data name="Module.Description.TrainingRecords" xml:space="preserve">
+    <value>Životni ciklus obuka zaposlenika, dodjele, odobrenja i provjere učinkovitosti</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.Content" xml:space="preserve">
+    <value>Pokreni</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.ToolTip" xml:space="preserve">
+    <value>Pokreni novu evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.AutomationName" xml:space="preserve">
+    <value>Pokreni evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Initiate</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.Content" xml:space="preserve">
+    <value>Dodijeli</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.ToolTip" xml:space="preserve">
+    <value>Dodijeli odabranu evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.AutomationName" xml:space="preserve">
+    <value>Dodijeli evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Assign</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.Content" xml:space="preserve">
+    <value>Odobri</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.ToolTip" xml:space="preserve">
+    <value>Odobri odabranu evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.AutomationName" xml:space="preserve">
+    <value>Odobri evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Approve</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.Content" xml:space="preserve">
+    <value>Dovrši</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.ToolTip" xml:space="preserve">
+    <value>Označi obuku dovršenom</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.AutomationName" xml:space="preserve">
+    <value>Dovrši evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Complete</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.Content" xml:space="preserve">
+    <value>Zatvori</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.ToolTip" xml:space="preserve">
+    <value>Zatvori odabranu evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.AutomationName" xml:space="preserve">
+    <value>Zatvori evidenciju obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Close</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.Content" xml:space="preserve">
+    <value>Izvoz</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.ToolTip" xml:space="preserve">
+    <value>Izvezi filtrirane evidencije obuka</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.AutomationName" xml:space="preserve">
+    <value>Izvoz evidencija obuka</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Export</value>
+  </data>
+  <data name="Module.TrainingRecords.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.TrainingRecords.Filter.Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Module.TrainingRecords.Grid.Column.Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Module.TrainingRecords.Grid.Column.Due" xml:space="preserve">
+    <value>Rok</value>
+  </data>
+  <data name="Module.TrainingRecords.Details.Header" xml:space="preserve">
+    <value>Detalji obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.Type" xml:space="preserve">
+    <value>Tip obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.AssignedTo" xml:space="preserve">
+    <value>Dodijeljeno</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.TrainingDate" xml:space="preserve">
+    <value>Datum obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.DueDate" xml:space="preserve">
+    <value>Datum dospijeća</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.ExpiryDate" xml:space="preserve">
+    <value>Datum isteka</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.Effectiveness" xml:space="preserve">
+    <value>Provjera učinkovitosti</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.Note" xml:space="preserve">
+    <value>Bilješka</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Initiated" xml:space="preserve">
+    <value>Evidencija obuke '{0}' pokrenuta.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Assigned" xml:space="preserve">
+    <value>Evidencija obuke '{0}' dodijeljena.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Approved" xml:space="preserve">
+    <value>Evidencija obuke '{0}' odobrena.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Completed" xml:space="preserve">
+    <value>Evidencija obuke '{0}' dovršena.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Closed" xml:space="preserve">
+    <value>Evidencija obuke '{0}' zatvorena.</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.AssignedTo" xml:space="preserve">
+    <value>Dodijeljeno</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.DueDate" xml:space="preserve">
+    <value>Datum dospijeća</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.TrainingDate" xml:space="preserve">
+    <value>Datum obuke</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.ExpiryDate" xml:space="preserve">
+    <value>Datum isteka</value>
+  </data>
+  <data name="Module.TrainingRecords.Search.AutomationId" xml:space="preserve">
+    <value>TrainingRecords.SearchBox</value>
+  </data>
+  <data name="Module.Title.SopGovernance" xml:space="preserve">
+    <value>Upravljanje SOP-ovima</value>
+  </data>
+  <data name="Module.Description.SopGovernance" xml:space="preserve">
+    <value>Upravljanje životnim ciklusom SOP-a, odobrenjima i usklađenošću</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.Content" xml:space="preserve">
+    <value>Kreiraj</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.ToolTip" xml:space="preserve">
+    <value>Kreiraj novi nacrt SOP-a</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.AutomationName" xml:space="preserve">
+    <value>Kreiraj SOP dokument</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.AutomationId" xml:space="preserve">
+    <value>Toolbar.SopGovernance.Create</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.Content" xml:space="preserve">
+    <value>Ažuriraj</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.ToolTip" xml:space="preserve">
+    <value>Ažuriraj odabrani SOP</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.AutomationName" xml:space="preserve">
+    <value>Ažuriraj SOP dokument</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.AutomationId" xml:space="preserve">
+    <value>Toolbar.SopGovernance.Update</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.Content" xml:space="preserve">
+    <value>Izbriši</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.ToolTip" xml:space="preserve">
+    <value>Izbriši odabrani SOP</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.AutomationName" xml:space="preserve">
+    <value>Izbriši SOP dokument</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.AutomationId" xml:space="preserve">
+    <value>Toolbar.SopGovernance.Delete</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.Process" xml:space="preserve">
+    <value>Proces</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.IssuedFrom" xml:space="preserve">
+    <value>Izdano od</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.IssuedTo" xml:space="preserve">
+    <value>Izdano do</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.ActiveOnly" xml:space="preserve">
+    <value>Samo aktivno</value>
+  </data>
+  <data name="Module.SopGovernance.Grid.Column.Process" xml:space="preserve">
+    <value>Proces</value>
+  </data>
+  <data name="Module.SopGovernance.Grid.Column.Issued" xml:space="preserve">
+    <value>Izdano</value>
+  </data>
+  <data name="Module.SopGovernance.Grid.Column.Expiry" xml:space="preserve">
+    <value>Istječe</value>
+  </data>
+  <data name="Module.SopGovernance.Details.Header" xml:space="preserve">
+    <value>Detalji SOP-a</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Process" xml:space="preserve">
+    <value>Proces</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Owner" xml:space="preserve">
+    <value>Vlasnik</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Issued" xml:space="preserve">
+    <value>Datum izdavanja</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Expiry" xml:space="preserve">
+    <value>Istječe</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Version" xml:space="preserve">
+    <value>Verzija</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Process" xml:space="preserve">
+    <value>Proces</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Issued" xml:space="preserve">
+    <value>Izdano</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Expiry" xml:space="preserve">
+    <value>Istječe</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Owner" xml:space="preserve">
+    <value>Vlasnik</value>
+  </data>
+  <data name="Module.SopGovernance.Search.AutomationId" xml:space="preserve">
+    <value>SopGovernance.SearchBox</value>
+  </data>
   <data name="Module.Assets.Status.Active" xml:space="preserve">
     <value>aktivan</value>
   </data>

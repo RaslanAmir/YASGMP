@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -188,35 +189,107 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
+        private TrainingRecord CreateDefaultTrainingRecord()
+            => new()
+            {
+                Title = "New Training",
+                TrainingType = TypeFilter ?? "GMP",
+                Status = "planned",
+                PlannedBy = _authService.CurrentUser?.UserName ?? string.Empty,
+                PlannedAt = DateTime.UtcNow,
+                AssignedTo = null,
+                DueDate = DateTime.UtcNow.AddDays(30),
+                ExpiryDate = DateTime.UtcNow.AddYears(1),
+                EffectivenessCheck = false,
+                Attachments = new(),
+                WorkflowHistory = new()
+            };
+
+        private static TrainingRecord CloneRecord(TrainingRecord source)
+        {
+            var clone = new TrainingRecord
+            {
+                Code = source.Code,
+                Title = source.Title,
+                TrainingType = source.TrainingType,
+                Status = source.Status,
+                Description = source.Description,
+                AssignedTo = source.AssignedTo,
+                AssignedToName = source.AssignedToName,
+                DueDate = source.DueDate,
+                TrainingDate = source.TrainingDate,
+                ExpiryDate = source.ExpiryDate,
+                EffectivenessCheck = source.EffectivenessCheck,
+                Note = source.Note,
+                Format = source.Format,
+                PlannedBy = source.PlannedBy,
+                PlannedAt = source.PlannedAt,
+                DeviceInfo = source.DeviceInfo,
+                SessionId = source.SessionId,
+                IpAddress = source.IpAddress,
+                TraineeSignature = source.TraineeSignature,
+                TrainerSignature = source.TrainerSignature,
+                CertificateNumber = source.CertificateNumber,
+                TestScore = source.TestScore,
+                IsELearning = source.IsELearning
+            };
+
+            if (source.Attachments is { Count: > 0 })
+            {
+                clone.Attachments = new List<Attachment>(source.Attachments);
+            }
+
+            if (source.WorkflowHistory is { Count: > 0 })
+            {
+                clone.WorkflowHistory = new List<string>(source.WorkflowHistory);
+            }
+
+            return clone;
+        }
+
         /// <summary>Initiates a new training record (plan).</summary>
-        public async Task InitiateTrainingRecordAsync()
+        public Task InitiateTrainingRecordAsync()
+            => InitiateTrainingRecordAsync(null, null);
+
+        /// <summary>Initiates a new training record using the provided template.</summary>
+        /// <param name="template">Optional template populated by the desktop shell.</param>
+        /// <param name="note">Optional audit note that accompanies the initiation.</param>
+        public async Task InitiateTrainingRecordAsync(TrainingRecord? template, string? note)
         {
             IsBusy = true;
             try
             {
-                var newRecord = new TrainingRecord
+                var newRecord = template is null ? CreateDefaultTrainingRecord() : CloneRecord(template);
+
+                if (string.IsNullOrWhiteSpace(newRecord.Title))
                 {
-                    Title = "New Training",
-                    TrainingType = TypeFilter ?? "GMP",
-                    Status = "planned",
-                    // FIX (CS8601): PlannedBy (non-nullable) receives a possibly-null value. Coalesce to empty.
-                    PlannedBy = _authService.CurrentUser?.UserName ?? string.Empty,
-                    PlannedAt = DateTime.UtcNow,
-                    AssignedTo = null,
-                    DueDate = DateTime.UtcNow.AddDays(30),
-                    ExpiryDate = DateTime.UtcNow.AddYears(1),
-                    EffectivenessCheck = false,
-                    Attachments = new(),
-                    WorkflowHistory = new(),
-                    DeviceInfo = _currentDeviceInfo,
-                    SessionId = _currentSessionId,
-                    IpAddress = _currentIpAddress
-                };
+                    newRecord.Title = template?.Title ?? "New Training";
+                }
+
+                if (string.IsNullOrWhiteSpace(newRecord.TrainingType))
+                {
+                    newRecord.TrainingType = template?.TrainingType ?? TypeFilter ?? "GMP";
+                }
+
+                if (string.IsNullOrWhiteSpace(newRecord.Status))
+                {
+                    newRecord.Status = template?.Status ?? "planned";
+                }
+
+                newRecord.PlannedBy = _authService.CurrentUser?.UserName ?? newRecord.PlannedBy ?? string.Empty;
+                newRecord.PlannedAt = DateTime.UtcNow;
+                newRecord.DueDate ??= DateTime.UtcNow.AddDays(30);
+                newRecord.ExpiryDate ??= DateTime.UtcNow.AddYears(1);
+                newRecord.Attachments ??= new();
+                newRecord.WorkflowHistory ??= new();
+                newRecord.DeviceInfo = _currentDeviceInfo;
+                newRecord.SessionId = _currentSessionId;
+                newRecord.IpAddress = _currentIpAddress;
 
                 await _dbService.InitiateTrainingRecordAsync(newRecord).ConfigureAwait(false);
-                await _dbService.LogTrainingRecordAuditAsync(newRecord, "INITIATE", _currentIpAddress, _currentDeviceInfo, _currentSessionId, null).ConfigureAwait(false);
+                await _dbService.LogTrainingRecordAuditAsync(newRecord, "INITIATE", _currentIpAddress, _currentDeviceInfo, _currentSessionId, note).ConfigureAwait(false);
 
-                StatusMessage = "Training record initiated.";
+                StatusMessage = $"Training record '{newRecord.Title}' initiated.";
                 await LoadTrainingRecordsAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
