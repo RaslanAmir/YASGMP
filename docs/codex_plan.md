@@ -126,6 +126,13 @@
 - CLI status: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` continue to fail with `bash: command not found: dotnet`; smoke automation remains pending a Windows host.
 - 2026-06-09: Registered the shared Training/SOP view-models with the WPF DI container, localized ModuleRegistry metadata (tree groups, tooltips, automation ids), and extended ribbon navigation; `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` still fail with `bash: command not found: dotnet` in this container.
 
+### Increment 2 Follow-up — Training & SOP governance documentation (2026-06-09)
+
+- Refreshed `docs/WPF_MAPPING.md` to replace the placeholder Training/SOP row with dedicated Training Records and SOP Governance entries detailing ribbon/module tree access, toolbar workflows, filters, and Golden Arrow/CFL parity delivered in the WPF shell.【F:docs/WPF_MAPPING.md†L72-L101】
+- Expanded `README_WPF_SHELL.md` onboarding guidance so operators know to launch the new Training Records and SOP Governance documents from the Quality ribbon or module tree and understand the mapped workflows, commands, and inspector synchronization with the shared MAUI view-models.【F:README_WPF_SHELL.md†L96-L109】
+- Logged the failed `dotnet --version`/`dotnet restore` attempts for this batch; Windows tooling remains required for restore/build/test coverage.
+
+
 ### Increment 2 Follow-up — Code & QR Adapter Documentation (2026-04-20)
 
 - Marked the code and QR helper parity rows in `docs/WPF_MAPPING.md` as complete now that WPF registers `CodeGeneratorServiceAdapter`/`QRCodeServiceAdapter` and exposes toolbar commands mirroring MAUI automation.
