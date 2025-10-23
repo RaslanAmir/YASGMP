@@ -188,7 +188,9 @@
     "Validations": "done",
     "ScheduledJobs": "done",
     "UsersRoles": "done",
+    "SopGovernance": "done",
     "Suppliers": "done",
+    "TrainingRecords": "done",
     "ExternalServicers": "done",
     "Audit": "in-progress",
     "ApiAudit": "in-progress",
@@ -198,8 +200,9 @@
     "Reports": "pending",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "chore: expand document control module tests",
+  "lastCommitSummary": "feat: sync training and sop governance modules",
   "notes": [
+    "2026-06-08: WPF Training Records and SOP Governance modules now project the shared MAUI view-models, synchronize inspector panes, and refresh ribbon command gating; dotnet --version/restore/build attempts still return 'command not found' so validation awaits a Windows host.",
     "2026-06-01: DocumentControlModuleViewModel regression tests now cover initialization, attachments, change-control linking, exports, and initiate/revise saves across success/failure/exception paths with busy/status assertions; dotnet restore/build/test remain blocked with 'command not found' in this container.",
     "2025-10-16: WorkOrdersModuleViewModel now exposes signature/audit observables, rehydrates persisted metadata after saves, and mirrors inspector updates while dotnet restore/build/test remain blocked with 'command not found'.",
     "2026-04-11: AssetsModuleViewModel now auto-fills machine codes and QR payloads, persists PNG previews via IPlatformService, and adds GenerateCode/PreviewQr unit coverage plus localized status strings; dotnet restore/build/test remain blocked with 'command not found' until the CLI is available.",
