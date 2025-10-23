@@ -119,6 +119,12 @@
 - Added `ReportsDocumentViewModelTests` and `NotificationsPaneViewModelTests` to cover export success/failure messaging, busy gating, and filtered projection refresh; updated `docs/WPF_MAPPING.md` to mark audit-ready reporting complete. TODO: review newly added ShellStrings HR translations during localization pass.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still exit with `bash: command not found: dotnet` in this container; Windows validation remains pending.
 
+### Increment 3 Follow-up — Training & SOP governance parity (2026-06-08)
+
+- Added `TrainingRecordsModuleViewModel`/`TrainingRecordsModuleView` and `SopGovernanceModuleViewModel`/`SopGovernanceModuleView` to project the shared MAUI training and SOP view-models into the WPF shell, wiring busy/status propagation, inspector context, and SAP B1 form-mode toolbar enablement.
+- Mirrored DocumentControl module patterns so ribbon commands, Golden Arrow navigation, and module registry metadata stay synchronized with MAUI filters and shared collections.
+- CLI status: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` continue to fail with `bash: command not found: dotnet`; smoke automation remains pending a Windows host.
+
 ### Increment 2 Follow-up — Code & QR Adapter Documentation (2026-04-20)
 
 - Marked the code and QR helper parity rows in `docs/WPF_MAPPING.md` as complete now that WPF registers `CodeGeneratorServiceAdapter`/`QRCodeServiceAdapter` and exposes toolbar commands mirroring MAUI automation.

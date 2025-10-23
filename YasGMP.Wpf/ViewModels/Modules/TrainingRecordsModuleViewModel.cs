@@ -438,6 +438,8 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             Records.Add(record);
         }
 
+        RecordsView.Refresh();
+
         if (previousKey is not null)
         {
             SelectedRecord = Records.FirstOrDefault(r => string.Equals(r.Key, previousKey, StringComparison.Ordinal));
@@ -450,6 +452,8 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
         {
             SelectedRecord = null;
         }
+
+        UpdateWorkflowCommandStates();
     }
 
     private IReadOnlyList<ModuleRecord> ProjectRecords()

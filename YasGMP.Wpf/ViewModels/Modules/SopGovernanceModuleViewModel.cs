@@ -411,6 +411,8 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
             Records.Add(record);
         }
 
+        RecordsView.Refresh();
+
         if (selectedKey is not null)
         {
             SelectedRecord = Records.FirstOrDefault(r => string.Equals(r.Key, selectedKey, StringComparison.Ordinal));
@@ -423,6 +425,8 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
         {
             SelectedRecord = null;
         }
+
+        UpdateWorkflowCommands();
     }
 
     private IReadOnlyList<ModuleRecord> ProjectRecords()
