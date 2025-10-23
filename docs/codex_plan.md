@@ -110,6 +110,13 @@
 - Authored a FlaUI-driven Assets module smoke scenario that opens the module via the localized tree, exercises Find→Add→Update transitions, triggers the attachment guardrail, and verifies signature cancellation messaging to mirror SAP B1 form behaviour.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still fail with `command not found: dotnet`; Windows-host validation remains required.
 
+### Increment 3 Follow-up — Analytics reporting parity (2026-06-07)
+
+- Introduced `ReportsDocumentViewModel`/`ReportsDocumentView` plus the docked `NotificationsPaneViewModel`/`NotificationsPaneView`, wiring shared `ReportViewModel`/`NotificationViewModel` filters, toolbar commands, and busy/error banners into the WPF shell.
+- Extended `ExportService` with `ExportReportsToPdfAsync/ExportReportsToExcelAsync` and `ExportNotificationsToPdfAsync/ExportNotificationsToExcelAsync`, enabling parity PDF/Excel exports reused by both MAUI and WPF.
+- Added `ReportsDocumentViewModelTests` and `NotificationsPaneViewModelTests` to cover export success/failure messaging, busy gating, and filtered projection refresh; updated `docs/WPF_MAPPING.md` to mark audit-ready reporting complete. TODO: review newly added ShellStrings HR translations during localization pass.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Tests` still exit with `bash: command not found: dotnet` in this container; Windows validation remains pending.
+
 ### Increment 2 Follow-up — Code & QR Adapter Documentation (2026-04-20)
 
 - Marked the code and QR helper parity rows in `docs/WPF_MAPPING.md` as complete now that WPF registers `CodeGeneratorServiceAdapter`/`QRCodeServiceAdapter` and exposes toolbar commands mirroring MAUI automation.

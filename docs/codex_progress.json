@@ -480,6 +480,7 @@
   ],
   "updates": [
     "2026-06-02: Promoted the RecordingDocumentControlService stub into TestStubs with configurable lifecycle/export/attachment hooks and expanded DocumentControlModuleViewModel tests to cover approve/publish/expire success, failure, and exception flows; dotnet restore/build/test still fail locally with 'command not found: dotnet'.",
-    "2026-06-03: Document Control milestone marked complete—desktop document view, adapter, and attachment/signature integration documented; dotnet --version continues to return 'command not found', so WPF smoke harness execution remains pending Windows tooling."
+    "2026-06-03: Document Control milestone marked complete—desktop document view, adapter, and attachment/signature integration documented; dotnet --version continues to return 'command not found', so WPF smoke harness execution remains pending Windows tooling.",
+    "2026-06-07: Added WPF analytics reporting document and notifications pane backed by shared Report/Notification view-models, extended ExportService with report/notification PDF+Excel helpers, updated docs/WPF_MAPPING.md, and added unit tests covering export success/failure messaging; dotnet restore/build/test still fail with 'command not found: dotnet' in this container."
   ]
 }

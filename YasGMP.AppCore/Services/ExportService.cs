@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using OfficeOpenXml;
@@ -80,7 +81,8 @@ namespace YasGMP.Services
         /// <returns>Full path to the generated Excel file.</returns>
         public async Task<string> ExportToExcelAsync(IEnumerable<Calibration> calibrations, string filterUsed = "")
         {
-            string filePath = Path.Combine(_exportRoot, $"Calibrations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+            string directory = EnsureExportDirectory("Calibrations");
+            string filePath = Path.Combine(directory, $"Calibrations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 
             // EPPlus v8: new License API; we suppress the deprecation warning to keep compatibility.
 #pragma warning disable CS0618
@@ -142,7 +144,8 @@ namespace YasGMP.Services
         /// <returns>Full path to the generated PDF file.</returns>
         public async Task<string> ExportToPdfAsync(IEnumerable<Calibration> calibrations, string filterUsed = "")
         {
-            string filePath = Path.Combine(_exportRoot, $"Calibrations_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+            string directory = EnsureExportDirectory("Calibrations");
+            string filePath = Path.Combine(directory, $"Calibrations_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
 
             using var writer = new PdfWriter(filePath);
             using var pdfDoc = new PdfDocument(writer);
@@ -209,7 +212,8 @@ namespace YasGMP.Services
         /// </summary>
         public async Task<string> ExportAuditToExcel(IEnumerable<AuditEntryDto> auditEntries, string filterUsed = "")
         {
-            string filePath = Path.Combine(_exportRoot, $"AuditLog_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+            string directory = EnsureExportDirectory("Audit");
+            string filePath = Path.Combine(directory, $"AuditLog_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 
             // EPPlus v8 deprecation – localized suppression.
 #pragma warning disable CS0618
@@ -259,7 +263,8 @@ namespace YasGMP.Services
         /// </summary>
         public async Task<string> ExportAuditToPdf(IEnumerable<AuditEntryDto> auditEntries, string filterUsed = "")
         {
-            string filePath = Path.Combine(_exportRoot, $"AuditLog_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+            string directory = EnsureExportDirectory("Audit");
+            string filePath = Path.Combine(directory, $"AuditLog_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
 
             using var writer = new PdfWriter(filePath);
             using var pdfDoc = new PdfDocument(writer);
@@ -310,6 +315,253 @@ namespace YasGMP.Services
             else
             {
                 await LogFallbackAuditAsync("EXPORT_AUDIT_PDF", $"Exported Audit Log PDF: {filePath}").ConfigureAwait(false);
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// Exports analytics reports to a PDF document.
+        /// </summary>
+        public virtual async Task<string> ExportReportsToPdfAsync(IEnumerable<Report> reports, string filterUsed = "")
+        {
+            string directory = EnsureExportDirectory("Reports");
+            string filePath = Path.Combine(directory, $"Reports_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+
+            using var writer = new PdfWriter(filePath);
+            using var pdfDoc = new PdfDocument(writer);
+            using var doc = new ITextDocument(pdfDoc);
+
+            PdfFont fontRegular = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            PdfFont fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+            PdfFont fontItalic = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_OBLIQUE);
+
+            doc.Add(new Paragraph("YasGMP Analytics Reports")
+                .SetFont(fontBold)
+                .SetFontSize(16)
+                .SetTextAlignment(ITextAlignment.CENTER));
+
+            doc.Add(new Paragraph($"Generated: {DateTime.Now:dd.MM.yyyy HH:mm}")
+                .SetFont(fontRegular)
+                .SetFontSize(10));
+
+            var table = new Table(6).UseAllAvailableWidth();
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("ID").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Title").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Type").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Status").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Generated On").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Entity").SetFont(fontBold)));
+
+            foreach (var report in reports ?? Array.Empty<Report>())
+            {
+                string generatedOn = report?.GeneratedOn.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+                table.AddCell(new ITextCell().Add(new Paragraph((report?.Id ?? 0).ToString(CultureInfo.InvariantCulture)).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(report?.Title ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(report?.ReportType ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(report?.Status ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(generatedOn).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(report?.LinkedEntityType ?? string.Empty).SetFont(fontRegular)));
+            }
+
+            doc.Add(table);
+
+            doc.Add(new Paragraph("Includes analytics metadata, entity linkage, and signature context.")
+                .SetFont(fontItalic)
+                .SetFontSize(9));
+
+            if (_audit is not null)
+            {
+                await _audit.LogCalibrationExportAsync("REPORTS_PDF", filePath, filterUsed ?? string.Empty).ConfigureAwait(false);
+            }
+            else
+            {
+                await LogFallbackAuditAsync("EXPORT_REPORTS_PDF", $"Exported Reports PDF: {filePath}").ConfigureAwait(false);
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// Exports analytics reports to an Excel workbook.
+        /// </summary>
+        public virtual async Task<string> ExportReportsToExcelAsync(IEnumerable<Report> reports, string filterUsed = "")
+        {
+            string directory = EnsureExportDirectory("Reports");
+            string filePath = Path.Combine(directory, $"Reports_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+
+#pragma warning disable CS0618
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+#pragma warning restore CS0618
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Reports");
+                string[] headers =
+                {
+                    "ID", "Title", "Type", "Status", "Generated On", "Entity Type", "Entity Id",
+                    "Generated By", "Device", "Session", "Signature"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cells[1, i + 1].Value = headers[i];
+                    worksheet.Cells[1, i + 1].Style.Font.Bold = true;
+                }
+
+                int row = 2;
+                foreach (var report in reports ?? Array.Empty<Report>())
+                {
+                    worksheet.Cells[row, 1].Value = report?.Id ?? 0;
+                    worksheet.Cells[row, 2].Value = report?.Title ?? string.Empty;
+                    worksheet.Cells[row, 3].Value = report?.ReportType ?? string.Empty;
+                    worksheet.Cells[row, 4].Value = report?.Status ?? string.Empty;
+                    worksheet.Cells[row, 5].Value = report?.GeneratedOn.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
+                    worksheet.Cells[row, 6].Value = report?.LinkedEntityType ?? string.Empty;
+                    worksheet.Cells[row, 7].Value = report?.LinkedEntityId?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                    worksheet.Cells[row, 8].Value = report?.GeneratedById ?? 0;
+                    worksheet.Cells[row, 9].Value = report?.DeviceInfo ?? string.Empty;
+                    worksheet.Cells[row, 10].Value = report?.SessionId ?? string.Empty;
+                    worksheet.Cells[row, 11].Value = report?.DigitalSignature ?? string.Empty;
+                    row++;
+                }
+
+                worksheet.Cells.AutoFitColumns();
+                await package.SaveAsAsync(new FileInfo(filePath)).ConfigureAwait(false);
+            }
+
+            if (_audit is not null)
+            {
+                await _audit.LogCalibrationExportAsync("REPORTS_EXCEL", filePath, filterUsed ?? string.Empty).ConfigureAwait(false);
+            }
+            else
+            {
+                await LogFallbackAuditAsync("EXPORT_REPORTS_EXCEL", $"Exported Reports Excel: {filePath}").ConfigureAwait(false);
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// Exports notification analytics to a PDF document.
+        /// </summary>
+        public virtual async Task<string> ExportNotificationsToPdfAsync(IEnumerable<Notification> notifications, string filterUsed = "")
+        {
+            string directory = EnsureExportDirectory("Notifications");
+            string filePath = Path.Combine(directory, $"Notifications_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+
+            using var writer = new PdfWriter(filePath);
+            using var pdfDoc = new PdfDocument(writer);
+            using var doc = new ITextDocument(pdfDoc);
+
+            PdfFont fontRegular = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            PdfFont fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+            PdfFont fontItalic = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_OBLIQUE);
+
+            doc.Add(new Paragraph("YasGMP Notifications")
+                .SetFont(fontBold)
+                .SetFontSize(16)
+                .SetTextAlignment(ITextAlignment.CENTER));
+
+            doc.Add(new Paragraph($"Generated: {DateTime.Now:dd.MM.yyyy HH:mm}")
+                .SetFont(fontRegular)
+                .SetFontSize(10));
+
+            var table = new Table(6).UseAllAvailableWidth();
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("ID").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Title").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Type").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Status").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Entity").SetFont(fontBold)));
+            table.AddHeaderCell(new ITextCell().Add(new Paragraph("Created").SetFont(fontBold)));
+
+            foreach (var notification in notifications ?? Array.Empty<Notification>())
+            {
+                string created = notification?.CreatedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+                table.AddCell(new ITextCell().Add(new Paragraph((notification?.Id ?? 0).ToString(CultureInfo.InvariantCulture)).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(notification?.Title ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(notification?.Type ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(notification?.Status ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(notification?.Entity ?? string.Empty).SetFont(fontRegular)));
+                table.AddCell(new ITextCell().Add(new Paragraph(created).SetFont(fontRegular)));
+            }
+
+            doc.Add(table);
+
+            doc.Add(new Paragraph("Snapshot includes entity linkage, priority, and session metadata.")
+                .SetFont(fontItalic)
+                .SetFontSize(9));
+
+            if (_audit is not null)
+            {
+                await _audit.LogCalibrationExportAsync("NOTIFICATIONS_PDF", filePath, filterUsed ?? string.Empty).ConfigureAwait(false);
+            }
+            else
+            {
+                await LogFallbackAuditAsync("EXPORT_NOTIFICATIONS_PDF", $"Exported Notifications PDF: {filePath}").ConfigureAwait(false);
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// Exports notification analytics to an Excel workbook.
+        /// </summary>
+        public virtual async Task<string> ExportNotificationsToExcelAsync(IEnumerable<Notification> notifications, string filterUsed = "")
+        {
+            string directory = EnsureExportDirectory("Notifications");
+            string filePath = Path.Combine(directory, $"Notifications_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+
+#pragma warning disable CS0618
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+#pragma warning restore CS0618
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Notifications");
+                string[] headers =
+                {
+                    "ID", "Title", "Type", "Status", "Entity", "Entity Id", "Priority",
+                    "Recipients", "Sender", "Created", "Updated", "Acked By", "Acked At", "Muted Until"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cells[1, i + 1].Value = headers[i];
+                    worksheet.Cells[1, i + 1].Style.Font.Bold = true;
+                }
+
+                int row = 2;
+                foreach (var notification in notifications ?? Array.Empty<Notification>())
+                {
+                    worksheet.Cells[row, 1].Value = notification?.Id ?? 0;
+                    worksheet.Cells[row, 2].Value = notification?.Title ?? string.Empty;
+                    worksheet.Cells[row, 3].Value = notification?.Type ?? string.Empty;
+                    worksheet.Cells[row, 4].Value = notification?.Status ?? string.Empty;
+                    worksheet.Cells[row, 5].Value = notification?.Entity ?? string.Empty;
+                    worksheet.Cells[row, 6].Value = notification?.EntityId?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                    worksheet.Cells[row, 7].Value = notification?.Priority ?? string.Empty;
+                    worksheet.Cells[row, 8].Value = notification?.Recipients ?? string.Empty;
+                    worksheet.Cells[row, 9].Value = notification?.Sender ?? string.Empty;
+                    worksheet.Cells[row, 10].Value = notification?.CreatedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
+                    worksheet.Cells[row, 11].Value = notification?.UpdatedAt?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+                    worksheet.Cells[row, 12].Value = notification?.AckedByUserId?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                    worksheet.Cells[row, 13].Value = notification?.AckedAt?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+                    worksheet.Cells[row, 14].Value = notification?.MutedUntil?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+                    row++;
+                }
+
+                worksheet.Cells.AutoFitColumns();
+                await package.SaveAsAsync(new FileInfo(filePath)).ConfigureAwait(false);
+            }
+
+            if (_audit is not null)
+            {
+                await _audit.LogCalibrationExportAsync("NOTIFICATIONS_EXCEL", filePath, filterUsed ?? string.Empty).ConfigureAwait(false);
+            }
+            else
+            {
+                await LogFallbackAuditAsync("EXPORT_NOTIFICATIONS_EXCEL", $"Exported Notifications Excel: {filePath}").ConfigureAwait(false);
             }
 
             return filePath;
@@ -426,9 +678,21 @@ namespace YasGMP.Services
                 }
             }
 
-            var root = Path.Combine(appData!, "Exports", "Calibrations");
+            var root = Path.Combine(appData!, "Exports");
             Directory.CreateDirectory(root);
             return root;
+        }
+
+        private string EnsureExportDirectory(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                throw new ArgumentException("Category must be provided.", nameof(category));
+            }
+
+            var path = Path.Combine(_exportRoot, category);
+            Directory.CreateDirectory(path);
+            return path;
         }
     }
 }

@@ -36,6 +36,7 @@ namespace YasGMP.Wpf.ViewModels
             OpenAuditTrailCommand = openAuditTrailCommand;
             OpenAuditCommand = openAuditTrailCommand;
             OpenAuditDashboardCommand = new RelayCommand(() => _shell.OpenModule(AuditDashboardDocumentViewModel.ModuleKey));
+            OpenReportsCommand = new RelayCommand(() => _shell.OpenModule(ReportsDocumentViewModel.ModuleKey));
             OpenApiAuditCommand = new RelayCommand(() => _shell.OpenModule(ApiAuditModuleViewModel.ModuleKey));
             SaveLayoutCommand = new AsyncRelayCommand(ExecuteSaveLayoutAsync);
             ResetLayoutCommand = new AsyncRelayCommand(ExecuteResetLayoutAsync);
@@ -129,6 +130,9 @@ namespace YasGMP.Wpf.ViewModels
 
         /// <summary>Opens the audit dashboard document.</summary>
         public IRelayCommand OpenAuditDashboardCommand { get; }
+
+        /// <summary>Opens the analytics reports module.</summary>
+        public IRelayCommand OpenReportsCommand { get; }
 
         /// <summary>Opens the API audit module.</summary>
         public IRelayCommand OpenApiAuditCommand { get; }

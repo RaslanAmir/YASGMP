@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -20,7 +21,7 @@ namespace YasGMP.ViewModels
     /// • Integrates with <see cref="DatabaseService"/> and <see cref="AuthService"/> for persistence and context
     /// </para>
     /// </summary>
-    public sealed class NotificationViewModel : INotifyPropertyChanged
+    public sealed class NotificationViewModel : INotificationAnalyticsViewModel
     {
         #region === Fields & Constructor =======================================================
 
@@ -147,7 +148,7 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>Available type values for filters.</summary>
-        public string[] AvailableTypes => new[] { "alert", "reminder", "escalation", "info", "overdue", "workflow", "custom" };
+        public IReadOnlyList<string> AvailableTypes => new[] { "alert", "reminder", "escalation", "info", "overdue", "workflow", "custom" };
 
         /// <summary>True for admin/superadmin/QA users.</summary>
         public bool CanSendNotifications =>
