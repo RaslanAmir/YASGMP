@@ -228,6 +228,18 @@
   <data name="Ribbon.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Manage controlled documents and SOP revisions.</value>
   </data>
+  <data name="Ribbon.Button.TrainingRecords.Header" xml:space="preserve">
+    <value>Training Records</value>
+  </data>
+  <data name="Ribbon.Button.TrainingRecords.ToolTip" xml:space="preserve">
+    <value>Manage employee training assignments and lifecycle.</value>
+  </data>
+  <data name="Ribbon.Button.SopGovernance.Header" xml:space="preserve">
+    <value>SOP Governance</value>
+  </data>
+  <data name="Ribbon.Button.SopGovernance.ToolTip" xml:space="preserve">
+    <value>Steer SOP revisions, approvals, and publishing.</value>
+  </data>
   <data name="Ribbon.Button.Validations.Header" xml:space="preserve">
     <value>Validations</value>
   </data>
@@ -1634,6 +1646,30 @@
   </data>
   <data name="ModuleTree.Node.Quality.DocumentControl.AutomationId" xml:space="preserve">
     <value>ModuleTree.Node.Quality.DocumentControl</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.TrainingRecords.Title" xml:space="preserve">
+    <value>Training Records</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.TrainingRecords.ToolTip" xml:space="preserve">
+    <value>Employee training lifecycle and compliance.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.TrainingRecords.AutomationName" xml:space="preserve">
+    <value>Training Records module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.TrainingRecords.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.TrainingRecords</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.SopGovernance.Title" xml:space="preserve">
+    <value>SOP Governance</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.SopGovernance.ToolTip" xml:space="preserve">
+    <value>SOP lifecycle governance and approvals.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.SopGovernance.AutomationName" xml:space="preserve">
+    <value>SOP Governance module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.SopGovernance.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.SopGovernance</value>
   </data>
   <data name="ModuleTree.Node.Quality.Validations.Title" xml:space="preserve">
     <value>Validations</value>

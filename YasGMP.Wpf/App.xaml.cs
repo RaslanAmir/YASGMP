@@ -140,6 +140,8 @@ namespace YasGMP.Wpf
                             var sharedAsset = sp.GetRequiredService<CoreAssetViewModel>();
                             return new WpfAssetViewModel(machineService, sharedAsset);
                         });
+                        svc.AddTransient<TrainingRecordViewModel>();
+                        svc.AddTransient<SopViewModel>();
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<NotificationsPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
@@ -235,17 +237,17 @@ namespace YasGMP.Wpf
                             registry.Register<ChangeControlModuleViewModel>(ChangeControlModuleViewModel.ModuleKey, "Change Control", "Quality", "Change control workflow");
                             registry.Register<DocumentControlModuleViewModel>(
                                 DocumentControlModuleViewModel.ModuleKey,
-                                "DocumentControl",
+                                localization.GetString("Module.Title.DocumentControl"),
                                 "Quality",
                                 localization.GetString("Module.Description.DocumentControl"));
                             registry.Register<TrainingRecordsModuleViewModel>(
                                 TrainingRecordsModuleViewModel.ModuleKey,
-                                "Training Records",
+                                localization.GetString("Module.Title.TrainingRecords"),
                                 "Quality",
                                 localization.GetString("Module.Description.TrainingRecords"));
                             registry.Register<SopGovernanceModuleViewModel>(
                                 SopGovernanceModuleViewModel.ModuleKey,
-                                "SOP Governance",
+                                localization.GetString("Module.Title.SopGovernance"),
                                 "Quality",
                                 localization.GetString("Module.Description.SopGovernance"));
                             registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");

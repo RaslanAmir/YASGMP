@@ -43,6 +43,8 @@
     <sys:String x:Key="Ribbon.Button.ChangeControl.AutomationId">Ribbon.Button.ChangeControl</sys:String>
     <sys:String x:Key="Ribbon.Button.DocumentControl.AutomationId">Ribbon.Button.DocumentControl</sys:String>
     <sys:String x:Key="Ribbon.Button.Validations.AutomationId">Ribbon.Button.Validations</sys:String>
+    <sys:String x:Key="Ribbon.Button.TrainingRecords.AutomationId">Ribbon.Button.TrainingRecords</sys:String>
+    <sys:String x:Key="Ribbon.Button.SopGovernance.AutomationId">Ribbon.Button.SopGovernance</sys:String>
     <sys:String x:Key="Ribbon.Button.AuditTrail.AutomationId">Ribbon.Button.AuditTrail</sys:String>
     <sys:String x:Key="Ribbon.Button.AuditDashboard.AutomationId">Ribbon.Button.AuditDashboard</sys:String>
     <sys:String x:Key="Ribbon.Button.ApiAuditTrail.AutomationId">Ribbon.Button.ApiAuditTrail</sys:String>
@@ -127,6 +129,8 @@
     <sys:String x:Key="ModuleTree.Node.Quality.Capa.AutomationId">ModuleTree.Node.Quality.CAPA</sys:String>
     <sys:String x:Key="ModuleTree.Node.Quality.Incidents.AutomationId">ModuleTree.Node.Quality.Incidents</sys:String>
     <sys:String x:Key="ModuleTree.Node.Quality.ChangeControl.AutomationId">ModuleTree.Node.Quality.ChangeControl</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.TrainingRecords.AutomationId">ModuleTree.Node.Quality.TrainingRecords</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.SopGovernance.AutomationId">ModuleTree.Node.Quality.SopGovernance</sys:String>
     <sys:String x:Key="ModuleTree.Node.Quality.Validations.AutomationId">ModuleTree.Node.Quality.Validations</sys:String>
 
     <sys:String x:Key="ModuleTree.Node.Planning.Scheduling.AutomationId">ModuleTree.Node.Planning.Scheduling</sys:String>

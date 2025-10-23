@@ -124,6 +124,7 @@
 - Added `TrainingRecordsModuleViewModel`/`TrainingRecordsModuleView` and `SopGovernanceModuleViewModel`/`SopGovernanceModuleView` to project the shared MAUI training and SOP view-models into the WPF shell, wiring busy/status propagation, inspector context, and SAP B1 form-mode toolbar enablement.
 - Mirrored DocumentControl module patterns so ribbon commands, Golden Arrow navigation, and module registry metadata stay synchronized with MAUI filters and shared collections.
 - CLI status: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` continue to fail with `bash: command not found: dotnet`; smoke automation remains pending a Windows host.
+- 2026-06-09: Registered the shared Training/SOP view-models with the WPF DI container, localized ModuleRegistry metadata (tree groups, tooltips, automation ids), and extended ribbon navigation; `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` still fail with `bash: command not found: dotnet` in this container.
 
 ### Increment 2 Follow-up — Code & QR Adapter Documentation (2026-04-20)
 
