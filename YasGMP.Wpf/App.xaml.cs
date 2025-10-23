@@ -133,6 +133,14 @@ namespace YasGMP.Wpf
                                 sp.GetRequiredService<IAttachmentWorkflowService>(),
                                 sp.GetRequiredService<IAttachmentService>(),
                                 sp.GetRequiredService<IElectronicSignatureDialogService>()));
+                        svc.AddTransient<ITrainingRecordService>(sp =>
+                            ActivatorUtilities.CreateInstance<TrainingRecordServiceAdapter>(
+                                sp,
+                                sp.GetRequiredService<DatabaseService>(),
+                                sp.GetRequiredService<IAuthContext>(),
+                                sp.GetRequiredService<IAttachmentWorkflowService>(),
+                                sp.GetRequiredService<IAttachmentService>(),
+                                sp.GetRequiredService<IElectronicSignatureDialogService>()));
                         svc.AddSingleton<CoreAssetViewModel>();
                         svc.AddSingleton<WpfAssetViewModel>(sp =>
                         {

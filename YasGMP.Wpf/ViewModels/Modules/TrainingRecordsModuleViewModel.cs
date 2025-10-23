@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using YasGMP.Helpers;
 using YasGMP.Models;
 using YasGMP.ViewModels;
 using YasGMP.Wpf.Services;
@@ -23,6 +25,7 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
     public const string ModuleKey = "TrainingRecords";
 
     private readonly TrainingRecordViewModel _trainingRecords;
+    private readonly ITrainingRecordService _trainingRecordService;
     private readonly ILocalizationService _localization;
     private readonly AsyncRelayCommand _initiateCommand;
     private readonly AsyncRelayCommand _assignCommand;
@@ -37,6 +40,7 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
     /// </summary>
     public TrainingRecordsModuleViewModel(
         TrainingRecordViewModel trainingRecords,
+        ITrainingRecordService trainingRecordService,
         ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
@@ -44,6 +48,7 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
         : base(ModuleKey, localization.GetString("Module.Title.TrainingRecords"), localization, cflDialogService, shellInteraction, navigation)
     {
         _trainingRecords = trainingRecords ?? throw new ArgumentNullException(nameof(trainingRecords));
+        _trainingRecordService = trainingRecordService ?? throw new ArgumentNullException(nameof(trainingRecordService));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         _trainingRecords.PropertyChanged += OnTrainingRecordsPropertyChanged;
@@ -130,7 +135,14 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
     /// <inheritdoc />
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        await _trainingRecords.LoadTrainingRecordsAsync().ConfigureAwait(false);
+        var result = await _trainingRecordService.LoadAsync().ConfigureAwait(false);
+        StatusMessage = result.Message;
+
+        if (result.Success)
+        {
+            ApplyRecordsToSharedViewModel(result.Records);
+        }
+
         return ProjectRecords();
     }
 
@@ -304,9 +316,10 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
         }
 
         var draft = Editor.ToEntity();
-        await _trainingRecords.InitiateTrainingRecordAsync(draft, Editor.Note).ConfigureAwait(false);
-        StatusMessage = _localization.GetString("Module.TrainingRecords.Status.Initiated", draft.Title);
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        var message = _localization.GetString("Module.TrainingRecords.Status.Initiated", draft.Title);
+        await ExecuteWorkflowAsync(
+            token => _trainingRecordService.InitiateAsync(draft, Editor.Note, token),
+            message).ConfigureAwait(false);
     }
 
     private bool CanInitiate() => !IsBusy;
@@ -318,8 +331,15 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        await ExecuteAsync(_trainingRecords.AssignTrainingRecordCommand).ConfigureAwait(false);
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        if (_trainingRecords.SelectedTrainingRecord is not TrainingRecord record)
+        {
+            return;
+        }
+
+        var message = _localization.GetString("Module.TrainingRecords.Status.Assigned", record.Title);
+        await ExecuteWorkflowAsync(
+            token => _trainingRecordService.AssignAsync(record, record.TraineeId, Editor.Note, token),
+            message).ConfigureAwait(false);
     }
 
     private bool CanAssign()
@@ -333,8 +353,15 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        await ExecuteAsync(_trainingRecords.ApproveTrainingRecordCommand).ConfigureAwait(false);
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        if (_trainingRecords.SelectedTrainingRecord is not TrainingRecord record)
+        {
+            return;
+        }
+
+        var message = _localization.GetString("Module.TrainingRecords.Status.Approved", record.Title);
+        await ExecuteWorkflowAsync(
+            token => _trainingRecordService.ApproveAsync(record, token),
+            message).ConfigureAwait(false);
     }
 
     private bool CanApprove()
@@ -348,8 +375,15 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        await ExecuteAsync(_trainingRecords.CompleteTrainingRecordCommand).ConfigureAwait(false);
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        if (_trainingRecords.SelectedTrainingRecord is not TrainingRecord record)
+        {
+            return;
+        }
+
+        var message = _localization.GetString("Module.TrainingRecords.Status.Completed", record.Title);
+        await ExecuteWorkflowAsync(
+            token => _trainingRecordService.CompleteAsync(record, Editor.Note, null, token),
+            message).ConfigureAwait(false);
     }
 
     private bool CanComplete()
@@ -363,8 +397,15 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        await ExecuteAsync(_trainingRecords.CloseTrainingRecordCommand).ConfigureAwait(false);
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        if (_trainingRecords.SelectedTrainingRecord is not TrainingRecord record)
+        {
+            return;
+        }
+
+        var message = _localization.GetString("Module.TrainingRecords.Status.Closed", record.Title);
+        await ExecuteWorkflowAsync(
+            token => _trainingRecordService.CloseAsync(record, Editor.Note, null, token),
+            message).ConfigureAwait(false);
     }
 
     private bool CanClose()
@@ -378,8 +419,32 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             return;
         }
 
-        await ExecuteAsync(_trainingRecords.ExportTrainingRecordsCommand).ConfigureAwait(false);
-        StatusMessage = _trainingRecords.StatusMessage ?? string.Empty;
+        IsBusy = true;
+        RefreshCommandStates();
+        UpdateWorkflowCommandStates();
+
+        try
+        {
+            var format = await ExportFormatPrompt.PromptAsync().ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(format))
+            {
+                StatusMessage = _localization.GetString("Module.Status.Cancelled");
+                return;
+            }
+
+            var snapshot = _trainingRecords.FilteredTrainingRecords.ToList();
+            var result = await _trainingRecordService
+                .ExportAsync(snapshot, format!, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            StatusMessage = result.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+            RefreshCommandStates();
+            UpdateWorkflowCommandStates();
+        }
     }
 
     private bool CanExport() => !IsBusy && _trainingRecords.FilteredTrainingRecords.Count > 0;
@@ -461,6 +526,25 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
             .Select(CreateRecord)
             .ToList();
 
+    private void ApplyRecordsToSharedViewModel(IReadOnlyList<TrainingRecord> records)
+    {
+        var list = records ?? Array.Empty<TrainingRecord>();
+        var previousId = _trainingRecords.SelectedTrainingRecord?.Id;
+
+        _trainingRecords.TrainingRecords = new ObservableCollection<TrainingRecord>(list);
+        _trainingRecords.FilterTrainingRecords();
+
+        if (previousId.HasValue)
+        {
+            var match = _trainingRecords.TrainingRecords.FirstOrDefault(r => r.Id == previousId.Value);
+            _trainingRecords.SelectedTrainingRecord = match;
+        }
+        else if (_trainingRecords.TrainingRecords.Count == 0)
+        {
+            _trainingRecords.SelectedTrainingRecord = null;
+        }
+    }
+
     private ModuleRecord CreateRecord(TrainingRecord record)
     {
         var inspector = new List<InspectorField>
@@ -502,17 +586,6 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
         }
     }
 
-    private static Task ExecuteAsync(ICommand command)
-    {
-        if (command is IAsyncRelayCommand asyncRelay)
-        {
-            return asyncRelay.ExecuteAsync(null);
-        }
-
-        command.Execute(null);
-        return Task.CompletedTask;
-    }
-
     private WorkflowAction DetermineWorkflowAction(string? status)
     {
         if (string.IsNullOrWhiteSpace(status))
@@ -538,6 +611,38 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
         _completeCommand.NotifyCanExecuteChanged();
         _closeCommand.NotifyCanExecuteChanged();
         _exportCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task ExecuteWorkflowAsync(
+        Func<CancellationToken, Task<TrainingRecordOperationResult>> operation,
+        string successMessage)
+    {
+        IsBusy = true;
+        RefreshCommandStates();
+        UpdateWorkflowCommandStates();
+
+        try
+        {
+            var result = await operation(CancellationToken.None).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                StatusMessage = result.Message;
+                return;
+            }
+
+            IsBusy = false;
+            RefreshCommandStates();
+            UpdateWorkflowCommandStates();
+
+            await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+            StatusMessage = successMessage;
+        }
+        finally
+        {
+            IsBusy = false;
+            RefreshCommandStates();
+            UpdateWorkflowCommandStates();
+        }
     }
 
     private enum WorkflowAction
