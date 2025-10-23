@@ -49,7 +49,7 @@
     <PackageReference Include="Syncfusion.Maui.Core" Version="31.1.19" />
     <PackageReference Include="Syncfusion.Maui.DataGrid" Version="31.1.19" />
     <PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
-    <PackageReference Include="System.Text.Json" Version="9.0.7" />
+    <PackageReference Include="System.Text.Json" Version="9.0.9" />
 
     <!-- Office/PDF -->
     <PackageReference Include="EPPlus" Version="8.0.8" />
@@ -75,11 +75,20 @@
     <!-- Exclude test sources from the main app build -->
     <Compile Remove="YasGMP.Tests\**\*.cs" />
     <None Include="YasGMP.Tests\**\*.cs" />
+    <!-- Exclude WPF test sources from the main app build -->
+    <Compile Remove="YasGMP.Wpf.Tests\**\*.cs" />
+    <None Include="YasGMP.Wpf.Tests\**\*.cs" />
     <!-- Exclude WPF desktop project sources from the main app build -->
     <Compile Remove="YasGMP.Wpf\**\*.cs" />
     <None Include="YasGMP.Wpf\**\*.cs" />
     <MauiXaml Remove="YasGMP.Wpf\**\*.xaml" />
     <None Include="YasGMP.Wpf\**\*.xaml" />
+    <!-- Exclude WPF smoke tests from the main app build -->
+    <Compile Remove="YasGMP.Wpf.Smoke\**\*.cs" />
+    <None Include="YasGMP.Wpf.Smoke\**\*.cs" />
+    <!-- Exclude AppCore sources to avoid duplicate compilation; use ProjectReference -->
+    <Compile Remove="YasGMP.AppCore\**\*.cs" />
+    <None Include="YasGMP.AppCore\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

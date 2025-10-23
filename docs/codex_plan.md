@@ -1,5 +1,24 @@
 # Codex Plan — WPF Shell & Full Integration
 
+## 2025-10-23 – Build fixes (TFM alignment, WPF items, XAML)
+
+- Aligned `YasGMP.Tests` to `net9.0-windows10.0.19041.0` so it can reference the MAUI app (`yasgmp.csproj`) which targets .NET 9 for Windows.
+- Removed explicit `Compile`/`Page` includes for `Dialogs/AiAssistantDialog` from `YasGMP.Wpf.csproj` to resolve `NETSDK1022` duplicate items (the SDK already includes XAML/code-behind by convention).
+- Fixed `ReportsModuleView.xaml` to use `DockPanel.Resources` instead of the invalid `UserControl.Resources` attached property on a `DockPanel` and replaced unsupported `StackPanel.Spacing` with per‑child margins.
+- Repaired `YasGMP.AppCore/Data/YasGmpDbContext.cs` by deleting a duplicated, out‑of‑scope tail block that caused `CS8803` (top‑level statements). The valid configuration remains inside `OnModelCreating`.
+- Addressed `OpenAiOptions` duplicate overloads by consolidating `GetEnvOr` to a single nullable overload and coalescing assignments.
+- Fixed `ExportService` local variable shadowing (`CS0136`) by renaming progress counter variables.
+- Ensured AppCore builds in isolation; added missing `using YasGMP.Services.Interfaces;` in `AttachmentEmbeddingService`.
+- Excluded `YasGMP.Wpf.Tests/**`, `YasGMP.Wpf.Smoke/**`, and `YasGMP.AppCore/**` sources from the MAUI app compile to avoid accidental inclusion (rely on `ProjectReference` instead). This removes duplicate assembly attributes and test artifacts from the MAUI build.
+
+Validation:
+- dotnet restore: OK
+- AppCore build: OK (warnings only)
+- Solution build: Remaining WPF compile errors are unrelated to the original report (namespace/type resolution during WPF XAML tmp compile); follow‑up tracked below.
+
+Follow‑ups (tracked):
+- WPF tmp compile cannot resolve `YasGMP.*` namespaces even though `YasGMP.AppCore` is referenced. Investigate XAML pass references and ensure no MAUI ViewModel namespaces are imported into WPF root types. Consider trimming `using` statements in `App.xaml.cs` and verifying the `ProjectReference` path and build order.
+
 ## Current Compile Status
 - [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.305 — previously 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
   - 2025-10-13T10:58Z: `dotnet --info` retried after retargeting MAUI/AppCore to .NET 9; command still returns `bash: command not found: dotnet` so validation remains Windows-host only.
@@ -562,3 +581,70 @@
 - 2026-05-27: WPF host registers `IDocumentControlService` via `DocumentControlServiceAdapter` using the DatabaseService, attachment workflow/service, and electronic signature dialog dependencies while `DocumentControlModuleViewModel` now resolves the adapter through DI; `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` each still fail with `command not found: dotnet` in this Linux container.
 - 2026-05-28: Training Records module now has dedicated WPF regression tests covering adapter load, status/type filters, initiate/assign/approve/complete/close/export workflows, export prompt mocking, and filtered-record projection while the module exposes an injectable export prompt delegate; `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` continue to fail with `command not found: dotnet` until the CLI is available.
 - 2026-06-13: Added SopGovernanceModuleViewModel regression tests covering adapter load, filter proxies, CRUD workflow success/failure paths, busy gating, and shared-view-model property propagation with refreshed SOP test doubles; `dotnet --version`, `dotnet restore`, `dotnet build`, and `dotnet test` continue to fail with `command not found: dotnet` in this container.
+# Codex Batch Plan — WPF Shell + ChatGPT (AI) Integration
+
+This file records the step-by-step plan and key decisions while delivering the WPF shell (Fluent.Ribbon + AvalonDock) and integrating a robust ChatGPT SDK–backed assistant across YasGMP (WPF + MAUI), per AGENTS.md.
+
+## Current Environment and Constraints
+- Detected host: Ubuntu 24.04 (WSL2). The `dotnet` SDK is not installed in this environment. WPF smoke execution is not possible here.
+- As mandated by AGENTS.md, we prefer .NET 9 (`net9.0-windows`). If the SDK is unavailable, we fall back to documenting the reason and proceed.
+- We will still structure the code, DI, and tests so they build and run on a Windows workstation with .NET 9 SDK.
+
+## Goals for this batch
+- Wire an AI assistant service using a ChatGPT SDK (with safe fallbacks) into YasGMP.AppCore.
+- Expose a simple WPF “Ask AI” dialog on the Tools tab; register services in DI (WPF + MAUI) without breaking existing APIs.
+- Add environment/config support: `OPENAI_API_KEY`, `Ai:OpenAI:ApiKey`, `Ai:OpenAI:BaseUrl`, `Ai:OpenAI:Model`.
+- Prepare smoke-harness hooks to log AI diagnostics in `%LOCALAPPDATA%/YasGMP/logs`.
+
+## Design Decisions
+- Place AI contracts and implementation in `YasGMP.AppCore` to be shared by WPF and MAUI hosts.
+- Prefer official OpenAI .NET SDK (pinned). If the SDK is missing at restore time, a lightweight HttpClient fallback is provided so the API surface compiles (SDK is still the default path on Windows).
+- Keep MAUI code intact. Only DI additions; no public API breaking changes.
+
+## Work Completed (this batch)
+- Added `IAiAssistantService` and `OpenAiAssistantService` with chat, embeddings and moderation entry points.
+- Added `OpenAiOptions` (config + env binding).
+- Registered AI services in WPF `App.xaml.cs` and MAUI `MauiProgram.cs`.
+- Added WPF dialog `AiAssistantDialog` + `AiAssistantDialogViewModel` and a Ribbon button (Tools tab) to open it.
+- Added docs updates (this file + codex_progress.json).
+
+## Next Batches
+- Expand AI assistant to do RAG (vectorization of attachments) once DB schema is approved for embeddings.
+- Add vision/image prompts from DB-backed attachments when user selects a file.
+- Add xUnit smoke covering AI service (offline stub) in `YasGMP.Wpf.Smoke` guarded by `RUN_WPF_SMOKE`.
+
+## Open Issues
+- `dotnet` SDK not present in this environment → cannot run `restore/build/test` here. On Windows, run the commands listed below.
+- Some NuGet versions may need locking to nearest lower stable if feeds differ on the developer machine; document any adjustments.
+
+## How to Build and Smoke-Test on Windows
+1. Install .NET 9 SDK and Windows Desktop pack.
+2. In repo root:
+   - `dotnet restore yasgmp.sln`
+   - `dotnet build yasgmp.sln -c Release`
+   - Optional WPF only: `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release`
+3. Enable smoke and run the WPF app: `set YASGMP_SMOKE=1 && dotnet run --project YasGMP.Wpf -- --smoke`
+4. Smoke tests (automation): `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release -p:RUN_WPF_SMOKE=1`
+
+## Acceptance Checklist (delta for this batch)
+- WPF project compiles with AI button and opens AI dialog.
+- MAUI build unaffected; AI services added via DI only.
+- AI options read from config/env; safe fallbacks applied.
+- Smoke harness logs created under `%LOCALAPPDATA%/YasGMP/logs`.
+## Increment — AI Assistant Module, One-Click Summaries, and RAG (Embeddings)
+
+- Added shared AI contracts and implementation in AppCore:
+  - `IAiAssistantService`, `OpenAiAssistantService`, `OpenAiOptions`.
+  - Config/env: `OPENAI_API_KEY`, `Ai:OpenAI:*`.
+- WPF shell:
+  - Tools → “Ask AI Assistant” dialog (already added).
+  - New docked document: `AiModuleViewModel` + `AiModuleView` registered in the Modules pane.
+  - Buttons in the AI module: “Summarize Audit” and “Summarize Work Orders”.
+  - One‑click buttons in Audit, Work Orders, Suppliers, Incidents, CAPA, and External Servicers: “Summarize (AI)” opens the AI module and executes with a context prompt.
+- Optional RAG (attachments embeddings):
+  - EF model `AttachmentEmbedding` table `attachment_embeddings`.
+  - Service `AttachmentEmbeddingService` that uses OpenAI embeddings.
+  - Attachments module: “Index AI Embedding” and “Find Similar (AI)” commands, plus a right-side Similar Attachments panel.
+- MAUI host registers the AI services (no UI changes, keeps APIs stable).
+
+Windows build/smoke validation pending — run the standard restore/build/test commands on a Windows host with .NET 9 + Windows Desktop SDK.
