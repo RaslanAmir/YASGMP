@@ -205,6 +205,7 @@
   },
   "lastCommitSummary": "feat: sync training and sop governance modules",
   "notes": [
+    "2026-06-11: Introduced ISopGovernanceService/SopGovernanceServiceAdapter so SOP workflows capture attachment uploads and electronic signatures with session metadata, refactored SopGovernanceModuleViewModel to consume the adapter and refresh inspector projections, and wired the registration into App.xaml.cs; dotnet restore/build remain blocked with 'command not found: dotnet'.",
     "2026-06-08: WPF Training Records and SOP Governance modules now project the shared MAUI view-models, synchronize inspector panes, and refresh ribbon command gating; dotnet --version/restore/build attempts still return 'command not found' so validation awaits a Windows host.",
     "2026-06-01: DocumentControlModuleViewModel regression tests now cover initialization, attachments, change-control linking, exports, and initiate/revise saves across success/failure/exception paths with busy/status assertions; dotnet restore/build/test remain blocked with 'command not found' in this container.",
     "2025-10-16: WorkOrdersModuleViewModel now exposes signature/audit observables, rehydrates persisted metadata after saves, and mirrors inspector updates while dotnet restore/build/test remain blocked with 'command not found'.",

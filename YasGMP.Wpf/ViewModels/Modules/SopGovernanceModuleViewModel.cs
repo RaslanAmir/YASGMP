@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -22,6 +23,7 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
     public const string ModuleKey = "SopGovernance";
 
     private readonly SopViewModel _sop;
+    private readonly ISopGovernanceService _sopService;
     private readonly ILocalizationService _localization;
     private readonly AsyncRelayCommand _createCommand;
     private readonly AsyncRelayCommand _updateCommand;
@@ -33,6 +35,7 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
     /// </summary>
     public SopGovernanceModuleViewModel(
         SopViewModel sop,
+        ISopGovernanceService sopService,
         ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
@@ -40,6 +43,7 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
         : base(ModuleKey, localization.GetString("Module.Title.SopGovernance"), localization, cflDialogService, shellInteraction, navigation)
     {
         _sop = sop ?? throw new ArgumentNullException(nameof(sop));
+        _sopService = sopService ?? throw new ArgumentNullException(nameof(sopService));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         _sop.PropertyChanged += OnSopPropertyChanged;
@@ -168,7 +172,14 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
     /// <inheritdoc />
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
-        await _sop.LoadDocumentsAsync().ConfigureAwait(false);
+        var result = await _sopService.LoadAsync().ConfigureAwait(false);
+        StatusMessage = result.Message;
+
+        if (result.Success)
+        {
+            _sop.ApplyDocuments(result.Documents);
+        }
+
         return ProjectRecords();
     }
 
@@ -240,23 +251,12 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
     {
         if (Mode == FormMode.Add)
         {
-            Editor.ApplyTo(_sop.DraftDocument);
-            await _sop.CreateDocumentAsync().ConfigureAwait(false);
-            StatusMessage = _sop.StatusMessage ?? string.Empty;
-            return true;
+            return await ExecuteCreateWorkflowAsync().ConfigureAwait(false);
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_sop.SelectedDocument is null)
-            {
-                return false;
-            }
-
-            Editor.ApplyTo(_sop.SelectedDocument);
-            await _sop.UpdateDocumentAsync().ConfigureAwait(false);
-            StatusMessage = _sop.StatusMessage ?? string.Empty;
-            return true;
+            return await ExecuteUpdateWorkflowAsync().ConfigureAwait(false);
         }
 
         return false;
@@ -308,10 +308,7 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
             return;
         }
 
-        Editor.ApplyTo(_sop.DraftDocument);
-        await _sop.CreateDocumentAsync().ConfigureAwait(false);
-        StatusMessage = _sop.StatusMessage ?? string.Empty;
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        await ExecuteCreateWorkflowAsync().ConfigureAwait(false);
     }
 
     private bool CanCreate() => !IsBusy;
@@ -323,14 +320,7 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
             return;
         }
 
-        if (_sop.SelectedDocument is SopDocument document)
-        {
-            Editor.ApplyTo(document);
-        }
-
-        await _sop.UpdateDocumentAsync().ConfigureAwait(false);
-        StatusMessage = _sop.StatusMessage ?? string.Empty;
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        await ExecuteUpdateWorkflowAsync().ConfigureAwait(false);
     }
 
     private bool CanUpdate()
@@ -343,13 +333,139 @@ public sealed partial class SopGovernanceModuleViewModel : ModuleDocumentViewMod
             return;
         }
 
-        await _sop.DeleteDocumentAsync().ConfigureAwait(false);
-        StatusMessage = _sop.StatusMessage ?? string.Empty;
-        await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+        await ExecuteDeleteWorkflowAsync().ConfigureAwait(false);
     }
 
     private bool CanDelete()
         => !IsBusy && _sop.SelectedDocument is not null;
+
+    private Task<bool> ExecuteCreateWorkflowAsync()
+    {
+        Editor.ApplyTo(_sop.DraftDocument);
+
+        SopDocument prepared;
+        try
+        {
+            prepared = _sop.PrepareForSave(_sop.DraftDocument, isNew: true);
+        }
+        catch (InvalidOperationException ex)
+        {
+            StatusMessage = ex.Message;
+            return Task.FromResult(false);
+        }
+
+        return ExecuteWorkflowAsync(
+            token => _sopService.CreateAsync(prepared, null, token),
+            async result =>
+            {
+                await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+
+                if (result.DocumentId.HasValue)
+                {
+                    var key = result.DocumentId.Value.ToString(CultureInfo.InvariantCulture);
+                    var record = Records.FirstOrDefault(r => string.Equals(r.Key, key, StringComparison.Ordinal));
+                    if (record is not null)
+                    {
+                        SelectedRecord = record;
+                    }
+                }
+
+                _sop.ResetDraftCommand.Execute(null);
+            });
+    }
+
+    private Task<bool> ExecuteUpdateWorkflowAsync()
+    {
+        if (_sop.SelectedDocument is not SopDocument document)
+        {
+            return Task.FromResult(false);
+        }
+
+        Editor.ApplyTo(document);
+
+        SopDocument prepared;
+        try
+        {
+            prepared = _sop.PrepareForSave(document, isNew: false);
+        }
+        catch (InvalidOperationException ex)
+        {
+            StatusMessage = ex.Message;
+            return Task.FromResult(false);
+        }
+
+        return ExecuteWorkflowAsync(
+            token => _sopService.UpdateAsync(prepared, null, token),
+            async result =>
+            {
+                await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+
+                var targetId = result.DocumentId ?? document.Id;
+                var key = targetId.ToString(CultureInfo.InvariantCulture);
+                var record = Records.FirstOrDefault(r => string.Equals(r.Key, key, StringComparison.Ordinal));
+                if (record is not null)
+                {
+                    SelectedRecord = record;
+                }
+            });
+    }
+
+    private Task<bool> ExecuteDeleteWorkflowAsync()
+    {
+        if (_sop.SelectedDocument is not SopDocument document)
+        {
+            return Task.FromResult(false);
+        }
+
+        return ExecuteWorkflowAsync(
+            token => _sopService.DeleteAsync(document, null, token),
+            async _ =>
+            {
+                await RefreshCommand.ExecuteAsync(null).ConfigureAwait(false);
+                ProjectRecordsIntoShell();
+
+                if (Records.Count == 0)
+                {
+                    _sop.ResetDraftCommand.Execute(null);
+                    Editor = SopDocumentEditor.FromDocument(_sop.DraftDocument, OnEditorChanged);
+                }
+            });
+    }
+
+    private async Task<bool> ExecuteWorkflowAsync(
+        Func<CancellationToken, Task<SopGovernanceOperationResult>> operation,
+        Func<SopGovernanceOperationResult, Task>? onSuccess = null)
+    {
+        IsBusy = true;
+        RefreshCommandStates();
+        UpdateWorkflowCommands();
+
+        try
+        {
+            var result = await operation(CancellationToken.None).ConfigureAwait(false);
+            StatusMessage = result.Message;
+
+            if (!result.Success)
+            {
+                return false;
+            }
+
+            if (onSuccess is not null)
+            {
+                await onSuccess(result).ConfigureAwait(false);
+            }
+
+            return true;
+        }
+        finally
+        {
+            IsBusy = false;
+            RefreshCommandStates();
+            UpdateWorkflowCommands();
+        }
+    }
 
     private void OnSopPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
