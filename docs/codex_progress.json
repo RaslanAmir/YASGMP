@@ -6,6 +6,7 @@
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
       "2026-06-03: dotnet --version retried while documenting the Document Control milestone wrap-up; CLI remains unavailable so the command exits with 'command not found'.",
+      "2026-06-09: dotnet --version and dotnet restore yasgmp.sln retried before documenting the Training/SOP modules; CLI still missing so each command exits with 'command not found'.",
       "2026-06-01: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried during Document Control module regression coverage; each command still exits with 'command not found'.",
       "2026-05-21: dotnet restore yasgmp.sln retried while landing Deviation CRUD adapter regression tests; CLI still missing so the command exits with 'command not found'.",
       "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
@@ -104,6 +105,7 @@
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",
       "2026-04-20: Documented WPF code/QR parity and operator guidance in docs/WPF_MAPPING.md; restore/build/test remain blocked with 'command not found' until the CLI is available."
+      "2026-06-09: Documented Training Records and SOP Governance module workflows in docs/WPF_MAPPING.md and README_WPF_SHELL.md; dotnet --version/dotnet restore still fail with 'command not found: dotnet'."
     ]
   },
   "batches": [
@@ -486,7 +488,8 @@
   "updates": [
     "2026-06-02: Promoted the RecordingDocumentControlService stub into TestStubs with configurable lifecycle/export/attachment hooks and expanded DocumentControlModuleViewModel tests to cover approve/publish/expire success, failure, and exception flows; dotnet restore/build/test still fail locally with 'command not found: dotnet'.",
     "2026-06-03: Document Control milestone marked complete—desktop document view, adapter, and attachment/signature integration documented; dotnet --version continues to return 'command not found', so WPF smoke harness execution remains pending Windows tooling.",
-    "2026-06-07: Added WPF analytics reporting document and notifications pane backed by shared Report/Notification view-models, extended ExportService with report/notification PDF+Excel helpers, updated docs/WPF_MAPPING.md, and added unit tests covering export success/failure messaging; dotnet restore/build/test still fail with 'command not found: dotnet' in this container."
-    ,"2026-06-08: Introduced Training Records and SOP Governance WPF modules that wrap the shared MAUI training/SOP view-models, project inspector metadata, and expose SAP B1 form-mode commands; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still return 'command not found: dotnet' in this Linux container."
+    "2026-06-07: Added WPF analytics reporting document and notifications pane backed by shared Report/Notification view-models, extended ExportService with report/notification PDF+Excel helpers, updated docs/WPF_MAPPING.md, and added unit tests covering export success/failure messaging; dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
+    "2026-06-08: Introduced Training Records and SOP Governance WPF modules that wrap the shared MAUI training/SOP view-models, project inspector metadata, and expose SAP B1 form-mode commands; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still return 'command not found: dotnet' in this Linux container.",
+    "2026-06-09: Documented Training Records and SOP Governance module access/workflows in docs/WPF_MAPPING.md and README_WPF_SHELL.md while dotnet --version/dotnet restore retries continue to fail with 'command not found: dotnet' in this container."
   ]
 }
