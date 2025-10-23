@@ -33,6 +33,7 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
     private readonly AsyncRelayCommand _completeCommand;
     private readonly AsyncRelayCommand _closeCommand;
     private readonly AsyncRelayCommand _exportCommand;
+    private Func<Task<string?>> _exportFormatPromptAsync = DefaultExportFormatPromptAsync;
     private INotifyCollectionChanged? _filteredRecordsSubscription;
 
     /// <summary>
@@ -87,6 +88,12 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
 
     /// <summary>Command that exports the filtered snapshot to PDF/Excel.</summary>
     public IAsyncRelayCommand ExportCommand => _exportCommand;
+
+    internal Func<Task<string?>> ExportFormatPromptAsync
+    {
+        get => _exportFormatPromptAsync;
+        set => _exportFormatPromptAsync = value ?? DefaultExportFormatPromptAsync;
+    }
 
     /// <summary>Status options mirrored from the shared view-model.</summary>
     public IReadOnlyList<string> StatusOptions => _trainingRecords.AvailableStatuses;
@@ -425,7 +432,7 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
 
         try
         {
-            var format = await ExportFormatPrompt.PromptAsync().ConfigureAwait(false);
+            var format = await _exportFormatPromptAsync().ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(format))
             {
                 StatusMessage = _localization.GetString("Module.Status.Cancelled");
@@ -448,6 +455,9 @@ public sealed partial class TrainingRecordsModuleViewModel : ModuleDocumentViewM
     }
 
     private bool CanExport() => !IsBusy && _trainingRecords.FilteredTrainingRecords.Count > 0;
+
+    private static async Task<string?> DefaultExportFormatPromptAsync()
+        => await ExportFormatPrompt.PromptAsync().ConfigureAwait(false);
 
     private void OnTrainingRecordsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
