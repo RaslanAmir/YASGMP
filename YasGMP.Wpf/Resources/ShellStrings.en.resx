@@ -519,6 +519,252 @@
   <data name="Module.Description.DocumentControl" xml:space="preserve">
     <value>SOP lifecycle and document governance.</value>
   </data>
+  <data name="Module.Title.TrainingRecords" xml:space="preserve">
+    <value>Training Records</value>
+  </data>
+  <data name="Module.Description.TrainingRecords" xml:space="preserve">
+    <value>Employee training lifecycle, assignments, approvals, and effectiveness tracking</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.Content" xml:space="preserve">
+    <value>Initiate</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.ToolTip" xml:space="preserve">
+    <value>Initiate a new training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.AutomationName" xml:space="preserve">
+    <value>Initiate training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Initiate.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Initiate</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.Content" xml:space="preserve">
+    <value>Assign</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.ToolTip" xml:space="preserve">
+    <value>Assign the selected training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.AutomationName" xml:space="preserve">
+    <value>Assign training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Assign.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Assign</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.Content" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.ToolTip" xml:space="preserve">
+    <value>Approve the selected training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.AutomationName" xml:space="preserve">
+    <value>Approve training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Approve.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Approve</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.Content" xml:space="preserve">
+    <value>Complete</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.ToolTip" xml:space="preserve">
+    <value>Mark the selected training record as completed</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.AutomationName" xml:space="preserve">
+    <value>Complete training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Complete.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Complete</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.Content" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.ToolTip" xml:space="preserve">
+    <value>Close the selected training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.AutomationName" xml:space="preserve">
+    <value>Close training record</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Close.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Close</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.Content" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.ToolTip" xml:space="preserve">
+    <value>Export the filtered training records</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.AutomationName" xml:space="preserve">
+    <value>Export training records</value>
+  </data>
+  <data name="Module.TrainingRecords.Toolbar.Export.AutomationId" xml:space="preserve">
+    <value>Toolbar.TrainingRecords.Export</value>
+  </data>
+  <data name="Module.TrainingRecords.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.TrainingRecords.Filter.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.TrainingRecords.Grid.Column.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.TrainingRecords.Grid.Column.Due" xml:space="preserve">
+    <value>Due</value>
+  </data>
+  <data name="Module.TrainingRecords.Details.Header" xml:space="preserve">
+    <value>Training Details</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.Type" xml:space="preserve">
+    <value>Training type</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.AssignedTo" xml:space="preserve">
+    <value>Assigned to</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.TrainingDate" xml:space="preserve">
+    <value>Training date</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.DueDate" xml:space="preserve">
+    <value>Due date</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.ExpiryDate" xml:space="preserve">
+    <value>Expiry date</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.Effectiveness" xml:space="preserve">
+    <value>Effectiveness check</value>
+  </data>
+  <data name="Module.TrainingRecords.Text.Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Initiated" xml:space="preserve">
+    <value>Training record '{0}' initiated.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Assigned" xml:space="preserve">
+    <value>Training record '{0}' assigned.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Approved" xml:space="preserve">
+    <value>Training record '{0}' approved.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Completed" xml:space="preserve">
+    <value>Training record '{0}' completed.</value>
+  </data>
+  <data name="Module.TrainingRecords.Status.Closed" xml:space="preserve">
+    <value>Training record '{0}' closed.</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.AssignedTo" xml:space="preserve">
+    <value>Assigned to</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.DueDate" xml:space="preserve">
+    <value>Due date</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.TrainingDate" xml:space="preserve">
+    <value>Training date</value>
+  </data>
+  <data name="Module.TrainingRecords.Field.ExpiryDate" xml:space="preserve">
+    <value>Expiry date</value>
+  </data>
+  <data name="Module.TrainingRecords.Search.AutomationId" xml:space="preserve">
+    <value>TrainingRecords.SearchBox</value>
+  </data>
+  <data name="Module.Title.SopGovernance" xml:space="preserve">
+    <value>SOP Governance</value>
+  </data>
+  <data name="Module.Description.SopGovernance" xml:space="preserve">
+    <value>SOP lifecycle governance, approvals, and audit alignment</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.Content" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.ToolTip" xml:space="preserve">
+    <value>Create a new SOP draft</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.AutomationName" xml:space="preserve">
+    <value>Create SOP document</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Create.AutomationId" xml:space="preserve">
+    <value>Toolbar.SopGovernance.Create</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.Content" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.ToolTip" xml:space="preserve">
+    <value>Update the selected SOP</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.AutomationName" xml:space="preserve">
+    <value>Update SOP document</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Update.AutomationId" xml:space="preserve">
+    <value>Toolbar.SopGovernance.Update</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.ToolTip" xml:space="preserve">
+    <value>Delete the selected SOP</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.AutomationName" xml:space="preserve">
+    <value>Delete SOP document</value>
+  </data>
+  <data name="Module.SopGovernance.Toolbar.Delete.AutomationId" xml:space="preserve">
+    <value>Toolbar.SopGovernance.Delete</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.Process" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.IssuedFrom" xml:space="preserve">
+    <value>Issued from</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.IssuedTo" xml:space="preserve">
+    <value>Issued to</value>
+  </data>
+  <data name="Module.SopGovernance.Filter.ActiveOnly" xml:space="preserve">
+    <value>Active only</value>
+  </data>
+  <data name="Module.SopGovernance.Grid.Column.Process" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="Module.SopGovernance.Grid.Column.Issued" xml:space="preserve">
+    <value>Issued</value>
+  </data>
+  <data name="Module.SopGovernance.Grid.Column.Expiry" xml:space="preserve">
+    <value>Expiry</value>
+  </data>
+  <data name="Module.SopGovernance.Details.Header" xml:space="preserve">
+    <value>SOP Details</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Process" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Issued" xml:space="preserve">
+    <value>Issued on</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Expiry" xml:space="preserve">
+    <value>Expiry</value>
+  </data>
+  <data name="Module.SopGovernance.Text.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Process" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Issued" xml:space="preserve">
+    <value>Issued</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Expiry" xml:space="preserve">
+    <value>Expiry</value>
+  </data>
+  <data name="Module.SopGovernance.Field.Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="Module.SopGovernance.Search.AutomationId" xml:space="preserve">
+    <value>SopGovernance.SearchBox</value>
+  </data>
   <data name="Module.Assets.Status.Active" xml:space="preserve">
     <value>active</value>
   </data>

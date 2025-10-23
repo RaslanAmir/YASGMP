@@ -202,6 +202,8 @@ namespace YasGMP.Wpf
                         svc.AddTransient<AuditDashboardDocumentViewModel>();
                         svc.AddTransient<ReportsDocumentViewModel>();
                         svc.AddTransient<ApiAuditModuleViewModel>();
+                        svc.AddTransient<TrainingRecordsModuleViewModel>();
+                        svc.AddTransient<SopGovernanceModuleViewModel>();
                         svc.AddTransient<DiagnosticsModuleViewModel>();
                         svc.AddTransient(sp => new AttachmentsModuleViewModel(
                             sp.GetRequiredService<DatabaseService>(),
@@ -236,6 +238,16 @@ namespace YasGMP.Wpf
                                 "DocumentControl",
                                 "Quality",
                                 localization.GetString("Module.Description.DocumentControl"));
+                            registry.Register<TrainingRecordsModuleViewModel>(
+                                TrainingRecordsModuleViewModel.ModuleKey,
+                                "Training Records",
+                                "Quality",
+                                localization.GetString("Module.Description.TrainingRecords"));
+                            registry.Register<SopGovernanceModuleViewModel>(
+                                SopGovernanceModuleViewModel.ModuleKey,
+                                "SOP Governance",
+                                "Quality",
+                                localization.GetString("Module.Description.SopGovernance"));
                             registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");

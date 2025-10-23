@@ -136,7 +136,8 @@
         "2026-04-01: Split module toolbar UI tests into ModuleToolbarTests and moved FakeLocalizationService into shared test doubles so toolbar command/template fixtures share localization stubs; dotnet restore/build commands still fail with 'command not found' in the container.",
         "2026-04-07: Documented remaining B1 scope (Windows-host ribbon/status validation, DockLayoutPersistenceService round-trip check, and YasGMP.Wpf.Smoke execution) so the batch can close once CLI access is restored.",
         "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host.",
-        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host."
+        "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host.",
+        "2026-06-08: Training Records and SOP Governance module view-models now monitor filtered collection subscriptions and implement IDisposable so event handlers are released when documents close; dotnet restore/build/test still fail with 'command not found' in this container."
       ]
     },
     {
@@ -482,5 +483,6 @@
     "2026-06-02: Promoted the RecordingDocumentControlService stub into TestStubs with configurable lifecycle/export/attachment hooks and expanded DocumentControlModuleViewModel tests to cover approve/publish/expire success, failure, and exception flows; dotnet restore/build/test still fail locally with 'command not found: dotnet'.",
     "2026-06-03: Document Control milestone marked complete—desktop document view, adapter, and attachment/signature integration documented; dotnet --version continues to return 'command not found', so WPF smoke harness execution remains pending Windows tooling.",
     "2026-06-07: Added WPF analytics reporting document and notifications pane backed by shared Report/Notification view-models, extended ExportService with report/notification PDF+Excel helpers, updated docs/WPF_MAPPING.md, and added unit tests covering export success/failure messaging; dotnet restore/build/test still fail with 'command not found: dotnet' in this container."
+    ,"2026-06-08: Introduced Training Records and SOP Governance WPF modules that wrap the shared MAUI training/SOP view-models, project inspector metadata, and expose SAP B1 form-mode commands; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still return 'command not found: dotnet' in this Linux container."
   ]
 }
