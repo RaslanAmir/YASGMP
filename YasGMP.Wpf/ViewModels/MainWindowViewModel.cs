@@ -38,6 +38,7 @@ public partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(
         IModuleRegistry moduleRegistry,
         ModulesPaneViewModel modulesPane,
+        NotificationsPaneViewModel notificationsPane,
         InspectorPaneViewModel inspectorPane,
         ShellStatusBarViewModel statusBar,
         ShellInteractionService shellInteraction,
@@ -51,6 +52,7 @@ public partial class MainWindowViewModel : ObservableObject
         _localization = localization;
         _alertService = alertService;
         ModulesPane = modulesPane;
+        NotificationsPane = notificationsPane;
         InspectorPane = inspectorPane;
         StatusBar = statusBar;
         Documents = new ObservableCollection<DocumentViewModel>();
@@ -68,6 +70,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     /// <summary>Left-hand navigation pane listing modules.</summary>
     public ModulesPaneViewModel ModulesPane { get; }
+
+    /// <summary>Anchorable pane exposing notifications analytics.</summary>
+    public NotificationsPaneViewModel NotificationsPane { get; }
 
     /// <summary>Inspector pane rendered along the right side of the shell.</summary>
     public InspectorPaneViewModel InspectorPane { get; }

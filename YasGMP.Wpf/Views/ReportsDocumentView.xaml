@@ -1,0 +1,176 @@
+<UserControl x:Class="YasGMP.Wpf.Views.ReportsDocumentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="400"
+             d:DesignWidth="700">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <Style x:Key="BusyAwareButtonStyle" TargetType="Button">
+                <Setter Property="Margin" Value="4,0,0,0" />
+                <Setter Property="Padding" Value="12,4" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <DockPanel>
+        <ToolBar DockPanel.Dock="Top">
+            <ItemsControl ItemsSource="{Binding Toolbar}"
+                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <Separator />
+            <Button Content="{DynamicResource Reports.Toolbar.Command.Generate.Content}"
+                    Command="{Binding GenerateCommand}"
+                    Style="{StaticResource BusyAwareButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Reports.Toolbar.Command.Generate.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Reports.Toolbar.Command.Generate.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Reports.Toolbar.Command.Generate.AutomationId}" />
+            <Button Content="{DynamicResource Reports.Toolbar.Command.ExportPdf.Content}"
+                    Command="{Binding ExportToPdfCommand}"
+                    Style="{StaticResource BusyAwareButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Reports.Toolbar.Command.ExportPdf.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Reports.Toolbar.Command.ExportPdf.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Reports.Toolbar.Command.ExportPdf.AutomationId}" />
+            <Button Content="{DynamicResource Reports.Toolbar.Command.ExportExcel.Content}"
+                    Command="{Binding ExportToExcelCommand}"
+                    Style="{StaticResource BusyAwareButtonStyle}"
+                    ToolTipService.ToolTip="{DynamicResource Reports.Toolbar.Command.ExportExcel.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Reports.Toolbar.Command.ExportExcel.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Reports.Toolbar.Command.ExportExcel.AutomationId}" />
+            <Separator />
+            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}"
+                    Command="{Binding ShowCflCommand}"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}" />
+            <controls:GoldenArrowButton
+                Command="{Binding GoldenArrowCommand}"
+                Margin="8,0,0,0"
+                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
+                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
+                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+        </ToolBar>
+        <Grid Margin="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <WrapPanel Margin="0,0,0,8">
+                    <StackPanel Width="180" Margin="0,0,12,0">
+                        <TextBlock Text="{DynamicResource Reports.Filter.From}" FontWeight="SemiBold" />
+                        <DatePicker SelectedDate="{Binding Analytics.FromDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
+                    </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,0">
+                        <TextBlock Text="{DynamicResource Reports.Filter.To}" FontWeight="SemiBold" />
+                        <DatePicker SelectedDate="{Binding Analytics.ToDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
+                    </StackPanel>
+                    <StackPanel Width="200" Margin="0,0,12,0">
+                        <TextBlock Text="{DynamicResource Reports.Filter.ReportType}" FontWeight="SemiBold" />
+                        <ComboBox ItemsSource="{Binding Analytics.AvailableReportTypes}"
+                                  SelectedItem="{Binding Analytics.SelectedReportType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="200" Margin="0,0,12,0">
+                        <TextBlock Text="{DynamicResource Reports.Filter.EntityType}" FontWeight="SemiBold" />
+                        <ComboBox ItemsSource="{Binding Analytics.AvailableEntityTypes}"
+                                  SelectedItem="{Binding Analytics.SelectedEntityType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="160" Margin="0,0,12,0">
+                        <TextBlock Text="{DynamicResource Reports.Filter.Status}" FontWeight="SemiBold" />
+                        <ComboBox ItemsSource="{Binding Analytics.AvailableStatuses}"
+                                  SelectedItem="{Binding Analytics.StatusFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="160" Margin="0,0,12,0">
+                        <TextBlock Text="{DynamicResource Reports.Filter.EntityId}" FontWeight="SemiBold" />
+                        <TextBox Text="{Binding Analytics.EntityIdText, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </WrapPanel>
+                <DockPanel>
+                    <TextBlock Text="{DynamicResource Dashboard.Search.Label}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <TextBox Width="220"
+                             Text="{Binding Analytics.SearchTerm, UpdateSourceTrigger=PropertyChanged}" />
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                        <Button Content="{DynamicResource Reports.Filter.Apply}"
+                                Command="{Binding Analytics.ApplyFiltersCommand}"
+                                Style="{StaticResource BusyAwareButtonStyle}" />
+                        <Button Content="{DynamicResource Reports.Filter.Clear}"
+                                Command="{Binding Analytics.ClearFiltersCommand}"
+                                Style="{StaticResource BusyAwareButtonStyle}" />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+
+            <Grid Grid.Row="1">
+                <DataGrid ItemsSource="{Binding RecordsView}"
+                          SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.Title}" Binding="{Binding Title}" Width="2*" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.Type}" Binding="{Binding Code}" Width="120" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.Status}" Binding="{Binding Status}" Width="120" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.GeneratedOn}" Binding="{Binding InspectorFields[0].Value}" Width="160" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.Entity}" Binding="{Binding InspectorFields[3].Value}" Width="140" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.EntityId}" Binding="{Binding InspectorFields[4].Value}" Width="120" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.GeneratedBy}" Binding="{Binding InspectorFields[5].Value}" Width="120" />
+                        <DataGridTextColumn Header="{DynamicResource Reports.Grid.Description}" Binding="{Binding Description}" Width="3*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Border Background="#80FFFFFF"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        IsHitTestVisible="True">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Orientation="Vertical"
+                                Margin="24">
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
+                        <TextBlock Text="{DynamicResource Reports.Status.Loading}"
+                                   Margin="0,12,0,0"
+                                   HorizontalAlignment="Center"
+                                   Foreground="Gray"
+                                   FontStyle="Italic" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <TextBlock Grid.Row="2"
+                       Text="{Binding StatusMessage}"
+                       FontStyle="Italic"
+                       Margin="0,8,0,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="Gray" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasError}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DockPanel>
+</UserControl>

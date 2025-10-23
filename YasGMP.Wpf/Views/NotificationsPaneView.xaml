@@ -1,0 +1,110 @@
+<UserControl x:Class="YasGMP.Wpf.Views.NotificationsPaneView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="400"
+             d:DesignWidth="320">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="BusyAwareButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="Padding" Value="10,4" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="{DynamicResource Notifications.Toolbar.ExportPdf}"
+                    Command="{Binding ExportToPdfCommand}"
+                    Style="{StaticResource BusyAwareButtonStyle}"
+                    AutomationProperties.Name="{DynamicResource Notifications.Toolbar.ExportPdf.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Notifications.Toolbar.ExportPdf.AutomationId}" />
+            <Button Content="{DynamicResource Notifications.Toolbar.ExportExcel}"
+                    Command="{Binding ExportToExcelCommand}"
+                    Style="{StaticResource BusyAwareButtonStyle}"
+                    AutomationProperties.Name="{DynamicResource Notifications.Toolbar.ExportExcel.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Notifications.Toolbar.ExportExcel.AutomationId}" />
+            <Button Content="{DynamicResource Notifications.Toolbar.Refresh}"
+                    Command="{Binding RefreshCommand}"
+                    Style="{StaticResource BusyAwareButtonStyle}"
+                    AutomationProperties.Name="{DynamicResource Notifications.Toolbar.Refresh.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Notifications.Toolbar.Refresh.AutomationId}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,8">
+            <TextBox Text="{Binding Analytics.SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,6" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <ComboBox Width="140"
+                          ItemsSource="{Binding Analytics.AvailableTypes}"
+                          SelectedItem="{Binding Analytics.TypeFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Width="140" Margin="6,0,0,0"
+                         Text="{Binding Analytics.EntityFilter, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Width="140" Margin="6,0,0,0"
+                         Text="{Binding Analytics.StatusFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <Button Content="{DynamicResource Notifications.Filter.Apply}"
+                    Command="{Binding Analytics.FilterChangedCommand}"
+                    HorizontalAlignment="Left"
+                    Style="{StaticResource BusyAwareButtonStyle}" />
+        </StackPanel>
+
+        <Border Grid.Row="2" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4">
+            <Grid>
+                <ListView ItemsSource="{Binding Notifications}" Margin="2">
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="False">
+                            <GridViewColumn Header="{DynamicResource Notifications.Grid.Title}" DisplayMemberBinding="{Binding Title}" Width="140" />
+                            <GridViewColumn Header="{DynamicResource Notifications.Grid.Type}" DisplayMemberBinding="{Binding Type}" Width="80" />
+                            <GridViewColumn Header="{DynamicResource Notifications.Grid.Status}" DisplayMemberBinding="{Binding Status}" Width="80" />
+                            <GridViewColumn Header="{DynamicResource Notifications.Grid.CreatedAt}" DisplayMemberBinding="{Binding CreatedAt}" Width="130" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <Border Background="#80FFFFFF"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        IsHitTestVisible="True">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Orientation="Vertical"
+                                Margin="24">
+                        <ProgressBar IsIndeterminate="True" Width="160" Height="16" />
+                        <TextBlock Text="{DynamicResource Notifications.Status.Loading}"
+                                   Margin="0,8,0,0"
+                                   HorizontalAlignment="Center"
+                                   Foreground="Gray" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="3"
+                   Text="{Binding StatusMessage}"
+                   Margin="0,8,0,0"
+                   FontStyle="Italic">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="Gray" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                            <Setter Property="Foreground" Value="Firebrick" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+    </Grid>
+</UserControl>

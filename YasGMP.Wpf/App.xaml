@@ -69,6 +69,9 @@
             <DataTemplate DataType="{x:Type vm:AuditLogDocumentViewModel}">
                 <views:AuditLogDocument />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ReportsDocumentViewModel}">
+                <views:ReportsDocumentView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type vm:RollbackPreviewDocumentViewModel}">
                 <views:RollbackPreviewDocument />
             </DataTemplate>
@@ -95,6 +98,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:DiagnosticsModuleViewModel}">
                 <views:DiagnosticsModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:NotificationsPaneViewModel}">
+                <views:NotificationsPaneView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

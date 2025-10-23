@@ -8,6 +8,7 @@ using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Services.Ui;
+using YasGMP.ViewModels;
 using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
@@ -140,6 +141,7 @@ namespace YasGMP.Wpf
                             return new WpfAssetViewModel(machineService, sharedAsset);
                         });
                         svc.AddSingleton<ModulesPaneViewModel>();
+                        svc.AddSingleton<NotificationsPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
                         svc.AddSingleton<ShellStatusBarViewModel>();
                         svc.AddSingleton<DebugSmokeTestService>();
@@ -154,6 +156,8 @@ namespace YasGMP.Wpf
                             return new AuditLogViewModel(database);
                         });
                         svc.AddTransient<AuditDashboardViewModel>();
+                        svc.AddTransient<IReportAnalyticsViewModel, ReportViewModel>();
+                        svc.AddTransient<INotificationAnalyticsViewModel, NotificationViewModel>();
                         svc.AddTransient<DashboardModuleViewModel>();
                         svc.AddTransient<AssetsModuleViewModel>(sp =>
                         {
@@ -196,6 +200,7 @@ namespace YasGMP.Wpf
                             sp.GetRequiredService<IModuleNavigationService>()));
                         svc.AddTransient<RollbackPreviewDocumentViewModel>();
                         svc.AddTransient<AuditDashboardDocumentViewModel>();
+                        svc.AddTransient<ReportsDocumentViewModel>();
                         svc.AddTransient<ApiAuditModuleViewModel>();
                         svc.AddTransient<DiagnosticsModuleViewModel>();
                         svc.AddTransient(sp => new AttachmentsModuleViewModel(
@@ -237,6 +242,7 @@ namespace YasGMP.Wpf
                             registry.Register<AdminModuleViewModel>(AdminModuleViewModel.ModuleKey, "Administration", "Administration", "Global configuration settings");
                             registry.Register<AuditLogDocumentViewModel>(AuditLogDocumentViewModel.ModuleKey, "Audit Trail", "Quality & Compliance", "System event history");
                             registry.Register<AuditDashboardDocumentViewModel>(AuditDashboardDocumentViewModel.ModuleKey, "Audit Dashboard", "Quality & Compliance", "Real-time audit feed and exports");
+                            registry.Register<ReportsDocumentViewModel>(ReportsDocumentViewModel.ModuleKey, "Reports", "Quality & Compliance", "Analytics reports and exports");
                             registry.Register<ApiAuditModuleViewModel>(ApiAuditModuleViewModel.ModuleKey, "API Audit Trail", "Quality & Compliance", "API key activity history and forensic request payloads");
                             registry.Register<DiagnosticsModuleViewModel>(DiagnosticsModuleViewModel.ModuleKey, "Diagnostics", "Diagnostics", "Telemetry snapshots and health checks");
                             registry.Register<AttachmentsModuleViewModel>(AttachmentsModuleViewModel.ModuleKey, "Attachments", "Documents", "File attachments and certificates");
