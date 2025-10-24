@@ -201,11 +201,12 @@
     "Attachments": "done",
     "Dashboard": "pending",
     "Reports": "pending",
-    "RiskAssessments": "in-progress",
+    "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: register risk assessments module",
+  "lastCommitSummary": "feat: deliver risk assessments workspace",
   "notes": [
+    "2026-06-12: Risk Assessments module now wraps the shared view-model with synchronized filters, records/inspector projection, and delegated initiate/update/approve/close/export toolbar commands; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-06-10: WPF host now registers the shared RiskAssessmentViewModel alongside the new RiskAssessmentsModuleViewModel so the Quality pane surfaces the risk workspace; dotnet restore/build/test remain blocked with 'command not found: dotnet' inside the Linux container.",
     "2026-06-11: Introduced ISopGovernanceService/SopGovernanceServiceAdapter so SOP workflows capture attachment uploads and electronic signatures with session metadata, refactored SopGovernanceModuleViewModel to consume the adapter and refresh inspector projections, and wired the registration into App.xaml.cs; dotnet restore/build remain blocked with 'command not found: dotnet'.",
     "2026-06-08: WPF Training Records and SOP Governance modules now project the shared MAUI view-models, synchronize inspector panes, and refresh ribbon command gating; dotnet --version/restore/build attempts still return 'command not found' so validation awaits a Windows host.",

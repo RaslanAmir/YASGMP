@@ -3691,4 +3691,142 @@
   <data name="Notifications.Grid.CreatedAt" xml:space="preserve">
     <value>Created</value>
   </data>
+  <data name="Module.Title.RiskAssessments" xml:space="preserve">
+    <value>Risk Assessments</value>
+  </data>
+  <data name="Module.Description.RiskAssessments" xml:space="preserve">
+    <value>Qualitative and quantitative GMP risk assessments.</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Initiate.Content" xml:space="preserve">
+    <value>Initiate</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Initiate.ToolTip" xml:space="preserve">
+    <value>Initiate a new risk assessment.</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Initiate.AutomationName" xml:space="preserve">
+    <value>Initiate risk assessment</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Initiate.AutomationId" xml:space="preserve">
+    <value>Toolbar.RiskAssessments.Initiate</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Update.Content" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Update.ToolTip" xml:space="preserve">
+    <value>Update the selected risk assessment.</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Update.AutomationName" xml:space="preserve">
+    <value>Update risk assessment</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Update.AutomationId" xml:space="preserve">
+    <value>Toolbar.RiskAssessments.Update</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Approve.Content" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Approve.ToolTip" xml:space="preserve">
+    <value>Approve the selected risk assessment.</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Approve.AutomationName" xml:space="preserve">
+    <value>Approve risk assessment</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Approve.AutomationId" xml:space="preserve">
+    <value>Toolbar.RiskAssessments.Approve</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Close.Content" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Close.ToolTip" xml:space="preserve">
+    <value>Close the selected risk assessment.</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Close.AutomationName" xml:space="preserve">
+    <value>Close risk assessment</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Close.AutomationId" xml:space="preserve">
+    <value>Toolbar.RiskAssessments.Close</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Export.Content" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Export.ToolTip" xml:space="preserve">
+    <value>Export the filtered risk assessments.</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Export.AutomationName" xml:space="preserve">
+    <value>Export risk assessments</value>
+  </data>
+  <data name="Module.RiskAssessments.Toolbar.Export.AutomationId" xml:space="preserve">
+    <value>Toolbar.RiskAssessments.Export</value>
+  </data>
+  <data name="Module.RiskAssessments.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.RiskAssessments.Filter.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Module.RiskAssessments.Grid.Column.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Module.RiskAssessments.Grid.Column.RiskLevel" xml:space="preserve">
+    <value>Risk level</value>
+  </data>
+  <data name="Module.RiskAssessments.Grid.Column.RiskScore" xml:space="preserve">
+    <value>Risk score</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.RiskLevel" xml:space="preserve">
+    <value>Risk level</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.RiskScore" xml:space="preserve">
+    <value>Risk score</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.ReviewDate" xml:space="preserve">
+    <value>Next review</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.RiskAssessments.Field.AssessedAt" xml:space="preserve">
+    <value>Assessed on</value>
+  </data>
+  <data name="Module.RiskAssessments.Search.AutomationId" xml:space="preserve">
+    <value>RiskAssessments.SearchBox</value>
+  </data>
+  <data name="Module.RiskAssessments.Inspector.Header" xml:space="preserve">
+    <value>Risk assessment details</value>
+  </data>
+  <data name="Module.RiskAssessments.Status.Initiated" xml:space="preserve">
+    <value>Initiated</value>
+  </data>
+  <data name="Module.RiskAssessments.Status.InProgress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
+  <data name="Module.RiskAssessments.Status.PendingApproval" xml:space="preserve">
+    <value>Pending approval</value>
+  </data>
+  <data name="Module.RiskAssessments.Status.EffectivenessCheck" xml:space="preserve">
+    <value>Effectiveness check</value>
+  </data>
+  <data name="Module.RiskAssessments.Status.Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Module.RiskAssessments.Status.Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.RiskAssessments.Title" xml:space="preserve">
+    <value>Risk assessments</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>ICH Q9 risk management workspace.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.RiskAssessments.AutomationName" xml:space="preserve">
+    <value>Risk assessments module</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.RiskAssessments.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Quality.RiskAssessments</value>
+  </data>
 </root>
