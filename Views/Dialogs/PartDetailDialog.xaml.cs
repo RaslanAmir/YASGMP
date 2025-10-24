@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
+using System.Linq;
 using YasGMP.Models;
 using YasGMP.Services;
 
@@ -13,25 +14,13 @@ namespace YasGMP.Views.Dialogs
     public partial class PartDetailDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
-        /// <summary>
-        /// Gets or sets the result.
-        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
         private readonly Part _part;
-        /// <summary>
-        /// Gets or sets the stocks.
-        /// </summary>
 
         public ObservableCollection<StockRow> Stocks { get; } = new();
-        /// <summary>
-        /// Gets or sets the transactions.
-        /// </summary>
         public ObservableCollection<TxRow> Transactions { get; } = new();
-        /// <summary>
-        /// Initializes a new instance of the PartDetailDialog class.
-        /// </summary>
 
         public PartDetailDialog(DatabaseService db, Part part)
         {
@@ -97,41 +86,17 @@ namespace YasGMP.Views.Dialogs
                 await DisplayAlert("Greška", ex.Message, "OK");
             }
         }
-        /// <summary>
-        /// Represents the Stock Row.
-        /// </summary>
 
         public sealed class StockRow
         {
             private readonly DatabaseService _db;
             private readonly int _partId;
-            /// <summary>
-            /// Gets or sets the warehouse id.
-            /// </summary>
             public int WarehouseId { get; }
-            /// <summary>
-            /// Gets or sets the warehouse name.
-            /// </summary>
             public string WarehouseName { get; }
-            /// <summary>
-            /// Gets or sets the quantity.
-            /// </summary>
             public int Quantity { get; }
-            /// <summary>
-            /// Gets or sets the min.
-            /// </summary>
             public int? Min { get; set; }
-            /// <summary>
-            /// Gets or sets the max.
-            /// </summary>
             public int? Max { get; set; }
-            /// <summary>
-            /// Gets or sets the save threshold command.
-            /// </summary>
             public Command SaveThresholdCommand { get; }
-            /// <summary>
-            /// Initializes a new instance of the StockRow class.
-            /// </summary>
 
             public StockRow(DatabaseService db, int partId, int warehouseId, string warehouseName, int qty, int? min, int? max)
             {
@@ -147,33 +112,19 @@ namespace YasGMP.Views.Dialogs
                 }
                 catch (Exception ex)
                 {
-                    await Application.Current?.MainPage?.DisplayAlert("Greška", ex.Message, "OK");
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
+                    if (page != null)
+                        await page.DisplayAlert("Greška", ex.Message, "OK");
                 }
             }
         }
-        /// <summary>
-        /// Represents the Tx Row.
-        /// </summary>
 
         public sealed class TxRow
         {
-            /// <summary>
-            /// Gets or sets the date.
-            /// </summary>
             public string Date { get; set; } = string.Empty;
-            /// <summary>
-            /// Gets or sets the type.
-            /// </summary>
             public string Type { get; set; } = string.Empty;
-            /// <summary>
-            /// Gets or sets the qty.
-            /// </summary>
             public int Qty { get; set; }
-            /// <summary>
-            /// Gets or sets the note.
-            /// </summary>
             public string Note { get; set; } = string.Empty;
         }
     }
 }
-

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using System.Linq;
 using Microsoft.Maui.Storage;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Common;
@@ -22,23 +23,14 @@ namespace YasGMP.Views.Dialogs
     public partial class MachineDocumentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
-        /// <summary>
-        /// Gets or sets the result.
-        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
         private readonly IAttachmentService _attachments;
         private readonly AuthService _auth;
         private readonly int _machineId;
-        /// <summary>
-        /// Gets or sets the documents.
-        /// </summary>
 
         public ObservableCollection<DocRow> Documents { get; } = new();
-        /// <summary>
-        /// Initializes a new instance of the MachineDocumentsDialog class.
-        /// </summary>
 
         public MachineDocumentsDialog(DatabaseService db, int machineId, IAttachmentService? attachmentService = null, AuthService? authService = null)
         {
@@ -137,51 +129,21 @@ namespace YasGMP.Views.Dialogs
             return status.Contains("integrity", StringComparison.OrdinalIgnoreCase)
                 || status.Contains("hash", StringComparison.OrdinalIgnoreCase);
         }
-        /// <summary>
-        /// Represents the Doc Row.
-        /// </summary>
 
         public sealed class DocRow
         {
             private readonly IAttachmentService _attachments;
             private readonly AuthService _auth;
             private readonly Func<Task> _onChanged;
-            /// <summary>
-            /// Gets or sets the link id.
-            /// </summary>
 
             public int LinkId { get; }
-            /// <summary>
-            /// Gets or sets the attachment id.
-            /// </summary>
             public int AttachmentId { get; }
-            /// <summary>
-            /// Gets or sets the file name.
-            /// </summary>
             public string FileName { get; }
-            /// <summary>
-            /// Gets or sets the size display.
-            /// </summary>
             public string SizeDisplay { get; }
-            /// <summary>
-            /// Gets or sets the retention summary.
-            /// </summary>
             public string RetentionSummary { get; }
-            /// <summary>
-            /// Gets or sets the has legal hold.
-            /// </summary>
             public bool HasLegalHold { get; }
-            /// <summary>
-            /// Gets or sets the open command.
-            /// </summary>
             public IAsyncRelayCommand OpenCommand { get; }
-            /// <summary>
-            /// Gets or sets the remove command.
-            /// </summary>
             public IAsyncRelayCommand RemoveCommand { get; }
-            /// <summary>
-            /// Initializes a new instance of the DocRow class.
-            /// </summary>
 
             public DocRow(IAttachmentService attachments, AuthService auth, AttachmentLinkWithAttachment row, Func<Task> onChanged)
             {
@@ -232,7 +194,7 @@ namespace YasGMP.Views.Dialogs
                     {
                         await MainThread.InvokeOnMainThreadAsync(async () =>
                         {
-                            var page = Application.Current?.MainPage;
+                            var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                             if (page != null)
                                 await page.DisplayAlert("Integrity warning", $"Attachment '{FileName}' reported a hash mismatch during streaming.", "OK").ConfigureAwait(false);
                         }).ConfigureAwait(false);
@@ -262,7 +224,7 @@ namespace YasGMP.Views.Dialogs
                 {
                     await MainThread.InvokeOnMainThreadAsync(async () =>
                     {
-                        var page = Application.Current?.MainPage;
+                        var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                         if (page != null)
                             await page.DisplayAlert("Greška", ex.Message, "OK").ConfigureAwait(false);
                     }).ConfigureAwait(false);
@@ -283,7 +245,9 @@ namespace YasGMP.Views.Dialogs
                 }
                 catch (Exception ex)
                 {
-                    await Application.Current?.MainPage?.DisplayAlert("Greška", ex.Message, "OK");
+                    var page2 = Application.Current?.Windows?.FirstOrDefault()?.Page;
+                    if (page2 != null)
+                        await page2.DisplayAlert("Greška", ex.Message, "OK");
                 }
             }
 
@@ -328,4 +292,3 @@ namespace YasGMP.Views.Dialogs
         }
     }
 }
-

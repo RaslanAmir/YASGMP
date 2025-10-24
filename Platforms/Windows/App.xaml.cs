@@ -3,6 +3,7 @@ using Microsoft.Maui.Hosting;            // Microsoft.Maui.Hosting.MauiApp
 using Microsoft.Maui.ApplicationModel;   // MainThread
 using Microsoft.Maui.Controls;           // Controls Application
 using ControlsApp = Microsoft.Maui.Controls.Application;
+using System.Linq;
 
 namespace YasGMP.WinUI
 {
@@ -25,7 +26,7 @@ namespace YasGMP.WinUI
                 {
                     try
                     {
-                        var page = ControlsApp.Current?.MainPage;
+                        var page = ControlsApp.Current?.Windows?.FirstOrDefault()?.Page;
                         if (page != null)
                         {
                             var msg = e.Exception?.ToString() ?? "Unknown Windows exception";

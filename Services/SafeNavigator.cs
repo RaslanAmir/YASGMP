@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using System.Linq;
 
 namespace YasGMP.Services
 {
@@ -128,7 +129,7 @@ namespace YasGMP.Services
             {
                 return await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    var page = Application.Current?.MainPage;
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                     if (page is null) return false;
                     return await page.DisplayAlert(title, message, accept, cancel).ConfigureAwait(false);
                 }).ConfigureAwait(false);
@@ -152,7 +153,7 @@ namespace YasGMP.Services
             {
                 return await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    var page = Application.Current?.MainPage;
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                     if (page is null)
                         return null;
 
@@ -174,7 +175,7 @@ namespace YasGMP.Services
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    var page = Application.Current?.MainPage;
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                     if (page != null)
                         await page.DisplayAlert(title, message, cancel).ConfigureAwait(false);
                 }).ConfigureAwait(false);

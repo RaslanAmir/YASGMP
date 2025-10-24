@@ -18,32 +18,17 @@ namespace YasGMP.ViewModels
         private readonly IDialogService _dialogService;
         private readonly IUserSession _userSession;
 
-        private CapaCase _capaCase;
-        /// <summary>
-        /// Gets or sets the status list.
-        /// </summary>
+        private CapaCase _capaCase = new();
 
         public ObservableCollection<string> StatusList { get; } = new()
         {
             "otvoren", "u tijeku", "zatvoren", "poništen", "odgođen"
         };
-        /// <summary>
-        /// Gets or sets the save command.
-        /// </summary>
 
         public ICommand SaveCommand { get; }
-        /// <summary>
-        /// Gets or sets the cancel command.
-        /// </summary>
         public ICommand CancelCommand { get; }
-        /// <summary>
-        /// Gets or sets the dialog result.
-        /// </summary>
 
         public bool? DialogResult { get; private set; }
-        /// <summary>
-        /// Represents the capa case value.
-        /// </summary>
 
         public CapaCase CapaCase
         {
@@ -57,9 +42,6 @@ namespace YasGMP.ViewModels
                 }
             }
         }
-        /// <summary>
-        /// Initializes a new instance of the CapaEditDialogViewModel class.
-        /// </summary>
 
         public CapaEditDialogViewModel()
             : this(null,
@@ -67,9 +49,6 @@ namespace YasGMP.ViewModels
                   ServiceLocator.GetRequiredService<IDialogService>())
         {
         }
-        /// <summary>
-        /// Initializes a new instance of the CapaEditDialogViewModel class.
-        /// </summary>
 
         public CapaEditDialogViewModel(CapaCase? capaCase)
             : this(capaCase,
@@ -77,9 +56,6 @@ namespace YasGMP.ViewModels
                   ServiceLocator.GetRequiredService<IDialogService>())
         {
         }
-        /// <summary>
-        /// Initializes a new instance of the CapaEditDialogViewModel class.
-        /// </summary>
 
         public CapaEditDialogViewModel(CapaCase? capaCase, IUserSession userSession, IDialogService dialogService)
         {
@@ -111,9 +87,6 @@ namespace YasGMP.ViewModels
             SaveCommand = new AsyncDelegateCommand(OnSaveAsync);
             CancelCommand = new DelegateCommand(OnCancel);
         }
-        /// <summary>
-        /// Occurs when property changed event handler is raised.
-        /// </summary>
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

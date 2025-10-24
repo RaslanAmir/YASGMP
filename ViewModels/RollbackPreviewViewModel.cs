@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using System.Linq;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
 
@@ -222,7 +223,7 @@ namespace YasGMP.ViewModels
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                var nav = Application.Current?.MainPage?.Navigation;
+                var nav = Application.Current?.Windows?.FirstOrDefault()?.Page?.Navigation;
                 if (nav != null && nav.ModalStack.Count > 0)
                     await nav.PopModalAsync();
             });

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using System.Linq;
 using YasGMP.Common;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -15,21 +16,12 @@ namespace YasGMP.Views.Dialogs
     public partial class MachineComponentsDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
-        /// <summary>
-        /// Gets or sets the result.
-        /// </summary>
         public Task<bool> Result => _tcs.Task;
 
         private readonly DatabaseService _db;
         private readonly int _machineId;
-        /// <summary>
-        /// Gets or sets the components.
-        /// </summary>
 
         public ObservableCollection<ComponentRow> Components { get; } = new();
-        /// <summary>
-        /// Initializes a new instance of the MachineComponentsDialog class.
-        /// </summary>
 
         public MachineComponentsDialog(DatabaseService db, int machineId)
         {
@@ -175,51 +167,21 @@ namespace YasGMP.Views.Dialogs
             _tcs.TrySetResult(true);
             await Navigation.PopModalAsync();
         }
-        /// <summary>
-        /// Represents the Component Row.
-        /// </summary>
 
         public sealed class ComponentRow
         {
             private readonly DatabaseService _db;
             private readonly MachineComponent _mc;
             private readonly Func<Task> _onChanged;
-            /// <summary>
-            /// Executes the name operation.
-            /// </summary>
 
             public string Name => string.IsNullOrWhiteSpace(_mc?.Name) ? _mc?.Code ?? string.Empty : _mc!.Name;
-            /// <summary>
-            /// Gets or sets the calibrate command.
-            /// </summary>
             public Command CalibrateCommand { get; }
-            /// <summary>
-            /// Gets or sets the calibrate command2.
-            /// </summary>
             public Command CalibrateCommand2 { get; }
-            /// <summary>
-            /// Gets or sets the edit command.
-            /// </summary>
             public Command EditCommand { get; }
-            /// <summary>
-            /// Gets or sets the remove command.
-            /// </summary>
             public Command RemoveCommand { get; }
-            /// <summary>
-            /// Gets or sets the remove or detach command.
-            /// </summary>
             public Command RemoveOrDetachCommand { get; }
-            /// <summary>
-            /// Gets or sets the docs command.
-            /// </summary>
             public Command DocsCommand { get; }
-            /// <summary>
-            /// Gets or sets the docs count.
-            /// </summary>
             public int DocsCount { get; private set; }
-            /// <summary>
-            /// Initializes a new instance of the ComponentRow class.
-            /// </summary>
 
             public ComponentRow(DatabaseService db, MachineComponent mc, Func<Task> onChanged, int docsCount)
             {
@@ -236,7 +198,9 @@ namespace YasGMP.Views.Dialogs
             {
                 try
                 {
-                    await Application.Current?.MainPage.DisplayAlert("Kalibracija", $"Pokreni kalibraciju za komponentu: {_mc.Name}", "OK");
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
+                    if (page != null)
+                        await page.DisplayAlert("Kalibracija", $"Pokreni kalibraciju za komponentu: {_mc.Name}", "OK");
                 }
                 catch { }
             }
@@ -245,15 +209,17 @@ namespace YasGMP.Views.Dialogs
             {
                 try
                 {
-                    var choice = await Application.Current?.MainPage.DisplayActionSheet(
+                    var pageCurrent = Application.Current?.Windows?.FirstOrDefault()?.Page;
+                    var choice = await pageCurrent?.DisplayActionSheet(
                         $"Kalibracija — {_mc.Name}", "Zatvori", null,
                         "Pregled kalibracija", "Nova kalibracija");
                     if (string.IsNullOrWhiteSpace(choice) || choice == "Zatvori") return;
 
                     var page = new YasGMP.Views.CalibrationsPage();
                     page.SetFilter(null, _mc, null, null);
-                    if (Application.Current?.MainPage?.Navigation != null)
-                        await Application.Current.MainPage.Navigation.PushModalAsync(page);
+                    var nav = Application.Current?.Windows?.FirstOrDefault()?.Page?.Navigation;
+                    if (nav != null)
+                        await nav.PushModalAsync(page);
                 }
                 catch { }
             }
@@ -274,8 +240,9 @@ namespace YasGMP.Views.Dialogs
                         Note = _mc.Note
                     };
                     var dlg = new ComponentEditDialog(snapshot);
-                    if (Application.Current?.MainPage?.Navigation != null)
-                        await Application.Current.MainPage.Navigation.PushModalAsync(dlg);
+                    var nav2 = Application.Current?.Windows?.FirstOrDefault()?.Page?.Navigation;
+                    if (nav2 != null)
+                        await nav2.PushModalAsync(dlg);
                     var ok = await dlg.Result;
                     if (!ok) return;
 
@@ -295,7 +262,9 @@ namespace YasGMP.Views.Dialogs
                 }
                 catch (Exception ex)
                 {
-                    await Application.Current?.MainPage.DisplayAlert("Greška", ex.Message, "OK");
+                    var pageErr = Application.Current?.Windows?.FirstOrDefault()?.Page;
+                    if (pageErr != null)
+                        await pageErr.DisplayAlert("Greška", ex.Message, "OK");
                 }
             }
 
@@ -367,3 +336,4 @@ namespace YasGMP.Views.Dialogs
         }
     }
 }
+

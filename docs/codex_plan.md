@@ -1,5 +1,23 @@
 # Codex Plan — WPF Shell & Full Integration
 
+## 2025-10-24 – Warnings reduction (batch 1)
+
+- Replaced deprecated `Application.MainPage` usages with `Application.Current.Windows.FirstOrDefault()?.Page` across MAUI code-behind and view-models to align with .NET 9 multi-window guidance and remove CS0618 warnings.
+- Initialized non-null field in `ViewModels/CapaEditDialogViewModel.cs` to satisfy CS8618.
+- Verified WPF + MAUI build on .NET 9 SDK 9.0.306. WPF builds clean; MAUI builds with fewer warnings (14,185 → 14,152).
+- Deferred converting `<Frame>` to `<Border>` in MAUI XAML due to required property mapping (Shadow/Stroke) — tracked as TODO.
+- Deferred XAML compiled bindings (x:DataType) rollout to a follow-up batch; will land incrementally per view to avoid risky refactors.
+
+Validation:
+- dotnet restore: OK (solution)
+- dotnet build: OK for `yasgmp.csproj` (MAUI Windows) and `YasGMP.Wpf.csproj` (WPF). WPF: 0 warnings. MAUI: warnings reduced; remaining are mostly XamlC compiled binding advisories and `Frame` obsoletion.
+- WPF smoke harness: environment not running UI automation in this session; left TODO note and will enable when UIA3 is available.
+
+Next batches (warnings focus):
+- Convert MAUI `<Frame>` usages to `<Border>` with `Stroke`/`StrokeShape` and `Shadow` replacements.
+- Introduce `x:DataType` for high-traffic views (Dashboard, WorkOrders, Components) to eliminate XamlC XC0022 warnings.
+- Replace remaining `Application.MainPage.set/get` in `LoginViewModel` with `Windows[0].Page` flow (post-login navigation) and ensure `CreateWindow` paths remain correct.
+
 ## 2025-10-23 – Build fixes (TFM alignment, WPF items, XAML)
 
 - Aligned `YasGMP.Tests` to `net9.0-windows10.0.19041.0` so it can reference the MAUI app (`yasgmp.csproj`) which targets .NET 9 for Windows.

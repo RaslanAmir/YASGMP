@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Maui;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using System.Linq;
 using Microsoft.Maui.Storage;
 using YasGMP.Models;
 using YasGMP.Views;
@@ -118,7 +119,7 @@ namespace YasGMP
             {
                 try
                 {
-                    var page = Application.Current?.MainPage;
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                     if (page != null) await page.DisplayAlert("Unexpected error", ex.Message, "OK");
                 }
                 catch { /* swallow */ }
@@ -134,7 +135,7 @@ namespace YasGMP
             {
                 try
                 {
-                    var page = Application.Current?.MainPage;
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                     if (page != null) await page.DisplayAlert("Background task error", e.Exception?.Message ?? "Unknown", "OK");
                 }
                 catch { /* swallow */ }
@@ -151,7 +152,7 @@ namespace YasGMP
             {
                 try
                 {
-                    var page = Application.Current?.MainPage;
+                    var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
                     if (page != null) await page.DisplayAlert("Android error", e.Exception.Message, "OK");
                 }
                 catch { /* swallow */ }

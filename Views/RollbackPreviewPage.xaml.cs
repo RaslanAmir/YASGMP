@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
+using System.Linq;
 using Microsoft.Maui.Graphics;
 using YasGMP.Models;
 using YasGMP.Services;
@@ -288,7 +289,7 @@ namespace YasGMP.Views
                 var entity  = _selectedAudit.EntityName ?? string.Empty;
 
                 // Confirm
-                if (Application.Current?.MainPage is Page page)
+                if (Application.Current?.Windows?.FirstOrDefault()?.Page is Page page)
                 {
                     var ok = await page.DisplayAlert("Potvrda", $"Zatražiti rollback za {entity} #{id}?", "Da", "Ne")
                                        .ConfigureAwait(false);
@@ -298,7 +299,7 @@ namespace YasGMP.Views
                 // Record the rollback request (GMP trail). Uses existing pattern from WorkOrderViewModel.
                 var succeeded = await TryRecordWorkOrderRollbackAsync(id).ConfigureAwait(false);
 
-                if (Application.Current?.MainPage is Page page2)
+                if (Application.Current?.Windows?.FirstOrDefault()?.Page is Page page2)
                 {
                     if (succeeded)
                         await page2.DisplayAlert("Rollback", "Zahtjev za rollback je zabilježen u audit logu.", "OK").ConfigureAwait(false);
@@ -312,13 +313,13 @@ namespace YasGMP.Views
             /// </summary>
             private Task OnCloseAsync()
             {
-                if (Application.Current?.MainPage is NavigationPage np && np.Navigation?.NavigationStack?.Count > 0)
+                if (Application.Current?.Windows?.FirstOrDefault()?.Page is NavigationPage np && np.Navigation?.NavigationStack?.Count > 0)
                 {
                     return np.Navigation.PopAsync();
                 }
 
                 // Fallback: try current shell/page
-                var current = Application.Current?.MainPage as Page;
+                var current = Application.Current?.Windows?.FirstOrDefault()?.Page as Page;
                 return current?.Navigation?.PopAsync() ?? Task.CompletedTask;
             }
 
