@@ -6,6 +6,7 @@
     "notes": [
       "2025-10-24: Warnings batch #1 — replaced deprecated Application.MainPage usages with Application.Current.Windows[0]?.Page across MAUI code-behind and VMs; initialized a non-null field in CapaEditDialogViewModel; WPF builds clean; MAUI warnings down (14185 → 14152).",
       "2025-10-24: Warnings batch #2 — converted high-traffic MAUI pages from Frame→Border (Dashboard, Machines, Components, Suppliers, Login, Validation) with Stroke/StrokeShape/Shadow mapping; added x:DataType for Validation/Components/Suppliers (AppCore model types via assembly qualifier); MAUI warnings down further (~14152 → ~14103).",
+      "2025-10-24: Warnings batch #3 — aligned WorkOrderEditDialog.xaml with WorkOrderEditDialogViewModel (x:DataType, property bindings); added VM properties (Components, SelectedComponent, Result); converted more Frames→Borders (AuditDashboard, Calibrations); removed remaining MainPage obsoletions in MachineComponentsDialog; MAUI warnings ~14096.",
       "2025-10-23: Introduced ChatGPT (OpenAI) assistant service in AppCore; registered in WPF and MAUI; added WPF AI dialog and Tools ribbon button.",
       "2025-10-23: Added docked AI Module with one‑click summaries (Audit, Work Orders) and optional RAG support via AttachmentEmbeddingService + attachment_embeddings; Attachments module exposes 'Index AI Embedding'.",
       "2025-10-23: Extended AI summaries to Suppliers and Incidents (selected record prompts) and added 'Find Similar (AI)' vector search in Attachments using cosine similarity over stored embeddings.",

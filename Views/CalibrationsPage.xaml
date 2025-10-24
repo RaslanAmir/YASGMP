@@ -20,7 +20,10 @@
         <VerticalStackLayout Padding="20" Spacing="18">
 
             <!-- 🔍 SEARCH & FILTER PANEL -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="12" HasShadow="True">
+            <Border Padding="12" Stroke="#e0e0e0" StrokeThickness="1" Background="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="8">
                     <Label Text="🔍 Pretraživanje i Filtriranje" 
                            FontSize="18" FontAttributes="Bold" TextColor="#00796b" />
@@ -40,7 +43,7 @@
                                 BackgroundColor="#eeeeee" TextColor="Black" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- 🟢 ACTION BUTTONS -->
             <HorizontalStackLayout Spacing="12" Padding="0,5,0,0">
@@ -67,8 +70,10 @@
                             BackgroundColor="#f5f7fa">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Margin="0,2" CornerRadius="10" Padding="12" 
-                               BackgroundColor="White" BorderColor="#cfd8dc">
+                        <Border Margin="0,2" Padding="12" Background="White" Stroke="#cfd8dc" StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="{Binding Id, StringFormat='#{0}'}" FontSize="14" FontAttributes="Bold" TextColor="#455a64" />
                                 <Label Text="{Binding Component.Name, StringFormat='🔧 Komponenta: {0}'}" FontSize="13" TextColor="#1976d2" />
@@ -80,7 +85,7 @@
                                 <Label Text="{Binding Comment, StringFormat='📝 Napomena: {0}'}" FontSize="12" />
                                 <Label Text="{Binding DigitalSignature, StringFormat='✍️ Potpis: {0}'}" FontSize="11" TextColor="#fbc02d" />
                             </VerticalStackLayout>
-                        </Frame>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

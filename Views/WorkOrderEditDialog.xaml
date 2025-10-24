@@ -11,8 +11,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:dlg="clr-namespace:YasGMP.Views.Dialogs"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
     xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
-    x:DataType="dlg:WorkOrderEditDialog"
+    x:DataType="vm:WorkOrderEditDialogViewModel"
     Title="Radni Nalog – Uredi / Dodaj"
     Padding="24">
 
@@ -50,8 +51,8 @@
                    VerticalOptions="Center"
                    maui:ToolTipProperties.Text="Odaberi vrstu radnog naloga (preventivni, korektivni, hitni…)" />
             <Picker Grid.Column="1"
-                    ItemsSource="{Binding TypeList}"
-                    SelectedItem="{Binding WorkOrder.Type, Mode=TwoWay}"
+                    ItemsSource="{Binding TypeOptions}"
+                    SelectedItem="{Binding Type, Mode=TwoWay}"
                     Title="Odaberi tip" />
           </Grid>
 
@@ -59,7 +60,7 @@
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
             <Label Text="Opis zadatka:" VerticalOptions="Center" />
             <Entry Grid.Column="1"
-                   Text="{Binding WorkOrder.TaskDescription, Mode=TwoWay}"
+                   Text="{Binding TaskDescription, Mode=TwoWay}"
                    Placeholder="Sažeti opis zadatka"
                    maui:ToolTipProperties.Text="Unesi kratak, jasan opis zadatka" />
           </Grid>
@@ -69,7 +70,7 @@
             <Label Text="Stroj:" VerticalOptions="Center" />
             <Picker Grid.Column="1"
                     ItemsSource="{Binding Machines}"
-                    SelectedItem="{Binding WorkOrder.Machine, Mode=TwoWay}"
+                    SelectedItem="{Binding SelectedMachine, Mode=TwoWay}"
                     ItemDisplayBinding="{Binding Name}"
                     Title="Odaberi stroj"
                     maui:ToolTipProperties.Text="Odaberi stroj na koji se odnosi nalog" />
@@ -80,7 +81,7 @@
             <Label Text="Komponenta:" VerticalOptions="Center" />
             <Picker Grid.Column="1"
                     ItemsSource="{Binding Components}"
-                    SelectedItem="{Binding WorkOrder.Component, Mode=TwoWay}"
+                    SelectedItem="{Binding SelectedComponent, Mode=TwoWay}"
                     ItemDisplayBinding="{Binding Name}"
                     Title="Odaberi komponentu"
                     maui:ToolTipProperties.Text="Opcionalno: odaberi komponentu ako je poznata" />
@@ -91,7 +92,7 @@
             <Label Text="Dodijeljeno:" VerticalOptions="Center" />
             <Picker Grid.Column="1"
                     ItemsSource="{Binding Users}"
-                    SelectedItem="{Binding WorkOrder.AssignedTo, Mode=TwoWay}"
+                    SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
                     ItemDisplayBinding="{Binding FullName}"
                     Title="Odaberi tehničara"
                     maui:ToolTipProperties.Text="Odaberi korisnika kojem je nalog dodijeljen" />
@@ -101,7 +102,7 @@
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
             <Label Text="Datum otvaranja:" VerticalOptions="Center" />
             <DatePicker Grid.Column="1"
-                        Date="{Binding WorkOrder.DateOpen, Mode=TwoWay}"
+                        Date="{Binding DateOpen, Mode=TwoWay}"
                         maui:ToolTipProperties.Text="Datum i vrijeme otvaranja radnog naloga" />
           </Grid>
 
@@ -109,8 +110,8 @@
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
             <Label Text="Status:" VerticalOptions="Center" />
             <Picker Grid.Column="1"
-                    ItemsSource="{Binding StatusList}"
-                    SelectedItem="{Binding WorkOrder.Status, Mode=TwoWay}"
+                    ItemsSource="{Binding StatusOptions}"
+                    SelectedItem="{Binding Status, Mode=TwoWay}"
                     Title="Odaberi status"
                     maui:ToolTipProperties.Text="Status naloga (otvoren, u tijeku, završen, odbijen…)" />
           </Grid>
@@ -119,7 +120,7 @@
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
             <Label Text="Rezultat:" VerticalOptions="Center" />
             <Entry Grid.Column="1"
-                   Text="{Binding WorkOrder.Result, Mode=TwoWay}"
+                   Text="{Binding Result, Mode=TwoWay}"
                    Placeholder="Rezultat ili napomena"
                    maui:ToolTipProperties.Text="Sažmi rezultat intervencije; koristi CAPA referencu po potrebi" />
           </Grid>
@@ -128,7 +129,7 @@
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
             <Label Text="E-potpis:" VerticalOptions="Center" />
             <Entry Grid.Column="1"
-                   Text="{Binding WorkOrder.DigitalSignature, Mode=TwoWay}"
+                   Text="{Binding DigitalSignature}"
                    Placeholder="Digitalni potpis / hash"
                    maui:ToolTipProperties.Text="Opcionalno: digitalni potpis korisnika (21 CFR Part 11)" />
           </Grid>

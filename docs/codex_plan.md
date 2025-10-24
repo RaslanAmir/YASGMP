@@ -34,6 +34,23 @@ Next batches (warnings focus):
   - `Views/SuppliersPage.xaml` → page `views:SuppliersPage`, item `models:Supplier` (AppCore assembly).
 - Build results: MAUI warnings reduced further (≈ 14152 → ≈ 14103). Remaining hotspots include `WorkOrderEditDialog.xaml` and pages without `x:DataType`.
 
+## 2025-10-24 – Warnings reduction (batch 3)
+
+- Fixed remaining `Application.MainPage` usages in `Views/Dialogs/MachineComponentsDialog.xaml.cs` by switching to `Application.Current.Windows.FirstOrDefault()?.Page` API.
+- Aligned `Views/WorkOrderEditDialog.xaml` to `WorkOrderEditDialogViewModel`:
+  - Set `x:DataType` to `vm:WorkOrderEditDialogViewModel` and added `xmlns:vm`.
+  - Updated bindings to match VM properties (`TypeOptions`, `StatusOptions`, `TaskDescription`, `SelectedMachine`, `SelectedUser`, `DateOpen`, `Result`, `DigitalSignature`).
+  - Added `Components` and `SelectedComponent` plus `Result` properties to the VM for binding completeness.
+- Converted additional frames to borders:
+  - `Views/AuditDashboardPage.xaml` list item
+  - `Views/CalibrationsPage.xaml` filter card and list items
+- Build results: MAUI warnings reduced again (~14103 → ~14096). Remaining XC0022 are from pages without `x:DataType` (e.g., Users, WorkOrders).
+
+Validation:
+- dotnet restore: OK
+- dotnet build (MAUI Windows): OK
+- dotnet build (WPF): OK
+
 Validation:
 - dotnet restore: OK
 - dotnet build (MAUI Windows): OK

@@ -26,14 +26,17 @@
         <CollectionView ItemsSource="{Binding FilteredAudits}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame BorderColor="LightGray" CornerRadius="6" Padding="5" Margin="2">
+                    <Border Stroke="LightGray" StrokeThickness="1" Padding="5" Margin="2">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="6" />
+                        </Border.StrokeShape>
                         <VerticalStackLayout>
                             <Label Text="{Binding Action}" FontAttributes="Bold"/>
                             <Label Text="{Binding EntityName}" FontSize="12"/>
                             <Label Text="{Binding UserFullName}" FontSize="12" TextColor="DarkBlue"/>
                             <Label Text="{Binding ChangedAt}" FontSize="11" TextColor="Gray"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

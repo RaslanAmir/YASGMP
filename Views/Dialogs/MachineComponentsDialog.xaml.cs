@@ -281,7 +281,7 @@ namespace YasGMP.Views.Dialogs
                 }
                 catch (Exception ex)
                 {
-                    await Application.Current?.MainPage.DisplayAlert("Greška", ex.Message, "OK");
+                    await Application.Current?.Windows?.FirstOrDefault()?.Page?.DisplayAlert("Greška", ex.Message, "OK");
                 }
             }
 
@@ -289,7 +289,7 @@ namespace YasGMP.Views.Dialogs
             {
                 try
                 {
-                    var choice = await Application.Current?.MainPage.DisplayActionSheet(
+                    var choice = await Application.Current?.Windows?.FirstOrDefault()?.Page?.DisplayActionSheet(
                         "Ukloni komponentu", "Odustani", null, "Odspoji od stroja", "Obriši komponentu");
                     if (string.IsNullOrWhiteSpace(choice) || choice == "Odustani") return;
 
@@ -315,7 +315,7 @@ namespace YasGMP.Views.Dialogs
                 }
                 catch (Exception ex)
                 {
-                    await Application.Current?.MainPage.DisplayAlert("Greška", ex.Message, "OK");
+                    await Application.Current?.Windows?.FirstOrDefault()?.Page?.DisplayAlert("Greška", ex.Message, "OK");
                 }
             }
 
@@ -324,16 +324,18 @@ namespace YasGMP.Views.Dialogs
                 try
                 {
                     var dlg = new ComponentDocumentsDialog(_db, _mc.Id);
-                    if (Application.Current?.MainPage?.Navigation != null)
-                        await Application.Current.MainPage.Navigation.PushModalAsync(dlg);
+                    if (Application.Current?.Windows?.FirstOrDefault()?.Page?.Navigation != null)
+                        await Application.Current?.Windows?.FirstOrDefault()?.Page?.Navigation.PushModalAsync(dlg);
                     _ = await dlg.Result;
                 }
                 catch (Exception ex)
                 {
-                    await Application.Current?.MainPage.DisplayAlert("Greška", ex.Message, "OK");
+                    await Application.Current?.Windows?.FirstOrDefault()?.Page?.DisplayAlert("Greška", ex.Message, "OK");
                 }
             }
         }
     }
 }
+
+
 
