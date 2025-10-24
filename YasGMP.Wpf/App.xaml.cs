@@ -12,6 +12,7 @@ using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
+using YasGMP.ViewModels;
 using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
@@ -63,7 +64,7 @@ namespace YasGMP.Wpf
             }
             catch { /* ignore arg parsing issues */ }
 
-            _host = Host.CreateDefaultBuilder()
+            _host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((_, cfg) =>
                 {
                     cfg.SetBasePath(AppContext.BaseDirectory);
