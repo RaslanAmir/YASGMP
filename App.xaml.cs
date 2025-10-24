@@ -19,17 +19,11 @@ namespace YasGMP
     /// </summary>
     public partial class App : Application
     {
-        /// <summary>
-        /// Gets the merged application configuration sourced from AppData and the bundled app folder.
-        /// </summary>
+        /// <summary>Application configuration (merged from AppData and app folder).</summary>
         public IConfiguration AppConfig { get; private set; } = default!;
 
         /// <summary>Currently authenticated user (null before login).</summary>
         private User? _loggedUser;
-        /// <summary>
-        /// Gets or sets the authenticated user for the current session.
-        /// Updates the diagnostic context when the value changes.
-        /// </summary>
         public User? LoggedUser
         {
             get => _loggedUser;
@@ -53,9 +47,6 @@ namespace YasGMP
 
         /// <summary>Unique session id (used in logs and audit correlating).</summary>
         public string SessionId { get; } = Guid.NewGuid().ToString("N");
-        /// <summary>
-        /// Initializes a new instance of the App class.
-        /// </summary>
 
         public App()
         {
@@ -78,8 +69,7 @@ namespace YasGMP
             }
             catch { }
 
-            // Start at Login; your LoginPage binds VM via DI in OnHandlerChanged (code-behind).
-            MainPage = new NavigationPage(new LoginPage());
+            // Window initialization is handled in CreateWindow override (no MainPage assignment here).
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
@@ -89,6 +79,12 @@ namespace YasGMP
 #endif
 
             _ = WriteAppLogAsync("info", "AppStart", $"Session {SessionId} started");
+        }
+
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            var root = new NavigationPage(new LoginPage());
+            return new Window(root);
         }
 
         private static IConfiguration LoadConfiguration()

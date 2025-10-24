@@ -17,61 +17,62 @@ namespace YasGMP.Services.Platform
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IUiDispatcher _dispatcher;
-        /// <summary>
-        /// Initializes a new instance of the MauiDialogService class.
-        /// </summary>
 
         public MauiDialogService(IServiceProvider serviceProvider, IUiDispatcher dispatcher)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
-        /// <summary>
-        /// Executes the show alert async operation.
-        /// </summary>
 
         public Task ShowAlertAsync(string title, string message, string cancel)
         {
             return _dispatcher.InvokeAsync(async () =>
             {
-                var page = Application.Current?.MainPage;
+                var page = Application.Current?.Windows?.Count > 0 ? Application.Current.Windows[0].Page : null;
                 if (page != null)
                     await page.DisplayAlert(title, message, cancel);
             });
         }
-        /// <summary>
-        /// Executes the show confirmation async operation.
-        /// </summary>
 
         public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
         {
-            return await _dispatcher.InvokeAsync(async () =>
-            {
-                var page = Application.Current?.MainPage;
-                if (page == null)
-                    return false;
+            var tcs = new TaskCompletionSource<bool>();
 
-                return await page.DisplayAlert(title, message, accept, cancel);
+            await _dispatcher.InvokeAsync(async () =>
+            {
+                var page = Application.Current?.Windows?.Count > 0 ? Application.Current.Windows[0].Page : null;
+                if (page == null)
+                {
+                    tcs.TrySetResult(false);
+                    return;
+                }
+
+                var result = await page.DisplayAlert(title, message, accept, cancel);
+                tcs.TrySetResult(result);
             }).ConfigureAwait(false);
-        }
-        /// <summary>
-        /// Executes the show action sheet async operation.
-        /// </summary>
 
-        public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
+            return await tcs.Task.ConfigureAwait(false);
+        }
+
+        public async Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
         {
-            return _dispatcher.InvokeAsync(async () =>
-            {
-                var page = Application.Current?.MainPage;
-                if (page == null)
-                    return null;
+            var tcs = new TaskCompletionSource<string?>();
 
-                return await page.DisplayActionSheet(title, cancel, destruction, buttons);
-            });
+            await _dispatcher.InvokeAsync(async () =>
+            {
+                var page = Application.Current?.Windows?.Count > 0 ? Application.Current.Windows[0].Page : null;
+                if (page == null)
+                {
+                    tcs.TrySetResult(null);
+                    return;
+                }
+
+                var result = await page.DisplayActionSheet(title, cancel, destruction, buttons);
+                tcs.TrySetResult(result);
+            }).ConfigureAwait(false);
+
+            return await tcs.Task.ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the show dialog async operation.
-        /// </summary>
 
         public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
         {
@@ -162,7 +163,9 @@ namespace YasGMP.Services.Platform
 
             await _dispatcher.InvokeAsync(async () =>
             {
-                await Application.Current!.MainPage!.Navigation.PushModalAsync(page);
+                var root = Application.Current?.Windows?.Count > 0 ? Application.Current.Windows[0].Page : null;
+                if (root != null)
+                    await root.Navigation.PushModalAsync(page);
             }).ConfigureAwait(false);
 
             using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
@@ -192,7 +195,9 @@ namespace YasGMP.Services.Platform
 
             await _dispatcher.InvokeAsync(async () =>
             {
-                await Application.Current!.MainPage!.Navigation.PushModalAsync(page);
+                var root = Application.Current?.Windows?.Count > 0 ? Application.Current.Windows[0].Page : null;
+                if (root != null)
+                    await root.Navigation.PushModalAsync(page);
             }).ConfigureAwait(false);
 
             using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))

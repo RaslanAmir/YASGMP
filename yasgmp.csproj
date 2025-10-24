@@ -50,6 +50,7 @@
     <PackageReference Include="Syncfusion.Maui.DataGrid" Version="31.1.19" />
     <PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
     <PackageReference Include="System.Text.Json" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
 
     <!-- Office/PDF -->
     <PackageReference Include="EPPlus" Version="8.0.8" />
@@ -89,13 +90,24 @@
     <!-- Exclude AppCore sources to avoid duplicate compilation; use ProjectReference -->
     <Compile Remove="YasGMP.AppCore\**\*.cs" />
     <None Include="YasGMP.AppCore\**\*.cs" />
+    <!-- Exclude Diagnostics sources which are compiled into AppCore -->
+    <Compile Remove="Diagnostics\**\*.cs" />
+    <None Include="Diagnostics\**\*.cs" />
+    <!-- Exclude helper duplicates that are provided by AppCore to avoid CS0436 conflicts -->
+    <Compile Remove="Helpers\CsvExportHelper.cs" />
+    <Compile Remove="Helpers\PdfExporter.cs" />
+    <Compile Remove="Helpers\XlsxExporter.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YASGMP\YasGMP.AppCore\YasGMP.AppCore.csproj" />
+    <ProjectReference Include="YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
 
   <Target Name="DbSyncAnalyzer" BeforeTargets="Build" Condition="'$(RUN_DB_ANALYZER_ON_BUILD)'=='true'">
     <Exec Command="pwsh -NoProfile -File scripts/analyze_db_sync.ps1" />
   </Target>
 </Project>
+
+
+
+
