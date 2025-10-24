@@ -84,6 +84,20 @@
                                         <ToolTip Content="{DynamicResource Tooltip_OpenApiAudit}" />
                                     </ToolTipService.ToolTip>
                                 </fluent:Button>
+                                <fluent:Button Header="{DynamicResource Button_OpenSmokeLog}"
+                                               Width="220"
+                                               Margin="0,0,0,8"
+                                               AutomationProperties.Name="{DynamicResource Button_OpenSmokeLog}"
+                                               Command="{Binding OpenSmokeLogCommand}">
+                                    <fluent:Button.LargeIcon>
+                                        <TextBlock Text="&#xE7BA;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="24" />
+                                    </fluent:Button.LargeIcon>
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="{DynamicResource Tooltip_OpenSmokeLog}" />
+                                    </ToolTipService.ToolTip>
+                                </fluent:Button>
                             </StackPanel>
                         </fluent:BackstageTabItem>
                     </fluent:BackstageTabControl>
@@ -223,9 +237,9 @@
                                    AutomationProperties.Name="{DynamicResource Button_RunSmokeTest}"
                                    ToolTip="{DynamicResource Button_RunSmokeTest}"
                                    Command="{Binding RunSmokeTestCommand}" />
-                    <fluent:Button Header="Open Smoke Log"
-                                   AutomationProperties.Name="Open Smoke Log"
-                                   ToolTip="Open the latest smoke log file"
+                    <fluent:Button Header="{DynamicResource Button_OpenSmokeLog}"
+                                   AutomationProperties.Name="{DynamicResource Button_OpenSmokeLog}"
+                                   ToolTip="{DynamicResource Tooltip_OpenSmokeLog}"
                                    Command="{Binding OpenSmokeLogCommand}" />
                 </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="AI">

@@ -1,0 +1,549 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <!-- Kartice vrpce -->
+  <sys:String x:Key="Tab_Home">Početna</sys:String>
+  <sys:String x:Key="Tab_View">Prikaz</sys:String>
+  <sys:String x:Key="Tab_Tools">Alati</sys:String>
+
+  <!-- Grupe / Backstage -->
+  <sys:String x:Key="Group_Layout">Raspored</sys:String>
+  <sys:String x:Key="Group_Persistence">Pohrana</sys:String>
+  <sys:String x:Key="Group_Diagnostics">Dijagnostika</sys:String>
+  <sys:String x:Key="Group_QualityCompliance">Kvaliteta i usklađenost</sys:String>
+  <sys:String x:Key="Backstage_Layout">Raspored</sys:String>
+  <sys:String x:Key="Backstage_SaveLayout">Spremi raspored</sys:String>
+  <sys:String x:Key="Backstage_ResetLayout">Poništi raspored</sys:String>
+
+  <!-- Gumbi -->
+  <sys:String x:Key="Button_AuditTrail">Revizijski zapis</sys:String>
+  <sys:String x:Key="Button_AuditDashboard">Revizijska nadzorna ploča</sys:String>
+  <sys:String x:Key="Button_ApiAuditTrail">API revizijski zapis</sys:String>
+  <sys:String x:Key="Button_RunSmokeTest">Pokreni brzi test</sys:String>
+  <sys:String x:Key="Button_OpenSmokeLog">Otvori zapisnik brzog testa</sys:String>
+  <sys:String x:Key="Button_Find">Pretraži</sys:String>
+  <sys:String x:Key="Button_Add">Dodaj</sys:String>
+  <sys:String x:Key="Button_View">Prikaz</sys:String>
+  <sys:String x:Key="Button_Update">Uredi</sys:String>
+  <sys:String x:Key="Button_Save">Spremi</sys:String>
+  <sys:String x:Key="Button_Cancel">Odustani</sys:String>
+  <sys:String x:Key="Button_Refresh">Osvježi</sys:String>
+
+  <!-- Naslovi sidrenih panela -->
+  <sys:String x:Key="Label_Modules">Moduli</sys:String>
+  <sys:String x:Key="Label_Inspector">Inspektor</sys:String>
+  <sys:String x:Key="Label_Active">Aktivno</sys:String>
+  <sys:String x:Key="Label_User">Korisnik</sys:String>
+  <sys:String x:Key="Label_DB">Baza</sys:String>
+  <sys:String x:Key="Label_Server">Posluzitelj</sys:String>
+  <sys:String x:Key="Label_Env">Okruzenje</sys:String>
+  <sys:String x:Key="Label_UTC">UTC</sys:String>
+
+  <!-- Zajedničke oznake / Stupci -->
+  <sys:String x:Key="Label_Search">Pretraga</sys:String>
+  <sys:String x:Key="Label_Code">Šifra</sys:String>
+  <sys:String x:Key="Label_Title">Naslov</sys:String>
+  <sys:String x:Key="Label_Status">Status</sys:String>
+  <sys:String x:Key="Label_Location">Lokacija</sys:String>
+  <sys:String x:Key="Label_AssetDetails">Detalji imovine</sys:String>
+  <sys:String x:Key="Label_URS_Document">URS dokument</sys:String>
+  <sys:String x:Key="Label_InstallDate">Datum instalacije</sys:String>
+  <sys:String x:Key="Label_ProcurementDate">Datum nabave</sys:String>
+  <sys:String x:Key="Label_WarrantyUntil">Jamstvo do</sys:String>
+  <sys:String x:Key="Label_CriticalAsset">Kritična imovina</sys:String>
+  <sys:String x:Key="Label_SerialNo">Serijski br.</sys:String>
+  <sys:String x:Key="Label_LifecyclePhase">Faza životnog ciklusa</sys:String>
+  <sys:String x:Key="Label_Notes">Bilješke</sys:String>
+  <sys:String x:Key="Label_RequestedBy">Zatražio</sys:String>
+  <sys:String x:Key="Label_DateRequested">Datum zahtjeva</sys:String>
+  <sys:String x:Key="Label_AssignedTo">Dodijeljeno</sys:String>
+  <sys:String x:Key="Label_DateAssigned">Datum dodjele</sys:String>
+  <sys:String x:Key="Label_LastModified">Zadnja izmjena</sys:String>
+  <sys:String x:Key="Label_Description">Opis</sys:String>
+  <sys:String x:Key="Label_CriticalIncident">Kritični incident</sys:String>
+  <sys:String x:Key="Label_RiskLevel">Razina rizika</sys:String>
+  <sys:String x:Key="Label_Anomaly">Anomalija</sys:String>
+  <sys:String x:Key="Label_ClosureComment">Komentar zatvaranja</sys:String>
+  <sys:String x:Key="Label_Requested">Zatraženo</sys:String>
+
+  <sys:String x:Key="Column_Code">Šifra</sys:String>
+  <sys:String x:Key="Column_Title">Naslov</sys:String>
+  <sys:String x:Key="Column_Status">Status</sys:String>
+  <sys:String x:Key="Column_Location">Lokacija</sys:String>
+  <sys:String x:Key="Column_Name">Naziv</sys:String>
+  <sys:String x:Key="Column_Recurrence">Učestalost</sys:String>
+  <sys:String x:Key="Column_NextDue">Sljedeći rok</sys:String>
+  <sys:String x:Key="Column_Priority">Prioritet</sys:String>
+  <sys:String x:Key="Column_Type">Vrsta</sys:String>
+  <sys:String x:Key="Column_Machine">Stroj</sys:String>
+  <sys:String x:Key="Column_Incident">Incident</sys:String>
+
+  <!-- Zajednički ToolTipovi / A11y -->
+  <sys:String x:Key="Tooltip_SearchBox">Filtriraj zapise tijekom tipkanja.</sys:String>
+  <sys:String x:Key="Tooltip_RecordsGrid">Dvoklik za otvaranje; koristi alatnu traku za radnje.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSmokeLog">Otvori zadnji zapisnik brzog testa.</sys:String>
+
+  <!-- Kategorije -->
+  <sys:String x:Key="Category_Cockpit">Nadzorna ploča</sys:String>
+  <sys:String x:Key="Category_Maintenance">Održavanje</sys:String>
+  <sys:String x:Key="Category_SupplyChain">Opskrba</sys:String>
+  <sys:String x:Key="Category_Quality">Kvaliteta</sys:String>
+  <sys:String x:Key="Category_QualityCompliance">Kvaliteta i usklađenost</sys:String>
+  <sys:String x:Key="Category_Planning">Planiranje</sys:String>
+  <sys:String x:Key="Category_Administration">Administracija</sys:String>
+  <sys:String x:Key="Category_Diagnostics">Dijagnostika</sys:String>
+  <sys:String x:Key="Category_Documents">Dokumenti</sys:String>
+
+  <!-- Moduli: Naslovi -->
+  <sys:String x:Key="Module_Dashboard_Title">Nadzorna ploča</sys:String>
+  <sys:String x:Key="Module_Assets_Title">Imovina</sys:String>
+  <sys:String x:Key="Module_Components_Title">Sastavnice</sys:String>
+  <sys:String x:Key="Module_Warehouse_Title">Skladište</sys:String>
+  <sys:String x:Key="Module_WorkOrders_Title">Radni nalozi</sys:String>
+  <sys:String x:Key="Module_Calibration_Title">Kalibracija</sys:String>
+  <sys:String x:Key="Module_Parts_Title">Dijelovi</sys:String>
+  <sys:String x:Key="Module_Suppliers_Title">Dobavljači</sys:String>
+  <sys:String x:Key="Module_ExternalServicers_Title">Vanjski serviseri</sys:String>
+  <sys:String x:Key="Module_CAPA_Title">CAPA</sys:String>
+  <sys:String x:Key="Module_Incidents_Title">Incidenti</sys:String>
+  <sys:String x:Key="Module_ChangeControl_Title">Upravljanje promjenama</sys:String>
+  <sys:String x:Key="Module_Validations_Title">Validacije</sys:String>
+  <sys:String x:Key="Module_Scheduling_Title">Raspoređivanje</sys:String>
+  <sys:String x:Key="Module_Security_Title">Sigurnost</sys:String>
+  <sys:String x:Key="Module_Administration_Title">Administracija</sys:String>
+  <sys:String x:Key="Module_AuditTrail_Title">Revizijski zapis</sys:String>
+  <sys:String x:Key="Module_AuditDashboard_Title">Revizijska nadzorna ploča</sys:String>
+  <sys:String x:Key="Module_ApiAuditTrail_Title">API revizijski zapis</sys:String>
+  <sys:String x:Key="Module_Diagnostics_Title">Dijagnostika</sys:String>
+  <sys:String x:Key="Module_Attachments_Title">Prilozi</sys:String>
+
+  <!-- Moduli: Opisi / ToolTipovi -->
+  <sys:String x:Key="Module_Dashboard_Tooltip">Pregled operacija i KPI pokazatelja</sys:String>
+  <sys:String x:Key="Module_Assets_Tooltip">Registar imovine i životni ciklus</sys:String>
+  <sys:String x:Key="Module_Components_Tooltip">Hijerarhija sastavnica i životni ciklus</sys:String>
+  <sys:String x:Key="Module_Warehouse_Tooltip">Matični podaci skladišta</sys:String>
+  <sys:String x:Key="Module_WorkOrders_Tooltip">Korektivni i preventivni poslovi</sys:String>
+  <sys:String x:Key="Module_Calibration_Tooltip">Zapisi o kalibraciji</sys:String>
+  <sys:String x:Key="Module_Parts_Tooltip">Dijelovi i zalihe</sys:String>
+  <sys:String x:Key="Module_Suppliers_Tooltip">Odobreni dobavljači i izvođači</sys:String>
+  <sys:String x:Key="Module_ExternalServicers_Tooltip">Akreditirani laboratoriji i servisni partneri</sys:String>
+  <sys:String x:Key="Module_CAPA_Tooltip">Korektivne radnje i preventivni planovi</sys:String>
+  <sys:String x:Key="Module_Incidents_Tooltip">Zaprimanje i istraga incidenata</sys:String>
+  <sys:String x:Key="Module_ChangeControl_Tooltip">Tijek upravljanja promjenama</sys:String>
+  <sys:String x:Key="Module_Validations_Tooltip">IQ/OQ/PQ životni ciklus i rekvalifikacija</sys:String>
+  <sys:String x:Key="Module_Scheduling_Tooltip">Automatizirani rasporedi poslova</sys:String>
+  <sys:String x:Key="Module_Security_Tooltip">Korisnici i sigurnosne uloge</sys:String>
+  <sys:String x:Key="Module_Administration_Tooltip">Globalne postavke konfiguracije</sys:String>
+  <sys:String x:Key="Module_AuditTrail_Tooltip">Povijest sistemskih događaja</sys:String>
+  <sys:String x:Key="Module_AuditDashboard_Tooltip">Stvarnovremenski pregled i izvozi revizije</sys:String>
+  <sys:String x:Key="Module_ApiAuditTrail_Tooltip">Povijest korištenja API ključeva i forenzički zahtjevi</sys:String>
+  <sys:String x:Key="Module_Diagnostics_Tooltip">Snimke telemetrije i zdravstvena provjera</sys:String>
+  <sys:String x:Key="Module_Attachments_Tooltip">Datotečni prilozi i certifikati</sys:String>
+
+  <!-- Gumbi vrpce (Početna) -->
+  <sys:String x:Key="Button_Machines">Strojevi</sys:String>
+  <sys:String x:Key="Button_Parts">Dijelovi</sys:String>
+  <sys:String x:Key="Button_WorkOrders">Radni nalozi</sys:String>
+  <sys:String x:Key="Button_Calibration">Kalibracija</sys:String>
+  <sys:String x:Key="Button_Suppliers">Dobavljači</sys:String>
+  <sys:String x:Key="Button_Security">Sigurnost</sys:String>
+  <sys:String x:Key="Button_Administration">Administracija</sys:String>
+  <sys:String x:Key="Button_Diagnostics">Dijagnostika</sys:String>
+
+  <!-- ToolTipovi vrpce -->
+  <sys:String x:Key="Tooltip_OpenAuditTrail">Otvori preglednik nepromjenjivog revizijskog zapisa.</sys:String>
+  <sys:String x:Key="Tooltip_OpenAuditDashboard">Pokreni nadzornu ploču revizije s trendovima.</sys:String>
+  <sys:String x:Key="Tooltip_OpenApiAudit">Pregled korištenja API ključeva i forenzičkih zahtjeva.</sys:String>
+  <sys:String x:Key="Tooltip_Find">Pretraživanje/filtriranje zapisa (Nađi)</sys:String>
+  <sys:String x:Key="Tooltip_Add">Dodaj novi zapis</sys:String>
+  <sys:String x:Key="Tooltip_View">Prikaz odabranog zapisa</sys:String>
+  <sys:String x:Key="Tooltip_Update">Uredi odabrani zapis</sys:String>
+  <sys:String x:Key="Tooltip_Save">Spremi promjene</sys:String>
+  <sys:String x:Key="Tooltip_Cancel">Odustani od promjena</sys:String>
+  <sys:String x:Key="Tooltip_Refresh">Osvježi listu i urednik</sys:String>
+  <sys:String x:Key="Tooltip_OpenMachines">Otvori matične podatke Strojeva.</sys:String>
+  <sys:String x:Key="Tooltip_OpenParts">Otvori Dijelove i zalihe.</sys:String>
+  <sys:String x:Key="Tooltip_OpenWorkOrders">Otvori modul Radnih naloga.</sys:String>
+  <sys:String x:Key="Tooltip_OpenCalibration">Otvori zapise o Kalibraciji.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSuppliers">Otvori registar Dobavljača.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSecurity">Upravljaj korisnicima i sigurnosnim ulogama.</sys:String>
+  <sys:String x:Key="Tooltip_OpenAdministration">Otvori globalne postavke konfiguracije.</sys:String>
+  <sys:String x:Key="Tooltip_OpenDiagnostics">Otvori dijagnostiku i telemetriju.</sys:String>
+
+  <!-- Zajednički gumbi u prikazima -->
+  <sys:String x:Key="Button_CFL">Odaberi s popisa</sys:String>
+  <sys:String x:Key="Button_OK">U redu</sys:String>
+  <sys:String x:Key="Button_Attach">Priloži</sys:String>
+  <sys:String x:Key="Button_GoldenArrow">Otvori povezano (Zlatna strelica)</sys:String>
+  <sys:String x:Key="Tooltip_CFL">Odaberi među dostupnim zapisima.</sys:String>
+  <sys:String x:Key="Tooltip_Attach">Priloži dokument trenutnom zapisu.</sys:String>
+  <sys:String x:Key="Tooltip_GoldenArrow">Navigiraj na povezani zapis.</sys:String>
+  <sys:String x:Key="Button_ApplyFilters">Primijeni filtre</sys:String>
+  <sys:String x:Key="Button_ExportPdf">Izvoz PDF</sys:String>
+  <sys:String x:Key="Button_ExportExcel">Izvoz Excel</sys:String>
+
+  <!-- Prilozi: gumbi/ToolTipovi -->
+  <sys:String x:Key="Button_PickFiles">Odaberi datoteke</sys:String>
+  <sys:String x:Key="Button_Download">Preuzmi</sys:String>
+  <sys:String x:Key="Button_Delete">Obriši</sys:String>
+  <sys:String x:Key="Tooltip_PickFiles">Odaberite datoteke za pripremu prijenosa.</sys:String>
+  <sys:String x:Key="Tooltip_DownloadAttachment">Preuzmi odabrani prilog.</sys:String>
+  <sys:String x:Key="Tooltip_DeleteAttachment">Obriši odabrani prilog nakon potvrde.</sys:String>
+
+  <!-- Prilozi: oznake -->
+  <sys:String x:Key="Label_AttachmentDetails">Detalji priloga</sys:String>
+  <sys:String x:Key="Label_Entity">Entitet</sys:String>
+  <sys:String x:Key="Label_EntityType">Vrsta entiteta</sys:String>
+  <sys:String x:Key="Label_EntityId">ID entiteta</sys:String>
+  <sys:String x:Key="Label_FileName">Naziv datoteke</sys:String>
+  <sys:String x:Key="Label_ContentType">Vrsta sadržaja</sys:String>
+  <sys:String x:Key="Label_FileType">Vrsta datoteke</sys:String>
+  <sys:String x:Key="Label_FileSize">Veličina datoteke</sys:String>
+  <sys:String x:Key="Label_SHA256">SHA-256</sys:String>
+  <sys:String x:Key="Label_RetentionPolicy">Politika zadržavanja</sys:String>
+  <sys:String x:Key="Label_RetainUntil">Zadržati do</sys:String>
+  <sys:String x:Key="Label_RetentionFlags">Oznake zadržavanja</sys:String>
+  <sys:String x:Key="Label_RetentionNotes">Bilješke o zadržavanju</sys:String>
+  <sys:String x:Key="Label_StagedUploads">Pripremljeni prijenosi</sys:String>
+  <sys:String x:Key="Label_Processing">Obrada...</sys:String>
+  <sys:String x:Key="Label_LegalHold">Pravna blokada</sys:String>
+  <sys:String x:Key="Label_ReviewRequired">Potrebna provjera</sys:String>
+  <sys:String x:Key="Text_NoFilesStaged">Nema pripremljenih datoteka za prijenos. Koristite Upload za dodavanje prije spremanja.</sys:String>
+  <sys:String x:Key="Text_SelectAttachmentToViewDetails">Odaberite prilog za prikaz detalja.</sys:String>
+
+  <!-- Dodatni stupci -->
+  <sys:String x:Key="Column_Description">Opis</sys:String>
+  <sys:String x:Key="Column_Timestamp">Vremenska oznaka</sys:String>
+  <sys:String x:Key="Column_ApiKey">API ključ</sys:String>
+  <sys:String x:Key="Column_Action">Radnja</sys:String>
+  <sys:String x:Key="Column_User">Korisnik</sys:String>
+  <sys:String x:Key="Column_IpAddress">IP adresa</sys:String>
+  <sys:String x:Key="Column_Request">Zahtjev</sys:String>
+  <sys:String x:Key="Column_Details">Detalji</sys:String>
+
+  <!-- Ostali ToolTipovi -->
+  <sys:String x:Key="Tooltip_DigitalSignatureWorkflow">Digitalni potpisi se bilježe kroz e-potpis tijek rada.</sys:String>
+
+  <!-- Kokpit/Nadzorna ploča -->
+  <sys:String x:Key="Label_ProductionKpis">Proizvodni KPI</sys:String>
+  <sys:String x:Key="Label_Notices">Obavijesti</sys:String>
+
+  <!-- Oznake za Vanjske servisere -->
+  <sys:String x:Key="Label_Name">Naziv</sys:String>
+  <sys:String x:Key="Label_ServiceType">Vrsta usluge</sys:String>
+  <sys:String x:Key="Label_VATID">OIB / ID</sys:String>
+  <sys:String x:Key="Label_ContactPerson">Kontakt osoba</sys:String>
+  <sys:String x:Key="Label_Email">E-pošta</sys:String>
+  <sys:String x:Key="Label_Phone">Telefon</sys:String>
+  <sys:String x:Key="Label_Address">Adresa</sys:String>
+  <sys:String x:Key="Label_CooperationStart">Početak suradnje</sys:String>
+  <sys:String x:Key="Label_CooperationEnd">Kraj suradnje</sys:String>
+  <sys:String x:Key="Label_Comment">Komentar</sys:String>
+  <sys:String x:Key="Label_ExtraNotes">Dodatne bilješke</sys:String>
+  <sys:String x:Key="Label_Certificates">Certifikati</sys:String>
+  <sys:String x:Key="Label_DigitalSignature">Digitalni potpis</sys:String>
+  <sys:String x:Key="Label_Action">Radnja</sys:String>
+  <sys:String x:Key="Label_From">Od</sys:String>
+  <sys:String x:Key="Label_To">Do</sys:String>
+  <sys:String x:Key="Label_ApiKey">API ključ</sys:String>
+  <sys:String x:Key="Label_Loading">Učitavanje...</sys:String>
+  <sys:String x:Key="Label_Manufacturer">Proizvođač</sys:String>
+  <sys:String x:Key="Label_Model">Model</sys:String>
+  
+  <!-- Oznake za Incidente -->
+  <sys:String x:Key="Label_IncidentDetails">Detalji incidenta</sys:String>
+  <sys:String x:Key="Label_Detected">Otkriveno</sys:String>
+  <sys:String x:Key="Label_Reported">Prijavljeno</sys:String>
+  <sys:String x:Key="Label_ReportedBy">Prijavio</sys:String>
+  <sys:String x:Key="Label_Investigator">Istražitelj</sys:String>
+  <sys:String x:Key="Label_WorkOrder">Radni nalog</sys:String>
+  <sys:String x:Key="Label_CapaCase">CAPA predmet</sys:String>
+  <sys:String x:Key="Label_Classification">Klasifikacija</sys:String>
+  <sys:String x:Key="Label_RootCause">Korijenski uzrok</sys:String>
+
+  <!-- Oznake za CAPA -->
+  <sys:String x:Key="Label_CAPADetails">Detalji CAPA</sys:String>
+  <sys:String x:Key="Label_Priority">Prioritet</sys:String>
+  <sys:String x:Key="Label_Opened">Otvoreno</sys:String>
+  <sys:String x:Key="Label_Closed">Zatvoreno</sys:String>
+  <sys:String x:Key="Label_Reason">Razlog</sys:String>
+  <sys:String x:Key="Label_CorrectiveAction">Korektivna radnja</sys:String>
+  <sys:String x:Key="Label_PreventiveAction">Preventivna radnja</sys:String>
+  <sys:String x:Key="Label_Actions">Radnje</sys:String>
+
+  <!-- Oznake za Validacije -->
+  <sys:String x:Key="Label_Type">Vrsta</sys:String>
+  <sys:String x:Key="Label_Target">Cilj</sys:String>
+  <sys:String x:Key="Label_Machine">Stroj</sys:String>
+  <sys:String x:Key="Label_Component">Sastavnica</sys:String>
+  <sys:String x:Key="Label_StartDate">Datum početka</sys:String>
+  <sys:String x:Key="Label_EndDate">Datum završetka</sys:String>
+  <sys:String x:Key="Label_NextDue">Sljedeći rok</sys:String>
+  <sys:String x:Key="Label_Documentation">Dokumentacija</sys:String>
+  <sys:String x:Key="Label_Comments">Komentari</sys:String>
+  <sys:String x:Key="Label_ProtocolCode">Protokol šifra</sys:String>
+  
+  <!-- Naslov detalja Validacije -->
+  <sys:String x:Key="Label_ValidationDetails">Detalji validacije</sys:String>
+
+  <!-- Oznake za Raspoređivanje -->
+  <sys:String x:Key="Label_ExecuteNow">Izvrši sada</sys:String>
+  <sys:String x:Key="Label_Acknowledge">Potvrdi</sys:String>
+  <sys:String x:Key="Label_IsCritical">Kritično</sys:String>
+  <sys:String x:Key="Label_RequiresAck">Zahtijeva potvrdu</sys:String>
+  <sys:String x:Key="Label_AlertOnFailure">Upozori na neuspjeh</sys:String>
+  <sys:String x:Key="Label_EscalationNote">Bilješka o eskalaciji</sys:String>
+  <sys:String x:Key="Label_LastResult">Zadnji rezultat</sys:String>
+  <sys:String x:Key="Label_LastError">Zadnja greška</sys:String>
+  <sys:String x:Key="Label_LastExecuted">Zadnje izvršeno</sys:String>
+  <sys:String x:Key="Label_Retries">Pokušaji</sys:String>
+  <sys:String x:Key="Label_MaxRetries">Maks. pokušaja</sys:String>
+  <sys:String x:Key="Label_ExtraParams">Dodatni parametri</sys:String>
+  <sys:String x:Key="Label_Device">Uređaj</sys:String>
+  <sys:String x:Key="Label_Session">Sesija</sys:String>
+  <sys:String x:Key="Label_IpAddress">IP adresa</sys:String>
+  <sys:String x:Key="Label_JobType">Vrsta posla</sys:String>
+  <sys:String x:Key="Label_CronExpression">Cron izraz</sys:String>
+  <sys:String x:Key="Label_Recurrence">Učestalost</sys:String>
+  
+  <!-- Naslov detalja rasporeda -->
+  <sys:String x:Key="Label_ScheduledJobDetails">Detalji zakazanog posla</sys:String>
+
+  <!-- Oznake za Sigurnost -->
+  <sys:String x:Key="Label_Username">Korisničko ime</sys:String>
+  <sys:String x:Key="Label_DisplayName">Prikazno ime</sys:String>
+  <sys:String x:Key="Label_EmailAddress">E-pošta</sys:String>
+  <sys:String x:Key="Label_Department">Odjel</sys:String>
+  <sys:String x:Key="Label_Locked">Zaključan</sys:String>
+  <sys:String x:Key="Label_TwoFactor">Dvofaktorska</sys:String>
+  <sys:String x:Key="Label_NewPassword">Nova lozinka</sys:String>
+  <sys:String x:Key="Label_ConfirmPassword">Potvrda lozinke</sys:String>
+  <sys:String x:Key="Label_AssignedRoles">Dodijeljene uloge</sys:String>
+  <sys:String x:Key="Label_FullName">Puno ime</sys:String>
+  <sys:String x:Key="Label_PrimaryRole">Primarna uloga</sys:String>
+  
+  <!-- Naslov detalja korisnika -->
+  <sys:String x:Key="Label_UserDetails">Detalji korisnika</sys:String>
+
+  <!-- Oznake za Dobavljače -->
+  <sys:String x:Key="Label_Contact">Kontakt</sys:String>
+  <sys:String x:Key="Label_Website">Web stranica</sys:String>
+  <sys:String x:Key="Label_City">Grad</sys:String>
+  <sys:String x:Key="Label_Country">Država</sys:String>
+  <sys:String x:Key="Label_ContractFile">Ugovor</sys:String>
+  <sys:String x:Key="Label_Qualified">Kvalificiran</sys:String>
+  <sys:String x:Key="Label_RegisteredAuthorities">Registrirana tijela</sys:String>
+  
+  <!-- Naslov detalja dobavljača -->
+  <sys:String x:Key="Label_SupplierDetails">Detalji dobavljača</sys:String>
+
+  <!-- Dodatni stupci -->
+  <sys:String x:Key="Column_Target">Cilj</sys:String>
+  <sys:String x:Key="Column_Username">Korisničko ime</sys:String>
+  <sys:String x:Key="Column_Role">Uloga</sys:String>
+  <sys:String x:Key="Column_Country">Država</sys:String>
+  <sys:String x:Key="Label_WorkOrderDetails">Detalji radnog naloga</sys:String>
+  <sys:String x:Key="Label_CreatedBy">Kreirao</sys:String>
+  <sys:String x:Key="Label_DateOpen">Datum otvaranja</sys:String>
+  <sys:String x:Key="Label_DueDate">Rok</sys:String>
+  <sys:String x:Key="Label_DateClosed">Datum zatvaranja</sys:String>
+  <sys:String x:Key="Label_Result">Rezultat</sys:String>
+  <sys:String x:Key="Label_TaskDescription">Opis zadatka</sys:String>
+  <sys:String x:Key="Column_Oee">OEE %</sys:String>
+  <sys:String x:Key="Column_LastMaintenance">Zadnje održavanje</sys:String>
+  <sys:String x:Key="Column_NextMaintenance">Sljedeće održavanje</sys:String>
+  <sys:String x:Key="Column_Stock">Zaliha</sys:String>
+  <sys:String x:Key="Label_Category">Kategorija</sys:String>
+  <sys:String x:Key="Label_MinStock">Min. zaliha</sys:String>
+  <sys:String x:Key="Label_SKU">SKU</sys:String>
+
+  <!-- Radni nalozi: Status/Validacija -->
+  <sys:String x:Key="Status_WorkOrders_FilteredBy">Filtrirano {0} po "{1}".</sys:String>
+  <sys:String x:Key="Status_WorkOrders_UnableToLoad">Nije moguće učitati {0}.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TitleRequired">Naslov je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_DescriptionRequired">Opis je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TypeRequired">Vrsta je obavezna.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_PriorityRequired">Prioritet je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_StatusRequired">Status je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_MachineRequired">Odabir stroja je obavezan.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_RequestedByRequired">Polje "Zatražio" je obavezno.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_CreatedByRequired">Polje "Kreirao" je obavezno.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_AssignedToRequired">Potrebno je dodijeliti tehničara.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_ResultRequired">Sažetak rezultata je obavezan.</sys:String>
+  <sys:String x:Key="Status_WorkOrders_SelectBeforeSave">Odaberite radni nalog prije spremanja.</sys:String>
+  <sys:String x:Key="Error_Signature_Failed">Elektronički potpis nije uspio: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Cancelled">Elektronički potpis je otkazan. Spremanje prekinuto.</sys:String>
+  <sys:String x:Key="Error_Signature_NotCaptured">Elektronički potpis nije zabilježen.</sys:String>
+  <sys:String x:Key="Error_Signature_PersistFailed">Neuspjelo spremanje elektroničkog potpisa: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Captured">Elektronički potpis zabilježen ({0}).</sys:String>
+  <sys:String x:Key="Error_Audit_LogWorkOrderFailed">Neuspjelo zapisivanje revizije radnog naloga.</sys:String>
+  <sys:String x:Key="Status_Attach_SaveBeforeAttach">Spremite radni nalog prije dodavanja priloga.</sys:String>
+  <sys:String x:Key="Status_Attach_Cancelled">Prijenos priloga otkazan.</sys:String>
+  <sys:String x:Key="Error_Attach_UploadFailed">Prijenos priloga nije uspio: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_WorkOrder">Odaberite radni nalog</sys:String>
+  <sys:String x:Key="Attachment_Picker_Title">Priloži datoteke uz {0}</sys:String>
+  <sys:String x:Key="CFL_Select_Warehouse">Odaberite skladište</sys:String>
+  <sys:String x:Key="Status_Warehouse_FilteredBy">Filtrirano {0} po "{1}".</sys:String>
+  <sys:String x:Key="Status_Warehouse_UnableToLocateById">Nije moguće pronaći skladište #{0}.</sys:String>
+
+  <!-- Radni nalozi: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_WorkOrders_Title">Kratki naslov radnog naloga.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Status">Status tijeka (npr. OTVOREN/ZATVOREN).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Type">Vrsta posla (npr. ODRŽAVANJE).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Priority">Relativni prioritet (npr. Visok/Srednji/Nizak).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Machine">Identifikator povezanog stroja.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Component">Opcionalni identifikator sastavnice.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_RequestedBy">Korisnik koji je zatražio posao.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_AssignedTo">Tehničar dodijeljen zadatku.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_CreatedBy">Korisnik koji je kreirao zapis.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateOpen">Datum otvaranja radnog naloga.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DueDate">Ciljani datum završetka.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateClosed">Datum zatvaranja radnog naloga.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Result">Ishod ili rezultat izvršenja.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_TaskDescription">Planirani koraci ili upute.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Description">Detaljan opis problema/zadatka.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Notes">Dodatne bilješke ili kontekst.</sys:String>
+
+  <!-- Imovina: Status/Validacija & CFL -->
+  <sys:String x:Key="CFL_Select_Asset">Odaberite imovinu</sys:String>
+  <sys:String x:Key="Status_Assets_FilteredBy">Filtrirano {0} po "{1}".</sys:String>
+  <sys:String x:Key="Status_Assets_UnableToLocateById">Nije moguće pronaći imovinu #{0}.</sys:String>
+  <sys:String x:Key="Status_Assets_SelectBeforeSave">Odaberite imovinu prije spremanja.</sys:String>
+  <sys:String x:Key="Error_Assets_SaveFailed">Neuspjelo spremanje imovine: {0}</sys:String>
+
+  <!-- Imovina: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Assets_Code">Jedinstvena šifra/taga imovine.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Name">Naziv imovine u registrima.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Description">Detaljan opis imovine.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Model">Model proizvođača.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Manufacturer">Proizvođač imovine.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Location">Trenutna lokacija.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Status">Stanje životnog ciklusa.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_UrsDoc">Referenca na URS dokument.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_InstallDate">Datum instalacije/puštanja u rad.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_ProcurementDate">Datum nabave.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_WarrantyUntil">Datum isteka jamstva.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_IsCritical">Označava je li imovina kritična.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_SerialNumber">Serijski broj proizvođača.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_LifecyclePhase">Trenutna faza životnog ciklusa.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Notes">Dodatne bilješke ili kontekst.</sys:String>
+
+  <!-- Skladište: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Warehouse_Name">Naziv skladišta.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Location">Fizička lokacija skladišta.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Status">Operativni status.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Responsible">Odgovorna osoba/tim.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_QrCode">QR kod identifikator (opcionalno).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_ClimateMode">Način klime/temperature (ako je primjenjivo).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Qualified">Zastavica kvalificiranosti.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_LastQualified">Datum zadnje kvalifikacije.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Notes">Bilješke o uvjetima/ograničenjima.</sys:String>
+
+  <!-- Validacije: Status/Greške -->
+  <sys:String x:Key="Status_Validations_UnableToLocateById">Nije moguće učitati validaciju #{0}.</sys:String>
+  <sys:String x:Key="Status_Validations_SelectBeforeSave">Odaberite validaciju prije spremanja.</sys:String>
+  <sys:String x:Key="Error_Validations_SaveFailed">Neuspjelo spremanje validacije: {0}</sys:String>
+
+  <!-- Validacije: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Validations_ProtocolCode">Broj protokola ili identifikator.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Type">Vrsta validacije (IQ/OQ/PQ).</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Machine">Povezani stroj.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Component">Povezana sastavnica.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_StartDate">Datum početka validacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_EndDate">Datum završetka validacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_NextDue">Sljedeći rok za revalidaciju.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Status">Trenutni status validacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Documentation">Poveznica ili sažetak dokumentacije.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Comments">Dodatni komentari.</sys:String>
+
+  <!-- Incidenti: CFL/Status/Greške -->
+  <sys:String x:Key="Status_Incidents_UnableToLoad">Nije moguće učitati {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_CflOnlyInEdit">CFL pretraživanja dostupna su samo tijekom uređivanja incidenta.</sys:String>
+  <sys:String x:Key="Status_Incidents_NoRelatedForLink">Nema povezanih CAPA slučajeva ili radnih naloga za povezivanje.</sys:String>
+  <sys:String x:Key="CFL_Select_RelatedRecord">Odaberite povezani zapis</sys:String>
+  <sys:String x:Key="Status_Incidents_UnableToLoadRelated">Nije moguće učitati povezane zapise: {0}</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedWorkOrder">Povezan radni nalog {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedCapa">Povezan CAPA slučaj {0}.</sys:String>
+
+  <!-- Incidenti: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_Incidents_Title">Kratki naslov incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Description">Detaljan opis incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Type">Kategorija (npr. Odstupanje, Kvaliteta).</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Priority">Relativni prioritet.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Status">Trenutni status.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Detected">Vrijeme otkrivanja incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Reported">Vrijeme prijave incidenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Target">Ciljni sustav/komponenta.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Machine">Identifikator povezanog stroja.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Component">Identifikator povezane sastavnice.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_AssignedTo">Dodijeljeni istražitelj/tehničar.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_LastModified">Zadnje izmijenjeno (vrijeme/korisnik).</sys:String>
+
+  <!-- CAPA: CFL/Status/Greške -->
+  <sys:String x:Key="Status_CAPA_SelectBeforeSave">Odaberite CAPA slučaj prije spremanja.</sys:String>
+  <sys:String x:Key="Error_CAPA_SaveFailed">Neuspjelo spremanje CAPA slučaja: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_CAPA">Odaberite CAPA</sys:String>
+  <sys:String x:Key="Status_CAPA_LoadedTitle">Učitano {0}.</sys:String>
+  <sys:String x:Key="Status_CAPA_FilteredBy">Filtrirano CAPA slučajeva po "{0}".</sys:String>
+  <sys:String x:Key="Attachment_Picker_CAPA">Odaberite CAPA prilog</sys:String>
+  <sys:String x:Key="Status_Attach_NoneSelected">Nije odabrana nijedna datoteka.</sys:String>
+
+  <!-- CAPA: ToolTipovi za polja -->
+  <sys:String x:Key="Tooltip_CAPA_Title">Kratki naslov CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Description">Detaljan opis problema.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Component">Povezana sastavnica.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_AssignedTo">Dodijeljena osoba za CAPA slučaj.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Priority">Prioritet CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Status">Trenutni status CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Opened">Datum otvaranja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Closed">Datum zatvaranja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Reason">Razlog CAPA slučaja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_RootCause">Analiza korijenskog uzroka.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_CorrectiveAction">Korektivne radnje koje treba provesti.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_PreventiveAction">Preventivne radnje za sprječavanje ponavljanja.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Actions">Sažetak dogovorenih radnji.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Notes">Dodatne bilješke ili kontekst.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Comments">Komentari recenzenata.</sys:String>
+  <sys:String x:Key="Label_WarehouseSummary">Sažetak skladišta</sys:String>
+  <sys:String x:Key="Label_Price">Cijena</sys:String>
+  <!-- Metapodaci potpisa -->
+  <sys:String x:Key="Label_SignatureMetadata">Metapodaci potpisa</sys:String>
+  <sys:String x:Key="Label_SignatureHash">Hash potpisa</sys:String>
+  <sys:String x:Key="Label_ReasonNote">Bilješka razloga</sys:String>
+  <sys:String x:Key="Label_SignedBy">Potpisao</sys:String>
+  <sys:String x:Key="Label_SignerId">ID potpisnika</sys:String>
+  <sys:String x:Key="Label_SignedAtUtc">Potpisano u (UTC)</sys:String>
+  <sys:String x:Key="Label_SourceIp">Izvorni IP</sys:String>
+  <sys:String x:Key="Label_SessionId">ID sesije</sys:String>
+  <sys:String x:Key="Label_DeviceInfo">Informacije o uređaju</sys:String>
+  <sys:String x:Key="Label_LastModifiedUtc">Zadnja izmjena (UTC)</sys:String>
+  <!-- Dijalog e-potpisa -->
+  <sys:String x:Key="Text_SignatureDialog_Intro">Ponovno unesite vjerodajnicu i zabilježite GMP-usklađen razlog prije primjene potpisa.</sys:String>
+  <sys:String x:Key="Label_PasswordPin">Lozinka/PIN</sys:String>
+  <sys:String x:Key="Label_ReasonCode">Šifra razloga</sys:String>
+  <sys:String x:Key="Label_CustomCode">Prilagođena šifra</sys:String>
+  <sys:String x:Key="Tooltip_EnterPasswordPin">Unesite svoju YasGMP lozinku ili PIN.</sys:String>
+  <sys:String x:Key="Button_Confirm">Potvrdi</sys:String>
+  <!-- Skladište oznake/stupci -->
+  <sys:String x:Key="Label_Responsible">Odgovorna osoba</sys:String>
+  <sys:String x:Key="Label_QRCode">QR kod</sys:String>
+  <sys:String x:Key="Label_ClimateMode">Klimatski režim</sys:String>
+  <sys:String x:Key="Label_LastQualified">Zadnja kvalifikacija</sys:String>
+  <sys:String x:Key="Text_UnderMinimumStock">Otkrivena zaliha ispod minimuma za jednu ili više stavki.</sys:String>
+  <sys:String x:Key="Label_StockSnapshot">Stanje zaliha</sys:String>
+  <sys:String x:Key="Label_RecentMovements">Nedavni pomaci</sys:String>
+  <sys:String x:Key="Column_Part">Dio</sys:String>
+  <sys:String x:Key="Column_Qty">Količina</sys:String>
+  <sys:String x:Key="Column_Reserved">Rezervirano</sys:String>
+  <sys:String x:Key="Column_Blocked">Blokirano</sys:String>
+  <sys:String x:Key="Column_Min">Min</sys:String>
+  <sys:String x:Key="Column_Max">Max</sys:String>
+  <sys:String x:Key="Column_Batch">Šarža</sys:String>
+  <sys:String x:Key="Column_Expiry">Rok</sys:String>
+  <sys:String x:Key="Column_When">Vrijeme</sys:String>
+  <sys:String x:Key="Column_Document">Dokument</sys:String>
+  <sys:String x:Key="Column_Note">Bilješka</sys:String>
+  <!-- Oznake kalibracije -->
+  <sys:String x:Key="Label_CalibrationDate">Datum kalibracije</sys:String>
+  <sys:String x:Key="Label_Certificate">Certifikat</sys:String>
+ </ResourceDictionary>

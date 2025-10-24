@@ -1,0 +1,549 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <!-- Ribbon Tabs -->
+  <sys:String x:Key="Tab_Home">Home</sys:String>
+  <sys:String x:Key="Tab_View">View</sys:String>
+  <sys:String x:Key="Tab_Tools">Tools</sys:String>
+
+  <!-- Groups / Backstage -->
+  <sys:String x:Key="Group_Layout">Layout</sys:String>
+  <sys:String x:Key="Group_Persistence">Persistence</sys:String>
+  <sys:String x:Key="Group_Diagnostics">Diagnostics</sys:String>
+  <sys:String x:Key="Group_QualityCompliance">Quality &amp; Compliance</sys:String>
+  <sys:String x:Key="Backstage_Layout">Layout</sys:String>
+  <sys:String x:Key="Backstage_SaveLayout">Save Layout</sys:String>
+  <sys:String x:Key="Backstage_ResetLayout">Reset Layout</sys:String>
+
+  <!-- Buttons -->
+  <sys:String x:Key="Button_AuditTrail">Audit Trail</sys:String>
+  <sys:String x:Key="Button_AuditDashboard">Audit Dashboard</sys:String>
+  <sys:String x:Key="Button_ApiAuditTrail">API Audit Trail</sys:String>
+  <sys:String x:Key="Button_RunSmokeTest">Run Smoke Test</sys:String>
+  <sys:String x:Key="Button_OpenSmokeLog">Open Smoke Log</sys:String>
+  <sys:String x:Key="Button_Find">Find</sys:String>
+  <sys:String x:Key="Button_Add">Add</sys:String>
+  <sys:String x:Key="Button_View">View</sys:String>
+  <sys:String x:Key="Button_Update">Update</sys:String>
+  <sys:String x:Key="Button_Save">Save</sys:String>
+  <sys:String x:Key="Button_Cancel">Cancel</sys:String>
+  <sys:String x:Key="Button_Refresh">Refresh</sys:String>
+
+  <!-- Anchorable Titles -->
+  <sys:String x:Key="Label_Modules">Modules</sys:String>
+  <sys:String x:Key="Label_Inspector">Inspector</sys:String>
+  <sys:String x:Key="Label_Active">Active</sys:String>
+  <sys:String x:Key="Label_User">User</sys:String>
+  <sys:String x:Key="Label_DB">DB</sys:String>
+  <sys:String x:Key="Label_Server">Server</sys:String>
+  <sys:String x:Key="Label_Env">Env</sys:String>
+  <sys:String x:Key="Label_UTC">UTC</sys:String>
+
+  <!-- Common Labels / Columns -->
+  <sys:String x:Key="Label_Search">Search</sys:String>
+  <sys:String x:Key="Label_Code">Code</sys:String>
+  <sys:String x:Key="Label_Title">Title</sys:String>
+  <sys:String x:Key="Label_Status">Status</sys:String>
+  <sys:String x:Key="Label_Location">Location</sys:String>
+  <sys:String x:Key="Label_AssetDetails">Asset Details</sys:String>
+  <sys:String x:Key="Label_URS_Document">URS Document</sys:String>
+  <sys:String x:Key="Label_InstallDate">Install Date</sys:String>
+  <sys:String x:Key="Label_ProcurementDate">Procurement Date</sys:String>
+  <sys:String x:Key="Label_WarrantyUntil">Warranty Until</sys:String>
+  <sys:String x:Key="Label_CriticalAsset">Critical asset</sys:String>
+  <sys:String x:Key="Label_SerialNo">Serial No.</sys:String>
+  <sys:String x:Key="Label_LifecyclePhase">Lifecycle Phase</sys:String>
+  <sys:String x:Key="Label_Notes">Notes</sys:String>
+  <sys:String x:Key="Label_RequestedBy">Requested By</sys:String>
+  <sys:String x:Key="Label_DateRequested">Date Requested</sys:String>
+  <sys:String x:Key="Label_AssignedTo">Assigned To</sys:String>
+  <sys:String x:Key="Label_DateAssigned">Date Assigned</sys:String>
+  <sys:String x:Key="Label_LastModified">Last Modified</sys:String>
+  <sys:String x:Key="Label_Description">Description</sys:String>
+  <sys:String x:Key="Label_CriticalIncident">Critical incident</sys:String>
+  <sys:String x:Key="Label_RiskLevel">Risk Level</sys:String>
+  <sys:String x:Key="Label_Anomaly">Anomaly</sys:String>
+  <sys:String x:Key="Label_ClosureComment">Closure Comment</sys:String>
+  <sys:String x:Key="Label_Requested">Requested</sys:String>
+
+  <sys:String x:Key="Column_Code">Code</sys:String>
+  <sys:String x:Key="Column_Title">Title</sys:String>
+  <sys:String x:Key="Column_Status">Status</sys:String>
+  <sys:String x:Key="Column_Location">Location</sys:String>
+  <sys:String x:Key="Column_Priority">Priority</sys:String>
+  <sys:String x:Key="Column_Type">Type</sys:String>
+  <sys:String x:Key="Column_Machine">Machine</sys:String>
+  <sys:String x:Key="Column_Incident">Incident</sys:String>
+  <sys:String x:Key="Column_Name">Name</sys:String>
+  <sys:String x:Key="Column_Recurrence">Recurrence</sys:String>
+  <sys:String x:Key="Column_NextDue">Next Due</sys:String>
+
+  <!-- Common Tooltips / A11y -->
+  <sys:String x:Key="Tooltip_SearchBox">Filter records as you type.</sys:String>
+  <sys:String x:Key="Tooltip_RecordsGrid">Double-click to open; use toolbar for actions.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSmokeLog">Open the latest smoke log file.</sys:String>
+
+  <!-- Categories -->
+  <sys:String x:Key="Category_Cockpit">Cockpit</sys:String>
+  <sys:String x:Key="Category_Maintenance">Maintenance</sys:String>
+  <sys:String x:Key="Category_SupplyChain">Supply Chain</sys:String>
+  <sys:String x:Key="Category_Quality">Quality</sys:String>
+  <sys:String x:Key="Category_QualityCompliance">Quality &amp; Compliance</sys:String>
+  <sys:String x:Key="Category_Planning">Planning</sys:String>
+  <sys:String x:Key="Category_Administration">Administration</sys:String>
+  <sys:String x:Key="Category_Diagnostics">Diagnostics</sys:String>
+  <sys:String x:Key="Category_Documents">Documents</sys:String>
+
+  <!-- Modules: Titles -->
+  <sys:String x:Key="Module_Dashboard_Title">Dashboard</sys:String>
+  <sys:String x:Key="Module_Assets_Title">Assets</sys:String>
+  <sys:String x:Key="Module_Components_Title">Components</sys:String>
+  <sys:String x:Key="Module_Warehouse_Title">Warehouse</sys:String>
+  <sys:String x:Key="Module_WorkOrders_Title">Work Orders</sys:String>
+  <sys:String x:Key="Module_Calibration_Title">Calibration</sys:String>
+  <sys:String x:Key="Module_Parts_Title">Parts</sys:String>
+  <sys:String x:Key="Module_Suppliers_Title">Suppliers</sys:String>
+  <sys:String x:Key="Module_ExternalServicers_Title">External Servicers</sys:String>
+  <sys:String x:Key="Module_CAPA_Title">CAPA</sys:String>
+  <sys:String x:Key="Module_Incidents_Title">Incidents</sys:String>
+  <sys:String x:Key="Module_ChangeControl_Title">Change Control</sys:String>
+  <sys:String x:Key="Module_Validations_Title">Validations</sys:String>
+  <sys:String x:Key="Module_Scheduling_Title">Scheduling</sys:String>
+  <sys:String x:Key="Module_Security_Title">Security</sys:String>
+  <sys:String x:Key="Module_Administration_Title">Administration</sys:String>
+  <sys:String x:Key="Module_AuditTrail_Title">Audit Trail</sys:String>
+  <sys:String x:Key="Module_AuditDashboard_Title">Audit Dashboard</sys:String>
+  <sys:String x:Key="Module_ApiAuditTrail_Title">API Audit Trail</sys:String>
+  <sys:String x:Key="Module_Diagnostics_Title">Diagnostics</sys:String>
+  <sys:String x:Key="Module_Attachments_Title">Attachments</sys:String>
+
+  <!-- Modules: Descriptions / Tooltips -->
+  <sys:String x:Key="Module_Dashboard_Tooltip">Operations overview and KPIs</sys:String>
+  <sys:String x:Key="Module_Assets_Tooltip">Asset register and lifecycle</sys:String>
+  <sys:String x:Key="Module_Components_Tooltip">Component hierarchy and lifecycle</sys:String>
+  <sys:String x:Key="Module_Warehouse_Tooltip">Warehouse master data</sys:String>
+  <sys:String x:Key="Module_WorkOrders_Tooltip">Corrective and preventive jobs</sys:String>
+  <sys:String x:Key="Module_Calibration_Tooltip">Calibration records</sys:String>
+  <sys:String x:Key="Module_Parts_Tooltip">Parts and spare stock</sys:String>
+  <sys:String x:Key="Module_Suppliers_Tooltip">Approved suppliers and contractors</sys:String>
+  <sys:String x:Key="Module_ExternalServicers_Tooltip">Accredited laboratories and service partners</sys:String>
+  <sys:String x:Key="Module_CAPA_Tooltip">Corrective actions and preventive plans</sys:String>
+  <sys:String x:Key="Module_Incidents_Tooltip">Incident intake and investigations</sys:String>
+  <sys:String x:Key="Module_ChangeControl_Tooltip">Change control workflow</sys:String>
+  <sys:String x:Key="Module_Validations_Tooltip">IQ/OQ/PQ lifecycle and requalification</sys:String>
+  <sys:String x:Key="Module_Scheduling_Tooltip">Automated job schedules</sys:String>
+  <sys:String x:Key="Module_Security_Tooltip">Users and security roles</sys:String>
+  <sys:String x:Key="Module_Administration_Tooltip">Global configuration settings</sys:String>
+  <sys:String x:Key="Module_AuditTrail_Tooltip">System event history</sys:String>
+  <sys:String x:Key="Module_AuditDashboard_Tooltip">Real-time audit feed and exports</sys:String>
+  <sys:String x:Key="Module_ApiAuditTrail_Tooltip">API key activity history and forensic request payloads</sys:String>
+  <sys:String x:Key="Module_Diagnostics_Tooltip">Telemetry snapshots and health checks</sys:String>
+  <sys:String x:Key="Module_Attachments_Tooltip">File attachments and certificates</sys:String>
+
+  <!-- Ribbon Buttons (Home) -->
+  <sys:String x:Key="Button_Machines">Machines</sys:String>
+  <sys:String x:Key="Button_Parts">Parts</sys:String>
+  <sys:String x:Key="Button_WorkOrders">Work Orders</sys:String>
+  <sys:String x:Key="Button_Calibration">Calibration</sys:String>
+  <sys:String x:Key="Button_Suppliers">Suppliers</sys:String>
+  <sys:String x:Key="Button_Security">Security</sys:String>
+  <sys:String x:Key="Button_Administration">Administration</sys:String>
+  <sys:String x:Key="Button_Diagnostics">Diagnostics</sys:String>
+
+  <!-- Ribbon Tooltips -->
+  <sys:String x:Key="Tooltip_OpenAuditTrail">Open the immutable audit trail browser.</sys:String>
+  <sys:String x:Key="Tooltip_OpenAuditDashboard">Launch the live audit dashboard with trend analytics.</sys:String>
+  <sys:String x:Key="Tooltip_OpenApiAudit">Review API key usage and forensic request payloads.</sys:String>
+  <sys:String x:Key="Tooltip_Find">Search/filter records (Find mode)</sys:String>
+  <sys:String x:Key="Tooltip_Add">Add a new record</sys:String>
+  <sys:String x:Key="Tooltip_View">View the selected record</sys:String>
+  <sys:String x:Key="Tooltip_Update">Edit the selected record</sys:String>
+  <sys:String x:Key="Tooltip_Save">Save changes</sys:String>
+  <sys:String x:Key="Tooltip_Cancel">Cancel changes</sys:String>
+  <sys:String x:Key="Tooltip_Refresh">Refresh list and editor</sys:String>
+  <sys:String x:Key="Tooltip_OpenMachines">Open Machines master data.</sys:String>
+  <sys:String x:Key="Tooltip_OpenParts">Open Parts and inventory records.</sys:String>
+  <sys:String x:Key="Tooltip_OpenWorkOrders">Open Work Orders module.</sys:String>
+  <sys:String x:Key="Tooltip_OpenCalibration">Open Calibration records.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSuppliers">Open Suppliers registry.</sys:String>
+  <sys:String x:Key="Tooltip_OpenSecurity">Manage users and security roles.</sys:String>
+  <sys:String x:Key="Tooltip_OpenAdministration">Open global configuration settings.</sys:String>
+  <sys:String x:Key="Tooltip_OpenDiagnostics">Open diagnostics and telemetry.</sys:String>
+
+  <!-- Common Buttons in Views -->
+  <sys:String x:Key="Button_CFL">Choose From List</sys:String>
+  <sys:String x:Key="Button_OK">OK</sys:String>
+  <sys:String x:Key="Button_Attach">Attach</sys:String>
+  <sys:String x:Key="Button_GoldenArrow">Open Related (Golden Arrow)</sys:String>
+  <sys:String x:Key="Tooltip_CFL">Choose from available records.</sys:String>
+  <sys:String x:Key="Tooltip_Attach">Attach a document to the current record.</sys:String>
+  <sys:String x:Key="Tooltip_GoldenArrow">Navigate to the related record.</sys:String>
+  <sys:String x:Key="Button_ApplyFilters">Apply Filters</sys:String>
+  <sys:String x:Key="Button_ExportPdf">Export PDF</sys:String>
+  <sys:String x:Key="Button_ExportExcel">Export Excel</sys:String>
+
+  <!-- Attachments Buttons/Tooltips -->
+  <sys:String x:Key="Button_PickFiles">Pick Files</sys:String>
+  <sys:String x:Key="Button_Download">Download</sys:String>
+  <sys:String x:Key="Button_Delete">Delete</sys:String>
+  <sys:String x:Key="Tooltip_PickFiles">Select files to stage for upload.</sys:String>
+  <sys:String x:Key="Tooltip_DownloadAttachment">Download the selected attachment.</sys:String>
+  <sys:String x:Key="Tooltip_DeleteAttachment">Delete the selected attachment after confirmation.</sys:String>
+
+  <!-- Attachments Labels -->
+  <sys:String x:Key="Label_AttachmentDetails">Attachment Details</sys:String>
+  <sys:String x:Key="Label_Entity">Entity</sys:String>
+  <sys:String x:Key="Label_EntityType">Entity Type</sys:String>
+  <sys:String x:Key="Label_EntityId">Entity ID</sys:String>
+  <sys:String x:Key="Label_FileName">File Name</sys:String>
+  <sys:String x:Key="Label_ContentType">Content Type</sys:String>
+  <sys:String x:Key="Label_FileType">File Type</sys:String>
+  <sys:String x:Key="Label_FileSize">File Size</sys:String>
+  <sys:String x:Key="Label_SHA256">SHA-256</sys:String>
+  <sys:String x:Key="Label_RetentionPolicy">Retention Policy</sys:String>
+  <sys:String x:Key="Label_RetainUntil">Retain Until</sys:String>
+  <sys:String x:Key="Label_RetentionFlags">Retention Flags</sys:String>
+  <sys:String x:Key="Label_RetentionNotes">Retention Notes</sys:String>
+  <sys:String x:Key="Label_StagedUploads">Staged Uploads</sys:String>
+  <sys:String x:Key="Label_Processing">Processing...</sys:String>
+  <sys:String x:Key="Label_LegalHold">Legal Hold</sys:String>
+  <sys:String x:Key="Label_ReviewRequired">Review Required</sys:String>
+  <sys:String x:Key="Text_NoFilesStaged">No files staged for upload. Use Upload to add files before saving.</sys:String>
+  <sys:String x:Key="Text_SelectAttachmentToViewDetails">Select an attachment to view details.</sys:String>
+
+  <!-- Additional Columns -->
+  <sys:String x:Key="Column_Description">Description</sys:String>
+  <sys:String x:Key="Column_Timestamp">Timestamp</sys:String>
+  <sys:String x:Key="Column_ApiKey">API Key</sys:String>
+  <sys:String x:Key="Column_Action">Action</sys:String>
+  <sys:String x:Key="Column_User">User</sys:String>
+  <sys:String x:Key="Column_IpAddress">IP Address</sys:String>
+  <sys:String x:Key="Column_Request">Request</sys:String>
+  <sys:String x:Key="Column_Details">Details</sys:String>
+
+  <!-- Misc tooltips -->
+  <sys:String x:Key="Tooltip_DigitalSignatureWorkflow">Digital signatures are captured via the e-signature workflow.</sys:String>
+
+  <!-- Cockpit/Dashboard -->
+  <sys:String x:Key="Label_ProductionKpis">Production KPIs</sys:String>
+  <sys:String x:Key="Label_Notices">Notices</sys:String>
+
+  <!-- External Servicers Labels -->
+  <sys:String x:Key="Label_Name">Name</sys:String>
+  <sys:String x:Key="Label_ServiceType">Service Type</sys:String>
+  <sys:String x:Key="Label_VATID">VAT / ID</sys:String>
+  <sys:String x:Key="Label_ContactPerson">Contact Person</sys:String>
+  <sys:String x:Key="Label_Email">Email</sys:String>
+  <sys:String x:Key="Label_Phone">Phone</sys:String>
+  <sys:String x:Key="Label_Address">Address</sys:String>
+  <sys:String x:Key="Label_CooperationStart">Cooperation Start</sys:String>
+  <sys:String x:Key="Label_CooperationEnd">Cooperation End</sys:String>
+  <sys:String x:Key="Label_Comment">Comment</sys:String>
+  <sys:String x:Key="Label_ExtraNotes">Extra Notes</sys:String>
+  <sys:String x:Key="Label_Certificates">Certificates</sys:String>
+  <sys:String x:Key="Label_DigitalSignature">Digital Signature</sys:String>
+  <sys:String x:Key="Label_Manufacturer">Manufacturer</sys:String>
+  <sys:String x:Key="Label_Model">Model</sys:String>
+  <sys:String x:Key="Label_Action">Action</sys:String>
+  <sys:String x:Key="Label_From">From</sys:String>
+  <sys:String x:Key="Label_To">To</sys:String>
+  <sys:String x:Key="Label_ApiKey">API Key</sys:String>
+  <sys:String x:Key="Label_Loading">Loading...</sys:String>
+
+  <!-- Incidents Labels -->
+  <sys:String x:Key="Label_IncidentDetails">Incident Details</sys:String>
+  <sys:String x:Key="Label_Detected">Detected</sys:String>
+  <sys:String x:Key="Label_Reported">Reported</sys:String>
+  <sys:String x:Key="Label_ReportedBy">Reported By</sys:String>
+  <sys:String x:Key="Label_Investigator">Investigator</sys:String>
+  <sys:String x:Key="Label_WorkOrder">Work Order</sys:String>
+  <sys:String x:Key="Label_CapaCase">CAPA Case</sys:String>
+  <sys:String x:Key="Label_Classification">Classification</sys:String>
+  <sys:String x:Key="Label_RootCause">Root Cause</sys:String>
+
+  <!-- CAPA Labels -->
+  <sys:String x:Key="Label_CAPADetails">CAPA Details</sys:String>
+  <sys:String x:Key="Label_Priority">Priority</sys:String>
+  <sys:String x:Key="Label_Opened">Opened</sys:String>
+  <sys:String x:Key="Label_Closed">Closed</sys:String>
+  <sys:String x:Key="Label_Reason">Reason</sys:String>
+  <sys:String x:Key="Label_CorrectiveAction">Corrective Action</sys:String>
+  <sys:String x:Key="Label_PreventiveAction">Preventive Action</sys:String>
+  <sys:String x:Key="Label_Actions">Actions</sys:String>
+
+  <!-- Validation Labels -->
+  <sys:String x:Key="Label_Type">Type</sys:String>
+  <sys:String x:Key="Label_Target">Target</sys:String>
+  <sys:String x:Key="Label_Machine">Machine</sys:String>
+  <sys:String x:Key="Label_Component">Component</sys:String>
+  <sys:String x:Key="Label_StartDate">Start Date</sys:String>
+  <sys:String x:Key="Label_EndDate">End Date</sys:String>
+  <sys:String x:Key="Label_NextDue">Next Due</sys:String>
+  <sys:String x:Key="Label_Documentation">Documentation</sys:String>
+  <sys:String x:Key="Label_Comments">Comments</sys:String>
+  <sys:String x:Key="Label_ProtocolCode">Protocol Code</sys:String>
+
+  <!-- Validation Details Title -->
+  <sys:String x:Key="Label_ValidationDetails">Validation Details</sys:String>
+
+  <!-- Scheduling Labels -->
+  <sys:String x:Key="Label_ExecuteNow">Execute Now</sys:String>
+  <sys:String x:Key="Label_Acknowledge">Acknowledge</sys:String>
+  <sys:String x:Key="Label_IsCritical">Is Critical</sys:String>
+  <sys:String x:Key="Label_RequiresAck">Requires Acknowledgment</sys:String>
+  <sys:String x:Key="Label_AlertOnFailure">Alert On Failure</sys:String>
+  <sys:String x:Key="Label_EscalationNote">Escalation Note</sys:String>
+  <sys:String x:Key="Label_LastResult">Last Result</sys:String>
+  <sys:String x:Key="Label_LastError">Last Error</sys:String>
+  <sys:String x:Key="Label_LastExecuted">Last Executed</sys:String>
+  <sys:String x:Key="Label_Retries">Retries</sys:String>
+  <sys:String x:Key="Label_MaxRetries">Max Retries</sys:String>
+  <sys:String x:Key="Label_ExtraParams">Extra Params</sys:String>
+  <sys:String x:Key="Label_Device">Device</sys:String>
+  <sys:String x:Key="Label_Session">Session</sys:String>
+  <sys:String x:Key="Label_IpAddress">IP Address</sys:String>
+  <sys:String x:Key="Label_JobType">Job Type</sys:String>
+  <sys:String x:Key="Label_CronExpression">Cron Expression</sys:String>
+  <sys:String x:Key="Label_Recurrence">Recurrence</sys:String>
+
+  <!-- Scheduling Details Title -->
+  <sys:String x:Key="Label_ScheduledJobDetails">Scheduled Job Details</sys:String>
+
+  <!-- Security Labels -->
+  <sys:String x:Key="Label_Username">Username</sys:String>
+  <sys:String x:Key="Label_DisplayName">Display Name</sys:String>
+  <sys:String x:Key="Label_EmailAddress">Email</sys:String>
+  <sys:String x:Key="Label_Department">Department</sys:String>
+  <sys:String x:Key="Label_Locked">Locked</sys:String>
+  <sys:String x:Key="Label_TwoFactor">Two Factor</sys:String>
+  <sys:String x:Key="Label_NewPassword">New Password</sys:String>
+  <sys:String x:Key="Label_ConfirmPassword">Confirm Password</sys:String>
+  <sys:String x:Key="Label_AssignedRoles">Assigned Roles</sys:String>
+  <sys:String x:Key="Label_FullName">Full Name</sys:String>
+  <sys:String x:Key="Label_PrimaryRole">Primary Role</sys:String>
+
+  <!-- Security Details Title -->
+  <sys:String x:Key="Label_UserDetails">User Details</sys:String>
+
+  <!-- Suppliers Labels -->
+  <sys:String x:Key="Label_Contact">Contact</sys:String>
+  <sys:String x:Key="Label_Website">Website</sys:String>
+  <sys:String x:Key="Label_City">City</sys:String>
+  <sys:String x:Key="Label_Country">Country</sys:String>
+  <sys:String x:Key="Label_ContractFile">Contract File</sys:String>
+  <sys:String x:Key="Label_Qualified">Qualified</sys:String>
+  <sys:String x:Key="Label_RegisteredAuthorities">Registered Authorities</sys:String>
+
+  <!-- Supplier Details Title -->
+  <sys:String x:Key="Label_SupplierDetails">Supplier Details</sys:String>
+
+  <!-- Additional Columns -->
+  <sys:String x:Key="Column_Target">Target</sys:String>
+  <sys:String x:Key="Column_Username">Username</sys:String>
+  <sys:String x:Key="Column_Role">Role</sys:String>
+  <sys:String x:Key="Column_Country">Country</sys:String>
+  <sys:String x:Key="Label_WorkOrderDetails">Work Order Details</sys:String>
+  <sys:String x:Key="Label_CreatedBy">Created By</sys:String>
+  <sys:String x:Key="Label_DateOpen">Date Open</sys:String>
+  <sys:String x:Key="Label_DueDate">Due Date</sys:String>
+  <sys:String x:Key="Label_DateClosed">Date Closed</sys:String>
+  <sys:String x:Key="Label_Result">Result</sys:String>
+  <sys:String x:Key="Label_TaskDescription">Task Description</sys:String>
+  <sys:String x:Key="Column_Oee">OEE %</sys:String>
+  <sys:String x:Key="Column_LastMaintenance">Last Maintenance</sys:String>
+  <sys:String x:Key="Column_NextMaintenance">Next Maintenance</sys:String>
+  <sys:String x:Key="Column_Stock">Stock</sys:String>
+  <sys:String x:Key="Label_Category">Category</sys:String>
+  <sys:String x:Key="Label_MinStock">Min Stock</sys:String>
+  <sys:String x:Key="Label_SKU">SKU</sys:String>
+
+  <!-- Work Orders: Status/Validation -->
+  <sys:String x:Key="Status_WorkOrders_FilteredBy">Filtered {0} by "{1}".</sys:String>
+  <sys:String x:Key="Status_WorkOrders_UnableToLoad">Unable to load {0}.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TitleRequired">Title is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_DescriptionRequired">Description is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_TypeRequired">Type is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_PriorityRequired">Priority is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_StatusRequired">Status is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_MachineRequired">Machine selection is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_RequestedByRequired">Requested by user is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_CreatedByRequired">Created by user is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_AssignedToRequired">Assigned technician is required.</sys:String>
+  <sys:String x:Key="Validation_WorkOrders_ResultRequired">Result summary is required.</sys:String>
+  <sys:String x:Key="Status_WorkOrders_SelectBeforeSave">Select a work order before saving.</sys:String>
+  <sys:String x:Key="Error_Signature_Failed">Electronic signature failed: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Cancelled">Electronic signature cancelled. Save aborted.</sys:String>
+  <sys:String x:Key="Error_Signature_NotCaptured">Electronic signature was not captured.</sys:String>
+  <sys:String x:Key="Error_Signature_PersistFailed">Failed to persist electronic signature: {0}</sys:String>
+  <sys:String x:Key="Status_Signature_Captured">Electronic signature captured ({0}).</sys:String>
+  <sys:String x:Key="Error_Audit_LogWorkOrderFailed">Failed to log work order audit.</sys:String>
+  <sys:String x:Key="Status_Attach_SaveBeforeAttach">Save the work order before adding attachments.</sys:String>
+  <sys:String x:Key="Status_Attach_Cancelled">Attachment upload cancelled.</sys:String>
+  <sys:String x:Key="Error_Attach_UploadFailed">Attachment upload failed: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_WorkOrder">Select Work Order</sys:String>
+  <sys:String x:Key="Attachment_Picker_Title">Attach files to {0}</sys:String>
+  <sys:String x:Key="CFL_Select_Warehouse">Select Warehouse</sys:String>
+  <sys:String x:Key="Status_Warehouse_FilteredBy">Filtered {0} by "{1}".</sys:String>
+  <sys:String x:Key="Status_Warehouse_UnableToLocateById">Unable to locate warehouse #{0}.</sys:String>
+
+  <!-- Work Orders: Input Tooltips -->
+  <sys:String x:Key="Tooltip_WorkOrders_Title">Short title for the work order.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Status">Workflow status (e.g., OPEN/CLOSED).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Type">Category of work (e.g., MAINTENANCE).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Priority">Relative priority (e.g., High/Medium/Low).</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Machine">Related machine identifier.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Component">Optional component identifier.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_RequestedBy">User who requested the work.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_AssignedTo">Technician assigned to the task.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_CreatedBy">User who created the record.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateOpen">Date when the work order was opened.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DueDate">Target completion date.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_DateClosed">Date when the work order was closed.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Result">Outcome or execution result.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_TaskDescription">Planned steps or instructions.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Description">Detailed description of the issue/task.</sys:String>
+  <sys:String x:Key="Tooltip_WorkOrders_Notes">Additional notes or context.</sys:String>
+
+  <!-- Assets: Status/Validation & CFL -->
+  <sys:String x:Key="CFL_Select_Asset">Select Asset</sys:String>
+  <sys:String x:Key="Status_Assets_FilteredBy">Filtered {0} by "{1}".</sys:String>
+  <sys:String x:Key="Status_Assets_UnableToLocateById">Unable to locate asset #{0}.</sys:String>
+  <sys:String x:Key="Status_Assets_SelectBeforeSave">Select an asset before saving.</sys:String>
+  <sys:String x:Key="Error_Assets_SaveFailed">Failed to persist asset: {0}</sys:String>
+
+  <!-- Assets: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Assets_Code">Unique asset code or inventory tag.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Name">Asset name as seen in registers.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Description">Detailed description of the asset.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Model">Manufacturer’s model identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Manufacturer">Company that built the asset.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Location">Current physical location.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Status">Lifecycle state (active/maintenance/etc.).</sys:String>
+  <sys:String x:Key="Tooltip_Assets_UrsDoc">URS document reference.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_InstallDate">Date when installed/commissioned.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_ProcurementDate">Date of purchase.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_WarrantyUntil">Warranty expiration date.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_IsCritical">Whether the asset is critical.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_SerialNumber">Manufacturer serial number.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_LifecyclePhase">Current lifecycle phase.</sys:String>
+  <sys:String x:Key="Tooltip_Assets_Notes">Additional notes or context.</sys:String>
+
+  <!-- Warehouse: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Warehouse_Name">Warehouse display name.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Location">Physical location of the warehouse.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Status">Operational status.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Responsible">Responsible person/team.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_QrCode">QR code identifier (optional).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_ClimateMode">Climate/temperature mode (if applicable).</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Qualified">Qualified flag.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_LastQualified">Date of last qualification.</sys:String>
+  <sys:String x:Key="Tooltip_Warehouse_Notes">Notes about conditions/constraints.</sys:String>
+
+  <!-- Validations: Status/Errors -->
+  <sys:String x:Key="Status_Validations_UnableToLocateById">Unable to load validation #{0}.</sys:String>
+  <sys:String x:Key="Status_Validations_SelectBeforeSave">Select a validation before saving.</sys:String>
+  <sys:String x:Key="Error_Validations_SaveFailed">Failed to persist validation: {0}</sys:String>
+
+  <!-- Validations: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Validations_ProtocolCode">Protocol number or identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Type">Validation type (IQ/OQ/PQ).</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Machine">Related machine.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Component">Related component.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_StartDate">Start date of the validation.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_EndDate">End date of the validation.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_NextDue">Next due date for revalidation.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Status">Current validation status.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Documentation">Documentation link or summary.</sys:String>
+  <sys:String x:Key="Tooltip_Validations_Comments">Additional comments.</sys:String>
+
+  <!-- Incidents: CFL/Status/Errors -->
+  <sys:String x:Key="Status_Incidents_UnableToLoad">Unable to load {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_CflOnlyInEdit">CFL lookups are only available while editing an incident.</sys:String>
+  <sys:String x:Key="Status_Incidents_NoRelatedForLink">No related CAPA cases or work orders available for linking.</sys:String>
+  <sys:String x:Key="CFL_Select_RelatedRecord">Select related record</sys:String>
+  <sys:String x:Key="Status_Incidents_UnableToLoadRelated">Unable to load related records: {0}</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedWorkOrder">Linked work order {0}.</sys:String>
+  <sys:String x:Key="Status_Incidents_LinkedCapa">Linked CAPA case {0}.</sys:String>
+
+  <!-- Incidents: Input Tooltips -->
+  <sys:String x:Key="Tooltip_Incidents_Title">Short incident title.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Description">Detailed description of the incident.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Type">Incident category (e.g., Deviation, Quality).</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Priority">Relative priority.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Status">Current status.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Detected">When the incident was detected.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Reported">When the incident was reported.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Target">Target system/component.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Machine">Related machine identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_Component">Related component identifier.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_AssignedTo">Assigned investigator/technician.</sys:String>
+  <sys:String x:Key="Tooltip_Incidents_LastModified">Last modified timestamp/user.</sys:String>
+
+  <!-- CAPA: CFL/Status/Errors -->
+  <sys:String x:Key="Status_CAPA_SelectBeforeSave">Select a CAPA case before saving.</sys:String>
+  <sys:String x:Key="Error_CAPA_SaveFailed">Failed to persist CAPA case: {0}</sys:String>
+  <sys:String x:Key="CFL_Select_CAPA">Select CAPA</sys:String>
+  <sys:String x:Key="Status_CAPA_LoadedTitle">Loaded {0}.</sys:String>
+  <sys:String x:Key="Status_CAPA_FilteredBy">Filtered CAPA cases by "{0}".</sys:String>
+  <sys:String x:Key="Attachment_Picker_CAPA">Select CAPA attachment</sys:String>
+  <sys:String x:Key="Status_Attach_NoneSelected">No files selected.</sys:String>
+
+  <!-- CAPA: Input Tooltips -->
+  <sys:String x:Key="Tooltip_CAPA_Title">Short title for the CAPA case.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Description">Detailed description of the issue.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Component">Related component.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_AssignedTo">Assignee for the CAPA case.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Priority">Priority of the CAPA case.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Status">Current CAPA status.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Opened">Date opened.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Closed">Date closed.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Reason">Reason for the CAPA.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_RootCause">Root cause analysis.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_CorrectiveAction">Corrective actions to be performed.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_PreventiveAction">Preventive actions to avoid recurrence.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Actions">Summary of agreed actions.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Notes">Additional notes or context.</sys:String>
+  <sys:String x:Key="Tooltip_CAPA_Comments">Reviewer comments.</sys:String>
+  <sys:String x:Key="Label_WarehouseSummary">Warehouse Summary</sys:String>
+  <sys:String x:Key="Label_Price">Price</sys:String>
+  <!-- Signature Metadata -->
+  <sys:String x:Key="Label_SignatureMetadata">Signature Metadata</sys:String>
+  <sys:String x:Key="Label_SignatureHash">Signature Hash</sys:String>
+  <sys:String x:Key="Label_ReasonNote">Reason Note</sys:String>
+  <sys:String x:Key="Label_SignedBy">Signed By</sys:String>
+  <sys:String x:Key="Label_SignerId">Signer ID</sys:String>
+  <sys:String x:Key="Label_SignedAtUtc">Signed At (UTC)</sys:String>
+  <sys:String x:Key="Label_SourceIp">Source IP</sys:String>
+  <sys:String x:Key="Label_SessionId">Session ID</sys:String>
+  <sys:String x:Key="Label_DeviceInfo">Device Info</sys:String>
+  <sys:String x:Key="Label_LastModifiedUtc">Last Modified (UTC)</sys:String>
+  <!-- Signature Dialog -->
+  <sys:String x:Key="Text_SignatureDialog_Intro">Re-enter your credential and capture a GMP-compliant reason before applying the signature.</sys:String>
+  <sys:String x:Key="Label_PasswordPin">Password/PIN</sys:String>
+  <sys:String x:Key="Label_ReasonCode">Reason code</sys:String>
+  <sys:String x:Key="Label_CustomCode">Custom code</sys:String>
+  <sys:String x:Key="Tooltip_EnterPasswordPin">Enter your YasGMP password or PIN.</sys:String>
+  <sys:String x:Key="Button_Confirm">Confirm</sys:String>
+  <!-- Warehouse labels/columns -->
+  <sys:String x:Key="Label_Responsible">Responsible</sys:String>
+  <sys:String x:Key="Label_QRCode">QR Code</sys:String>
+  <sys:String x:Key="Label_ClimateMode">Climate Mode</sys:String>
+  <sys:String x:Key="Label_LastQualified">Last Qualified</sys:String>
+  <sys:String x:Key="Text_UnderMinimumStock">Under-minimum stock detected for one or more items.</sys:String>
+  <sys:String x:Key="Label_StockSnapshot">Stock Snapshot</sys:String>
+  <sys:String x:Key="Label_RecentMovements">Recent Movements</sys:String>
+  <sys:String x:Key="Column_Part">Part</sys:String>
+  <sys:String x:Key="Column_Qty">Qty</sys:String>
+  <sys:String x:Key="Column_Reserved">Reserved</sys:String>
+  <sys:String x:Key="Column_Blocked">Blocked</sys:String>
+  <sys:String x:Key="Column_Min">Min</sys:String>
+  <sys:String x:Key="Column_Max">Max</sys:String>
+  <sys:String x:Key="Column_Batch">Batch</sys:String>
+  <sys:String x:Key="Column_Expiry">Expiry</sys:String>
+  <sys:String x:Key="Column_When">When</sys:String>
+  <sys:String x:Key="Column_Document">Document</sys:String>
+  <sys:String x:Key="Column_Note">Note</sys:String>
+  <!-- Calibration labels -->
+  <sys:String x:Key="Label_CalibrationDate">Calibration Date</sys:String>
+  <sys:String x:Key="Label_Certificate">Certificate</sys:String>
+ </ResourceDictionary>
