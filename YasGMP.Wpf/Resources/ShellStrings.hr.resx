@@ -87,6 +87,15 @@
   <data name="Backstage.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Pokreni radni prostor za kontrolirane dokumente i revizije SOP-a.</value>
   </data>
+  <data name="Backstage.Button.RiskAssessments.Header" xml:space="preserve">
+    <value>Procjene rizika</value>
+  </data>
+  <data name="Backstage.Button.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>Pokreni radni prostor procjene rizika.</value>
+  </data>
+  <data name="Backstage.Button.RiskAssessments.AutomationId" xml:space="preserve">
+    <value>Backstage.RiskAssessments</value>
+  </data>
   <data name="Backstage.Button.AuditDashboard.Header" xml:space="preserve">
     <value>Nadzorna ploča audita</value>
   </data>
@@ -227,6 +236,12 @@
   </data>
   <data name="Ribbon.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Upravljaj kontroliranim dokumentima i revizijama SOP-a.</value>
+  </data>
+  <data name="Ribbon.Button.RiskAssessments.Header" xml:space="preserve">
+    <value>Procjene rizika</value>
+  </data>
+  <data name="Ribbon.Button.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>Upravljaj ICH Q9 registrima rizika i planovima ublažavanja.</value>
   </data>
   <data name="Ribbon.Button.TrainingRecords.Header" xml:space="preserve">
     <value>Evidencija obuka</value>
@@ -4260,5 +4275,14 @@
   </data>
   <data name="ModuleTree.Node.Quality.RiskAssessments.AutomationId" xml:space="preserve">
     <value>ModuleTree.Quality.RiskAssessments</value>
+  </data>
+  <data name="Menu.Quality.RiskAssessments.Header" xml:space="preserve">
+    <value>Procjene rizika</value>
+  </data>
+  <data name="Menu.Quality.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>Otvori radni prostor procjene rizika.</value>
+  </data>
+  <data name="Menu.Quality.RiskAssessments.AutomationId" xml:space="preserve">
+    <value>Menu.Quality.RiskAssessments</value>
   </data>
 </root>

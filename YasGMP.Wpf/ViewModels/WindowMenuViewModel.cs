@@ -28,6 +28,7 @@ namespace YasGMP.Wpf.ViewModels
             OpenIncidentsCommand = new RelayCommand(() => _shell.OpenModule(IncidentsModuleViewModel.ModuleKey));
             OpenChangeControlCommand = new RelayCommand(() => _shell.OpenModule(ChangeControlModuleViewModel.ModuleKey));
             OpenDocumentControlCommand = new RelayCommand(() => _shell.OpenModule(DocumentControlModuleViewModel.ModuleKey));
+            OpenRiskAssessmentsCommand = new RelayCommand(() => _shell.OpenModule(RiskAssessmentsModuleViewModel.ModuleKey));
             OpenTrainingRecordsCommand = new RelayCommand(() => _shell.OpenModule(TrainingRecordsModuleViewModel.ModuleKey));
             OpenSopGovernanceCommand = new RelayCommand(() => _shell.OpenModule(SopGovernanceModuleViewModel.ModuleKey));
             OpenValidationsCommand = new RelayCommand(() => _shell.OpenModule(ValidationsModuleViewModel.ModuleKey));
@@ -103,6 +104,11 @@ namespace YasGMP.Wpf.ViewModels
         /// </summary>
 
         public IRelayCommand OpenDocumentControlCommand { get; }
+        /// <summary>
+        /// Gets the open risk assessments command.
+        /// </summary>
+
+        public IRelayCommand OpenRiskAssessmentsCommand { get; }
         /// <summary>
         /// Gets the open training records command.
         /// </summary>
