@@ -87,6 +87,15 @@
   <data name="Backstage.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Launch the controlled documents workspace for SOP and policy revisions.</value>
   </data>
+  <data name="Backstage.Button.RiskAssessments.Header" xml:space="preserve">
+    <value>Risk Assessments</value>
+  </data>
+  <data name="Backstage.Button.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>Launch the risk assessment workspace.</value>
+  </data>
+  <data name="Backstage.Button.RiskAssessments.AutomationId" xml:space="preserve">
+    <value>Backstage.RiskAssessments</value>
+  </data>
   <data name="Backstage.Button.AuditDashboard.Header" xml:space="preserve">
     <value>Audit Dashboard</value>
   </data>
@@ -227,6 +236,12 @@
   </data>
   <data name="Ribbon.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Manage controlled documents and SOP revisions.</value>
+  </data>
+  <data name="Ribbon.Button.RiskAssessments.Header" xml:space="preserve">
+    <value>Risk Assessments</value>
+  </data>
+  <data name="Ribbon.Button.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>Manage ICH Q9 risk registers and mitigation plans.</value>
   </data>
   <data name="Ribbon.Button.TrainingRecords.Header" xml:space="preserve">
     <value>Training Records</value>
@@ -4257,5 +4272,14 @@
   </data>
   <data name="ModuleTree.Node.Quality.RiskAssessments.AutomationId" xml:space="preserve">
     <value>ModuleTree.Quality.RiskAssessments</value>
+  </data>
+  <data name="Menu.Quality.RiskAssessments.Header" xml:space="preserve">
+    <value>Risk Assessments</value>
+  </data>
+  <data name="Menu.Quality.RiskAssessments.ToolTip" xml:space="preserve">
+    <value>Open the risk assessment workspace.</value>
+  </data>
+  <data name="Menu.Quality.RiskAssessments.AutomationId" xml:space="preserve">
+    <value>Menu.Quality.RiskAssessments</value>
   </data>
 </root>
