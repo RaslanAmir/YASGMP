@@ -5,6 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:conv="clr-namespace:YasGMP.Converters"
+    xmlns:local="clr-namespace:YasGMP"
+    xmlns:models="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+    x:DataType="local:ExternalServicersPage"
     Title="Vanjski serviseri i laboratoriji – YasGMP">
 
     <!-- Page-scoped resources -->
@@ -55,14 +58,15 @@
                         HeightRequest="540"
                         BackgroundColor="#f8fafc">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame
+                            <DataTemplate x:DataType="models:ExternalContractor">
+                                <Border
                                     Margin="0,2,0,2"
-                                    CornerRadius="10"
                                     Padding="12"
-                                    BackgroundColor="#f5f7fa"
-                                    HasShadow="False"
-                                    BorderColor="#bdbdbd">
+                                    Background="#f5f7fa"
+                                    Stroke="#bdbdbd" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
                                     <VerticalStackLayout Spacing="2">
                                         <Label Text="{Binding Id, StringFormat='#{0}'}" FontSize="13" FontAttributes="Bold" TextColor="#512da8" />
                                         <Label Text="{Binding Name, StringFormat='Naziv: {0}'}" FontSize="13" TextColor="#1976d2" />
@@ -84,7 +88,7 @@
                                         <Label Text="{Binding DigitalSignature, StringFormat='Potpis: {0}'}" FontSize="11" TextColor="#fbc02d" />
                                         <Label Text="{Binding Comment, StringFormat='GMP napomena: {0}'}" FontSize="11" TextColor="#bdbdbd" />
                                     </VerticalStackLayout>
-                                </Frame>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>

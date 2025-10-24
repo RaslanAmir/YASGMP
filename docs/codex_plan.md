@@ -70,6 +70,19 @@ Next batches (warnings focus):
 Follow-up tweak:
 - `Views/LoginPage.xaml`: typed the LastLogins item template (`x:DataType="x:String"`) to remove XC0024 outer-scope warning.
 
+## 2025-10-24 – Warnings reduction (batch 7)
+
+- External Servicers page compiled bindings + border conversion:
+  - `Views/ExternalServicersPage.xaml`: added `x:DataType="local:ExternalServicersPage"`, typed item template to `models:ExternalContractor`, and replaced item `Frame` with `Border` (stroke + round corners).
+  - Added AppCore UI-compat aliases for bindings used in XAML:
+    - `YasGMP.AppCore/Models/ExternalContractor.UICompat.cs` with NotMapped properties: `CooperationStart`, `CooperationEnd`, and `Comment` (alias of `Note`).
+- Build results: MAUI warnings trimmed further (~13925 → ~13913). Remaining: a few XC0022 items where Picker ItemDisplayBinding cannot be compiled and DocumentControl page templates still need `x:DataType`.
+
+Validation:
+- dotnet restore: OK
+- dotnet build (MAUI Windows): OK
+- dotnet build (WPF): OK
+
 Validation:
 - dotnet restore: OK
 - dotnet build (MAUI Windows): OK
