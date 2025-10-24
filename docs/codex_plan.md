@@ -46,6 +46,19 @@ Next batches (warnings focus):
   - `Views/CalibrationsPage.xaml` filter card and list items
 - Build results: MAUI warnings reduced again (~14103 → ~14096). Remaining XC0022 are from pages without `x:DataType` (e.g., Users, WorkOrders).
 
+## 2025-10-24 – Warnings reduction (batch 4)
+
+- Added compiled bindings on Users/WorkOrders/Admin pages:
+  - `Views/UsersPage.xaml`: `x:DataType="views:UsersPage"`; item template typed to `models:Permission`.
+  - `Views/UserRolePermissionPage.xaml`: `x:DataType="vm:UserRolePermissionViewModel"`; item templates typed to `models:User`, `models:Role`, `models:Permission`.
+  - `Views/AdminPanelPage.xaml`: Root `TabbedPage` `x:DataType="vm:AdminViewModel"`; roles list template typed to `models:Role`.
+- Result: Fewer XC0022 warnings (≈ 14096 → ≈ 14007). Remaining ones are in PpmPage and RollbackPreviewPage where `x:DataType` is still pending.
+
+Validation:
+- dotnet restore: OK
+- dotnet build (MAUI Windows): OK; warnings trend downward
+- dotnet build (WPF): OK
+
 Validation:
 - dotnet restore: OK
 - dotnet build (MAUI Windows): OK

@@ -4,6 +4,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:conv="clr-namespace:YasGMP.Converters"
+    xmlns:views="clr-namespace:YasGMP.Views"
+    xmlns:models="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+    x:DataType="views:UsersPage"
     Title="Users">
 
     <ContentPage.Resources>
@@ -45,7 +48,7 @@
                             SelectionMode="Single"
                             SelectedItem="{Binding RolePermVM.SelectedPermission}">
                 <CollectionView.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="models:Permission">
                         <Label Text="{Binding Name}" Padding="8,4" />
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
