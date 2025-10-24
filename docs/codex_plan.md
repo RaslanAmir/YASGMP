@@ -67,6 +67,9 @@ Next batches (warnings focus):
   - `Views/MainPage.xaml`: `x:DataType="vm:MainPageViewModel"` to type top-level bindings (Welcome text + command buttons).
 - Build results: MAUI warnings dropped again (~13977 → ~13965). Remaining XC0022 clusters are in LoginPage and WorkOrderEditDialog where nested sections still need typing; will address next.
 
+Follow-up tweak:
+- `Views/LoginPage.xaml`: typed the LastLogins item template (`x:DataType="x:String"`) to remove XC0024 outer-scope warning.
+
 Validation:
 - dotnet restore: OK
 - dotnet build (MAUI Windows): OK

@@ -3,6 +3,8 @@
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:vm="clr-namespace:YasGMP.ViewModels"
+             x:DataType="vm:LoginViewModel"
              Title="Prijava u sustav"
              BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#1c1c1c}"
              Shell.NavBarIsVisible="False"
@@ -217,8 +219,8 @@
                         <Label Text="Zadnje prijave:" FontSize="12" FontAttributes="Bold" TextColor="#555" />
                         <CollectionView ItemsSource="{Binding LastLogins}">
                             <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Label Text="{Binding}" FontSize="11" TextColor="#888" />
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" FontSize="11" TextColor="#888" />
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
@@ -263,3 +265,4 @@
         </ScrollView>
     </Grid>
 </ContentPage>
+
