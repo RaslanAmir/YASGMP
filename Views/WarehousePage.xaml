@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:YasGMP.ViewModels"
     xmlns:model="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+    xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
     x:DataType="vm:WarehouseViewModel"
     Title="Skladišta – YasGMP">
   <ScrollView>
@@ -14,10 +15,13 @@
           RowDefinitions="Auto,Auto,*"
           ColumnDefinitions="320,*">
 
-      <Frame Grid.ColumnSpan="2"
-             BackgroundColor="{StaticResource YtSurfaceCard}"
-             BorderColor="{StaticResource YtRowBorder}"
-             Padding="12">
+      <Border Grid.ColumnSpan="2"
+              Background="{StaticResource YtSurfaceCard}"
+              Stroke="{StaticResource YtRowBorder}"
+              Padding="12">
+        <Border.StrokeShape>
+          <shapes:RoundRectangle CornerRadius="10" />
+        </Border.StrokeShape>
         <VerticalStackLayout Spacing="4">
           <Label Text="{Binding StatusMessage}"
                  FontSize="14"
@@ -26,7 +30,7 @@
                  FontSize="12"
                  TextColor="{StaticResource YtOnSurfaceDim}" />
         </VerticalStackLayout>
-      </Frame>
+      </Border>
 
       <Frame Grid.Row="1"
              Grid.Column="0"
@@ -47,11 +51,13 @@
                           BackgroundColor="{StaticResource YtSurface}">
             <CollectionView.ItemTemplate>
               <DataTemplate x:DataType="model:Warehouse">
-                <Frame Margin="0,4"
-                       Padding="10"
-                       CornerRadius="10"
-                       BorderColor="{StaticResource YtRowBorder}"
-                       BackgroundColor="{StaticResource YtSurface}">
+                <Border Margin="0,4"
+                        Padding="10"
+                        Stroke="{StaticResource YtRowBorder}"
+                        Background="{StaticResource YtSurface}">
+                  <Border.StrokeShape>
+                    <shapes:RoundRectangle CornerRadius="10" />
+                  </Border.StrokeShape>
                   <VerticalStackLayout Spacing="4">
                     <Label Text="{Binding Name}"
                            FontAttributes="Bold"
@@ -66,7 +72,7 @@
                            FontSize="11"
                            TextColor="{StaticResource YtOnSurfaceDim}" />
                   </VerticalStackLayout>
-                </Frame>
+                </Border>
               </DataTemplate>
             </CollectionView.ItemTemplate>
           </CollectionView>
@@ -77,11 +83,10 @@
             Grid.Column="1"
             RowDefinitions="Auto,*"
             RowSpacing="18">
-        <Frame BackgroundColor="{StaticResource YtSurfaceCard}"
-               BorderColor="{StaticResource YtRowBorder}"
-               Padding="14"
-               HasShadow="True"
-               CornerRadius="14">
+        <Border Background="{StaticResource YtSurfaceCard}"
+                Stroke="{StaticResource YtRowBorder}"
+                Padding="14">
+          <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
           <VerticalStackLayout Spacing="10">
             <Label Text="Artikli i zalihe"
                    FontSize="18"
@@ -112,11 +117,11 @@
                             BackgroundColor="{StaticResource YtSurface}">
               <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:WarehouseViewModel+WarehousePartRow">
-                  <Frame Margin="0,4"
-                         Padding="10"
-                         CornerRadius="10"
-                         BorderColor="{StaticResource YtRowBorder}"
-                         BackgroundColor="{StaticResource YtSurface}">
+                  <Border Margin="0,4"
+                          Padding="10"
+                          Stroke="{StaticResource YtRowBorder}"
+                          Background="{StaticResource YtSurface}">
+                    <Border.StrokeShape><shapes:RoundRectangle CornerRadius="10" /></Border.StrokeShape>
                     <VerticalStackLayout Spacing="4">
                       <Label Text="{Binding PartName}"
                              FontAttributes="Bold"
@@ -135,16 +140,16 @@
                                FontSize="12"
                                TextColor="{StaticResource YtOnSurfaceDim}" />
                       </HorizontalStackLayout>
-                      <Frame BackgroundColor="{StaticResource YtDanger50}"
-                             Padding="4,2"
-                             CornerRadius="6"
-                             IsVisible="{Binding IsLowStock}">
+                      <Border Background="{StaticResource YtDanger50}"
+                              Padding="4,2"
+                              IsVisible="{Binding IsLowStock}">
+                        <Border.StrokeShape><shapes:RoundRectangle CornerRadius="6" /></Border.StrokeShape>
                         <Label Text="⚠ Potrebna nadopuna"
                                FontSize="11"
                                TextColor="{StaticResource YtDanger700}" />
-                      </Frame>
+                      </Border>
                     </VerticalStackLayout>
-                  </Frame>
+                  </Border>
                 </DataTemplate>
               </CollectionView.ItemTemplate>
             </CollectionView>
@@ -182,11 +187,11 @@
               </CollectionView.EmptyView>
               <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:WarehouseViewModel+MovementPreview">
-                  <Frame Margin="0,4"
-                         Padding="10"
-                         CornerRadius="10"
-                         BorderColor="{StaticResource YtRowBorder}"
-                         BackgroundColor="{StaticResource YtSurface}">
+                  <Border Margin="0,4"
+                          Padding="10"
+                          Stroke="{StaticResource YtRowBorder}"
+                          Background="{StaticResource YtSurface}">
+                    <Border.StrokeShape><shapes:RoundRectangle CornerRadius="10" /></Border.StrokeShape>
                     <VerticalStackLayout Spacing="6">
                       <Grid ColumnDefinitions="160,*,80"
                             ColumnSpacing="10">
@@ -238,12 +243,12 @@
                         </Label.Triggers>
                       </Label>
                     </VerticalStackLayout>
-                  </Frame>
+                  </Border>
                 </DataTemplate>
               </CollectionView.ItemTemplate>
             </CollectionView>
           </VerticalStackLayout>
-        </Frame>
+        </Border>
       </Grid>
     </Grid>
   </ScrollView>
