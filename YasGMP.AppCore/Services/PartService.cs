@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -48,7 +48,7 @@ namespace YasGMP.Services
             if (part == null) throw new ArgumentNullException(nameof(part));
             ValidatePart(part);
 
-            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeDefaultSignature(part));
             await _db.InsertOrUpdatePartAsync(part, update: false, signatureMetadata: signatureMetadata);
 
             await _audit.LogSystemEventAsync("PART_CREATE", $"Dodani novi dio ID={part.Id}, Name={part.Name}, Stock={part.Stock}");
@@ -60,7 +60,7 @@ namespace YasGMP.Services
             if (part == null) throw new ArgumentNullException(nameof(part));
             ValidatePart(part);
 
-            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeDefaultSignature(part));
             await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
 
             await _audit.LogSystemEventAsync("PART_UPDATE", $"Ažuriran dio ID={part.Id}, Name={part.Name}, Stock={part.Stock}");
@@ -76,22 +76,16 @@ namespace YasGMP.Services
         #endregion
 
         #region === STOCK MANAGEMENT ===
-        /// <summary>
-        /// Executes the increase stock async operation.
-        /// </summary>
 
         public async Task IncreaseStockAsync(int partId, int amount, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             var part = await GetByIdAsync(partId);
             part.Stock += amount;
-            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeDefaultSignature(part));
 
             await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
             await _audit.LogSystemEventAsync("PART_STOCK_INCREASE", $"Povećana zaliha za dio ID={part.Id} za {amount}, nova zaliha={part.Stock}");
         }
-        /// <summary>
-        /// Executes the decrease stock async operation.
-        /// </summary>
 
         public async Task DecreaseStockAsync(int partId, int amount, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
@@ -100,7 +94,7 @@ namespace YasGMP.Services
                 throw new InvalidOperationException("Zaliha ne može biti negativna.");
 
             part.Stock -= amount;
-            ApplySignatureMetadata(part, signatureMetadata, () => ComputeLegacyDigitalSignature(part));
+            ApplySignatureMetadata(part, signatureMetadata, () => ComputeDefaultSignature(part));
 
             await _db.InsertOrUpdatePartAsync(part, update: true, signatureMetadata: signatureMetadata);
             await _audit.LogSystemEventAsync("PART_STOCK_DECREASE", $"Smanjena zaliha za dio ID={part.Id} za {amount}, nova zaliha={part.Stock}");
@@ -151,11 +145,10 @@ namespace YasGMP.Services
             }
         }
 
-        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
-        private string ComputeLegacyDigitalSignature(Part part)
+        private static string ComputeDefaultSignature(Part part)
         {
             string supplierName = GetSupplierNameForSignature(part);
-            string raw = $"{part.Id}|{part.Code}|{part.Name}|{supplierName}|{DateTime.UtcNow:O}";
+            string raw = $"{part.Id}|{part.Code}|{part.Name}|{supplierName}";
             using var sha = SHA256.Create();
             return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
         }

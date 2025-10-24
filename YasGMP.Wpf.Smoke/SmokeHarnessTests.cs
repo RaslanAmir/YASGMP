@@ -27,7 +27,7 @@ namespace YasGMP.Wpf.Smoke;
     }
 
     [Fact]
-    public async Task ReportsVm_RunsProvider_WithoutUi()
+    public void ReportsVm_RunsProvider_WithoutUi()
     {
         // Headless smoke for the Reports VM run/export providers
         var db = new YasGMP.Services.DatabaseService("Server=127.0.0.1;Port=3306;Database=YASGMP;User ID=yasgmp_app;Password=Jasenka1;CharSet=utf8mb4;");

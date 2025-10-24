@@ -1,54 +1,56 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the Dashboard Module View Model.
-/// </summary>
 
+/// <summary>Projects dashboard event telemetry into the WPF shell with SAP B1 scaffolding.</summary>
+/// <remarks>
+/// Form Modes: Operates in Find/View to browse events; Add/Update are surfaced for consistency but the dashboard stream is read-only.
+/// Audit &amp; Logging: Reads recent events from the shared database service without adding new audit entries.
+/// Localization: Uses inline strings like `"Dashboard"` and severity labels until a resource file supplies keys.
+/// Navigation: ModuleKey `Dashboard` registers the tab and allows Golden Arrow to route to `RelatedModule` targets surfaced in each `ModuleRecord`, with status strings updating the shell status bar during refresh.
+/// </remarks>
 public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Dashboard";
-    /// <summary>
-    /// Initializes a new instance of the DashboardModuleViewModel class.
-    /// </summary>
+    /// <summary>Shell registration key that binds Dashboard into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Dashboard" until `Modules_Dashboard_Title` is introduced.</remarks>
+    public new const string ModuleKey = "Dashboard";
 
+    /// <summary>Initializes the Dashboard module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public DashboardModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization,
-        ISignalRClientService signalRClient)
-        : base(ModuleKey, localization.GetString("Module.Title.Dashboard"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Dashboard", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
-        _signalRClient = signalRClient ?? throw new ArgumentNullException(nameof(signalRClient));
-        _signalRClient.AuditReceived += OnAuditReceived;
-        _inventoryAlerts = new ObservableCollection<InventoryAlertRow>();
-        _inventoryMovements = new ObservableCollection<InventoryMovementRow>();
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Opens the AI module to summarize dashboard events.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
+
+    /// <summary>Loads Dashboard records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Dashboard_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var events = await Database.GetRecentDashboardEventsAsync(25).ConfigureAwait(false);
-        await LoadInventoryInsightsAsync().ConfigureAwait(false);
+        SetProvenance("source: system_event_log, order: event_time desc, limit: 25");
         return events.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Dashboard designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var now = DateTime.Now;
@@ -100,166 +102,13 @@ public sealed class DashboardModuleViewModel : DataDrivenModuleDocumentViewModel
             evt.RelatedRecordId);
     }
 
-    private readonly ISignalRClientService _signalRClient;
-    private readonly ObservableCollection<InventoryAlertRow> _inventoryAlerts;
-    private readonly ObservableCollection<InventoryMovementRow> _inventoryMovements;
-
-    private async void OnAuditReceived(object? sender, AuditEventArgs e)
+    private void OpenAiSummary()
     {
-        try
-        {
-            await RefreshAsync().ConfigureAwait(false);
-        }
-        catch
-        {
-            // Best-effort refresh – real-time failures should not crash the dashboard.
-        }
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        // Reuse AI module built-in audit summary
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, "summary:audit");
+        shell.Activate(doc);
     }
-
-    public ObservableCollection<InventoryAlertRow> InventoryAlerts => _inventoryAlerts;
-
-    public ObservableCollection<InventoryMovementRow> InventoryMovements => _inventoryMovements;
-
-    private async Task LoadInventoryInsightsAsync()
-    {
-        DataTable? zoneTable = null;
-        DataTable? movementTable = null;
-        var alertsError = false;
-        var movementsError = false;
-
-        try
-        {
-            zoneTable = await Database.GetInventoryZoneDashboardAsync(25).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            alertsError = true;
-            StatusMessage = $"Unable to load inventory alerts: {ex.Message}";
-        }
-
-        try
-        {
-            movementTable = await Database.GetInventoryMovementPreviewAsync(null, null, 15).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            movementsError = true;
-            StatusMessage = $"Unable to load inventory movements: {ex.Message}";
-        }
-
-        await RunOnUiThreadAsync(() =>
-        {
-            _inventoryAlerts.Clear();
-            if (zoneTable is not null)
-            {
-                foreach (DataRow row in zoneTable.Rows)
-                {
-                    _inventoryAlerts.Add(new InventoryAlertRow(
-                        SafeInt(row, "part_id"),
-                        row["part_name"]?.ToString() ?? string.Empty,
-                        row["part_code"]?.ToString() ?? string.Empty,
-                        SafeInt(row, "warehouse_id"),
-                        row["warehouse_name"]?.ToString() ?? string.Empty,
-                        row["zone"]?.ToString() ?? string.Empty,
-                        SafeInt(row, "quantity"),
-                        SafeNullableInt(row, "min_threshold"),
-                        SafeNullableInt(row, "max_threshold")));
-                }
-            }
-
-            _inventoryMovements.Clear();
-            if (movementTable is not null)
-            {
-                foreach (DataRow row in movementTable.Rows)
-                {
-                    _inventoryMovements.Add(new InventoryMovementRow(
-                        SafeDate(row, "transaction_date"),
-                        row["transaction_type"]?.ToString() ?? string.Empty,
-                        SafeInt(row, "quantity"),
-                        row.Table.Columns.Contains("related_document") ? row["related_document"]?.ToString() : null,
-                        row.Table.Columns.Contains("note") ? row["note"]?.ToString() : null,
-                        SafeNullableInt(row, "performed_by_id")));
-                }
-            }
-
-            if (!alertsError && !movementsError)
-            {
-                StatusMessage = $"{Title}: inventory insights refreshed ({_inventoryAlerts.Count} alert(s), {_inventoryMovements.Count} movement(s)).";
-            }
-        }).ConfigureAwait(false);
-    }
-
-    private static Task RunOnUiThreadAsync(Action action)
-    {
-        if (action is null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
-
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null || dispatcher.CheckAccess())
-        {
-            action();
-            return Task.CompletedTask;
-        }
-
-        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
-    }
-
-    private static int SafeInt(DataRow row, string column)
-    {
-        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value)
-        {
-            return Convert.ToInt32(row[column], CultureInfo.InvariantCulture);
-        }
-
-        return 0;
-    }
-
-    private static int? SafeNullableInt(DataRow row, string column)
-    {
-        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value)
-        {
-            return Convert.ToInt32(row[column], CultureInfo.InvariantCulture);
-        }
-
-        return null;
-    }
-
-    private static DateTime SafeDate(DataRow row, string column)
-    {
-        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value)
-        {
-            if (row[column] is DateTime dt)
-            {
-                return dt;
-            }
-
-            if (DateTime.TryParse(row[column]?.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
-            {
-                return parsed;
-            }
-        }
-
-        return DateTime.UtcNow;
-    }
-
-    public sealed record InventoryAlertRow(
-        int PartId,
-        string PartName,
-        string PartCode,
-        int WarehouseId,
-        string WarehouseName,
-        string Zone,
-        int Quantity,
-        int? Minimum,
-        int? Maximum);
-
-    public sealed record InventoryMovementRow(
-        DateTime Timestamp,
-        string Type,
-        int Quantity,
-        string? Document,
-        string? Note,
-        int? PerformedById);
 }
+
+

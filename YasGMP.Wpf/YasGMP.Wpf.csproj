@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
@@ -32,9 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Helpers\DigitalSignatureHelper.cs">
-      <Link>Shared\Helpers\DigitalSignatureHelper.cs</Link>
-    </Compile>
     <Compile Include="..\ViewModels\DigitalSignatureViewModel.cs">
       <Link>Shared\ViewModels\DigitalSignatureViewModel.cs</Link>
     </Compile>

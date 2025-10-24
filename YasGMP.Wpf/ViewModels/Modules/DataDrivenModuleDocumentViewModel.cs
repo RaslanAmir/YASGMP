@@ -7,19 +7,24 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-/// <summary>Base class for modules backed by <see cref="DatabaseService"/> queries.</summary>
+/// <summary>Base class for database-backed modules that hydrate the shell via <see cref="DatabaseService"/> queries.</summary>
+/// <remarks>
+/// Form Modes: Inherits the standard Find/Add/View/Update handling from <see cref="ModuleDocumentViewModel"/>; implementers typically toggle editor enablement inside <see cref="ModuleDocumentViewModel.OnModeChangedAsync(FormMode)"/>.
+/// Audit &amp; Logging: Supplies <see cref="ExecuteSafeAsync{T}"/> and <see cref="LogAuditAsync"/> helpers so derived modules can wrap CRUD operations and funnel audit events through the shared <see cref="AuditService"/>.
+/// Localization: Does not access localisation resources directly—titles and status strings come from derived constructors or overrides.
+/// Navigation: Uses the provided module key from the constructor to keep shell docking IDs, Golden Arrow target routing, and status-bar text aligned with the WPF host.
+/// </remarks>
 public abstract class DataDrivenModuleDocumentViewModel : ModuleDocumentViewModel
 {
     protected DataDrivenModuleDocumentViewModel(
         string key,
         string title,
         DatabaseService databaseService,
-        ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         AuditService? auditService = null)
-        : base(key, title, localization, cflDialogService, shellInteraction, navigation)
+        : base(key, title, cflDialogService, shellInteraction, navigation)
     {
         Database = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         Audit = auditService;
@@ -74,3 +79,5 @@ public abstract class DataDrivenModuleDocumentViewModel : ModuleDocumentViewMode
         }
     }
 }
+
+

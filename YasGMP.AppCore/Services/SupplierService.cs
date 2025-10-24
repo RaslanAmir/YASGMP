@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models.Enums;
 using YasGMP.Services.Interfaces;
 
@@ -22,9 +22,6 @@ namespace YasGMP.Services
         private readonly ISupplierAuditService _audit;
 
         #region Constructors
-        /// <summary>
-        /// Initializes a new instance of the SupplierService class.
-        /// </summary>
 
         public SupplierService(DatabaseService databaseService, ISupplierAuditService auditService)
         {
@@ -35,25 +32,16 @@ namespace YasGMP.Services
         #endregion
 
         #region CRUD Operations
-        /// <summary>
-        /// Executes the get all async operation.
-        /// </summary>
 
         public Task<List<Supplier>> GetAllAsync() => _db.GetAllSuppliersAsync();
-        /// <summary>
-        /// Executes the get by id async operation.
-        /// </summary>
 
         public Task<Supplier?> GetByIdAsync(int id) => _db.GetSupplierByIdAsync(id);
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task CreateAsync(Supplier supplier, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateSupplier(supplier);
 
-            ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeLegacyDigitalSignature(supplier));
+            ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeDefaultSignature(supplier));
             await _db.InsertOrUpdateSupplierAsync(
                 supplier,
                 update: false,
@@ -69,15 +57,12 @@ namespace YasGMP.Services
                 SupplierActionType.CREATE,
                 $"Created new supplier: {supplier.Name}");
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task UpdateAsync(Supplier supplier, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
             ValidateSupplier(supplier);
 
-            ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeLegacyDigitalSignature(supplier));
+            ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeDefaultSignature(supplier));
             await _db.InsertOrUpdateSupplierAsync(
                 supplier,
                 update: true,
@@ -93,9 +78,6 @@ namespace YasGMP.Services
                 SupplierActionType.UPDATE,
                 $"Updated supplier ID={supplier.Id}");
         }
-        /// <summary>
-        /// Executes the delete async operation.
-        /// </summary>
 
         public async Task DeleteAsync(int supplierId, int userId)
         {
@@ -132,7 +114,7 @@ namespace YasGMP.Services
                 supplier.Notes ?? string.Empty,
                 " | Suspended: ", reason, " (", DateTime.UtcNow.ToString("dd.MM.yyyy"), ")");
 
-            ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeLegacyDigitalSignature(supplier));
+            ApplySignatureMetadata(supplier, signatureMetadata, () => ComputeDefaultSignature(supplier));
             await _db.InsertOrUpdateSupplierAsync(
                 supplier,
                 update: true,
@@ -206,29 +188,19 @@ namespace YasGMP.Services
             }
         }
 
-        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
-        private static string ComputeLegacyDigitalSignature(Supplier s)
+        private static string ComputeDefaultSignature(Supplier s)
         {
             var raw = new StringBuilder()
                 .Append(s.Id).Append('|')
                 .Append(s.Name).Append('|')
                 .Append(s.Status).Append('|')
                 .Append(s.CooperationStart?.ToString("O")).Append('|')
-                .Append(s.CooperationEnd?.ToString("O")).Append('|')
-                .Append(DateTime.UtcNow.ToString("O"))
+                .Append(s.CooperationEnd?.ToString("O"))
                 .ToString();
 
             using var sha = SHA256.Create();
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(raw));
             return Convert.ToBase64String(bytes);
-        }
-
-        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
-        private static string ComputeLegacyDigitalSignature(string payload)
-        {
-            using var sha = SHA256.Create();
-            var toHash = $"{payload}|{Guid.NewGuid():N}";
-            return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)));
         }
 
         #endregion
@@ -248,16 +220,13 @@ namespace YasGMP.Services
                 ActionType       = action.ToString(),
                 Details          = details,
                 ActionTimestamp  = DateTime.UtcNow,
-                DigitalSignature = ComputeLegacyDigitalSignature(details)
+                DigitalSignature = Convert.ToBase64String(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(details)))
             });
         }
 
         #endregion
 
         #region Future Extensibility Hooks
-        /// <summary>
-        /// Executes the trigger requalification async operation.
-        /// </summary>
 
         public async Task TriggerRequalificationAsync(int supplierId)
         {
@@ -267,9 +236,6 @@ namespace YasGMP.Services
                 SupplierActionType.REQUALIFICATION,
                 $"Triggered re-qualification for supplier ID={supplierId}");
         }
-        /// <summary>
-        /// Executes the link to capa async operation.
-        /// </summary>
 
         public async Task LinkToCapaAsync(int supplierId, int capaId)
         {
