@@ -18,6 +18,27 @@ Next batches (warnings focus):
 - Introduce `x:DataType` for high-traffic views (Dashboard, WorkOrders, Components) to eliminate XamlC XC0022 warnings.
 - Replace remaining `Application.MainPage.set/get` in `LoginViewModel` with `Windows[0].Page` flow (post-login navigation) and ensure `CreateWindow` paths remain correct.
 
+## 2025-10-24 – Warnings reduction (batch 2)
+
+- Converted high-traffic MAUI pages from `Frame` to `Border`:
+  - `Views/DashboardPage.xaml` main card and quick tile
+  - `Views/MachinesPage.xaml` wrapper + selected banner
+  - `Views/ComponentsPage.xaml` shell card + list item + pill
+  - `Views/SuppliersPage.xaml` shell card + list item
+  - `Views/LoginPage.xaml` login card
+  - `Views/ValidationPage.xaml` edit area
+- Mapped properties: `BackgroundColor`→`Background`, `BorderColor`→`Stroke`(+ `StrokeThickness=1`), `CornerRadius`→`<RoundRectangle CornerRadius=...>`, `HasShadow=True`→`<Border.Shadow><Shadow/></Border.Shadow>`.
+- Added compiled bindings (`x:DataType`) to reduce XamlC XC0022 warnings:
+  - `Views/ValidationPage.xaml` → page `views:ValidationPage`, item `models:Validation` (via `assembly=YasGMP.AppCore`).
+  - `Views/ComponentsPage.xaml` → page `vm:ComponentViewModel`, item `models:MachineComponent` (AppCore assembly).
+  - `Views/SuppliersPage.xaml` → page `views:SuppliersPage`, item `models:Supplier` (AppCore assembly).
+- Build results: MAUI warnings reduced further (≈ 14152 → ≈ 14103). Remaining hotspots include `WorkOrderEditDialog.xaml` and pages without `x:DataType`.
+
+Validation:
+- dotnet restore: OK
+- dotnet build (MAUI Windows): OK
+- dotnet build (WPF): OK
+
 ## 2025-10-23 – Build fixes (TFM alignment, WPF items, XAML)
 
 - Aligned `YasGMP.Tests` to `net9.0-windows10.0.19041.0` so it can reference the MAUI app (`yasgmp.csproj`) which targets .NET 9 for Windows.

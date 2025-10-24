@@ -4,11 +4,13 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:views="clr-namespace:YasGMP.Views"
+    x:DataType="views:MachinesPage"
     Title="Strojevi / Oprema">
 
   <ContentPage.Content>
     <VerticalStackLayout Padding="28,20,28,20" Spacing="18">
-      <Frame>
+      <Border>
         <VerticalStackLayout Spacing="14">
           <!-- Header -->
           <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
@@ -34,14 +36,17 @@
           </Grid>
 
           <!-- Selected machine summary -->
-          <Frame x:Name="SelectedInfo" IsVisible="False" HasShadow="False" Padding="12" CornerRadius="10" BackgroundColor="{StaticResource YtPrimary50}">
+          <Border x:Name="SelectedInfo" IsVisible="False" Padding="12" Background="{StaticResource YtPrimary50}">
+            <Border.StrokeShape>
+              <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
             <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
               <Label Grid.Row="0" Grid.Column="0" Text="{Binding SelectedMachine.Name}" FontAttributes="Bold"/>
               <Label Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMachine.Code}" TextColor="{StaticResource YtOnSurfaceDim}"/>
               <Label Grid.Row="0" Grid.Column="2" Text="{Binding SelectedMachine.Status}" TextColor="{StaticResource YtPrimary700}"/>
               <Label Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding SelectedMachine.Manufacturer}"/>
             </Grid>
-          </Frame>
+          </Border>
 
           <!-- List (Syncfusion DataGrid) -->
           <sf:SfDataGrid xmlns:sf="http://schemas.syncfusion.com/maui"
@@ -82,7 +87,7 @@
 
           <Label Text="Odaberite redak pa koristite akcije iznad (Uredi/Briši)." Style="{StaticResource YtCaption}" HorizontalOptions="Center"/>
         </VerticalStackLayout>
-      </Frame>
+      </Border>
     </VerticalStackLayout>
   </ContentPage.Content>
 </ContentPage>

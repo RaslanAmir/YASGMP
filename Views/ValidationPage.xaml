@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:YasGMP.Views"
+             xmlns:models="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
              x:Class="YasGMP.Views.ValidationPage"
+             x:DataType="views:ValidationPage"
              Title="Validacije (IQ/OQ/PQ/URS/DQ/FAT/SAT)">
 
   <VerticalStackLayout Padding="10" Spacing="10">
@@ -31,7 +34,7 @@
                     ItemsSource="{Binding ValidationList}"
                     SelectedItem="{Binding SelectedValidation, Mode=TwoWay}">
       <CollectionView.ItemTemplate>
-        <DataTemplate>
+        <DataTemplate x:DataType="models:Validation">
           <Grid Padding="6" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
             <Label Grid.Row="0" Text="{Binding Code}" FontAttributes="Bold" />
             <Label Grid.Row="1" Text="{Binding Type}" FontAttributes="Italic" />
@@ -45,7 +48,10 @@
     </CollectionView>
 
     <!-- Edit form -->
-    <Frame Padding="10" BorderColor="Gray">
+    <Border Padding="10" Stroke="Gray" StrokeThickness="1">
+      <Border.StrokeShape>
+        <RoundRectangle CornerRadius="8" />
+      </Border.StrokeShape>
       <VerticalStackLayout Spacing="8">
         <Label Text="Unos/izmjena validacije" FontSize="18" />
 
@@ -107,7 +113,7 @@
                   IsVisible="{Binding CanDelete}" />
         </Grid>
       </VerticalStackLayout>
-    </Frame>
+    </Border>
 
   </VerticalStackLayout>
 </ContentPage>

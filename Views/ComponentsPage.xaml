@@ -4,6 +4,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
+    xmlns:models="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+    x:DataType="vm:ComponentViewModel"
     Title="Komponente strojeva – YasGMP">
 
   <ContentPage.ToolbarItems>
@@ -16,8 +19,13 @@
   <ContentPage.Content>
     <VerticalStackLayout Padding="28,20,28,20" Spacing="18"
                          BackgroundColor="{StaticResource YtSurface}">
-      <Frame BackgroundColor="{StaticResource YtSurfaceCard}" CornerRadius="14" HasShadow="True" Padding="20"
-             BorderColor="{StaticResource YtRowBorder}">
+      <Border Background="{StaticResource YtSurfaceCard}" Padding="20" Stroke="{StaticResource YtRowBorder}" StrokeThickness="1">
+        <Border.StrokeShape>
+          <RoundRectangle CornerRadius="14" />
+        </Border.StrokeShape>
+        <Border.Shadow>
+          <Shadow />
+        </Border.Shadow>
 
         <VerticalStackLayout Spacing="16">
           <Label Text="Pregled strojnih komponenti"
@@ -53,11 +61,11 @@
                           HeightRequest="440"
                           BackgroundColor="{StaticResource YtSurface}">
             <CollectionView.ItemTemplate>
-              <DataTemplate>
-                <Frame Margin="0,2,0,2" CornerRadius="8" Padding="10"
-                       BackgroundColor="{StaticResource YtSurface}"
-                       HasShadow="False"
-                       BorderColor="{StaticResource YtRowBorder}">
+              <DataTemplate x:DataType="models:MachineComponent">
+                <Border Margin="0,2,0,2" Padding="10" Background="{StaticResource YtSurface}" Stroke="{StaticResource YtRowBorder}" StrokeThickness="1">
+                  <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                  </Border.StrokeShape>
                   <VerticalStackLayout Spacing="4">
                     <Label Text="{Binding Name}" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource YtOnSurface}" />
                     <Label Text="{Binding Code}" FontSize="13" TextColor="{StaticResource YtOnSurfaceDim}"
@@ -71,13 +79,16 @@
                     <Label Text="{Binding SopDoc}" FontSize="12" TextColor="{StaticResource YtOnSurfaceDim}"
                            maui:ToolTipProperties.Text="SOP/URS dokument (putanja)" />
                     <HorizontalStackLayout Spacing="8">
-                      <Frame Padding="6,2" CornerRadius="6" BackgroundColor="{StaticResource YtPrimary50}">
+                      <Border Padding="6,2" Background="{StaticResource YtPrimary50}">
+                        <Border.StrokeShape>
+                          <RoundRectangle CornerRadius="6" />
+                        </Border.StrokeShape>
                         <Label Text="{Binding DocumentsCount, StringFormat='Dokumenti: {0}'}" FontSize="11" TextColor="{StaticResource YtPrimary700}"/>
-                      </Frame>
+                      </Border>
                       <Button Text="Dokumenti" Clicked="OnOpenDocsClicked" />
                     </HorizontalStackLayout>
                   </VerticalStackLayout>
-                </Frame>
+                </Border>
               </DataTemplate>
             </CollectionView.ItemTemplate>
           </CollectionView>
@@ -86,7 +97,7 @@
                  FontSize="12" TextColor="{StaticResource YtOnSurfaceDim}" HorizontalOptions="Center"/>
         </VerticalStackLayout>
 
-      </Frame>
+      </Border>
     </VerticalStackLayout>
   </ContentPage.Content>
 </ContentPage>
