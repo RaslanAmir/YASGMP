@@ -9,7 +9,7 @@
       "2025-10-23: Extended AI summaries to Suppliers and Incidents (selected record prompts) and added 'Find Similar (AI)' vector search in Attachments using cosine similarity over stored embeddings.",
       "2025-10-23: Added 'Summarize (AI)' to CAPA and External Servicers; Attachments view now includes a right-side Similar Attachments panel bound to vector search results.",
       "2025-10-23: Extended 'Summarize (AI)' to Warehouse, Security (Users/Roles), Scheduling, Assets, Components, Parts, Dashboard, and Administration; Similar panel supports 'Open' which selects the attachment and jumps to related modules, or opens a local preview when unmapped.",
-      "Windows host has .NET 9.0.306; restore succeeds; AppCore builds; WPF compile has remaining namespace resolution (tracked).",
+      "Windows host has .NET 9.0.306; restore succeeds; AppCore builds; WPF namespace resolution fixed; remaining compile failures are API mismatches to AppCore models (tracked).",
       "2026-06-03: dotnet --version retried while documenting the Document Control milestone wrap-up; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-06-09: dotnet --version and dotnet restore yasgmp.sln retried before documenting the Training/SOP modules; CLI still missing so each command exits with 'command not found'.",
       "2026-06-01: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried during Document Control module regression coverage; each command still exits with 'command not found'.",

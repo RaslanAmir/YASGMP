@@ -14,10 +14,15 @@
 Validation:
 - dotnet restore: OK
 - AppCore build: OK (warnings only)
-- Solution build: Remaining WPF compile errors are unrelated to the original report (namespace/type resolution during WPF XAML tmp compile); follow‑up tracked below.
+- WPF namespace resolution: fixed (AppCore namespaces now resolve in XAML tmp compile).
+- Solution build: Remaining WPF compile errors are API mismatches (view models expect properties not present on AppCore models, and a few missing helper methods). Examples: Machine.Vendor, ChangeControl.DateOpen.
 
 Follow‑ups (tracked):
-- WPF tmp compile cannot resolve `YasGMP.*` namespaces even though `YasGMP.AppCore` is referenced. Investigate XAML pass references and ensure no MAUI ViewModel namespaces are imported into WPF root types. Consider trimming `using` statements in `App.xaml.cs` and verifying the `ProjectReference` path and build order.
+- Align WPF view models with AppCore models or add computed UI projections:
+  - Replace missing properties with available ones or compute: e.g., `Machine.Vendor` → `Machine.Supplier`, `Machine.LastServiceDate` → derive from maintenance history, `ChangeControl.DateOpen/DateClose/RiskLevel/OwnerId` → map to existing fields.
+  - Update places that read `InspectorField.Name` to use `InspectorField.Label`.
+  - ReportsModuleViewModel cancellation/progress signatures to match current method definitions.
+  - Verify all calls to shell navigation use the unified `IShellInteractionService` (now exposes OpenModule/Activate).
 
 ## Current Compile Status
 - [x] Dotnet SDKs detected and recorded *(dotnet-install.sh installed SDK 9.0.305 — previously 9.0.100; `dotnet --info` captured 2025-10-10 on linux-x64. Windows desktop workloads still require Windows 10 SDK 19041+ and workloads to build.)*
