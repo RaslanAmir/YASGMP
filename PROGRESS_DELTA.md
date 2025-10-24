@@ -1,6 +1,0 @@
-- Module Environment: blocked → blocked | Reasons: dotnet CLI still unavailable; static documentation refreshed | Issues closed: []
-- Batch B0: blocked → blocked | Reasons: 2025-10-07T11:06Z CLI absence reconfirmed; next actions scoped to documentation, schema review, and static analysis | Issues closed: []
-- Increment 1 Planning: new → drafted | Reasons: Created compliance backlog (inventory, traceability, audit hash-chain) pending execution once CLI available | Issues closed: []
-- Increment 2 Planning: drafted → documented | Reasons: Added per-folder/module inventory table, initial entity traceability map, and audit/signature hash-chain outline in docs/codex_plan.md | Issues closed: [I-002]
-- Documentation Sync: stale → current | Reasons: Updated docs/codex_progress.json to reference Increment 2 artifacts and mark planning TODOs complete | Issues closed: []
-- Assets Module Accessibility: regression risk → stabilized | Reasons: DataGrid cell automation names now bind to row values so assistive tech announces cell content while retaining localized tooltips/automation ids | Issues closed: []

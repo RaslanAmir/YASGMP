@@ -4,18 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics
 {
-    /// <summary>
-    /// Represents the Diagnostic Context.
-    /// </summary>
     public sealed class DiagnosticContext
     {
-        /// <summary>
-        /// Initializes a new instance of the DiagnosticContext class.
-        /// </summary>
         public DiagnosticContext(IConfiguration config)
         {
             Config = config;
@@ -26,107 +19,35 @@ namespace YasGMP.Diagnostics
             Device     = GetDeviceInfoSafe();
             GitCommit  = TryReadGitCommit();
         }
-        /// <summary>
-        /// Gets or sets the config.
-        /// </summary>
 
         public IConfiguration Config { get; }
 
         // Ambient fields
-        /// <summary>
-        /// Gets or sets the corr id.
-        /// </summary>
         public string CorrId { get; private set; }
-        /// <summary>
-        /// Gets or sets the span id.
-        /// </summary>
         public string SpanId { get; private set; }
-        /// <summary>
-        /// Gets or sets the parent span id.
-        /// </summary>
         public string? ParentSpanId { get; private set; }
-        /// <summary>
-        /// Gets or sets the user id.
-        /// </summary>
         public int? UserId { get; set; }
-        /// <summary>
-        /// Gets or sets the username.
-        /// </summary>
         public string? Username { get; set; }
-        /// <summary>
-        /// Gets or sets the role ids csv.
-        /// </summary>
         public string? RoleIdsCsv { get; set; }
-        /// <summary>
-        /// Gets or sets the ip.
-        /// </summary>
         public string? Ip { get; set; }
-        /// <summary>
-        /// Gets or sets the session id.
-        /// </summary>
         public string? SessionId { get; set; }
-        /// <summary>
-        /// Gets or sets the device.
-        /// </summary>
         public string? Device { get; }
-        /// <summary>
-        /// Gets or sets the os version.
-        /// </summary>
         public string? OsVersion { get; }
-        /// <summary>
-        /// Gets or sets the app version.
-        /// </summary>
         public string? AppVersion { get; }
-        /// <summary>
-        /// Gets or sets the git commit.
-        /// </summary>
         public string? GitCommit { get; }
-        /// <summary>
-        /// Gets or sets the db schema hash.
-        /// </summary>
         public string? DbSchemaHash { get; set; }
-        /// <summary>
-        /// Executes the redaction enabled operation.
-        /// </summary>
 
         public bool RedactionEnabled => GetBool(DiagnosticsConstants.KeyRedactionEnabled, defaultValue: true);
 
         // Derived settings
-        /// <summary>
-        /// Executes the enabled operation.
-        /// </summary>
         public bool Enabled => GetBool(DiagnosticsConstants.KeyEnabled, defaultValue: true);
-        /// <summary>
-        /// Executes the sinks operation.
-        /// </summary>
         public string[] Sinks => GetString(DiagnosticsConstants.KeySinks, "file,stdout").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        /// <summary>
-        /// Executes the level operation.
-        /// </summary>
         public DiagLevel Level => ParseLevel(GetString(DiagnosticsConstants.KeyLevel, "info"));
-        /// <summary>
-        /// Executes the slow query ms operation.
-        /// </summary>
         public int SlowQueryMs => GetInt(DiagnosticsConstants.KeySlowQueryMs, DiagnosticsConstants.DefaultSlowQueryMs);
-        /// <summary>
-        /// Executes the rolling max mb operation.
-        /// </summary>
         public int RollingMaxMb => GetInt(DiagnosticsConstants.KeyRollingMaxMb, DiagnosticsConstants.DefaultRollingMaxMb);
-        /// <summary>
-        /// Executes the rolling max days operation.
-        /// </summary>
         public int RollingMaxDays => GetInt(DiagnosticsConstants.KeyRollingMaxDays, DiagnosticsConstants.DefaultRollingMaxDays);
-        /// <summary>
-        /// Executes the top n release operation.
-        /// </summary>
         public int TopNRelease => GetInt(DiagnosticsConstants.KeyTopNRelease, DiagnosticsConstants.DefaultTopNRelease);
-        /// <summary>
-        /// Executes the random percent release operation.
-        /// </summary>
         public double RandomPercentRelease => GetDouble(DiagnosticsConstants.KeyRandomPercentRelease, DiagnosticsConstants.DefaultRandomPercentRel);
-        /// <summary>
-        /// Executes the new correlation operation.
-        /// </summary>
 
         public void NewCorrelation(string? corrId = null)
         {
@@ -134,9 +55,6 @@ namespace YasGMP.Diagnostics
             ParentSpanId = null;
             SpanId = NewSpanId();
         }
-        /// <summary>
-        /// Executes the push span operation.
-        /// </summary>
 
         public string PushSpan()
         {
@@ -145,18 +63,12 @@ namespace YasGMP.Diagnostics
             SpanId = NewSpanId();
             return parent;
         }
-        /// <summary>
-        /// Executes the pop span operation.
-        /// </summary>
 
         public void PopSpan(string? parentSpan)
         {
             SpanId = NewSpanId();
             ParentSpanId = parentSpan;
         }
-        /// <summary>
-        /// Executes the new span id operation.
-        /// </summary>
 
         public static string NewSpanId() => Guid.NewGuid().ToString("N").Substring(0, 16);
 
@@ -262,9 +174,6 @@ namespace YasGMP.Diagnostics
 
     internal static class RuntimeInformationShim
     {
-        /// <summary>
-        /// Represents the arch value.
-        /// </summary>
         public static string Arch
         {
             get

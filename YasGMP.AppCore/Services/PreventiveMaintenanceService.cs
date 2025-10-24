@@ -28,9 +28,6 @@ namespace YasGMP.Services
         }
 
         #region === CRUD OPERATIONS ===
-        /// <summary>
-        /// Executes the get all async operation.
-        /// </summary>
 
         public async Task<List<PreventiveMaintenancePlan>> GetAllAsync() => await _db.GetAllPpmPlansAsync();
 
@@ -41,9 +38,6 @@ namespace YasGMP.Services
             if (plan == null) throw new KeyNotFoundException($"PPM plan #{id} nije pronađen.");
             return plan;
         }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task CreateAsync(PreventiveMaintenancePlan plan, int userId)
         {
@@ -55,9 +49,6 @@ namespace YasGMP.Services
             await _db.InsertOrUpdatePpmPlanAsync(plan, false);
             await LogAudit(plan.Id, userId, PpmActionType.CREATE, $"PPM plan {plan.Code} kreiran.");
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task UpdateAsync(PreventiveMaintenancePlan plan, int userId)
         {
@@ -68,9 +59,6 @@ namespace YasGMP.Services
             await _db.InsertOrUpdatePpmPlanAsync(plan, true);
             await LogAudit(plan.Id, userId, PpmActionType.UPDATE, $"PPM plan {plan.Code} ažuriran.");
         }
-        /// <summary>
-        /// Executes the delete async operation.
-        /// </summary>
 
         public async Task DeleteAsync(int ppmId, int userId)
         {
@@ -81,18 +69,12 @@ namespace YasGMP.Services
         #endregion
 
         #region === STATUS & ADVANCED MONITORING ===
-        /// <summary>
-        /// Executes the get overdue plans async operation.
-        /// </summary>
 
         public async Task<List<PreventiveMaintenancePlan>> GetOverduePlansAsync()
         {
             var plans = await _db.GetAllPpmPlansAsync();
             return plans.Where(p => p.NextDue.HasValue && p.NextDue.Value < DateTime.UtcNow).ToList();
         }
-        /// <summary>
-        /// Executes the mark executed async operation.
-        /// </summary>
 
         public async Task MarkExecutedAsync(int ppmId, int userId)
         {
@@ -175,16 +157,11 @@ namespace YasGMP.Services
         #endregion
 
         #region === FUTURE-READY EXTENSIONS ===
-        /// <summary>
-        /// Executes the predict failure risk async operation.
-        /// </summary>
 
         public Task<double> PredictFailureRiskAsync(int planId) => Task.FromResult(new Random().NextDouble());
-        /// <summary>
-        /// Executes the get io t status async operation.
-        /// </summary>
         public Task<string> GetIoTStatusAsync(int machineId)   => Task.FromResult("OK");
 
         #endregion
     }
 }
+

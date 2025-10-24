@@ -5,63 +5,23 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="240"
-             d:DesignWidth="400"
-             AutomationProperties.AutomationId="{Binding AutomationId}"
-             AutomationProperties.Name="{Binding Title}"
-             ToolTipService.ToolTip="{Binding HelpText}"
-             AutomationProperties.HelpText="{Binding HelpText}">
+             d:DesignWidth="400">
     <Border Padding="12" Background="#1E1E1E" CornerRadius="4">
         <DockPanel>
-            <StackPanel DockPanel.Dock="Top"
-                        ToolTipService.ToolTip="{Binding ModuleAutomationTooltip}"
-                        AutomationProperties.Name="{Binding ModuleAutomationName}"
-                        AutomationProperties.AutomationId="{Binding ModuleAutomationId}"
-                        AutomationProperties.HelpText="{Binding ModuleAutomationTooltip}">
-                <TextBlock Text="{Binding ModuleTitle}"
-                           FontSize="14"
-                           FontWeight="Bold"
-                           Foreground="#F9F9F9"
-                            ToolTipService.ToolTip="{Binding ModuleAutomationTooltip}"
-                           AutomationProperties.Name="{Binding ModuleAutomationName}"
-                           AutomationProperties.AutomationId="{Binding ModuleAutomationId}"
-                           AutomationProperties.HelpText="{Binding ModuleAutomationTooltip}" />
-                <TextBlock Text="{Binding RecordTitle}"
-                           FontSize="12"
-                           Foreground="#CCCCCC"
-                           Margin="0,4,0,12"
-                           ToolTipService.ToolTip="{Binding RecordAutomationTooltip}"
-                           AutomationProperties.Name="{Binding RecordAutomationName}"
-                           AutomationProperties.AutomationId="{Binding RecordAutomationId}"
-                           AutomationProperties.HelpText="{Binding RecordAutomationTooltip}" />
+            <StackPanel DockPanel.Dock="Top">
+                <TextBlock Text="{Binding ModuleTitle}" FontSize="14" FontWeight="Bold" Foreground="#F9F9F9" />
+                <TextBlock Text="{Binding RecordTitle}" FontSize="12" Foreground="#CCCCCC" Margin="0,4,0,12" />
             </StackPanel>
             <ItemsControl ItemsSource="{Binding Fields}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,2"
-                              ToolTipService.ToolTip="{Binding AutomationTooltip}"
-                              AutomationProperties.Name="{Binding AutomationName}"
-                              AutomationProperties.AutomationId="{Binding AutomationId}"
-                              AutomationProperties.HelpText="{Binding AutomationTooltip}">
+                        <Grid Margin="0,2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="180" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="FieldLabel"
-                                       Text="{Binding Label}"
-                                       Foreground="#BBBBBB"
-                                       ToolTipService.ToolTip="{Binding AutomationTooltip}"
-                                       AutomationProperties.Name="{Binding AutomationName}"
-                                       AutomationProperties.AutomationId="{Binding AutomationId, StringFormat={}{0}.Label}"
-                                       AutomationProperties.HelpText="{Binding AutomationTooltip}" />
-                            <TextBlock Text="{Binding Value}"
-                                       Grid.Column="1"
-                                       Foreground="#FFFFFF"
-                                       TextWrapping="Wrap"
-                                       ToolTipService.ToolTip="{Binding AutomationTooltip}"
-                                       AutomationProperties.Name="{Binding AutomationName}"
-                                       AutomationProperties.AutomationId="{Binding AutomationId, StringFormat={}{0}.Value}"
-                                       AutomationProperties.HelpText="{Binding AutomationTooltip}"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=FieldLabel}" />
+                            <TextBlock Text="{Binding Label}" Foreground="#BBBBBB" />
+                            <TextBlock Text="{Binding Value}" Grid.Column="1" Foreground="#FFFFFF" TextWrapping="Wrap" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

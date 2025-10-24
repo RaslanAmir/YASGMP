@@ -138,34 +138,13 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
-        /// <summary>
-        /// Gets or sets the load validations command.
-        /// </summary>
 
         public ICommand LoadValidationsCommand { get; }
-        /// <summary>
-        /// Gets or sets the add validation command.
-        /// </summary>
         public ICommand AddValidationCommand { get; }
-        /// <summary>
-        /// Gets or sets the update validation command.
-        /// </summary>
         public ICommand UpdateValidationCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete validation command.
-        /// </summary>
         public ICommand DeleteValidationCommand { get; }
-        /// <summary>
-        /// Gets or sets the rollback validation command.
-        /// </summary>
         public ICommand RollbackValidationCommand { get; }
-        /// <summary>
-        /// Gets or sets the export validations command.
-        /// </summary>
         public ICommand ExportValidationsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

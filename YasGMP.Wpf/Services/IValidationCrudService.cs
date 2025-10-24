@@ -1,21 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared contract that directs validation CRUD through <see cref="YasGMP.Services.ValidationService"/> and the MAUI audit pipeline.
+/// Adapter abstraction over <see cref="YasGMP.Services.ValidationService"/> so the WPF shell can
+/// coordinate validation CRUD flows without binding directly to infrastructure types during tests.
 /// </summary>
-/// <remarks>
-/// Module view models invoke these members on the UI thread, implementations forward work to the shared
-/// <see cref="YasGMP.Services.ValidationService"/> and <see cref="YasGMP.Services.AuditService"/>, and UI consumers marshal updates via
-/// <see cref="WpfUiDispatcher"/> after awaiting tasks. <see cref="CrudSaveResult"/> must return identifiers, signature context, and localization-ready
-/// status text so <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> can translate the values consistently with the MAUI shell.
-/// </remarks>
 public interface IValidationCrudService
 {
     Task<IReadOnlyList<Validation>> GetAllAsync();
@@ -36,15 +30,8 @@ public interface IValidationCrudService
 }
 
 /// <summary>
-/// Context metadata captured during validation persistence operations. Each value flows into
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines replay the
-/// accepted signature manifest.
+/// Context metadata captured during validation persistence operations.
 /// </summary>
-/// <remarks>
-/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside validation records, and MAUI experiences should propagate the
-/// same payload when presenting or synchronizing validations to keep shared audit history aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current auth context.</param>
 /// <param name="DeviceInfo">Machine fingerprint/hostname.</param>
@@ -67,9 +54,6 @@ public readonly record struct ValidationCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ValidationCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -82,9 +66,6 @@ public readonly record struct ValidationCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ValidationCrudContext Create(
         int userId,
@@ -113,3 +94,4 @@ public readonly record struct ValidationCrudContext(
         };
     }
 }
+

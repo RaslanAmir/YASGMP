@@ -25,9 +25,6 @@ namespace YasGMP.Models
         /// </summary>
         [Required]
         public int PartId { get; set; }
-        /// <summary>
-        /// Gets or sets the part.
-        /// </summary>
         public Part? Part { get; set; }
 
         /// <summary>
@@ -41,9 +38,6 @@ namespace YasGMP.Models
         /// </summary>
         [Required]
         public int ChangedById { get; set; }
-        /// <summary>
-        /// Gets or sets the changed by.
-        /// </summary>
         public User? ChangedBy { get; set; }
 
         /// <summary>
@@ -113,3 +107,4 @@ namespace YasGMP.Models
         }
     }
 }
+

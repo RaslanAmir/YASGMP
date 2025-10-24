@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -15,7 +15,7 @@ using QuestPDF.Infrastructure;
 using MySqlConnector;
 using YasGMP.Common;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
@@ -26,9 +26,6 @@ namespace YasGMP.Services
     public static class DatabaseServiceWorkOrdersExtensions
     {
         #region Core Insert/Update
-        /// <summary>
-        /// Executes the insert or update work order async operation.
-        /// </summary>
         public static async Task<int> InsertOrUpdateWorkOrderAsync(
             this DatabaseService db,
             WorkOrder wo,
@@ -242,9 +239,6 @@ WHERE id=@id";
         }
 
         #region Convenience CRUD + Queries
-        /// <summary>
-        /// Executes the add work order async operation.
-        /// </summary>
         public static Task AddWorkOrderAsync(
             this DatabaseService db,
             WorkOrder wo,
@@ -254,9 +248,6 @@ WHERE id=@id";
             string? sessionId,
             CancellationToken token = default)
             => db.InsertOrUpdateWorkOrderAsync(wo, update: false, actorUserId, ip, device, sessionId, signatureMetadata: null, token);
-        /// <summary>
-        /// Executes the delete work order async operation.
-        /// </summary>
 
         public static async Task DeleteWorkOrderAsync(
             this DatabaseService db,
@@ -275,9 +266,6 @@ WHERE id=@id";
             catch { /* tolerant of schema differences */ }
             await db.LogSystemEventAsync(actorUserId, "WO_DELETE", "work_orders", "WorkOrders", workOrderId, null, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the get all work orders full async operation.
-        /// </summary>
 
         public static async Task<List<WorkOrder>> GetAllWorkOrdersFullAsync(
             this DatabaseService db,
@@ -357,9 +345,6 @@ ORDER BY w.date_open DESC, w.id DESC";
             };
         }
         #endregion
-        /// <summary>
-        /// Executes the get work order by id async operation.
-        /// </summary>
         
         public static async Task<WorkOrder?> GetWorkOrderByIdAsync(
             this DatabaseService db,
@@ -400,9 +385,6 @@ WHERE w.id=@id";
             if (dt.Rows.Count == 0) return null;
             return MapWorkOrder(dt.Rows[0]);
         }
-        /// <summary>
-        /// Executes the add work order part async operation.
-        /// </summary>
 
         public static async Task<int> AddWorkOrderPartAsync(
             this DatabaseService db,
@@ -463,9 +445,6 @@ WHERE w.id=@id";
 
             return part.WorkOrderId;
         }
-        /// <summary>
-        /// Executes the add work order signature async operation.
-        /// </summary>
 
         public static async Task<WorkOrderSignature> AddWorkOrderSignatureAsync(
             this DatabaseService db,
@@ -593,7 +572,7 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                 EntityType = "WorkOrder",
                 EntityId = request.WorkOrderId,
                 UploadedById = request.UserId,
-                DisplayName = $"WorkOrder #{request.WorkOrderId} â€“ potpis v{recordVersion}",
+                DisplayName = $"WorkOrder #{request.WorkOrderId} – potpis v{recordVersion}",
                 Notes = request.ReasonDescription,
                 Reason = $"workorder-signature:{request.ReasonCode}",
                 SourceIp = request.IpAddress,
@@ -604,9 +583,6 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
 
             return signature;
         }
-        /// <summary>
-        /// Executes the attach work order photo async operation.
-        /// </summary>
 
         public static async Task AttachWorkOrderPhotoAsync(
             this DatabaseService db,
@@ -671,9 +647,6 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                 token: token
             ).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the get next work order signature version async operation.
-        /// </summary>
 
         public static async Task<int> GetNextWorkOrderSignatureVersionAsync(
             this DatabaseService db,
@@ -687,9 +660,6 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
             int current = obj is null || obj == DBNull.Value ? 0 : Convert.ToInt32(obj, CultureInfo.InvariantCulture);
             return current + 1;
         }
-        /// <summary>
-        /// Executes the get current work order revision async operation.
-        /// </summary>
 
         public static async Task<int> GetCurrentWorkOrderRevisionAsync(
             this DatabaseService db,
@@ -759,17 +729,17 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
         {
             QuestPDF.Settings.License = LicenseType.Community;
             using var stream = new MemoryStream();
-            Document.Create(container =>
+            QuestPDF.Fluent.Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Margin(20);
                     page.Size(PageSizes.A4);
-                    page.Header().Text($"Radni nalog #{workOrder.Id} â€“ manifest potpisa").SemiBold().FontSize(16);
+                    page.Header().Text($"Radni nalog #{workOrder.Id} – manifest potpisa").SemiBold().FontSize(16);
                     page.Content().Column(col =>
                     {
                         col.Item().Text($"Potpisao: {request.SignerFullName ?? request.SignerUsername} (ID {signature.UserId})");
-                        col.Item().Text($"KorisniÄko ime: {request.SignerUsername}");
+                        col.Item().Text($"Korisnièko ime: {request.SignerUsername}");
                         col.Item().Text($"Razlog (kod): {signature.ReasonCode}");
                         if (!string.IsNullOrWhiteSpace(request.ReasonDisplay))
                             col.Item().Text($"Razlog (opis): {request.ReasonDisplay}");
@@ -781,7 +751,7 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                             col.Item().Text($"Hash potpisa: {signature.SignatureHash}");
                         col.Item().Text($"Vrijeme potpisa: {signature.SignedAt:yyyy-MM-dd HH:mm:ss} {signature.ServerTimezone}");
                         col.Item().Text($"IP: {signature.IpAddress ?? "n/a"}");
-                        col.Item().Text($"UreÄ‘aj: {signature.DeviceInfo ?? "n/a"}");
+                        col.Item().Text($"Ureðaj: {signature.DeviceInfo ?? "n/a"}");
                         if (!string.IsNullOrWhiteSpace(signature.SessionId))
                             col.Item().Text($"Session ID: {signature.SessionId}");
                         col.Item().Text(string.IsNullOrWhiteSpace(request.MfaEvidence)
@@ -790,7 +760,7 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
 
                         col.Item().Element(e => e.PaddingVertical(6)).LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
 
-                        col.Item().Text("SaÅ¾etak radnog naloga").SemiBold();
+                        col.Item().Text("Sažetak radnog naloga").SemiBold();
                         col.Item().Text($"Naslov: {workOrder.Title}");
                         col.Item().Text($"Status: {workOrder.Status}");
                         col.Item().Text($"Tip / Prioritet: {workOrder.Type} / {workOrder.Priority}");
@@ -830,9 +800,6 @@ VALUES(@wo, @uid, @hash, @signedAt, NULL, @type, @note,
                 yield return line;
             }
         }
-        /// <summary>
-        /// Executes the add work order comment async operation.
-        /// </summary>
 
         public static async Task AddWorkOrderCommentAsync(
             this DatabaseService db,
@@ -870,9 +837,6 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
             var raw = $"WO:{workOrderId}|U:{userId}|{DateTime.UtcNow:O}|{text}";
             return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw)));
         }
-        /// <summary>
-        /// Executes the approve work order async operation.
-        /// </summary>
 
         public static async Task ApproveWorkOrderAsync(
             this DatabaseService db,
@@ -893,9 +857,6 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
             catch { }
             await db.LogSystemEventAsync(actorUserId, "WO_APPROVE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the close work order async operation.
-        /// </summary>
 
         public static async Task CloseWorkOrderAsync(
             this DatabaseService db,
@@ -915,9 +876,6 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
             catch { }
             await db.LogSystemEventAsync(actorUserId, "WO_CLOSE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the escalate work order async operation.
-        /// </summary>
 
         public static async Task EscalateWorkOrderAsync(
             this DatabaseService db,
@@ -937,9 +895,6 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
             catch { }
             await db.LogSystemEventAsync(actorUserId, "WO_ESCALATE", "work_orders", "WorkOrders", workOrderId, note, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the export work orders async operation.
-        /// </summary>
 
         public static async Task ExportWorkOrdersAsync(
             this DatabaseService db,
@@ -952,9 +907,6 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
         {
             await db.LogSystemEventAsync(actorUserId, "WO_EXPORT", "work_orders", "WorkOrders", null, $"count={items?.Count ?? 0}", ip, "info", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the export work orders async operation.
-        /// </summary>
 
         public static async Task<string?> ExportWorkOrdersAsync(
             this DatabaseService db,
@@ -1015,9 +967,6 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
             await db.LogSystemEventAsync(actorUserId, "WO_EXPORT", "work_orders", "WorkOrders", null, $"fmt={fmt}; count={list.Count}; file={path}", ip, "info", device, sessionId, token: token).ConfigureAwait(false);
             return path;
         }
-        /// <summary>
-        /// Executes the log work order audit async operation.
-        /// </summary>
         
         public static Task LogWorkOrderAuditAsync(
             this DatabaseService db,
@@ -1033,3 +982,4 @@ VALUES (@wo, @uid, @txt, NOW(), 'comment', 1, @sig, 0, @ip)";
         #endregion
     }
 }
+

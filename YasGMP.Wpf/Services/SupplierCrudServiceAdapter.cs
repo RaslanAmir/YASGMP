@@ -4,54 +4,33 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Bridges supplier workflows in the WPF shell to the shared MAUI
-/// <see cref="YasGMP.Services.SupplierService"/> and supporting persistence services.
+/// Adapter that allows the WPF shell to reuse the shared <see cref="SupplierService"/>
+/// while capturing the extra audit metadata required by desktop saves.
 /// </summary>
-/// <remarks>
-/// Supplier module view models issue CRUD commands through this adapter; requests are then forwarded to
-/// <see cref="YasGMP.Services.SupplierService"/> and <see cref="YasGMP.Services.DatabaseService"/> so both shells share the
-/// same persistence and audit story. Await operations off the UI thread and dispatch UI updates via
-/// <see cref="WpfUiDispatcher"/>. The returned <see cref="CrudSaveResult"/> contains identifiers, status, and signature data that
-/// callers must localize with <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before
-/// presenting to operators. Audit information is written through <see cref="YasGMP.Services.DatabaseServiceSuppliersExtensions.LogSupplierAuditAsync(YasGMP.Services.DatabaseService,int,string,int,string?,string,string,string?,System.Threading.CancellationToken)"/>,
-/// which feeds the shared <see cref="YasGMP.Services.AuditService"/> surfaced inside MAUI.
-/// </remarks>
 public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
 {
     private readonly SupplierService _supplierService;
     private readonly DatabaseService _databaseService;
-    /// <summary>
-    /// Initializes a new instance of the SupplierCrudServiceAdapter class.
-    /// </summary>
 
     public SupplierCrudServiceAdapter(SupplierService supplierService, DatabaseService databaseService)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
     }
-    /// <summary>
-    /// Executes the get all async operation.
-    /// </summary>
 
     public async Task<IReadOnlyList<Supplier>> GetAllAsync()
     {
         var suppliers = await _supplierService.GetAllAsync().ConfigureAwait(false);
         return suppliers.AsReadOnly();
     }
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public Task<Supplier?> TryGetByIdAsync(int id) => _supplierService.GetByIdAsync(id);
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(Supplier supplier, SupplierCrudContext context)
     {
@@ -69,9 +48,6 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
         await StampAsync(supplier, context, "CREATE", signature).ConfigureAwait(false);
         return new CrudSaveResult(supplier.Id, metadata);
     }
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(Supplier supplier, SupplierCrudContext context)
     {
@@ -89,9 +65,6 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
         await StampAsync(supplier, context, "UPDATE", signature).ConfigureAwait(false);
         return new CrudSaveResult(supplier.Id, metadata);
     }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(Supplier supplier)
     {
@@ -121,9 +94,6 @@ public sealed class SupplierCrudServiceAdapter : ISupplierCrudService
             throw new InvalidOperationException("Contract end cannot precede its start date.");
         }
     }
-    /// <summary>
-    /// Executes the normalize status operation.
-    /// </summary>
 
     public string NormalizeStatus(string? status) => SupplierCrudExtensions.NormalizeStatusDefault(status);
 
@@ -259,3 +229,4 @@ WHERE id=@id";
             IpAddress = context.Ip
         };
 }
+

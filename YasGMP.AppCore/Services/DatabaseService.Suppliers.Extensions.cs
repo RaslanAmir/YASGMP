@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -19,9 +19,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceSuppliersExtensions
     {
-        /// <summary>
-        /// Executes the get all suppliers async operation.
-        /// </summary>
         public static async Task<List<Supplier>> GetAllSuppliersAsync(this DatabaseService db, CancellationToken token = default)
         {
             // Some dumps use table name 'suppliers', others 'supplier' (singular). Try plural first.
@@ -36,9 +33,6 @@ namespace YasGMP.Services
                 return MapList(dt);
             }
         }
-        /// <summary>
-        /// Executes the get supplier by id async operation.
-        /// </summary>
 
         public static async Task<Supplier?> GetSupplierByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -53,9 +47,6 @@ namespace YasGMP.Services
                 return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
             }
         }
-        /// <summary>
-        /// Executes the insert or update supplier async operation.
-        /// </summary>
 
         public static async Task<int> InsertOrUpdateSupplierAsync(this DatabaseService db, Supplier s, bool update, SignatureMetadataDto? signatureMetadata = null, int actorUserId = 0, string ip = "", string device = "", string? sessionId = null, CancellationToken token = default)
         {
@@ -199,9 +190,6 @@ namespace YasGMP.Services
 
             return s.Id;
         }
-        /// <summary>
-        /// Executes the delete supplier async operation.
-        /// </summary>
 
         public static async Task DeleteSupplierAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -214,15 +202,9 @@ namespace YasGMP.Services
                 await db.ExecuteNonQueryAsync("DELETE FROM supplier WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             }
         }
-        /// <summary>
-        /// Executes the rollback supplier async operation.
-        /// </summary>
 
         public static Task RollbackSupplierAsync(this DatabaseService db, int id, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SUPPLIER_ROLLBACK", "suppliers", "SupplierModule", id, null, ip, "audit", device, sessionId, token: token);
-        /// <summary>
-        /// Executes the export suppliers async operation.
-        /// </summary>
 
         public static Task ExportSuppliersAsync(this DatabaseService db, List<Supplier> items, string format, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -267,44 +249,29 @@ namespace YasGMP.Services
             }
             return db.LogSystemEventAsync(actorUserId, "SUPPLIER_EXPORT", "suppliers", "SupplierModule", null, $"format={format}; count={items?.Count ?? 0}; file={path}", ip, "info", device, sessionId, token: token);
         }
-        /// <summary>
-        /// Executes the log supplier audit async operation.
-        /// </summary>
 
         public static Task LogSupplierAuditAsync(this DatabaseService db, int supplierId, string action, int actorUserId, string? details, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, $"SUPPLIER_{action}", "suppliers", "SupplierModule", supplierId, details, ip, "audit", device, sessionId, token: token);
 
         // ViewModel-friendly helpers
-        /// <summary>
-        /// Executes the add supplier async operation.
-        /// </summary>
         public static async Task<int> AddSupplierAsync(this DatabaseService db, Supplier supplier, int actorUserId, string ip, string device, CancellationToken token = default)
         {
             var id = await db.InsertOrUpdateSupplierAsync(supplier, update: false, signatureMetadata: null, actorUserId: actorUserId, ip: ip, device: device, sessionId: null, token: token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(id, "CREATE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
             return id;
         }
-        /// <summary>
-        /// Executes the update supplier async operation.
-        /// </summary>
 
         public static async Task UpdateSupplierAsync(this DatabaseService db, Supplier supplier, int actorUserId, string ip, string device, CancellationToken token = default)
         {
             await db.InsertOrUpdateSupplierAsync(supplier, update: true, signatureMetadata: null, actorUserId: actorUserId, ip: ip, device: device, sessionId: null, token: token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(supplier.Id, "UPDATE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the delete supplier async operation.
-        /// </summary>
 
         public static async Task DeleteSupplierAsync(this DatabaseService db, int id, int actorUserId, string ip, string device, CancellationToken token = default)
         {
             await db.DeleteSupplierAsync(id, token).ConfigureAwait(false);
             await db.LogSupplierAuditAsync(id, "DELETE", actorUserId, null, ip, device, sessionId: null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the get all suppliers full async operation.
-        /// </summary>
 
         public static Task<List<Supplier>> GetAllSuppliersFullAsync(this DatabaseService db, CancellationToken token = default)
             => db.GetAllSuppliersAsync(token);
@@ -348,4 +315,5 @@ namespace YasGMP.Services
         }
     }
 }
+
 

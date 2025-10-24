@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -39,9 +39,6 @@ namespace YasGMP.Services
             _machineColumnsCacheTime = DateTime.UtcNow;
             return set;
         }
-        /// <summary>
-        /// Executes the get all machines async operation.
-        /// </summary>
         public static async Task<List<Machine>> GetAllMachinesAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sqlPrefer = @"
@@ -132,14 +129,8 @@ ORDER BY m.name, m.id";
         }
 
         // Overload used by some callers that pass includeAudit; flag is ignored for compatibility
-        /// <summary>
-        /// Executes the get all machines async operation.
-        /// </summary>
         public static Task<List<Machine>> GetAllMachinesAsync(this DatabaseService db, bool includeAudit, CancellationToken token = default)
             => db.GetAllMachinesAsync(token);
-        /// <summary>
-        /// Executes the get machine by id async operation.
-        /// </summary>
 
         public static async Task<Machine?> GetMachineByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -207,9 +198,6 @@ LIMIT 1";
                 DigitalSignatureId = r.Table.Columns.Contains("digital_signature_id") && r["digital_signature_id"] != DBNull.Value ? Convert.ToInt32(r["digital_signature_id"]) : (int?)null
             };
         }
-        /// <summary>
-        /// Executes the insert or update machine async operation.
-        /// </summary>
 
         public static async Task<int> InsertOrUpdateMachineAsync(
             this DatabaseService db,
@@ -502,9 +490,6 @@ WHERE id=@id";
 
             return m.Id;
         }
-        /// <summary>
-        /// Executes the rollback machine async operation.
-        /// </summary>
 
         public static Task<int> RollbackMachineAsync(
             this DatabaseService db,
@@ -516,9 +501,6 @@ WHERE id=@id";
             SignatureMetadataDto? signatureMetadata = null,
             CancellationToken token = default)
             => db.InsertOrUpdateMachineAsync(snapshot, update: true, actorUserId, ip, deviceInfo, sessionId, signatureMetadata, token);
-        /// <summary>
-        /// Executes the export machines async operation.
-        /// </summary>
 
         public static async Task<string> ExportMachinesAsync(
             this DatabaseService db,
@@ -549,9 +531,6 @@ WHERE id=@id";
 
             return path;
         }
-        /// <summary>
-        /// Executes the delete machine async operation.
-        /// </summary>
 
         public static async Task DeleteMachineAsync(
             this DatabaseService db,
@@ -591,3 +570,4 @@ WHERE id=@id";
         }
     }
 }
+

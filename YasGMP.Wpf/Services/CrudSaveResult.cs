@@ -1,14 +1,10 @@
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
 /// Represents the payload returned from a CRUD adapter after the entity has been persisted.
 /// </summary>
-/// <remarks>
-/// WPF shell and MAUI consumers must propagate <see cref="SignatureMetadata"/> into their persistence and presentation layers
-/// so audit, e-signature, and compliance services receive the same manifest that was captured during the save.
-/// </remarks>
 public sealed record CrudSaveResult
 {
     /// <summary>
@@ -30,10 +26,11 @@ public sealed record CrudSaveResult
     public int Id { get; }
 
     /// <summary>
-    /// Gets the electronic signature metadata captured during the save operation as a
-    /// <see cref="SignatureMetadataDto"/>. Callers should persist or surface this payload alongside the entity (for example, by
-    /// updating audit records or exposing signature details in the UI) to ensure downstream services receive the same signature
+    /// Gets the electronic signature metadata captured during the save operation. Callers should
+    /// persist or surface this payload alongside the entity (for example, by updating audit records or
+    /// exposing signature details in the UI) to ensure downstream services receive the same signature
     /// context that was accepted at save time.
     /// </summary>
     public SignatureMetadataDto? SignatureMetadata { get; }
 }
+

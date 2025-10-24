@@ -1,36 +1,22 @@
 using System;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Bridges incident workflows from the WPF shell to the shared MAUI
-/// <see cref="YasGMP.Services.IncidentService"/> implementation.
+/// Adapter that exposes <see cref="IncidentService"/> CRUD operations to the WPF shell.
 /// </summary>
-/// <remarks>
-/// Incident module view models call this adapter, which forwards the request to <see cref="YasGMP.Services.IncidentService"/>
-/// and the underlying <see cref="YasGMP.Services.AuditService"/> so persistence, localization, and audit logging match MAUI.
-/// Operations should be awaited off the dispatcher thread with UI updates marshalled via <see cref="WpfUiDispatcher"/>. The
-/// <see cref="CrudSaveResult"/> payload contains identifiers, status text, and signature metadata that callers localize using
-/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before rendering in the shell.
-/// </remarks>
 public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
 {
     private readonly IncidentService _service;
-    /// <summary>
-    /// Initializes a new instance of the IncidentCrudServiceAdapter class.
-    /// </summary>
 
     public IncidentCrudServiceAdapter(IncidentService service)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public async Task<Incident?> TryGetByIdAsync(int id)
     {
@@ -43,9 +29,6 @@ public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
             return null;
         }
     }
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(Incident incident, IncidentCrudContext context)
     {
@@ -59,9 +42,6 @@ public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
         await _service.CreateAsync(incident, context.UserId).ConfigureAwait(false);
         return new CrudSaveResult(incident.Id, CreateMetadata(context, signature));
     }
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(Incident incident, IncidentCrudContext context)
     {
@@ -75,9 +55,6 @@ public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
         await _service.UpdateAsync(incident, context.UserId).ConfigureAwait(false);
         return new CrudSaveResult(incident.Id, CreateMetadata(context, signature));
     }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(Incident incident)
     {
@@ -101,9 +78,6 @@ public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
             throw new InvalidOperationException("Detected date must be provided.");
         }
     }
-    /// <summary>
-    /// Executes the normalize status operation.
-    /// </summary>
 
     public string NormalizeStatus(string? status)
         => string.IsNullOrWhiteSpace(status) ? "REPORTED" : status.Trim().ToUpperInvariant();
@@ -136,3 +110,4 @@ public sealed class IncidentCrudServiceAdapter : IIncidentCrudService
             IpAddress = context.Ip
         };
 }
+

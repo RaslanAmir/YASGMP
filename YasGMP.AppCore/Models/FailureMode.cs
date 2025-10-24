@@ -39,10 +39,8 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the component type.
-        /// </summary>
         [ForeignKey(nameof(ComponentTypeId))]
         public virtual ComponentType? ComponentType { get; set; }
     }
 }
+

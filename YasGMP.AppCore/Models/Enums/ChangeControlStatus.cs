@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace YasGMP.Models.Enums
 {
@@ -32,3 +32,4 @@ namespace YasGMP.Models.Enums
         Cancelled = 7
     }
 }
+

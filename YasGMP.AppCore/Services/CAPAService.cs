@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Services
@@ -70,6 +70,7 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="capa">CAPA case to create.</param>
         /// <param name="userId">User performing the action.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
         public async Task CreateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
@@ -96,6 +97,7 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="capa">CAPA case with updated data.</param>
         /// <param name="userId">User performing the update.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
         public async Task UpdateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null)
         {
@@ -138,6 +140,7 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">Investigator user ID.</param>
         /// <param name="investigator">Investigator's name.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         public async Task StartInvestigationAsync(int capaId, int userId, string investigator, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
@@ -162,6 +165,7 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">User defining action plan.</param>
         /// <param name="actionPlan">Action plan details.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         public async Task DefineActionPlanAsync(int capaId, int userId, string actionPlan, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
@@ -186,6 +190,7 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="approverId">Approving user ID.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         public async Task ApproveActionPlanAsync(int capaId, int approverId, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
@@ -212,6 +217,7 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">User who executed the action.</param>
         /// <param name="executionComment">Execution notes/comments.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         public async Task MarkActionExecutedAsync(int capaId, int userId, string executionComment, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
@@ -237,6 +243,7 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="verifierId">User who verifies effectiveness.</param>
         /// <param name="effective">Whether the action was effective.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         public async Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
@@ -262,6 +269,7 @@ namespace YasGMP.Services
         /// <param name="capaId">CAPA case ID.</param>
         /// <param name="userId">User closing the CAPA.</param>
         /// <param name="closureComment">Closure notes/comments.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         public async Task CloseCapaAsync(int capaId, int userId, string closureComment, SignatureMetadataDto? signatureMetadata = null)
         {
             var capa = await GetByIdAsync(capaId);
@@ -333,11 +341,10 @@ namespace YasGMP.Services
 
         #region === DIGITAL SIGNATURES ===
 
-        /// <summary>
-        /// Generates a robust digital signature hash for the given CAPA case.
-        /// </summary>
-        /// <param name="c">The CAPA case.</param>
-        /// <returns>Base64 SHA256 hash.</returns>
+        /// <summary>Applies signature metadata to the CAPA entity or computes a fallback signature.</summary>
+        /// <param name="capa">The CAPA case.</param>
+        /// <param name="metadata">Optional electronic signature metadata.</param>
+        /// <param name="legacyFactory">Fallback signature factory.</param>
         private static void ApplySignatureMetadata(CapaCase capa, SignatureMetadataDto? metadata, Func<string> legacyFactory)
         {
             if (capa == null) throw new ArgumentNullException(nameof(capa));
@@ -362,10 +369,12 @@ namespace YasGMP.Services
                 capa.SessionId = metadata.Session!;
             }
         }
-        /// <summary>
-        /// Executes the generate digital signature operation.
-        /// </summary>
 
+        /// <summary>
+        /// Generates a robust digital signature hash for the given CAPA case.
+        /// </summary>
+        /// <param name="c">The CAPA case.</param>
+        /// <returns>Base64 SHA256 hash.</returns>
         public string GenerateDigitalSignature(CapaCase c)
         {
             string raw = $"{c.Id}|{c.Reason}|{c.Status}|{DateTime.UtcNow:O}";

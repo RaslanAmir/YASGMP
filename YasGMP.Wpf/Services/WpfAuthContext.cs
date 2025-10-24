@@ -13,35 +13,29 @@ namespace YasGMP.Wpf.Services
     {
         private readonly IUserSession _session;
         private readonly IPlatformService _platform;
-        /// <summary>
-        /// Initializes a new instance of the WpfAuthContext class.
-        /// </summary>
+        private readonly Lazy<User?> _user;
+        private readonly string _sessionId = Guid.NewGuid().ToString("N");
 
         public WpfAuthContext(IUserSession session, IPlatformService platform)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
             _platform = platform ?? throw new ArgumentNullException(nameof(platform));
+            _user = new Lazy<User?>(() => new User
+            {
+                Id = _session.UserId ?? 0,
+                Username = _session.Username ?? string.Empty
+            });
         }
-        /// <summary>
-        /// Gets or sets the current user.
-        /// </summary>
 
-        public User? CurrentUser => _session.CurrentUser;
-        /// <summary>
-        /// Gets or sets the current session id.
-        /// </summary>
+        public User? CurrentUser => _user.Value;
 
-        public string CurrentSessionId => _session.SessionId;
-        /// <summary>
-        /// Gets or sets the current device info.
-        /// </summary>
+        public string CurrentSessionId => _sessionId;
 
         public string CurrentDeviceInfo =>
             $"OS={_platform.GetOsVersion()};Host={_platform.GetHostName()};User={_platform.GetUserName()}";
-        /// <summary>
-        /// Executes the current ip address operation.
-        /// </summary>
 
         public string CurrentIpAddress => _platform.GetLocalIpAddress();
     }
 }
+
+

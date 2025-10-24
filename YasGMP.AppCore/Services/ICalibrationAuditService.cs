@@ -12,3 +12,4 @@ namespace YasGMP.Services.Interfaces
         // Add more methods if you have them (GetByCalibrationIdAsync, etc)
     }
 }
+

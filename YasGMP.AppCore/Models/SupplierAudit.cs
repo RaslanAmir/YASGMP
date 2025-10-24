@@ -9,9 +9,6 @@ namespace YasGMP.Models
     /// </summary>
     public partial class SupplierAudit
     {
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -36,42 +33,21 @@ namespace YasGMP.Models
         [Required]
         public DateTime ActionTimestamp { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// Gets or sets the source ip.
-        /// </summary>
         [MaxLength(45)]
         public string SourceIp { get; set; } = "N/A";
 
-        /// <summary>
-        /// Gets or sets the device info.
-        /// </summary>
         [MaxLength(256)]
         public string DeviceInfo { get; set; } = "N/A";
 
-        /// <summary>
-        /// Gets or sets the digital signature.
-        /// </summary>
         [MaxLength(1024)]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the supplier version.
-        /// </summary>
         [NotMapped]
         public int? SupplierVersion { get; set; }
-        /// <summary>
-        /// Gets or sets the json snapshot before.
-        /// </summary>
         [NotMapped]
         public string? JsonSnapshotBefore { get; set; }
-        /// <summary>
-        /// Gets or sets the json snapshot after.
-        /// </summary>
         [NotMapped]
         public string? JsonSnapshotAfter { get; set; }
-        /// <summary>
-        /// Gets or sets the extension data json.
-        /// </summary>
         [NotMapped]
         public string? ExtensionDataJson { get; set; }
 
@@ -109,3 +85,4 @@ namespace YasGMP.Models
         }
     }
 }
+

@@ -15,9 +15,6 @@ namespace YasGMP.Services.Database
     /// </summary>
     internal static class DbCommandWrapper
     {
-        /// <summary>
-        /// Executes the execute non query async operation.
-        /// </summary>
         public static async Task<int> ExecuteNonQueryAsync(
             MySqlCommand cmd,
             DiagnosticContext ctx,
@@ -64,9 +61,6 @@ namespace YasGMP.Services.Database
                 }
             }
         }
-        /// <summary>
-        /// Executes the execute scalar async operation.
-        /// </summary>
 
         public static async Task<object?> ExecuteScalarAsync(
             MySqlCommand cmd,
@@ -114,9 +108,6 @@ namespace YasGMP.Services.Database
                 }
             }
         }
-        /// <summary>
-        /// Executes the execute select async operation.
-        /// </summary>
 
         public static async Task<DataTable> ExecuteSelectAsync(
             MySqlCommand cmd,
@@ -185,4 +176,5 @@ namespace YasGMP.Services.Database
         }
     }
 }
+
 

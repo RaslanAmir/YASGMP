@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,12 +6,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>Attachment</b> â€“ Ultra-robust digital record for any file (PDF, image, scan, doc, certificate, etc.)
+    /// <b>Attachment</b> – Ultra-robust digital record for any file (PDF, image, scan, doc, certificate, etc.)
     /// linked to GMP/CMMS entities (WorkOrder, Machine, Component, CAPA, Calibration, Inspection, etc).
     /// <para>
-    /// âś… Fully auditable (upload, approval, expiry, rollback, versioning, chain-of-custody, e-sign).<br/>
-    /// âś… Supports multi-entity links, digital signature, hash, OCR, session, device, IP, ML/AI.<br/>
-    /// âś… Inspector, regulatory, and future-proof: ALL FIELDS for forensic, analytics, rollback, audit, and more.
+    /// ✅ Fully auditable (upload, approval, expiry, rollback, versioning, chain-of-custody, e-sign).<br/>
+    /// ✅ Supports multi-entity links, digital signature, hash, OCR, session, device, IP, ML/AI.<br/>
+    /// ✅ Inspector, regulatory, and future-proof: ALL FIELDS for forensic, analytics, rollback, audit, and more.
     /// </para>
     /// </summary>
     [Table("attachments")]
@@ -60,7 +60,7 @@ namespace YasGMP.Models
         /// File size in bytes (optional, for quotas/security checks).
         /// </summary>
         [Column("file_size")]
-        [Display(Name = "VeliÄŤina (B)")]
+        [Display(Name = "Veličina (B)")]
         public long? FileSize { get; set; }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace YasGMP.Models
         /// Optional field for full file content if stored in DB (BLOB).
         /// </summary>
         [Column("file_content", TypeName = "LONGBLOB")]
-        [Display(Name = "SadrĹľaj datoteke (BLOB)")]
+        [Display(Name = "Sadržaj datoteke (BLOB)")]
         public byte[]? FileContent { get; set; }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace YasGMP.Models
         /// </summary>
         [StringLength(256)]
         [Column("device_info")]
-        [Display(Name = "UreÄ‘aj / Device info")]
+        [Display(Name = "Uređaj / Device info")]
         public string? DeviceInfo { get; set; }
 
         /// <summary>
@@ -330,14 +330,8 @@ namespace YasGMP.Models
         /// </summary>
         /// <returns>A string representing the attachment details.</returns>
         public virtual ICollection<AttachmentLink> Links { get; set; } = new List<AttachmentLink>();
-        /// <summary>
-        /// Gets or sets the retention policies.
-        /// </summary>
 
         public virtual ICollection<RetentionPolicy> RetentionPolicies { get; set; } = new List<RetentionPolicy>();
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
 
         public override string ToString()
         {
@@ -345,3 +339,4 @@ namespace YasGMP.Models
         }
     }
 }
+

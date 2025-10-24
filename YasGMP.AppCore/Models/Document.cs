@@ -9,11 +9,9 @@ namespace YasGMP.Models
     [Table("documents")]
     public partial class Document
     {
-        /// <summary>
-        /// Initializes a new instance of the Document class.
-        /// </summary>
         public Document()
         {
         }
     }
 }
+

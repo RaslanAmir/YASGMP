@@ -19,3 +19,4 @@ namespace YasGMP.Models.Enums
         [Display(Name = "Custom/other")] Custom = 1000
     }
 }
+

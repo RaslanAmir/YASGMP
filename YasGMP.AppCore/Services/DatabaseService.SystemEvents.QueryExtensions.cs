@@ -17,9 +17,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceSystemEventsQueryExtensions
     {
-        /// <summary>
-        /// Executes the get system events async operation.
-        /// </summary>
         public static async Task<List<SystemEvent>> GetSystemEventsAsync(
             this DatabaseService db,
             int? userId,
@@ -81,4 +78,5 @@ namespace YasGMP.Services
         }
     }
 }
+
 

@@ -99,3 +99,4 @@ namespace YasGMP.Models
         public string RegulatoryRequirement { get; set; } = string.Empty;
     }
 }
+

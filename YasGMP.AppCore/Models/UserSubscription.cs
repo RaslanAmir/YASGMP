@@ -33,16 +33,11 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user.
-        /// </summary>
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }
 
-        /// <summary>
-        /// Gets or sets the template.
-        /// </summary>
         [ForeignKey(nameof(TemplateId))]
         public virtual NotificationTemplate? Template { get; set; }
     }
 }
+

@@ -92,9 +92,6 @@ namespace YasGMP.Models
         [Display(Name = "Vlasnik/odgovorna osoba")]
         public int? OwnerId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the owner.
-        /// </summary>
         [ForeignKey(nameof(OwnerId))]
         public User? Owner { get; set; }
 
@@ -102,9 +99,6 @@ namespace YasGMP.Models
         [Display(Name = "Odobrio korisnik")]
         public int? ApprovedById { get; set; }
 
-        /// <summary>
-        /// Gets or sets the approved by.
-        /// </summary>
         [ForeignKey(nameof(ApprovedById))]
         public User? ApprovedBy { get; set; }
 
@@ -185,52 +179,29 @@ namespace YasGMP.Models
     /// </summary>
     public class RiskAssessmentAuditLog
     {
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
         [Key]
         public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the risk assessment id.
-        /// </summary>
         [Display(Name = "ID procjene rizika")]
         public int RiskAssessmentId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the risk assessment.
-        /// </summary>
         [ForeignKey(nameof(RiskAssessmentId))]
         public RiskAssessment? RiskAssessment { get; set; }
 
-        /// <summary>
-        /// Gets or sets the timestamp.
-        /// </summary>
         [Display(Name = "Vrijeme događaja")]
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
-        /// <summary>
-        /// Gets or sets the action.
-        /// </summary>
         [Display(Name = "Akcija")]
         public string? Action { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user id.
-        /// </summary>
         [Display(Name = "Korisnik")]
         public int? UserId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user.
-        /// </summary>
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
 
-        /// <summary>
-        /// Gets or sets the description.
-        /// </summary>
         [Display(Name = "Opis događaja")]
         public string? Description { get; set; }
     }
 }
+

@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceAssetsExtensions
     {
-        /// <summary>
-        /// Executes the get all assets full async operation.
-        /// </summary>
         public static async Task<List<Asset>> GetAllAssetsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT 
@@ -35,9 +32,6 @@ ORDER BY name, id";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the add asset async operation.
-        /// </summary>
 
         public static async Task AddAssetAsync(this DatabaseService db, Asset asset, string signatureHash, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -67,9 +61,6 @@ ORDER BY name, id";
             catch { }
             await db.LogSystemEventAsync(actorUserId, "ASSET_CREATE", "machines", "AssetModule", null, asset?.Name, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the update asset async operation.
-        /// </summary>
 
         public static async Task UpdateAssetAsync(this DatabaseService db, Asset asset, string signatureHash, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -94,30 +85,18 @@ ORDER BY name, id";
             catch { }
             await db.LogSystemEventAsync(actorUserId, "ASSET_UPDATE", "machines", "AssetModule", asset?.Id, asset?.Name, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the delete asset async operation.
-        /// </summary>
 
         public static async Task DeleteAssetAsync(this DatabaseService db, int id, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("DELETE FROM machines WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(actorUserId, "ASSET_DELETE", "machines", "AssetModule", id, null, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the rollback asset async operation.
-        /// </summary>
 
         public static Task RollbackAssetAsync(this DatabaseService db, int id, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "ASSET_ROLLBACK", "machines", "AssetModule", id, null, ip, "audit", device, sessionId, token: token);
-        /// <summary>
-        /// Executes the export assets async operation.
-        /// </summary>
 
         public static Task ExportAssetsAsync(this DatabaseService db, List<Asset> items, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "ASSET_EXPORT", "machines", "AssetModule", null, $"count={items?.Count ?? 0}", ip, "info", device, sessionId, token: token);
-        /// <summary>
-        /// Executes the export assets async operation.
-        /// </summary>
 
         public static async Task<string?> ExportAssetsAsync(this DatabaseService db, List<Asset> items, string format, string ip, string device, string sessionId, int actorUserId, CancellationToken token = default)
         {
@@ -165,9 +144,6 @@ ORDER BY name, id";
             await db.LogSystemEventAsync(actorUserId, "ASSET_EXPORT", "machines", "AssetModule", null, $"fmt={fmt}; count={list.Count}; file={path}", ip, "info", device, sessionId, token: token).ConfigureAwait(false);
             return path;
         }
-        /// <summary>
-        /// Executes the log asset audit async operation.
-        /// </summary>
 
         public static Task LogAssetAuditAsync(
             this DatabaseService db,
@@ -211,3 +187,4 @@ ORDER BY name, id";
         }
     }
 }
+

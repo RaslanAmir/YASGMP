@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -14,15 +13,18 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the work orders module view model value.
-/// </summary>
 
+/// <summary>Runs work-order workflows in the WPF shell with SAP B1 style navigation.</summary>
+/// <remarks>
+/// Form Modes: Find filters the backlog (including CFL search), Add seeds <see cref="WorkOrderEditor.CreateEmpty"/>, View freezes the editor for read-only review, and Update enables editing, attachment uploads, and execution metadata entry.
+/// Audit &amp; Logging: Persists via <see cref="IWorkOrderCrudService"/> under mandatory e-signatures and logs `CREATE`/`UPDATE` events through <see cref="AuditService"/> using <see cref="DataDrivenModuleDocumentViewModel.LogAuditAsync"/>.
+/// Localization: Relies on inline strings such as `"Work Orders"`, status prompts for signature capture, and attachment feedback; resource keys are pending.
+/// Navigation: ModuleKey `WorkOrders` anchors docking, while CFL overrides and related module keys link to assets/calibration records so Golden Arrow navigation and status messages stay synchronized across the shell.
+/// </remarks>
 public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
+    /// <summary>Shell registration key that binds Work Orders into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Work Orders" until `Modules_WorkOrders_Title` is introduced.</remarks>
     public new const string ModuleKey = "WorkOrders";
 
     private readonly AuditService _auditService;
@@ -35,10 +37,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     private WorkOrder? _loadedEntity;
     private WorkOrderEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
-    /// <summary>
-    /// Initializes a new instance of the WorkOrdersModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Work Orders module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public WorkOrdersModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -49,9 +50,8 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.WorkOrders"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Work Orders", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _workOrderService = workOrderService ?? throw new ArgumentNullException(nameof(workOrderService));
@@ -61,54 +61,68 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         Editor = WorkOrderEditor.CreateEmpty();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the Work Orders module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_WorkOrders_Editor` resources are available.</remarks>
     [ObservableProperty]
     private WorkOrderEditor _editor;
 
+    /// <summary>Generated property exposing the is editor enabled for the Work Orders module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_WorkOrders_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
-    public IAsyncRelayCommand AttachDocumentCommand { get; }
+    /// <summary>Opens the AI module and runs a Work Orders summary.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
 
-    protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
+    private void OpenAiSummary()
     {
-        var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
-        return workOrders.Select(ToRecord).ToList();
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, "summary:workorders");
+        shell.Activate(doc);
     }
 
+    /// <summary>Command executing the attach document workflow for the Work Orders module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_WorkOrders_AttachDocument` resources are authored.</remarks>
+    public IAsyncRelayCommand AttachDocumentCommand { get; }
+
+    /// <summary>Loads Work Orders records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_WorkOrders_Loaded` resources.</remarks>
+    protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
+    {
+        var result = await Database.GetAllWorkOrdersWithProvenanceAsync();
+        SetProvenance($"source: work_orders, variant: {result.Variant}");
+        return result.Items.Select(ToRecord).ToList();
+    }
+
+    /// <summary>Provides design-time sample data for the Work Orders designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
         => new List<ModuleRecord>
         {
             new("WO-1001", "Preventive maintenance - Autoclave", "WO-1001", "In Progress", "Monthly PM",
                 new[]
                 {
-                    CreateInspectorField("WO-1001", "Preventive maintenance - Autoclave", "Assigned To", "Technician A"),
-                    CreateInspectorField("WO-1001", "Preventive maintenance - Autoclave", "Priority", "High"),
-                    CreateInspectorField(
-                        "WO-1001",
-                        "Preventive maintenance - Autoclave",
-                        "Due",
-                        DateTime.Now.AddDays(2).ToString("d", CultureInfo.CurrentCulture))
+                    new InspectorField("Assigned To", "Technician A"),
+                    new InspectorField("Priority", "High"),
+                    new InspectorField("Due", DateTime.Now.AddDays(2).ToString("d", CultureInfo.CurrentCulture))
                 },
                 AssetsModuleViewModel.ModuleKey, 1),
             new("WO-1002", "Calibration - pH meter", "WO-1002", "Open", "Annual calibration",
                 new[]
                 {
-                    CreateInspectorField("WO-1002", "Calibration - pH meter", "Assigned To", "Technician B"),
-                    CreateInspectorField("WO-1002", "Calibration - pH meter", "Priority", "Medium"),
-                    CreateInspectorField(
-                        "WO-1002",
-                        "Calibration - pH meter",
-                        "Due",
-                        DateTime.Now.AddDays(5).ToString("d", CultureInfo.CurrentCulture))
+                    new InspectorField("Assigned To", "Technician B"),
+                    new InspectorField("Priority", "Medium"),
+                    new InspectorField("Due", DateTime.Now.AddDays(5).ToString("d", CultureInfo.CurrentCulture))
                 },
                 CalibrationModuleViewModel.ModuleKey, 2)
         };
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "WorkOrders". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_WorkOrders` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var workOrders = await Database.GetAllWorkOrdersFullAsync().ConfigureAwait(false);
@@ -141,9 +155,11 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             })
             .ToList();
 
-        return new CflRequest("Select Work Order", items);
+        return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_WorkOrder", "Select Work Order"), items);
     }
 
+    /// <summary>Applies CFL selections back into the Work Orders workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "WorkOrders". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_WorkOrders_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var search = result.Selected.Label;
@@ -155,10 +171,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
 
         SearchText = search;
-        StatusMessage = $"Filtered {Title} by \"{search}\".";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_WorkOrders_FilteredBy", "Filtered {0} by \"{1}\"."), Title, search);
         return Task.CompletedTask;
     }
 
+    /// <summary>Loads editor payloads for the selected Work Orders record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "WorkOrders". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_WorkOrders` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -182,7 +200,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         var entity = await _workOrderService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (entity is null)
         {
-            StatusMessage = $"Unable to load {record.Title}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_WorkOrders_UnableToLoad", "Unable to load {0}."), record.Title);
             return;
         }
 
@@ -190,6 +208,8 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         LoadEditor(entity);
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -212,63 +232,47 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Editor.Title))
-        {
-            errors.Add("Title is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_TitleRequired", "Title is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Description))
-        {
-            errors.Add("Description is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_DescriptionRequired", "Description is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Type))
-        {
-            errors.Add("Type is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_TypeRequired", "Type is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Priority))
-        {
-            errors.Add("Priority is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_PriorityRequired", "Priority is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Status))
-        {
-            errors.Add("Status is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_StatusRequired", "Status is required."));
 
         if (Editor.MachineId <= 0)
-        {
-            errors.Add("Machine selection is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_MachineRequired", "Machine selection is required."));
 
         if (Editor.RequestedById <= 0)
-        {
-            errors.Add("Requested by user is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_RequestedByRequired", "Requested by user is required."));
 
         if (Editor.CreatedById <= 0)
-        {
-            errors.Add("Created by user is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_CreatedByRequired", "Created by user is required."));
 
         if (Editor.AssignedToId <= 0)
-        {
-            errors.Add("Assigned technician is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_AssignedToRequired", "Assigned technician is required."));
 
         if (string.IsNullOrWhiteSpace(Editor.Result))
-        {
-            errors.Add("Result summary is required.");
-        }
+            errors.Add(YasGMP.Wpf.Helpers.Loc.S("Validation_WorkOrders_ResultRequired", "Result summary is required."));
 
         return await Task.FromResult(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Editor is null)
@@ -292,7 +296,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         if (Mode == FormMode.Update && _loadedEntity is null)
         {
-            StatusMessage = "Select a work order before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_WorkOrders_SelectBeforeSave", "Select a work order before saving.");
             return false;
         }
 
@@ -306,24 +310,23 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_Failed", "Electronic signature failed: {0}"), ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Cancelled", "Electronic signature cancelled. Save aborted.");
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Error_Signature_NotCaptured", "Electronic signature was not captured.");
             return false;
         }
 
-        var signature = signatureResult.Signature;
-        entity.DigitalSignature = signature.SignatureHash ?? string.Empty;
+        entity.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
 
         var context = WorkOrderCrudContext.Create(
             userId.Value,
@@ -359,13 +362,17 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist work order: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_WorkOrders_SaveFailed", "Failed to persist work order: {0}"), ex.Message), ex);
         }
 
         if (saveResult.SignatureMetadata?.Id is { } signatureId)
         {
             adapterResult.DigitalSignatureId = signatureId;
         }
+
+        _loadedEntity = entity;
+        LoadEditor(entity);
+        UpdateAttachmentCommandState();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
@@ -381,12 +388,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             fallbackIpAddress: context.Ip,
             fallbackSessionId: context.SessionId);
 
-        ApplySignatureMetadataToEntity(entity, signatureResult, context, saveResult.SignatureMetadata);
-
-        _loadedEntity = entity;
-        LoadEditor(entity);
-        UpdateAttachmentCommandState();
-
         try
         {
             await SignaturePersistenceHelper
@@ -395,18 +396,19 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_PersistFailed", "Failed to persist electronic signature: {0}"), ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Captured", "Electronic signature captured ({0})."), signatureResult.ReasonDisplay);
 
         var auditAction = Mode == FormMode.Add ? "CREATE" : "UPDATE";
         var currentUserId = userId ?? 0;
         var currentIp = _authContext.CurrentIpAddress ?? string.Empty;
         var currentDevice = _authContext.CurrentDeviceInfo ?? string.Empty;
         var currentSession = _authContext.CurrentSessionId ?? string.Empty;
+        var signature = signatureResult.Signature;
         var details = string.Join(", ", new[]
         {
             $"user={currentUserId}",
@@ -422,12 +424,14 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
 
         await LogAuditAsync(
                 _ => _auditService.LogEntityAuditAsync("work_orders", entity.Id, auditAction, details),
-                "Failed to log work order audit.")
+                YasGMP.Wpf.Helpers.Loc.S("Error_Audit_LogWorkOrderFailed", "Failed to log work order audit."))
             .ConfigureAwait(false);
 
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -510,7 +514,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     {
         if (_loadedEntity is null || _loadedEntity.Id <= 0)
         {
-            StatusMessage = "Save the work order before adding attachments.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_SaveBeforeAttach", "Save the work order before adding attachments.");
             return;
         }
 
@@ -518,12 +522,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         {
             IsBusy = true;
             var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to {_loadedEntity.Title}"))
+                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: string.Format(YasGMP.Wpf.Helpers.Loc.S("Attachment_Picker_Title", "Attach files to {0}"), _loadedEntity.Title)))
                 .ConfigureAwait(false);
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_Cancelled", "Attachment upload cancelled.");
                 return;
             }
 
@@ -559,7 +563,7 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {
@@ -569,202 +573,19 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
-
-    private void ApplySignatureMetadataToEntity(
-        WorkOrder entity,
-        ElectronicSignatureDialogResult signatureResult,
-        WorkOrderCrudContext context,
-        SignatureMetadataDto? metadata)
     {
-        if (entity is null)
-        {
-            throw new ArgumentNullException(nameof(entity));
-        }
-
-        if (signatureResult is null)
-        {
-            throw new ArgumentNullException(nameof(signatureResult));
-        }
-
-        if (signatureResult.Signature is null)
-        {
-            throw new ArgumentException("Signature result is missing the captured signature payload.", nameof(signatureResult));
-        }
-
-        var signature = signatureResult.Signature;
-        var signerId = signature.UserId != 0 ? signature.UserId : context.UserId;
-        var fallbackName = _authContext.CurrentUser?.FullName
-            ?? _authContext.CurrentUser?.Username
-            ?? string.Empty;
-        var signerName = !string.IsNullOrWhiteSpace(signature.UserName)
-            ? signature.UserName!
-            : !string.IsNullOrWhiteSpace(fallbackName)
-                ? fallbackName
-                : entity.LastModifiedBy?.FullName
-                    ?? entity.LastModifiedBy?.Username
-                    ?? string.Empty;
-
-        var signatureHash = !string.IsNullOrWhiteSpace(signature.SignatureHash)
-            ? signature.SignatureHash!
-            : metadata?.Hash ?? entity.DigitalSignature ?? string.Empty;
-
-        entity.DigitalSignature = signatureHash;
-        var metadataId = metadata?.Id ?? (signature.Id > 0 ? signature.Id : (int?)null);
-        if (metadataId.HasValue)
-        {
-            entity.DigitalSignatureId = metadataId;
-        }
-
-        entity.LastModified = signature.SignedAt ?? DateTime.UtcNow;
-
-        if (signerId > 0)
-        {
-            entity.LastModifiedById = signerId;
-        }
-
-        var deviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
-            ? signature.DeviceInfo!
-            : metadata?.Device ?? context.DeviceInfo ?? entity.DeviceInfo ?? string.Empty;
-        var sourceIp = !string.IsNullOrWhiteSpace(signature.IpAddress)
-            ? signature.IpAddress!
-            : metadata?.IpAddress ?? context.Ip ?? entity.SourceIp ?? string.Empty;
-        var sessionId = !string.IsNullOrWhiteSpace(signature.SessionId)
-            ? signature.SessionId!
-            : metadata?.Session ?? context.SessionId ?? entity.SessionId ?? string.Empty;
-
-        entity.DeviceInfo = deviceInfo ?? string.Empty;
-        entity.SourceIp = sourceIp ?? string.Empty;
-        entity.SessionId = sessionId ?? string.Empty;
-
-        if (entity.LastModifiedBy is null && (!string.IsNullOrWhiteSpace(signerName) || signerId > 0))
-        {
-            entity.LastModifiedBy = new User
-            {
-                Id = signerId,
-                FullName = signerName,
-                Username = signerName
-            };
-        }
-        else if (entity.LastModifiedBy is not null)
-        {
-            if (signerId > 0)
-            {
-                entity.LastModifiedBy.Id = signerId;
-            }
-
-            if (!string.IsNullOrWhiteSpace(signerName))
-            {
-                if (string.IsNullOrWhiteSpace(entity.LastModifiedBy.FullName))
-                {
-                    entity.LastModifiedBy.FullName = signerName;
-                }
-
-                if (string.IsNullOrWhiteSpace(entity.LastModifiedBy.Username))
-                {
-                    entity.LastModifiedBy.Username = signerName;
-                }
-            }
-        }
-
-        entity.Signatures ??= new List<WorkOrderSignature>();
-
-        var expectedId = metadataId;
-        var latestSignature = entity.Signatures
-            .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
-            .FirstOrDefault();
-
-        if (latestSignature is null || (expectedId.HasValue && expectedId.Value > 0 && latestSignature.Id != expectedId.Value))
-        {
-            latestSignature = new WorkOrderSignature();
-            entity.Signatures.Add(latestSignature);
-        }
-
-        latestSignature.WorkOrderId = entity.Id;
-        if (expectedId.HasValue && expectedId.Value > 0)
-        {
-            latestSignature.Id = expectedId.Value;
-        }
-
-        latestSignature.UserId = signerId;
-        latestSignature.SignatureHash = signatureHash;
-        latestSignature.SignedAt = signature.SignedAt ?? entity.LastModified;
-        latestSignature.Note = !string.IsNullOrWhiteSpace(signature.Note)
-            ? signature.Note
-            : metadata?.Note ?? context.SignatureNote ?? latestSignature.Note;
-
-        if (!string.IsNullOrWhiteSpace(signatureResult.ReasonDisplay))
-        {
-            latestSignature.ReasonDescription = signatureResult.ReasonDisplay;
-        }
-
-        if (!string.IsNullOrWhiteSpace(signatureResult.ReasonCode))
-        {
-            latestSignature.ReasonCode = signatureResult.ReasonCode;
-        }
-
-        latestSignature.DeviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
-            ? signature.DeviceInfo
-            : metadata?.Device ?? context.DeviceInfo ?? latestSignature.DeviceInfo;
-        latestSignature.IpAddress = !string.IsNullOrWhiteSpace(signature.IpAddress)
-            ? signature.IpAddress
-            : metadata?.IpAddress ?? context.Ip ?? latestSignature.IpAddress;
-        latestSignature.SessionId = !string.IsNullOrWhiteSpace(signature.SessionId)
-            ? signature.SessionId
-            : metadata?.Session ?? context.SessionId ?? latestSignature.SessionId;
-
-        if (latestSignature.User is null && (!string.IsNullOrWhiteSpace(signerName) || signerId > 0))
-        {
-            latestSignature.User = new User
-            {
-                Id = signerId,
-                FullName = signerName,
-                Username = signerName
-            };
-        }
-        else if (latestSignature.User is not null)
-        {
-            if (signerId > 0)
-            {
-                latestSignature.User.Id = signerId;
-            }
-
-            if (!string.IsNullOrWhiteSpace(signerName))
-            {
-                if (string.IsNullOrWhiteSpace(latestSignature.User.FullName))
-                {
-                    latestSignature.User.FullName = signerName;
-                }
-
-                if (string.IsNullOrWhiteSpace(latestSignature.User.Username))
-                {
-                    latestSignature.User.Username = signerName;
-                }
-            }
-        }
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
     }
 
-    private ModuleRecord ToRecord(WorkOrder workOrder)
+    private static ModuleRecord ToRecord(WorkOrder workOrder)
     {
         var fields = new List<InspectorField>
         {
-            CreateInspectorField(
-                workOrder.Id.ToString(CultureInfo.InvariantCulture),
-                workOrder.Title,
-                "Assigned To",
-                workOrder.AssignedTo?.FullName ?? workOrder.AssignedTo?.Username ?? "-"),
-            CreateInspectorField(workOrder.Id.ToString(CultureInfo.InvariantCulture), workOrder.Title, "Priority", workOrder.Priority),
-            CreateInspectorField(workOrder.Id.ToString(CultureInfo.InvariantCulture), workOrder.Title, "Status", workOrder.Status),
-            CreateInspectorField(
-                workOrder.Id.ToString(CultureInfo.InvariantCulture),
-                workOrder.Title,
-                "Due Date",
-                workOrder.DueDate?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
-            CreateInspectorField(
-                workOrder.Id.ToString(CultureInfo.InvariantCulture),
-                workOrder.Title,
-                "Machine",
-                workOrder.Machine?.Name ?? workOrder.MachineId.ToString(CultureInfo.InvariantCulture))
+            new("Assigned To", workOrder.AssignedTo?.FullName ?? workOrder.AssignedTo?.Username ?? "-"),
+            new("Priority", workOrder.Priority),
+            new("Status", workOrder.Status),
+            new("Due Date", workOrder.DueDate?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
+            new("Machine", workOrder.Machine?.Name ?? workOrder.MachineId.ToString(CultureInfo.InvariantCulture))
         };
 
         return new ModuleRecord(
@@ -777,9 +598,6 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             AssetsModuleViewModel.ModuleKey,
             workOrder.MachineId);
     }
-    /// <summary>
-    /// Represents the work order editor value.
-    /// </summary>
 
     public sealed partial class WorkOrderEditor : ObservableObject
     {
@@ -834,74 +652,11 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         [ObservableProperty]
         private string _notes = string.Empty;
 
-        [ObservableProperty]
-        private int? _digitalSignatureId;
-
-        [ObservableProperty]
-        private string _signatureHash = string.Empty;
-
-        [ObservableProperty]
-        private string _signatureReason = string.Empty;
-
-        [ObservableProperty]
-        private string _signatureNote = string.Empty;
-
-        [ObservableProperty]
-        private DateTime? _signatureTimestampUtc;
-
-        [ObservableProperty]
-        private int? _signerUserId;
-
-        [ObservableProperty]
-        private string _signerUserName = string.Empty;
-
-        [ObservableProperty]
-        private DateTime? _lastModifiedUtc;
-
-        [ObservableProperty]
-        private int? _lastModifiedById;
-
-        [ObservableProperty]
-        private string _lastModifiedByName = string.Empty;
-
-        [ObservableProperty]
-        private string _sourceIp = string.Empty;
-
-        [ObservableProperty]
-        private string _sessionId = string.Empty;
-
-        [ObservableProperty]
-        private string _deviceInfo = string.Empty;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
-
-        public static WorkOrderEditor CreateEmpty()
-            => new()
-            {
-                SignatureHash = string.Empty,
-                SignatureReason = string.Empty,
-                SignatureNote = string.Empty,
-                SignatureTimestampUtc = null,
-                SignerUserId = null,
-                SignerUserName = string.Empty,
-                LastModifiedUtc = null,
-                LastModifiedById = null,
-                LastModifiedByName = string.Empty,
-                SourceIp = string.Empty,
-                SessionId = string.Empty,
-                DeviceInfo = string.Empty
-            };
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
+        public static WorkOrderEditor CreateEmpty() => new();
 
         public static WorkOrderEditor CreateForNew(IAuthContext authContext)
         {
             var userId = authContext.CurrentUser?.Id ?? 1;
-            var userName = authContext.CurrentUser?.FullName
-                ?? authContext.CurrentUser?.Username
-                ?? string.Empty;
             return new WorkOrderEditor
             {
                 Status = "OPEN",
@@ -912,37 +667,12 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 DateOpen = DateTime.UtcNow,
                 RequestedById = userId,
                 CreatedById = userId,
-                AssignedToId = userId,
-                LastModifiedUtc = DateTime.UtcNow,
-                LastModifiedById = userId,
-                LastModifiedByName = userName,
-                SignatureTimestampUtc = null,
-                SignerUserId = userId,
-                SignerUserName = userName,
-                SignatureHash = string.Empty,
-                SignatureReason = string.Empty,
-                SignatureNote = string.Empty,
-                SourceIp = authContext.CurrentIpAddress ?? string.Empty,
-                SessionId = authContext.CurrentSessionId ?? string.Empty,
-                DeviceInfo = authContext.CurrentDeviceInfo ?? string.Empty
+                AssignedToId = userId
             };
         }
-        /// <summary>
-        /// Executes the from entity operation.
-        /// </summary>
 
         public static WorkOrderEditor FromEntity(WorkOrder entity)
         {
-            var latestSignature = entity.Signatures?
-                .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
-                .FirstOrDefault();
-
-            var signerName = latestSignature?.User?.FullName
-                              ?? latestSignature?.User?.Username
-                              ?? entity.LastModifiedBy?.FullName
-                              ?? entity.LastModifiedBy?.Username
-                              ?? string.Empty;
-
             return new WorkOrderEditor
             {
                 Id = entity.Id,
@@ -961,25 +691,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 MachineId = entity.MachineId,
                 ComponentId = entity.ComponentId,
                 Result = entity.Result,
-                Notes = entity.Notes,
-                DigitalSignatureId = entity.DigitalSignatureId,
-                SignatureHash = entity.DigitalSignature ?? string.Empty,
-                SignatureReason = latestSignature?.ReasonDescription ?? string.Empty,
-                SignatureNote = latestSignature?.Note ?? string.Empty,
-                SignatureTimestampUtc = latestSignature?.SignedAt ?? entity.LastModified,
-                SignerUserId = latestSignature?.UserId ?? entity.LastModifiedById,
-                SignerUserName = signerName,
-                LastModifiedUtc = entity.LastModified,
-                LastModifiedById = entity.LastModifiedById,
-                LastModifiedByName = signerName,
-                SourceIp = entity.SourceIp ?? string.Empty,
-                SessionId = entity.SessionId ?? string.Empty,
-                DeviceInfo = entity.DeviceInfo ?? string.Empty
+                Notes = entity.Notes
             };
         }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public WorkOrderEditor Clone()
             => new()
@@ -1000,24 +714,8 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
                 MachineId = MachineId,
                 ComponentId = ComponentId,
                 Result = Result,
-                Notes = Notes,
-                DigitalSignatureId = DigitalSignatureId,
-                SignatureHash = SignatureHash,
-                SignatureReason = SignatureReason,
-                SignatureNote = SignatureNote,
-                SignatureTimestampUtc = SignatureTimestampUtc,
-                SignerUserId = SignerUserId,
-                SignerUserName = SignerUserName,
-                LastModifiedUtc = LastModifiedUtc,
-                LastModifiedById = LastModifiedById,
-                LastModifiedByName = LastModifiedByName,
-                SourceIp = SourceIp,
-                SessionId = SessionId,
-                DeviceInfo = DeviceInfo
+                Notes = Notes
             };
-        /// <summary>
-        /// Executes the to entity operation.
-        /// </summary>
 
         public WorkOrder ToEntity(WorkOrder? existing)
         {
@@ -1039,70 +737,9 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
             entity.ComponentId = ComponentId;
             entity.Result = Result;
             entity.Notes = Notes;
-            entity.DigitalSignatureId = DigitalSignatureId;
-            entity.DigitalSignature = SignatureHash ?? string.Empty;
-            entity.LastModified = LastModifiedUtc ?? entity.LastModified;
-            entity.LastModifiedById = LastModifiedById ?? entity.LastModifiedById;
-            entity.DeviceInfo = string.IsNullOrWhiteSpace(DeviceInfo) ? entity.DeviceInfo : DeviceInfo;
-            entity.SourceIp = string.IsNullOrWhiteSpace(SourceIp) ? entity.SourceIp : SourceIp;
-            entity.SessionId = string.IsNullOrWhiteSpace(SessionId) ? entity.SessionId : SessionId;
-
-            if (!string.IsNullOrWhiteSpace(SignatureReason)
-                || !string.IsNullOrWhiteSpace(SignatureNote)
-                || SignatureTimestampUtc is not null
-                || SignerUserId is not null
-                || !string.IsNullOrWhiteSpace(SignerUserName))
-            {
-                entity.Signatures ??= new List<WorkOrderSignature>();
-                var latestSignature = entity.Signatures
-                    .OrderByDescending(s => s.SignedAt ?? DateTime.MinValue)
-                    .FirstOrDefault();
-
-                if (latestSignature is null)
-                {
-                    latestSignature = new WorkOrderSignature { WorkOrderId = entity.Id };
-                    entity.Signatures.Add(latestSignature);
-                }
-
-                latestSignature.SignatureHash = string.IsNullOrWhiteSpace(SignatureHash)
-                    ? latestSignature.SignatureHash
-                    : SignatureHash;
-                latestSignature.ReasonDescription = SignatureReason ?? latestSignature.ReasonDescription;
-                latestSignature.Note = SignatureNote ?? latestSignature.Note;
-                latestSignature.SignedAt = SignatureTimestampUtc ?? latestSignature.SignedAt;
-
-                if (SignerUserId is > 0)
-                {
-                    latestSignature.UserId = SignerUserId.Value;
-                }
-
-                if (!string.IsNullOrWhiteSpace(SignerUserName))
-                {
-                    if (latestSignature.User is null)
-                    {
-                        latestSignature.User = new User
-                        {
-                            Id = SignerUserId ?? latestSignature.UserId,
-                            FullName = SignerUserName,
-                            Username = SignerUserName
-                        };
-                    }
-                    else
-                    {
-                        if (string.IsNullOrWhiteSpace(latestSignature.User.FullName))
-                        {
-                            latestSignature.User.FullName = SignerUserName;
-                        }
-
-                        if (string.IsNullOrWhiteSpace(latestSignature.User.Username))
-                        {
-                            latestSignature.User.Username = SignerUserName;
-                        }
-                    }
-                }
-            }
-
             return entity;
         }
     }
 }
+
+

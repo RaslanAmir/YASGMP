@@ -105,15 +105,9 @@ namespace YasGMP.Models
         [Column("source_ip")]
         public string? SourceIp { get; set; }
 
-        /// <summary>
-        /// Gets or sets the created at.
-        /// </summary>
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the updated at.
-        /// </summary>
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
@@ -154,3 +148,4 @@ namespace YasGMP.Models
         public string Note { get; set; } = string.Empty;
     }
 }
+

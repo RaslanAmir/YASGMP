@@ -13,17 +13,21 @@ using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the validations module view model value.
-/// </summary>
 
+/// <summary>Manages equipment/software validation packages in the WPF SAP B1 shell.</summary>
+/// <remarks>
+/// Form Modes: Find filters validations (with machine/component CFL pickers), Add seeds <see cref="ValidationEditor.CreateEmpty"/>, View keeps history read-only, and Update enables editing with attachment capture and status tracking.
+/// Audit &amp; Logging: Persists via <see cref="IValidationCrudService"/> under enforced e-signatures, delegating audit hashing and attachment retention to shared services.
+/// Localization: Inline literals—for example `"Validations"`, `"Pending"`, and status messages for due dates—remain until localisation keys are supplied.
+/// Navigation: ModuleKey `Validations` anchors docking; overrides build CFL payloads and `ModuleRecord` entries embed machine/component identifiers for Golden Arrow navigation while status messages feed the shell.
+/// </remarks>
 public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
+    /// <summary>Shell registration key that binds Validations into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Validations" until `Modules_Validations_Title` is introduced.</remarks>
     public new const string ModuleKey = "Validations";
 
     private readonly IValidationCrudService _validationService;
@@ -37,10 +41,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Machine> _machines = Array.Empty<Machine>();
     private IReadOnlyList<MachineComponent> _components = Array.Empty<MachineComponent>();
-    /// <summary>
-    /// Initializes a new instance of the ValidationsModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Validations module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public ValidationsModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -51,9 +54,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.Validations"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Validations", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
@@ -68,39 +70,45 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         TypeOptions = new ObservableCollection<string>(Enum.GetNames(typeof(ValidationType)));
 
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the Validations module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Validations_Editor` resources are available.</remarks>
     [ObservableProperty]
     private ValidationEditor _editor;
 
+    /// <summary>Opens the AI module to summarize the selected validation.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
+
+    /// <summary>Generated property exposing the is editor enabled for the Validations module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Validations_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Gets or sets the machine options.
-    /// </summary>
 
+    /// <summary>Collection presenting the machine options for the Validations document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Validations_Grid` resources exist.</remarks>
     public ObservableCollection<MachineOption> MachineOptions { get; }
-    /// <summary>
-    /// Gets or sets the component options.
-    /// </summary>
 
+    /// <summary>Collection presenting the component options for the Validations document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Validations_Grid` resources exist.</remarks>
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
-    /// <summary>
-    /// Gets or sets the status options.
-    /// </summary>
 
+    /// <summary>Collection presenting the status options for the Validations document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Validations_Grid` resources exist.</remarks>
     public ObservableCollection<string> StatusOptions { get; }
-    /// <summary>
-    /// Gets or sets the type options.
-    /// </summary>
 
+    /// <summary>Collection presenting the type options for the Validations document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Validations_Grid` resources exist.</remarks>
     public ObservableCollection<string> TypeOptions { get; }
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
+    /// <summary>Command executing the attach document workflow for the Validations module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Validations_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
+    /// <summary>Loads Validations records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Validations_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         _machines = await Database.GetAllMachinesAsync().ConfigureAwait(false);
@@ -113,6 +121,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         return validations.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Validations designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         _machines = new List<Machine>
@@ -140,7 +150,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 MachineId = 100,
                 DateStart = DateTime.UtcNow.AddDays(-10),
                 DateEnd = DateTime.UtcNow.AddDays(-7),
-                Status = ValidationStatus.Completed.ToString(),
+                Status = ValidationStatus.Successful.ToString(),
                 NextDue = DateTime.UtcNow.AddMonths(12),
                 Comment = "Initial IQ for autoclave"
             },
@@ -160,6 +170,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Validations". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Validations` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var validations = await _validationService.GetAllAsync().ConfigureAwait(false);
@@ -182,13 +194,15 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 return new CflItem(
                     key,
                     $"{validation.Code} ({validation.Type})",
-                    string.Join(" • ", description.Where(static part => !string.IsNullOrWhiteSpace(part))));
+                    string.Join(" â€˘ ", description.Where(static part => !string.IsNullOrWhiteSpace(part))));
             })
             .ToList();
 
         return new CflRequest("Select Validation", items);
     }
 
+    /// <summary>Applies CFL selections back into the Validations workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Validations". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Validations_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -206,6 +220,32 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         return Task.CompletedTask;
     }
 
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedValidation is null)
+        {
+            StatusMessage = "Select a validation to summarize.";
+            return;
+        }
+
+        var v = _loadedValidation;
+        string prompt;
+        if (v is null)
+        {
+            prompt = $"Summarize validation: {SelectedRecord?.Title}. Provide scope, status, due dates and next steps in <= 8 bullets.";
+        }
+        else
+        {
+            prompt = $"Summarize this validation (<= 8 bullets). Code={v.Code}; Type={v.Type}; Status={v.Status}; MachineId={v.MachineId}; ComponentId={v.ComponentId}; Start={v.DateStart:yyyy-MM-dd}; End={v.DateEnd:yyyy-MM-dd}; NextDue={v.NextDue:yyyy-MM-dd}; Comment={v.Comment}.";
+        }
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Loads editor payloads for the selected Validations record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Validations". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Validations` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -229,7 +269,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         var validation = await _validationService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (validation is null)
         {
-            StatusMessage = $"Unable to load validation #{id}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Validations_UnableToLocateById", "Unable to load validation #{0}."), id);
             return;
         }
 
@@ -238,6 +278,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -266,6 +308,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -308,13 +352,15 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         return await Task.FromResult(errors);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var entity = Editor.ToValidation(_loadedValidation);
 
         if (Mode == FormMode.Update && _loadedValidation is null)
         {
-            StatusMessage = "Select a validation before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Validations_SelectBeforeSave", "Select a validation before saving.");
             return false;
         }
 
@@ -328,19 +374,19 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_Failed", "Electronic signature failed: {0}"), ex.Message);
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Cancelled", "Electronic signature cancelled. Save aborted.");
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = "Electronic signature was not captured.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Error_Signature_NotCaptured", "Electronic signature was not captured.");
             return false;
         }
 
@@ -353,8 +399,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
         var context = ValidationCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentIpAddress ?? string.Empty,
+            _authContext.CurrentDeviceInfo ?? string.Empty,
             _authContext.CurrentSessionId,
             signatureResult);
 
@@ -388,7 +434,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist validation: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Validations_SaveFailed", "Failed to persist validation: {0}"), ex.Message), ex);
         }
 
         _loadedValidation = entity;
@@ -417,15 +463,17 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Signature_PersistFailed", "Failed to persist electronic signature: {0}"), ex.Message);
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_Signature_Captured", "Electronic signature captured ({0})."), signatureResult.ReasonDisplay);
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -562,18 +610,13 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     private ModuleRecord ToRecord(Validation validation)
     {
         var targetName = FindMachineName(validation.MachineId) ?? FindComponentName(validation.ComponentId) ?? "Unassigned";
-        var recordKey = validation.Id.ToString(CultureInfo.InvariantCulture);
-        var recordTitle = $"{validation.Code} ({validation.Type})";
-
-        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
-
         var fields = new List<InspectorField>
         {
-            Field("Type", validation.Type),
-            Field("Status", string.IsNullOrWhiteSpace(validation.Status) ? "-" : validation.Status),
-            Field("Target", targetName),
-            Field("Start", validation.DateStart?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
-            Field("Next Due", validation.NextDue?.ToString("d", CultureInfo.CurrentCulture) ?? "-")
+            new("Type", validation.Type),
+            new("Status", string.IsNullOrWhiteSpace(validation.Status) ? "-" : validation.Status),
+            new("Target", targetName),
+            new("Start", validation.DateStart?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
+            new("Next Due", validation.NextDue?.ToString("d", CultureInfo.CurrentCulture) ?? "-")
         };
 
         var relatedKey = validation.ComponentId.HasValue
@@ -584,8 +627,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         var relatedParameter = validation.ComponentId ?? validation.MachineId as object;
 
         return new ModuleRecord(
-            recordKey,
-            recordTitle,
+            validation.Id.ToString(CultureInfo.InvariantCulture),
+            $"{validation.Code} ({validation.Type})",
             validation.Code,
             validation.Status,
             validation.Comment,
@@ -646,12 +689,12 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         {
             IsBusy = true;
             var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to {_loadedValidation.Code}"))
+                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: string.Format(YasGMP.Wpf.Helpers.Loc.S("Attachment_Picker_Title", "Attach files to {0}"), _loadedValidation.Code)))
                 .ConfigureAwait(false);
 
             if (files is null || files.Count == 0)
             {
-                StatusMessage = "Attachment upload cancelled.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_Cancelled", "Attachment upload cancelled.");
                 return;
             }
 
@@ -668,8 +711,8 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                     EntityId = _loadedValidation.Id,
                     UploadedById = _authContext.CurrentUser?.Id,
                     Reason = $"validation:{_loadedValidation.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
-                    SourceHost = _authContext.CurrentDeviceInfo,
+                    SourceIp = _authContext.CurrentIpAddress ?? string.Empty,
+                    SourceHost = _authContext.CurrentDeviceInfo ?? string.Empty,
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
 
@@ -685,7 +728,7 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {
@@ -695,10 +738,9 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
-    /// <summary>
-    /// Represents the validation editor value.
-    /// </summary>
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     public sealed partial class ValidationEditor : ObservableObject
     {
@@ -740,19 +782,10 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
 
         [ObservableProperty]
         private string _comment = string.Empty;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
 
         public static ValidationEditor CreateEmpty() => new();
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
 
         public static ValidationEditor CreateForNew() => new();
-        /// <summary>
-        /// Executes the from validation operation.
-        /// </summary>
 
         public static ValidationEditor FromValidation(
             Validation validation,
@@ -776,9 +809,6 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
                 Comment = validation.Comment ?? string.Empty
             };
         }
-        /// <summary>
-        /// Executes the to validation operation.
-        /// </summary>
 
         public Validation ToValidation(Validation? existing)
         {
@@ -796,9 +826,6 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             validation.Comment = Comment ?? string.Empty;
             return validation;
         }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public ValidationEditor Clone()
             => new()
@@ -836,26 +863,21 @@ public sealed partial class ValidationsModuleViewModel : DataDrivenModuleDocumen
             };
         }
     }
-    /// <summary>
-    /// Executes the struct operation.
-    /// </summary>
 
+    /// <summary>Executes the machine option routine for the Validations module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public readonly record struct MachineOption(int Id, string Name)
     {
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
         public override string ToString() => Name;
     }
-    /// <summary>
-    /// Executes the struct operation.
-    /// </summary>
 
+    /// <summary>Executes the component option routine for the Validations module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public readonly record struct ComponentOption(int Id, string Name)
     {
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
         public override string ToString() => Name;
     }
 }
+
+
+

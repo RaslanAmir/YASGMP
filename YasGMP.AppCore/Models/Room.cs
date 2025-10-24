@@ -39,10 +39,8 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the building.
-        /// </summary>
         [ForeignKey(nameof(BuildingId))]
         public virtual Building? Building { get; set; }
     }
 }
+

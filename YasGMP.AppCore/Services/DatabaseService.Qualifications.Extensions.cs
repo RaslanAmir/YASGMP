@@ -19,9 +19,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceQualificationsExtensions
     {
-        /// <summary>
-        /// Executes the get all qualifications async operation.
-        /// </summary>
         public static async Task<List<Qualification>> GetAllQualificationsAsync(this DatabaseService db, bool includeAudit = true, bool includeCertificates = true, bool includeAttachments = true, CancellationToken token = default)
         {
             // Map from `component_qualifications` if available; otherwise return empty set.
@@ -30,9 +27,6 @@ namespace YasGMP.Services
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the get qualification by id async operation.
-        /// </summary>
 
         public static async Task<Qualification?> GetQualificationByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -69,9 +63,6 @@ LIMIT 1";
                 Supplier = string.IsNullOrWhiteSpace(supplierName) ? null : new Supplier { Name = supplierName }
             };
         }
-        /// <summary>
-        /// Executes the add qualification async operation.
-        /// </summary>
 
         public static async Task AddQualificationAsync(this DatabaseService db, Qualification q, string signature, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -91,9 +82,6 @@ LIMIT 1";
             catch { /* tolerate schema diffs */ }
             await db.LogQualificationAuditAsync(q, "CREATE", ip, device, sessionId, signature, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the update qualification async operation.
-        /// </summary>
 
         public static async Task UpdateQualificationAsync(this DatabaseService db, Qualification q, string signature, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -113,30 +101,18 @@ LIMIT 1";
             catch { }
             await db.LogQualificationAuditAsync(q, "UPDATE", ip, device, sessionId, signature, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the delete qualification async operation.
-        /// </summary>
 
         public static async Task DeleteQualificationAsync(this DatabaseService db, int id, string ip, string device, string? sessionId, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("DELETE FROM component_qualifications WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false); } catch { }
             await db.LogQualificationAuditAsync(null, "DELETE", ip, device, sessionId, null, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the rollback qualification async operation.
-        /// </summary>
 
         public static Task RollbackQualificationAsync(this DatabaseService db, int id, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.LogQualificationAuditAsync(null, "ROLLBACK", ip, device, sessionId, null, token);
-        /// <summary>
-        /// Executes the export qualifications async operation.
-        /// </summary>
 
         public static Task ExportQualificationsAsync(this DatabaseService db, List<Qualification> items, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.LogQualificationAuditAsync(null, "EXPORT", ip, device, sessionId, $"count={items?.Count ?? 0}", token);
-        /// <summary>
-        /// Executes the log qualification audit async operation.
-        /// </summary>
 
         public static Task LogQualificationAuditAsync(this DatabaseService db, Qualification? q, string action, string ip, string device, string? sessionId, string? details, CancellationToken token = default)
             => db.LogSystemEventAsync(null, $"QUAL_{action}", "qualifications", "Qualification", q?.Id, details ?? q?.Code, ip, "audit", device, sessionId, token: token);
@@ -164,3 +140,4 @@ LIMIT 1";
         }
     }
 }
+

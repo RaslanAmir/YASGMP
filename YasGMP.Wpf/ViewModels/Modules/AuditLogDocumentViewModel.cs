@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
@@ -13,18 +14,30 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-/// <summary>
-/// Projects the MAUI <see cref="AuditLogViewModel"/> onto the WPF shell while preserving toolbar/status semantics.
-/// </summary>
+/// <summary>Projects the MAUI <see cref="AuditLogViewModel"/> into the WPF shell with SAP B1 tooling.</summary>
+/// <remarks>
+/// Form Modes: Operates in Find/View modes to query audit history; Add/Update remain present for parity but the log is immutable.
+/// Audit &amp; Logging: Reads the consolidated audit log through the underlying MAUI view model and export services without generating new entries.
+/// Localization: Uses inline button captions such as `"Apply Filter"`, `"Export CSV"`, and propagated status text; resource keys are pending.
+/// Navigation: ModuleKey `Audit` integrates with Golden Arrow routing when other modules reference audit trails, and status strings stay aligned with the shell's status bar.
+/// </remarks>
 public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Audit";
-    /// <summary>
-    /// Initializes a new instance of the AuditLogDocumentViewModel class.
-    /// </summary>
+    public new const string ModuleKey = "Audit";
+
+    private readonly AuditLogViewModel _auditLogViewModel;
+    private readonly AsyncRelayCommand _applyFilterCommand;
+    private readonly AsyncRelayCommand _refreshCommand;
+    private readonly AsyncRelayCommand _exportCsvCommand;
+    private readonly AsyncRelayCommand _exportXlsxCommand;
+    private readonly AsyncRelayCommand _exportPdfCommand;
+    private bool _suppressProjection;
+
+    [ObservableProperty]
+    private bool _hasResults;
+
+    [ObservableProperty]
+    private bool _hasError;
 
     public AuditLogDocumentViewModel(
         AuditService auditService,
@@ -32,11 +45,9 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         AuditLogViewModel auditLogViewModel,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.AuditTrail"), localization, cflDialogService, shellInteraction, navigation)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Audit Trail", cflDialogService, shellInteraction, navigation)
     {
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _ = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _ = exportService ?? throw new ArgumentNullException(nameof(exportService));
         _auditLogViewModel = auditLogViewModel ?? throw new ArgumentNullException(nameof(auditLogViewModel));
@@ -44,102 +55,45 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         _auditLogViewModel.FilteredEvents.CollectionChanged += OnFilteredEventsChanged;
         _auditLogViewModel.PropertyChanged += OnAuditLogPropertyChanged;
 
-        _applyFilterCommand = new AsyncRelayCommand(ExecuteApplyFilterAsync, CanExecuteNonBusyCommand);
-        _refreshCommand = new AsyncRelayCommand(ExecuteRefreshAsync, CanExecuteNonBusyCommand);
-        _exportCsvCommand = new AsyncRelayCommand(() => ExecuteExportAsync(_auditLogViewModel.ExportCsvCommand, "CSV"), CanExecuteExport);
-        _exportXlsxCommand = new AsyncRelayCommand(() => ExecuteExportAsync(_auditLogViewModel.ExportXlsxCommand, "Excel"), CanExecuteExport);
-        _exportPdfCommand = new AsyncRelayCommand(() => ExecuteExportAsync(_auditLogViewModel.ExportPdfCommand, "PDF"), CanExecuteExport);
+        _applyFilterCommand = new AsyncRelayCommand(_ => ExecuteApplyFilterAsync(), CanExecuteNonBusyCommand);
+        _refreshCommand = new AsyncRelayCommand(_ => ExecuteRefreshAsync(), CanExecuteNonBusyCommand);
+        _exportCsvCommand = new AsyncRelayCommand(_ => ExecuteExportAsync(_auditLogViewModel.ExportCsvCommand, "CSV"), CanExecuteExport);
+        _exportXlsxCommand = new AsyncRelayCommand(_ => ExecuteExportAsync(_auditLogViewModel.ExportXlsxCommand, "Excel"), CanExecuteExport);
+        _exportPdfCommand = new AsyncRelayCommand(_ => ExecuteExportAsync(_auditLogViewModel.ExportPdfCommand, "PDF"), CanExecuteExport);
 
         var refreshEntry = Toolbar
             .Select((command, index) => (Command: command, Index: index))
-            .FirstOrDefault(tuple => string.Equals(tuple.Command.CaptionKey, "Module.Toolbar.Command.Refresh.Content", StringComparison.Ordinal));
+            .FirstOrDefault(tuple => string.Equals(tuple.Command.Caption, "Refresh", StringComparison.OrdinalIgnoreCase));
 
         if (refreshEntry.Command is not null)
         {
             Toolbar.Remove(refreshEntry.Command);
-            Toolbar.Insert(refreshEntry.Index, new ModuleToolbarCommand(
-                "Module.Toolbar.Command.Refresh.Content",
-                _refreshCommand,
-                _localization,
-                "Module.Toolbar.Command.Refresh.ToolTip",
-                "Module.Toolbar.Command.Refresh.AutomationName",
-                "Module.Toolbar.Command.Refresh.AutomationId"));
+            Toolbar.Insert(refreshEntry.Index, new ModuleToolbarCommand("Refresh", _refreshCommand));
         }
         else
         {
-            Toolbar.Add(new ModuleToolbarCommand(
-                "Module.Toolbar.Command.Refresh.Content",
-                _refreshCommand,
-                _localization,
-                "Module.Toolbar.Command.Refresh.ToolTip",
-                "Module.Toolbar.Command.Refresh.AutomationName",
-                "Module.Toolbar.Command.Refresh.AutomationId"));
+            Toolbar.Add(new ModuleToolbarCommand("Refresh", _refreshCommand));
         }
 
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Audit.Toolbar.Command.ApplyFilter.Content",
-            _applyFilterCommand,
-            _localization,
-            "Audit.Toolbar.Command.ApplyFilter.ToolTip",
-            "Audit.Toolbar.Command.ApplyFilter.AutomationName",
-            "Audit.Toolbar.Command.ApplyFilter.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Audit.Toolbar.Command.ExportCsv.Content",
-            _exportCsvCommand,
-            _localization,
-            "Audit.Toolbar.Command.ExportCsv.ToolTip",
-            "Audit.Toolbar.Command.ExportCsv.AutomationName",
-            "Audit.Toolbar.Command.ExportCsv.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Audit.Toolbar.Command.ExportExcel.Content",
-            _exportXlsxCommand,
-            _localization,
-            "Audit.Toolbar.Command.ExportExcel.ToolTip",
-            "Audit.Toolbar.Command.ExportExcel.AutomationName",
-            "Audit.Toolbar.Command.ExportExcel.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Audit.Toolbar.Command.ExportPdf.Content",
-            _exportPdfCommand,
-            _localization,
-            "Audit.Toolbar.Command.ExportPdf.ToolTip",
-            "Audit.Toolbar.Command.ExportPdf.AutomationName",
-            "Audit.Toolbar.Command.ExportPdf.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand("Apply Filter", _applyFilterCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Export CSV", _exportCsvCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Export Excel", _exportXlsxCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Export PDF", _exportPdfCommand));
 
         PropertyChanged += OnSelfPropertyChanged;
     }
-    /// <summary>
-    /// Gets or sets the audit log.
-    /// </summary>
 
     public AuditLogViewModel AuditLog => _auditLogViewModel;
-    /// <summary>
-    /// Gets or sets the apply filter command.
-    /// </summary>
 
     public IAsyncRelayCommand ApplyFilterCommand => _applyFilterCommand;
-    /// <summary>
-    /// Gets or sets the refresh command.
-    /// </summary>
 
     public new IAsyncRelayCommand RefreshCommand => _refreshCommand;
-    /// <summary>
-    /// Gets or sets the export csv command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportCsvCommand => _exportCsvCommand;
-    /// <summary>
-    /// Gets or sets the export xlsx command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportXlsxCommand => _exportXlsxCommand;
-    /// <summary>
-    /// Gets or sets the export pdf command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportPdfCommand => _exportPdfCommand;
-    /// <summary>
-    /// Executes the initialize async operation.
-    /// </summary>
 
     public new async Task InitializeAsync(object? parameter = null)
     {
@@ -193,53 +147,35 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
             MapToRecord(new SystemEvent
             {
                 Id = 2,
-                EventTime = now.AddMinutes(-42),
+                EventTime = now.AddMinutes(-4),
                 EventType = "UPDATE",
                 TableName = "work_orders",
                 RecordId = 1204,
-                UserId = 17,
-                Description = "Adjusted planned start",
-                DeviceInfo = "Win10 | MAINT-02",
-                SourceIp = "10.0.5.12"
+                UserId = 5,
+                Description = "Updated WO-1204 status from Planned to Released",
+                DeviceInfo = "Win11 | QA-WS01",
+                SourceIp = "192.168.10.5"
+            }),
+            MapToRecord(new SystemEvent
+            {
+                Id = 3,
+                EventTime = now.AddMinutes(-1),
+                EventType = "SIGN",
+                TableName = "calibration_runs",
+                RecordId = 88,
+                UserId = 7,
+                Description = "Calibration run 88 signed by jane",
+                DeviceInfo = "Win11 | QA-WS02",
+                SourceIp = "192.168.10.6"
             })
         };
     }
 
-    protected override string FormatLoadedStatus(int count)
-    {
-        if (!string.IsNullOrWhiteSpace(_auditLogViewModel.StatusMessage))
-        {
-            return _auditLogViewModel.StatusMessage!;
-        }
-
-        return count switch
-        {
-            <= 0 => "No audit events match the current filters.",
-            1 => "Loaded 1 audit event.",
-            _ => $"Loaded {count} audit events."
-        };
-    }
-
-    [ObservableProperty]
-    private bool _hasResults;
-
-    [ObservableProperty]
-    private bool _hasError;
-
-    private readonly ILocalizationService _localization;
-    private readonly AuditLogViewModel _auditLogViewModel;
-    private readonly AsyncRelayCommand _applyFilterCommand;
-    private readonly AsyncRelayCommand _refreshCommand;
-    private readonly AsyncRelayCommand _exportCsvCommand;
-    private readonly AsyncRelayCommand _exportXlsxCommand;
-    private readonly AsyncRelayCommand _exportPdfCommand;
-    private bool _suppressProjection;
-
-    private async Task ExecuteApplyFilterAsync()
+    private Task ExecuteApplyFilterAsync()
     {
         if (!CanExecuteNonBusyCommand())
         {
-            return;
+            return Task.CompletedTask;
         }
 
         try
@@ -260,6 +196,8 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
             IsBusy = false;
             UpdateCommandStates();
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task ExecuteRefreshAsync()
@@ -280,7 +218,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         }
     }
 
-    private async Task ExecuteExportAsync(System.Windows.Input.ICommand? mauiCommand, string formatLabel)
+    private async Task ExecuteExportAsync(System.Windows.Input.ICommand? sourceCommand, string formatLabel)
     {
         if (!CanExecuteExport())
         {
@@ -292,7 +230,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
             IsBusy = true;
             StatusMessage = $"Exporting audit log to {formatLabel}...";
 
-            switch (mauiCommand)
+            switch (sourceCommand)
             {
                 case IAsyncRelayCommand asyncRelay:
                     await asyncRelay.ExecuteAsync(null).ConfigureAwait(false);
@@ -301,7 +239,7 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
                     relay.Execute(null);
                     break;
                 default:
-                    mauiCommand?.Execute(null);
+                    sourceCommand?.Execute(null);
                     break;
             }
 
@@ -324,10 +262,13 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
     private bool CanExecuteNonBusyCommand() => !IsBusy;
 
     private bool CanExecuteExport()
-        => !IsBusy && (_auditLogViewModel.FilteredEvents?.Count ?? 0) > 0;
+        => CanExecuteNonBusyCommand() && _auditLogViewModel.FilteredEvents.Count > 0 && !_auditLogViewModel.IsBusy;
 
     private List<ModuleRecord> ProjectRecords()
         => _auditLogViewModel.FilteredEvents.Select(MapToRecord).ToList();
+
+    private static IReadOnlyList<ModuleRecord> ToReadOnlyList(List<ModuleRecord> records)
+        => records.AsReadOnly();
 
     private void ProjectRecordsFromEvents()
     {
@@ -337,15 +278,11 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         }
 
         var previousKey = SelectedRecord?.Key;
-        var snapshot = ProjectRecords();
-
         Records.Clear();
-        foreach (var record in snapshot)
+        foreach (var record in ProjectRecords())
         {
             Records.Add(record);
         }
-
-        RecordsView.Refresh();
 
         SelectedRecord = previousKey is not null
             ? Records.FirstOrDefault(r => string.Equals(r.Key, previousKey, StringComparison.Ordinal))
@@ -470,3 +407,5 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
         base.RefreshCommand.NotifyCanExecuteChanged();
     }
 }
+
+

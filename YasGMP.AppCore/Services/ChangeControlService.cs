@@ -16,36 +16,21 @@ public class ChangeControlService
 {
     private readonly DatabaseService _database;
     private readonly AuditService _audit;
-    /// <summary>
-    /// Initializes a new instance of the ChangeControlService class.
-    /// </summary>
 
     public ChangeControlService(DatabaseService databaseService, AuditService auditService)
     {
         _database = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _audit = auditService ?? throw new ArgumentNullException(nameof(auditService));
     }
-    /// <summary>
-    /// Executes the get all async operation.
-    /// </summary>
 
     public Task<List<ChangeControl>> GetAllAsync(CancellationToken token = default)
         => _database.GetAllChangeControlsAsync(token);
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public Task<ChangeControl?> TryGetByIdAsync(int id, CancellationToken token = default)
         => _database.GetChangeControlByIdAsync(id, token);
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public Task<int> CreateAsync(ChangeControl changeControl, int userId, CancellationToken token = default)
         => CreateAsync(changeControl, userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null, token);
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public async Task<int> CreateAsync(
         ChangeControl changeControl,
@@ -83,15 +68,9 @@ public class ChangeControlService
             .ConfigureAwait(false);
         return id;
     }
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public Task UpdateAsync(ChangeControl changeControl, int userId, CancellationToken token = default)
         => UpdateAsync(changeControl, userId, ip: "system", deviceInfo: Environment.MachineName, sessionId: null, token);
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public async Task UpdateAsync(
         ChangeControl changeControl,
@@ -126,9 +105,6 @@ public class ChangeControlService
         await _audit.LogEntityAuditAsync("change_controls", changeControl.Id, "UPDATE", changeControl.Title ?? string.Empty)
             .ConfigureAwait(false);
     }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(ChangeControl changeControl)
     {
@@ -155,9 +131,6 @@ public class ChangeControlService
             }
         }
     }
-    /// <summary>
-    /// Executes the normalize status operation.
-    /// </summary>
 
     public string NormalizeStatus(string? status)
     {
@@ -180,3 +153,4 @@ public class ChangeControlService
         changeControl.StatusRaw = NormalizeStatus(changeControl.StatusRaw);
     }
 }
+

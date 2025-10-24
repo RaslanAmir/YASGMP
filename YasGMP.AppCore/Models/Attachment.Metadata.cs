@@ -32,3 +32,4 @@ namespace YasGMP.Models
         public string? RetentionNotes { get; set; }
     }
 }
+

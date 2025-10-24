@@ -27,9 +27,6 @@ namespace YasGMP.Services
         }
 
         #region === CRUD OPERATIONS ===
-        /// <summary>
-        /// Executes the get all async operation.
-        /// </summary>
 
         public async Task<List<PreventiveMaintenancePlan>> GetAllAsync() => await _db.GetAllPpmPlansAsync();
 
@@ -40,9 +37,6 @@ namespace YasGMP.Services
             if (plan == null) throw new KeyNotFoundException($"PPM plan #{id} nije pronađen.");
             return plan;
         }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task CreateAsync(PreventiveMaintenancePlan plan, int userId)
         {
@@ -51,9 +45,6 @@ namespace YasGMP.Services
             await _db.InsertOrUpdatePpmPlanAsync(plan, false);
             await LogAudit(plan.Id, userId, PpmActionType.CREATE, $"Kreiran PPM plan {plan.Code} ({plan.Name})");
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task UpdateAsync(PreventiveMaintenancePlan plan, int userId)
         {
@@ -62,9 +53,6 @@ namespace YasGMP.Services
             await _db.InsertOrUpdatePpmPlanAsync(plan, true);
             await LogAudit(plan.Id, userId, PpmActionType.UPDATE, $"Ažuriran PPM plan {plan.Code} ({plan.Name})");
         }
-        /// <summary>
-        /// Executes the delete async operation.
-        /// </summary>
 
         public async Task DeleteAsync(int planId, int userId)
         {
@@ -75,18 +63,12 @@ namespace YasGMP.Services
         #endregion
 
         #region === ADVANCED FEATURES ===
-        /// <summary>
-        /// Executes the get overdue plans async operation.
-        /// </summary>
 
         public async Task<List<PreventiveMaintenancePlan>> GetOverduePlansAsync()
         {
             var plans = await _db.GetAllPpmPlansAsync();
             return plans.Where(p => p.NextDue != null && p.NextDue < DateTime.UtcNow).ToList();
         }
-        /// <summary>
-        /// Executes the calculate next due operation.
-        /// </summary>
 
         public DateTime CalculateNextDue(PreventiveMaintenancePlan plan)
         {
@@ -96,9 +78,6 @@ namespace YasGMP.Services
                 return plan.LastExecuted?.AddMonths(3) ?? DateTime.UtcNow.AddMonths(3);
             return plan.LastExecuted?.AddDays(30) ?? DateTime.UtcNow.AddDays(30);
         }
-        /// <summary>
-        /// Executes the mark executed async operation.
-        /// </summary>
 
         public async Task MarkExecutedAsync(int planId, int userId)
         {
@@ -156,3 +135,4 @@ namespace YasGMP.Services
         #endregion
     }
 }
+

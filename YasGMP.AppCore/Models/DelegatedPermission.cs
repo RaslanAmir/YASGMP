@@ -171,3 +171,4 @@ namespace YasGMP.Models
         public bool IsCurrentlyActive => IsActive && !IsRevoked && (EndAt is null || EndAt > DateTime.UtcNow);
     }
 }
+

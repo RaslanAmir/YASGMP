@@ -109,9 +109,6 @@ namespace YasGMP.Views
         private sealed class AuditDashboardAdapter : INotifyPropertyChanged
         {
             private readonly AuditLogViewModel _vm;
-            /// <summary>
-            /// Initializes a new instance of the AuditDashboardAdapter class.
-            /// </summary>
 
             public AuditDashboardAdapter(AuditLogViewModel vm)
             {

@@ -43,3 +43,4 @@ public sealed class RecordingAuditService : AuditService, IAttachmentWorkflowAud
 
     public sealed record AttachmentAuditRecord(int? ActorUserId, string EntityType, int EntityId, string Description, int AttachmentId);
 }
+

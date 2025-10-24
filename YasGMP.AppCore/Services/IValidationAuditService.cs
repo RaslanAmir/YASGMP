@@ -27,3 +27,4 @@ namespace YasGMP.Services.Interfaces
         Task LogAsync(int validationId, int userId, ValidationActionType action, string details);
     }
 }
+

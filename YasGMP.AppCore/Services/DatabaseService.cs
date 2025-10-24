@@ -45,13 +45,7 @@ namespace YasGMP.Services
 
         /// <summary>Global fallbacks for components created outside DI.</summary>
         public static DiagnosticContext? GlobalDiagnosticContext { get; set; }
-        /// <summary>
-        /// Gets or sets the global trace.
-        /// </summary>
         public static ITrace? GlobalTrace { get; set; }
-        /// <summary>
-        /// Gets or sets the global configuration.
-        /// </summary>
         public static IConfiguration? GlobalConfiguration { get; set; }
 
         private string? TryGetShadowConnFromConfig()
@@ -273,6 +267,8 @@ namespace YasGMP.Services
         /// <param name="newValue">New field value (nullable).</param>
         /// <param name="eventCode">Legacy alias for eventType used if eventType is null/empty.</param>
         /// <param name="table">Legacy alias for tableName used if tableName is null.</param>
+        /// <param name="signatureId">Optional digital signature id (if available).</param>
+        /// <param name="signatureHash">Optional digital signature hash.</param>
         /// <param name="token">Cancellation token for the async operation.</param>
 
         public async Task LogSystemEventAsync(

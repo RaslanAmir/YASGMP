@@ -3,43 +3,34 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Globalization;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
+using YasGMP.Wpf.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using YasGMP.Common;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
 /// <summary>
-/// Base document view-model that reproduces SAP Business One toolbar behaviour.
+/// Base document view-model that reproduces SAP Business One toolbar behaviour while coordinating shell navigation.
 /// </summary>
+/// <remarks>
+/// Form Modes: Implements SAP B1 Find/Add/View/Update flows, wiring `Mode`, `IsInEditMode`, and toolbar command enablement so derived modules inherit canonical behaviour.
+/// Audit &amp; Logging: Surfaces `StatusMessage`, `ValidationMessages`, and `IsBusy` toggles that downstream modules use to raise audit/audit-trail notifications after saves; the base itself defers actual writes to the injected services.
+/// Localization: Currently emits inline toolbar captions (`"Find"`, `"Add"`, `"View"`, `"Update"`, `"Save"`, `"Cancel"`, `"Refresh"`) until RESX keys are plumbed; derived titles feed in localised module headers.
+/// Navigation: Captures the provided `ModuleKey` for registration with `IModuleNavigationService`, drives Golden Arrow routing via `GoldenArrowCommand`, and channels Choose-From-List dialogs through `ICflDialogService` while updating shell chrome status strings.
+/// </remarks>
 public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 {
-    private const string ReadyStatusKey = "Module.Status.Ready";
-    private const string LoadingStatusKey = "Module.Status.Loading";
-    private const string LoadedStatusKey = "Module.Status.Loaded";
-    private const string OfflineFallbackStatusKey = "Module.Status.OfflineFallback";
-    private const string NotInEditModeStatusKey = "Module.Status.NotInEditMode";
-    private const string ValidationIssuesStatusKey = "Module.Status.ValidationIssues";
-    private const string SaveSuccessStatusKey = "Module.Status.SaveSuccess";
-    private const string NoChangesStatusKey = "Module.Status.NoChanges";
-    private const string SaveFailureStatusKey = "Module.Status.SaveFailure";
-    private const string CancelledStatusKey = "Module.Status.Cancelled";
-
     private readonly ICflDialogService _cflDialogService;
     private readonly IShellInteractionService _shellInteraction;
     private readonly IModuleNavigationService _moduleNavigation;
-    private readonly ILocalizationService _localization;
-    private readonly Lazy<IShellAlertService?> _alertService;
-    private string _currentReadyStatus = string.Empty;
 
     protected B1FormDocumentViewModel(
         string moduleKey,
         string title,
-        ILocalizationService localization,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService moduleNavigation)
@@ -47,24 +38,22 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         ModuleKey = moduleKey ?? throw new ArgumentNullException(nameof(moduleKey));
         Title = title ?? throw new ArgumentNullException(nameof(title));
         ContentId = $"YasGmp.Shell.Module.{moduleKey}.{Guid.NewGuid():N}";
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _cflDialogService = cflDialogService;
         _shellInteraction = shellInteraction;
         _moduleNavigation = moduleNavigation;
-        _alertService = new Lazy<IShellAlertService?>(ServiceLocator.GetService<IShellAlertService>);
 
         Records = new ObservableCollection<ModuleRecord>();
         RecordsView = CollectionViewSource.GetDefaultView(Records);
         RecordsView.Filter = FilterRecord;
 
-        EnterFindModeCommand = new AsyncRelayCommand(SetFindModeAsync, () => CanEnterMode(FormMode.Find));
-        EnterAddModeCommand = new AsyncRelayCommand(SetAddModeAsync, () => CanEnterMode(FormMode.Add));
-        EnterViewModeCommand = new AsyncRelayCommand(SetViewModeAsync, () => CanEnterMode(FormMode.View));
-        EnterUpdateModeCommand = new AsyncRelayCommand(SetUpdateModeAsync, () => CanEnterMode(FormMode.Update));
-        SaveCommand = new AsyncRelayCommand(SaveAsync, CanSave);
+        EnterFindModeCommand = new AsyncRelayCommand(ct => SetFindModeAsync(), () => CanEnterMode(FormMode.Find));
+        EnterAddModeCommand = new AsyncRelayCommand(ct => SetAddModeAsync(), () => CanEnterMode(FormMode.Add));
+        EnterViewModeCommand = new AsyncRelayCommand(ct => SetViewModeAsync(), () => CanEnterMode(FormMode.View));
+        EnterUpdateModeCommand = new AsyncRelayCommand(ct => SetUpdateModeAsync(), () => CanEnterMode(FormMode.Update));
+        SaveCommand = new AsyncRelayCommand(ct => SaveAsync(), CanSave);
         CancelCommand = new RelayCommand(Cancel, () => !IsBusy && (IsInEditMode || Mode == FormMode.Find));
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => !IsBusy);
-        ShowCflCommand = new AsyncRelayCommand(ShowCflAsync, () => !IsBusy);
+        RefreshCommand = new AsyncRelayCommand(ct => RefreshAsync(), () => !IsBusy);
+        ShowCflCommand = new AsyncRelayCommand(ct => ShowCflAsync(), () => !IsBusy);
         GoldenArrowCommand = new RelayCommand(NavigateToRelated, () => SelectedRecord?.RelatedModuleKey is not null && !IsBusy);
 
         ValidationMessages = new ObservableCollection<string>();
@@ -72,32 +61,14 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
         Toolbar = new ObservableCollection<ModuleToolbarCommand>
         {
-            new("Module.Toolbar.Toggle.Find.Content", EnterFindModeCommand, _localization,
-                "Module.Toolbar.Toggle.Find.ToolTip", "Module.Toolbar.Toggle.Find.AutomationName",
-                "Module.Toolbar.Toggle.Find.AutomationId", FormMode.Find),
-            new("Module.Toolbar.Toggle.Add.Content", EnterAddModeCommand, _localization,
-                "Module.Toolbar.Toggle.Add.ToolTip", "Module.Toolbar.Toggle.Add.AutomationName",
-                "Module.Toolbar.Toggle.Add.AutomationId", FormMode.Add),
-            new("Module.Toolbar.Toggle.View.Content", EnterViewModeCommand, _localization,
-                "Module.Toolbar.Toggle.View.ToolTip", "Module.Toolbar.Toggle.View.AutomationName",
-                "Module.Toolbar.Toggle.View.AutomationId", FormMode.View),
-            new("Module.Toolbar.Toggle.Update.Content", EnterUpdateModeCommand, _localization,
-                "Module.Toolbar.Toggle.Update.ToolTip", "Module.Toolbar.Toggle.Update.AutomationName",
-                "Module.Toolbar.Toggle.Update.AutomationId", FormMode.Update),
-            new("Module.Toolbar.Command.Save.Content", SaveCommand, _localization,
-                "Module.Toolbar.Command.Save.ToolTip", "Module.Toolbar.Command.Save.AutomationName",
-                "Module.Toolbar.Command.Save.AutomationId"),
-            new("Module.Toolbar.Command.Cancel.Content", CancelCommand, _localization,
-                "Module.Toolbar.Command.Cancel.ToolTip", "Module.Toolbar.Command.Cancel.AutomationName",
-                "Module.Toolbar.Command.Cancel.AutomationId"),
-            new("Module.Toolbar.Command.Refresh.Content", RefreshCommand, _localization,
-                "Module.Toolbar.Command.Refresh.ToolTip", "Module.Toolbar.Command.Refresh.AutomationName",
-                "Module.Toolbar.Command.Refresh.AutomationId")
+            new("Button_Find", EnterFindModeCommand, toolTipKey: "Tooltip_Find", associatedMode: FormMode.Find),
+            new("Button_Add", EnterAddModeCommand, toolTipKey: "Tooltip_Add", associatedMode: FormMode.Add),
+            new("Button_View", EnterViewModeCommand, toolTipKey: "Tooltip_View", associatedMode: FormMode.View),
+            new("Button_Update", EnterUpdateModeCommand, toolTipKey: "Tooltip_Update", associatedMode: FormMode.Update),
+            new("Button_Save", SaveCommand, toolTipKey: "Tooltip_Save"),
+            new("Button_Cancel", CancelCommand, toolTipKey: "Tooltip_Cancel"),
+            new("Button_Refresh", RefreshCommand, toolTipKey: "Tooltip_Refresh")
         };
-
-        StatusMessage = _localization.GetString(ReadyStatusKey);
-        _currentReadyStatus = StatusMessage;
-        _localization.LanguageChanged += OnLocalizationLanguageChanged;
     }
 
     /// <summary>Stable module key registered inside <see cref="IModuleRegistry"/>.</summary>
@@ -115,6 +86,12 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     /// <summary>Whether the view-model completed its initial data load.</summary>
     public bool IsInitialized { get; private set; }
 
+    private string? _provenance;
+    protected void SetProvenance(string? provenance)
+    {
+        _provenance = string.IsNullOrWhiteSpace(provenance) ? null : provenance;
+    }
+
     /// <summary>Validation errors surfaced to the UI when saving fails.</summary>
     public ObservableCollection<string> ValidationMessages { get; }
 
@@ -125,120 +102,36 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     [ObservableProperty]
     private bool _isDirty;
 
-    /// <summary>
-    /// Command that transitions the document into SAP B1 style Find mode so derived modules can query records without mutating data.
-    /// </summary>
-    /// <remarks>
-    /// Find mode keeps the editor read-only, allows re-entry even when already active, and does not trigger audit hooks until a record is loaded into View mode.
-    /// </remarks>
     public IAsyncRelayCommand EnterFindModeCommand { get; }
 
-    /// <summary>
-    /// Command that enters Add mode, enabling editor fields for new record entry following SAP B1 toolbar semantics.
-    /// </summary>
-    /// <remarks>
-    /// While Add mode is active the busy gate prevents parallel operations, <see cref="IsDirty"/> is expected to track edits, and audit status updates do not occur until a successful save returns to View mode.
-    /// </remarks>
     public IAsyncRelayCommand EnterAddModeCommand { get; }
 
-    /// <summary>
-    /// Command that returns the form to View mode for read-only inspection of the selected record.
-    /// </summary>
-    /// <remarks>
-    /// View mode resets edit state, clears validation errors, and is the mode in which status messages reflect the last persisted audit state.
-    /// </remarks>
     public IAsyncRelayCommand EnterViewModeCommand { get; }
 
-    /// <summary>
-    /// Command that switches the document into Update mode so the current record can be edited in-place.
-    /// </summary>
-    /// <remarks>
-    /// Update mode mirrors SAP B1 behaviour by reusing the selected record, gating execution while <see cref="IsBusy"/> is <c>true</c>, and deferring audit journal updates until <see cref="SaveCommand"/> completes.
-    /// </remarks>
     public IAsyncRelayCommand EnterUpdateModeCommand { get; }
 
-    /// <summary>
-    /// Command that persists Add/Update changes, drives validation, and propagates audit/status messages back to the shell.
-    /// </summary>
-    /// <remarks>
-    /// The save pipeline invokes <see cref="OnSaveAsync"/>, refreshes data, flips the mode back to View, and updates the status banner so derived modules can hook e-signature or audit logging during the transition.
-    /// </remarks>
     public IAsyncRelayCommand SaveCommand { get; }
 
-    /// <summary>
-    /// Command that abandons the current edit session, clears validation, and reverts toolbar state without touching persisted data.
-    /// </summary>
-    /// <remarks>
-    /// Cancel is disabled while <see cref="IsBusy"/> is <c>true</c>; when executed it raises <see cref="OnCancel"/>, resets audit messaging to a cancelled status, and returns the form to View mode if necessary.
-    /// </remarks>
     public IRelayCommand CancelCommand { get; }
 
-    /// <summary>
-    /// Command that reloads module records, updating the busy state and localized status text as SAP B1 toolbars do after a find or save.
-    /// </summary>
-    /// <remarks>
-    /// Refresh is blocked while <see cref="IsBusy"/> is <c>true</c> to ensure audit/status transitions remain ordered and derived modules can safely rehydrate their data sources.
-    /// </remarks>
     public IAsyncRelayCommand RefreshCommand { get; }
 
-    /// <summary>
-    /// Command that opens the Choose-From-List dialog, allowing derived modules to select related master data while respecting busy gating.
-    /// </summary>
-    /// <remarks>
-    /// The command is disabled while <see cref="IsBusy"/> is <c>true</c> so that audit prompts or status updates originating from the CFL do not overlap long-running operations.
-    /// </remarks>
     public IAsyncRelayCommand ShowCflCommand { get; }
 
-    /// <summary>
-    /// Command that triggers Golden Arrow navigation into the related module tied to <see cref="SelectedRecord"/>.
-    /// </summary>
-    /// <remarks>
-    /// Navigation is only available when a record exposes <see cref="ModuleRecord.RelatedModuleKey"/> and the view-model is not busy, ensuring audit chains reflect the originating record before transitioning.
-    /// </remarks>
     public IRelayCommand GoldenArrowCommand { get; }
 
-    /// <summary>
-    /// Current SAP B1 form mode that drives toolbar toggles, editor enablement, and audit lifecycle hooks.
-    /// </summary>
-    /// <remarks>
-    /// Changing the mode invokes <see cref="OnModeChangedAsync(FormMode)"/>, resets dirty state when leaving edit scenarios, and synchronizes status messages with the shell.
-    /// </remarks>
     [ObservableProperty]
     private FormMode _mode = FormMode.View;
 
-    /// <summary>
-    /// Indicates whether the view-model is performing an asynchronous operation, disabling toolbar commands until completion.
-    /// </summary>
-    /// <remarks>
-    /// Derived modules should check this flag before triggering long-running work so that audit/status updates maintain the same ordering expected in SAP B1.
-    /// </remarks>
     [ObservableProperty]
     private bool _isBusy;
 
-    /// <summary>
-    /// Localized status text surfaced in the shell status bar to reflect audit outcomes and busy states.
-    /// </summary>
-    /// <remarks>
-    /// Updates propagate to <see cref="IShellInteractionService"/> which mirrors SAP B1 behaviour by keeping the status bar synchronized with find/add/view/update transitions.
-    /// </remarks>
     [ObservableProperty]
-    private string _statusMessage = string.Empty;
+    private string _statusMessage = "Ready";
 
-    /// <summary>
-    /// Free-form text entered by the user to filter the records list while in Find or View mode.
-    /// </summary>
-    /// <remarks>
-    /// Changing this property refreshes <see cref="RecordsView"/> and lets derived modules extend search semantics via <see cref="MatchesSearch(ModuleRecord, string)"/>.
-    /// </remarks>
     [ObservableProperty]
     private string? _searchText;
 
-    /// <summary>
-    /// Record currently highlighted in the results grid, used for inspector details, Golden Arrow navigation, and update operations.
-    /// </summary>
-    /// <remarks>
-    /// Assigning a value updates the inspector, raises <see cref="OnRecordSelectedAsync(ModuleRecord?)"/>, and determines whether edit/audit commands operate on an existing entity or a placeholder.
-    /// </remarks>
     [ObservableProperty]
     private ModuleRecord? _selectedRecord;
 
@@ -252,11 +145,11 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     {
         if (IsInitialized)
         {
-            await OnActivatedAsync(parameter).ConfigureAwait(false);
+            await OnActivatedAsync(parameter);
             return;
         }
 
-        await RefreshAsync(parameter).ConfigureAwait(false);
+        await RefreshAsync(parameter);
         IsInitialized = true;
     }
 
@@ -301,14 +194,19 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
             count = 0;
         }
 
-        return _localization.GetString(LoadedStatusKey, count);
+        var text = $"Loaded {count} record(s).";
+        if (!string.IsNullOrWhiteSpace(_provenance))
+        {
+            text += $" ({_provenance})";
+        }
+        return text;
     }
 
     partial void OnModeChanged(FormMode value)
     {
         foreach (var button in Toolbar)
         {
-            button.IsChecked = button.AssociatedMode is not null && button.AssociatedMode == value;
+            button.IsChecked = string.Equals(button.Caption, value.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         _shellInteraction.UpdateStatus($"{Title}: {value} mode");
@@ -329,30 +227,9 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         RefreshCommandStates();
     }
 
-    partial void OnIsDirtyChanged(bool value)
-    {
-        RefreshCommandStates();
-    }
-
     partial void OnStatusMessageChanged(string value)
     {
         _shellInteraction.UpdateStatus(value);
-        var alertService = _alertService.Value;
-        if (alertService is not null && !string.IsNullOrWhiteSpace(value))
-        {
-            alertService.PublishStatus(value, DetermineSeverity(value));
-        }
-    }
-
-    private void OnLocalizationLanguageChanged(object? sender, EventArgs e)
-    {
-        var ready = _localization.GetString(ReadyStatusKey);
-        if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == _currentReadyStatus)
-        {
-            StatusMessage = ready;
-        }
-
-        _currentReadyStatus = ready;
     }
 
     partial void OnSearchTextChanged(string? value)
@@ -365,15 +242,13 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         GoldenArrowCommand.NotifyCanExecuteChanged();
         if (value is null)
         {
-            _shellInteraction.UpdateInspector(new InspectorContext(ModuleKey, Title, null, "No record selected", Array.Empty<InspectorField>()));
+            _shellInteraction.UpdateInspector(new InspectorContext(Title, "No record selected", Array.Empty<InspectorField>()));
             _ = OnRecordSelectedAsync(null);
-            RefreshCommandStates();
             return;
         }
 
-        _shellInteraction.UpdateInspector(new InspectorContext(ModuleKey, Title, value.Key, value.Title, value.InspectorFields));
+        _shellInteraction.UpdateInspector(new InspectorContext(Title, value.Title, value.InspectorFields));
         _ = OnRecordSelectedAsync(value);
-        RefreshCommandStates();
     }
 
     private Task SetFindModeAsync()
@@ -410,15 +285,15 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         try
         {
             IsBusy = true;
-            StatusMessage = _localization.GetString(LoadingStatusKey, Title);
-            var records = await LoadAsync(parameter).ConfigureAwait(false);
+            StatusMessage = $"Loading {Title} records...";
+            var records = await LoadAsync(parameter);
             ApplyRecords(records);
             StatusMessage = FormatLoadedStatus(Records.Count);
         }
         catch (Exception ex)
         {
             ApplyRecords(CreateDesignTimeRecords());
-            StatusMessage = _localization.GetString(OfflineFallbackStatusKey, ex.Message);
+            StatusMessage = $"Offline data loaded because: {ex.Message}";
         }
         finally
         {
@@ -444,8 +319,6 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         {
             SelectedRecord = null;
         }
-
-        RefreshCommandStates();
     }
 
     private bool FilterRecord(object obj)
@@ -464,33 +337,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     }
 
     private bool CanEnterMode(FormMode mode)
-    {
-        if (IsBusy)
-        {
-            return false;
-        }
-
-        if (mode == FormMode.Find)
-        {
-            return true;
-        }
-
-        if (Mode == mode)
-        {
-            return false;
-        }
-
-        return mode switch
-        {
-            FormMode.Add => CanEnterAddMode(),
-            FormMode.View or FormMode.Update => HasSelectedRecord(),
-            _ => true
-        };
-    }
-
-    private bool HasSelectedRecord() => SelectedRecord is not null;
-
-    private bool CanEnterAddMode() => !IsDirty && !HasValidationErrors;
+        => !IsBusy && (Mode != mode || mode == FormMode.Find);
 
     private async Task<bool> SaveAsync()
     {
@@ -501,39 +348,39 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
         if (!IsInEditMode)
         {
-            StatusMessage = _localization.GetString(NotInEditModeStatusKey, Title);
+            StatusMessage = $"{Title} is not in Add/Update mode.";
             return false;
         }
 
         try
         {
             IsBusy = true;
-            var validation = await ValidateAsync().ConfigureAwait(false);
+            var validation = await ValidateAsync();
             ApplyValidation(validation);
             if (validation.Count > 0)
             {
-                StatusMessage = _localization.GetString(ValidationIssuesStatusKey, Title, validation.Count);
+                StatusMessage = $"{Title} has {validation.Count} validation issue(s).";
                 return false;
             }
 
             var previousMessage = StatusMessage;
-            var saved = await OnSaveAsync().ConfigureAwait(false);
+            var saved = await OnSaveAsync();
             if (saved)
             {
                 if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
                 {
-                    StatusMessage = _localization.GetString(SaveSuccessStatusKey, Title);
+                    StatusMessage = $"{Title} saved successfully.";
                 }
 
                 ResetDirty();
                 Mode = FormMode.View;
-                await RefreshAsync().ConfigureAwait(false);
+                await RefreshAsync();
             }
             else
             {
                 if (string.IsNullOrWhiteSpace(StatusMessage) || StatusMessage == previousMessage)
                 {
-                    StatusMessage = _localization.GetString(NoChangesStatusKey, Title);
+                    StatusMessage = $"No changes to save for {Title}.";
                 }
             }
 
@@ -541,7 +388,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         }
         catch (Exception ex)
         {
-            StatusMessage = _localization.GetString(SaveFailureStatusKey, Title, ex.Message);
+            StatusMessage = $"Failed to save {Title}: {ex.Message}";
             return false;
         }
         finally
@@ -565,25 +412,24 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         {
             Mode = FormMode.View;
         }
-        StatusMessage = _localization.GetString(CancelledStatusKey, Title);
-        RefreshCommandStates();
+        StatusMessage = $"{Title} changes cancelled.";
     }
 
     private async Task ShowCflAsync()
     {
-        var request = await CreateCflRequestAsync().ConfigureAwait(false);
+        var request = await CreateCflRequestAsync();
         if (request is null)
         {
             return;
         }
 
-        var result = await _cflDialogService.ShowAsync(request).ConfigureAwait(false);
+        var result = await _cflDialogService.ShowAsync(request);
         if (result is null)
         {
             return;
         }
 
-        await OnCflSelectionAsync(result).ConfigureAwait(false);
+        await OnCflSelectionAsync(result);
     }
 
     private void NavigateToRelated()
@@ -601,15 +447,22 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     private void RefreshCommandStates()
     {
-        EnterFindModeCommand.NotifyCanExecuteChanged();
-        EnterAddModeCommand.NotifyCanExecuteChanged();
-        EnterViewModeCommand.NotifyCanExecuteChanged();
-        EnterUpdateModeCommand.NotifyCanExecuteChanged();
-        SaveCommand.NotifyCanExecuteChanged();
-        CancelCommand.NotifyCanExecuteChanged();
-        RefreshCommand.NotifyCanExecuteChanged();
-        ShowCflCommand.NotifyCanExecuteChanged();
-        GoldenArrowCommand.NotifyCanExecuteChanged();
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(new Action(RefreshCommandStates));
+            return;
+        }
+        UiCommandHelper.NotifyManyOnUi(
+            EnterFindModeCommand,
+            EnterAddModeCommand,
+            EnterViewModeCommand,
+            EnterUpdateModeCommand,
+            SaveCommand,
+            CancelCommand,
+            RefreshCommand,
+            ShowCflCommand,
+            GoldenArrowCommand);
     }
 
     /// <summary>Allows derived classes to react when the selection changes.</summary>
@@ -641,12 +494,10 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
     {
         if (ValidationMessages.Count == 0)
         {
-            RefreshCommandStates();
             return;
         }
 
         ValidationMessages.Clear();
-        RefreshCommandStates();
     }
 
     /// <summary>Pushes validation errors to the observable collection.</summary>
@@ -655,7 +506,6 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         ValidationMessages.Clear();
         if (errors is null)
         {
-            RefreshCommandStates();
             return;
         }
 
@@ -666,8 +516,6 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
                 ValidationMessages.Add(error);
             }
         }
-
-        RefreshCommandStates();
     }
 
     private void OnValidationMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -675,52 +523,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         OnPropertyChanged(nameof(HasValidationErrors));
         RefreshCommandStates();
     }
-
-    private static AlertSeverity DetermineSeverity(string message)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            return AlertSeverity.Info;
-        }
-
-        var normalized = message.ToLower(CultureInfo.InvariantCulture);
-        if (normalized.Contains("error", StringComparison.Ordinal)
-            || normalized.Contains("failed", StringComparison.Ordinal)
-            || normalized.Contains("neusp", StringComparison.Ordinal)
-            || normalized.Contains("gre\u0161", StringComparison.Ordinal)
-            || normalized.Contains("gres", StringComparison.Ordinal))
-        {
-            return AlertSeverity.Error;
-        }
-
-        if (normalized.Contains("warning", StringComparison.Ordinal)
-            || normalized.Contains("validation", StringComparison.Ordinal)
-            || normalized.Contains("oprez", StringComparison.Ordinal)
-            || normalized.Contains("nije odabrano", StringComparison.Ordinal))
-        {
-            return AlertSeverity.Warning;
-        }
-
-        if (normalized.Contains("success", StringComparison.Ordinal)
-            || normalized.Contains("saved", StringComparison.Ordinal)
-            || normalized.Contains("captured", StringComparison.Ordinal)
-            || normalized.Contains("spreml", StringComparison.Ordinal)
-            || normalized.Contains("uspje", StringComparison.Ordinal))
-        {
-            return AlertSeverity.Success;
-        }
-
-        return AlertSeverity.Info;
-    }
-
-    /// <summary>
-    /// Creates an <see cref="InspectorField"/> using the module context and supplied record metadata.
-    /// </summary>
-    /// <param name="recordKey">Stable key that identifies the record.</param>
-    /// <param name="recordTitle">Display title associated with the record.</param>
-    /// <param name="label">Inspector label.</param>
-    /// <param name="value">Inspector value.</param>
-    /// <returns>A populated <see cref="InspectorField"/> scoped to the module.</returns>
-    protected InspectorField CreateInspectorField(string? recordKey, string? recordTitle, string label, string? value)
-        => InspectorField.Create(ModuleKey, Title, recordKey, recordTitle, label, value);
 }
+
+
+

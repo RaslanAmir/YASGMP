@@ -6,33 +6,36 @@
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="600"
-             d:DesignWidth="900">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-
+             d:DesignWidth="900"
+             AutomationProperties.Name="{DynamicResource Module_ExternalServicers_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_ExternalServicers_Tooltip}">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
-            <ItemsControl ItemsSource="{Binding Toolbar}"
-                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
+            <ItemsControl ItemsSource="{Binding Toolbar}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ToggleButton Content="{Binding Caption}"
+                                      AutomationProperties.Name="{Binding Caption}"
+                                      ToolTipService.ToolTip="{Binding Caption}"
+                                      Command="{Binding Command}"
+                                      IsChecked="{Binding IsChecked}"
+                                      Margin="0,0,4,0" AutomationProperties.AutomationId="{Binding AutomationIdKey}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
-            <controls:GoldenArrowButton
-                Command="{Binding GoldenArrowCommand}"
-                Margin="8,0,0,0"
-                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
-                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
-                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+            <Button Content="{DynamicResource Button_CFL}"
+                    Command="{Binding ShowCflCommand}"
+                    ToolTipService.ToolTip="{DynamicResource Tooltip_CFL}"
+                    AutomationProperties.AutomationId="CflButton" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                       Margin="8,0,0,0"
+                                       AutomationProperties.AutomationId="GoldenArrowButton" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -43,11 +46,10 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="2.5*" />
             </Grid.ColumnDefinitions>
-            <DockPanel Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
-                <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="240" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+            <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="240" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{DynamicResource Label_Search}" ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
@@ -59,11 +61,14 @@
                       CanUserDeleteRows="False"
                       Margin="0,0,8,0">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="{DynamicResource Module.Assets.Text.Name}" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="120" />
-                    <DataGridTextColumn Header="{DynamicResource Module.Components.Text.Type}" Binding="{Binding InspectorFields[0].Value}" Width="140" />
-                    <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Header.Contact}" Binding="{Binding InspectorFields[1].Value}" Width="160" />
+                    <DataGridTextColumn Header="{DynamicResource Label_Name}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Label_ServiceType}" Binding="{Binding InspectorFields[0].Value}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Label_ContactPerson}" Binding="{Binding InspectorFields[1].Value}" Width="160" />
                 </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
             </DataGrid>
             <Border Grid.Row="1"
                     Grid.Column="1"
@@ -73,7 +78,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.ExternalServicerDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Module_ExternalServicers_Title}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="160" />
@@ -95,26 +100,26 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.Name}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Name}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Code.Header}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Code}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Code, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Status}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="2"
                                       Grid.Column="1"
                                       ItemsSource="{Binding StatusOptions}"
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.ServiceType}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_ServiceType}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="3"
                                       Grid.Column="1"
                                       ItemsSource="{Binding ServiceTypeOptions}"
@@ -122,31 +127,31 @@
                                       IsEditable="True"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.VATID}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_VATID}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
                                      Text="{Binding Editor.VatOrId, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.ContactPerson}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_ContactPerson}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.ContactPerson, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Email}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Email}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="6"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Email, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Phone}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Phone}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Phone, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Address}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Address}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Address, UpdateSourceTrigger=PropertyChanged}"
@@ -154,19 +159,19 @@
                                      AcceptsReturn="True"
                                      Height="48" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.CooperationStart}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_CooperationStart}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="9"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.CooperationStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.CooperationEnd}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_CooperationEnd}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="10"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.CooperationEnd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Comment}" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Comment}" Grid.Row="11" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="11"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Comment, UpdateSourceTrigger=PropertyChanged}"
@@ -175,7 +180,7 @@
                                      Height="60"
                                      TextWrapping="Wrap" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.ExtraNotes}" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_ExtraNotes}" Grid.Row="12" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="12"
                                      Grid.Column="1"
                                      Text="{Binding Editor.ExtraNotes, UpdateSourceTrigger=PropertyChanged}"
@@ -184,7 +189,7 @@
                                      Height="60"
                                      TextWrapping="Wrap" />
 
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Certificates}" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Certificates}" Grid.Row="13" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="13"
                                      Grid.Column="1"
                                      Text="{Binding Editor.CertificateFiles, UpdateSourceTrigger=PropertyChanged}"
@@ -194,140 +199,22 @@
                                      TextWrapping="Wrap" />
                         </Grid>
 
-                        <TextBlock Text="{DynamicResource Module.Audit.Header.DigitalSignature}" Margin="0,12,0,4" />
+                        <TextBlock Text="{DynamicResource Label_DigitalSignature}" Margin="0,12,0,4" />
                         <TextBox Text="{Binding Editor.DigitalSignature, UpdateSourceTrigger=PropertyChanged}"
                                  IsEnabled="False"
-                                 ToolTip="{DynamicResource Module.ExternalServicers.ToolTip.DigitalSignature}" />
+                                 ToolTip="{DynamicResource Tooltip_DigitalSignatureWorkflow}" />
 
                         <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Binding}" Foreground="Red" />
+                                    <TextBlock Text="• {Binding}" Foreground="Red" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-            <Border Grid.Row="1"
-                    Grid.Column="2"
-                    Margin="8,0,0,0"
-                    Padding="12"
-                    Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
-                    BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
-                    BorderThickness="1">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <DockPanel Margin="0,0,0,12">
-                            <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Header}"
-                                       FontWeight="Bold"
-                                       FontSize="14"
-                                       AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Header.AutomationName}"
-                                       AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Header.AutomationId}" />
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Content="{DynamicResource Module.ExternalServicers.Oversight.Refresh.Content}"
-                                        Command="{Binding RefreshOversightCommand}"
-                                        Margin="0,0,8,0"
-                                        Padding="12,4"
-                                        ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Refresh.ToolTip}"
-                                        AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Refresh.AutomationName}"
-                                        AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Refresh.AutomationId}" />
-                                <Button Content="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.Content}"
-                                        Command="{Binding DrillIntoOversightCommand}"
-                                        Padding="12,4"
-                                        ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.ToolTip}"
-                                        AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.AutomationName}"
-                                        AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.DrillIn.AutomationId}" />
-                            </StackPanel>
-                        </DockPanel>
-
-                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Metrics.Header}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,4"
-                                   AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Metrics.AutomationName}"
-                                   AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Metrics.AutomationId}" />
-                        <ItemsControl ItemsSource="{Binding OversightMetrics}"
-                                      Margin="0,0,0,12"
-                                      ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Metrics.ToolTip}"
-                                      AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Metrics.Items.AutomationName}"
-                                      AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Metrics.Items.AutomationId}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel ItemWidth="160" ItemHeight="Auto" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border CornerRadius="4"
-                                            Background="{Binding AccentBrush}"
-                                            Margin="0,0,8,8"
-                                            Padding="12"
-                                            MinWidth="150">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Title}" Foreground="White" FontWeight="Bold" />
-                                            <TextBlock Text="{Binding FormattedValue}" Foreground="White" FontSize="18" />
-                                            <TextBlock Text="{Binding TrendText}" Foreground="White" FontStyle="Italic" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Timeline.Header}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,4"
-                                   AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Timeline.AutomationName}"
-                                   AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Timeline.AutomationId}" />
-                        <ItemsControl ItemsSource="{Binding InterventionTimeline}"
-                                      Margin="0,0,0,12"
-                                      ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Timeline.ToolTip}"
-                                      AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Timeline.Items.AutomationName}"
-                                      AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Timeline.Items.AutomationId}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderThickness="0,0,0,1"
-                                            BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
-                                            Padding="0,4,0,8">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Timestamp, StringFormat={}{0:G}}"
-                                                       FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding Summary}" />
-                                            <TextBlock Text="{Binding Details}" FontStyle="Italic" Foreground="Gray" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <TextBlock Text="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Header}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,4"
-                                   AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationName}"
-                                   AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationId}" />
-                        <DataGrid ItemsSource="{Binding OversightAnalytics}"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  HeadersVisibility="Column"
-                                  ToolTipService.ToolTip="{DynamicResource Module.ExternalServicers.Oversight.Analytics.ToolTip}"
-                                  AutomationProperties.Name="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationName}"
-                                  AutomationProperties.AutomationId="{DynamicResource Module.ExternalServicers.Oversight.Analytics.AutomationId}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Metric}"
-                                                    Binding="{Binding Metric}" Width="2*" />
-                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Value}"
-                                                    Binding="{Binding Value}" Width="*" />
-                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Target}"
-                                                    Binding="{Binding Target}" Width="*" />
-                                <DataGridTextColumn Header="{DynamicResource Module.ExternalServicers.Oversight.Analytics.Column.Status}"
-                                                    Binding="{Binding Status}" Width="*" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
-                </ScrollViewer>
-            </Border>
-            <StatusBar Grid.Row="2" Grid.ColumnSpan="3" Margin="0,8,0,0">
+            <StatusBar Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,0">
                 <StatusBarItem>
                     <TextBlock Text="{Binding StatusMessage}" />
                 </StatusBarItem>
@@ -338,3 +225,6 @@
         </Grid>
     </DockPanel>
 </UserControl>
+
+
+

@@ -2,115 +2,80 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
-using YasGMP.Wpf.Dialogs;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the parts module view model value.
-/// </summary>
 
+/// <summary>Handles spare part inventory within the WPF shell using SAP B1 form semantics.</summary>
+/// <remarks>
+/// Form Modes: Find filters parts, Add seeds <see cref="PartEditor.CreateEmpty"/>, View keeps the editor read-only for stock review, and Update enables edits plus attachment uploads and supplier refreshes.
+/// Audit &amp; Logging: Persists via <see cref="IPartCrudService"/> behind mandatory e-signatures; attachment retention and audit trails are delegated to the workflow and CRUD services.
+/// Localization: Inline strings such as `"Parts &amp; Stock"`, `"Stock health calculated"`, and status prompts remain until resource keys become available.
+/// Navigation: ModuleKey `Parts` anchors docking; CFL requests expose part pickers, and `ModuleRecord` entries carry supplier/warehouse identifiers so Golden Arrow navigation can pivot to related modules while status text updates the shell.
+/// </remarks>
 public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
+    /// <summary>Shell registration key that binds Parts &amp; Stock into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Parts &amp; Stock" until `Modules_Parts_Title` is introduced.</remarks>
     public new const string ModuleKey = "Parts";
 
     private readonly IPartCrudService _partService;
-    private readonly IInventoryTransactionService _inventoryService;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly ILocalizationService _localization;
-    private readonly ObservableCollection<ZoneSummaryItem> _zoneSummaries;
-    private readonly ObservableCollection<InventoryTransactionReportItem> _recentTransactions;
-    private readonly ObservableCollection<string> _transactionAlerts;
-    private readonly ICollectionView _zoneSummariesView;
-    private readonly string _zoneAllLabel;
-    private readonly Dictionary<ZoneClassification, string> _zoneLabels;
     private Part? _loadedPart;
     private PartEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
-    /// <summary>
-    /// Initializes a new instance of the PartsModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Parts &amp; Stock module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public PartsModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
         IPartCrudService partService,
-        IInventoryTransactionService inventoryService,
         IAttachmentWorkflowService attachmentWorkflow,
         IFilePicker filePicker,
         IAuthContext authContext,
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.PartsStock"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Parts &amp; Stock", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _partService = partService ?? throw new ArgumentNullException(nameof(partService));
-        _inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = PartEditor.CreateEmpty();
-        _zoneSummaries = new ObservableCollection<ZoneSummaryItem>();
-        _recentTransactions = new ObservableCollection<InventoryTransactionReportItem>();
-        _transactionAlerts = new ObservableCollection<string>();
-        _zoneLabels = new Dictionary<ZoneClassification, string>
-        {
-            [ZoneClassification.Critical] = GetZoneLabel("Module.Parts.ZoneFilter.Critical", "Critical"),
-            [ZoneClassification.Warning] = GetZoneLabel("Module.Parts.ZoneFilter.Warning", "Warning"),
-            [ZoneClassification.Healthy] = GetZoneLabel("Module.Parts.ZoneFilter.Healthy", "Healthy"),
-            [ZoneClassification.Overflow] = GetZoneLabel("Module.Parts.ZoneFilter.Overflow", "Overflow")
-        };
-        _zoneAllLabel = GetZoneLabel("Module.Parts.ZoneFilter.All", "All Zones");
-        ZoneFilters = new ObservableCollection<string>(new[]
-        {
-            _zoneAllLabel,
-            _zoneLabels[ZoneClassification.Critical],
-            _zoneLabels[ZoneClassification.Warning],
-            _zoneLabels[ZoneClassification.Healthy],
-            _zoneLabels[ZoneClassification.Overflow]
-        });
-        SelectedZoneFilter = _zoneAllLabel;
-        _zoneSummariesView = CollectionViewSource.GetDefaultView(_zoneSummaries);
-        _zoneSummariesView.Filter = FilterZoneSummary;
-        StatusOptions = new ReadOnlyCollection<string>(new[]
-        {
-            _localization.GetString("Module.Parts.Status.Active"),
-            _localization.GetString("Module.Parts.Status.Inactive"),
-            _localization.GetString("Module.Parts.Status.Blocked")
-        });
+        StatusOptions = new ReadOnlyCollection<string>(new[] { "active", "inactive", "blocked" });
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-        ReceiveStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Receive), CanExecuteInventoryTransaction);
-        IssueStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Issue), CanExecuteInventoryTransaction);
-        AdjustStockCommand = new AsyncRelayCommand(() => ExecuteInventoryTransactionAsync(InventoryTransactionType.Adjust), CanExecuteInventoryTransaction);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the Parts &amp; Stock module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Parts_Editor` resources are available.</remarks>
     [ObservableProperty]
     private PartEditor _editor;
 
+    /// <summary>Opens the AI module to summarize the selected part.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
+
+    /// <summary>Generated property exposing the is editor enabled for the Parts &amp; Stock module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Parts_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
@@ -119,36 +84,17 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
     [ObservableProperty]
     private string _stockHealthMessage = string.Empty;
-    /// <summary>
-    /// Gets or sets the status options.
-    /// </summary>
 
+    /// <summary>Collection presenting the status options for the Parts &amp; Stock document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Parts_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
+    /// <summary>Command executing the attach document workflow for the Parts &amp; Stock module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Parts_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
-    public ObservableCollection<ZoneSummaryItem> ZoneSummaries => _zoneSummaries;
-
-    public ICollectionView ZoneSummariesView => _zoneSummariesView;
-
-    public ObservableCollection<InventoryTransactionReportItem> RecentTransactions => _recentTransactions;
-
-    public ObservableCollection<string> TransactionAlerts => _transactionAlerts;
-
-    public ObservableCollection<string> ZoneFilters { get; }
-
-    [ObservableProperty]
-    private string _selectedZoneFilter = string.Empty;
-
-    public IAsyncRelayCommand ReceiveStockCommand { get; }
-
-    public IAsyncRelayCommand IssueStockCommand { get; }
-
-    public IAsyncRelayCommand AdjustStockCommand { get; }
-
+    /// <summary>Loads Parts &amp; Stock records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Parts_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         await EnsureSuppliersAsync().ConfigureAwait(false);
@@ -156,6 +102,8 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return parts.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Parts &amp; Stock designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var sample = new[]
@@ -165,7 +113,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 Id = 1,
                 Code = "PRT-001",
                 Name = "Sterile Tubing",
-                Status = StatusOptions[0],
+                Status = "active",
                 Description = "Silicone transfer tubing",
                 Location = "Main Warehouse",
                 Stock = 120,
@@ -177,7 +125,7 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 Id = 2,
                 Code = "FLT-010",
                 Name = "HEPA Filter",
-                Status = StatusOptions[1],
+                Status = "inactive",
                 Description = "Spare HEPA H14",
                 Location = "Cleanroom",
                 Stock = 10,
@@ -189,11 +137,15 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Executes the on activated async routine for the Parts &amp; Stock module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override async Task OnActivatedAsync(object? parameter)
     {
         await EnsureSuppliersAsync().ConfigureAwait(false);
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Parts". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Parts` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var parts = await _partService.GetAllAsync().ConfigureAwait(false);
@@ -227,6 +179,8 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return new CflRequest("Select Part", items);
     }
 
+    /// <summary>Applies CFL selections back into the Parts &amp; Stock workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Parts". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Parts_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -244,6 +198,26 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return Task.CompletedTask;
     }
 
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedPart is null)
+        {
+            StatusMessage = "Select a part to summarize.";
+            return;
+        }
+
+        var p = _loadedPart;
+        string prompt = p is null
+            ? $"Summarize part: {SelectedRecord?.Title}. Provide stock, suppliers and replenishment risks in <= 8 bullets."
+            : $"Summarize this part (<= 8 bullets). Name={p.Name}; Code={p.Code}; Status={p.Status}; Stock={p.Stock}; Location={p.Location}; PreferredSupplier={p.DefaultSupplierName ?? p.Supplier}.";
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Loads editor payloads for the selected Parts &amp; Stock record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Parts". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Parts` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -252,7 +226,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             SetEditor(PartEditor.CreateEmpty());
             StockHealthMessage = string.Empty;
             UpdateAttachmentCommandState();
-            await ClearInventoryReportsAsync().ConfigureAwait(false);
             return;
         }
 
@@ -277,10 +250,11 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         LoadEditor(part);
         UpdateStockHealth();
         UpdateAttachmentCommandState();
-        await RefreshInventoryReportsAsync(part.Id).ConfigureAwait(false);
     }
 
-    protected override async Task OnModeChangedAsync(FormMode mode)
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
+    protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
 
@@ -291,7 +265,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 _loadedPart = null;
                 SetEditor(PartEditor.CreateForNew(_partService.NormalizeStatus("active")));
                 StockHealthMessage = "";
-                await ClearInventoryReportsAsync().ConfigureAwait(false);
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -301,14 +274,16 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 {
                     LoadEditor(_loadedPart);
                     UpdateStockHealth();
-                    await RefreshInventoryReportsAsync(_loadedPart.Id).ConfigureAwait(false);
                 }
                 break;
         }
 
         UpdateAttachmentCommandState();
+        return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var part = Editor.ToPart(_loadedPart);
@@ -329,6 +304,8 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return await Task.FromResult(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Mode == FormMode.Update && _loadedPart is null)
@@ -450,6 +427,8 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -471,6 +450,8 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Observes property changes to maintain dirty state and command availability.</summary>
+    /// <remarks>Execution: Raised whenever generated observable setters fire. Form Mode: Primarily impacts Add/Update as Find/View remain read-only. Localization: Downstream notifications still rely on inline strings.</remarks>
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
@@ -478,7 +459,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
         {
             UpdateAttachmentCommandState();
-            NotifyInventoryCommands();
         }
     }
 
@@ -502,246 +482,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         value.PropertyChanged += OnEditorPropertyChanged;
     }
 
-    partial void OnSelectedZoneFilterChanged(string value)
-    {
-        _zoneSummariesView.Refresh();
-    }
-
-    private bool FilterZoneSummary(object obj)
-    {
-        if (obj is not ZoneSummaryItem item)
-        {
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(SelectedZoneFilter) || string.Equals(SelectedZoneFilter, _zoneAllLabel, StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        if (string.Equals(item.ZoneLabel, SelectedZoneFilter, StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        return _zoneLabels.TryGetValue(item.Classification, out var label)
-            && string.Equals(label, SelectedZoneFilter, StringComparison.Ordinal);
-    }
-
-    private async Task RefreshInventoryReportsAsync(int partId)
-    {
-        List<(int warehouseId, string warehouseName, int quantity, int? min, int? max)> stockLevels;
-        try
-        {
-            stockLevels = await Database.GetStockLevelsForPartAsync(partId).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to load stock levels: {ex.Message}";
-            await ClearInventoryReportsAsync().ConfigureAwait(false);
-            return;
-        }
-
-        var warehouseLookup = stockLevels.ToDictionary(s => s.warehouseId, s => s.warehouseName);
-
-        await RunOnUiThreadAsync(() =>
-        {
-            _zoneSummaries.Clear();
-            _transactionAlerts.Clear();
-
-            foreach (var level in stockLevels)
-            {
-                var classification = ClassifyZone(level.quantity, level.min, level.max);
-                var zoneLabel = _zoneLabels.TryGetValue(classification, out var label)
-                    ? label
-                    : classification.ToString();
-
-                _zoneSummaries.Add(new ZoneSummaryItem(
-                    level.warehouseId,
-                    classification,
-                    zoneLabel,
-                    level.warehouseName,
-                    level.quantity,
-                    level.min,
-                    level.max));
-
-                if (classification == ZoneClassification.Critical)
-                {
-                    var minText = level.min.HasValue ? level.min.Value.ToString(CultureInfo.InvariantCulture) : "n/a";
-                    _transactionAlerts.Add($"{level.warehouseName} below minimum ({level.quantity}/{minText}).");
-                }
-                else if (classification == ZoneClassification.Overflow)
-                {
-                    var maxText = level.max.HasValue ? level.max.Value.ToString(CultureInfo.InvariantCulture) : "n/a";
-                    _transactionAlerts.Add($"{level.warehouseName} above maximum ({level.quantity}/{maxText}).");
-                }
-            }
-
-            _zoneSummariesView.Refresh();
-        }).ConfigureAwait(false);
-
-        DataTable history;
-        try
-        {
-            history = await Database.GetInventoryTransactionsForPartAsync(partId, 50).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to load inventory history: {ex.Message}";
-            await RunOnUiThreadAsync(() => _recentTransactions.Clear()).ConfigureAwait(false);
-            return;
-        }
-
-        await RunOnUiThreadAsync(() =>
-        {
-            _recentTransactions.Clear();
-
-            foreach (DataRow row in history.Rows)
-            {
-                var dateValue = row["transaction_date"];
-                var transactionDate = dateValue switch
-                {
-                    DateTime dt => dt,
-                    _ => DateTime.TryParse(dateValue?.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
-                        ? parsed
-                        : DateTime.MinValue
-                };
-
-                var typeValue = row.Table.Columns.Contains("transaction_type")
-                    ? row["transaction_type"]?.ToString() ?? string.Empty
-                    : string.Empty;
-
-                var quantityValue = row.Table.Columns.Contains("quantity") && row["quantity"] != DBNull.Value
-                    ? Convert.ToInt32(row["quantity"])
-                    : 0;
-
-                var warehouseId = row.Table.Columns.Contains("warehouse_id") && row["warehouse_id"] != DBNull.Value
-                    ? Convert.ToInt32(row["warehouse_id"])
-                    : 0;
-
-                var warehouseName = warehouseLookup.TryGetValue(warehouseId, out var name)
-                    ? name
-                    : $"WH-{warehouseId}";
-
-                var document = row.Table.Columns.Contains("related_document") && row["related_document"] != DBNull.Value
-                    ? row["related_document"]?.ToString()
-                    : null;
-
-                var note = row.Table.Columns.Contains("note") && row["note"] != DBNull.Value
-                    ? row["note"]?.ToString()
-                    : null;
-
-                int? performedBy = row.Table.Columns.Contains("performed_by_id") && row["performed_by_id"] != DBNull.Value
-                    ? Convert.ToInt32(row["performed_by_id"])
-                    : null;
-
-                _recentTransactions.Add(new InventoryTransactionReportItem(
-                    transactionDate,
-                    typeValue,
-                    quantityValue,
-                    warehouseName,
-                    document,
-                    note,
-                    performedBy));
-            }
-        }).ConfigureAwait(false);
-    }
-
-    private Task ClearInventoryReportsAsync()
-        => RunOnUiThreadAsync(() =>
-        {
-            _zoneSummaries.Clear();
-            _recentTransactions.Clear();
-            _transactionAlerts.Clear();
-            _zoneSummariesView.Refresh();
-        });
-
-    private ZoneClassification ClassifyZone(int quantity, int? minimum, int? maximum)
-    {
-        if (minimum.HasValue && quantity < minimum.Value)
-        {
-            return ZoneClassification.Critical;
-        }
-
-        if (maximum.HasValue && quantity > maximum.Value)
-        {
-            return ZoneClassification.Overflow;
-        }
-
-        if (minimum.HasValue)
-        {
-            var warningThreshold = (int)Math.Ceiling(minimum.Value * 1.2);
-            if (quantity <= warningThreshold)
-            {
-                return ZoneClassification.Warning;
-            }
-        }
-
-        return ZoneClassification.Healthy;
-    }
-
-    private Task RunOnUiThreadAsync(Action action)
-    {
-        if (action is null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
-
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null || dispatcher.CheckAccess())
-        {
-            action();
-            return Task.CompletedTask;
-        }
-
-        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
-    }
-
-    public sealed class ZoneSummaryItem
-    {
-        public ZoneSummaryItem(int warehouseId, ZoneClassification classification, string zoneLabel, string warehouse, int quantity, int? minimum, int? maximum)
-        {
-            WarehouseId = warehouseId;
-            Classification = classification;
-            ZoneLabel = zoneLabel;
-            Warehouse = warehouse;
-            Quantity = quantity;
-            Minimum = minimum;
-            Maximum = maximum;
-        }
-
-        public int WarehouseId { get; }
-
-        public ZoneClassification Classification { get; }
-
-        public string ZoneLabel { get; }
-
-        public string Warehouse { get; }
-
-        public int Quantity { get; }
-
-        public int? Minimum { get; }
-
-        public int? Maximum { get; }
-    }
-
-    public sealed record InventoryTransactionReportItem(
-        DateTime TransactionDate,
-        string TransactionType,
-        int Quantity,
-        string Warehouse,
-        string? Document,
-        string? Note,
-        int? PerformedById);
-
-    public enum ZoneClassification
-    {
-        Critical,
-        Warning,
-        Healthy,
-        Overflow
-    }
-
     private async Task EnsureSuppliersAsync()
     {
         if (SupplierOptions.Count > 0)
@@ -751,21 +491,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
         var suppliers = await Database.GetAllSuppliersAsync().ConfigureAwait(false) ?? new List<Supplier>();
         SupplierOptions = new ReadOnlyCollection<Supplier>(suppliers);
-    }
-
-    private string GetZoneLabel(string resourceKey, string fallback)
-    {
-        try
-        {
-            var value = _localization.GetString(resourceKey);
-            return string.IsNullOrWhiteSpace(value) || string.Equals(value, resourceKey, StringComparison.Ordinal)
-                ? fallback
-                : value;
-        }
-        catch
-        {
-            return fallback;
-        }
     }
 
     private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -796,7 +521,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateStockHealth();
-        NotifyInventoryCommands();
     }
 
     private void SetEditor(PartEditor editor)
@@ -806,7 +530,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateStockHealth();
-        NotifyInventoryCommands();
     }
 
     private bool CanAttachDocument()
@@ -814,12 +537,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
            && !IsEditorEnabled
            && _loadedPart is not null
            && _loadedPart.Id > 0;
-
-    private bool CanExecuteInventoryTransaction()
-        => !IsBusy
-           && !IsEditorEnabled
-           && _loadedPart is { Id: > 0 }
-           && Mode is FormMode.View;
 
     private async Task AttachDocumentAsync()
     {
@@ -868,7 +585,9 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
+    {
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
+    }
 
     private void UpdateStockHealth()
     {
@@ -888,167 +607,21 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         }
     }
 
-    private void NotifyInventoryCommands()
+    private static ModuleRecord ToRecord(Part part)
     {
-        ReceiveStockCommand.NotifyCanExecuteChanged();
-        IssueStockCommand.NotifyCanExecuteChanged();
-        AdjustStockCommand.NotifyCanExecuteChanged();
-    }
-
-    private async Task ExecuteInventoryTransactionAsync(InventoryTransactionType type)
-    {
-        if (_loadedPart is null)
-        {
-            return;
-        }
-
-        List<Warehouse> warehouses;
-        try
-        {
-            warehouses = await Database.GetWarehousesAsync().ConfigureAwait(false) ?? new List<Warehouse>();
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to load warehouses: {ex.Message}";
-            return;
-        }
-
-        if (warehouses.Count == 0)
-        {
-            StatusMessage = "No warehouses available for stock transaction.";
-            return;
-        }
-
-        InventoryTransactionRequest? submittedRequest = null;
-        ElectronicSignatureDialogResult? submittedSignature = null;
-
-        await RunOnUiThreadAsync(() =>
-        {
-            var displayName = string.IsNullOrWhiteSpace(_loadedPart.Name)
-                ? _loadedPart.Code ?? $"Part #{_loadedPart.Id}"
-                : $"{_loadedPart.Name} ({_loadedPart.Code})";
-
-            var dialogVm = new StockTransactionDialogViewModel(
-                _loadedPart.Id,
-                displayName ?? $"Part #{_loadedPart.Id}",
-                type,
-                _signatureDialog,
-                async (request, signature) =>
-                {
-                    var context = CreateInventoryContext(signature);
-                    await _inventoryService.ExecuteAsync(request, context).ConfigureAwait(false);
-                });
-
-            dialogVm.LoadWarehouses(warehouses);
-
-            var dialog = new StockTransactionDialog
-            {
-                Owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current?.MainWindow,
-                DataContext = dialogVm
-            };
-
-            var result = dialog.ShowDialog();
-            if (result == true)
-            {
-                submittedRequest = dialogVm.SubmittedRequest;
-                submittedSignature = dialogVm.SubmittedSignature;
-            }
-        }).ConfigureAwait(false);
-
-        if (submittedRequest is null || submittedSignature is null)
-        {
-            return;
-        }
-
-        var selectedWarehouseName = warehouses
-            .FirstOrDefault(w => w.Id == submittedRequest.Value.WarehouseId)?.Name
-            ?? $"WH-{submittedRequest.Value.WarehouseId}";
-
-        await RefreshInventoryStateAsync(type, submittedRequest.Value, selectedWarehouseName).ConfigureAwait(false);
-    }
-
-    private InventoryTransactionContext CreateInventoryContext(ElectronicSignatureDialogResult signature)
-    {
-        var userId = _authContext.CurrentUser?.Id ?? 0;
-        return new InventoryTransactionContext(
-            userId,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId,
-            signature);
-    }
-
-    private async Task RefreshInventoryStateAsync(
-        InventoryTransactionType type,
-        InventoryTransactionRequest request,
-        string warehouseName)
-    {
-        try
-        {
-            var part = await _partService.TryGetByIdAsync(request.PartId).ConfigureAwait(false);
-            if (part is not null)
-            {
-                _loadedPart = part;
-                await RunOnUiThreadAsync(() =>
-                {
-                    LoadEditor(part);
-                    UpdateAttachmentCommandState();
-                }).ConfigureAwait(false);
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to reload part: {ex.Message}";
-        }
-
-        await RefreshInventoryReportsAsync(request.PartId).ConfigureAwait(false);
-
-        var delta = type switch
-        {
-            InventoryTransactionType.Adjust => request.AdjustmentDelta ?? 0,
-            InventoryTransactionType.Issue => -request.Quantity,
-            _ => request.Quantity
-        };
-
-        var verb = type switch
-        {
-            InventoryTransactionType.Receive => "received",
-            InventoryTransactionType.Issue => "issued",
-            InventoryTransactionType.Adjust => "adjusted",
-            _ => "processed"
-        };
-
-        var deltaDisplay = delta >= 0
-            ? $"+{delta}"
-            : delta.ToString(CultureInfo.InvariantCulture);
-
-        var message = $"{verb} {deltaDisplay} units at {warehouseName}.";
-        StatusMessage = message;
-        _shellInteraction.UpdateStatus(message);
-
-        NotifyInventoryCommands();
-    }
-
-    private ModuleRecord ToRecord(Part part)
-    {
-        var recordKey = part.Id.ToString(CultureInfo.InvariantCulture);
-        var recordTitle = string.IsNullOrWhiteSpace(part.Name) ? recordKey : part.Name;
-
-        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
-
         var fields = new List<InspectorField>
         {
-            Field("SKU", part.Sku ?? part.Code),
-            Field("Supplier", part.DefaultSupplierName ?? "-"),
-            Field("Stock", part.Stock?.ToString(CultureInfo.InvariantCulture) ?? "-"),
-            Field("Min Stock", part.MinStockAlert?.ToString(CultureInfo.InvariantCulture) ?? "-"),
-            Field("Location", part.Location ?? "-"),
-            Field("Status", part.Status ?? "-")
+            new("SKU", part.Sku ?? part.Code),
+            new("Supplier", part.DefaultSupplierName ?? "-"),
+            new("Stock", part.Stock?.ToString(CultureInfo.InvariantCulture) ?? "-"),
+            new("Min Stock", part.MinStockAlert?.ToString(CultureInfo.InvariantCulture) ?? "-"),
+            new("Location", part.Location ?? "-"),
+            new("Status", part.Status ?? "-")
         };
 
         return new ModuleRecord(
-            recordKey,
-            recordTitle,
+            part.Id.ToString(CultureInfo.InvariantCulture),
+            part.Name,
             part.Code,
             part.Status,
             part.Description,
@@ -1056,9 +629,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
             SuppliersModuleViewModel.ModuleKey,
             part.DefaultSupplierId);
     }
-    /// <summary>
-    /// Represents the part editor value.
-    /// </summary>
 
     public sealed partial class PartEditor : ObservableObject
     {
@@ -1109,25 +679,13 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
 
         [ObservableProperty]
         private bool _isWarehouseStockCritical;
-        /// <summary>
-        /// Gets or sets the is below minimum.
-        /// </summary>
 
         public bool IsBelowMinimum => MinStockAlert.HasValue && Stock.HasValue && Stock.Value < MinStockAlert.Value;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
 
         public static PartEditor CreateEmpty() => new();
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
 
         public static PartEditor CreateForNew(string normalizedStatus)
             => new() { Status = normalizedStatus };
-        /// <summary>
-        /// Executes the from part operation.
-        /// </summary>
 
         public static PartEditor FromPart(Part part, Func<string?, string> normalizer)
         {
@@ -1151,9 +709,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 IsWarehouseStockCritical = part.IsWarehouseStockCritical
             };
         }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public PartEditor Clone()
             => new()
@@ -1175,9 +730,6 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
                 WarehouseSummary = WarehouseSummary,
                 IsWarehouseStockCritical = IsWarehouseStockCritical
             };
-        /// <summary>
-        /// Executes the to part operation.
-        /// </summary>
 
         public Part ToPart(Part? existing)
         {
@@ -1202,3 +754,4 @@ public sealed partial class PartsModuleViewModel : DataDrivenModuleDocumentViewM
         }
     }
 }
+

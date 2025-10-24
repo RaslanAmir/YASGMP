@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Models
 {
@@ -19,45 +17,6 @@ namespace YasGMP.Models
         public string? Location { get; set; }
         public string? Status { get; set; }
         public DateTime? InstallDate { get; set; }
-        public static InspectorField Create(
-            string moduleKey,
-            string moduleTitle,
-            string? recordKey,
-            string? recordTitle,
-            string label,
-            string? value)
-        {
-            var moduleToken = AutomationIdSanitizer.Normalize(moduleKey, "module");
-            var recordToken = AutomationIdSanitizer.Normalize(recordKey, "record");
-            var labelToken = AutomationIdSanitizer.Normalize(label, "field");
-            var displayModule = string.IsNullOrWhiteSpace(moduleTitle) ? moduleKey : moduleTitle;
-            var displayRecord = string.IsNullOrWhiteSpace(recordTitle)
-                ? (string.IsNullOrWhiteSpace(recordKey) ? "Record" : recordKey)
-                : recordTitle;
-
-            var automationName = string.Format(
-                CultureInfo.CurrentCulture,
-                "{0} — {1} ({2})",
-                displayModule,
-                label,
-                displayRecord);
-
-            var automationId = string.Format(
-                CultureInfo.InvariantCulture,
-                "Dock.Inspector.{0}.{1}.{2}",
-                moduleToken,
-                recordToken,
-                labelToken);
-
-            var automationTooltip = string.Format(
-                CultureInfo.CurrentCulture,
-                "{0} for {1} in {2}.",
-                label,
-                displayRecord,
-                displayModule);
-
-            return new InspectorField(label, value, automationName, automationId, automationTooltip);
-        }
     }
 
     public class Component
@@ -76,11 +35,6 @@ namespace YasGMP.Models
         public DateTime? WarrantyUntil { get; set; }
         public string? Comments { get; set; }
         public string? LifecycleState { get; set; }
-        public string? QrCode { get; set; }
-        public string? QrPayload { get; set; }
-        public string? CodeOverride { get; set; }
-        public bool IsCodeOverrideEnabled { get; set; }
-        public List<string> LinkedDocuments { get; set; } = new();
     }
 
     public class WorkOrder
@@ -450,269 +404,13 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
     }
 }
 
-namespace YasGMP.Wpf.Tests.TestStubs;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using YasGMP.Models;
-using YasGMP.Models.DTO;
-using YasGMP.Wpf.Services;
-
-public enum DocumentLifecycleOperation
-{
-    Initiate,
-    Revise,
-    Approve,
-    Publish,
-    Expire,
-    Link
-}
-
-/// <summary>
-/// Recording test double for <see cref="IDocumentControlService"/> that surfaces configurable responses.
-/// </summary>
-public sealed class RecordingDocumentControlService : IDocumentControlService
-{
-    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _initiateHandler =
-        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Initiated.", doc.Id));
-
-    private Func<SopDocument, SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _reviseHandler =
-        (_, _, _) => Task.FromResult(new DocumentLifecycleResult(true, "Revised."));
-
-    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _approveHandler =
-        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Approved.", doc.Id));
-
-    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _publishHandler =
-        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Published.", doc.Id));
-
-    private Func<SopDocument, CancellationToken, Task<DocumentLifecycleResult>> _expireHandler =
-        (doc, _) => Task.FromResult(new DocumentLifecycleResult(true, "Expired.", doc.Id));
-
-    private Func<SopDocument, ChangeControlSummaryDto, CancellationToken, Task<DocumentLifecycleResult>> _linkHandler =
-        (_, _, _) => Task.FromResult(new DocumentLifecycleResult(true, "Linked."));
-
-    private Func<IReadOnlyCollection<SopDocument>, string, CancellationToken, Task<DocumentExportResult>> _exportHandler =
-        (docs, _, _) => Task.FromResult(new DocumentExportResult(true, "Exported.", null));
-
-    private Func<SopDocument, IReadOnlyList<DocumentAttachmentUpload>, CancellationToken, Task<DocumentAttachmentUploadResult>> _uploadHandler =
-        (_, uploads, _) => Task.FromResult(new DocumentAttachmentUploadResult(true, "Uploaded.", uploads.Count, 0, Array.Empty<AttachmentLinkWithAttachment>()));
-
-    private Func<int, CancellationToken, Task<IReadOnlyList<AttachmentLinkWithAttachment>>> _manifestHandler =
-        (_, _) => Task.FromResult<IReadOnlyList<AttachmentLinkWithAttachment>>(Array.Empty<AttachmentLinkWithAttachment>());
-
-    public int InitiateCallCount { get; private set; }
-    public int ReviseCallCount { get; private set; }
-    public int ApproveCallCount { get; private set; }
-    public int PublishCallCount { get; private set; }
-    public int ExpireCallCount { get; private set; }
-    public int LinkCallCount { get; private set; }
-    public int ExportCallCount { get; private set; }
-    public int UploadCallCount { get; private set; }
-    public int ManifestCallCount { get; private set; }
-
-    public SopDocument? LastInitiatedDocument { get; private set; }
-    public (SopDocument Existing, SopDocument Revision)? LastRevisionDocuments { get; private set; }
-    public SopDocument? LastApprovedDocument { get; private set; }
-    public SopDocument? LastPublishedDocument { get; private set; }
-    public SopDocument? LastExpiredDocument { get; private set; }
-    public (SopDocument Document, ChangeControlSummaryDto ChangeControl)? LastLinkRequest { get; private set; }
-    public IReadOnlyList<SopDocument> LastExportedDocuments { get; private set; } = Array.Empty<SopDocument>();
-    public string? LastExportFormat { get; private set; }
-    public SopDocument? LastUploadedDocument { get; private set; }
-    public IReadOnlyList<DocumentAttachmentUpload> LastUploadedAttachments { get; private set; } = Array.Empty<DocumentAttachmentUpload>();
-    public IReadOnlyList<string> LastUploadedFileNames => LastUploadedAttachments.Select(a => a.FileName).ToArray();
-    public int? LastManifestDocumentId { get; private set; }
-
-    public void SetLifecycleResult(DocumentLifecycleOperation operation, DocumentLifecycleResult result)
-    {
-        switch (operation)
-        {
-            case DocumentLifecycleOperation.Initiate:
-                _initiateHandler = (_, _) => Task.FromResult(result);
-                break;
-            case DocumentLifecycleOperation.Revise:
-                _reviseHandler = (_, _, _) => Task.FromResult(result);
-                break;
-            case DocumentLifecycleOperation.Approve:
-                _approveHandler = (_, _) => Task.FromResult(result);
-                break;
-            case DocumentLifecycleOperation.Publish:
-                _publishHandler = (_, _) => Task.FromResult(result);
-                break;
-            case DocumentLifecycleOperation.Expire:
-                _expireHandler = (_, _) => Task.FromResult(result);
-                break;
-            case DocumentLifecycleOperation.Link:
-                _linkHandler = (_, _, _) => Task.FromResult(result);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
-        }
-    }
-
-    public void SetLifecycleException(DocumentLifecycleOperation operation, Exception exception)
-    {
-        if (exception is null)
-        {
-            throw new ArgumentNullException(nameof(exception));
-        }
-
-        switch (operation)
-        {
-            case DocumentLifecycleOperation.Initiate:
-                _initiateHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                break;
-            case DocumentLifecycleOperation.Revise:
-                _reviseHandler = (_, _, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                break;
-            case DocumentLifecycleOperation.Approve:
-                _approveHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                break;
-            case DocumentLifecycleOperation.Publish:
-                _publishHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                break;
-            case DocumentLifecycleOperation.Expire:
-                _expireHandler = (_, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                break;
-            case DocumentLifecycleOperation.Link:
-                _linkHandler = (_, _, _) => Task.FromException<DocumentLifecycleResult>(exception);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
-        }
-    }
-
-    public void SetExportResult(DocumentExportResult result)
-    {
-        _exportHandler = (docs, format, _) => Task.FromResult(result);
-    }
-
-    public void SetExportException(Exception exception)
-    {
-        _exportHandler = (_, _, _) => Task.FromException<DocumentExportResult>(exception ?? throw new ArgumentNullException(nameof(exception)));
-    }
-
-    public void SetAttachmentResult(DocumentAttachmentUploadResult result)
-    {
-        _uploadHandler = (_, uploads, _) => Task.FromResult(result);
-    }
-
-    public void SetAttachmentException(Exception exception)
-    {
-        if (exception is null)
-        {
-            throw new ArgumentNullException(nameof(exception));
-        }
-
-        _uploadHandler = (_, _, _) => Task.FromException<DocumentAttachmentUploadResult>(exception);
-    }
-
-    public void SetAttachmentManifest(IReadOnlyList<AttachmentLinkWithAttachment> manifest)
-    {
-        _manifestHandler = (_, _) => Task.FromResult(manifest);
-    }
-
-    public void SetAttachmentManifestException(Exception exception)
-    {
-        if (exception is null)
-        {
-            throw new ArgumentNullException(nameof(exception));
-        }
-
-        _manifestHandler = (_, _) => Task.FromException<IReadOnlyList<AttachmentLinkWithAttachment>>(exception);
-    }
-
-    public Task<DocumentLifecycleResult> InitiateDocumentAsync(SopDocument draft, CancellationToken cancellationToken = default)
-    {
-        InitiateCallCount++;
-        LastInitiatedDocument = draft;
-        return _initiateHandler(draft, cancellationToken);
-    }
-
-    public Task<DocumentLifecycleResult> ReviseDocumentAsync(
-        SopDocument existing,
-        SopDocument revision,
-        CancellationToken cancellationToken = default)
-    {
-        ReviseCallCount++;
-        LastRevisionDocuments = (existing, revision);
-        return _reviseHandler(existing, revision, cancellationToken);
-    }
-
-    public Task<DocumentLifecycleResult> ApproveDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
-    {
-        ApproveCallCount++;
-        LastApprovedDocument = document;
-        return _approveHandler(document, cancellationToken);
-    }
-
-    public Task<DocumentLifecycleResult> PublishDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
-    {
-        PublishCallCount++;
-        LastPublishedDocument = document;
-        return _publishHandler(document, cancellationToken);
-    }
-
-    public Task<DocumentLifecycleResult> ExpireDocumentAsync(SopDocument document, CancellationToken cancellationToken = default)
-    {
-        ExpireCallCount++;
-        LastExpiredDocument = document;
-        return _expireHandler(document, cancellationToken);
-    }
-
-    public Task<DocumentLifecycleResult> LinkChangeControlAsync(
-        SopDocument document,
-        ChangeControlSummaryDto changeControl,
-        CancellationToken cancellationToken = default)
-    {
-        LinkCallCount++;
-        LastLinkRequest = (document, changeControl);
-        return _linkHandler(document, changeControl, cancellationToken);
-    }
-
-    public Task<DocumentExportResult> ExportDocumentsAsync(
-        IReadOnlyCollection<SopDocument> documents,
-        string format,
-        CancellationToken cancellationToken = default)
-    {
-        ExportCallCount++;
-        LastExportedDocuments = documents.ToList();
-        LastExportFormat = format;
-        return _exportHandler(documents, format, cancellationToken);
-    }
-
-    public Task<DocumentAttachmentUploadResult> UploadAttachmentsAsync(
-        SopDocument document,
-        IEnumerable<DocumentAttachmentUpload> attachments,
-        CancellationToken cancellationToken = default)
-    {
-        UploadCallCount++;
-        LastUploadedDocument = document;
-        var list = attachments.ToList();
-        LastUploadedAttachments = list;
-        return _uploadHandler(document, list, cancellationToken);
-    }
-
-    public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetAttachmentManifestAsync(
-        int documentId,
-        CancellationToken cancellationToken = default)
-    {
-        ManifestCallCount++;
-        LastManifestDocumentId = documentId;
-        return _manifestHandler(documentId, cancellationToken);
-    }
-}
-
         private readonly List<Machine> _store = new();
 
 
         public List<Machine> Saved => _store;
 
 
-    public partial class DatabaseService
+    public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -766,63 +464,7 @@ public sealed class RecordingDocumentControlService : IDocumentControlService
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
-
-        public Func<List<Part>>? PartsFactory { get; set; }
-
-        public Func<Exception?>? PartsExceptionFactory { get; set; }
-
-        public Exception? PartsException { get; set; }
-
-        public Task<List<Part>> GetAllPartsAsync()
-        {
-            if (PartsExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (PartsException is not null)
-            {
-                throw PartsException;
-            }
-
-            if (PartsFactory is not null)
-            {
-                return Task.FromResult(PartsFactory());
-            }
-
-            return Task.FromResult(Parts.Select(ClonePart).ToList());
-        }
-
-        private static Part ClonePart(Part source)
-            => new()
-            {
-                Id = source.Id,
-                Code = source.Code,
-                Name = source.Name,
-                Description = source.Description,
-                Category = source.Category,
-                Status = source.Status,
-                Stock = source.Stock,
-                MinStockAlert = source.MinStockAlert,
-                Location = source.Location,
-                DefaultSupplierId = source.DefaultSupplierId,
-                DefaultSupplierName = source.DefaultSupplierName,
-                Sku = source.Sku,
-                Price = source.Price
-            };
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -831,58 +473,6 @@ public sealed class RecordingDocumentControlService : IDocumentControlService
 
         public Task<IReadOnlyList<PickedFile>> PickFilesAsync(FilePickerRequest request, CancellationToken cancellationToken = default)
             => Task.FromResult(Files);
-    }
-}
-
-namespace YasGMP.Services
-{
-    using System.Linq;
-    using YasGMP.Models;
-
-    public partial class DatabaseService
-    {
-        public List<DashboardEvent> DashboardEvents { get; } = new();
-
-        public Exception? DashboardEventsException { get; set; }
-
-        public Task<List<DashboardEvent>> GetRecentDashboardEventsAsync(int take, CancellationToken cancellationToken = default)
-        {
-            if (DashboardEventsException is not null)
-            {
-                throw DashboardEventsException;
-            }
-
-            if (take <= 0)
-            {
-                take = 1;
-            }
-
-            var ordered = DashboardEvents
-                .OrderByDescending(evt => evt.Timestamp)
-                .ThenByDescending(evt => evt.Id)
-                .Take(take)
-                .Select(CloneDashboardEvent)
-                .ToList();
-
-            return Task.FromResult(ordered);
-        }
-
-        private static DashboardEvent CloneDashboardEvent(DashboardEvent source)
-            => new()
-            {
-                Id = source.Id,
-                EventType = source.EventType,
-                Description = source.Description,
-                Timestamp = source.Timestamp,
-                Severity = source.Severity,
-                UserId = source.UserId,
-                RelatedModule = source.RelatedModule,
-                RelatedRecordId = source.RelatedRecordId,
-                Icon = source.Icon,
-                IsUnread = source.IsUnread,
-                DrilldownKey = source.DrilldownKey,
-                Note = source.Note
-            };
     }
 }
 
@@ -1103,10 +693,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -1127,9 +714,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -1336,7 +920,6 @@ namespace YasGMP.Services.Interfaces
     {
         private readonly List<Machine> _store = new();
         private readonly List<(Machine Entity, MachineCrudContext Context)> _savedSnapshots = new();
-        private readonly List<(int Id, MachineCrudContext Context)> _deletedSnapshots = new();
 
         public List<Machine> Saved => _store;
         public IReadOnlyList<(Machine Entity, MachineCrudContext Context)> SavedWithContext => _savedSnapshots;
@@ -1344,8 +927,6 @@ namespace YasGMP.Services.Interfaces
         public Machine? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
         public IEnumerable<MachineCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
         public IEnumerable<Machine> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
-        public IReadOnlyList<(int Id, MachineCrudContext Context)> DeletedWithContext => _deletedSnapshots;
-        public IEnumerable<MachineCrudContext> DeletedContexts => _deletedSnapshots.Select(tuple => tuple.Context);
 
         public Task<IReadOnlyList<Machine>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Machine>>(_store.ToList());
@@ -1400,9 +981,6 @@ namespace YasGMP.Services.Interfaces
         private void TrackSnapshot(Machine machine, MachineCrudContext context)
             => _savedSnapshots.Add((Clone(machine), context));
 
-        private void TrackDeletion(int id, MachineCrudContext context)
-            => _deletedSnapshots.Add((id, context));
-
         private static Machine Clone(Machine source)
         {
             return new Machine
@@ -1422,10 +1000,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -1446,9 +1021,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -1640,10 +1212,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -1769,9 +1338,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -1786,7 +1352,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult<IReadOnlyList<Component>>(_store.ToList());
 
 
-    public partial class DatabaseService
+    public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -1826,19 +1392,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -2177,10 +1731,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -2201,9 +1752,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -2417,7 +1965,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Calibration?> TryGetByIdAsync(int id)
             => Task.FromResult<Calibration?>(_store.FirstOrDefault(c => c.Id == id));
 
-    public partial class DatabaseService
+    public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -2445,19 +1993,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -2676,10 +2212,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -2700,9 +2233,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -2927,7 +2457,7 @@ namespace YasGMP.Services.Interfaces
         public Task<IReadOnlyList<Calibration>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Calibration>>(_store.ToList());
 
-    public partial class DatabaseService
+    public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -2961,19 +2491,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -3195,10 +2713,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -3219,9 +2734,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -3534,7 +3046,7 @@ namespace YasGMP.Services.Interfaces
 
         public List<Machine> Saved => _store;
 
-    public partial class DatabaseService
+    public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -3568,19 +3080,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -3709,10 +3209,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -3733,9 +3230,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -3763,7 +3257,6 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(incident));
             TrackSnapshot(incident, context);
-            RecordTransition("Create", incident, context);
             return Task.FromResult(incident.Id);
         }
 
@@ -3780,7 +3273,6 @@ namespace YasGMP.Services.Interfaces
             }
 
             TrackSnapshot(incident, context);
-            RecordTransition("Update", incident, context);
             return Task.CompletedTask;
         }
 
@@ -4223,7 +3715,7 @@ namespace YasGMP.Services.Interfaces
         public Task<Incident?> TryGetByIdAsync(int id)
             => Task.FromResult(_store.FirstOrDefault(i => i.Id == id));
 
-    public partial class DatabaseService
+    public class DatabaseService
     {
         public List<Asset> Assets { get; } = new();
         public List<Component> Components { get; } = new();
@@ -4259,19 +3751,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -4458,7 +3938,6 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(capa));
             TrackSnapshot(capa, context);
-            RecordTransition("Create", capa, context);
             return Task.FromResult(capa.Id);
         }
 
@@ -4475,7 +3954,6 @@ namespace YasGMP.Services.Interfaces
             }
 
             TrackSnapshot(capa, context);
-            RecordTransition("Update", capa, context);
             return Task.CompletedTask;
         }
 
@@ -4834,10 +4312,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -4858,9 +4333,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -5010,7 +4482,6 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(changeControl));
             TrackSnapshot(changeControl, context);
-            RecordTransition("Create", changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -5217,19 +4688,7 @@ namespace YasGMP.Services.Interfaces
             => Task.FromResult(Suppliers);
 
         public Task<List<Warehouse>> GetWarehousesAsync()
-        {
-            if (WarehousesExceptionFactory?.Invoke() is Exception dynamicException)
-            {
-                throw dynamicException;
-            }
-
-            if (WarehousesException is not null)
-            {
-                throw WarehousesException;
-            }
-
-            return Task.FromResult(Warehouses.Select(CloneWarehouse).ToList());
-        }
+            => Task.FromResult(Warehouses);
     }
 
     public sealed class TestFilePicker : IFilePicker
@@ -5643,10 +5102,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -5667,9 +5123,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -5820,7 +5273,6 @@ namespace YasGMP.Services.Interfaces
 
             _store.Add(Clone(changeControl));
             TrackSnapshot(changeControl, context);
-            RecordTransition("Create", changeControl, context);
             return Task.FromResult(changeControl.Id);
         }
 
@@ -5837,7 +5289,6 @@ namespace YasGMP.Services.Interfaces
             }
 
             TrackSnapshot(changeControl, context);
-            RecordTransition("Update", changeControl, context);
             return Task.CompletedTask;
         }
 
@@ -6423,10 +5874,7 @@ namespace YasGMP.Services.Interfaces
                 IsCritical = source.IsCritical,
                 SerialNumber = source.SerialNumber,
                 LifecyclePhase = source.LifecyclePhase,
-                Note = source.Note,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                DigitalSignature = source.DigitalSignature
+                Note = source.Note
             };
         }
 
@@ -6447,9 +5895,6 @@ namespace YasGMP.Services.Interfaces
             destination.SerialNumber = source.SerialNumber;
             destination.LifecyclePhase = source.LifecyclePhase;
             destination.Note = source.Note;
-            destination.QrCode = source.QrCode;
-            destination.QrPayload = source.QrPayload;
-            destination.DigitalSignature = source.DigitalSignature;
         }
     }
 
@@ -7121,7 +6566,6 @@ namespace YasGMP.Services.Interfaces
 namespace YasGMP.Wpf.ViewModels.Modules
 {
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using YasGMP.Services;
@@ -7129,47 +6573,27 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
     public sealed class InspectorField
     {
-        public InspectorField(string label, string? value)
-            : this(label, value, string.Empty, string.Empty, string.Empty)
+        public InspectorField(string name, string value)
         {
+            Name = name;
+            Value = value;
         }
 
-        public InspectorField(string label, string? value, string automationName, string automationId, string automationTooltip)
-        {
-            Label = label;
-            Value = value ?? string.Empty;
-            AutomationName = automationName;
-            AutomationId = automationId;
-            AutomationTooltip = automationTooltip;
-        }
-
-        public string Label { get; }
+        public string Name { get; }
 
         public string Value { get; }
-
-        public string AutomationName { get; }
-
-        public string AutomationId { get; }
-
-        public string AutomationTooltip { get; }
     }
 
     public sealed class InspectorContext
     {
-        public InspectorContext(string moduleKey, string title, string? recordKey, string subtitle, IReadOnlyList<InspectorField> fields)
+        public InspectorContext(string title, string subtitle, IReadOnlyList<InspectorField> fields)
         {
-            ModuleKey = moduleKey;
             Title = title;
-            RecordKey = recordKey ?? string.Empty;
             Subtitle = subtitle;
-            Fields = fields ?? new List<InspectorField>();
+            Fields = fields;
         }
 
-        public string ModuleKey { get; }
-
         public string Title { get; }
-
-        public string RecordKey { get; }
 
         public string Subtitle { get; }
 
@@ -7554,10 +6978,6 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public List<InventoryMovementEntry> Movements { get; } = new();
 
-        public List<InventoryTransactionRequest> ExecutedTransactions { get; } = new();
-
-        public List<ElectronicSignatureDialogResult> ExecutedSignatures { get; } = new();
-
         public Task<IReadOnlyList<Warehouse>> GetAllAsync()
             => Task.FromResult<IReadOnlyList<Warehouse>>(_store.ToList());
 
@@ -7620,26 +7040,6 @@ namespace YasGMP.Wpf.ViewModels.Modules
             return Task.FromResult<IReadOnlyList<InventoryMovementEntry>>(items);
         }
 
-        public Task<InventoryTransactionResult> ExecuteInventoryTransactionAsync(
-            InventoryTransactionRequest request,
-            WarehouseCrudContext context,
-            ElectronicSignatureDialogResult signatureResult,
-            CancellationToken cancellationToken = default)
-        {
-            ExecutedTransactions.Add(request);
-            ExecutedSignatures.Add(signatureResult);
-            return Task.FromResult(new InventoryTransactionResult
-            {
-                Type = request.Type,
-                PartId = request.PartId,
-                WarehouseId = request.WarehouseId,
-                Quantity = request.Quantity,
-                Document = request.Document,
-                Note = request.Note,
-                Signature = signatureResult
-            });
-        }
-
         private void TrackSnapshot(Warehouse warehouse, WarehouseCrudContext context)
             => _savedSnapshots.Add((Clone(warehouse), context));
 
@@ -7680,8 +7080,6 @@ namespace YasGMP.Wpf.ViewModels.Modules
     {
         private readonly List<ScheduledJob> _store = new();
         private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _savedSnapshots = new();
-        private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _createdSnapshots = new();
-        private readonly List<(ScheduledJob Entity, ScheduledJobCrudContext Context)> _updatedSnapshots = new();
 
         public List<ScheduledJob> Saved => _store;
         public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> SavedWithContext => _savedSnapshots;
@@ -7690,19 +7088,9 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public IEnumerable<ScheduledJobCrudContext> SavedContexts => _savedSnapshots.Select(tuple => tuple.Context);
         public IEnumerable<ScheduledJob> SavedEntities => _savedSnapshots.Select(tuple => Clone(tuple.Entity));
 
-        public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> CreatedWithContext => _createdSnapshots;
-        public IReadOnlyList<(ScheduledJob Entity, ScheduledJobCrudContext Context)> UpdatedWithContext => _updatedSnapshots;
-
-        public ScheduledJobCrudContext? LastCreatedContext => _createdSnapshots.Count == 0 ? null : _createdSnapshots[^1].Context;
-        public ScheduledJobCrudContext? LastUpdatedContext => _updatedSnapshots.Count == 0 ? null : _updatedSnapshots[^1].Context;
-
         public List<int> Executed { get; } = new();
 
         public List<int> Acknowledged { get; } = new();
-
-        public List<(int JobId, ScheduledJobCrudContext Context)> ExecutionLog { get; } = new();
-
-        public List<(int JobId, ScheduledJobCrudContext Context)> AcknowledgementLog { get; } = new();
 
         public void Seed(ScheduledJob job)
         {
@@ -7728,7 +7116,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
             }
 
             _store.Add(Clone(job));
-            TrackSnapshot(job, context, isUpdate: false);
+            TrackSnapshot(job, context);
             return Task.FromResult(job.Id);
         }
 
@@ -7744,14 +7132,13 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 Copy(job, existing);
             }
 
-            TrackSnapshot(job, context, isUpdate: true);
+            TrackSnapshot(job, context);
             return Task.CompletedTask;
         }
 
         public Task ExecuteAsync(int jobId, ScheduledJobCrudContext context)
         {
             Executed.Add(jobId);
-            ExecutionLog.Add((jobId, context));
             var job = _store.FirstOrDefault(j => j.Id == jobId);
             if (job is not null)
             {
@@ -7765,7 +7152,6 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task AcknowledgeAsync(int jobId, ScheduledJobCrudContext context)
         {
             Acknowledged.Add(jobId);
-            AcknowledgementLog.Add((jobId, context));
             var job = _store.FirstOrDefault(j => j.Id == jobId);
             if (job is not null)
             {
@@ -7790,19 +7176,8 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "scheduled" : status.Trim().ToLowerInvariant();
 
-        private void TrackSnapshot(ScheduledJob job, ScheduledJobCrudContext context, bool isUpdate)
-        {
-            var snapshot = (Clone(job), context);
-            _savedSnapshots.Add(snapshot);
-            if (isUpdate)
-            {
-                _updatedSnapshots.Add(snapshot);
-            }
-            else
-            {
-                _createdSnapshots.Add(snapshot);
-            }
-        }
+        private void TrackSnapshot(ScheduledJob job, ScheduledJobCrudContext context)
+            => _savedSnapshots.Add((Clone(job), context));
 
         private static ScheduledJob Clone(ScheduledJob source)
         {
@@ -8133,3 +7508,4 @@ namespace YasGMP.Wpf.ViewModels.Modules
         }
     }
 }
+

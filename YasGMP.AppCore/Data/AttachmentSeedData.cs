@@ -11,9 +11,6 @@ namespace YasGMP.Data
     /// </summary>
     public static class AttachmentSeedData
     {
-        /// <summary>
-        /// Executes the ensure seeded operation.
-        /// </summary>
         public static void EnsureSeeded(YasGmpDbContext? context)
         {
             if (context == null)
@@ -54,3 +51,4 @@ namespace YasGMP.Data
         }
     }
 }
+

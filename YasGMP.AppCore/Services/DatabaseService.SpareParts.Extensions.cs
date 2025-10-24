@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -19,14 +19,8 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceSparePartsExtensions
     {
-        /// <summary>
-        /// Executes the get all parts async operation.
-        /// </summary>
         public static async Task<List<Part>> GetAllPartsAsync(this DatabaseService db, CancellationToken token = default)
             => await db.GetAllSparePartsFullAsync(token).ConfigureAwait(false);
-        /// <summary>
-        /// Executes the get part by id async operation.
-        /// </summary>
 
         public static async Task<Part?> GetPartByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -44,9 +38,6 @@ namespace YasGMP.Services
             }
             return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
         }
-        /// <summary>
-        /// Executes the insert or update part async operation.
-        /// </summary>
 
         public static async Task<int> InsertOrUpdatePartAsync(this DatabaseService db, Part part, bool update, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
@@ -78,15 +69,9 @@ namespace YasGMP.Services
             await db.UpdateSparePartAsync(part, actorUserId: 0, ip: ip, deviceInfo: device, signatureMetadata: signatureMetadata, token: token).ConfigureAwait(false);
             return part.Id;
         }
-        /// <summary>
-        /// Executes the delete part async operation.
-        /// </summary>
 
         public static Task DeletePartAsync(this DatabaseService db, int id, CancellationToken token = default)
             => db.DeleteSparePartAsync(id, actorUserId: 0, ip: string.Empty, token);
-        /// <summary>
-        /// Executes the get all spare parts full async operation.
-        /// </summary>
         public static async Task<List<Part>> GetAllSparePartsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sqlPreferred = @"SELECT p.id, p.code, p.name, p.description, p.category, p.barcode, p.rfid, p.serial_or_lot,
@@ -130,9 +115,6 @@ ORDER BY p.name, p.id";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the add spare part async operation.
-        /// </summary>
 
         public static async Task<int> AddSparePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
@@ -206,9 +188,6 @@ ORDER BY p.name, p.id";
             }
             return part.Id;
         }
-        /// <summary>
-        /// Executes the update spare part async operation.
-        /// </summary>
 
         public static async Task UpdateSparePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, SignatureMetadataDto? signatureMetadata = null, CancellationToken token = default)
         {
@@ -278,15 +257,9 @@ ORDER BY p.name, p.id";
                 }
             }
         }
-        /// <summary>
-        /// Executes the update part min stock alert async operation.
-        /// </summary>
 
         public static Task UpdatePartMinStockAlertAsync(this DatabaseService db, int partId, int? minStock, CancellationToken token = default)
             => db.ExecuteNonQueryAsync("UPDATE parts SET min_stock_alert=@m WHERE id=@id", new[] { new MySqlParameter("@m", (object?)minStock ?? DBNull.Value), new MySqlParameter("@id", partId) }, token);
-        /// <summary>
-        /// Executes the delete spare part async operation.
-        /// </summary>
 
         public static async Task DeleteSparePartAsync(this DatabaseService db, int id, int actorUserId, string ip, CancellationToken token = default)
         {
@@ -299,9 +272,6 @@ ORDER BY p.name, p.id";
                 signatureHash: null,
                 token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the rollback spare part async operation.
-        /// </summary>
 
         public static Task RollbackSparePartAsync(this DatabaseService db, int id, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSparePartAuditAsync(
@@ -312,9 +282,6 @@ ORDER BY p.name, p.id";
                 deviceInfo: deviceInfo,
                 sessionId: sessionId,
                 token: token);
-        /// <summary>
-        /// Executes the export spare parts async operation.
-        /// </summary>
 
         public static Task ExportSparePartsAsync(this DatabaseService db, List<Part> items, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
@@ -367,9 +334,6 @@ ORDER BY p.name, p.id";
                 sessionId: sessionId,
                 token: token);
         }
-        /// <summary>
-        /// Executes the log spare part audit async operation.
-        /// </summary>
 
         public static Task LogSparePartAuditAsync(
             this DatabaseService db,
@@ -397,34 +361,19 @@ ORDER BY p.name, p.id";
                 signatureId: signatureId,
                 signatureHash: signatureHash,
                 token: token);
-        /// <summary>
-        /// Executes the add part async operation.
-        /// </summary>
 
         public static Task AddPartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
-            => db.AddSparePartAsync(part, actorUserId, ip, deviceInfo, token);
+            => db.AddSparePartAsync(part, actorUserId, ip, deviceInfo, signatureMetadata: null, token: token);
 
         // Back-compat wrappers for PartViewModel naming
-        /// <summary>
-        /// Executes the update part async operation.
-        /// </summary>
         public static Task UpdatePartAsync(this DatabaseService db, Part part, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
-            => db.UpdateSparePartAsync(part, actorUserId, ip, deviceInfo, token);
-        /// <summary>
-        /// Executes the delete part async operation.
-        /// </summary>
+            => db.UpdateSparePartAsync(part, actorUserId, ip, deviceInfo, signatureMetadata: null, token: token);
 
         public static Task DeletePartAsync(this DatabaseService db, int id, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
             => db.DeleteSparePartAsync(id, actorUserId, ip, token);
-        /// <summary>
-        /// Executes the rollback part async operation.
-        /// </summary>
 
         public static Task RollbackPartAsync(this DatabaseService db, int id, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.RollbackSparePartAsync(id, actorUserId, ip, deviceInfo, sessionId, token);
-        /// <summary>
-        /// Executes the export parts async operation.
-        /// </summary>
 
         public static Task ExportPartsAsync(this DatabaseService db, List<Part> items, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.ExportSparePartsAsync(items, format, actorUserId, ip, deviceInfo, sessionId, token);
@@ -503,4 +452,6 @@ ORDER BY p.name, p.id";
         }
     }
 }
+
+
 

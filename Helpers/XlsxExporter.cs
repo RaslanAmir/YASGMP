@@ -5,14 +5,8 @@ using ClosedXML.Excel;
 
 namespace YasGMP.Helpers
 {
-    /// <summary>
-    /// Represents the xlsx exporter value.
-    /// </summary>
     public static class XlsxExporter
     {
-        /// <summary>
-        /// Executes the write sheet operation.
-        /// </summary>
         public static string WriteSheet<T>(IEnumerable<T> rows, string filePrefix, IEnumerable<(string Header, Func<T, object?> Selector)> columns)
         {
             string dir = CsvExportHelper.EnsureExportDirectory();
@@ -45,9 +39,6 @@ namespace YasGMP.Helpers
             wb.SaveAs(path);
             return path;
         }
-        /// <summary>
-        /// Executes the write single sheet operation.
-        /// </summary>
 
         public static void WriteSingleSheet(string filePath, string sheetName, IList<string> headers, IList<IList<string>> rows)
         {

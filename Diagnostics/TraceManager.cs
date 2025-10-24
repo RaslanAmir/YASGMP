@@ -4,34 +4,19 @@ using System.Diagnostics;
 
 namespace YasGMP.Diagnostics
 {
-    /// <summary>
-    /// Represents the Trace Manager.
-    /// </summary>
     public sealed class TraceManager : ITrace
     {
         private readonly DiagnosticContext _ctx;
         private readonly ILogWriter _writer;
-        /// <summary>
-        /// Initializes a new instance of the TraceManager class.
-        /// </summary>
 
         public TraceManager(DiagnosticContext ctx, ILogWriter writer)
         {
             _ctx = ctx;
             _writer = writer;
         }
-        /// <summary>
-        /// Gets or sets the current correlation id.
-        /// </summary>
 
         public string CurrentCorrelationId => _ctx.CorrId;
-        /// <summary>
-        /// Gets or sets the current span id.
-        /// </summary>
         public string CurrentSpanId => _ctx.SpanId;
-        /// <summary>
-        /// Executes the log operation.
-        /// </summary>
 
         public void Log(DiagLevel level, string category, string evt, string message, Exception? ex = null, IDictionary<string, object?>? data = null)
         {
@@ -66,9 +51,6 @@ namespace YasGMP.Diagnostics
             };
             _writer.Enqueue(payload);
         }
-        /// <summary>
-        /// Executes the start span operation.
-        /// </summary>
 
         public IDisposable StartSpan(string category, string name, IDictionary<string, object?>? data = null)
         {
@@ -95,17 +77,11 @@ namespace YasGMP.Diagnostics
             private readonly string _name;
             private readonly IDictionary<string, object?>? _data;
             private bool _done;
-            /// <summary>
-            /// Initializes a new instance of the ProfilerSpan class.
-            /// </summary>
 
             public ProfilerSpan(TraceManager tm, DiagnosticContext ctx, string? parent, Stopwatch sw, string category, string name, IDictionary<string, object?>? data)
             {
                 _tm = tm; _ctx = ctx; _parent = parent; _sw = sw; _category = category; _name = name; _data = data;
             }
-            /// <summary>
-            /// Executes the dispose operation.
-            /// </summary>
 
             public void Dispose()
             {

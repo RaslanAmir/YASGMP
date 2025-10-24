@@ -59,49 +59,16 @@ namespace YasGMP.ViewModels
 
         private static class Routes
         {
-            /// <summary>
-            /// Represents the dashboard value.
-            /// </summary>
             public const string Dashboard    = "//root/home/dashboard";
-            /// <summary>
-            /// Represents the users value.
-            /// </summary>
             public const string Users        = "//root/admin/users";
-            /// <summary>
-            /// Represents the machines value.
-            /// </summary>
             public const string Machines     = "//root/ops/machines";
-            /// <summary>
-            /// Represents the components value.
-            /// </summary>
             public const string Components   = "//root/ops/components";
-            /// <summary>
-            /// Represents the parts value.
-            /// </summary>
             public const string Parts        = "//root/ops/parts";
-            /// <summary>
-            /// Represents the suppliers value.
-            /// </summary>
             public const string Suppliers    = "//root/ops/suppliers";
-            /// <summary>
-            /// Represents the work orders value.
-            /// </summary>
             public const string WorkOrders   = "//root/ops/workorders";
-            /// <summary>
-            /// Represents the calibrations value.
-            /// </summary>
             public const string Calibrations = "//root/ops/calibrations";
-            /// <summary>
-            /// Represents the validation value.
-            /// </summary>
             public const string Validation   = "//root/quality/validation";
-            /// <summary>
-            /// Represents the capa value.
-            /// </summary>
             public const string Capa         = "//root/quality/capa";
-            /// <summary>
-            /// Represents the audit log value.
-            /// </summary>
             public const string AuditLog     = "//root/quality/auditlog";
         }
 

@@ -8,29 +8,18 @@ namespace YasGMP.Services
     /// </summary>
     public sealed class CalibrationDialogRequest
     {
-        /// <summary>
-        /// Initializes a new instance of the CalibrationDialogRequest class.
-        /// </summary>
         public CalibrationDialogRequest(Calibration calibration, IReadOnlyList<MachineComponent> components, IReadOnlyList<Supplier> suppliers)
         {
             Calibration = calibration;
             Components = components;
             Suppliers = suppliers;
         }
-        /// <summary>
-        /// Gets or sets the calibration.
-        /// </summary>
 
         public Calibration Calibration { get; }
-        /// <summary>
-        /// Gets or sets the components.
-        /// </summary>
 
         public IReadOnlyList<MachineComponent> Components { get; }
-        /// <summary>
-        /// Gets or sets the suppliers.
-        /// </summary>
 
         public IReadOnlyList<Supplier> Suppliers { get; }
     }
 }
+

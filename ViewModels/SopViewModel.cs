@@ -261,39 +261,6 @@ namespace YasGMP.ViewModels
         /// <summary>Command that resets <see cref="DraftDocument"/> to defaults.</summary>
         public ICommand ResetDraftCommand { get; }
 
-        /// <summary>
-        /// Applies a database snapshot to the view-model, replacing the current
-        /// document collections and reapplying the active filters.
-        /// </summary>
-        /// <param name="documents">Snapshot retrieved from the persistence layer.</param>
-        public void ApplyDocuments(IReadOnlyList<SopDocument> documents)
-        {
-            var snapshot = documents ?? Array.Empty<SopDocument>();
-            var previousId = SelectedDocument?.Id;
-
-            Documents = new ObservableCollection<SopDocument>(snapshot);
-            FilterDocuments();
-
-            if (previousId.HasValue)
-            {
-                SelectedDocument = Documents.FirstOrDefault(d => d.Id == previousId.Value);
-            }
-            else if (Documents.Count == 0)
-            {
-                SelectedDocument = null;
-            }
-        }
-
-        /// <summary>
-        /// Prepares a SOP document for persistence, mirroring the sanitization
-        /// and validation logic used by the legacy command handlers.
-        /// </summary>
-        /// <param name="document">Document to normalize.</param>
-        /// <param name="isNew">Indicates whether the document is being created.</param>
-        /// <returns>A deep copy ready for persistence.</returns>
-        public SopDocument PrepareForSave(SopDocument document, bool isNew)
-            => PrepareDocumentForPersistence(document, isNew);
-
         /// <summary>Loads SOP documents and applies the active filters.</summary>
         public async Task LoadDocumentsAsync()
         {
@@ -321,7 +288,7 @@ namespace YasGMP.ViewModels
             SopDocument prepared;
             try
             {
-                prepared = PrepareForSave(DraftDocument, isNew: true);
+                prepared = PrepareDocumentForPersistence(DraftDocument, isNew: true);
             }
             catch (InvalidOperationException validationEx)
             {
@@ -367,7 +334,7 @@ namespace YasGMP.ViewModels
             SopDocument prepared;
             try
             {
-                prepared = PrepareForSave(SelectedDocument, isNew: false);
+                prepared = PrepareDocumentForPersistence(SelectedDocument, isNew: false);
                 prepared.Id = SelectedDocument.Id;
             }
             catch (InvalidOperationException validationEx)

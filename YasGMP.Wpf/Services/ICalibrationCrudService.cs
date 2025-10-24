@@ -1,23 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared CRUD contract used by both shells to persist calibrations through
-/// <see cref="YasGMP.Services.CalibrationService"/> and the MAUI audit infrastructure.
+/// Adapter-friendly abstraction over <see cref="YasGMP.Services.CalibrationService"/> so the
+/// WPF shell can execute CRUD operations without pulling in the full database runtime during tests.
 /// </summary>
-/// <remarks>
-/// Module view models invoke this interface on the dispatcher thread, implementations relay work to the shared
-/// <see cref="YasGMP.Services.CalibrationService"/> and <see cref="YasGMP.Services.AuditService"/>, and UI consumers must marshal
-/// updates with <see cref="WpfUiDispatcher"/> once operations complete. The returned <see cref="CrudSaveResult"/> is expected to
-/// include identifiers, signature data, and localization-ready status/notes so MAUI and WPF present consistent audit history and
-/// can translate the text using <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/>.
-/// </remarks>
 public interface ICalibrationCrudService
 {
     Task<IReadOnlyList<Calibration>> GetAllAsync();
@@ -38,15 +30,8 @@ public interface ICalibrationCrudService
 }
 
 /// <summary>
-/// Context metadata captured when persisting calibrations to support downstream audit logging. Each value flows into
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines replay the
-/// accepted signature manifest.
+/// Context metadata captured when persisting calibrations to support downstream audit logging.
 /// </summary>
-/// <remarks>
-/// Adapters project this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside calibration records, and MAUI experiences should propagate the
-/// same payload when presenting or synchronizing calibrations so shared audit history remains aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current auth context.</param>
 /// <param name="DeviceInfo">Machine fingerprint/hostname.</param>
@@ -69,9 +54,6 @@ public readonly record struct CalibrationCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static CalibrationCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -84,9 +66,6 @@ public readonly record struct CalibrationCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static CalibrationCrudContext Create(
         int userId,
@@ -115,3 +94,4 @@ public readonly record struct CalibrationCrudContext(
         };
     }
 }
+

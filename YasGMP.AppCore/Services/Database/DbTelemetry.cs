@@ -13,9 +13,6 @@ namespace YasGMP.Services.Database
     internal static class DbTelemetry
     {
         private static readonly ConcurrentDictionary<string, int> NPlusOneCounter = new();
-        /// <summary>
-        /// Executes the should sample operation.
-        /// </summary>
 
         public static bool ShouldSample(DiagnosticContext ctx, int durationMs)
         {
@@ -28,9 +25,6 @@ namespace YasGMP.Services.Database
             return rnd < Math.Max(0.0, ctx.RandomPercentRelease);
 #endif
         }
-        /// <summary>
-        /// Executes the signature of operation.
-        /// </summary>
 
         public static string SignatureOf(string sql)
         {
@@ -40,9 +34,6 @@ namespace YasGMP.Services.Database
             while (s.Contains("  ")) s = s.Replace("  ", " ");
             return s.Trim().ToLowerInvariant();
         }
-        /// <summary>
-        /// Executes the record n plus one operation.
-        /// </summary>
 
         public static void RecordNPlusOne(string corrId, string signature, ITrace trace)
         {
@@ -58,4 +49,5 @@ namespace YasGMP.Services.Database
         }
     }
 }
+
 

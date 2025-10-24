@@ -1,24 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
-/// <summary>
-/// Shared contract used by the WPF shell and MAUI host to manage Change Control records through
-/// <see cref="YasGMP.Services.ChangeControlService"/> while sharing audit plumbing.
-/// </summary>
-/// <remarks>
-/// Module view models call these members synchronously on the dispatcher thread. Implementations relay the request to the
-/// shared <see cref="YasGMP.Services.ChangeControlService"/> and <see cref="YasGMP.Services.AuditService"/> so both shells
-/// persist and log identical metadata. Callers should dispatch UI updates via <see cref="WpfUiDispatcher"/> after awaiting the
-/// asynchronous operations. Returned <see cref="CrudSaveResult"/> values must include identifiers, signature data, and
-/// localization-ready status text for consumption with <see cref="LocalizationServiceExtensions"/> or
-/// <see cref="ILocalizationService"/>.
-/// </remarks>
 public interface IChangeControlCrudService
 {
     Task<IReadOnlyList<ChangeControl>> GetAllAsync();
@@ -40,16 +27,7 @@ public interface IChangeControlCrudService
     string NormalizeStatus(string? status);
 }
 
-/// <summary>
-/// Context metadata propagated when persisting change control edits. The captured values flow into
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance
-/// pipelines replay the accepted signature manifest.
-/// </summary>
-/// <remarks>
-/// Adapters project this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside change control records, and MAUI experiences should reuse
-/// the same payload when presenting or synchronizing the record to keep shared audit history aligned.
-/// </remarks>
+/// <summary>Context metadata propagated when persisting change control edits.</summary>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="IpAddress">Source IP recorded for auditing.</param>
 /// <param name="DeviceInfo">Originating device fingerprint.</param>
@@ -72,9 +50,6 @@ public readonly record struct ChangeControlCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ChangeControlCrudContext Create(int userId, string? ip, string? device, string? sessionId)
         => new(
@@ -87,9 +62,6 @@ public readonly record struct ChangeControlCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ChangeControlCrudContext Create(
         int userId,
@@ -118,3 +90,4 @@ public readonly record struct ChangeControlCrudContext(
         };
     }
 }
+

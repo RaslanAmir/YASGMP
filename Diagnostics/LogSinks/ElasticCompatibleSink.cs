@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics.LogSinks
 {
@@ -20,16 +19,12 @@ namespace YasGMP.Diagnostics.LogSinks
         private readonly string? _authScheme;
         private readonly Dictionary<string, string> _extraHeaders = new();
         private readonly System.Threading.Timer _flushTimer;
-        /// <summary>
-        /// Initializes a new instance of the ElasticCompatibleSink class.
-        /// </summary>
 
         public ElasticCompatibleSink(IConfiguration cfg)
         {
             _url = cfg[DiagnosticsConstants.KeyElasticUrl];
             _index = cfg[DiagnosticsConstants.KeyElasticIndex];
-            var dir = Path.Combine(FileSystem.AppDataDirectory, "logs");
-            Directory.CreateDirectory(dir);
+            var dir = DiagnosticsPathProvider.GetLogsDirectory();
             _bufferPath = Path.Combine(dir, "elastic_buffer.ndjson");
             _authHeader = cfg["Diagnostics:Elastic:Authorization"];
             _authScheme = cfg["Diagnostics:Elastic:AuthScheme"]; // e.g., Bearer or ApiKey
@@ -48,14 +43,8 @@ namespace YasGMP.Diagnostics.LogSinks
             }
             _flushTimer = new System.Threading.Timer(_ => TryFlushBuffer(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30));
         }
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
 
         public string Name => "elastic";
-        /// <summary>
-        /// Executes the write batch operation.
-        /// </summary>
 
         public void WriteBatch(IReadOnlyList<DiagnosticEvent> batch)
         {
@@ -121,16 +110,10 @@ namespace YasGMP.Diagnostics.LogSinks
         }
 
         // Exposed for DiagnosticsHub button
-        /// <summary>
-        /// Executes the flush buffer now operation.
-        /// </summary>
         public void FlushBufferNow()
         {
             TryFlushBuffer();
         }
-        /// <summary>
-        /// Executes the dispose operation.
-        /// </summary>
 
         public void Dispose()
         {
@@ -139,3 +122,4 @@ namespace YasGMP.Diagnostics.LogSinks
         }
     }
 }
+

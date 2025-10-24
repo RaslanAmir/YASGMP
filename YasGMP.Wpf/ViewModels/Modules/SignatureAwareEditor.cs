@@ -44,3 +44,6 @@ public abstract partial class SignatureAwareEditor : ObservableObject
     [ObservableProperty]
     private string _deviceInfo = string.Empty;
 }
+
+
+

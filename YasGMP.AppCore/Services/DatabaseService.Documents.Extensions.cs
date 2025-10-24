@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceDocumentsExtensions
     {
-        /// <summary>
-        /// Executes the get all documents full async operation.
-        /// </summary>
         public static async Task<List<SopDocument>> GetAllDocumentsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT
@@ -41,9 +38,6 @@ FROM documentcontrol ORDER BY id DESC";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the initiate document async operation.
-        /// </summary>
 
         public static async Task<int> InitiateDocumentAsync(this DatabaseService db, string code, string name, string version, string? filePath, int actorUserId, string? notes, CancellationToken token = default)
         {
@@ -64,9 +58,6 @@ FROM documentcontrol ORDER BY id DESC";
             await db.LogSystemEventAsync(actorUserId, "DOC_INITIATE", "documentcontrol", "DocControl", id, notes, null, "audit", null, null, token: token).ConfigureAwait(false);
             return id;
         }
-        /// <summary>
-        /// Executes the revise document async operation.
-        /// </summary>
 
         public static async Task ReviseDocumentAsync(this DatabaseService db, int documentId, string newVersion, string? newFilePath, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
         {
@@ -82,42 +73,27 @@ FROM documentcontrol ORDER BY id DESC";
             catch { }
             await db.LogSystemEventAsync(actorUserId, "DOC_REVISE", "documentcontrol", "DocControl", documentId, $"rev={newVersion}", ip, "audit", deviceInfo, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the assign document async operation.
-        /// </summary>
 
         public static Task AssignDocumentAsync(this DatabaseService db, int documentId, int userId, string? note, int actorUserId, string ip, string device, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "DOC_ASSIGN", "documentcontrol", "DocControl", documentId, $"user={userId}; note={note}", ip, "audit", device, null, token: token);
-        /// <summary>
-        /// Executes the approve document async operation.
-        /// </summary>
 
         public static async Task ApproveDocumentAsync(this DatabaseService db, int documentId, int approverUserId, string ip, string deviceInfo, string? signatureHash, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE documentcontrol SET status='approved' WHERE id=@id", new[] { new MySqlParameter("@id", documentId) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(approverUserId, "DOC_APPROVE", "documentcontrol", "DocControl", documentId, signatureHash, ip, "audit", deviceInfo, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the publish document async operation.
-        /// </summary>
 
         public static async Task PublishDocumentAsync(this DatabaseService db, int documentId, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE documentcontrol SET status='published' WHERE id=@id", new[] { new MySqlParameter("@id", documentId) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(actorUserId, "DOC_PUBLISH", "documentcontrol", "DocControl", documentId, null, ip, "audit", deviceInfo, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the expire document async operation.
-        /// </summary>
 
         public static async Task ExpireDocumentAsync(this DatabaseService db, int documentId, int actorUserId, string ip, string deviceInfo, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE documentcontrol SET status='expired' WHERE id=@id", new[] { new MySqlParameter("@id", documentId) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(actorUserId, "DOC_EXPIRE", "documentcontrol", "DocControl", documentId, null, ip, "audit", deviceInfo, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the link change control to document async operation.
-        /// </summary>
 
         public static async Task LinkChangeControlToDocumentAsync(this DatabaseService db, int documentId, int changeControlId, int actorUserId, string ip, string device, CancellationToken token = default)
         {
@@ -208,9 +184,6 @@ ON DUPLICATE KEY UPDATE linked_at = CURRENT_TIMESTAMP, linked_by = @actor";
 
             await db.LogSystemEventAsync(actorUserId, "DOC_LINK_CHANGE", "documentcontrol", "DocControl", documentId, $"cc={changeControlId}", ip, "audit", device, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the export documents async operation.
-        /// </summary>
 
         public static async Task<string> ExportDocumentsAsync(this DatabaseService db, List<SopDocument> rows, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
@@ -262,9 +235,6 @@ ON DUPLICATE KEY UPDATE linked_at = CURRENT_TIMESTAMP, linked_by = @actor";
             await db.LogSystemEventAsync(actorUserId, "DOC_EXPORT", "documentcontrol", "DocControl", null, $"count={rows?.Count ?? 0}; file={path}", ip, "info", deviceInfo, sessionId, token: token).ConfigureAwait(false);
             return path;
         }
-        /// <summary>
-        /// Executes the log document audit async operation.
-        /// </summary>
 
         public static Task LogDocumentAuditAsync(this DatabaseService db, int documentId, string action, int actorUserId, string? description, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, $"DOC_{action}", "documentcontrol", "DocControl", documentId == 0 ? null : documentId, description, ip, "audit", deviceInfo, sessionId, token: token);
@@ -313,3 +283,4 @@ ON DUPLICATE KEY UPDATE linked_at = CURRENT_TIMESTAMP, linked_by = @actor";
         }
     }
 }
+

@@ -100,3 +100,4 @@ namespace YasGMP.Services.Interfaces
         Task LinkToCapaAsync(int calibrationId, int capaId);
     }
 }
+

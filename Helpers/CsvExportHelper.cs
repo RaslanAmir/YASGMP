@@ -6,23 +6,14 @@ using System.Text;
 
 namespace YasGMP.Helpers
 {
-    /// <summary>
-    /// Represents the csv export helper value.
-    /// </summary>
     public static class CsvExportHelper
     {
-        /// <summary>
-        /// Executes the ensure export directory operation.
-        /// </summary>
         public static string EnsureExportDirectory()
         {
             var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YASGMP", "exports");
             Directory.CreateDirectory(dir);
             return dir;
         }
-        /// <summary>
-        /// Executes the write csv operation.
-        /// </summary>
 
         public static string WriteCsv<T>(IEnumerable<T> rows, string filePrefix, IEnumerable<(string Header, Func<T, object?> Selector)> columns)
         {

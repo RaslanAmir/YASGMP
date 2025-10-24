@@ -1,18 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace YasGMP.Models
 {
-    /// <summary>
-    /// Represents the Preventive Maintenance Plan.
-    /// </summary>
     public partial class PreventiveMaintenancePlan
     {
-        /// <summary>
-        /// Represents the execution history value.
-        /// </summary>
         [NotMapped]
         public List<string> ExecutionHistory
         {
@@ -20,9 +14,6 @@ namespace YasGMP.Models
             set => ExecutionHistoryRaw = Join(value);
         }
 
-        /// <summary>
-        /// Represents the attachments value.
-        /// </summary>
         [NotMapped]
         public List<string> Attachments
         {
@@ -30,9 +21,6 @@ namespace YasGMP.Models
             set => AttachmentsRaw = Join(value);
         }
 
-        /// <summary>
-        /// Represents the linked work orders value.
-        /// </summary>
         [NotMapped]
         public List<string> LinkedWorkOrders
         {
@@ -48,3 +36,4 @@ namespace YasGMP.Models
             => values == null ? null : string.Join(',', values.Where(v => !string.IsNullOrWhiteSpace(v)));
     }
 }
+

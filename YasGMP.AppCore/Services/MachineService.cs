@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -53,7 +53,7 @@ namespace YasGMP.Services
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             ValidateMachine(machine);
             machine.Status = NormalizeStatus(machine.Status);
-            ApplySignatureMetadata(machine, signatureMetadata, () => GenerateLegacyDigitalSignature(machine));
+            ApplySignatureMetadata(machine, signatureMetadata, () => ComputeDefaultSignature(machine));
 
             string effectiveDevice = signatureMetadata?.Device ?? deviceInfo;
             string? effectiveSession = signatureMetadata?.Session ?? sessionId;
@@ -85,7 +85,7 @@ namespace YasGMP.Services
             if (machine == null) throw new ArgumentNullException(nameof(machine));
             ValidateMachine(machine);
             machine.Status = NormalizeStatus(machine.Status);
-            ApplySignatureMetadata(machine, signatureMetadata, () => GenerateLegacyDigitalSignature(machine));
+            ApplySignatureMetadata(machine, signatureMetadata, () => ComputeDefaultSignature(machine));
 
             string effectiveDevice = signatureMetadata?.Device ?? deviceInfo;
             string? effectiveSession = signatureMetadata?.Session ?? sessionId;
@@ -187,12 +187,14 @@ namespace YasGMP.Services
             machine.DigitalSignature = hash;
         }
 
-        /// <summary>Legacy deterministic signature generator retained for backward compatibility.</summary>
-        [Obsolete("Signature metadata should provide the hash; this fallback will be removed once legacy flows are upgraded.")]
-        private string GenerateLegacyDigitalSignature(Machine machine)
+        /// <summary>Deterministic signature using stable machine properties (no time-based salt).</summary>
+        private static string ComputeDefaultSignature(Machine machine)
         {
             string status = NormalizeStatus(machine.Status);
-            string raw = $"{machine.Id}|{machine.Name}|{machine.Location}|{machine.UrsDoc}|{status}|{DateTime.UtcNow:O}";
+            string name = machine.Name ?? string.Empty;
+            string loc = machine.Location ?? string.Empty;
+            string urs = machine.UrsDoc ?? string.Empty;
+            string raw = $"{machine.Id}|{name}|{loc}|{urs}|{status}";
             using var sha = System.Security.Cryptography.SHA256.Create();
             return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw)));
         }
@@ -200,15 +202,9 @@ namespace YasGMP.Services
         #endregion
 
         #region === EXTENSIBILITY HOOKS =======================================================
-        /// <summary>
-        /// Executes the link to ppm plan async operation.
-        /// </summary>
 
         public async Task LinkToPpmPlanAsync(int machineId, int ppmPlanId)
             => await _audit.LogSystemEventAsync("MACHINE_PPM_LINK", $"🔗 Povezan PPM Plan ID={ppmPlanId} sa strojem ID={machineId}");
-        /// <summary>
-        /// Executes the trigger initial calibration async operation.
-        /// </summary>
 
         public async Task TriggerInitialCalibrationAsync(int machineId)
             => await _audit.LogSystemEventAsync("MACHINE_CALIBRATION_TRIGGER", $"📌 Automatski trigger kalibracije za stroj ID={machineId}");

@@ -126,26 +126,6 @@ namespace YasGMP.Models
         [Display(Name = "Dobavljač/proizvođač")]
         public string Supplier { get; set; } = string.Empty;
 
-        /// <summary>QR code asset or image path associated with this component.</summary>
-        [StringLength(128)]
-        [Column("qr_code")]
-        [Display(Name = "QR kod komponente")]
-        public string QrCode { get; set; } = string.Empty;
-
-        /// <summary>Canonical QR payload stored for component scans.</summary>
-        [StringLength(256)]
-        [Column("qr_payload")]
-        [Display(Name = "QR payload")]
-        public string QrPayload { get; set; } = string.Empty;
-
-        /// <summary>Optional override when operators need to diverge from generated codes.</summary>
-        [NotMapped]
-        public string CodeOverride { get; set; } = string.Empty;
-
-        /// <summary>Gets or sets a value indicating whether the override should be honored.</summary>
-        [NotMapped]
-        public bool IsCodeOverrideEnabled { get; set; }
-
         /// <summary>Linked documents (bonus for audit/inspection/validation).</summary>
         [NotMapped]
         public List<string> LinkedDocuments { get; set; } = new();
@@ -169,3 +149,4 @@ namespace YasGMP.Models
         public bool IsDeleted { get; set; } = false;
     }
 }
+

@@ -51,3 +51,4 @@ namespace YasGMP.Services.Interfaces
         Task DenyPermissionRequestAsync(int requestId, int deniedBy, string comment);
     }
 }
+

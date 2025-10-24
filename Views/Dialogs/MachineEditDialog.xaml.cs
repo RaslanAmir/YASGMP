@@ -23,40 +23,16 @@ namespace YasGMP.Views.Dialogs
     public partial class MachineEditDialog : ContentPage
     {
         private readonly TaskCompletionSource<bool> _tcs = new();
-        /// <summary>
-        /// Gets or sets the result.
-        /// </summary>
         public Task<bool> Result => _tcs.Task;
-        /// <summary>
-        /// Gets or sets the machine.
-        /// </summary>
         public Machine Machine { get; }
         private readonly DatabaseService _db;
         private readonly CodeGeneratorService _codeGen = new();
-        /// <summary>
-        /// Gets or sets the type items.
-        /// </summary>
 
         public ObservableCollection<MachineType> TypeItems { get; } = new();
-        /// <summary>
-        /// Gets or sets the manufacturer items.
-        /// </summary>
         public ObservableCollection<Manufacturer> ManufacturerItems { get; } = new();
-        /// <summary>
-        /// Gets or sets the location items.
-        /// </summary>
         public ObservableCollection<LocationModel> LocationItems { get; } = new();
-        /// <summary>
-        /// Gets or sets the responsible items.
-        /// </summary>
         public ObservableCollection<ResponsibleParty> ResponsibleItems { get; } = new();
-        /// <summary>
-        /// Gets or sets the status items.
-        /// </summary>
         public ObservableCollection<MachineStatus> StatusItems { get; } = new();
-        /// <summary>
-        /// Initializes a new instance of the MachineEditDialog class.
-        /// </summary>
 
         public MachineEditDialog(Machine machine, DatabaseService db)
         {

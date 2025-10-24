@@ -229,27 +229,15 @@ namespace YasGMP.ViewModels
 
         // You can add properties here for attachments popup, audit trail, digital signature state, etc.
         // Example stubs:
-        /// <summary>
-        /// Gets or sets the is attachment dialog open.
-        /// </summary>
 
         public bool IsAttachmentDialogOpen { get; set; } // Add OnPropertyChanged as above if you bind this
-        /// <summary>
-        /// Gets or sets the is audit popup open.
-        /// </summary>
         public bool IsAuditPopupOpen { get; set; }
-        /// <summary>
-        /// Gets or sets the is signature dialog open.
-        /// </summary>
         public bool IsSignatureDialogOpen { get; set; }
         // More advanced state/logic as needed...
 
         #endregion
 
         #region === INotifyPropertyChanged Support ===
-        /// <summary>
-        /// Occurs when property changed event handler is raised.
-        /// </summary>
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

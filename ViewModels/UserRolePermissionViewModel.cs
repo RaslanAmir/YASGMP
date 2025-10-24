@@ -87,126 +87,84 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Properties
-        /// <summary>
-        /// Represents the users value.
-        /// </summary>
 
         public ObservableCollection<User> Users
         {
             get => _users;
             set { _users = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the roles value.
-        /// </summary>
 
         public ObservableCollection<Role> Roles
         {
             get => _roles;
             set { _roles = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the permissions value.
-        /// </summary>
 
         public ObservableCollection<Permission> Permissions
         {
             get => _permissions;
             set { _permissions = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the filtered users value.
-        /// </summary>
 
         public ObservableCollection<User> FilteredUsers
         {
             get => _filteredUsers;
             set { _filteredUsers = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the filtered roles value.
-        /// </summary>
 
         public ObservableCollection<Role> FilteredRoles
         {
             get => _filteredRoles;
             set { _filteredRoles = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the filtered permissions value.
-        /// </summary>
 
         public ObservableCollection<Permission> FilteredPermissions
         {
             get => _filteredPermissions;
             set { _filteredPermissions = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the selected user value.
-        /// </summary>
 
         public User? SelectedUser
         {
             get => _selectedUser;
             set { _selectedUser = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the selected role value.
-        /// </summary>
 
         public Role? SelectedRole
         {
             get => _selectedRole;
             set { _selectedRole = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the selected permission value.
-        /// </summary>
 
         public Permission? SelectedPermission
         {
             get => _selectedPermission;
             set { _selectedPermission = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the user search term value.
-        /// </summary>
 
         public string UserSearchTerm
         {
             get => _userSearchTerm;
             set { _userSearchTerm = value ?? string.Empty; OnPropertyChanged(); FilterAll(); }
         }
-        /// <summary>
-        /// Represents the role search term value.
-        /// </summary>
 
         public string RoleSearchTerm
         {
             get => _roleSearchTerm;
             set { _roleSearchTerm = value ?? string.Empty; OnPropertyChanged(); FilterAll(); }
         }
-        /// <summary>
-        /// Represents the perm search term value.
-        /// </summary>
 
         public string PermSearchTerm
         {
             get => _permSearchTerm;
             set { _permSearchTerm = value ?? string.Empty; OnPropertyChanged(); FilterAll(); }
         }
-        /// <summary>
-        /// Represents the is busy value.
-        /// </summary>
 
         public bool IsBusy
         {
             get => _isBusy;
             set { _isBusy = value; OnPropertyChanged(); }
         }
-        /// <summary>
-        /// Represents the status message value.
-        /// </summary>
 
         public string StatusMessage
         {
@@ -217,78 +175,27 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
-        /// <summary>
-        /// Gets or sets the load users command.
-        /// </summary>
 
         public ICommand LoadUsersCommand { get; }
-        /// <summary>
-        /// Gets or sets the load roles command.
-        /// </summary>
         public ICommand LoadRolesCommand { get; }
-        /// <summary>
-        /// Gets or sets the load permissions command.
-        /// </summary>
         public ICommand LoadPermissionsCommand { get; }
-        /// <summary>
-        /// Gets or sets the assign role command.
-        /// </summary>
         public ICommand AssignRoleCommand { get; }
-        /// <summary>
-        /// Gets or sets the remove role command.
-        /// </summary>
         public ICommand RemoveRoleCommand { get; }
-        /// <summary>
-        /// Gets or sets the assign permission command.
-        /// </summary>
         public ICommand AssignPermissionCommand { get; }
-        /// <summary>
-        /// Gets or sets the remove permission command.
-        /// </summary>
         public ICommand RemovePermissionCommand { get; }
-        /// <summary>
-        /// Gets or sets the lock user command.
-        /// </summary>
         public ICommand LockUserCommand { get; }
-        /// <summary>
-        /// Gets or sets the unlock user command.
-        /// </summary>
         public ICommand UnlockUserCommand { get; }
-        /// <summary>
-        /// Gets or sets the reset password command.
-        /// </summary>
         public ICommand ResetPasswordCommand { get; }
-        /// <summary>
-        /// Gets or sets the add user command.
-        /// </summary>
         public ICommand AddUserCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete user command.
-        /// </summary>
         public ICommand DeleteUserCommand { get; }
-        /// <summary>
-        /// Gets or sets the export users command.
-        /// </summary>
         public ICommand ExportUsersCommand { get; }
-        /// <summary>
-        /// Gets or sets the export roles command.
-        /// </summary>
         public ICommand ExportRolesCommand { get; }
-        /// <summary>
-        /// Gets or sets the export permissions command.
-        /// </summary>
         public ICommand ExportPermissionsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Executes the load users async operation.
-        /// </summary>
 
         public async Task LoadUsersAsync()
         {
@@ -306,9 +213,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the load roles async operation.
-        /// </summary>
 
         public async Task LoadRolesAsync()
         {
@@ -326,9 +230,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the load permissions async operation.
-        /// </summary>
 
         public async Task LoadPermissionsAsync()
         {
@@ -346,9 +247,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the assign role async operation.
-        /// </summary>
 
         public async Task AssignRoleAsync()
         {
@@ -368,9 +266,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the remove role async operation.
-        /// </summary>
 
         public async Task RemoveRoleAsync()
         {
@@ -390,9 +285,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the assign permission async operation.
-        /// </summary>
 
         public async Task AssignPermissionAsync()
         {
@@ -412,9 +304,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the remove permission async operation.
-        /// </summary>
 
         public async Task RemovePermissionAsync()
         {
@@ -434,9 +323,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the lock user async operation.
-        /// </summary>
 
         public async Task LockUserAsync()
         {
@@ -456,9 +342,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the unlock user async operation.
-        /// </summary>
 
         public async Task UnlockUserAsync()
         {
@@ -478,9 +361,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the reset password async operation.
-        /// </summary>
 
         public async Task ResetPasswordAsync()
         {
@@ -499,9 +379,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the add user async operation.
-        /// </summary>
 
         public async Task AddUserAsync()
         {
@@ -521,9 +398,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the delete user async operation.
-        /// </summary>
 
         public async Task DeleteUserAsync()
         {
@@ -544,9 +418,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the export users async operation.
-        /// </summary>
 
         public async Task ExportUsersAsync()
         {
@@ -562,9 +433,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the export roles async operation.
-        /// </summary>
 
         public async Task ExportRolesAsync()
         {
@@ -580,9 +448,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the export permissions async operation.
-        /// </summary>
 
         public async Task ExportPermissionsAsync()
         {
@@ -598,9 +463,6 @@ namespace YasGMP.ViewModels
             }
             finally { IsBusy = false; }
         }
-        /// <summary>
-        /// Executes the filter all operation.
-        /// </summary>
 
         public void FilterAll()
         {
@@ -626,9 +488,6 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Audit/Auxiliary (DTO→Model tolerant mapping)
-        /// <summary>
-        /// Executes the load user audit async operation.
-        /// </summary>
 
         public async Task<ObservableCollection<AuditLogEntry>> LoadUserAuditAsync(int userId)
         {
@@ -636,9 +495,6 @@ namespace YasGMP.ViewModels
             var mapped = raw?.Select(MapAuditEntryToModel) ?? Enumerable.Empty<AuditLogEntry>();
             return new ObservableCollection<AuditLogEntry>(mapped);
         }
-        /// <summary>
-        /// Executes the load role audit async operation.
-        /// </summary>
 
         public async Task<ObservableCollection<AuditLogEntry>> LoadRoleAuditAsync(int roleId)
         {
@@ -646,9 +502,6 @@ namespace YasGMP.ViewModels
             var mapped = raw?.Select(MapAuditEntryToModel) ?? Enumerable.Empty<AuditLogEntry>();
             return new ObservableCollection<AuditLogEntry>(mapped);
         }
-        /// <summary>
-        /// Executes the load permission audit async operation.
-        /// </summary>
 
         public async Task<ObservableCollection<AuditLogEntry>> LoadPermissionAuditAsync(int permissionId)
         {

@@ -146,34 +146,13 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ========================================================
-        /// <summary>
-        /// Gets or sets the load suppliers command.
-        /// </summary>
 
         public ICommand LoadSuppliersCommand { get; }
-        /// <summary>
-        /// Gets or sets the add supplier command.
-        /// </summary>
         public ICommand AddSupplierCommand { get; }
-        /// <summary>
-        /// Gets or sets the update supplier command.
-        /// </summary>
         public ICommand UpdateSupplierCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete supplier command.
-        /// </summary>
         public ICommand DeleteSupplierCommand { get; }
-        /// <summary>
-        /// Gets or sets the rollback supplier command.
-        /// </summary>
         public ICommand RollbackSupplierCommand { get; }
-        /// <summary>
-        /// Gets or sets the export suppliers command.
-        /// </summary>
         public ICommand ExportSuppliersCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

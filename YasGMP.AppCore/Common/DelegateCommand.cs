@@ -88,3 +88,4 @@ namespace YasGMP.Common
         public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }
+

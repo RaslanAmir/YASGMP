@@ -12,9 +12,6 @@ namespace YasGMP.Models
     [Table("stock_levels")]
     public partial class StockLevel
     {
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
         [Key]
         [Column("id")]
         public int Id { get; set; }
@@ -24,9 +21,6 @@ namespace YasGMP.Models
         [Column("part_id")]
         public int PartId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the part.
-        /// </summary>
         [ForeignKey(nameof(PartId))]
         public virtual Part Part { get; set; } = null!;
 
@@ -35,9 +29,6 @@ namespace YasGMP.Models
         [Column("warehouse_id")]
         public int WarehouseId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the warehouse.
-        /// </summary>
         [ForeignKey(nameof(WarehouseId))]
         public virtual Warehouse Warehouse { get; set; } = null!;
 
@@ -78,9 +69,6 @@ namespace YasGMP.Models
         [Column("last_modified_by_id")]
         public int LastModifiedById { get; set; }
 
-        /// <summary>
-        /// Gets or sets the last modified by.
-        /// </summary>
         [ForeignKey(nameof(LastModifiedById))]
         public virtual User LastModifiedBy { get; set; } = null!;
 
@@ -144,3 +132,4 @@ namespace YasGMP.Models
         }
     }
 }
+

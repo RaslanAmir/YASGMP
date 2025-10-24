@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceIncidentAuditsExtensions
     {
-        /// <summary>
-        /// Executes the insert incident audit async operation.
-        /// </summary>
         public static async Task<int> InsertIncidentAuditAsync(this DatabaseService db, IncidentAudit a, CancellationToken token = default)
         {
             await db.LogSystemEventAsync(
@@ -69,9 +66,6 @@ namespace YasGMP.Services
 
             return a.Id;
         }
-        /// <summary>
-        /// Executes the get incident audit by id async operation.
-        /// </summary>
 
         public static async Task<IncidentAudit?> GetIncidentAuditByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -87,9 +81,6 @@ namespace YasGMP.Services
                 return null;
             }
         }
-        /// <summary>
-        /// Executes the get incident audits by incident id async operation.
-        /// </summary>
 
         public static async Task<List<IncidentAudit>> GetIncidentAuditsByIncidentIdAsync(this DatabaseService db, int incidentId, CancellationToken token = default)
         {
@@ -105,9 +96,6 @@ namespace YasGMP.Services
                 return new List<IncidentAudit>();
             }
         }
-        /// <summary>
-        /// Executes the get incident audits by user id async operation.
-        /// </summary>
 
         public static async Task<List<IncidentAudit>> GetIncidentAuditsByUserIdAsync(this DatabaseService db, int userId, CancellationToken token = default)
         {
@@ -163,3 +151,4 @@ namespace YasGMP.Services
         }
     }
 }
+

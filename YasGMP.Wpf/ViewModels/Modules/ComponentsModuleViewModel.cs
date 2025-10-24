@@ -3,29 +3,30 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
+using ComponentEntity = YasGMP.Models.Component;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the components module view model value.
-/// </summary>
 
+/// <summary>Maintains component records linked to assets inside the WPF SAP B1 shell.</summary>
+/// <remarks>
+/// Form Modes: Find filters across linked machines, Add seeds a new <see cref="ComponentEditor"/>, View freezes the editor, and Update enables editing with machine selection lookups.
+/// Audit &amp; Logging: Persists through <see cref="IComponentCrudService"/> with enforced electronic signatures; audit diffing lives in the shared service layer.
+/// Localization: Uses inline literals such as `"Components"`, `"Unable to locate component #{id}."`, and status prompts; RESX keys are still TODO.
+/// Navigation: ModuleKey `Components` ties the module into docking and status updates, while CFL helpers route Golden Arrow navigation between assets and component records using machine-related module keys.
+/// </remarks>
 public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
+    /// <summary>Shell registration key that binds Components into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Components" until `Modules_Components_Title` is introduced.</remarks>
     public new const string ModuleKey = "Components";
 
     private static readonly string[] DefaultStatuses =
@@ -45,117 +46,70 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         "other"
     };
 
-    private const string ComponentNotFoundStatusKey = "Module.Components.Status.ComponentNotFound";
-    private const string CodeAndQrGeneratedStatusKey = "Module.Components.Status.CodeAndQrGenerated";
-    private const string QrGeneratedStatusKey = "Module.Components.Status.QrGenerated";
-    private const string QrGenerationFailedStatusKey = "Module.Components.Status.QrGenerationFailed";
-    private const string QrPathUnavailableStatusKey = "Module.Components.Status.QrPathUnavailable";
-    private const string SelectBeforeSaveStatusKey = "Module.Components.Status.SelectBeforeSave";
-    private const string SignatureFailedStatusKey = "Module.Components.Status.SignatureFailed";
-    private const string SignatureCancelledStatusKey = "Module.Components.Status.SignatureCancelled";
-    private const string SignatureNotCapturedStatusKey = "Module.Components.Status.SignatureNotCaptured";
-    private const string SignaturePersistenceFailedStatusKey = "Module.Components.Status.SignaturePersistenceFailed";
-    private const string SignatureCapturedStatusKey = "Module.Components.Status.SignatureCaptured";
-    private const string SaveBeforeAttachmentStatusKey = "Module.Components.Status.SaveBeforeAttachment";
-    private const string AttachmentCancelledStatusKey = "Module.Components.Status.AttachmentCancelled";
-    private const string AttachmentFailedStatusKey = "Module.Components.Status.AttachmentFailed";
-
     private readonly IComponentCrudService _componentService;
     private readonly IMachineCrudService _machineService;
     private readonly IAuthContext _authContext;
-    private readonly IFilePicker _filePicker;
-    private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly IShellInteractionService _shellInteraction;
-    private readonly ILocalizationService _localization;
-    private readonly ICodeGeneratorService _codeGeneratorService;
-    private readonly IQRCodeService _qrCodeService;
-    private readonly IPlatformService _platformService;
 
-    private Component? _loadedComponent;
+    private ComponentEntity? _loadedComponent;
     private ComponentEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
     private IReadOnlyList<Machine> _machines = Array.Empty<Machine>();
-    /// <summary>
-    /// Initializes a new instance of the ComponentsModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Components module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public ComponentsModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
         IComponentCrudService componentService,
         IMachineCrudService machineService,
         IAuthContext authContext,
-        IFilePicker filePicker,
-        IAttachmentWorkflowService attachmentWorkflow,
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization,
-        ICodeGeneratorService codeGeneratorService,
-        IQRCodeService qrCodeService,
-        IPlatformService platformService)
-        : base(ModuleKey, localization.GetString("Module.Title.Components"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Components", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
         _machineService = machineService ?? throw new ArgumentNullException(nameof(machineService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
-        _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
-        _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
-        _codeGeneratorService = codeGeneratorService ?? throw new ArgumentNullException(nameof(codeGeneratorService));
-        _qrCodeService = qrCodeService ?? throw new ArgumentNullException(nameof(qrCodeService));
-        _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
 
         Editor = ComponentEditor.CreateEmpty();
         StatusOptions = Array.AsReadOnly(DefaultStatuses);
         TypeOptions = Array.AsReadOnly(DefaultTypes);
         MachineOptions = new ObservableCollection<MachineOption>();
-
-        AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-        GenerateCodeCommand = new AsyncRelayCommand(GenerateCodeAsync, CanGenerateCode);
-        PreviewQrCommand = new AsyncRelayCommand(PreviewQrAsync, CanPreviewQr);
+        SummarizeWithAiCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the Components module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Components_Editor` resources are available.</remarks>
     [ObservableProperty]
     private ComponentEditor _editor;
 
+    /// <summary>Opens the AI module to summarize the selected component.</summary>
+    public CommunityToolkit.Mvvm.Input.IRelayCommand SummarizeWithAiCommand { get; }
+
+    /// <summary>Generated property exposing the is editor enabled for the Components module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Components_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Command exposed to the toolbar for uploading attachments.
-    /// </summary>
 
-    public IAsyncRelayCommand AttachDocumentCommand { get; }
-    /// <summary>
-    /// Generates a component code and QR payload.
-    /// </summary>
-
-    public IAsyncRelayCommand GenerateCodeCommand { get; }
-    /// <summary>
-    /// Persists and previews the QR image for the current component.
-    /// </summary>
-
-    public IAsyncRelayCommand PreviewQrCommand { get; }
-    /// <summary>
-    /// Gets or sets the machine options.
-    /// </summary>
-
+    /// <summary>Collection presenting the machine options for the Components document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Components_Grid` resources exist.</remarks>
     public ObservableCollection<MachineOption> MachineOptions { get; }
-    /// <summary>
-    /// Gets or sets the status options.
-    /// </summary>
 
+    /// <summary>Collection presenting the status options for the Components document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Components_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
-    /// <summary>
-    /// Gets or sets the type options.
-    /// </summary>
 
+    /// <summary>Collection presenting the type options for the Components document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Components_Grid` resources exist.</remarks>
     public IReadOnlyList<string> TypeOptions { get; }
 
+    /// <summary>Loads Components records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Components_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         _machines = await _machineService.GetAllAsync().ConfigureAwait(false);
@@ -165,6 +119,8 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         return components.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Components designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var machines = new List<Machine>
@@ -186,7 +142,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         _machines = machines;
         RefreshMachineOptions(machines);
 
-        var sample = new List<Component>
+        var sample = new List<ComponentEntity>
         {
             new()
             {
@@ -225,6 +181,8 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Components". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Components` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var components = await _componentService.GetAllAsync().ConfigureAwait(false);
@@ -250,16 +208,36 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 }
 
                 var description = descriptionParts.Count > 0
-                    ? string.Join(" • ", descriptionParts)
+                    ? string.Join(" â€˘ ", descriptionParts)
                     : null;
 
                 return new CflItem(key, label, description);
             })
             .ToList();
 
-        return new CflRequest("Select Component", items);
+        return new CflRequest("Select ComponentEntity", items);
     }
 
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedComponent is null)
+        {
+            StatusMessage = "Select a component to summarize.";
+            return;
+        }
+
+        var c = _loadedComponent;
+        string prompt = c is null
+            ? $"Summarize component: {SelectedRecord?.Title}. Provide status, machine link and risks in <= 8 bullets."
+            : $"Summarize this component (<= 8 bullets). Name={c.Name}; Code={c.Code}; Status={c.Status}; Type={c.Type}; Machine={c.MachineName}; Supplier={c.Supplier}; Serial={c.SerialNumber}.";
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Applies CFL selections back into the Components workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Components". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Components_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var search = result.Selected.Label;
@@ -271,17 +249,18 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
 
         SearchText = search;
-        StatusMessage = _localization.GetString("Module.Status.Filtered", Title, search);
+        StatusMessage = $"Filtered {Title} by \"{search}\".";
         return Task.CompletedTask;
     }
 
+    /// <summary>Loads editor payloads for the selected Components record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Components". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Components` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
         {
             _loadedComponent = null;
             SetEditor(ComponentEditor.CreateEmpty());
-            UpdateCommandStates();
             return;
         }
 
@@ -298,17 +277,17 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         var component = await _componentService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (component is null)
         {
-            StatusMessage = _localization.GetString(ComponentNotFoundStatusKey, id);
+            StatusMessage = $"Unable to locate component #{id}.";
             return;
         }
 
         _loadedComponent = component;
         LoadEditor(component);
-        await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
-        UpdateCommandStates();
     }
 
-    protected override async Task OnModeChangedAsync(FormMode mode)
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
+    protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
 
@@ -323,33 +302,27 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                     _componentService.NormalizeStatus("active"),
                     defaultMachineId,
                     defaultMachineName));
-                await InitializeEditorIdentifiersAsync(resetDirty: true).ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(Editor.Code) && !string.IsNullOrWhiteSpace(Editor.QrCode))
-                {
-                    StatusMessage = _localization.GetString(CodeAndQrGeneratedStatusKey, Editor.Code, Editor.QrCode);
-                }
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
-                await InitializeEditorIdentifiersAsync().ConfigureAwait(false);
                 break;
             case FormMode.View:
                 _snapshot = null;
                 break;
         }
 
-        UpdateCommandStates();
+        return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
         try
         {
-            EnsureEditorStatusNormalized(suppressDirty: true);
-            var code = EnsureEditorCode(force: false, suppressDirty: true);
-            EnsureEditorQrPayload(code, suppressDirty: true);
             var component = Editor.ToComponent(_loadedComponent);
+            component.Status = _componentService.NormalizeStatus(component.Status);
             component.MachineName = ResolveMachineName(component.MachineId);
             _componentService.Validate(component);
         }
@@ -365,22 +338,17 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var component = Editor.ToComponent(_loadedComponent);
-        try
-        {
-            await SynchronizeIdentifiersAsync(component, forceCode: false, suppressDirty: true).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
-            return false;
-        }
+        component.Status = _componentService.NormalizeStatus(component.Status);
+        component.MachineName = ResolveMachineName(component.MachineId);
 
         if (Mode == FormMode.Update && _loadedComponent is null)
         {
-            StatusMessage = _localization.GetString(SelectBeforeSaveStatusKey);
+            StatusMessage = "Select a component before saving.";
             return false;
         }
 
@@ -394,38 +362,35 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = _localization.GetString(SignatureFailedStatusKey, ex.Message);
+            StatusMessage = $"Electronic signature failed: {ex.Message}";
             return false;
         }
 
         if (signatureResult is null)
         {
-            StatusMessage = _localization.GetString(SignatureCancelledStatusKey);
+            StatusMessage = "Electronic signature cancelled. Save aborted.";
             return false;
         }
 
         if (signatureResult.Signature is null)
         {
-            StatusMessage = _localization.GetString(SignatureNotCapturedStatusKey);
+            StatusMessage = "Electronic signature was not captured.";
             return false;
         }
 
-        var signature = signatureResult.Signature;
-        component.DigitalSignature = signature.SignatureHash ?? string.Empty;
-        component.LastModified = signature.SignedAt ?? DateTime.UtcNow;
-        component.LastModifiedById = signature.UserId != 0
-            ? signature.UserId
-            : _authContext.CurrentUser?.Id ?? component.LastModifiedById;
+        component.DigitalSignature = signatureResult.Signature.SignatureHash ?? string.Empty;
+        component.LastModified = DateTime.UtcNow;
+        component.LastModifiedById = _authContext.CurrentUser?.Id ?? component.LastModifiedById;
         component.SourceIp = _authContext.CurrentIpAddress ?? component.SourceIp ?? string.Empty;
 
         var context = ComponentCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentIpAddress ?? string.Empty,
+            _authContext.CurrentDeviceInfo ?? string.Empty,
             _authContext.CurrentSessionId,
             signatureResult);
 
-        Component adapterResult;
+        ComponentEntity adapterResult;
         CrudSaveResult saveResult;
         try
         {
@@ -480,16 +445,17 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         }
         catch (Exception ex)
         {
-            StatusMessage = _localization.GetString(SignaturePersistenceFailedStatusKey, ex.Message);
+            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
             Mode = FormMode.Update;
             return false;
         }
 
-        StatusMessage = _localization.GetString(SignatureCapturedStatusKey, signatureResult.ReasonDisplay);
-        UpdateCommandStates();
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -507,8 +473,6 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         {
             SetEditor(_snapshot.Clone());
         }
-
-        UpdateCommandStates();
     }
 
     partial void OnEditorChanging(ComponentEditor value)
@@ -549,17 +513,14 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         {
             MarkDirty();
         }
-
-        UpdateCommandStates();
     }
 
-    private void LoadEditor(Component component)
+    private void LoadEditor(ComponentEntity component)
     {
         _suppressEditorDirtyNotifications = true;
         Editor = ComponentEditor.FromComponent(component, _componentService.NormalizeStatus, ResolveMachineName);
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
-        UpdateCommandStates();
     }
 
     private void SetEditor(ComponentEditor editor)
@@ -568,17 +529,6 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         Editor = editor;
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
-        UpdateCommandStates();
-    }
-
-    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-    {
-        base.OnPropertyChanged(e);
-
-        if (e.PropertyName is nameof(IsBusy) or nameof(Mode) or nameof(SelectedRecord) or nameof(IsDirty))
-        {
-            UpdateCommandStates();
-        }
     }
 
     private void RefreshMachineOptions(IEnumerable<Machine> machines)
@@ -639,7 +589,7 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         return $"Machine #{machine.Id}";
     }
 
-    private ModuleRecord ToRecord(Component component)
+    private ModuleRecord ToRecord(ComponentEntity component)
     {
         var inspector = new List<InspectorField>
         {
@@ -662,397 +612,6 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             AssetsModuleViewModel.ModuleKey,
             component.MachineId);
     }
-
-    private bool CanGenerateCode()
-        => !IsBusy && IsInEditMode;
-
-    private bool CanPreviewQr()
-        => !IsBusy && Editor is not null && !string.IsNullOrWhiteSpace(Editor.QrPayload);
-
-    private bool CanAttachDocument()
-        => !IsBusy
-           && !IsEditorEnabled
-           && _loadedComponent is { Id: > 0 };
-
-    private async Task GenerateCodeAsync()
-    {
-        if (!IsInEditMode)
-        {
-            return;
-        }
-
-        try
-        {
-            IsBusy = true;
-            var code = EnsureEditorCode(force: true, suppressDirty: false);
-            var payload = EnsureEditorQrPayload(code, suppressDirty: false);
-            var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty: false).ConfigureAwait(false);
-            StatusMessage = _localization.GetString(
-                CodeAndQrGeneratedStatusKey,
-                code,
-                string.IsNullOrWhiteSpace(path) ? _localization.GetString(QrPathUnavailableStatusKey) : path);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateCommandStates();
-        }
-    }
-
-    private async Task PreviewQrAsync()
-    {
-        try
-        {
-            IsBusy = true;
-            var component = Editor.ToComponent(_loadedComponent);
-            await SynchronizeIdentifiersAsync(component, forceCode: false, suppressDirty: false).ConfigureAwait(false);
-            var path = component.QrCode ?? Editor.QrCode;
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                StatusMessage = _localization.GetString(
-                    QrGenerationFailedStatusKey,
-                    _localization.GetString(QrPathUnavailableStatusKey));
-            }
-            else
-            {
-                _shellInteraction.PreviewDocument(path);
-                StatusMessage = _localization.GetString(QrGeneratedStatusKey, path);
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateCommandStates();
-        }
-    }
-
-    private async Task AttachDocumentAsync()
-    {
-        if (_loadedComponent is null || _loadedComponent.Id <= 0)
-        {
-            StatusMessage = _localization.GetString(SaveBeforeAttachmentStatusKey);
-            return;
-        }
-
-        try
-        {
-            IsBusy = true;
-            var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(AllowMultiple: true, Title: $"Attach files to component #{_loadedComponent.Id}"))
-                .ConfigureAwait(false);
-
-            if (files is null || files.Count == 0)
-            {
-                StatusMessage = _localization.GetString(AttachmentCancelledStatusKey);
-                return;
-            }
-
-            var processed = 0;
-            var deduplicated = 0;
-            var uploadedBy = _authContext.CurrentUser?.Id;
-
-            foreach (var file in files)
-            {
-                await using var stream = await file.OpenReadAsync().ConfigureAwait(false);
-                var request = new AttachmentUploadRequest
-                {
-                    FileName = file.FileName,
-                    ContentType = file.ContentType,
-                    EntityType = "components",
-                    EntityId = _loadedComponent.Id,
-                    UploadedById = uploadedBy,
-                    Reason = $"component:{_loadedComponent.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
-                    SourceHost = _authContext.CurrentDeviceInfo,
-                    Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
-                };
-
-                var result = await _attachmentWorkflow.UploadAsync(stream, request).ConfigureAwait(false);
-                processed++;
-                if (result.Deduplicated)
-                {
-                    deduplicated++;
-                }
-            }
-
-            StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = _localization.GetString(AttachmentFailedStatusKey, ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateCommandStates();
-        }
-    }
-
-    private async Task InitializeEditorIdentifiersAsync(bool resetDirty = false)
-    {
-        if (Editor is null)
-        {
-            return;
-        }
-
-        var component = Editor.ToComponent(_loadedComponent);
-        try
-        {
-            await SynchronizeIdentifiersAsync(
-                    component,
-                    forceCode: false,
-                    suppressDirty: true,
-                    resetDirtyAfter: resetDirty)
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = _localization.GetString(QrGenerationFailedStatusKey, ex.Message);
-        }
-    }
-
-    private async Task SynchronizeIdentifiersAsync(
-        Component component,
-        bool forceCode,
-        bool suppressDirty,
-        bool resetDirtyAfter = false,
-        CancellationToken cancellationToken = default)
-    {
-        if (component is null)
-        {
-            return;
-        }
-
-        var normalizedStatus = EnsureEditorStatusNormalized(suppressDirty);
-        var code = EnsureEditorCode(forceCode, suppressDirty);
-        var payload = EnsureEditorQrPayload(code, suppressDirty);
-        var path = await EnsureEditorQrImageAsync(payload, code, suppressDirty, cancellationToken).ConfigureAwait(false);
-
-        component.Status = normalizedStatus;
-        component.MachineName = ResolveMachineName(component.MachineId);
-        if (suppressDirty)
-        {
-            ExecuteWithDirtySuppression(() => Editor.MachineName = component.MachineName);
-        }
-        else
-        {
-            Editor.MachineName = component.MachineName;
-        }
-
-        component.Code = code;
-        component.QrPayload = payload;
-        component.QrCode = path;
-
-        if (resetDirtyAfter)
-        {
-            ResetDirty();
-        }
-    }
-
-    private string EnsureEditorStatusNormalized(bool suppressDirty)
-    {
-        var normalized = _componentService.NormalizeStatus(Editor.Status);
-        if (string.Equals(Editor.Status, normalized, StringComparison.Ordinal))
-        {
-            return normalized;
-        }
-
-        if (suppressDirty)
-        {
-            ExecuteWithDirtySuppression(() => Editor.Status = normalized);
-        }
-        else
-        {
-            Editor.Status = normalized;
-        }
-
-        return normalized;
-    }
-
-    private string EnsureEditorCode(bool force, bool suppressDirty)
-    {
-        if (Editor.IsCodeOverrideEnabled && !string.IsNullOrWhiteSpace(Editor.CodeOverride))
-        {
-            var overrideValue = Editor.CodeOverride.Trim();
-            if (suppressDirty)
-            {
-                ExecuteWithDirtySuppression(() => Editor.Code = overrideValue);
-            }
-            else
-            {
-                Editor.Code = overrideValue;
-            }
-
-            return Editor.Code;
-        }
-
-        if (!force && !string.IsNullOrWhiteSpace(Editor.Code))
-        {
-            return Editor.Code;
-        }
-
-        var machineName = ResolveMachineName(Editor.MachineId);
-        var generated = _codeGeneratorService.GenerateMachineCode(Editor.Name, machineName);
-
-        if (string.IsNullOrWhiteSpace(generated))
-        {
-            throw new InvalidOperationException("Unable to generate a component code.");
-        }
-
-        if (Editor.IsCodeOverrideEnabled)
-        {
-            ExecuteWithDirtySuppression(() =>
-            {
-                Editor.IsCodeOverrideEnabled = false;
-                Editor.CodeOverride = string.Empty;
-            });
-        }
-
-        if (suppressDirty)
-        {
-            ExecuteWithDirtySuppression(() => Editor.Code = generated);
-        }
-        else
-        {
-            Editor.Code = generated;
-        }
-
-        return Editor.Code;
-    }
-
-    private string EnsureEditorQrPayload(string code, bool suppressDirty)
-    {
-        var payload = BuildQrPayload(code, Editor.MachineId);
-        if (string.Equals(Editor.QrPayload, payload, StringComparison.Ordinal))
-        {
-            return payload;
-        }
-
-        if (suppressDirty)
-        {
-            ExecuteWithDirtySuppression(() => Editor.QrPayload = payload);
-        }
-        else
-        {
-            Editor.QrPayload = payload;
-        }
-
-        return payload;
-    }
-
-    private async Task<string> EnsureEditorQrImageAsync(
-        string payload,
-        string code,
-        bool suppressDirty,
-        CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(payload))
-        {
-            throw new InvalidOperationException("QR payload is required before generating an image.");
-        }
-
-        var path = await SaveQrImageAsync(payload, code, Editor.Id, cancellationToken).ConfigureAwait(false);
-
-        if (suppressDirty)
-        {
-            ExecuteWithDirtySuppression(() => Editor.QrCode = path);
-        }
-        else
-        {
-            Editor.QrCode = path;
-        }
-
-        return path;
-    }
-
-    private static string BuildQrPayload(string code, int machineId)
-    {
-        var identifier = string.IsNullOrWhiteSpace(code)
-            ? "pending"
-            : Uri.EscapeDataString(code.Trim());
-        var machineSegment = machineId > 0 ? $"?machine={machineId}" : string.Empty;
-        return $"yasgmp://component/{identifier}{machineSegment}";
-    }
-
-    private async Task<string> SaveQrImageAsync(
-        string payload,
-        string code,
-        int editorId,
-        CancellationToken cancellationToken)
-    {
-        var appData = _platformService.GetAppDataDirectory();
-        var qrDirectory = Path.Combine(appData, "Components", "QrCodes");
-        Directory.CreateDirectory(qrDirectory);
-
-        var hint = !string.IsNullOrWhiteSpace(code)
-            ? code
-            : editorId > 0
-                ? editorId.ToString(CultureInfo.InvariantCulture)
-                : Guid.NewGuid().ToString("N");
-        var fileName = $"{SanitizeFileName(hint)}.png";
-        var path = Path.Combine(qrDirectory, fileName);
-
-        using var pngStream = _qrCodeService.GeneratePng(payload);
-        if (pngStream.CanSeek)
-        {
-            pngStream.Position = 0;
-        }
-
-        await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
-        await pngStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
-        await fileStream.FlushAsync(cancellationToken).ConfigureAwait(false);
-
-        return path;
-    }
-
-    private static string SanitizeFileName(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return "component";
-        }
-
-        var invalid = Path.GetInvalidFileNameChars();
-        var builder = new StringBuilder(value.Length);
-        foreach (var ch in value)
-        {
-            builder.Append(Array.IndexOf(invalid, ch) >= 0 ? '_' : ch);
-        }
-
-        return builder.ToString();
-    }
-
-    private void ExecuteWithDirtySuppression(Action action)
-    {
-        var previous = _suppressEditorDirtyNotifications;
-        _suppressEditorDirtyNotifications = true;
-        try
-        {
-            action();
-        }
-        finally
-        {
-            _suppressEditorDirtyNotifications = previous;
-        }
-    }
-
-    private void UpdateCommandStates()
-    {
-        AttachDocumentCommand.NotifyCanExecuteChanged();
-        GenerateCodeCommand.NotifyCanExecuteChanged();
-        PreviewQrCommand.NotifyCanExecuteChanged();
-    }
-    /// <summary>
-    /// Represents the component editor value.
-    /// </summary>
 
     public sealed partial class ComponentEditor : ObservableObject
     {
@@ -1098,54 +657,18 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
         [ObservableProperty]
         private string _lifecycleState = string.Empty;
 
-        [ObservableProperty]
-        private string _qrCode = string.Empty;
-
-        [ObservableProperty]
-        private string _qrPayload = string.Empty;
-
-        [ObservableProperty]
-        private string _codeOverride = string.Empty;
-
-        [ObservableProperty]
-        private bool _isCodeOverrideEnabled;
-
-        [ObservableProperty]
-        private ObservableCollection<string> _linkedDocuments = new();
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
-
-        public static ComponentEditor CreateEmpty() => new()
-        {
-            QrCode = string.Empty,
-            QrPayload = string.Empty,
-            CodeOverride = string.Empty,
-            IsCodeOverrideEnabled = false,
-            LinkedDocuments = new ObservableCollection<string>()
-        };
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
+        public static ComponentEditor CreateEmpty() => new();
 
         public static ComponentEditor CreateForNew(string normalizedStatus, int machineId, string machineName)
             => new()
             {
                 Status = normalizedStatus,
                 MachineId = machineId,
-                MachineName = machineName,
-                QrCode = string.Empty,
-                QrPayload = string.Empty,
-                CodeOverride = string.Empty,
-                IsCodeOverrideEnabled = false,
-                LinkedDocuments = new ObservableCollection<string>()
+                MachineName = machineName
             };
-        /// <summary>
-        /// Executes the from component operation.
-        /// </summary>
 
         public static ComponentEditor FromComponent(
-            Component component,
+            ComponentEntity component,
             Func<string?, string> statusNormalizer,
             Func<int, string> machineNameResolver)
         {
@@ -1166,21 +689,13 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 Supplier = component.Supplier ?? string.Empty,
                 WarrantyUntil = component.WarrantyUntil,
                 Comments = component.Comments ?? string.Empty,
-                LifecycleState = component.LifecycleState ?? string.Empty,
-                QrCode = component.QrCode ?? string.Empty,
-                QrPayload = component.QrPayload ?? string.Empty,
-                CodeOverride = component.CodeOverride ?? string.Empty,
-                IsCodeOverrideEnabled = component.IsCodeOverrideEnabled,
-                LinkedDocuments = new ObservableCollection<string>(component.LinkedDocuments ?? new List<string>())
+                LifecycleState = component.LifecycleState ?? string.Empty
             };
         }
-        /// <summary>
-        /// Executes the to component operation.
-        /// </summary>
 
-        public Component ToComponent(Component? existing)
+        public ComponentEntity ToComponent(ComponentEntity? existing)
         {
-            var component = existing is null ? new Component() : CloneComponent(existing);
+            var component = existing is null ? new ComponentEntity() : CloneComponent(existing);
             component.Id = Id;
             component.MachineId = MachineId;
             component.MachineName = MachineName;
@@ -1195,16 +710,8 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
             component.WarrantyUntil = WarrantyUntil;
             component.Comments = Comments;
             component.LifecycleState = LifecycleState;
-            component.QrCode = string.IsNullOrWhiteSpace(QrCode) ? string.Empty : QrCode.Trim();
-            component.QrPayload = string.IsNullOrWhiteSpace(QrPayload) ? string.Empty : QrPayload.Trim();
-            component.CodeOverride = CodeOverride ?? string.Empty;
-            component.IsCodeOverrideEnabled = IsCodeOverrideEnabled;
-            component.LinkedDocuments = LinkedDocuments?.ToList() ?? new List<string>();
             return component;
         }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public ComponentEditor Clone()
             => new()
@@ -1222,17 +729,12 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 Supplier = Supplier,
                 WarrantyUntil = WarrantyUntil,
                 Comments = Comments,
-                LifecycleState = LifecycleState,
-                QrCode = QrCode,
-                QrPayload = QrPayload,
-                CodeOverride = CodeOverride,
-                IsCodeOverrideEnabled = IsCodeOverrideEnabled,
-                LinkedDocuments = new ObservableCollection<string>(LinkedDocuments)
+                LifecycleState = LifecycleState
             };
 
-        private static Component CloneComponent(Component source)
+        private static ComponentEntity CloneComponent(ComponentEntity source)
         {
-            return new Component
+            return new ComponentEntity
             {
                 Id = source.Id,
                 MachineId = source.MachineId,
@@ -1247,18 +749,15 @@ public sealed partial class ComponentsModuleViewModel : DataDrivenModuleDocument
                 Supplier = source.Supplier,
                 WarrantyUntil = source.WarrantyUntil,
                 Comments = source.Comments,
-                LifecycleState = source.LifecycleState,
-                QrCode = source.QrCode,
-                QrPayload = source.QrPayload,
-                CodeOverride = source.CodeOverride,
-                IsCodeOverrideEnabled = source.IsCodeOverrideEnabled,
-                LinkedDocuments = new List<string>(source.LinkedDocuments)
+                LifecycleState = source.LifecycleState
             };
         }
     }
-    /// <summary>
-    /// Represents the Machine Option record.
-    /// </summary>
 
+    /// <summary>Executes the machine option routine for the Components module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public sealed record MachineOption(int Id, string Name);
 }
+
+
+

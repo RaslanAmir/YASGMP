@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using MySqlConnector;
 using YasGMP.Data;
 using YasGMP.Models;
@@ -32,9 +33,6 @@ namespace YasGMP.Services
 
         private bool? _supportsEfSchema;
         private readonly SemaphoreSlim _schemaGate = new(1, 1);
-        /// <summary>
-        /// Initializes a new instance of the AttachmentService class.
-        /// </summary>
 
         public AttachmentService(
             IDbContextFactory<YasGmpDbContext> contextFactory,
@@ -88,9 +86,6 @@ namespace YasGMP.Services
                 _schemaGate.Release();
             }
         }
-        /// <summary>
-        /// Executes the upload async operation.
-        /// </summary>
 
         public async Task<AttachmentUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
         {
@@ -252,9 +247,6 @@ namespace YasGMP.Services
                 encryptionSession.Dispose();
             }
         }
-        /// <summary>
-        /// Executes the find by hash async operation.
-        /// </summary>
 
         public async Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default)
         {
@@ -278,9 +270,6 @@ namespace YasGMP.Services
                 return await FindByHashLegacyAsync(sha256, token).ConfigureAwait(false);
             }
         }
-        /// <summary>
-        /// Executes the find by hash and size async operation.
-        /// </summary>
 
         public async Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default)
         {
@@ -306,9 +295,6 @@ namespace YasGMP.Services
                 return await FindByHashLegacyAsync(sha256, token).ConfigureAwait(false);
             }
         }
-        /// <summary>
-        /// Executes the stream content async operation.
-        /// </summary>
 
         public async Task<AttachmentStreamResult> StreamContentAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default)
         {
@@ -355,9 +341,6 @@ namespace YasGMP.Services
             bool partial = request.RangeStart.HasValue || request.RangeLength.HasValue;
             return new AttachmentStreamResult(attachment, bytesWritten, totalLength, partial, request);
         }
-        /// <summary>
-        /// Executes the get links for entity async operation.
-        /// </summary>
 
         public async Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
         {
@@ -396,9 +379,6 @@ namespace YasGMP.Services
                 return await GetLegacyLinksAsync(entityType, entityId, token).ConfigureAwait(false);
             }
         }
-        /// <summary>
-        /// Executes the remove link async operation.
-        /// </summary>
 
         public async Task RemoveLinkAsync(int linkId, CancellationToken token = default)
         {
@@ -426,9 +406,6 @@ namespace YasGMP.Services
                 await RemoveLegacyLinkByIdAsync(linkId, token).ConfigureAwait(false);
             }
         }
-        /// <summary>
-        /// Executes the remove link async operation.
-        /// </summary>
 
         public async Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
         {
@@ -749,12 +726,10 @@ namespace YasGMP.Services
 
         private sealed class AttachmentCryptoProvider
         {
+            private const int GcmTagSize = 16;
             private readonly AttachmentEncryptionOptions _options;
             private readonly byte[]? _key;
             private readonly int _chunkSize;
-            /// <summary>
-            /// Initializes a new instance of the AttachmentCryptoProvider class.
-            /// </summary>
 
             public AttachmentCryptoProvider(AttachmentEncryptionOptions options)
             {
@@ -762,52 +737,34 @@ namespace YasGMP.Services
                 _key = ParseKey(options.KeyMaterial);
                 _chunkSize = options.ChunkSize > 0 ? options.ChunkSize : 128 * 1024;
             }
-            /// <summary>
-            /// Gets or sets the chunk size.
-            /// </summary>
 
             public int ChunkSize => _chunkSize;
-            /// <summary>
-            /// Gets or sets the is encryption enabled.
-            /// </summary>
             public bool IsEncryptionEnabled => _key is not null;
-            /// <summary>
-            /// Executes the key id operation.
-            /// </summary>
             public string KeyId => string.IsNullOrWhiteSpace(_options.KeyId) ? "default" : _options.KeyId!;
-            /// <summary>
-            /// Executes the create encryption session operation.
-            /// </summary>
 
             public EncryptionSession CreateEncryptionSession() => new EncryptionSession(_key);
-            /// <summary>
-            /// Executes the encrypt chunk operation.
-            /// </summary>
 
             public EncryptedChunk EncryptChunk(EncryptionSession session, ReadOnlyMemory<byte> plaintext, int chunkIndex)
             {
                 if (!IsEncryptionEnabled || session.Cipher is null)
                 {
-                    var payload = plaintext.ToArray();
+                    var plainBytes = plaintext.ToArray();
                     session.RecordChunk(plaintext.Length);
-                    return new EncryptedChunk(payload);
+                    return new EncryptedChunk(plainBytes);
                 }
 
-                var payload = new byte[4 + 12 + plaintext.Length + 16];
+                var payload = new byte[4 + 12 + plaintext.Length + GcmTagSize];
                 BinaryPrimitives.WriteInt32LittleEndian(payload.AsSpan(0, 4), plaintext.Length);
                 var nonceSpan = payload.AsSpan(4, 12);
                 RandomNumberGenerator.Fill(nonceSpan);
                 var cipherSpan = payload.AsSpan(4 + 12, plaintext.Length);
-                var tagSpan = payload.AsSpan(4 + 12 + plaintext.Length, 16);
+                var tagSpan = payload.AsSpan(4 + 12 + plaintext.Length, GcmTagSize);
 
                 session.Cipher.Encrypt(nonceSpan, plaintext.Span, cipherSpan, tagSpan);
                 session.RecordChunk(plaintext.Length);
 
                 return new EncryptedChunk(payload, Convert.ToHexString(nonceSpan), Convert.ToHexString(tagSpan));
             }
-            /// <summary>
-            /// Executes the complete encryption operation.
-            /// </summary>
 
             public string? CompleteEncryption(EncryptionSession session)
             {
@@ -823,9 +780,6 @@ namespace YasGMP.Services
                     session.Dispose();
                 }
             }
-            /// <summary>
-            /// Executes the copy to async operation.
-            /// </summary>
 
             public async Task<long> CopyToAsync(Stream source, Stream destination, bool isEncrypted, long rangeStart, long? rangeLength, CancellationToken token)
             {
@@ -899,13 +853,13 @@ namespace YasGMP.Services
 
                 var headerBuffer = new byte[4];
                 var nonceBuffer = new byte[12];
-                var tagBuffer = new byte[16];
+                var tagBuffer = new byte[GcmTagSize];
                 var cipherBuffer = ArrayPool<byte>.Shared.Rent(_chunkSize);
                 var plainBuffer = ArrayPool<byte>.Shared.Rent(_chunkSize);
 
                 try
                 {
-                    using var aes = new AesGcm(_key!);
+                    using var aes = new AesGcm(_key!, GcmTagSize);
                     while (true)
                     {
                         int headerRead = await ReadAtLeastAsync(source, headerBuffer, token).ConfigureAwait(false);
@@ -1036,39 +990,21 @@ namespace YasGMP.Services
             internal sealed class EncryptionSession : IDisposable
             {
                 private bool _disposed;
-                /// <summary>
-                /// Initializes a new instance of the EncryptionSession class.
-                /// </summary>
 
                 public EncryptionSession(byte[]? key)
                 {
-                    Cipher = key is not null ? new AesGcm(key) : null;
+                    Cipher = key is not null ? new AesGcm(key, GcmTagSize) : null;
                 }
-                /// <summary>
-                /// Gets or sets the cipher.
-                /// </summary>
 
                 public AesGcm? Cipher { get; }
-                /// <summary>
-                /// Gets or sets the chunk count.
-                /// </summary>
                 public int ChunkCount { get; private set; }
-                /// <summary>
-                /// Gets or sets the total bytes.
-                /// </summary>
                 public long TotalBytes { get; private set; }
-                /// <summary>
-                /// Executes the record chunk operation.
-                /// </summary>
 
                 public void RecordChunk(int length)
                 {
                     ChunkCount++;
                     TotalBytes += length;
                 }
-                /// <summary>
-                /// Executes the dispose operation.
-                /// </summary>
 
                 public void Dispose()
                 {
@@ -1082,43 +1018,22 @@ namespace YasGMP.Services
 
             internal readonly struct EncryptedChunk
             {
-                /// <summary>
-                /// Initializes a new instance of the <see cref="EncryptedChunk"/> struct with encrypted payload metadata.
-                /// </summary>
-                /// <param name="payload">The encrypted data segment.</param>
-                /// <param name="nonceHex">Optional nonce value encoded as hexadecimal.</param>
-                /// <param name="tagHex">Optional authentication tag encoded as hexadecimal.</param>
                 public EncryptedChunk(byte[] payload, string? nonceHex = null, string? tagHex = null)
                 {
                     Payload = payload;
                     NonceHex = nonceHex;
                     TagHex = tagHex;
                 }
-                /// <summary>
-                /// Gets or sets the payload.
-                /// </summary>
 
                 public byte[] Payload { get; }
-                /// <summary>
-                /// Gets or sets the nonce hex.
-                /// </summary>
                 public string? NonceHex { get; }
-                /// <summary>
-                /// Gets or sets the tag hex.
-                /// </summary>
                 public string? TagHex { get; }
             }
         }
 
         private sealed class MalwareScanner
         {
-            /// <summary>
-            /// Executes the create context operation.
-            /// </summary>
             public MalwareScanContext CreateContext() => new MalwareScanContext();
-            /// <summary>
-            /// Executes the update operation.
-            /// </summary>
 
             public void Update(MalwareScanContext context, ReadOnlySpan<byte> chunk)
             {
@@ -1131,9 +1046,6 @@ namespace YasGMP.Services
                     context.Sampled += toCopy;
                 }
             }
-            /// <summary>
-            /// Executes the complete async operation.
-            /// </summary>
 
             public Task<MalwareScanResult> CompleteAsync(MalwareScanContext context, string fileName, string hashHex, long size, CancellationToken token)
             {
@@ -1152,17 +1064,8 @@ namespace YasGMP.Services
 
             internal sealed class MalwareScanContext
             {
-                /// <summary>
-                /// Gets or sets the total bytes.
-                /// </summary>
                 public long TotalBytes { get; set; }
-                /// <summary>
-                /// Gets or sets the sample buffer.
-                /// </summary>
                 public byte[] SampleBuffer { get; } = new byte[64];
-                /// <summary>
-                /// Gets or sets the sampled.
-                /// </summary>
                 public int Sampled { get; set; }
             }
 
@@ -1171,3 +1074,9 @@ namespace YasGMP.Services
 
     }
 }
+
+
+
+
+
+

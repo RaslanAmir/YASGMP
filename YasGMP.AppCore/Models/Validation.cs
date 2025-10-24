@@ -10,64 +10,34 @@ namespace YasGMP.Models
     [Table("validations")]
     public class Validation
     {
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the code.
-        /// </summary>
         [MaxLength(40)]
         [Column("code")]
         public string Code { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the type.
-        /// </summary>
         [Required, MaxLength(20)]
         [Column("type")]
         public string Type { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the machine id.
-        /// </summary>
         [Column("machine_id")]
         public int? MachineId { get; set; }
-        /// <summary>
-        /// Gets or sets the machine.
-        /// </summary>
         [ForeignKey(nameof(MachineId))]
         public virtual Machine? Machine { get; set; }
 
-        /// <summary>
-        /// Gets or sets the component id.
-        /// </summary>
         [Column("component_id")]
         public int? ComponentId { get; set; }
-        /// <summary>
-        /// Gets or sets the component.
-        /// </summary>
         [ForeignKey(nameof(ComponentId))]
         public virtual MachineComponent? Component { get; set; }
 
-        /// <summary>
-        /// Gets or sets the date start.
-        /// </summary>
         [Column("date_start")]
         public DateTime? DateStart { get; set; }
 
-        /// <summary>
-        /// Gets or sets the date end.
-        /// </summary>
         [Column("date_end")]
         public DateTime? DateEnd { get; set; }
 
-        /// <summary>
-        /// Gets or sets the status.
-        /// </summary>
         [MaxLength(30)]
         [Column("status")]
         public string Status { get; set; } = string.Empty;
@@ -76,146 +46,77 @@ namespace YasGMP.Models
         [NotMapped]
         public DateTime ValidationDate => DateEnd ?? DateStart ?? DateTime.MinValue;
 
-        /// <summary>
-        /// Gets or sets the documentation.
-        /// </summary>
         [MaxLength(1024)]
         [Column("documentation")]
         public string Documentation { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the signed by id.
-        /// </summary>
         [Column("signed_by_id")]
         public int? SignedById { get; set; }
-        /// <summary>
-        /// Gets or sets the signed by.
-        /// </summary>
         [ForeignKey(nameof(SignedById))]
         public virtual User? SignedBy { get; set; }
 
-        /// <summary>
-        /// Gets or sets the signed by name.
-        /// </summary>
         [MaxLength(100)]
         [Column("signed_by_name")]
         public string SignedByName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the next due.
-        /// </summary>
         [Column("next_due")]
         public DateTime? NextDue { get; set; }
 
-        /// <summary>
-        /// Gets or sets the comment.
-        /// </summary>
         [MaxLength(500)]
         [Column("comment")]
         public string Comment { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the digital signature.
-        /// </summary>
         [MaxLength(128)]
         [Column("digital_signature")]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the entry hash.
-        /// </summary>
         [MaxLength(128)]
         [Column("entry_hash")]
         public string EntryHash { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the created at.
-        /// </summary>
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the created by id.
-        /// </summary>
         [Column("created_by_id")]
         public int? CreatedById { get; set; }
-        /// <summary>
-        /// Gets or sets the created by.
-        /// </summary>
         [ForeignKey(nameof(CreatedById))]
         public virtual User? CreatedBy { get; set; }
 
-        /// <summary>
-        /// Gets or sets the last modified.
-        /// </summary>
         [Column("last_modified")]
         public DateTime? LastModified { get; set; }
 
-        /// <summary>
-        /// Gets or sets the last modified by id.
-        /// </summary>
         [Column("last_modified_by_id")]
         public int? LastModifiedById { get; set; }
-        /// <summary>
-        /// Gets or sets the last modified by.
-        /// </summary>
         [ForeignKey(nameof(LastModifiedById))]
         public virtual User? LastModifiedBy { get; set; }
 
-        /// <summary>
-        /// Gets or sets the source ip.
-        /// </summary>
         [MaxLength(64)]
         [Column("source_ip")]
         public string SourceIp { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the workflow status.
-        /// </summary>
         [MaxLength(40)]
         [Column("workflow_status")]
         public string WorkflowStatus { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the additional signers.
-        /// </summary>
         [MaxLength(512)]
         [Column("additional_signers")]
         public string AdditionalSigners { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the regulator.
-        /// </summary>
         [MaxLength(60)]
         [Column("regulator")]
         public string Regulator { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the anomaly score.
-        /// </summary>
         [Column("anomaly_score")]
         public double? AnomalyScore { get; set; }
 
-        /// <summary>
-        /// Gets or sets the linked capa id.
-        /// </summary>
         [Column("linked_capa_id")]
         public int? LinkedCapaId { get; set; }
-        /// <summary>
-        /// Gets or sets the linked capa.
-        /// </summary>
         [ForeignKey(nameof(LinkedCapaId))]
         public virtual CapaCase? LinkedCapa { get; set; }
 
-        /// <summary>
-        /// Gets or sets the signature timestamp.
-        /// </summary>
         [Column("signature_timestamp")]
         public DateTime? SignatureTimestamp { get; set; }
 
-        /// <summary>
-        /// Gets or sets the session id.
-        /// </summary>
         [MaxLength(80)]
         [Column("session_id")]
         public string SessionId { get; set; } = string.Empty;
@@ -319,3 +220,4 @@ namespace YasGMP.Models
         public override string ToString() => $"Validation {Code} ({Type}) – Status: {Status}, Signed by: {SignedByName}";
     }
 }
+

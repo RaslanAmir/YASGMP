@@ -15,160 +15,97 @@ namespace YasGMP.Models
     [Table("machines")]
     public partial class Machine
     {
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the code.
-        /// </summary>
         [Required, StringLength(64)]
         [Column("code")]
         [Display(Name = "Šifra stroja")]
         public string Code { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
         [Required, StringLength(100)]
         [Column("name")]
         [Display(Name = "Naziv stroja")]
         public string Name { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the machine type.
-        /// </summary>
         [StringLength(100)]
         [NotMapped]
         [Display(Name = "Tip stroja")]
         public string? MachineType { get; set; }
 
-        /// <summary>
-        /// Gets or sets the description.
-        /// </summary>
         [StringLength(1000)]
         [Column("description")]
         [Display(Name = "Opis stroja")]
         public string? Description { get; set; }
 
-        /// <summary>
-        /// Gets or sets the model.
-        /// </summary>
         [StringLength(100)]
         [Column("model")]
         [Display(Name = "Model stroja")]
         public string? Model { get; set; }
 
-        /// <summary>
-        /// Gets or sets the manufacturer.
-        /// </summary>
         [StringLength(100)]
         [Column("manufacturer")]
         [Display(Name = "Proizvođač")]
         public string? Manufacturer { get; set; }
 
-        /// <summary>
-        /// Gets or sets the location.
-        /// </summary>
         [StringLength(100)]
         [Column("location")]
         [Display(Name = "Lokacija")]
         public string? Location { get; set; }
 
-        /// <summary>
-        /// Gets or sets the responsible party.
-        /// </summary>
         [StringLength(100)]
         [NotMapped]
         [Display(Name = "Odgovorna osoba/entitet")]
         public string? ResponsibleParty { get; set; }
 
-        /// <summary>
-        /// Gets or sets the install date.
-        /// </summary>
         [Column("install_date")]
         [Display(Name = "Datum instalacije")]
         public DateTime? InstallDate { get; set; }
 
-        /// <summary>
-        /// Gets or sets the procurement date.
-        /// </summary>
         [Column("procurement_date")]
         [Display(Name = "Datum nabave")]
         public DateTime? ProcurementDate { get; set; }
 
-        /// <summary>
-        /// Gets or sets the purchase date.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Datum kupnje")]
         public DateTime? PurchaseDate => ProcurementDate;
 
-        /// <summary>
-        /// Gets or sets the warranty until.
-        /// </summary>
         [Column("warranty_until")]
         [Display(Name = "Jamstvo vrijedi do")]
         public DateTime? WarrantyUntil { get; set; }
 
-        /// <summary>
-        /// Gets or sets the warranty expiry.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Jamstvo isteklo")]
         public DateTime? WarrantyExpiry => WarrantyUntil;
 
-        /// <summary>
-        /// Gets or sets the status.
-        /// </summary>
         [StringLength(30)]
         [Column("status")]
         [Display(Name = "Status")]
         public string? Status { get; set; }
 
-        /// <summary>
-        /// Gets or sets the urs doc.
-        /// </summary>
         [StringLength(255)]
         [Column("urs_doc")]
         [Display(Name = "URS dokument")]
         public string? UrsDoc { get; set; }
 
-        /// <summary>
-        /// Gets or sets the decommission date.
-        /// </summary>
         [Column("decommission_date")]
         [Display(Name = "Datum povlačenja")]
         public DateTime? DecommissionDate { get; set; }
 
-        /// <summary>
-        /// Gets or sets the decommission reason.
-        /// </summary>
         [Column("decommission_reason")]
         [Display(Name = "Razlog povlačenja")]
         public string? DecommissionReason { get; set; }
 
-        /// <summary>
-        /// Gets or sets the serial number.
-        /// </summary>
         [StringLength(80)]
         [Column("serial_number")]
         [Display(Name = "Serijski/lot broj")]
         public string? SerialNumber { get; set; }
 
-        /// <summary>
-        /// Gets or sets the acquisition cost.
-        /// </summary>
         [Column("acquisition_cost")]
         [Display(Name = "Nabavna vrijednost")]
         public decimal? AcquisitionCost { get; set; }
 
-        /// <summary>
-        /// Gets or sets the rfid tag.
-        /// </summary>
         [StringLength(64)]
         [Column("rfid_tag")]
         [Display(Name = "RFID/NFC")]
@@ -192,120 +129,66 @@ namespace YasGMP.Models
         [Display(Name = "QR payload")]
         public string? QrPayload { get; set; }
 
-        /// <summary>
-        /// Gets or sets the io t device id.
-        /// </summary>
         [StringLength(64)]
         [Column("iot_device_id")]
         [Display(Name = "IoT uređaj ID")]
         public string? IoTDeviceId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the cloud device guid.
-        /// </summary>
         [StringLength(64)]
         [Column("cloud_device_guid")]
         [Display(Name = "Cloud device GUID")]
         public string? CloudDeviceGuid { get; set; }
 
-        /// <summary>
-        /// Gets or sets the is critical.
-        /// </summary>
         [Column("is_critical")]
         [Display(Name = "Kritično")]
         public bool IsCritical { get; set; }
 
-        /// <summary>
-        /// Gets or sets the lifecycle phase.
-        /// </summary>
         [StringLength(30)]
         [Column("lifecycle_phase")]
         [Display(Name = "Faza životnog ciklusa")]
         public string? LifecyclePhase { get; set; }
 
-        /// <summary>
-        /// Gets or sets the note.
-        /// </summary>
         [StringLength(200)]
         [Column("note")]
         [Display(Name = "Napomena")]
         public string? Note { get; set; }
 
-        /// <summary>
-        /// Gets or sets the notes.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Napomene (UI alias)")]
         public string? Notes => Note;
 
-        /// <summary>
-        /// Gets or sets the last modified.
-        /// </summary>
         [Column("last_modified")]
         [Display(Name = "Zadnja izmjena")]
         public DateTime LastModified { get; set; }
 
-        /// <summary>
-        /// Gets or sets the last modified by id.
-        /// </summary>
         [Column("last_modified_by_id")]
         [Display(Name = "Zadnji izmijenio")]
         public int? LastModifiedById { get; set; }
 
-        /// <summary>
-        /// Gets or sets the last modified by.
-        /// </summary>
         [ForeignKey(nameof(LastModifiedById))]
         public virtual User? LastModifiedBy { get; set; }
 
-        /// <summary>
-        /// Gets or sets the digital signature id.
-        /// </summary>
         [Column("digital_signature_id")]
         [Display(Name = "ID digitalnog potpisa")]
         public int? DigitalSignatureId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the digital signature.
-        /// </summary>
         [StringLength(128)]
         [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]
         public string? DigitalSignature { get; set; }
-        /// <summary>
-        /// Gets or sets the components.
-        /// </summary>
 
         public virtual ICollection<MachineComponent> Components { get; set; } = new List<MachineComponent>();
-        /// <summary>
-        /// Gets or sets the work orders.
-        /// </summary>
         public virtual ICollection<WorkOrder> WorkOrders { get; set; } = new List<WorkOrder>();
-        /// <summary>
-        /// Gets or sets the inspections.
-        /// </summary>
         public virtual ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();
-        /// <summary>
-        /// Gets or sets the calibrations.
-        /// </summary>
         public virtual ICollection<Calibration> Calibrations { get; set; } = new List<Calibration>();
 
-        /// <summary>
-        /// Gets or sets the object.
-        /// </summary>
         [NotMapped]
         public Dictionary<string, object> ExtraFields { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the linked documents.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Tehnička dokumentacija")]
         public List<string> LinkedDocuments { get; set; } = new();
 
-        /// <summary>
-        /// Executes the display status operation.
-        /// </summary>
         [NotMapped]
         public string DisplayStatus => (Status ?? string.Empty) switch
         {
@@ -317,15 +200,9 @@ namespace YasGMP.Models
             _ => Status ?? string.Empty
         };
 
-        /// <summary>
-        /// Gets or sets the is under warranty.
-        /// </summary>
         [NotMapped]
         public bool IsUnderWarranty => WarrantyUntil.HasValue && WarrantyUntil > DateTime.UtcNow;
 
-        /// <summary>
-        /// Executes the is decommissioned operation.
-        /// </summary>
         [NotMapped]
         public bool IsDecommissioned => (Status?.ToLowerInvariant() == "decommissioned") || DecommissionDate.HasValue;
 
@@ -375,3 +252,4 @@ namespace YasGMP.Models
         }
     }
 }
+

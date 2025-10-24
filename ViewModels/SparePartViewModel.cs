@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace YasGMP.ViewModels
         private readonly string _currentSessionId;
         private readonly string _currentDeviceInfo;
         private readonly string _currentIpAddress;
+        private bool _lowOnly;
 
         /// <summary>Initializes the view model.</summary>
         public SparePartViewModel(DatabaseService dbService, AuthService authService)
@@ -150,34 +152,13 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
-        /// <summary>
-        /// Gets or sets the load spare parts command.
-        /// </summary>
 
         public ICommand LoadSparePartsCommand { get; }
-        /// <summary>
-        /// Gets or sets the add spare part command.
-        /// </summary>
         public ICommand AddSparePartCommand { get; }
-        /// <summary>
-        /// Gets or sets the update spare part command.
-        /// </summary>
         public ICommand UpdateSparePartCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete spare part command.
-        /// </summary>
         public ICommand DeleteSparePartCommand { get; }
-        /// <summary>
-        /// Gets or sets the rollback spare part command.
-        /// </summary>
         public ICommand RollbackSparePartCommand { get; }
-        /// <summary>
-        /// Gets or sets the export spare parts command.
-        /// </summary>
         public ICommand ExportSparePartsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

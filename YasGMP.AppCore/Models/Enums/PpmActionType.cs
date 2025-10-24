@@ -57,3 +57,4 @@ namespace YasGMP.Models
         CUSTOM = 99
     }
 }
+

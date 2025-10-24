@@ -64,3 +64,4 @@ namespace YasGMP.Services.Interfaces
         Task<double> AnalyzeAnomalyAsync(int deviationId);
     }
 }
+

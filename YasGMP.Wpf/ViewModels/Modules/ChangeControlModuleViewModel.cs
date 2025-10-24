@@ -13,18 +13,22 @@ using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the change control module view model value.
-/// </summary>
 
+/// <summary>Hosts change-control workflows inside the WPF shell with SAP B1 tooling.</summary>
+/// <remarks>
+/// Form Modes: Find filters change requests, Add seeds <see cref="ChangeControlEditor.CreateEmpty"/>, View keeps records read-only, and Update unlocks editing plus attachment/e-signature flows.
+/// Audit &amp; Logging: Defers persistence (and corresponding audit hashing) to <see cref="IChangeControlCrudService"/> with mandatory electronic signatures before save and file retention via the attachment workflow.
+/// Localization: Currently relies on inline labels (`"Change Control"`, status prompts, error/status messages) pending resource keys.
+/// Navigation: ModuleKey `ChangeControl` registers the document, `CreateCflRequestAsync` powers CFL pickers, and status strings keep the shell status bar and Golden Arrow navigation aligned with change request transitions.
+/// </remarks>
 public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "ChangeControl";
+    /// <summary>Shell registration key that binds Change Control into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Change Control" until `Modules_ChangeControl_Title` is introduced.</remarks>
+    public new const string ModuleKey = "ChangeControl";
 
     private readonly IChangeControlCrudService _changeControlService;
     private readonly IAuthContext _authContext;
@@ -35,10 +39,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     private ChangeControl? _loadedEntity;
     private ChangeControlEditor? _snapshot;
     private bool _suppressDirtyNotifications;
-    /// <summary>
-    /// Initializes a new instance of the ChangeControlModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Change Control module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public ChangeControlModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -49,9 +52,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.ChangeControl"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Change Control", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _changeControlService = changeControlService ?? throw new ArgumentNullException(nameof(changeControlService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
@@ -61,54 +63,32 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
         StatusOptions = Enum.GetNames(typeof(ChangeControlStatus));
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-        AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
-        ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
-        ExecuteCommand = new AsyncRelayCommand(ExecuteAsync, CanExecute);
-        CloseCommand = new AsyncRelayCommand(CloseAsync, CanClose);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
         SetEditor(ChangeControlEditor.CreateEmpty());
-        UpdateWorkflowCommandState();
     }
 
     [ObservableProperty]
     private ChangeControlEditor _editor = null!;
 
+    /// <summary>Generated property exposing the is editor enabled for the Change Control module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ChangeControl_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Gets or sets the status options.
-    /// </summary>
 
+    /// <summary>Collection presenting the status options for the Change Control document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_ChangeControl_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
+    /// <summary>Opens the AI module to summarize the selected change control.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
+
+    /// <summary>Command executing the attach document workflow for the Change Control module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_ChangeControl_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
-    /// <summary>
-    /// Gets the command that persists a new change control record.
-    /// </summary>
-
-    public IAsyncRelayCommand AddCommand { get; }
-
-    /// <summary>
-    /// Gets the command that approves the change control.
-    /// </summary>
-
-    public IAsyncRelayCommand ApproveCommand { get; }
-
-    /// <summary>
-    /// Gets the command that executes the change control.
-    /// </summary>
-
-    public IAsyncRelayCommand ExecuteCommand { get; }
-
-    /// <summary>
-    /// Gets the command that closes the change control.
-    /// </summary>
-
-    public IAsyncRelayCommand CloseCommand { get; }
-
+    /// <summary>Loads Change Control records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_ChangeControl_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var changeControls = await _changeControlService.GetAllAsync().ConfigureAwait(false);
@@ -120,6 +100,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return changeControls.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Change Control designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var now = DateTime.Now;
@@ -148,6 +130,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return demo.Select(ToRecord).ToList();
     }
 
+    /// <summary>Loads editor payloads for the selected Change Control record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "ChangeControl". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_ChangeControl` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -178,9 +162,10 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         entity.StatusRaw = _changeControlService.NormalizeStatus(entity.StatusRaw);
         _loadedEntity = entity;
         LoadEditor(entity);
-        UpdateWorkflowCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -205,11 +190,36 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         }
 
         UpdateAttachmentCommandState();
-        UpdateWorkflowCommandState();
         return Task.CompletedTask;
     }
 
-    protected override async Task<IReadOnlyList<string>> ValidateAsync()
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedEntity is null)
+        {
+            StatusMessage = "Select a change control record to summarize.";
+            return;
+        }
+
+        var c = _loadedEntity;
+        string prompt;
+        if (c is null)
+        {
+            prompt = $"Summarize change control: {SelectedRecord?.Title}. Provide scope, risk, approvals and next steps in <= 8 bullets.";
+        }
+        else
+        {
+            prompt = $"Summarize this change control (<= 8 bullets). Code={c.Code}; Status={c.StatusRaw}; Title={c.Title}; Opened={c.CreatedAt:yyyy-MM-dd}; Closed={c.UpdatedAt:yyyy-MM-dd}; Risk={c.Status}; Owner={(c.AssignedToId ?? c.RequestedById)}.";
+        }
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
+    protected override Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
 
@@ -245,9 +255,11 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
             errors.Add(ex.Message);
         }
 
-        return errors;
+        return Task.FromResult<IReadOnlyList<string>>(errors);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         var entity = Editor.ToEntity(_loadedEntity ?? new ChangeControl());
@@ -363,6 +375,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -385,6 +399,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "ChangeControl". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_ChangeControl` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var changeControls = await _changeControlService.GetAllAsync().ConfigureAwait(false);
@@ -408,7 +424,7 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                     descriptionParts.Add(cc.DateRequested.Value.ToString("d", CultureInfo.CurrentCulture));
                 }
 
-                var description = descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null;
+                var description = descriptionParts.Count > 0 ? string.Join(" â€˘ ", descriptionParts) : null;
                 return new CflItem(cc.Id.ToString(CultureInfo.InvariantCulture), label, description);
             })
             .ToList();
@@ -416,6 +432,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return new CflRequest("Select Change Control", items);
     }
 
+    /// <summary>Applies CFL selections back into the Change Control workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "ChangeControl". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_ChangeControl_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -434,6 +452,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         return Task.CompletedTask;
     }
 
+    /// <summary>Executes the matches search routine for the Change Control module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
         if (base.MatchesSearch(record, searchText))
@@ -447,23 +467,16 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
     private ModuleRecord ToRecord(ChangeControl changeControl)
     {
-        var recordKey = changeControl.Id.ToString(CultureInfo.InvariantCulture);
-        var recordTitle = string.IsNullOrWhiteSpace(changeControl.Title)
-            ? changeControl.Code ?? recordKey
-            : changeControl.Title!;
-
-        InspectorField Field(string label, string? value) => CreateInspectorField(recordKey, recordTitle, label, value);
-
         var fields = new List<InspectorField>
         {
-            Field("Status", changeControl.StatusRaw ?? ChangeControlStatus.Draft.ToString()),
-            Field("Requested", changeControl.DateRequested?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
-            Field("Assigned To", changeControl.AssignedToId?.ToString(CultureInfo.InvariantCulture) ?? "-")
+            new("Status", changeControl.StatusRaw ?? ChangeControlStatus.Draft.ToString()),
+            new("Requested", changeControl.DateRequested?.ToString("d", CultureInfo.CurrentCulture) ?? "-"),
+            new("Assigned To", changeControl.AssignedToId?.ToString(CultureInfo.InvariantCulture) ?? "-")
         };
 
         return new ModuleRecord(
-            recordKey,
-            recordTitle,
+            changeControl.Id.ToString(CultureInfo.InvariantCulture),
+            string.IsNullOrWhiteSpace(changeControl.Title) ? changeControl.Code ?? changeControl.Id.ToString(CultureInfo.InvariantCulture) : changeControl.Title!,
             changeControl.Code,
             changeControl.StatusRaw,
             changeControl.Description,
@@ -488,7 +501,6 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         _suppressDirtyNotifications = false;
         ResetDirty();
         UpdateAttachmentCommandState();
-        UpdateWorkflowCommandState();
     }
 
     private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -496,11 +508,6 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         if (_suppressDirtyNotifications)
         {
             return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(ChangeControlEditor.Status), StringComparison.Ordinal))
-        {
-            UpdateWorkflowCommandState();
         }
 
         if (Mode is FormMode.Add or FormMode.Update)
@@ -576,174 +583,9 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
-
-    private void UpdateWorkflowCommandState()
     {
-        AddCommand.NotifyCanExecuteChanged();
-        ApproveCommand.NotifyCanExecuteChanged();
-        ExecuteCommand.NotifyCanExecuteChanged();
-        CloseCommand.NotifyCanExecuteChanged();
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
     }
-
-    private async Task AddAsync()
-    {
-        if (!CanAdd())
-        {
-            return;
-        }
-
-        try
-        {
-            IsBusy = true;
-            var entity = Editor.ToEntity();
-            entity.StatusRaw = _changeControlService.NormalizeStatus(ChangeControlStatus.Submitted.ToString());
-            entity.DateRequested ??= DateTime.UtcNow;
-
-            _changeControlService.Validate(entity);
-
-            var context = ChangeControlCrudContext.Create(
-                _authContext.CurrentUser?.Id ?? 0,
-                _authContext.CurrentIpAddress,
-                _authContext.CurrentDeviceInfo,
-                _authContext.CurrentSessionId);
-
-            var result = await _changeControlService.CreateAsync(entity, context).ConfigureAwait(false);
-            if (entity.Id == 0 && result.Id > 0)
-            {
-                entity.Id = result.Id;
-            }
-
-            _loadedEntity = entity;
-            LoadEditor(entity);
-            var record = UpsertRecord(entity);
-            SelectedRecord = record;
-            Mode = FormMode.View;
-            StatusMessage = $"Change control {entity.Code ?? entity.Id.ToString(CultureInfo.InvariantCulture)} submitted.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to add change control: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateAttachmentCommandState();
-            UpdateWorkflowCommandState();
-        }
-    }
-
-    private async Task ApproveAsync()
-    {
-        if (!CanApprove() || _loadedEntity is null)
-        {
-            return;
-        }
-
-        await TransitionAsync(ChangeControlStatus.Approved, "Change control approved.").ConfigureAwait(false);
-    }
-
-    private async Task ExecuteAsync()
-    {
-        if (!CanExecute() || _loadedEntity is null)
-        {
-            return;
-        }
-
-        await TransitionAsync(ChangeControlStatus.Implemented, "Change control implemented.").ConfigureAwait(false);
-    }
-
-    private async Task CloseAsync()
-    {
-        if (!CanClose() || _loadedEntity is null)
-        {
-            return;
-        }
-
-        await TransitionAsync(ChangeControlStatus.Closed, "Change control closed.", updateTimestamp: true).ConfigureAwait(false);
-    }
-
-    private async Task TransitionAsync(ChangeControlStatus targetStatus, string successMessage, bool updateTimestamp = false)
-    {
-        try
-        {
-            IsBusy = true;
-            var entity = Editor.ToEntity(_loadedEntity);
-            entity.StatusRaw = _changeControlService.NormalizeStatus(targetStatus.ToString());
-
-            if (updateTimestamp)
-            {
-                entity.UpdatedAt = DateTime.UtcNow;
-            }
-
-            _changeControlService.Validate(entity);
-
-            var context = ChangeControlCrudContext.Create(
-                _authContext.CurrentUser?.Id ?? 0,
-                _authContext.CurrentIpAddress,
-                _authContext.CurrentDeviceInfo,
-                _authContext.CurrentSessionId);
-
-            await _changeControlService.UpdateAsync(entity, context).ConfigureAwait(false);
-
-            _loadedEntity = entity;
-            LoadEditor(entity);
-            var record = UpsertRecord(entity);
-            SelectedRecord = record;
-            Mode = FormMode.View;
-            StatusMessage = successMessage;
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to update change control: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateAttachmentCommandState();
-            UpdateWorkflowCommandState();
-        }
-    }
-
-    private ModuleRecord UpsertRecord(ChangeControl entity)
-    {
-        var record = ToRecord(entity);
-        for (var i = 0; i < Records.Count; i++)
-        {
-            if (Records[i].Key == record.Key)
-            {
-                Records[i] = record;
-                return record;
-            }
-        }
-
-        Records.Add(record);
-        return record;
-    }
-
-    private bool CanAdd()
-        => !IsBusy && Mode == FormMode.Add;
-
-    private bool CanApprove()
-        => !IsBusy
-           && Mode == FormMode.View
-           && _loadedEntity is not null
-           && string.Equals(Editor.Status, ChangeControlStatus.Submitted.ToString(), StringComparison.OrdinalIgnoreCase);
-
-    private bool CanExecute()
-        => !IsBusy
-           && Mode == FormMode.View
-           && _loadedEntity is not null
-           && string.Equals(Editor.Status, ChangeControlStatus.Approved.ToString(), StringComparison.OrdinalIgnoreCase);
-
-    private bool CanClose()
-        => !IsBusy
-           && Mode == FormMode.View
-           && _loadedEntity is not null
-           && string.Equals(Editor.Status, ChangeControlStatus.Implemented.ToString(), StringComparison.OrdinalIgnoreCase);
-    /// <summary>
-    /// Represents the change control editor value.
-    /// </summary>
 
     public sealed partial class ChangeControlEditor : ObservableObject
     {
@@ -785,14 +627,8 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
 
         [ObservableProperty]
         private DateTime? _updatedAt;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
 
         public static ChangeControlEditor CreateEmpty() => new();
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
 
         public static ChangeControlEditor CreateForNew(IAuthContext auth)
             => new()
@@ -803,9 +639,6 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 RequestedById = auth.CurrentUser?.Id,
                 DateRequested = DateTime.UtcNow
             };
-        /// <summary>
-        /// Executes the from entity operation.
-        /// </summary>
 
         public static ChangeControlEditor FromEntity(ChangeControl entity)
             => new()
@@ -824,9 +657,6 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 CreatedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt
             };
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public ChangeControlEditor Clone()
             => new()
@@ -845,9 +675,6 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt
             };
-        /// <summary>
-        /// Executes the to entity operation.
-        /// </summary>
 
         public ChangeControl ToEntity(ChangeControl? destination = null)
         {
@@ -869,3 +696,5 @@ public sealed partial class ChangeControlModuleViewModel : DataDrivenModuleDocum
         }
     }
 }
+
+

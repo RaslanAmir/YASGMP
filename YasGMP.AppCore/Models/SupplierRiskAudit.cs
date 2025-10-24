@@ -45,16 +45,11 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the supplier.
-        /// </summary>
         [ForeignKey(nameof(SupplierId))]
         public virtual Supplier? Supplier { get; set; }
 
-        /// <summary>
-        /// Gets or sets the performed by navigation.
-        /// </summary>
         [ForeignKey(nameof(PerformedBy))]
         public virtual User? PerformedByNavigation { get; set; }
     }
 }
+

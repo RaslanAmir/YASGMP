@@ -32,13 +32,12 @@
         </VerticalStackLayout>
       </Border>
 
-      <Frame Grid.Row="1"
-             Grid.Column="0"
-             BackgroundColor="{StaticResource YtSurfaceCard}"
-             BorderColor="{StaticResource YtRowBorder}"
-             Padding="14"
-             HasShadow="True"
-             CornerRadius="14">
+      <Border Grid.Row="1"
+              Grid.Column="0"
+              Background="{StaticResource YtSurfaceCard}"
+              Stroke="{StaticResource YtRowBorder}"
+              Padding="14">
+        <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
         <VerticalStackLayout Spacing="10">
           <Label Text="Skladišta"
                  FontSize="18"
@@ -77,7 +76,7 @@
             </CollectionView.ItemTemplate>
           </CollectionView>
         </VerticalStackLayout>
-      </Frame>
+      </Border>
 
       <Grid Grid.Row="1"
             Grid.Column="1"
@@ -154,14 +153,13 @@
               </CollectionView.ItemTemplate>
             </CollectionView>
           </VerticalStackLayout>
-        </Frame>
+        </Border>
 
-        <Frame Grid.Row="1"
-               BackgroundColor="{StaticResource YtSurfaceCard}"
-               BorderColor="{StaticResource YtRowBorder}"
-               Padding="14"
-               HasShadow="True"
-               CornerRadius="14">
+        <Border Grid.Row="1"
+                Background="{StaticResource YtSurfaceCard}"
+                Stroke="{StaticResource YtRowBorder}"
+                Padding="14">
+          <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
           <VerticalStackLayout Spacing="10">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="10"
@@ -253,3 +251,4 @@
     </Grid>
   </ScrollView>
 </ContentPage>
+

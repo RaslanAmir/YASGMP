@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -133,38 +132,14 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
-        /// <summary>
-        /// Gets or sets the load training records command.
-        /// </summary>
 
         public ICommand LoadTrainingRecordsCommand { get; }
-        /// <summary>
-        /// Gets or sets the initiate training record command.
-        /// </summary>
         public ICommand InitiateTrainingRecordCommand { get; }
-        /// <summary>
-        /// Gets or sets the assign training record command.
-        /// </summary>
         public ICommand AssignTrainingRecordCommand { get; }
-        /// <summary>
-        /// Gets or sets the approve training record command.
-        /// </summary>
         public ICommand ApproveTrainingRecordCommand { get; }
-        /// <summary>
-        /// Gets or sets the complete training record command.
-        /// </summary>
         public ICommand CompleteTrainingRecordCommand { get; }
-        /// <summary>
-        /// Gets or sets the close training record command.
-        /// </summary>
         public ICommand CloseTrainingRecordCommand { get; }
-        /// <summary>
-        /// Gets or sets the export training records command.
-        /// </summary>
         public ICommand ExportTrainingRecordsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion
@@ -189,107 +164,35 @@ namespace YasGMP.ViewModels
             finally { IsBusy = false; }
         }
 
-        private TrainingRecord CreateDefaultTrainingRecord()
-            => new()
-            {
-                Title = "New Training",
-                TrainingType = TypeFilter ?? "GMP",
-                Status = "planned",
-                PlannedBy = _authService.CurrentUser?.UserName ?? string.Empty,
-                PlannedAt = DateTime.UtcNow,
-                AssignedTo = null,
-                DueDate = DateTime.UtcNow.AddDays(30),
-                ExpiryDate = DateTime.UtcNow.AddYears(1),
-                EffectivenessCheck = false,
-                Attachments = new(),
-                WorkflowHistory = new()
-            };
-
-        private static TrainingRecord CloneRecord(TrainingRecord source)
-        {
-            var clone = new TrainingRecord
-            {
-                Code = source.Code,
-                Title = source.Title,
-                TrainingType = source.TrainingType,
-                Status = source.Status,
-                Description = source.Description,
-                AssignedTo = source.AssignedTo,
-                AssignedToName = source.AssignedToName,
-                DueDate = source.DueDate,
-                TrainingDate = source.TrainingDate,
-                ExpiryDate = source.ExpiryDate,
-                EffectivenessCheck = source.EffectivenessCheck,
-                Note = source.Note,
-                Format = source.Format,
-                PlannedBy = source.PlannedBy,
-                PlannedAt = source.PlannedAt,
-                DeviceInfo = source.DeviceInfo,
-                SessionId = source.SessionId,
-                IpAddress = source.IpAddress,
-                TraineeSignature = source.TraineeSignature,
-                TrainerSignature = source.TrainerSignature,
-                CertificateNumber = source.CertificateNumber,
-                TestScore = source.TestScore,
-                IsELearning = source.IsELearning
-            };
-
-            if (source.Attachments is { Count: > 0 })
-            {
-                clone.Attachments = new List<Attachment>(source.Attachments);
-            }
-
-            if (source.WorkflowHistory is { Count: > 0 })
-            {
-                clone.WorkflowHistory = new List<string>(source.WorkflowHistory);
-            }
-
-            return clone;
-        }
-
         /// <summary>Initiates a new training record (plan).</summary>
-        public Task InitiateTrainingRecordAsync()
-            => InitiateTrainingRecordAsync(null, null);
-
-        /// <summary>Initiates a new training record using the provided template.</summary>
-        /// <param name="template">Optional template populated by the desktop shell.</param>
-        /// <param name="note">Optional audit note that accompanies the initiation.</param>
-        public async Task InitiateTrainingRecordAsync(TrainingRecord? template, string? note)
+        public async Task InitiateTrainingRecordAsync()
         {
             IsBusy = true;
             try
             {
-                var newRecord = template is null ? CreateDefaultTrainingRecord() : CloneRecord(template);
-
-                if (string.IsNullOrWhiteSpace(newRecord.Title))
+                var newRecord = new TrainingRecord
                 {
-                    newRecord.Title = template?.Title ?? "New Training";
-                }
-
-                if (string.IsNullOrWhiteSpace(newRecord.TrainingType))
-                {
-                    newRecord.TrainingType = template?.TrainingType ?? TypeFilter ?? "GMP";
-                }
-
-                if (string.IsNullOrWhiteSpace(newRecord.Status))
-                {
-                    newRecord.Status = template?.Status ?? "planned";
-                }
-
-                newRecord.PlannedBy = _authService.CurrentUser?.UserName ?? newRecord.PlannedBy ?? string.Empty;
-                newRecord.PlannedAt = DateTime.UtcNow;
-                newRecord.DueDate ??= DateTime.UtcNow.AddDays(30);
-                newRecord.ExpiryDate ??= DateTime.UtcNow.AddYears(1);
-                newRecord.Attachments ??= new();
-                newRecord.WorkflowHistory ??= new();
-                newRecord.DeviceInfo = _currentDeviceInfo;
-                newRecord.SessionId = _currentSessionId;
-                newRecord.IpAddress = _currentIpAddress;
+                    Title = "New Training",
+                    TrainingType = TypeFilter ?? "GMP",
+                    Status = "planned",
+                    // FIX (CS8601): PlannedBy (non-nullable) receives a possibly-null value. Coalesce to empty.
+                    PlannedBy = _authService.CurrentUser?.UserName ?? string.Empty,
+                    PlannedAt = DateTime.UtcNow,
+                    AssignedTo = null,
+                    DueDate = DateTime.UtcNow.AddDays(30),
+                    ExpiryDate = DateTime.UtcNow.AddYears(1),
+                    EffectivenessCheck = false,
+                    Attachments = new(),
+                    WorkflowHistory = new(),
+                    DeviceInfo = _currentDeviceInfo,
+                    SessionId = _currentSessionId,
+                    IpAddress = _currentIpAddress
+                };
 
                 await _dbService.InitiateTrainingRecordAsync(newRecord).ConfigureAwait(false);
-                await _dbService.LogTrainingRecordAuditAsync(newRecord, "INITIATE", _currentIpAddress, _currentDeviceInfo, _currentSessionId, note).ConfigureAwait(false);
+                await _dbService.LogTrainingRecordAuditAsync(newRecord, "INITIATE", _currentIpAddress, _currentDeviceInfo, _currentSessionId, null).ConfigureAwait(false);
 
-                StatusMessage = $"Training record '{newRecord.Title}' initiated.";
+                StatusMessage = "Training record initiated.";
                 await LoadTrainingRecordsAsync().ConfigureAwait(false);
             }
             catch (Exception ex)

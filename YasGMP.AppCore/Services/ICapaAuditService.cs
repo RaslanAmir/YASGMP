@@ -80,3 +80,4 @@ namespace YasGMP.Services.Interfaces
         bool ValidateIntegrity(CapaAudit audit);
     }
 }
+

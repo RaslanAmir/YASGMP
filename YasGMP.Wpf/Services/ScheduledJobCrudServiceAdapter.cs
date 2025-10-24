@@ -4,49 +4,29 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using MySqlConnector;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Connects the WPF Scheduled Job module to the shared database-backed MAUI services exposed through
-/// <see cref="YasGMP.Services.DatabaseService"/>.
+/// Adapter that bridges the WPF shell to <see cref="DatabaseService"/> for scheduled jobs.
 /// </summary>
-/// <remarks>
-/// Module view models invoke this adapter which executes the same SQL routines as the MAUI app via
-/// <see cref="YasGMP.Services.DatabaseService"/> and surfaces audit metadata that ultimately feeds
-/// <see cref="YasGMP.Services.AuditService"/>. Calls should be awaited off the UI thread with UI updates marshalled via
-/// <see cref="WpfUiDispatcher"/>. <see cref="CrudSaveResult"/> values carry identifiers, scheduling status, and signature data;
-/// callers are responsible for localizing the status/comment text using <see cref="LocalizationServiceExtensions"/> or
-/// <see cref="ILocalizationService"/> before displaying it to operators.
-/// </remarks>
 public sealed class ScheduledJobCrudServiceAdapter : IScheduledJobCrudService
 {
     private readonly DatabaseService _database;
-    private readonly IPreventiveMaintenanceService? _preventiveMaintenanceService;
-    /// <summary>
-    /// Initializes a new instance of the ScheduledJobCrudServiceAdapter class.
-    /// </summary>
 
-    public ScheduledJobCrudServiceAdapter(DatabaseService database, IPreventiveMaintenanceService? preventiveMaintenanceService = null)
+    public ScheduledJobCrudServiceAdapter(DatabaseService database)
     {
         _database = database ?? throw new ArgumentNullException(nameof(database));
-        _preventiveMaintenanceService = preventiveMaintenanceService;
     }
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public async Task<ScheduledJob?> TryGetByIdAsync(int id)
     {
         var jobs = await _database.GetAllScheduledJobsFullAsync().ConfigureAwait(false);
         return jobs.FirstOrDefault(j => j.Id == id);
     }
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(ScheduledJob job, ScheduledJobCrudContext context)
     {
@@ -84,9 +64,6 @@ SELECT LAST_INSERT_ID();";
 
         return new CrudSaveResult(id, CreateMetadata(context, signature));
     }
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(ScheduledJob job, ScheduledJobCrudContext context)
     {
@@ -136,9 +113,6 @@ WHERE id=@id";
 
         return new CrudSaveResult(job.Id, CreateMetadata(context, signature));
     }
-    /// <summary>
-    /// Executes the execute async operation.
-    /// </summary>
 
     public async Task ExecuteAsync(int jobId, ScheduledJobCrudContext context)
     {
@@ -163,12 +137,7 @@ WHERE id=@id";
         await _database.ExecuteNonQueryAsync(sql, parameters).ConfigureAwait(false);
         await _database.LogScheduledJobAuditAsync(new ScheduledJob { Id = jobId }, "EXECUTE", context.Ip, context.DeviceInfo, context.SessionId, $"user={context.UserId}")
             .ConfigureAwait(false);
-
-        await TryAdvancePreventiveMaintenanceAsync(jobId, context).ConfigureAwait(false);
     }
-    /// <summary>
-    /// Executes the acknowledge async operation.
-    /// </summary>
 
     public async Task AcknowledgeAsync(int jobId, ScheduledJobCrudContext context)
     {
@@ -192,35 +161,6 @@ WHERE id=@id";
         await _database.LogScheduledJobAuditAsync(new ScheduledJob { Id = jobId }, "ACK", context.Ip, context.DeviceInfo, context.SessionId, $"user={context.UserId}")
             .ConfigureAwait(false);
     }
-
-    private async Task TryAdvancePreventiveMaintenanceAsync(int jobId, ScheduledJobCrudContext context)
-    {
-        if (_preventiveMaintenanceService is null || context.UserId <= 0)
-        {
-            return;
-        }
-
-        try
-        {
-            var job = await TryGetByIdAsync(jobId).ConfigureAwait(false);
-            if (job?.EntityId is int planId && !string.IsNullOrWhiteSpace(job.EntityType) && IsPreventiveMaintenanceEntity(job.EntityType))
-            {
-                await _preventiveMaintenanceService.MarkExecutedAsync(planId, context.UserId).ConfigureAwait(false);
-            }
-        }
-        catch
-        {
-            // Swallow failures so scheduler persistence remains resilient; audit trail already captures the execute attempt.
-        }
-    }
-
-    private static bool IsPreventiveMaintenanceEntity(string entityType)
-        => entityType.Equals("ppm_plan", StringComparison.OrdinalIgnoreCase)
-            || entityType.Equals("preventive_maintenance_plan", StringComparison.OrdinalIgnoreCase)
-            || entityType.Equals("preventive_maintenance", StringComparison.OrdinalIgnoreCase);
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(ScheduledJob job)
     {
@@ -249,9 +189,6 @@ WHERE id=@id";
             throw new InvalidOperationException("Recurrence pattern is required.");
         }
     }
-    /// <summary>
-    /// Executes the normalize status operation.
-    /// </summary>
 
     public string NormalizeStatus(string? status)
         => string.IsNullOrWhiteSpace(status)
@@ -331,3 +268,4 @@ WHERE id=@id";
             IpAddress = context.Ip
         };
 }
+

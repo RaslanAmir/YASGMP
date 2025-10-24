@@ -2,24 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared CRUD contract that both WPF and MAUI use to reach <see cref="YasGMP.Services.ExternalServicerService"/>
-/// and its audit/persistence pipeline.
+/// Adapter-friendly abstraction exposing external servicer CRUD operations to the WPF shell.
 /// </summary>
-/// <remarks>
-/// WPF module view models invoke these members on the dispatcher thread, adapters forward calls to the shared
-/// <see cref="YasGMP.Services.ExternalServicerService"/> and <see cref="YasGMP.Services.DatabaseService"/> (which in turn feed
-/// <see cref="YasGMP.Services.AuditService"/>). Awaited operations should marshal UI updates with <see cref="WpfUiDispatcher"/>.
-/// Implementations must populate <see cref="CrudSaveResult"/> with identifiers, signature metadata, and localization-ready
-/// status/note text so either shell can translate them using <see cref="LocalizationServiceExtensions"/> or
-/// <see cref="ILocalizationService"/> before presentation.
-/// </remarks>
 public interface IExternalServicerCrudService
 {
     Task<IReadOnlyList<ExternalServicer>> GetAllAsync();
@@ -44,15 +34,8 @@ public interface IExternalServicerCrudService
 }
 
 /// <summary>
-/// Metadata captured when persisting external servicer edits to feed audit/trace data. Each value feeds
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance pipelines
-/// can replay the accepted signature manifest.
+/// Metadata captured when persisting external servicer edits to feed audit/trace data.
 /// </summary>
-/// <remarks>
-/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside external servicers, and MAUI experiences should propagate the
-/// same payload when presenting or synchronizing records to keep audit history consistent across platforms.
-/// </remarks>
 /// <param name="UserId">Authenticated operator identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Device or workstation fingerprint.</param>
@@ -75,9 +58,6 @@ public readonly record struct ExternalServicerCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ExternalServicerCrudContext Create(int userId, string? ip, string? deviceInfo, string? sessionId)
         => new(
@@ -90,9 +70,6 @@ public readonly record struct ExternalServicerCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ExternalServicerCrudContext Create(
         int userId,
@@ -131,3 +108,4 @@ public static class ExternalServicerCrudExtensions
             ? "active"
             : status.Trim().ToLower(CultureInfo.InvariantCulture);
 }
+

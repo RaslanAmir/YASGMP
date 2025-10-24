@@ -102,3 +102,4 @@ namespace YasGMP.Models.Enums
         OTHER = 999
     }
 }
+

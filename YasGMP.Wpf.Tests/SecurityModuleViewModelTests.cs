@@ -166,3 +166,4 @@ public class SecurityModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

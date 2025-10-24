@@ -35,7 +35,7 @@ namespace YasGMP.Models
         /// </summary>
         [Column("permission_type")]
         [Display(Name = "Tip dozvole")]
-        public PermissionType? PermissionType { get; set; }
+        public YasGMP.Models.Enums.PermissionType? PermissionType { get; set; }
 
         /// <summary>
         /// Unique code for this permission (e.g. "CanEditUser", "WorkOrder_Approve").
@@ -205,3 +205,4 @@ namespace YasGMP.Models
         public override string ToString() => $"{Code} – {Name}";
     }
 }
+

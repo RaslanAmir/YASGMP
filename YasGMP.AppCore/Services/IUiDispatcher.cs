@@ -24,3 +24,4 @@ namespace YasGMP.Services
         void BeginInvoke(Action action);
     }
 }
+

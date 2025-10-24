@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceIncidentReportsExtensions
     {
-        /// <summary>
-        /// Executes the get all incident reports full async operation.
-        /// </summary>
         public static async Task<List<IncidentReport>> GetAllIncidentReportsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT id, title, type, status, description, detected_at, reported_at, reported_by_id, assigned_to_id,
@@ -31,9 +28,6 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY reported_a
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the initiate incident report async operation.
-        /// </summary>
 
         public static async Task InitiateIncidentReportAsync(this DatabaseService db, IncidentReport report, CancellationToken token = default)
         {
@@ -59,9 +53,6 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY reported_a
             try { await db.ExecuteNonQueryAsync(sql, pars, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(report.ReportedById, "IR_CREATE", "incidents", "IncidentReports", null, report.Title, report.IpAddress, "audit", report.DeviceInfo, report.SessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the assign incident report async operation.
-        /// </summary>
 
         public static async Task AssignIncidentReportAsync(this DatabaseService db, int incidentId, int userId, string? note, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             {
@@ -70,47 +61,29 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY reported_a
         }
 
         // Overload matching ViewModel call order (id, actorUserId, ip, device, sessionId, note)
-        /// <summary>
-        /// Executes the assign incident report async operation.
-        /// </summary>
         public static Task AssignIncidentReportAsync(this DatabaseService db, int incidentId, int actorUserId, string ip, string device, string? sessionId, string? note, CancellationToken token = default)
             => db.AssignIncidentReportAsync(incidentId, actorUserId, note, actorUserId, ip, device, sessionId, token);
-        /// <summary>
-        /// Executes the investigate incident report async operation.
-        /// </summary>
 
         public static async Task InvestigateIncidentReportAsync(this DatabaseService db, IncidentReport report, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE incidents /* ANALYZER_IGNORE: pending schema mapping */ SET status='investigated' WHERE id=@id", new[] { new MySqlParameter("@id", report.Id) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(actorUserId, "IR_INVESTIGATE", "incidents", "IncidentReports", report.Id, report.Title, ip, "audit", deviceInfo, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the approve incident report async operation.
-        /// </summary>
 
         public static async Task ApproveIncidentReportAsync(this DatabaseService db, int incidentId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE incidents /* ANALYZER_IGNORE: pending schema mapping */ SET status='approved' WHERE id=@id", new[] { new MySqlParameter("@id", incidentId) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(actorUserId, "IR_APPROVE", "incidents", "IncidentReports", incidentId, null, ip, "audit", deviceInfo, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the escalate incident report async operation.
-        /// </summary>
 
         public static Task EscalateIncidentReportAsync(this DatabaseService db, int incidentId, int actorUserId, string ip, string deviceInfo, string? sessionId, string? reason, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "IR_ESCALATE", "incidents", "IncidentReports", incidentId, reason, ip, "warn", deviceInfo, sessionId, token: token);
-        /// <summary>
-        /// Executes the close incident report async operation.
-        /// </summary>
 
         public static async Task CloseIncidentReportAsync(this DatabaseService db, int incidentId, int actorUserId, string ip, string deviceInfo, string? sessionId, string? note, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE incidents /* ANALYZER_IGNORE: pending schema mapping */ SET status='closed', closed_at=NOW(), closed_by_id=@u WHERE id=@id", new[] { new MySqlParameter("@id", incidentId), new MySqlParameter("@u", actorUserId) }, token).ConfigureAwait(false); } catch { }
             await db.LogSystemEventAsync(actorUserId, "IR_CLOSE", "incidents", "IncidentReports", incidentId, note, ip, "audit", deviceInfo, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the export incident reports async operation.
-        /// </summary>
 
         public static Task ExportIncidentReportsAsync(this DatabaseService db, List<IncidentReport> items, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
@@ -126,9 +99,6 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY reported_a
                 });
             return db.LogSystemEventAsync(0, "IR_EXPORT", "incidents", "IncidentReports", null, $"count={items?.Count ?? 0}; file={path}", ip, "info", deviceInfo, sessionId, token: token);
         }
-        /// <summary>
-        /// Executes the export incident reports async operation.
-        /// </summary>
 
         public static Task ExportIncidentReportsAsync(this DatabaseService db, List<IncidentReport> items, string format, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
@@ -203,4 +173,5 @@ FROM incidents /* ANALYZER_IGNORE: pending schema mapping */ ORDER BY reported_a
         }
     }
 }
+
 

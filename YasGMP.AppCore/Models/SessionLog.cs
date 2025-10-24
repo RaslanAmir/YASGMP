@@ -138,3 +138,4 @@ namespace YasGMP.Models
         public bool IsActive => LogoutTime == null && !IsTerminated;
     }
 }
+

@@ -190,38 +190,14 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ===
-        /// <summary>
-        /// Gets or sets the load attachments command.
-        /// </summary>
 
         public ICommand LoadAttachmentsCommand { get; }
-        /// <summary>
-        /// Gets or sets the add attachment command.
-        /// </summary>
         public ICommand AddAttachmentCommand { get; }
-        /// <summary>
-        /// Gets or sets the download attachment command.
-        /// </summary>
         public ICommand DownloadAttachmentCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete attachment command.
-        /// </summary>
         public ICommand DeleteAttachmentCommand { get; }
-        /// <summary>
-        /// Gets or sets the rollback attachment command.
-        /// </summary>
         public ICommand RollbackAttachmentCommand { get; }
-        /// <summary>
-        /// Gets or sets the export attachments command.
-        /// </summary>
         public ICommand ExportAttachmentsCommand { get; }
-        /// <summary>
-        /// Gets or sets the approve attachment command.
-        /// </summary>
         public ICommand ApproveAttachmentCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

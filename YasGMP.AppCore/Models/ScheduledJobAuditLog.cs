@@ -77,16 +77,11 @@ namespace YasGMP.Models
         [Column("details")]
         public string? Details { get; set; }
 
-        /// <summary>
-        /// Gets or sets the scheduled job.
-        /// </summary>
         [ForeignKey(nameof(ScheduledJobId))]
         public virtual ScheduledJob? ScheduledJob { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user.
-        /// </summary>
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }
     }
 }
+

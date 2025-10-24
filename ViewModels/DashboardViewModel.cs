@@ -108,14 +108,8 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region Commands
-        /// <summary>
-        /// Gets or sets the load dashboard command.
-        /// </summary>
 
         public ICommand LoadDashboardCommand { get; }
-        /// <summary>
-        /// Gets or sets the date range changed command.
-        /// </summary>
         public ICommand DateRangeChangedCommand { get; }
 
         #endregion

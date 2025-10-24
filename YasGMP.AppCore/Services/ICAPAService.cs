@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 
 namespace YasGMP.Services.Interfaces
@@ -33,6 +33,7 @@ namespace YasGMP.Services.Interfaces
         /// </summary>
         /// <param name="capa">CAPA case to create.</param>
         /// <param name="userId">User ID performing the operation.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         Task CreateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -40,6 +41,7 @@ namespace YasGMP.Services.Interfaces
         /// </summary>
         /// <param name="capa">CAPA case with new data.</param>
         /// <param name="userId">User ID performing the update.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         Task UpdateAsync(CapaCase capa, int userId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -55,6 +57,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User starting investigation.</param>
         /// <param name="investigator">Investigator's name.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         Task StartInvestigationAsync(int capaId, int userId, string investigator, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -63,6 +66,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User defining plan.</param>
         /// <param name="actionPlan">Action plan string.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         Task DefineActionPlanAsync(int capaId, int userId, string actionPlan, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -70,6 +74,7 @@ namespace YasGMP.Services.Interfaces
         /// </summary>
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="approverId">User approving.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         Task ApproveActionPlanAsync(int capaId, int approverId, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -78,6 +83,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User executing.</param>
         /// <param name="executionComment">Execution notes.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         Task MarkActionExecutedAsync(int capaId, int userId, string executionComment, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -86,6 +92,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="verifierId">Verifier user ID.</param>
         /// <param name="effective">Is it effective?</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata applied during verification.</param>
         Task VerifyEffectivenessAsync(int capaId, int verifierId, bool effective, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>
@@ -94,6 +101,7 @@ namespace YasGMP.Services.Interfaces
         /// <param name="capaId">CAPA ID.</param>
         /// <param name="userId">User closing.</param>
         /// <param name="closureComment">Closure comments.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata captured at CAPA closure.</param>
         Task CloseCapaAsync(int capaId, int userId, string closureComment, SignatureMetadataDto? signatureMetadata = null);
 
         /// <summary>

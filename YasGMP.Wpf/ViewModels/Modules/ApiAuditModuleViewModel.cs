@@ -10,29 +10,26 @@ using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the api audit module view model value.
-/// </summary>
 
-public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentViewModel
+/// <summary>Exposes API audit trail records within the WPF shell using the shared SAP B1 document workflow.</summary>
+/// <remarks>
+/// Form Modes: Leverages Find to filter by API key/user/action, View to inspect entries, and keeps Add/Update available for parity even though the module is read-only.
+/// Audit &amp; Logging: Operates exclusively in read-only mode by querying <see cref="AuditService"/>; no additional audit writes are produced from this view.
+/// Localization: Uses inline captions such as `"API Audit Trail"`, `"All"`, and loaded-status strings until the `Modules_ApiAudit_*` resource keys are introduced.
+/// Navigation: Publishes ModuleKey `ApiAudit` so the shell can dock the document, reuse status-bar messages (e.g. `"Loading API Audit Trail records..."`), and route Golden Arrow jumps when other modules surface related audit entries.
+/// </remarks>
+public partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "ApiAudit";
+    public new const string ModuleKey = "ApiAudit";
     private const int DefaultResultLimit = 500;
-    /// <summary>
-    /// Initializes a new instance of the ApiAuditModuleViewModel class.
-    /// </summary>
 
     public ApiAuditModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.ApiAuditTrail"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "API Audit Trail", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
 
@@ -44,9 +41,6 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         FilterTo = DateTime.Today;
         SelectedAction = _actionOptions.First();
     }
-    /// <summary>
-    /// Gets or sets the action options.
-    /// </summary>
 
     public ReadOnlyObservableCollection<string> ActionOptions { get; }
 
@@ -176,14 +170,17 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
            || record.InspectorFields.Any(field =>
                field.Value?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
 
-    protected virtual Task<IReadOnlyList<ApiAuditEntryDto>> QueryApiAuditsAsync(
+    protected virtual async Task<IReadOnlyList<ApiAuditEntryDto>> QueryApiAuditsAsync(
         string apiKey,
         string user,
         string action,
         DateTime from,
         DateTime to,
         int limit)
-        => _auditService.GetApiAuditEntriesAsync(apiKey, user, action, from, to, limit);
+    {
+        var entries = await _auditService.GetApiAuditEntriesAsync(apiKey, user, action, from, to, limit).ConfigureAwait(false);
+        return entries;
+    }
 
     private ModuleRecord MapToRecord(ApiAuditEntryDto entry)
     {
@@ -299,3 +296,7 @@ public sealed partial class ApiAuditModuleViewModel : DataDrivenModuleDocumentVi
         _ = RefreshCommand.ExecuteAsync(null);
     }
 }
+
+
+
+

@@ -49,10 +49,8 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the gateway.
-        /// </summary>
         [ForeignKey(nameof(GatewayId))]
         public virtual IotGateway? Gateway { get; set; }
     }
 }
+

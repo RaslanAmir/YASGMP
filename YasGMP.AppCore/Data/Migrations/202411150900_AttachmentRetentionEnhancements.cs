@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace YasGMP.Data.Migrations
 {
-    /// <summary>
-    /// Represents the Attachment Retention Enhancements.
-    /// </summary>
     public partial class AttachmentRetentionEnhancements : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,3 +43,4 @@ namespace YasGMP.Data.Migrations
         }
     }
 }
+

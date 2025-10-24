@@ -1,105 +1,67 @@
-using System;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
 /// <summary>
-/// Provides a localized toolbar command whose caption, tooltip, automation name, and automation ID
-/// bindings are refreshed whenever <see cref="ILocalizationService.LanguageChanged"/> fires so that the
-/// shell ribbon and FlaUI smoke tests observe the updated values without additional wiring.
+/// Represents a SAP Business One style toolbar command that caches localization resource keys so the shell can refresh the caption, tooltip, automation name, and automation ID bindings whenever an <c>ILocalizationService.LanguageChanged</c> notification occurs, keeping the Fluent.Ribbon surface and FlaUI smoke harness synchronized across language switches.
 /// </summary>
 /// <remarks>
-/// SAP Business One form-mode toggles drive toolbar enablement, and <see cref="AssociatedMode"/> maps to
-/// those semantics by indicating when the command should be active in the docked ribbon. The same
-/// metadata feeds Golden Arrow navigation where automation identifiers are generated from the supplied
-/// localization keys so that UIA clients can discover the buttons deterministically.
+/// SAP Business One form-mode semantics dictate when toolbar buttons enable, disable, or latch. The optional <c>AssociatedMode</c> flag captures that mapping so Find/Add/View/Update toggles behave exactly like their SAP B1 counterparts. The <c>automationIdKey</c> feeds the Golden Arrow navigation registry, which combines the key with the module context to generate deterministic UI Automation identifiers for cross-module jumps and smoke-test lookups.
 /// </remarks>
 public partial class ModuleToolbarCommand : ObservableObject
 {
-    private readonly ILocalizationService? _localization;
-    private readonly string _captionKey;
-    private readonly string? _toolTipKey;
-    private readonly string? _automationNameKey;
-    private readonly string? _automationIdKey;
     /// <summary>
-    /// Gets or sets the caption key.
+    /// Creates a toolbar command that caches localization resource keys and optional form-mode affinity so the shell can keep ribbon bindings and automation identifiers aligned with SAP B1 semantics.
     /// </summary>
-
-    public string CaptionKey => _captionKey;
-    /// <summary>
-    /// Gets or sets the tool tip key.
-    /// </summary>
-
-    public string? ToolTipKey => _toolTipKey;
-    /// <summary>
-    /// Gets or sets the automation name key.
-    /// </summary>
-
-    public string? AutomationNameKey => _automationNameKey;
-    /// <summary>
-    /// Gets or sets the automation id key.
-    /// </summary>
-
-    public string? AutomationIdKey => _automationIdKey;
-
-    /// <param name="captionKey">Localization resource key that resolves to the ribbon caption and serves as the fallback automation text.</param>
-    /// <param name="command">Executable that integrates with the ribbon button and SAP B1 style enablement logic.</param>
-    /// <param name="localization">Localization service responsible for translating resource keys and raising <see cref="ILocalizationService.LanguageChanged"/>.</param>
-    /// <param name="toolTipKey">Optional localization key used for the accessibility tooltip consumed by the ribbon hover behavior.</param>
-    /// <param name="automationNameKey">Optional localization key that produces the screen-reader friendly automation name consumed by FlaUI.</param>
-    /// <param name="automationIdKey">Optional localization key used to derive deterministic Golden Arrow automation identifiers.</param>
-    /// <param name="associatedMode">SAP B1 form mode the command participates in, guiding enable/disable toggles across the toolbar.</param>
+    /// <param name="captionKey">Localization resource key (or fallback literal) used to resolve the ribbon caption that Fluent.Ribbon renders.</param>
+    /// <param name="command">Executable invoked when the toolbar item is activated; also used by the FormMode engine to determine enablement.</param>
+    /// <param name="localization">Optional localization service instance expected to implement <c>ILocalizationService</c>; the shell subscribes to its <c>LanguageChanged</c> event to repopulate caption and automation bindings.</param>
+    /// <param name="toolTipKey">Resource key for the tooltip text that surfaces in the ribbon and status bar when the button is focused.</param>
+    /// <param name="automationNameKey">Resource key providing the accessibility name consumed by screen readers and FlaUI lookups.</param>
+    /// <param name="automationIdKey">Resource key or suffix used to produce a stable UI Automation identifier for Golden Arrow navigation and smoke automation.</param>
+    /// <param name="associatedMode">SAP Business One <see cref="FormMode"/> that this command activates, allowing the toolbar state machine to mirror Find/Add/View/Update wiring.</param>
     public ModuleToolbarCommand(
         string captionKey,
         ICommand command,
-        ILocalizationService? localization = null,
+        object? localization = null,
         string? toolTipKey = null,
         string? automationNameKey = null,
         string? automationIdKey = null,
         FormMode? associatedMode = null)
     {
-        if (string.IsNullOrWhiteSpace(captionKey))
-        {
-            throw new ArgumentException("Caption key must be provided.", nameof(captionKey));
-        }
-
-        Command = command ?? throw new ArgumentNullException(nameof(command));
-        _localization = localization;
-        _captionKey = captionKey;
-        _toolTipKey = toolTipKey;
-        _automationNameKey = automationNameKey;
-        _automationIdKey = automationIdKey;
+        Caption = captionKey;
+        Command = command;
+        CaptionKey = captionKey;
+        LocalizationContext = localization;
+        ToolTipKey = toolTipKey;
+        AutomationNameKey = automationNameKey ?? captionKey;
+        AutomationIdKey = automationIdKey ?? AutomationNameKey;
         AssociatedMode = associatedMode;
-        UpdateLocalizedValues();
-
-        if (_localization is not null)
-        {
-            _localization.LanguageChanged += OnLanguageChanged;
-        }
     }
 
     /// <summary>Display text rendered in the toolbar.</summary>
-    [ObservableProperty]
-    private string _caption = string.Empty;
-
-    /// <summary>Tooltip displayed when hovering the toolbar button.</summary>
-    [ObservableProperty]
-    private string? _toolTip;
-
-    /// <summary>Automation-friendly name surfaced to screen readers.</summary>
-    [ObservableProperty]
-    private string? _automationName;
-
-    /// <summary>Automation identifier for UIA/FlaUI.</summary>
-    [ObservableProperty]
-    private string? _automationId;
+    public string Caption { get; }
 
     /// <summary>Gets the command executed when the toolbar button is clicked.</summary>
     public ICommand Command { get; }
 
-    /// <summary>Optional form mode associated with the toggle.</summary>
+    /// <summary>Resource key backing the <see cref="Caption"/> value so localization updates can rehydrate the binding.</summary>
+    public string CaptionKey { get; }
+
+    /// <summary>Localization service reference stored for tooling; expected to be an <c>ILocalizationService</c> instance.</summary>
+    public object? LocalizationContext { get; }
+
+    /// <summary>Resource key used to resolve the tooltip displayed for this command.</summary>
+    public string? ToolTipKey { get; }
+
+    /// <summary>Resource key used to produce the automation name consumed by accessibility clients and FlaUI smoke tests.</summary>
+    public string AutomationNameKey { get; }
+
+    /// <summary>Resource key or suffix used to generate a deterministic automation identifier for Golden Arrow navigation.</summary>
+    public string AutomationIdKey { get; }
+
+    /// <summary>Optional SAP Business One form mode associated with this command.</summary>
     public FormMode? AssociatedMode { get; }
 
     [ObservableProperty]
@@ -107,26 +69,7 @@ public partial class ModuleToolbarCommand : ObservableObject
 
     [ObservableProperty]
     private bool _isChecked;
-
-    private void OnLanguageChanged(object? sender, EventArgs e)
-    {
-        UpdateLocalizedValues();
-    }
-
-    private void UpdateLocalizedValues()
-    {
-        if (_localization is null)
-        {
-            Caption = _captionKey;
-            ToolTip = _toolTipKey;
-            AutomationName = _automationNameKey ?? _captionKey;
-            AutomationId = _automationIdKey ?? _automationNameKey ?? _captionKey;
-            return;
-        }
-
-        Caption = _localization.GetString(_captionKey);
-        ToolTip = _toolTipKey is null ? null : _localization.GetString(_toolTipKey);
-        AutomationName = _localization.GetString(_automationNameKey ?? _captionKey);
-        AutomationId = _automationIdKey is null ? AutomationName : _localization.GetString(_automationIdKey);
-    }
 }
+
+
+

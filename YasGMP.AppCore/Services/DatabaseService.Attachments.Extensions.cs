@@ -21,9 +21,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceAttachmentsExtensions
     {
-        /// <summary>
-        /// Executes the get attachments filtered async operation.
-        /// </summary>
         public static async Task<List<Attachment>> GetAttachmentsFilteredAsync(this DatabaseService db, string? entityFilter, string? typeFilter, string? searchTerm, CancellationToken token = default)
         {
             string sql = @"SELECT a.id,
@@ -67,9 +64,6 @@ namespace YasGMP.Services
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the add attachment async operation.
-        /// </summary>
 
         public static async Task<int> AddAttachmentAsync(this DatabaseService db, string filePath, string entity, int entityId, int actorUserId, string ip, string device, string sessionId, string? reason = null, IAttachmentService? attachmentService = null, CancellationToken token = default)
         {
@@ -106,9 +100,6 @@ namespace YasGMP.Services
 
             return upload.Attachment.Id;
         }
-        /// <summary>
-        /// Executes the delete attachment async operation.
-        /// </summary>
 
         public static async Task DeleteAttachmentAsync(this DatabaseService db, int id, int actorUserId, string ip, string device, string sessionId, CancellationToken token = default)
         {
@@ -117,20 +108,11 @@ namespace YasGMP.Services
         }
 
         // Back-compat overload used by AttachmentViewModel
-        /// <summary>
-        /// Executes the delete attachment async operation.
-        /// </summary>
         public static Task DeleteAttachmentAsync(this DatabaseService db, int id, CancellationToken token = default)
             => db.DeleteAttachmentAsync(id, actorUserId: 0, ip: string.Empty, device: string.Empty, sessionId: string.Empty, token: token);
-        /// <summary>
-        /// Executes the approve attachment async operation.
-        /// </summary>
 
         public static Task ApproveAttachmentAsync(this DatabaseService db, int attachmentId, int actorUserId, string ip, string deviceInfo, string signatureHash, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "ATTACHMENT_APPROVE", "attachments", null, attachmentId, $"sig={signatureHash}", ip, "audit", deviceInfo, null, token: token);
-        /// <summary>
-        /// Executes the save export print log async operation.
-        /// </summary>
 
         public static async Task<int> SaveExportPrintLogAsync(this DatabaseService db, int userId, string format, string tableName, string filterUsed, string filePath, string sourceIp, string? note = null, CancellationToken token = default)
         {
@@ -139,14 +121,8 @@ namespace YasGMP.Services
         }
 
         // Overload signatures expected by AttachmentViewModel (named args: relatedTable/relatedId/fileType/search)
-        /// <summary>
-        /// Executes the get attachments filtered async operation.
-        /// </summary>
         public static Task<List<Attachment>> GetAttachmentsFilteredAsync(this DatabaseService db, string? relatedTable, int? relatedId, string? fileType, string? search, CancellationToken token = default)
             => db.GetAttachmentsFilteredAsync(entityFilter: relatedTable, typeFilter: fileType, searchTerm: search, token);
-        /// <summary>
-        /// Executes the add attachment async operation.
-        /// </summary>
 
         public static Task<int> AddAttachmentAsync(this DatabaseService db, string relatedTable, int relatedId, string fileName, string filePath, CancellationToken token = default)
             => db.AddAttachmentAsync(filePath: filePath, entity: relatedTable, entityId: relatedId, actorUserId: 0, ip: string.Empty, device: string.Empty, sessionId: string.Empty, reason: $"ui:{relatedTable}", token: token);
@@ -182,9 +158,6 @@ namespace YasGMP.Services
         }
 
         // -------------------- documents/document_links helpers (DocumentService compatible) --------------------
-        /// <summary>
-        /// Executes the get documents for entity async operation.
-        /// </summary>
         public static async Task<DataTable> GetDocumentsForEntityAsync(
             this DatabaseService db,
             string entityType,
@@ -200,9 +173,6 @@ ORDER BY d.id DESC";
             var pars = new[] { new MySqlParameter("@et", entityType), new MySqlParameter("@eid", entityId) };
             return await db.ExecuteSelectAsync(sql, pars, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the delete document link async operation.
-        /// </summary>
 
         public static async Task DeleteDocumentLinkAsync(
             this DatabaseService db,
@@ -222,3 +192,4 @@ ORDER BY d.id DESC";
         }
     }
 }
+

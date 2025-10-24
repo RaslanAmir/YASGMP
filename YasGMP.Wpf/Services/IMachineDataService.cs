@@ -12,9 +12,6 @@ namespace YasGMP.Wpf.Services
     /// <summary>Mock implementation returning deterministic sample data.</summary>
     public sealed class MockMachineDataService : IMachineDataService
     {
-        /// <summary>
-        /// Executes the get machines operation.
-        /// </summary>
         public IEnumerable<MachineRowViewModel> GetMachines()
         {
             return new[]
@@ -63,3 +60,4 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
+

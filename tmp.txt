@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YasGMP.Views.Dialogs.WorkOrderEditDialog"
+             x:Name="DialogPage"
+             Title="Radni nalog">
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="10">
+      <Entry Text="{Binding Title}" Placeholder="Naslov" />
+      <Picker x:Name="TypePicker" Title="Tip (korektivno/preventivno/vanredno)" SelectedIndexChanged="OnTypeChanged" />
+      <Picker x:Name="PriorityPicker" Title="Prioritet" SelectedIndexChanged="OnPriorityChanged" />
+      <Picker x:Name="StatusPicker" Title="Status" SelectedIndexChanged="OnStatusChanged" />
+      <Picker x:Name="UserPicker" Title="Dodijeljeno (tehnicar)" SelectedIndexChanged="OnUserChanged" />
+      <Picker x:Name="MachinePicker" Title="Stroj" SelectedIndexChanged="OnMachineChanged" />
+      <Picker x:Name="ComponentPicker" Title="Komponenta" />
+      <Editor Text="{Binding Description}" Placeholder="Opis" AutoSize="TextChanges" />
+      <Entry Text="{Binding TaskDescription}" Placeholder="Opis zadatka (legacy)" />
+      <DatePicker Date="{Binding DateOpen}" />
+      <DatePicker Date="{Binding Source={x:Reference DialogPage}, Path=DueDatePickerValue, Mode=TwoWay}" />
+      <DatePicker Date="{Binding Source={x:Reference DialogPage}, Path=DateClosePickerValue, Mode=TwoWay}" />
+      <Entry Text="{Binding Result}" Placeholder="Rezultat/nalaz" />
+      <Editor Text="{Binding Notes}" Placeholder="Napomena" AutoSize="TextChanges" />
+
+      <HorizontalStackLayout Spacing="10" Margin="0,10,0,0">
+        <Button Text="Potpiši" Clicked="OnSignClicked" />
+        <Button Text="Dodaj slike (prije)" Clicked="OnAddBeforePhotosClicked" />
+        <Button Text="Dodaj slike (poslije)" Clicked="OnAddAfterPhotosClicked" />
+      </HorizontalStackLayout>
+
+      <HorizontalStackLayout Spacing="16" Margin="0,20,0,0">
+        <Button Text="Spremi" Clicked="OnSaveClicked" />
+        <Button Text="Odustani" Clicked="OnCancelClicked" />
+      </HorizontalStackLayout>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>
+

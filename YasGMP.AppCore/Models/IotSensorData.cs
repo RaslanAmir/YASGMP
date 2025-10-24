@@ -68,16 +68,11 @@ namespace YasGMP.Models
         [Column("unit_id")]
         public int? UnitId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the component.
-        /// </summary>
         [ForeignKey(nameof(ComponentId))]
         public virtual MachineComponent? Component { get; set; }
 
-        /// <summary>
-        /// Gets or sets the measurement unit.
-        /// </summary>
         [ForeignKey(nameof(UnitId))]
         public virtual MeasurementUnit? MeasurementUnit { get; set; }
     }
 }
+

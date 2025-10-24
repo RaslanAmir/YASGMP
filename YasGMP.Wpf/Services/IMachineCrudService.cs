@@ -1,24 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Shared CRUD contract that lets both shells execute Machine workflows through
-    /// <see cref="YasGMP.Services.MachineService"/> with consistent auditing.
+    /// Adapter-friendly abstraction around <see cref="YasGMP.Services.MachineService"/>
+    /// so the WPF shell can be unit-tested without the full database infrastructure.
     /// </summary>
-    /// <remarks>
-    /// WPF module view models call these members on the UI thread; adapters pass the work to
-    /// <see cref="YasGMP.Services.MachineService"/> and <see cref="YasGMP.Services.AuditService"/>, then callers dispatch UI
-    /// updates via <see cref="WpfUiDispatcher"/> after awaiting the tasks. Implementations must populate
-    /// <see cref="CrudSaveResult"/> with identifiers, signature context, and localization-ready status text so both MAUI and WPF
-    /// can translate them using <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> and maintain a
-    /// unified audit history.
-    /// </remarks>
     public interface IMachineCrudService
     {
         Task<IReadOnlyList<Machine>> GetAllAsync();
@@ -35,26 +26,14 @@ namespace YasGMP.Wpf.Services
         /// </summary>
         Task<CrudSaveResult> UpdateAsync(Machine machine, MachineCrudContext context);
 
-        /// <summary>
-        /// Deletes an existing machine record while capturing the signature context used to authorise the action.
-        /// </summary>
-        Task DeleteAsync(int id, MachineCrudContext context);
-
         void Validate(Machine machine);
 
         string NormalizeStatus(string? status);
     }
 
     /// <summary>
-    /// Ambient metadata required for audit logging when persisting machines. Each value feeds
-    /// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines retain the
-    /// accepted signature manifest.
+    /// Ambient metadata required for audit logging when persisting machines.
     /// </summary>
-    /// <remarks>
-    /// Adapters shape this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
-    /// WPF shell consumers must persist and surface the DTO beside machine records, and MAUI experiences should propagate the
-    /// same payload when presenting or synchronizing equipment so the shared audit history stays aligned.
-    /// </remarks>
     /// <param name="UserId">Authenticated user identifier.</param>
     /// <param name="Ip">Source IP captured by the auth context.</param>
     /// <param name="DeviceInfo">Device fingerprint (Workstation name, etc.).</param>
@@ -77,9 +56,6 @@ namespace YasGMP.Wpf.Services
     {
         private const string DefaultSignatureMethod = "password";
         private const string DefaultSignatureStatus = "valid";
-        /// <summary>
-        /// Executes the create operation.
-        /// </summary>
 
         public static MachineCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
             => new(userId <= 0 ? 1 : userId,
@@ -91,9 +67,6 @@ namespace YasGMP.Wpf.Services
                    DefaultSignatureMethod,
                    DefaultSignatureStatus,
                    null);
-        /// <summary>
-        /// Executes the create operation.
-        /// </summary>
 
         public static MachineCrudContext Create(
             int userId,
@@ -123,3 +96,4 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
+

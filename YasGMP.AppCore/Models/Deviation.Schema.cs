@@ -10,21 +10,12 @@ namespace YasGMP.Models
     /// </summary>
     public partial class Deviation
     {
-        /// <summary>
-        /// Gets or sets the created at.
-        /// </summary>
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the updated at.
-        /// </summary>
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Represents the corrective actions raw value.
-        /// </summary>
         [Column("corrective_actions")]
         public string? CorrectiveActionsRaw
         {
@@ -36,9 +27,6 @@ namespace YasGMP.Models
                 : value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         }
 
-        /// <summary>
-        /// Represents the attachment ids raw value.
-        /// </summary>
         [Column("attachment_ids")]
         public string? AttachmentIdsRaw
         {
@@ -70,3 +58,4 @@ namespace YasGMP.Models
         public string? AuditTrailRaw { get; set; }
     }
 }
+

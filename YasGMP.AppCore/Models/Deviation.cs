@@ -7,7 +7,7 @@ using YasGMP.Models.Enums;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>Deviation</b>  Ultra-mega robust GMP deviation/non-conformance record (audit, workflow, root cause, CAPA, digital signature, AI-ready).
+    /// <b>Deviation</b> – Ultra-mega robust GMP deviation/non-conformance record (audit, workflow, root cause, CAPA, digital signature, AI-ready).
     /// <para>Supports complete GMP/Annex 11/21 CFR Part 11 requirements, forensics, workflow, advanced escalation, custom fields, attachments, and AI/ML hooks.</para>
     /// </summary>
     [Table("deviations")]
@@ -80,14 +80,14 @@ namespace YasGMP.Models
         [Required]
         [MaxLength(16)]
         [Column("severity")]
-        [Display(Name = "Teina")]
+        [Display(Name = "Težina")]
         public string Severity { get; set; } = "LOW";
 
         /// <summary>
         /// True if deviation is GMP/Compliance critical.
         /// </summary>
         [Column("is_critical")]
-        [Display(Name = "Kritino za GMP")]
+        [Display(Name = "Kritièno za GMP")]
         public bool IsCritical { get; set; }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace YasGMP.Models
         /// User ID currently responsible/investigator (FK to Users).
         /// </summary>
         [Column("assigned_investigator_id")]
-        [Display(Name = "Istraitelj")]
+        [Display(Name = "Istražitelj")]
         public int? AssignedInvestigatorId { get; set; }
 
         /// <summary>
@@ -263,11 +263,9 @@ namespace YasGMP.Models
         /// </summary>
         [NotMapped]
         public bool IsGmpCritical => IsCritical || (Severity?.ToUpperInvariant() == "CRITICAL");
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
 
         public override string ToString()
-            => $"[{Code ?? ("DEV-" + Id)}] {Title}  Status: {Status}";
+            => $"[{Code ?? ("DEV-" + Id)}] {Title} – Status: {Status}";
     }
 }
+

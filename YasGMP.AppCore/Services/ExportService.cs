@@ -77,6 +77,8 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="calibrations">Rows to export (null-safe).</param>
         /// <param name="filterUsed">Optional filter description for the audit log.</param>
+        /// <param name="token">Cancellation token for the export operation.</param>
+        /// <param name="progress">Optional progress reporter (0-100).</param>
         /// <returns>Full path to the generated Excel file.</returns>
         public async Task<string> ExportToExcelAsync(IEnumerable<Calibration> calibrations, string filterUsed = "", CancellationToken token = default, IProgress<int>? progress = null)
         {
@@ -145,6 +147,8 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="calibrations">Rows to export (null-safe).</param>
         /// <param name="filterUsed">Optional filter description for the audit log.</param>
+        /// <param name="token">Cancellation token for the export operation.</param>
+        /// <param name="progress">Optional progress reporter (0-100).</param>
         /// <returns>Full path to the generated PDF file.</returns>
         public async Task<string> ExportToPdfAsync(IEnumerable<Calibration> calibrations, string filterUsed = "", CancellationToken token = default, IProgress<int>? progress = null)
         {

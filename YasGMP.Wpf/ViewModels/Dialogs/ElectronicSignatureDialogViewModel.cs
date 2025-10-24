@@ -7,6 +7,7 @@ using YasGMP.Common;
 using YasGMP.Helpers;
 using YasGMP.Models;
 using YasGMP.Services.Interfaces;
+using YasGMP.Wpf.Helpers;
 
 namespace YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -18,9 +19,6 @@ namespace YasGMP.Wpf.ViewModels.Dialogs;
 public sealed partial class ElectronicSignatureDialogViewModel : ObservableObject
 {
     private readonly IAuthContext _authContext;
-    /// <summary>
-    /// Initializes a new instance of the ElectronicSignatureDialogViewModel class.
-    /// </summary>
 
     public ElectronicSignatureDialogViewModel(
         IAuthContext authContext,
@@ -84,12 +82,12 @@ public sealed partial class ElectronicSignatureDialogViewModel : ObservableObjec
     {
         IsCustomReasonVisible = value is not null &&
             string.Equals(value.Code, WorkOrderSignatureReasonCodes.Custom, StringComparison.OrdinalIgnoreCase);
-        ConfirmCommand.NotifyCanExecuteChanged();
+        UiCommandHelper.NotifyCanExecuteOnUi(ConfirmCommand);
     }
 
-    partial void OnPasswordChanged(string value) => ConfirmCommand.NotifyCanExecuteChanged();
+    partial void OnPasswordChanged(string value) => UiCommandHelper.NotifyCanExecuteOnUi(ConfirmCommand);
 
-    partial void OnIsBusyChanged(bool value) => ConfirmCommand.NotifyCanExecuteChanged();
+    partial void OnIsBusyChanged(bool value) => UiCommandHelper.NotifyCanExecuteOnUi(ConfirmCommand);
 
     private bool CanConfirm()
         => !IsBusy && !string.IsNullOrWhiteSpace(Password) && SelectedReason is not null;
@@ -212,3 +210,4 @@ public sealed record ElectronicSignatureDialogResult(
     string? ReasonDetail,
     string ReasonDisplay,
     DigitalSignature Signature);
+

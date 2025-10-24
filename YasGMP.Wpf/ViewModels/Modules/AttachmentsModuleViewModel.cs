@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -20,20 +21,22 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the attachments module view model value.
-/// </summary>
 
-public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
+/// <summary>Manages database-backed attachments and their signatures within the WPF shell.</summary>
+/// <remarks>
+/// Form Modes: Find lists attachments with filtering, Add and Update enable staging uploads plus metadata edits, and View locks the grid for read-only inspection.
+/// Audit &amp; Logging: Commits staged uploads only after capturing an electronic signature and records an entity-level audit entry per file via <see cref="AuditService.LogEntityAuditAsync"/>.
+/// Localization: Uses inline strings for captions and status text (e.g. `"Attachments"`, `"Upload"`, `"Staged uploads pending signature"`); resource keys will replace these literals once available.
+/// Navigation: ModuleKey `Attachments` registers the document with the shell; `ModuleRecord` entries populate related module keys so Golden Arrow launches entity-specific editors while status messages keep the ribbon informed.
+/// </remarks>
+    public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Attachments";
-    /// <summary>
-    /// Initializes a new instance of the AttachmentsModuleViewModel class.
-    /// </summary>
+    /// <summary>Shell registration key that binds Attachments into the docking catalog.</summary>
+    /// <remarks>Execution: Resolved during module composition so ribbon tabs and layout persistence can route to this view. Form Mode: Applies to all modes as a neutral identifier. Localization: Currently paired with the inline caption literal "Attachments" until `Modules_Attachments_Title` exists.</remarks>
+    public new const string ModuleKey = "Attachments";
 
+    /// <summary>Initializes the attachments surface with persistence, signature, and navigation services.</summary>
+    /// <remarks>Execution: Invoked at module activation when the shell resolves dependencies. Form Mode: Ensures Find/View primes lists while Add/Update wire staging plus e-signature prompts. Localization: Uses inline labels such as "Attachments" and "Upload" pending resource bindings.</remarks>
     public AttachmentsModuleViewModel(
         DatabaseService databaseService,
         IAttachmentService attachmentService,
@@ -42,11 +45,9 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         AuditService auditService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.Attachments"), localization, cflDialogService, shellInteraction, navigation)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Attachments", cflDialogService, shellInteraction, navigation)
     {
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
@@ -72,27 +73,14 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         UploadCommand = new AsyncRelayCommand(UploadAsync, CanUpload);
         DownloadCommand = new AsyncRelayCommand(DownloadAsync, CanDownload);
         DeleteCommand = new AsyncRelayCommand(DeleteAsync, CanDelete);
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Attachments.Toolbar.Command.Upload.Content",
-            UploadCommand,
-            _localization,
-            "Attachments.Toolbar.Command.Upload.ToolTip",
-            "Attachments.Toolbar.Command.Upload.AutomationName",
-            "Attachments.Toolbar.Command.Upload.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Attachments.Toolbar.Command.Download.Content",
-            DownloadCommand,
-            _localization,
-            "Attachments.Toolbar.Command.Download.ToolTip",
-            "Attachments.Toolbar.Command.Download.AutomationName",
-            "Attachments.Toolbar.Command.Download.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "Attachments.Toolbar.Command.Delete.Content",
-            DeleteCommand,
-            _localization,
-            "Attachments.Toolbar.Command.Delete.ToolTip",
-            "Attachments.Toolbar.Command.Delete.AutomationName",
-            "Attachments.Toolbar.Command.Delete.AutomationId"));
+        IndexEmbeddingCommand = new AsyncRelayCommand(IndexEmbeddingAsync, CanIndexEmbedding);
+        FindSimilarCommand = new AsyncRelayCommand(FindSimilarAsync, CanIndexEmbedding);
+        OpenSimilarCommand = new RelayCommand<object?>(OpenSimilar);
+        Toolbar.Add(new ModuleToolbarCommand("Upload", UploadCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Download", DownloadCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Delete", DeleteCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Index AI Embedding", IndexEmbeddingCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Find Similar (AI)", FindSimilarCommand));
 
         PropertyChanged += OnPropertyChanged;
 
@@ -112,50 +100,274 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             ResetAttachmentState(clearStagedUploads: true, clearAttachmentRows: true);
         }
     }
-    /// <summary>
-    /// Gets or sets the has attachment workflow.
-    /// </summary>
 
+    /// <summary>Indicates whether upload/download/signature services were provided by the container.</summary>
+    /// <remarks>Execution: Evaluated during construction and read whenever commands toggle availability. Form Mode: Checked during Add/Update when attachments become editable; ignored during Find/View. Localization: Drives inline status text ("Staged uploads pending signature") until formal resources land.</remarks>
     public bool HasAttachmentWorkflow { get; }
-    /// <summary>
-    /// Gets or sets the has shell integration.
-    /// </summary>
 
+    /// <summary>Signals that CFL dialogs and shell navigation hooks are available.</summary>
+    /// <remarks>Execution: Computed in the constructor before the shell wires Golden Arrow routing. Form Mode: Enables link-outs from Find/View as well as Add/Update inspectors. Localization: Supports inline shell status messages pending `Shell_Status_Attachments_*` resources.</remarks>
     public bool HasShellIntegration { get; }
-    /// <summary>
-    /// Gets or sets the attachment rows.
-    /// </summary>
 
+    /// <summary>Rows presented in the attachments grid backing the document host.</summary>
+    /// <remarks>Execution: Populated after `LoadAsync` completes or design-time seed flows. Form Mode: Always visible; only Add/Update enable per-row editing affordances. Localization: Column headers remain inline until grid resources are published.</remarks>
     public ObservableCollection<AttachmentRowViewModel> AttachmentRows { get; }
-    /// <summary>
-    /// Gets or sets the staged uploads.
-    /// </summary>
 
+    /// <summary>Pending upload sessions created during Add/Update flows.</summary>
+    /// <remarks>Execution: Mutated by staging commands as users pick files. Form Mode: Only Add/Update push items into the collection; Find/View observe read-only. Localization: Status prompts and badges use literals pending RESX entries.</remarks>
     public ObservableCollection<StagedAttachmentUploadViewModel> StagedUploads { get; }
-    /// <summary>
-    /// Gets or sets the has staged uploads.
-    /// </summary>
 
+    /// <summary>Gets a value indicating whether staged uploads exist for signature capture.</summary>
+    /// <remarks>Execution: Evaluated on collection change events to update ribbon buttons. Form Mode: Relevant solely to Add/Update transactions. Localization: Tied to inline badge strings until shared resources arrive.</remarks>
     public bool HasStagedUploads => StagedUploads.Count > 0;
 
+    /// <summary>Top-K similar attachments discovered via vector search (AI).</summary>
+    public ObservableCollection<SimilarAttachmentItem> SimilarAttachments { get; } = new();
+
+    /// <summary>Lightweight item for the Similar Attachments panel.</summary>
+    public sealed class SimilarAttachmentItem
+    {
+        public int AttachmentId { get; init; }
+        public double Score { get; init; }
+        public string DisplayName { get; init; } = string.Empty;
+        public string Display => $"#{AttachmentId} • {DisplayName} (score={Score:F3})";
+    }
+
+    /// <summary>Attachment row currently highlighted in the inspector viewport.</summary>
+    /// <remarks>Execution: Setter fires on grid selection change events. Form Mode: Read-only in Find/View; editable metadata appears in Add/Update. Localization: Inspector labels rely on inline literals pending attachments resource dictionary.</remarks>
     [ObservableProperty]
     private AttachmentRowViewModel? _selectedAttachment;
-    /// <summary>
-    /// Gets or sets the upload command.
-    /// </summary>
 
+    /// <summary>Command surfaced on the ribbon for staging file uploads.</summary>
+    /// <remarks>Execution: Invoked asynchronously when the user taps Upload. Form Mode: Enabled exclusively in Add/Update once `HasAttachmentWorkflow` is true. Localization: Tooltip and label use inline literals pending `Ribbon_Attachments_Upload`.</remarks>
     public IAsyncRelayCommand UploadCommand { get; }
-    /// <summary>
-    /// Gets or sets the download command.
-    /// </summary>
 
+    /// <summary>Command that streams the selected attachment to a local file.</summary>
+    /// <remarks>Execution: Runs when the ribbon Download action is triggered. Form Mode: Available in View/Find for read-only access; Add/Update also permitted. Localization: Uses inline caption "Download" pending ribbon resource keys.</remarks>
     public IAsyncRelayCommand DownloadCommand { get; }
-    /// <summary>
-    /// Gets or sets the delete command.
-    /// </summary>
 
+    /// <summary>Command responsible for unregistering an attachment link.</summary>
+    /// <remarks>Execution: Fired from the ribbon Delete action after confirmation. Form Mode: Restricted to Update mode with proper signature gating; Find/View disable this command. Localization: Inline text "Delete" currently shown until resources exist.</remarks>
     public IAsyncRelayCommand DeleteCommand { get; }
 
+    /// <summary>Creates an embedding vector for the selected attachment (optional RAG index).</summary>
+    public IAsyncRelayCommand IndexEmbeddingCommand { get; }
+    public IAsyncRelayCommand FindSimilarCommand { get; }
+    public IRelayCommand OpenSimilarCommand { get; }
+
+    private bool CanIndexEmbedding()
+        => !IsBusy && SelectedRecord != null;
+
+    private async Task IndexEmbeddingAsync()
+    {
+        try
+        {
+            if (SelectedRecord == null)
+            {
+                return;
+            }
+
+            var row = AttachmentRows.FirstOrDefault(r => r.Model.Id.ToString() == SelectedRecord.Key);
+            if (row == null)
+            {
+                StatusMessage = "Select an attachment to index.";
+                return;
+            }
+
+            var locator = YasGMP.Common.ServiceLocator.GetService<YasGMP.Services.AttachmentEmbeddingService>();
+            if (locator == null)
+            {
+                StatusMessage = "Embedding service not available.";
+                return;
+            }
+
+            IsBusy = true;
+            await locator.IndexAttachmentAsync(row.Model).ConfigureAwait(false);
+            StatusMessage = $"Indexed embedding for #{row.Model.Id} ({row.Model.FileName}).";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Embedding index failed: {ex.Message}";
+            throw;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task FindSimilarAsync()
+    {
+        try
+        {
+            if (SelectedRecord == null)
+            {
+                return;
+            }
+
+            var row = AttachmentRows.FirstOrDefault(r => r.Model.Id.ToString() == SelectedRecord.Key);
+            if (row == null)
+            {
+                StatusMessage = "Select an attachment to search similar.";
+                return;
+            }
+
+            var service = YasGMP.Common.ServiceLocator.GetService<YasGMP.Services.AttachmentEmbeddingService>();
+            if (service == null)
+            {
+                StatusMessage = "Embedding search unavailable.";
+                return;
+            }
+
+            IsBusy = true;
+            var matches = await service.FindSimilarAsync(row.Model.Id, 5).ConfigureAwait(false);
+            if (matches.Count == 0)
+            {
+                StatusMessage = "No similar embeddings found. Consider indexing first.";
+                SimilarAttachments.Clear();
+                return;
+            }
+
+            SimilarAttachments.Clear();
+            foreach (var m in matches)
+            {
+                var display = AttachmentRows.FirstOrDefault(a => a.Id == m.AttachmentId)?.DisplayName
+                               ?? AttachmentRows.FirstOrDefault(a => a.Model.Id == m.AttachmentId)?.DisplayName
+                               ?? "Attachment";
+                SimilarAttachments.Add(new SimilarAttachmentItem
+                {
+                    AttachmentId = m.AttachmentId,
+                    Score = m.Score,
+                    DisplayName = display
+                });
+            }
+
+            StatusMessage = $"Found {SimilarAttachments.Count} similar attachment(s).";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Similar search failed: {ex.Message}";
+            throw;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void OpenSimilar(object? parameter)
+    {
+        try
+        {
+            if (parameter is null) return;
+            int id = parameter is int i ? i : int.TryParse(parameter.ToString(), out var parsed) ? parsed : 0;
+            if (id <= 0) return;
+
+            var key = id.ToString(CultureInfo.InvariantCulture);
+            var match = Records.FirstOrDefault(r => r.Key == key);
+            if (match is null)
+            {
+                StatusMessage = $"Attachment #{id} not loaded; refresh to see it.";
+                return;
+            }
+
+            SelectedRecord = match;
+            StatusMessage = $"Opened similar attachment #{id}.";
+
+            // Golden Arrow: open related module if available
+            var row = AttachmentRows.FirstOrDefault(r => r.Id == id);
+            if (row?.Model is Attachment a && !string.IsNullOrWhiteSpace(a.EntityType) && a.EntityId.HasValue)
+            {
+                var moduleKey = MapEntityTypeToModuleKey(a.EntityType!);
+                if (moduleKey != null)
+                {
+                    var doc = _navigationService.OpenModule(moduleKey, a.EntityId.Value);
+                    _navigationService.Activate(doc);
+                    return;
+                }
+            }
+
+            // Fallback: preview file if no related module mapping
+            if (row?.Model is Attachment att)
+            {
+                _ = PreviewAttachmentAsync(att);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Open similar failed: {ex.Message}";
+        }
+    }
+
+    private static string? MapEntityTypeToModuleKey(string entityType)
+    {
+        switch (entityType.Trim().ToLowerInvariant())
+        {
+            case "work_orders": return WorkOrdersModuleViewModel.ModuleKey;
+            case "calibrations": return CalibrationModuleViewModel.ModuleKey;
+            case "capa_cases": return CapaModuleViewModel.ModuleKey;
+            case "users": return SecurityModuleViewModel.ModuleKey;
+            case "assets": return AssetsModuleViewModel.ModuleKey;
+            case "components": return ComponentsModuleViewModel.ModuleKey;
+            case "suppliers": return SuppliersModuleViewModel.ModuleKey;
+            case "external_servicers": return ExternalServicersModuleViewModel.ModuleKey;
+            default: return null;
+        }
+    }
+
+    private async Task PreviewAttachmentAsync(Attachment a)
+    {
+        if (!HasAttachmentWorkflow)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            var dir = Path.Combine(Path.GetTempPath(), "YasGMP", "preview", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, string.IsNullOrWhiteSpace(a.FileName) ? $"attachment_{a.Id}" : a.FileName);
+
+            await using (var destination = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 128 * 1024, useAsync: true))
+            {
+                var request = new AttachmentReadRequest
+                {
+                    Reason = $"wpf:{ModuleKey}:preview",
+                    SourceHost = Environment.MachineName,
+                    SourceIp = "ui:wpf"
+                };
+
+                await _attachmentService.StreamContentAsync(a.Id, destination, request).ConfigureAwait(false);
+            }
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = path,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+                StatusMessage = $"Preview opened: {path}";
+            }
+            catch (Exception openEx)
+            {
+                StatusMessage = $"Preview saved to {path} (unable to open: {openEx.Message})";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Preview failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Loads the attachment catalog from the persistence layer.</summary>
+    /// <remarks>Execution: Called by the base class when the module enters Find mode or refreshes. Form Mode: Supplies records for Find/View while Add/Update reuse the same backing list. Localization: Relays status messages using inline strings pending `Status_Attachments_Loaded`.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var attachments = await _databaseService.GetAttachmentsFilteredAsync(null, null, null).ConfigureAwait(false);
@@ -174,6 +386,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return records;
     }
 
+    /// <summary>Provides design-time attachments for Blend and preview tooling.</summary>
+    /// <remarks>Execution: Invoked only by the design-time branch in the constructor. Form Mode: Mimics Find mode to preview list rendering. Localization: Returns sample data with inline strings for previews.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var rows = new List<AttachmentRowViewModel>
@@ -217,6 +431,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             .ToList();
     }
 
+    /// <summary>Formats the status message after records are loaded.</summary>
+    /// <remarks>Execution: Called by the base module scaffolding after `LoadAsync`. Form Mode: Applies to Find/View to inform ribbon state; Add/Update reuse the last status. Localization: Uses inline fallback strings until shared resource keys are wired.</remarks>
     protected override string FormatLoadedStatus(int count)
     {
         if (!string.IsNullOrWhiteSpace(_pendingStatusMessage))
@@ -229,7 +445,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return base.FormatLoadedStatus(count);
     }
 
-    private ModuleRecord ToRecord(Attachment attachment)
+    private static ModuleRecord ToRecord(Attachment attachment)
     {
         var moduleKey = attachment.EntityType?.ToLowerInvariant() switch
         {
@@ -240,21 +456,18 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
             _ => null
         };
 
-        var recordKey = attachment.Id.ToString(CultureInfo.InvariantCulture);
-        var recordTitle = string.IsNullOrWhiteSpace(attachment.Name) ? attachment.FileName : attachment.Name;
-
         return new ModuleRecord(
-            recordKey,
-            recordTitle,
+            attachment.Id.ToString(CultureInfo.InvariantCulture),
+            string.IsNullOrWhiteSpace(attachment.Name) ? attachment.FileName : attachment.Name,
             attachment.FileName,
             attachment.Status,
             attachment.Notes ?? attachment.Note,
-            CreateRecordInspectorFields(attachment, recordKey, recordTitle),
+            CreateRecordInspectorFields(attachment),
             moduleKey,
             attachment.EntityId);
     }
 
-    private IReadOnlyList<InspectorField> CreateRecordInspectorFields(Attachment attachment, string recordKey, string recordTitle)
+    private static IReadOnlyList<InspectorField> CreateRecordInspectorFields(Attachment attachment)
     {
         var entity = string.IsNullOrWhiteSpace(attachment.EntityType)
             ? "-"
@@ -266,27 +479,29 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
         return new List<InspectorField>
         {
-            CreateInspectorField(recordKey, recordTitle, "Entity/Table", entity),
-            CreateInspectorField(recordKey, recordTitle, "Linked Record Id", linkedRecordId),
-            CreateInspectorField(recordKey, recordTitle, "SHA-256", sha256),
-            CreateInspectorField(recordKey, recordTitle, "Status", status)
+            new("Entity/Table", entity),
+            new("Linked Record Id", linkedRecordId),
+            new("SHA-256", sha256),
+            new("Status", status)
         };
     }
 
+    /// <summary>Loads editor payloads for the selected Attachments record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Attachments". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Attachments` resources are available.</remarks>
     protected override Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
         {
             ResetAttachmentState(clearStagedUploads: false, clearAttachmentRows: false);
             _shellInteractionService.UpdateInspector(
-                new InspectorContext(ModuleKey, Title, null, "No attachment selected", Array.Empty<InspectorField>()));
+                new InspectorContext(Title, "No attachment selected", Array.Empty<InspectorField>()));
             return Task.CompletedTask;
         }
 
         if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var attachmentId))
         {
             ResetAttachmentState(clearStagedUploads: false, clearAttachmentRows: false);
-            _shellInteractionService.UpdateInspector(new InspectorContext(ModuleKey, Title, record.Key, record.Title, record.InspectorFields));
+            _shellInteractionService.UpdateInspector(new InspectorContext(Title, record.Title, record.InspectorFields));
             return Task.CompletedTask;
         }
 
@@ -294,7 +509,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         if (attachment is null)
         {
             ResetAttachmentState(clearStagedUploads: false, clearAttachmentRows: false);
-            _shellInteractionService.UpdateInspector(new InspectorContext(ModuleKey, Title, record.Key, record.Title, record.InspectorFields));
+            _shellInteractionService.UpdateInspector(new InspectorContext(Title, record.Title, record.InspectorFields));
             return Task.CompletedTask;
         }
 
@@ -302,11 +517,13 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
         var inspectorFields = BuildInspectorFields(attachment);
         _shellInteractionService.UpdateInspector(
-            new InspectorContext(ModuleKey, Title, attachment.Id.ToString(CultureInfo.InvariantCulture), attachment.DisplayName, inspectorFields));
+            new InspectorContext(Title, attachment.DisplayName, inspectorFields));
 
         return Task.CompletedTask;
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         DiscardStagedUploads();
@@ -328,19 +545,14 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         else
         {
             inspectorTitle = $"{mode} mode";
-            var modeKey = $"Mode.{mode}";
             inspectorFields = new List<InspectorField>
             {
-                CreateInspectorField(modeKey, inspectorTitle, "Mode", mode.ToString()),
-                CreateInspectorField(
-                    modeKey,
-                    inspectorTitle,
-                    "Staged Uploads",
-                    StagedUploads.Count.ToString(CultureInfo.CurrentCulture))
+                new("Mode", mode.ToString()),
+                new("Staged Uploads", StagedUploads.Count.ToString(CultureInfo.CurrentCulture))
             };
         }
 
-        _shellInteractionService.UpdateInspector(new InspectorContext(ModuleKey, Title, modeKey, inspectorTitle, inspectorFields));
+        _shellInteractionService.UpdateInspector(new InspectorContext(Title, inspectorTitle, inspectorFields));
 
         StatusMessage = mode switch
         {
@@ -354,6 +566,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return Task.CompletedTask;
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (!HasAttachmentWorkflow)
@@ -556,6 +770,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         var hadStagedUploads = StagedUploads.Count;
@@ -576,52 +792,41 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
 
     private IReadOnlyList<InspectorField> BuildInspectorFields(AttachmentRowViewModel attachment)
     {
-        var recordKey = attachment.Id.ToString(CultureInfo.InvariantCulture);
-        var recordTitle = string.IsNullOrWhiteSpace(attachment.DisplayName)
-            ? attachment.FileName
-            : attachment.DisplayName;
-
         var fields = new List<InspectorField>
         {
-            CreateInspectorField(recordKey, recordTitle, "Attachment Id", recordKey),
-            CreateInspectorField(recordKey, recordTitle, "File Name", attachment.FileName),
-            CreateInspectorField(recordKey, recordTitle, "Display Name", attachment.DisplayName),
-            CreateInspectorField(recordKey, recordTitle, "Status", attachment.Status ?? "-"),
-            CreateInspectorField(recordKey, recordTitle, "Entity", attachment.EntityDisplayName),
-            CreateInspectorField(
-                recordKey,
-                recordTitle,
-                "Uploaded",
-                attachment.UploadedAt.ToString("g", CultureInfo.CurrentCulture)),
-            CreateInspectorField(recordKey, recordTitle, "File Type", attachment.FileType ?? "-"),
-            CreateInspectorField(recordKey, recordTitle, "File Size", attachment.FileSizeDisplay),
-            CreateInspectorField(recordKey, recordTitle, "SHA-256", attachment.Sha256 ?? "-"),
-            CreateInspectorField(recordKey, recordTitle, "Notes", attachment.Notes ?? string.Empty)
+            new("Attachment Id", attachment.Id.ToString(CultureInfo.InvariantCulture)),
+            new("File Name", attachment.FileName),
+            new("Display Name", attachment.DisplayName),
+            new("Status", attachment.Status ?? "-"),
+            new("Entity", attachment.EntityDisplayName),
+            new("Uploaded", attachment.UploadedAt.ToString("g", CultureInfo.CurrentCulture)),
+            new("File Type", attachment.FileType ?? "-"),
+            new("File Size", attachment.FileSizeDisplay),
+            new("SHA-256", attachment.Sha256 ?? "-"),
+            new("Notes", attachment.Notes ?? string.Empty)
         };
 
         if (!string.IsNullOrWhiteSpace(attachment.RetentionPolicyName) || attachment.RetainUntil is not null)
         {
-            fields.Add(CreateInspectorField(recordKey, recordTitle, "Retention Policy", attachment.RetentionPolicyName ?? "-"));
-            fields.Add(CreateInspectorField(
-                recordKey,
-                recordTitle,
+            fields.Add(new InspectorField("Retention Policy", attachment.RetentionPolicyName ?? "-"));
+            fields.Add(new InspectorField(
                 "Retain Until",
                 attachment.RetainUntil?.ToString("g", CultureInfo.CurrentCulture) ?? "-"));
         }
 
         if (attachment.RetentionLegalHold)
         {
-            fields.Add(CreateInspectorField(recordKey, recordTitle, "Legal Hold", "Enabled"));
+            fields.Add(new InspectorField("Legal Hold", "Enabled"));
         }
 
         if (attachment.RetentionReviewRequired)
         {
-            fields.Add(CreateInspectorField(recordKey, recordTitle, "Manual Review", "Required"));
+            fields.Add(new InspectorField("Manual Review", "Required"));
         }
 
         if (!string.IsNullOrWhiteSpace(attachment.RetentionNotes))
         {
-            fields.Add(CreateInspectorField(recordKey, recordTitle, "Retention Notes", attachment.RetentionNotes));
+            fields.Add(new InspectorField("Retention Notes", attachment.RetentionNotes));
         }
 
         return fields;
@@ -886,13 +1091,7 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                 .ConfigureAwait(false);
 
             var inspectorFields = BuildInspectorFields(SelectedAttachment);
-            _shellInteractionService.UpdateInspector(
-                new InspectorContext(
-                    ModuleKey,
-                    Title,
-                    SelectedAttachment.Id.ToString(CultureInfo.InvariantCulture),
-                    SelectedAttachment.DisplayName,
-                    inspectorFields));
+            _shellInteractionService.UpdateInspector(new InspectorContext(Title, SelectedAttachment.DisplayName, inspectorFields));
 
             StatusMessage = $"Downloaded {FormatBytes(result.BytesWritten)} of {FormatBytes(result.TotalLength)} to '{dialog.FileName}'.";
         }
@@ -1044,54 +1243,30 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     {
         private readonly IAttachmentService _inner;
         private readonly AttachmentUploadResult _result;
-        /// <summary>
-        /// Initializes a new instance of the AttachmentServiceUploadProxy class.
-        /// </summary>
 
         public AttachmentServiceUploadProxy(IAttachmentService inner, AttachmentUploadResult result)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _result = result ?? throw new ArgumentNullException(nameof(result));
         }
-        /// <summary>
-        /// Executes the upload async operation.
-        /// </summary>
 
         public Task<AttachmentUploadResult> UploadAsync(Stream content, AttachmentUploadRequest request, CancellationToken token = default)
             => Task.FromResult(_result);
-        /// <summary>
-        /// Executes the find by hash async operation.
-        /// </summary>
 
         public Task<Attachment?> FindByHashAsync(string sha256, CancellationToken token = default)
             => _inner.FindByHashAsync(sha256, token);
-        /// <summary>
-        /// Executes the find by hash and size async operation.
-        /// </summary>
 
         public Task<Attachment?> FindByHashAndSizeAsync(string sha256, long fileSize, CancellationToken token = default)
             => _inner.FindByHashAndSizeAsync(sha256, fileSize, token);
-        /// <summary>
-        /// Executes the stream content async operation.
-        /// </summary>
 
         public Task<AttachmentStreamResult> StreamContentAsync(int attachmentId, Stream destination, AttachmentReadRequest? request = null, CancellationToken token = default)
             => _inner.StreamContentAsync(attachmentId, destination, request, token);
-        /// <summary>
-        /// Executes the get links for entity async operation.
-        /// </summary>
 
         public Task<IReadOnlyList<AttachmentLinkWithAttachment>> GetLinksForEntityAsync(string entityType, int entityId, CancellationToken token = default)
             => _inner.GetLinksForEntityAsync(entityType, entityId, token);
-        /// <summary>
-        /// Executes the remove link async operation.
-        /// </summary>
 
         public Task RemoveLinkAsync(int linkId, CancellationToken token = default)
             => _inner.RemoveLinkAsync(linkId, token);
-        /// <summary>
-        /// Executes the remove link async operation.
-        /// </summary>
 
         public Task RemoveLinkAsync(string entityType, int entityId, int attachmentId, CancellationToken token = default)
             => _inner.RemoveLinkAsync(entityType, entityId, attachmentId, token);
@@ -1100,57 +1275,32 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
     private static bool IsInDesignMode()
         => DesignerProperties.GetIsInDesignMode(new DependencyObject());
 
-    private readonly ILocalizationService _localization;
-    private readonly DatabaseService _databaseService;
-    private readonly IAttachmentService _attachmentService;
-    private readonly IFilePicker _filePicker;
-    private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly AuditService _audit;
-    private readonly ICflDialogService _cflDialogService;
-    private readonly IShellInteractionService _shellInteractionService;
-    private readonly IModuleNavigationService _navigationService;
+    private readonly DatabaseService _databaseService = null!;
+    private readonly IAttachmentService _attachmentService = null!;
+    private readonly IFilePicker _filePicker = null!;
+    private readonly IElectronicSignatureDialogService _signatureDialog = null!;
+    private readonly AuditService _audit = null!;
+    private readonly ICflDialogService _cflDialogService = null!;
+    private readonly IShellInteractionService _shellInteractionService = null!;
+    private readonly IModuleNavigationService _navigationService = null!;
     private string? _pendingStatusMessage;
-    /// <summary>
-    /// Represents the Attachment Row View Model.
-    /// </summary>
 
     public sealed class AttachmentRowViewModel
     {
-        /// <summary>
-        /// Initializes a new instance of the AttachmentRowViewModel class.
-        /// </summary>
         public AttachmentRowViewModel(Attachment model)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
         }
-        /// <summary>
-        /// Gets or sets the model.
-        /// </summary>
 
         public Attachment Model { get; }
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
 
         public int Id => Model.Id;
-        /// <summary>
-        /// Executes the file name operation.
-        /// </summary>
 
         public string FileName => string.IsNullOrWhiteSpace(Model.FileName) ? "(unknown)" : Model.FileName;
-        /// <summary>
-        /// Executes the display name operation.
-        /// </summary>
 
         public string DisplayName => string.IsNullOrWhiteSpace(Model.Name) ? FileName : Model.Name;
-        /// <summary>
-        /// Gets or sets the status.
-        /// </summary>
 
         public string? Status => Model.Status;
-        /// <summary>
-        /// Represents the entity display name value.
-        /// </summary>
 
         public string EntityDisplayName
         {
@@ -1166,14 +1316,8 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                     : $"{Model.EntityType}/{Model.EntityId}";
             }
         }
-        /// <summary>
-        /// Gets or sets the file type.
-        /// </summary>
 
         public string? FileType => Model.FileType;
-        /// <summary>
-        /// Represents the file size display value.
-        /// </summary>
 
         public string FileSizeDisplay
         {
@@ -1198,50 +1342,23 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
                 return (size / 1024d / 1024d).ToString("F1", CultureInfo.CurrentCulture) + " MB";
             }
         }
-        /// <summary>
-        /// Gets or sets the sha256.
-        /// </summary>
 
         public string? Sha256 => Model.Sha256;
-        /// <summary>
-        /// Executes the notes operation.
-        /// </summary>
 
         public string? Notes => string.IsNullOrWhiteSpace(Model.Notes) ? Model.Note : Model.Notes;
-        /// <summary>
-        /// Gets or sets the uploaded at.
-        /// </summary>
 
         public DateTime UploadedAt => Model.UploadedAt;
-        /// <summary>
-        /// Gets or sets the retention policy name.
-        /// </summary>
 
         public string? RetentionPolicyName => Model.RetentionPolicyName;
-        /// <summary>
-        /// Gets or sets the retain until.
-        /// </summary>
 
         public DateTime? RetainUntil => Model.RetainUntil;
-        /// <summary>
-        /// Gets or sets the retention legal hold.
-        /// </summary>
 
         public bool RetentionLegalHold => Model.RetentionLegalHold;
-        /// <summary>
-        /// Gets or sets the retention review required.
-        /// </summary>
 
         public bool RetentionReviewRequired => Model.RetentionReviewRequired;
-        /// <summary>
-        /// Gets or sets the retention notes.
-        /// </summary>
 
         public string? RetentionNotes => Model.RetentionNotes;
     }
-    /// <summary>
-    /// Represents the Staged Attachment Upload View Model.
-    /// </summary>
 
     public sealed class StagedAttachmentUploadViewModel : ObservableObject
     {
@@ -1254,81 +1371,54 @@ public sealed partial class AttachmentsModuleViewModel : ModuleDocumentViewModel
         private string? _tempDirectory;
         private long _fileSize;
         private string? _sha256;
-        /// <summary>
-        /// Represents the file name value.
-        /// </summary>
 
         public string FileName
         {
             get => _fileName;
             set => SetProperty(ref _fileName, value);
         }
-        /// <summary>
-        /// Represents the content type value.
-        /// </summary>
 
         public string? ContentType
         {
             get => _contentType;
             set => SetProperty(ref _contentType, value);
         }
-        /// <summary>
-        /// Represents the entity type value.
-        /// </summary>
 
         public string EntityType
         {
             get => _entityType;
             set => SetProperty(ref _entityType, value);
         }
-        /// <summary>
-        /// Represents the entity id value.
-        /// </summary>
 
         public int EntityId
         {
             get => _entityId;
             set => SetProperty(ref _entityId, value);
         }
-        /// <summary>
-        /// Represents the notes value.
-        /// </summary>
 
         public string? Notes
         {
             get => _notes;
             set => SetProperty(ref _notes, value);
         }
-        /// <summary>
-        /// Represents the temp path value.
-        /// </summary>
 
         public string? TempPath
         {
             get => _tempPath;
             set => SetProperty(ref _tempPath, value);
         }
-        /// <summary>
-        /// Represents the temp directory value.
-        /// </summary>
 
         public string? TempDirectory
         {
             get => _tempDirectory;
             set => SetProperty(ref _tempDirectory, value);
         }
-        /// <summary>
-        /// Represents the file size value.
-        /// </summary>
 
         public long FileSize
         {
             get => _fileSize;
             set => SetProperty(ref _fileSize, value);
         }
-        /// <summary>
-        /// Represents the sha256 value.
-        /// </summary>
 
         public string? Sha256
         {

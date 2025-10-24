@@ -6,62 +6,48 @@
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="600">
+             d:DesignWidth="600"
+             AutomationProperties.Name="{DynamicResource Module_AuditTrail_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_AuditTrail_Tooltip}">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <Style x:Key="BusyAwareToolbarButtonStyle" TargetType="Button">
-                <Setter Property="Margin" Value="4,0,0,0" />
-                <Setter Property="Padding" Value="12,4" />
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                        <Setter Property="IsEnabled" Value="False" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </ResourceDictionary>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="BusyAwareToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="Padding" Value="12,4" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
-            <ItemsControl ItemsSource="{Binding Toolbar}"
-                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
+            <ItemsControl ItemsSource="{Binding Toolbar}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ToggleButton Content="{Binding Caption}"
+                                      Command="{Binding Command}"
+                                      IsChecked="{Binding IsChecked}"
+                                      Margin="0,0,4,0" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
-            <controls:GoldenArrowButton
-                Command="{Binding GoldenArrowCommand}"
-                Margin="8,0,0,0"
-                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
-                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
-                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+            <Button Content="CFL" Command="{Binding ShowCflCommand}" AutomationProperties.AutomationId="CflButton" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}" Margin="8,0,0,0" AutomationProperties.AutomationId="GoldenArrowButton" />
             <Separator />
-            <Button Content="{DynamicResource Audit.Toolbar.Command.RollbackPreview.Content}"
-                    Command="{Binding RollbackPreviewCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
-                    ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.RollbackPreview.ToolTip}"
-                    AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.RollbackPreview.AutomationName}"
-                    AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.RollbackPreview.AutomationId}" />
-            <Button Content="{DynamicResource Audit.Toolbar.Command.ExportPdf.Content}"
+            <Button Content="Export PDF"
                     Command="{Binding ExportToPdfCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}"
-                   ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ExportPdf.ToolTip}"
-                   AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ExportPdf.AutomationName}"
-                   AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ExportPdf.AutomationId}"/>
-            <Button Content="{DynamicResource Audit.Toolbar.Command.ExportExcel.Content}"
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
+            <Button Content="Export Excel"
                     Command="{Binding ExportToExcelCommand}"
-                    Style="{StaticResource BusyAwareToolbarButtonStyle}" 
-                   ToolTipService.ToolTip="{DynamicResource Audit.Toolbar.Command.ExportExcel.ToolTip}"
-                   AutomationProperties.Name="{DynamicResource Audit.Toolbar.Command.ExportExcel.AutomationName}"
-                   AutomationProperties.AutomationId="{DynamicResource Audit.Toolbar.Command.ExportExcel.AutomationId}"/>
+                    Style="{StaticResource BusyAwareToolbarButtonStyle}" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -72,24 +58,24 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,8">
                 <WrapPanel Margin="0,0,0,8">
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="{DynamicResource Module.ApiAudit.Header.User}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_User}" FontWeight="SemiBold" />
                         <TextBox Text="{Binding FilterUser, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="200" Margin="0,0,12,0">
-                        <TextBlock Text="{DynamicResource Module.Audit.Header.Entity}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_Entity}" FontWeight="SemiBold" />
                         <TextBox Text="{Binding FilterEntity, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="{DynamicResource Module.ApiAudit.Header.Action}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_Action}" FontWeight="SemiBold" />
                         <ComboBox ItemsSource="{Binding ActionOptions}"
                                   SelectedItem="{Binding SelectedAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="{DynamicResource Module.ApiAudit.Text.From}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_From}" FontWeight="SemiBold" />
                         <DatePicker SelectedDate="{Binding FilterFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
                     </StackPanel>
                     <StackPanel Width="180" Margin="0,0,12,0">
-                        <TextBlock Text="{DynamicResource Module.ApiAudit.Text.To}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Label_To}" FontWeight="SemiBold" />
                         <DatePicker SelectedDate="{Binding FilterTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
                     </StackPanel>
                 </WrapPanel>
@@ -100,16 +86,13 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Tooltip_SearchBox}" />
                     <Button Grid.Column="2"
-                            Content="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.Content}"
+                            Content="Apply Filters"
                             Command="{Binding RefreshCommand}"
                             Margin="12,0,0,0"
-                            Padding="12,4" 
-                           ToolTipService.ToolTip="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip}"
-                           AutomationProperties.Name="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName}"
-                           AutomationProperties.AutomationId="{DynamicResource AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId}"/>
+                            Padding="12,4" />
                 </Grid>
             </StackPanel>
             <Grid Grid.Row="1">
@@ -120,16 +103,16 @@
                           CanUserAddRows="False"
                           CanUserDeleteRows="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.Timestamp}" Binding="{Binding InspectorFields[0].Value}" Width="160" />
-                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.User}" Binding="{Binding InspectorFields[1].Value}" Width="200" />
-                        <DataGridTextColumn Header="{DynamicResource Module.Audit.Header.Entity}" Binding="{Binding Title}" Width="200" />
-                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.Action}" Binding="{Binding Code}" Width="120" />
-                        <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="120" />
-                        <DataGridTextColumn Header="{DynamicResource Module.ApiAudit.Header.IPAddress}" Binding="{Binding InspectorFields[4].Value}" Width="160" />
-                        <DataGridTextColumn Header="{DynamicResource Module.Audit.Header.Device}" Binding="{Binding InspectorFields[5].Value}" Width="2*" />
-                        <DataGridTextColumn Header="{DynamicResource Module.Audit.Header.DigitalSignature}" Binding="{Binding InspectorFields[7].Value}" Width="200" />
-                        <DataGridTextColumn Header="{DynamicResource Module.Audit.Header.SignatureHash}" Binding="{Binding InspectorFields[8].Value}" Width="200" />
-                        <DataGridTextColumn Header="{DynamicResource Module.Audit.Header.Reason}" Binding="{Binding Description}" Width="2*" />
+                        <DataGridTextColumn Header="Timestamp" Binding="{Binding InspectorFields[0].Value}" Width="160" />
+                        <DataGridTextColumn Header="User" Binding="{Binding InspectorFields[1].Value}" Width="200" />
+                        <DataGridTextColumn Header="Entity" Binding="{Binding Title}" Width="200" />
+                        <DataGridTextColumn Header="Action" Binding="{Binding Code}" Width="120" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
+                        <DataGridTextColumn Header="IP Address" Binding="{Binding InspectorFields[4].Value}" Width="160" />
+                        <DataGridTextColumn Header="Device" Binding="{Binding InspectorFields[5].Value}" Width="2*" />
+                        <DataGridTextColumn Header="Digital Signature" Binding="{Binding InspectorFields[7].Value}" Width="200" />
+                        <DataGridTextColumn Header="Signature Hash" Binding="{Binding InspectorFields[8].Value}" Width="200" />
+                        <DataGridTextColumn Header="Reason" Binding="{Binding Description}" Width="2*" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <Border Background="#80FFFFFF"
@@ -140,7 +123,7 @@
                                 Orientation="Vertical"
                                 Margin="24">
                         <ProgressBar IsIndeterminate="True" Width="200" Height="20" />
-                        <TextBlock Text="{DynamicResource Module.ApiAudit.Text.Loading}"
+                        <TextBlock Text="{DynamicResource Label_Loading}"
                                    Margin="0,12,0,0"
                                    HorizontalAlignment="Center"
                                    Foreground="Gray"

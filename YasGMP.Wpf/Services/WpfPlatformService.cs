@@ -12,16 +12,6 @@ namespace YasGMP.Wpf.Services
     /// WPF desktop implementation of <see cref="IPlatformService"/> that surfaces
     /// basic device and network metadata for audit logging in the shared core.
     /// </summary>
-    /// <remarks>
-    /// <para><strong>Feature parity:</strong> matches the MAUI implementation's contract for host name,
-    /// user name, OS version, and application data paths so shared services can log identical audit
-    /// metadata.</para>
-    /// <para><strong>Known gaps:</strong> IPv4/IPv6 discovery skips virtual adapters and falls back to
-    /// DNS/socket probing; unlike MAUI it cannot guarantee Wi-Fi vs. cellular detection. Folder prompts
-    /// rely on the calling shell to message users about storage locations.</para>
-    /// <para><strong>Localization:</strong> any status or path prompts shown in the UI must be localized
-    /// by the consuming module; this service only returns raw values.</para>
-    /// </remarks>
     public sealed class WpfPlatformService : IPlatformService
     {
         /// <inheritdoc />
@@ -148,3 +138,4 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
+

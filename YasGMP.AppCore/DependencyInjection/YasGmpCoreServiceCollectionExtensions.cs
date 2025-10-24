@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using YasGMP.Data;
+using YasGMP.Services;
 
 namespace YasGMP.AppCore.DependencyInjection
 {
@@ -148,9 +149,6 @@ namespace YasGMP.AppCore.DependencyInjection
 
     internal sealed class YasGmpCoreState
     {
-        /// <summary>
-        /// Initializes a new instance of the YasGmpCoreState class.
-        /// </summary>
         public YasGmpCoreState(
             Func<IServiceProvider, string> connectionResolver,
             Func<IServiceProvider, string, ServerVersion> serverVersionResolver,
@@ -168,39 +166,18 @@ namespace YasGMP.AppCore.DependencyInjection
             DatabaseFactory = databaseFactory;
             DatabasePostConfigure = databasePostConfigure;
         }
-        /// <summary>
-        /// Gets or sets the string.
-        /// </summary>
 
         public Func<IServiceProvider, string> ConnectionResolver { get; }
-        /// <summary>
-        /// Gets or sets the string.
-        /// </summary>
 
         public Func<IServiceProvider, string, ServerVersion> ServerVersionResolver { get; }
-        /// <summary>
-        /// Gets or sets the db context options builder.
-        /// </summary>
 
         public Action<IServiceProvider, DbContextOptionsBuilder, string>? DbContextPostConfigure { get; }
-        /// <summary>
-        /// Gets or sets the register db context factory.
-        /// </summary>
 
         public bool RegisterDbContextFactory { get; }
-        /// <summary>
-        /// Gets or sets the database service type.
-        /// </summary>
 
         public Type? DatabaseServiceType { get; }
-        /// <summary>
-        /// Gets or sets the string.
-        /// </summary>
 
         public Func<IServiceProvider, string, object>? DatabaseFactory { get; }
-        /// <summary>
-        /// Gets or sets the object.
-        /// </summary>
 
         public Action<IServiceProvider, object, string>? DatabasePostConfigure { get; }
     }
@@ -210,9 +187,6 @@ namespace YasGMP.AppCore.DependencyInjection
     /// </summary>
     public static class YasGmpCoreServiceCollectionExtensions
     {
-        /// <summary>
-        /// Executes the add yas gmp core services operation.
-        /// </summary>
         public static IServiceCollection AddYasGmpCoreServices(
             this IServiceCollection services,
             Action<YasGmpCoreBuilder> configure)

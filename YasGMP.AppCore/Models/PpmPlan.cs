@@ -51,10 +51,8 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the machine.
-        /// </summary>
         [ForeignKey(nameof(MachineId))]
         public virtual Machine? Machine { get; set; }
     }
 }
+

@@ -1,25 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Shared contract for routing warehouse CRUD/ledger operations through
-    /// <see cref="YasGMP.Services.DatabaseService"/> and the shared MAUI audit services.
+    /// Abstraction around warehouse CRUD for the WPF shell.
     /// </summary>
-    /// <remarks>
-    /// Module view models call into this interface on the dispatcher thread; adapters forward the work to
-    /// <see cref="YasGMP.Services.DatabaseService"/> and <see cref="YasGMP.Services.AuditService"/> so warehouse persistence,
-    /// stock snapshots, and audit logs remain unified across MAUI and WPF. After awaiting, callers should marshal UI updates via
-    /// <see cref="WpfUiDispatcher"/>. Returned <see cref="CrudSaveResult"/> values carry identifiers, signature context, and
-    /// localization-ready status strings so <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/>
-    /// can translate them before presentation.
-    /// </remarks>
     public interface IWarehouseCrudService
     {
         Task<IReadOnlyList<Warehouse>> GetAllAsync();
@@ -43,24 +32,11 @@ namespace YasGMP.Wpf.Services
         Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId);
 
         Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10);
-
-        Task<InventoryTransactionResult> ExecuteInventoryTransactionAsync(
-            InventoryTransactionRequest request,
-            WarehouseCrudContext context,
-            ElectronicSignatureDialogResult signatureResult,
-            CancellationToken cancellationToken = default);
     }
 
     /// <summary>
-    /// Ambient metadata propagated with warehouse saves for auditing. Each value flows into
-    /// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> to preserve the accepted signature
-    /// manifest for compliance pipelines.
+    /// Ambient metadata propagated with warehouse saves for auditing.
     /// </summary>
-    /// <remarks>
-    /// Adapters hydrate <see cref="SignatureMetadataDto"/> from this record before returning <see cref="CrudSaveResult"/>.
-    /// WPF shell consumers must persist and surface the DTO beside warehouse records, and MAUI experiences should propagate the
-    /// same payload when presenting or synchronizing warehouses to keep the shared audit history aligned.
-    /// </remarks>
     /// <param name="UserId">Authenticated user id.</param>
     /// <param name="Ip">Source IP address.</param>
     /// <param name="DeviceInfo">Device or workstation info.</param>
@@ -83,9 +59,6 @@ namespace YasGMP.Wpf.Services
     {
         private const string DefaultSignatureMethod = "password";
         private const string DefaultSignatureStatus = "valid";
-        /// <summary>
-        /// Executes the create operation.
-        /// </summary>
 
         public static WarehouseCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
             => new(userId <= 0 ? 1 : userId,
@@ -97,9 +70,6 @@ namespace YasGMP.Wpf.Services
                    DefaultSignatureMethod,
                    DefaultSignatureStatus,
                    null);
-        /// <summary>
-        /// Executes the create operation.
-        /// </summary>
 
         public static WarehouseCrudContext Create(
             int userId,
@@ -128,9 +98,6 @@ namespace YasGMP.Wpf.Services
             };
         }
     }
-    /// <summary>
-    /// Represents the Warehouse Stock Snapshot record.
-    /// </summary>
 
     public sealed record WarehouseStockSnapshot(
         int WarehouseId,
@@ -146,19 +113,10 @@ namespace YasGMP.Wpf.Services
         string SerialNumber,
         DateTime? ExpiryDate)
     {
-        /// <summary>
-        /// Gets or sets the is below minimum.
-        /// </summary>
         public bool IsBelowMinimum => MinThreshold.HasValue && Quantity - Reserved - Blocked < MinThreshold.Value;
-        /// <summary>
-        /// Gets or sets the is above maximum.
-        /// </summary>
 
         public bool IsAboveMaximum => MaxThreshold.HasValue && Quantity > MaxThreshold.Value;
     }
-    /// <summary>
-    /// Represents the Inventory Movement Entry record.
-    /// </summary>
 
     public sealed record InventoryMovementEntry(
         int WarehouseId,
@@ -169,3 +127,4 @@ namespace YasGMP.Wpf.Services
         string? Note,
         int? PerformedById);
 }
+

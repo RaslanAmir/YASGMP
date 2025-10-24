@@ -3,48 +3,68 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
-using YasGMP.AppCore.Models.Signatures;
-using YasGMP.AppCore.Services;
 using YasGMP.Models;
-using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the suppliers module view model value.
-/// </summary>
 
+/// <summary>Manages supplier qualification data inside the WPF shell with SAP B1 conventions.</summary>
+/// <remarks>
+/// Form Modes: Find filters suppliers, Add seeds <see cref="SupplierEditor.CreateEmpty"/>, View keeps the record immutable for review, and Update enables edits, risk/status updates, and attachment capture.
+/// Audit &amp; Logging: Persists through <see cref="ISupplierCrudService"/> with enforced e-signature capture and attachment retention; audit history is produced by the backend service.
+/// Localization: Inline strings such as `"Suppliers"`, `"Active"`, `"Blacklisted"`, and workflow status prompts will be replaced by localisation keys in a later pass.
+/// Navigation: ModuleKey `Suppliers` anchors docking and Golden Arrow routing (e.g. from parts or incidents), while `StatusMessage` updates share supplier save/search outcomes with the shell status bar.
+/// </remarks>
 public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Suppliers";
+    /// <summary>Shell registration key that binds Suppliers into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Suppliers" until `Modules_Suppliers_Title` is introduced.</remarks>
+    public new const string ModuleKey = "Suppliers";
+
+    private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
+    {
+        "Active",
+        "Validated",
+        "Qualified",
+        "Suspended",
+        "Under Review",
+        "Pending Approval",
+        "CAPA",
+        "Expired",
+        "Delisted",
+        "Blacklisted",
+        "Probation"
+    });
+
+    private static readonly IReadOnlyList<string> DefaultRiskOptions = new ReadOnlyCollection<string>(new[]
+    {
+        "Low",
+        "Moderate",
+        "Elevated",
+        "High",
+        "Critical"
+    });
 
     private readonly ISupplierCrudService _supplierService;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IFilePicker _filePicker;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly ILocalizationService _localization;
-    private readonly IShellInteractionService _shellInteraction;
     private Supplier? _loadedSupplier;
     private SupplierEditor? _snapshot;
     private bool _suppressDirtyNotifications;
     private int? _lastSavedSupplierId;
-    /// <summary>
-    /// Initializes a new instance of the SuppliersModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Suppliers module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public SuppliersModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -55,77 +75,77 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.Suppliers"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Suppliers", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _supplierService = supplierService ?? throw new ArgumentNullException(nameof(supplierService));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
-        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
 
         Editor = SupplierEditor.CreateEmpty();
-        StatusOptions = new ReadOnlyCollection<string>(new[]
-        {
-            _localization.GetString("Module.Suppliers.Status.Active"),
-            _localization.GetString("Module.Suppliers.Status.Validated"),
-            _localization.GetString("Module.Suppliers.Status.Qualified"),
-            _localization.GetString("Module.Suppliers.Status.Suspended"),
-            _localization.GetString("Module.Suppliers.Status.UnderReview"),
-            _localization.GetString("Module.Suppliers.Status.PendingApproval"),
-            _localization.GetString("Module.Suppliers.Status.Capa"),
-            _localization.GetString("Module.Suppliers.Status.Expired"),
-            _localization.GetString("Module.Suppliers.Status.Delisted"),
-            _localization.GetString("Module.Suppliers.Status.Blacklisted"),
-            _localization.GetString("Module.Suppliers.Status.Probation")
-        });
-        RiskOptions = new ReadOnlyCollection<string>(new[]
-        {
-            _localization.GetString("Module.Suppliers.Risk.Low"),
-            _localization.GetString("Module.Suppliers.Risk.Moderate"),
-            _localization.GetString("Module.Suppliers.Risk.Elevated"),
-            _localization.GetString("Module.Suppliers.Risk.High"),
-            _localization.GetString("Module.Suppliers.Risk.Critical")
-        });
-        AuditTimeline = new ObservableCollection<AuditEntryDto>();
+        StatusOptions = DefaultStatusOptions;
+        RiskOptions = DefaultRiskOptions;
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-        PreviewContractCommand = new AsyncRelayCommand(PreviewContractAsync, CanPreviewContract);
-        DownloadContractCommand = new AsyncRelayCommand(DownloadContractAsync, CanDownloadContract);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_Editor` resources are available.</remarks>
     [ObservableProperty]
     private SupplierEditor _editor;
 
+    /// <summary>Opens the AI module to summarize the currently selected supplier.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
+
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedSupplier is null)
+        {
+            StatusMessage = "Select a supplier to summarize.";
+            return;
+        }
+
+        var s = _loadedSupplier;
+        string prompt;
+        if (s is null)
+        {
+            // Fallback to record title only
+            prompt = $"Summarize supplier: {SelectedRecord?.Title}. Provide risks, status and recommended next steps in <= 8 bullets.";
+        }
+        else
+        {
+            prompt = $"Summarize this supplier for QA/Procurement in <= 8 bullets. Name={s.Name}; Type={s.SupplierType}; Status={s.Status}; Risk={s.RiskLevel}; Country={s.Country}; Contacts={s.Email}/{s.Phone}; ActiveFrom={s.CooperationStart:yyyy-MM-dd}; ActiveTo={s.CooperationEnd:yyyy-MM-dd}.";
+        }
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Generated property exposing the is editor enabled for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
+    /// <summary>Generated property exposing the status options for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_StatusOptions` resources are available.</remarks>
     [ObservableProperty]
     private IReadOnlyList<string> _statusOptions;
 
+    /// <summary>Generated property exposing the risk options for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_RiskOptions` resources are available.</remarks>
     [ObservableProperty]
     private IReadOnlyList<string> _riskOptions;
 
-    [ObservableProperty]
-    private ObservableCollection<AuditEntryDto> _auditTimeline;
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
-
+    /// <summary>Command executing the attach document workflow for the Suppliers module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Suppliers_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
-    /// <summary>
-    /// Gets the command that previews the configured supplier contract.
-    /// </summary>
-    public IAsyncRelayCommand PreviewContractCommand { get; }
-
-    /// <summary>
-    /// Gets the command that downloads the configured supplier contract.
-    /// </summary>
-    public IAsyncRelayCommand DownloadContractCommand { get; }
-
+    /// <summary>Loads Suppliers records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Suppliers_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var suppliers = await _supplierService.GetAllAsync().ConfigureAwait(false);
@@ -152,6 +172,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return ordered;
     }
 
+    /// <summary>Provides design-time sample data for the Suppliers designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var sample = new[]
@@ -161,10 +183,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
                 Id = 1,
                 Name = "Contoso Calibration",
                 SupplierType = "Calibration",
-                Status = StatusOptions[0],
+                Status = "active",
                 Email = "support@contoso.example",
                 Phone = "+385 91 111 222",
-                RiskLevel = RiskOptions[1],
+                RiskLevel = "Moderate",
                 Country = "Croatia",
                 CooperationStart = DateTime.UtcNow.AddYears(-2),
                 CooperationEnd = DateTime.UtcNow.AddYears(1)
@@ -174,10 +196,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
                 Id = 2,
                 Name = "Globex Servicers",
                 SupplierType = "Maintenance",
-                Status = StatusOptions[3],
+                Status = "suspended",
                 Email = "hq@globex.example",
                 Phone = "+385 91 333 444",
-                RiskLevel = RiskOptions[3],
+                RiskLevel = "High",
                 Country = "Austria"
             }
         };
@@ -185,13 +207,14 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Loads editor payloads for the selected Suppliers record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Suppliers". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Suppliers` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
         {
             _loadedSupplier = null;
             SetEditor(SupplierEditor.CreateEmpty());
-            AuditTimeline.Clear();
             UpdateAttachmentCommandState();
             return;
         }
@@ -213,12 +236,14 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             return;
         }
 
+
         _loadedSupplier = supplier;
         LoadEditor(supplier);
-        await LoadAuditTimelineAsync(supplier.Id).ConfigureAwait(false);
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -228,8 +253,7 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             case FormMode.Add:
                 _snapshot = null;
                 _loadedSupplier = null;
-                SetEditor(SupplierEditor.CreateForNew(_authContext));
-                AuditTimeline.Clear();
+                SetEditor(SupplierEditor.CreateForNew());
                 break;
             case FormMode.Update:
                 if (_loadedSupplier is not null)
@@ -247,6 +271,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var supplier = Editor.ToSupplier(_loadedSupplier);
@@ -268,6 +294,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Mode == FormMode.Update && _loadedSupplier is null)
@@ -340,14 +368,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             throw new InvalidOperationException($"Failed to persist supplier: {ex.Message}", ex);
         }
 
-        var editorState = ApplySignatureMetadataToSupplier(supplier, signatureResult, context, saveResult.SignatureMetadata);
-
         _loadedSupplier = supplier;
         _lastSavedSupplierId = supplier.Id;
 
         LoadEditor(supplier);
-        ApplySignatureMetadataToEditor(editorState);
-        await LoadAuditTimelineAsync(supplier.Id).ConfigureAwait(false);
         UpdateAttachmentCommandState();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
@@ -381,6 +405,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -388,12 +414,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             if (_loadedSupplier is not null)
             {
                 LoadEditor(_loadedSupplier);
-                _ = LoadAuditTimelineAsync(_loadedSupplier.Id);
             }
             else
             {
                 SetEditor(SupplierEditor.CreateEmpty());
-                AuditTimeline.Clear();
             }
         }
         else if (Mode == FormMode.Update && _snapshot is not null)
@@ -404,6 +428,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         UpdateAttachmentCommandState();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Suppliers". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Suppliers` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var suppliers = await _supplierService.GetAllAsync().ConfigureAwait(false);
@@ -433,6 +459,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return new CflRequest("Select Supplier", items);
     }
 
+    /// <summary>Applies CFL selections back into the Suppliers workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Suppliers". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Suppliers_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -450,6 +478,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return Task.CompletedTask;
     }
 
+    /// <summary>Executes the matches search routine for the Suppliers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
         if (base.MatchesSearch(record, searchText))
@@ -460,6 +490,8 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         return record.InspectorFields.Any(field => field.Value.Contains(searchText, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>Observes property changes to maintain dirty state and command availability.</summary>
+    /// <remarks>Execution: Raised whenever generated observable setters fire. Form Mode: Primarily impacts Add/Update as Find/View remain read-only. Localization: Downstream notifications still rely on inline strings.</remarks>
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
@@ -524,20 +556,10 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
 
     private void UpdateAttachmentCommandState()
     {
-        if (AttachDocumentCommand is AsyncRelayCommand attach)
-        {
-            attach.NotifyCanExecuteChanged();
-        }
-
-        if (PreviewContractCommand is AsyncRelayCommand preview)
-        {
-            preview.NotifyCanExecuteChanged();
-        }
-
-        if (DownloadContractCommand is AsyncRelayCommand download)
-        {
-            download.NotifyCanExecuteChanged();
-        }
+        var app = System.Windows.Application.Current;
+        void Invoke() { if (AttachDocumentCommand is AsyncRelayCommand c) c.NotifyCanExecuteChanged(); }
+        if (app?.Dispatcher?.CheckAccess() == true) Invoke();
+        else app?.Dispatcher?.BeginInvoke(new Action(Invoke));
     }
 
     private async Task AttachDocumentAsync()
@@ -586,383 +608,6 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
         StatusMessage = AttachmentStatusFormatter.Format(processed, deduplicated);
     }
 
-    private bool CanPreviewContract()
-        => !IsBusy
-           && !IsEditorEnabled
-           && _loadedSupplier is { Id: > 0 }
-           && !string.IsNullOrWhiteSpace(Editor?.ContractFile);
-
-    private async Task PreviewContractAsync()
-    {
-        if (!CanPreviewContract())
-        {
-            return;
-        }
-
-        var contractName = Editor.ContractFile?.Trim();
-        if (string.IsNullOrWhiteSpace(contractName))
-        {
-            StatusMessage = "Contract file name is not specified.";
-            return;
-        }
-
-        try
-        {
-            IsBusy = true;
-            UpdateAttachmentCommandState();
-
-            var attachment = await FindContractAttachmentAsync(contractName).ConfigureAwait(false);
-            if (attachment is null)
-            {
-                StatusMessage = $"Contract '{contractName}' not found for the selected supplier.";
-                return;
-            }
-
-            var tempDirectory = Path.Combine(Path.GetTempPath(), $"YasGMP.Supplier.{_loadedSupplier!.Id}.{Guid.NewGuid():N}");
-            Directory.CreateDirectory(tempDirectory);
-            var tempPath = Path.Combine(tempDirectory, attachment.Attachment.FileName);
-
-            await using (var destination = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.Read, 128 * 1024, useAsync: true))
-            {
-                var request = new AttachmentReadRequest
-                {
-                    RequestedById = _authContext.CurrentUser?.Id,
-                    Reason = $"wpf:{ModuleKey}:preview",
-                    SourceHost = Environment.MachineName,
-                    SourceIp = _authContext.CurrentIpAddress
-                };
-
-                await _attachmentWorkflow
-                    .DownloadAsync(attachment.Attachment.Id, destination, request)
-                    .ConfigureAwait(false);
-            }
-
-            _shellInteraction.PreviewDocument(tempPath);
-            StatusMessage = $"Previewing contract '{attachment.Attachment.FileName}'.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to preview contract: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateAttachmentCommandState();
-        }
-    }
-
-    private bool CanDownloadContract()
-        => !IsBusy
-           && !IsEditorEnabled
-           && _loadedSupplier is { Id: > 0 }
-           && !string.IsNullOrWhiteSpace(Editor?.ContractFile);
-
-    private async Task DownloadContractAsync()
-    {
-        if (!CanDownloadContract())
-        {
-            return;
-        }
-
-        var contractName = Editor.ContractFile?.Trim();
-        if (string.IsNullOrWhiteSpace(contractName))
-        {
-            StatusMessage = "Contract file name is not specified.";
-            return;
-        }
-
-        var dialog = new SaveFileDialog
-        {
-            FileName = contractName,
-            Title = $"Save {contractName}",
-            Filter = "All files (*.*)|*.*"
-        };
-
-        if (dialog.ShowDialog() != true)
-        {
-            StatusMessage = "Download cancelled.";
-            return;
-        }
-
-        try
-        {
-            IsBusy = true;
-            UpdateAttachmentCommandState();
-
-            var attachment = await FindContractAttachmentAsync(contractName).ConfigureAwait(false);
-            if (attachment is null)
-            {
-                StatusMessage = $"Contract '{contractName}' not found for the selected supplier.";
-                return;
-            }
-
-            await using (var destination = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.None, 128 * 1024, useAsync: true))
-            {
-                var request = new AttachmentReadRequest
-                {
-                    RequestedById = _authContext.CurrentUser?.Id,
-                    Reason = $"wpf:{ModuleKey}:download",
-                    SourceHost = Environment.MachineName,
-                    SourceIp = _authContext.CurrentIpAddress
-                };
-
-                var result = await _attachmentWorkflow
-                    .DownloadAsync(attachment.Attachment.Id, destination, request)
-                    .ConfigureAwait(false);
-
-                StatusMessage = $"Downloaded {result.BytesWritten:N0} byte(s) to '{dialog.FileName}'.";
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to download contract: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateAttachmentCommandState();
-        }
-    }
-
-    private async Task<AttachmentLinkWithAttachment?> FindContractAttachmentAsync(string contractName)
-    {
-        if (_loadedSupplier is null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var links = await _attachmentWorkflow
-                .GetLinksForEntityAsync("suppliers", _loadedSupplier.Id)
-                .ConfigureAwait(false);
-
-            return links.FirstOrDefault(link
-                => string.Equals(link.Attachment.FileName, contractName, StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(link.Attachment.Name, contractName, StringComparison.OrdinalIgnoreCase));
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to query supplier attachments: {ex.Message}";
-            return null;
-        }
-    }
-
-    private async Task LoadAuditTimelineAsync(int supplierId)
-    {
-        if (Audit is null)
-        {
-            AuditTimeline.Clear();
-            return;
-        }
-
-        try
-        {
-            var from = DateTime.UtcNow.AddYears(-5);
-            var to = DateTime.UtcNow.AddDays(1);
-            var audits = await Audit
-                .GetFilteredAudits(string.Empty, "suppliers", string.Empty, from, to)
-                .ConfigureAwait(false);
-
-            var filtered = audits
-                .Where(entry => string.Equals(entry.Entity, "suppliers", StringComparison.OrdinalIgnoreCase))
-                .Where(entry => int.TryParse(entry.EntityId, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedId)
-                                 && parsedId == supplierId)
-                .OrderBy(entry => entry.Timestamp)
-                .ToList();
-
-            AuditTimeline.Clear();
-            foreach (var entry in filtered)
-            {
-                AuditTimeline.Add(entry);
-            }
-        }
-        catch (Exception ex)
-        {
-            AuditTimeline.Clear();
-            StatusMessage = $"Failed to load supplier audit timeline: {ex.Message}";
-        }
-    }
-
-    private sealed record SupplierSignatureEditorState(
-        int? DigitalSignatureId,
-        string DigitalSignature,
-        string SignatureHash,
-        string SignatureReason,
-        string SignatureNote,
-        DateTime? SignatureTimestampUtc,
-        int? SignerUserId,
-        string SignerUserName,
-        DateTime? LastModifiedUtc,
-        int? LastModifiedById,
-        string LastModifiedByName,
-        string SourceIp,
-        string SessionId,
-        string DeviceInfo);
-
-    private SupplierSignatureEditorState ApplySignatureMetadataToSupplier(
-        Supplier supplier,
-        ElectronicSignatureDialogResult signatureResult,
-        SupplierCrudContext context,
-        SignatureMetadataDto? metadata)
-    {
-        if (supplier is null)
-        {
-            throw new ArgumentNullException(nameof(supplier));
-        }
-
-        if (signatureResult is null)
-        {
-            throw new ArgumentNullException(nameof(signatureResult));
-        }
-
-        if (signatureResult.Signature is null)
-        {
-            throw new ArgumentException("Signature result is missing the captured signature payload.", nameof(signatureResult));
-        }
-
-        var signature = signatureResult.Signature;
-        var signerId = signature.UserId != 0 ? signature.UserId : context.UserId;
-        var fallbackName = _authContext.CurrentUser?.FullName
-            ?? _authContext.CurrentUser?.Username
-            ?? string.Empty;
-        var signerName = !string.IsNullOrWhiteSpace(signature.UserName)
-            ? signature.UserName!
-            : supplier.LastModifiedBy?.FullName
-                ?? supplier.LastModifiedBy?.Username
-                ?? fallbackName;
-
-        var signatureHash = !string.IsNullOrWhiteSpace(signature.SignatureHash)
-            ? signature.SignatureHash!
-            : metadata?.Hash
-              ?? context.SignatureHash
-              ?? supplier.DigitalSignature
-              ?? string.Empty;
-
-        supplier.DigitalSignature = signatureHash;
-        var metadataId = metadata?.Id ?? (signature.Id > 0 ? signature.Id : supplier.DigitalSignatureId);
-        supplier.DigitalSignatureId = metadataId;
-
-        var signedAt = signature.SignedAt ?? DateTime.UtcNow;
-        supplier.LastModified = signedAt;
-
-        if (signerId > 0)
-        {
-            supplier.LastModifiedById = signerId;
-        }
-
-        supplier.SourceIp = !string.IsNullOrWhiteSpace(signature.IpAddress)
-            ? signature.IpAddress!
-            : metadata?.IpAddress
-              ?? context.Ip
-              ?? supplier.SourceIp;
-
-        supplier.SessionId = !string.IsNullOrWhiteSpace(signature.SessionId)
-            ? signature.SessionId!
-            : metadata?.Session
-              ?? context.SessionId
-              ?? supplier.SessionId;
-
-        if (supplier.LastModifiedBy is null && (!string.IsNullOrWhiteSpace(signerName) || signerId > 0))
-        {
-            supplier.LastModifiedBy = new User
-            {
-                Id = signerId,
-                FullName = signerName,
-                Username = signerName
-            };
-        }
-        else if (supplier.LastModifiedBy is not null)
-        {
-            if (signerId > 0)
-            {
-                supplier.LastModifiedBy.Id = signerId;
-            }
-
-            if (!string.IsNullOrWhiteSpace(signerName))
-            {
-                if (string.IsNullOrWhiteSpace(supplier.LastModifiedBy.FullName))
-                {
-                    supplier.LastModifiedBy.FullName = signerName;
-                }
-
-                if (string.IsNullOrWhiteSpace(supplier.LastModifiedBy.Username))
-                {
-                    supplier.LastModifiedBy.Username = signerName;
-                }
-            }
-        }
-
-        var reason = signatureResult.ReasonDisplay ?? string.Empty;
-        var note = !string.IsNullOrWhiteSpace(signature.Note)
-            ? signature.Note!
-            : metadata?.Note
-              ?? context.SignatureNote
-              ?? string.Empty;
-        var deviceInfo = !string.IsNullOrWhiteSpace(signature.DeviceInfo)
-            ? signature.DeviceInfo!
-            : metadata?.Device
-              ?? context.DeviceInfo
-              ?? string.Empty;
-        var lastModifiedName = supplier.LastModifiedBy?.FullName
-            ?? supplier.LastModifiedBy?.Username
-            ?? signerName;
-        var digitalSignature = supplier.DigitalSignature ?? string.Empty;
-        var sourceIp = supplier.SourceIp ?? string.Empty;
-        var sessionId = supplier.SessionId ?? string.Empty;
-
-        return new SupplierSignatureEditorState(
-            supplier.DigitalSignatureId,
-            digitalSignature,
-            digitalSignature,
-            reason,
-            note,
-            signedAt,
-            supplier.LastModifiedById,
-            signerName,
-            supplier.LastModified,
-            supplier.LastModifiedById,
-            lastModifiedName,
-            sourceIp,
-            sessionId,
-            deviceInfo);
-    }
-
-    private void ApplySignatureMetadataToEditor(SupplierSignatureEditorState editorState)
-    {
-        if (Editor is null)
-        {
-            return;
-        }
-
-        var previous = _suppressDirtyNotifications;
-        _suppressDirtyNotifications = true;
-
-        try
-        {
-            Editor.DigitalSignatureId = editorState.DigitalSignatureId;
-            Editor.DigitalSignature = editorState.DigitalSignature;
-            Editor.SignatureHash = editorState.SignatureHash;
-            Editor.SignatureReason = editorState.SignatureReason;
-            Editor.SignatureNote = editorState.SignatureNote;
-            Editor.SignatureTimestampUtc = editorState.SignatureTimestampUtc;
-            Editor.SignerUserId = editorState.SignerUserId;
-            Editor.SignerUserName = editorState.SignerUserName;
-            Editor.LastModifiedUtc = editorState.LastModifiedUtc;
-            Editor.LastModifiedById = editorState.LastModifiedById;
-            Editor.LastModifiedByName = editorState.LastModifiedByName;
-            Editor.SourceIp = editorState.SourceIp;
-            Editor.SessionId = editorState.SessionId;
-            Editor.DeviceInfo = editorState.DeviceInfo;
-        }
-        finally
-        {
-            _suppressDirtyNotifications = previous;
-        }
-
-        ResetDirty();
-    }
-
     private static ModuleRecord ToRecord(Supplier supplier)
     {
         var inspector = new List<InspectorField>
@@ -986,12 +631,11 @@ public sealed partial class SuppliersModuleViewModel : DataDrivenModuleDocumentV
             supplier.PartsSupplied.Count > 0 ? supplier.PartsSupplied.First().Id : null);
     }
 }
-/// <summary>
-/// Represents the supplier editor value.
-/// </summary>
 
 public sealed partial class SupplierEditor : ObservableObject
 {
+    /// <summary>Generated property exposing the id for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_Id` resources are available.</remarks>
     [ObservableProperty]
     private int _id;
 
@@ -1034,12 +678,16 @@ public sealed partial class SupplierEditor : ObservableObject
     [ObservableProperty]
     private string _riskLevel = "Low";
 
+    /// <summary>Generated property exposing the is qualified for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_IsQualified` resources are available.</remarks>
     [ObservableProperty]
     private bool _isQualified;
 
     [ObservableProperty]
     private DateTime? _cooperationStart = DateTime.UtcNow.Date;
 
+    /// <summary>Generated property exposing the cooperation end for the Suppliers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Suppliers_CooperationEnd` resources are available.</remarks>
     [ObservableProperty]
     private DateTime? _cooperationEnd;
 
@@ -1049,88 +697,22 @@ public sealed partial class SupplierEditor : ObservableObject
     [ObservableProperty]
     private string _digitalSignature = string.Empty;
 
-    [ObservableProperty]
-    private int? _digitalSignatureId;
-
-    [ObservableProperty]
-    private string _signatureHash = string.Empty;
-
-    [ObservableProperty]
-    private string _signatureReason = string.Empty;
-
-    [ObservableProperty]
-    private string _signatureNote = string.Empty;
-
-    [ObservableProperty]
-    private DateTime? _signatureTimestampUtc;
-
-    [ObservableProperty]
-    private int? _signerUserId;
-
-    [ObservableProperty]
-    private string _signerUserName = string.Empty;
-
-    [ObservableProperty]
-    private DateTime? _lastModifiedUtc;
-
-    [ObservableProperty]
-    private int? _lastModifiedById;
-
-    [ObservableProperty]
-    private string _lastModifiedByName = string.Empty;
-
-    [ObservableProperty]
-    private string _sourceIp = string.Empty;
-
-    [ObservableProperty]
-    private string _sessionId = string.Empty;
-
-    [ObservableProperty]
-    private string _deviceInfo = string.Empty;
-    /// <summary>
-    /// Executes the create empty operation.
-    /// </summary>
-
+    /// <summary>Executes the create empty routine for the Suppliers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static SupplierEditor CreateEmpty() => new();
-    /// <summary>
-    /// Executes the create for new operation.
-    /// </summary>
 
-    public static SupplierEditor CreateForNew(IAuthContext authContext)
-    {
-        if (authContext is null)
-        {
-            throw new ArgumentNullException(nameof(authContext));
-        }
-
-        var userId = authContext.CurrentUser?.Id;
-        var userName = authContext.CurrentUser?.FullName
-            ?? authContext.CurrentUser?.Username
-            ?? string.Empty;
-
-        return new SupplierEditor
+    /// <summary>Executes the create for new routine for the Suppliers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
+    public static SupplierEditor CreateForNew()
+        => new()
         {
             Status = "Active",
             RiskLevel = "Low",
-            CooperationStart = DateTime.UtcNow.Date,
-            SignatureHash = string.Empty,
-            SignatureReason = string.Empty,
-            SignatureNote = string.Empty,
-            SignatureTimestampUtc = DateTime.UtcNow,
-            SignerUserId = userId,
-            SignerUserName = userName,
-            LastModifiedUtc = DateTime.UtcNow,
-            LastModifiedById = userId,
-            LastModifiedByName = userName,
-            SourceIp = authContext.CurrentIpAddress ?? string.Empty,
-            SessionId = authContext.CurrentSessionId ?? string.Empty,
-            DeviceInfo = authContext.CurrentDeviceInfo ?? string.Empty
+            CooperationStart = DateTime.UtcNow.Date
         };
-    }
-    /// <summary>
-    /// Executes the from supplier operation.
-    /// </summary>
 
+    /// <summary>Executes the from supplier routine for the Suppliers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static SupplierEditor FromSupplier(Supplier supplier)
     {
         return new SupplierEditor
@@ -1155,30 +737,12 @@ public sealed partial class SupplierEditor : ObservableObject
             CooperationStart = supplier.CooperationStart,
             CooperationEnd = supplier.CooperationEnd,
             RegisteredAuthorities = supplier.RegisteredAuthorities ?? string.Empty,
-            DigitalSignature = supplier.DigitalSignature ?? string.Empty,
-            DigitalSignatureId = supplier.DigitalSignatureId,
-            SignatureHash = supplier.DigitalSignature ?? string.Empty,
-            SignatureReason = string.Empty,
-            SignatureNote = string.Empty,
-            SignatureTimestampUtc = supplier.LastModified,
-            SignerUserId = supplier.LastModifiedById,
-            SignerUserName = supplier.LastModifiedBy?.FullName
-                ?? supplier.LastModifiedBy?.Username
-                ?? string.Empty,
-            LastModifiedUtc = supplier.LastModified,
-            LastModifiedById = supplier.LastModifiedById,
-            LastModifiedByName = supplier.LastModifiedBy?.FullName
-                ?? supplier.LastModifiedBy?.Username
-                ?? string.Empty,
-            SourceIp = supplier.SourceIp ?? string.Empty,
-            SessionId = supplier.SessionId ?? string.Empty,
-            DeviceInfo = string.Empty
+            DigitalSignature = supplier.DigitalSignature ?? string.Empty
         };
     }
-    /// <summary>
-    /// Executes the clone operation.
-    /// </summary>
 
+    /// <summary>Executes the clone routine for the Suppliers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public SupplierEditor Clone()
     {
         return new SupplierEditor
@@ -1201,26 +765,12 @@ public sealed partial class SupplierEditor : ObservableObject
             CooperationStart = CooperationStart,
             CooperationEnd = CooperationEnd,
             RegisteredAuthorities = RegisteredAuthorities,
-            DigitalSignature = DigitalSignature,
-            DigitalSignatureId = DigitalSignatureId,
-            SignatureHash = SignatureHash,
-            SignatureReason = SignatureReason,
-            SignatureNote = SignatureNote,
-            SignatureTimestampUtc = SignatureTimestampUtc,
-            SignerUserId = SignerUserId,
-            SignerUserName = SignerUserName,
-            LastModifiedUtc = LastModifiedUtc,
-            LastModifiedById = LastModifiedById,
-            LastModifiedByName = LastModifiedByName,
-            SourceIp = SourceIp,
-            SessionId = SessionId,
-            DeviceInfo = DeviceInfo
+            DigitalSignature = DigitalSignature
         };
     }
-    /// <summary>
-    /// Executes the to supplier operation.
-    /// </summary>
 
+    /// <summary>Executes the to supplier routine for the Suppliers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public Supplier ToSupplier(Supplier? existing)
     {
         var supplier = existing ?? new Supplier();
@@ -1242,14 +792,10 @@ public sealed partial class SupplierEditor : ObservableObject
         supplier.CooperationStart = CooperationStart;
         supplier.CooperationEnd = CooperationEnd;
         supplier.RegisteredAuthorities = RegisteredAuthorities?.Trim() ?? string.Empty;
-        supplier.DigitalSignatureId = DigitalSignatureId;
-        supplier.DigitalSignature = !string.IsNullOrWhiteSpace(SignatureHash)
-            ? SignatureHash!
-            : DigitalSignature ?? existing?.DigitalSignature ?? string.Empty;
-        supplier.LastModified = LastModifiedUtc ?? supplier.LastModified;
-        supplier.LastModifiedById = LastModifiedById ?? supplier.LastModifiedById;
-        supplier.SourceIp = string.IsNullOrWhiteSpace(SourceIp) ? supplier.SourceIp : SourceIp;
-        supplier.SessionId = string.IsNullOrWhiteSpace(SessionId) ? supplier.SessionId : SessionId;
+        supplier.DigitalSignature = DigitalSignature ?? existing?.DigitalSignature ?? string.Empty;
         return supplier;
     }
 }
+
+
+

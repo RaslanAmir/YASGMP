@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -21,7 +20,7 @@ namespace YasGMP.ViewModels
     /// • Integrates with <see cref="DatabaseService"/> and <see cref="AuthService"/> for persistence and context
     /// </para>
     /// </summary>
-    public sealed class NotificationViewModel : INotificationAnalyticsViewModel
+    public sealed class NotificationViewModel : INotifyPropertyChanged
     {
         #region === Fields & Constructor =======================================================
 
@@ -148,7 +147,7 @@ namespace YasGMP.ViewModels
         }
 
         /// <summary>Available type values for filters.</summary>
-        public IReadOnlyList<string> AvailableTypes => new[] { "alert", "reminder", "escalation", "info", "overdue", "workflow", "custom" };
+        public string[] AvailableTypes => new[] { "alert", "reminder", "escalation", "info", "overdue", "workflow", "custom" };
 
         /// <summary>True for admin/superadmin/QA users.</summary>
         public bool CanSendNotifications =>
@@ -159,34 +158,13 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ==================================================================
-        /// <summary>
-        /// Gets or sets the load notifications command.
-        /// </summary>
 
         public ICommand LoadNotificationsCommand { get; }
-        /// <summary>
-        /// Gets or sets the send notification command.
-        /// </summary>
         public ICommand SendNotificationCommand { get; }
-        /// <summary>
-        /// Gets or sets the acknowledge notification command.
-        /// </summary>
         public ICommand AcknowledgeNotificationCommand { get; }
-        /// <summary>
-        /// Gets or sets the mute notification command.
-        /// </summary>
         public ICommand MuteNotificationCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete notification command.
-        /// </summary>
         public ICommand DeleteNotificationCommand { get; }
-        /// <summary>
-        /// Gets or sets the export notifications command.
-        /// </summary>
         public ICommand ExportNotificationsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion
@@ -476,9 +454,6 @@ namespace YasGMP.ViewModels
 
         /// <inheritdoc/>
         // FIX (CS8612): Use nullable delegate type to match the interface.
-        /// <summary>
-        /// Occurs when property changed event handler is raised.
-        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>Raises <see cref="PropertyChanged"/>.</summary>

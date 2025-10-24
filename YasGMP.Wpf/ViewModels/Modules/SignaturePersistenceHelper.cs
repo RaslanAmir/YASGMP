@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
@@ -9,9 +9,6 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
 internal static class SignaturePersistenceHelper
 {
-    /// <summary>
-    /// Executes the apply entity metadata operation.
-    /// </summary>
     public static void ApplyEntityMetadata(
         ElectronicSignatureDialogResult signatureResult,
         string tableName,
@@ -106,9 +103,6 @@ internal static class SignaturePersistenceHelper
             signature.SessionId = sessionId;
         }
     }
-    /// <summary>
-    /// Executes the persist if required async operation.
-    /// </summary>
 
     public static async Task PersistIfRequiredAsync(
         IElectronicSignatureDialogService signatureDialog,
@@ -143,3 +137,6 @@ internal static class SignaturePersistenceHelper
             .ConfigureAwait(false);
     }
 }
+
+
+

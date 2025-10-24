@@ -16,9 +16,6 @@ namespace YasGMP.Services
         private readonly DatabaseService _db;
         private readonly AuditService _audit;
         private readonly IRBACService _rbac;
-        /// <summary>
-        /// Initializes a new instance of the UserService class.
-        /// </summary>
 
         public UserService(DatabaseService databaseService, AuditService auditService, IRBACService rbacService)
         {
@@ -28,9 +25,6 @@ namespace YasGMP.Services
         }
 
         #region === AUTHENTICATION & SECURITY ===
-        /// <summary>
-        /// Executes the authenticate async operation.
-        /// </summary>
 
         public async Task<User?> AuthenticateAsync(string username, string password)
         {
@@ -96,18 +90,12 @@ namespace YasGMP.Services
             byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(password ?? string.Empty));
             return Convert.ToBase64String(hash);
         }
-        /// <summary>
-        /// Executes the verify two factor code async operation.
-        /// </summary>
 
         public async Task<bool> VerifyTwoFactorCodeAsync(string username, string code)
         {
             await Task.Delay(50);
             return code == "123456";
         }
-        /// <summary>
-        /// Executes the lock user async operation.
-        /// </summary>
 
         public async Task LockUserAsync(int userId)
         {
@@ -121,24 +109,12 @@ namespace YasGMP.Services
         #endregion
 
         #region === CRUD OPERATIONS ===
-        /// <summary>
-        /// Executes the get all users async operation.
-        /// </summary>
 
         public async Task<List<User>> GetAllUsersAsync() => await _db.GetAllUsersAsync(includeAudit: true);
-        /// <summary>
-        /// Executes the get user by id async operation.
-        /// </summary>
 
         public async Task<User?> GetUserByIdAsync(int id) => await _db.GetUserByIdAsync(id);
-        /// <summary>
-        /// Executes the get user by username async operation.
-        /// </summary>
 
         public async Task<User?> GetUserByUsernameAsync(string username) => await _db.GetUserByUsernameAsync(username);
-        /// <summary>
-        /// Executes the create user async operation.
-        /// </summary>
 
         public async Task CreateUserAsync(User user, int adminId = 0)
         {
@@ -149,9 +125,6 @@ namespace YasGMP.Services
             await _audit.LogEntityAuditAsync("users", user.Id, "CREATE",
                 $"Korisnik {user.Username} kreiran od admin ID={adminId}");
         }
-        /// <summary>
-        /// Executes the update user async operation.
-        /// </summary>
 
         public async Task UpdateUserAsync(User user, int adminId = 0)
         {
@@ -161,9 +134,6 @@ namespace YasGMP.Services
             await _audit.LogEntityAuditAsync("users", user.Id, "UPDATE",
                 $"Korisnik {user.Username} ažuriran od admin ID={adminId}");
         }
-        /// <summary>
-        /// Executes the delete user async operation.
-        /// </summary>
 
         public async Task DeleteUserAsync(int userId, int adminId = 0)
         {
@@ -173,9 +143,6 @@ namespace YasGMP.Services
             await _audit.LogEntityAuditAsync("users", userId, "DELETE",
                 $"Korisnik ID={userId} obrisan od admin ID={adminId}");
         }
-        /// <summary>
-        /// Executes the deactivate user async operation.
-        /// </summary>
 
         public async Task DeactivateUserAsync(int userId)
         {
@@ -192,20 +159,11 @@ namespace YasGMP.Services
         #endregion
 
         #region === ROLE, PERMISSIONS, PROFILE ===
-        /// <summary>
-        /// Executes the has role operation.
-        /// </summary>
 
         public bool HasRole(User? user, string role) =>
             user != null && user.Role?.Equals(role, StringComparison.OrdinalIgnoreCase) == true;
-        /// <summary>
-        /// Executes the is active operation.
-        /// </summary>
 
         public bool IsActive(User? user) => user != null && user.Active;
-        /// <summary>
-        /// Executes the change password async operation.
-        /// </summary>
 
         public async Task ChangePasswordAsync(int userId, string newPassword, int adminId = 0)
         {
@@ -237,9 +195,6 @@ namespace YasGMP.Services
         #endregion
 
         #region === DIGITAL SIGNATURES & EXTRAS ===
-        /// <summary>
-        /// Executes the generate digital signature operation.
-        /// </summary>
 
         public string GenerateDigitalSignature(User? user)
         {
@@ -247,21 +202,12 @@ namespace YasGMP.Services
             string raw = $"{user.Username}|{DateTime.UtcNow:O}|{Guid.NewGuid()}";
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(raw));
         }
-        /// <summary>
-        /// Executes the validate digital signature operation.
-        /// </summary>
 
         public bool ValidateDigitalSignature(string signature) =>
             !string.IsNullOrWhiteSpace(signature);
-        /// <summary>
-        /// Executes the log user event async operation.
-        /// </summary>
 
         public Task LogUserEventAsync(int userId, string eventType, string details)
             => _audit.LogEntityAuditAsync("users", userId, eventType, details);
-        /// <summary>
-        /// Executes the unlock user async operation.
-        /// </summary>
 
         public async Task UnlockUserAsync(int userId, int adminId)
         {
@@ -271,9 +217,6 @@ namespace YasGMP.Services
             await _audit.LogEntityAuditAsync("users", userId, "UNLOCK",
                 $"Korisnik ID={userId} otključan od admin ID={adminId}");
         }
-        /// <summary>
-        /// Executes the set two factor enabled async operation.
-        /// </summary>
 
         public async Task SetTwoFactorEnabledAsync(int userId, bool enabled)
         {
@@ -283,9 +226,6 @@ namespace YasGMP.Services
             await _audit.LogEntityAuditAsync("users", userId,
                 enabled ? "ENABLE_2FA" : "DISABLE_2FA", $"2FA postavljen na {enabled}");
         }
-        /// <summary>
-        /// Executes the update user profile async operation.
-        /// </summary>
 
         public async Task UpdateUserProfileAsync(User user, int adminId = 0)
         {
@@ -313,3 +253,4 @@ namespace YasGMP.Services
         #endregion
     }
 }
+

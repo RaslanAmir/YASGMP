@@ -1,4 +1,4 @@
-// File: YASGMP/Services/ComponentService.cs
+﻿// File: YASGMP/Services/ComponentService.cs
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,11 +11,11 @@ using YasGMP.Helpers;
 namespace YasGMP.Services
 {
     /// <summary>
-    /// <b>ComponentService</b> — GMP/Annex 11 &amp; 21 CFR Part 11 aligned service for managing machine components.
+    /// <b>ComponentService</b> â€” GMP/Annex 11 &amp; 21 CFR Part 11 aligned service for managing machine components.
     /// <para>
-    /// • Full CRUD with validation and digital signatures.<br/>
-    /// • All actions recorded via <see cref="AuditService"/> for complete traceability.<br/>
-    /// • Calls are aligned with <see cref="DatabaseService"/> Region “03 · MACHINE / COMPONENT”.
+    /// â€˘ Full CRUD with validation and digital signatures.<br/>
+    /// â€˘ All actions recorded via <see cref="AuditService"/> for complete traceability.<br/>
+    /// â€˘ Calls are aligned with <see cref="DatabaseService"/> Region â€ś03 Â· MACHINE / COMPONENTâ€ť.
     /// </para>
     /// </summary>
     public class ComponentService
@@ -80,7 +80,7 @@ namespace YasGMP.Services
             component.LastModifiedById = userId;
 
             var ip = ResolveIp(component, context);
-            var device = Normalize(context?.DeviceInfo);
+            var device = Normalize(context?.DeviceInfo) ?? string.Empty;
             var session = Normalize(context?.SessionId);
 
             await _db.InsertOrUpdateComponentAsync(
@@ -130,7 +130,7 @@ namespace YasGMP.Services
             component.LastModifiedById = userId;
 
             var ip = ResolveIp(component, context);
-            var device = Normalize(context?.DeviceInfo);
+            var device = Normalize(context?.DeviceInfo) ?? string.Empty;
             var session = Normalize(context?.SessionId);
 
             await _db.InsertOrUpdateComponentAsync(
@@ -182,13 +182,13 @@ namespace YasGMP.Services
         private static void ValidateComponent(Component c)
         {
             if (string.IsNullOrWhiteSpace(c.Name))
-                throw new InvalidOperationException("❌ Component name is required.");
+                throw new InvalidOperationException("âťŚ Component name is required.");
             if (string.IsNullOrWhiteSpace(c.Code))
-                throw new InvalidOperationException("❌ Component code is required.");
+                throw new InvalidOperationException("âťŚ Component code is required.");
             if (c.MachineId <= 0)
-                throw new InvalidOperationException("❌ Component must be linked to an existing machine.");
+                throw new InvalidOperationException("âťŚ Component must be linked to an existing machine.");
             if (string.IsNullOrWhiteSpace(c.SopDoc))
-                throw new InvalidOperationException("⚠️ SOP document is required for GMP compliance.");
+                throw new InvalidOperationException("âš ď¸Ź SOP document is required for GMP compliance.");
         }
 
         #endregion
@@ -256,3 +256,5 @@ namespace YasGMP.Services
         #endregion
     }
 }
+
+

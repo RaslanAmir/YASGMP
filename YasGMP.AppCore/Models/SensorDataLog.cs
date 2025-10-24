@@ -188,3 +188,4 @@ namespace YasGMP.Models
             $"SensorDataLog [ID={Id}]: {SensorType}={Value}{Unit} @ {Timestamp:u} on {DeviceName} (Status={Status})";
     }
 }
+

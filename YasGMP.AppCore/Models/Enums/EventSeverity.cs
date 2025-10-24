@@ -50,3 +50,4 @@ namespace YasGMP.Models.Enums
         Notification = 7
     }
 }
+

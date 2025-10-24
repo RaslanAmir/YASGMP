@@ -9,22 +9,26 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using ComponentEntity = YasGMP.Models.Component;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the capa module view model value.
-/// </summary>
 
+/// <summary>Runs CAPA case management within the WPF shell using SAP B1 form semantics.</summary>
+/// <remarks>
+/// Form Modes: Find filters cases via CFL, Add provisions a new <see cref="CapaEditor"/> with default status/priority, View locks the editor, and Update enables collaborative editing alongside attachment uploads.
+/// Audit &amp; Logging: Persists CAPA records through <see cref="ICapaCrudService"/> while enforcing e-signature capture and attachment retention; detailed audit hashes are written by downstream services.
+/// Localization: Emits inline captions such as `"CAPA"`, `"Attachment upload failed"`, and status prompts for workflows until resource keys (for status/priority labels) are introduced.
+/// Navigation: ModuleKey `Capa` anchors docking, `CreateCflRequestAsync` surfaces Choose-From-List navigation, and status messages broadcast to the shell so Golden Arrow hops from related modules resolve back to CAPA cases.
+/// </remarks>
 public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Capa";
+    /// <summary>Shell registration key that binds CAPA into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "CAPA" until `Modules_Capa_Title` is introduced.</remarks>
+    public new const string ModuleKey = "Capa";
 
     private static readonly string[] DefaultStatuses =
     {
@@ -52,14 +56,13 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
 
-    private IReadOnlyList<Component> _components = Array.Empty<Component>();
+    private IReadOnlyList<ComponentEntity> _components = Array.Empty<ComponentEntity>();
     private CapaCase? _loadedCapa;
     private CapaEditor? _snapshot;
     private bool _suppressDirtyNotifications;
-    /// <summary>
-    /// Initializes a new instance of the CapaModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the CAPA module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public CapaModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -71,9 +74,8 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.Capa"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "CAPA", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _capaService = capaService ?? throw new ArgumentNullException(nameof(capaService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
@@ -88,64 +90,41 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
         Editor = CapaEditor.CreateEmpty();
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-        AddCommand = new AsyncRelayCommand(AddAsync, CanAdd);
-        ApproveCommand = new AsyncRelayCommand(ApproveAsync, CanApprove);
-        ExecuteCommand = new AsyncRelayCommand(ExecuteAsync, CanExecute);
-        CloseCommand = new AsyncRelayCommand(CloseAsync, CanClose);
-
-        UpdateWorkflowCommandState();
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the CAPA module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Capa_Editor` resources are available.</remarks>
     [ObservableProperty]
     private CapaEditor _editor;
 
+    /// <summary>Generated property exposing the is editor enabled for the CAPA module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Capa_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Gets or sets the component options.
-    /// </summary>
 
+    /// <summary>Collection presenting the component options for the CAPA document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Capa_Grid` resources exist.</remarks>
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
-    /// <summary>
-    /// Gets or sets the status options.
-    /// </summary>
 
+    /// <summary>Collection presenting the status options for the CAPA document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Capa_Grid` resources exist.</remarks>
     public IReadOnlyList<string> StatusOptions { get; }
-    /// <summary>
-    /// Gets or sets the priority options.
-    /// </summary>
 
+    /// <summary>Collection presenting the priority options for the CAPA document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Capa_Grid` resources exist.</remarks>
     public IReadOnlyList<string> PriorityOptions { get; }
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
+    /// <summary>Command executing the attach document workflow for the CAPA module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Capa_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
-    /// <summary>
-    /// Gets the command that persists a new CAPA case.
-    /// </summary>
+    /// <summary>Opens the AI module to summarize the selected CAPA case.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
 
-    public IAsyncRelayCommand AddCommand { get; }
-
-    /// <summary>
-    /// Gets the command that advances the CAPA case into the approved stage.
-    /// </summary>
-
-    public IAsyncRelayCommand ApproveCommand { get; }
-
-    /// <summary>
-    /// Gets the command that advances the CAPA case into the executed stage.
-    /// </summary>
-
-    public IAsyncRelayCommand ExecuteCommand { get; }
-
-    /// <summary>
-    /// Gets the command that closes the CAPA case.
-    /// </summary>
-
-    public IAsyncRelayCommand CloseCommand { get; }
-
+    /// <summary>Loads CAPA records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Capa_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         _components = await _componentService.GetAllAsync().ConfigureAwait(false);
@@ -161,9 +140,11 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         return capaCases.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the CAPA designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
-        var components = new List<Component>
+        var components = new List<ComponentEntity>
         {
             new()
             {
@@ -221,6 +202,8 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         return cases.Select(ToRecord).ToList();
     }
 
+    /// <summary>Loads editor payloads for the selected CAPA record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Capa". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Capa` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -253,9 +236,10 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         _loadedCapa = capa;
         LoadEditor(capa);
         UpdateAttachmentCommandState();
-        UpdateWorkflowCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -276,15 +260,40 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
 
         UpdateAttachmentCommandState();
-        UpdateWorkflowCommandState();
         return Task.CompletedTask;
     }
 
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedCapa is null)
+        {
+            StatusMessage = "Select a CAPA case to summarize.";
+            return;
+        }
+
+        var c = _loadedCapa;
+        string prompt;
+        if (c is null)
+        {
+            prompt = $"Summarize CAPA: {SelectedRecord?.Title}. Provide root cause, actions and effectiveness checks in <= 8 bullets.";
+        }
+        else
+        {
+            prompt = $"Summarize this CAPA (<= 8 bullets). Title={c.Title}; Status={c.Status}; Priority={c.Priority}; Opened={c.OpenedAt:yyyy-MM-dd}; Closed={c.ClosedAt:yyyy-MM-dd}; RootCause={c.RootCause}; Corrective={c.CorrectiveAction}; Preventive={c.PreventiveAction}; ComponentId={c.ComponentId}.";
+        }
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Mode == FormMode.Update && _loadedCapa is null)
         {
-            StatusMessage = "Select a CAPA case before saving.";
+            StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_CAPA_SelectBeforeSave", "Select a CAPA case before saving.");
             return false;
         }
 
@@ -325,7 +334,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
 
         var context = CapaCrudContext.Create(
             _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
+            (_authContext.CurrentIpAddress ?? string.Empty),
             _authContext.CurrentDeviceInfo,
             _authContext.CurrentSessionId,
             signatureResult);
@@ -357,7 +366,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to persist CAPA case: {ex.Message}", ex);
+            throw new InvalidOperationException(string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_CAPA_SaveFailed", "Failed to persist CAPA case: {0}"), ex.Message), ex);
         }
 
         _loadedCapa = capa;
@@ -394,6 +403,8 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -413,6 +424,8 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Capa". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Capa` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var capaCases = await _capaService.GetAllAsync().ConfigureAwait(false);
@@ -441,9 +454,11 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             })
             .ToList();
 
-        return new CflRequest("Select CAPA", items);
+        return new CflRequest(YasGMP.Wpf.Helpers.Loc.S("CFL_Select_CAPA", "Select CAPA"), items);
     }
 
+    /// <summary>Applies CFL selections back into the CAPA workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Capa". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Capa_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -451,16 +466,18 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         {
             SelectedRecord = match;
             SearchText = match.Title;
-            StatusMessage = $"Loaded {match.Title}.";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_CAPA_LoadedTitle", "Loaded {0}."), match.Title);
             return Task.CompletedTask;
         }
 
         SearchText = result.Selected.Label;
-        StatusMessage = $"Filtered CAPA cases by \"{result.Selected.Label}\".";
+        StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Status_CAPA_FilteredBy", "Filtered CAPA cases by \"{0}\"."), result.Selected.Label);
         RecordsView.Refresh();
         return Task.CompletedTask;
     }
 
+    /// <summary>Executes the matches search routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
         if (base.MatchesSearch(record, searchText))
@@ -485,12 +502,12 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             UpdateAttachmentCommandState();
 
             var files = await _filePicker
-                .PickFilesAsync(new FilePickerRequest(true, null, "Select CAPA attachment"))
+                .PickFilesAsync(new FilePickerRequest(true, null, YasGMP.Wpf.Helpers.Loc.S("Attachment_Picker_CAPA", "Select CAPA attachment")))
                 .ConfigureAwait(false);
 
             if (files.Count == 0)
             {
-                StatusMessage = "No files selected.";
+                StatusMessage = YasGMP.Wpf.Helpers.Loc.S("Status_Attach_NoneSelected", "No files selected.");
                 return;
             }
 
@@ -509,7 +526,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
                     EntityId = _loadedCapa.Id,
                     UploadedById = uploadedBy,
                     Reason = $"capa:{_loadedCapa.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
+                    SourceIp = (_authContext.CurrentIpAddress ?? string.Empty),
                     SourceHost = _authContext.CurrentDeviceInfo,
                     Notes = $"WPF:{ModuleKey}:{DateTime.UtcNow:O}"
                 };
@@ -526,7 +543,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Attachment upload failed: {ex.Message}";
+            StatusMessage = string.Format(YasGMP.Wpf.Helpers.Loc.S("Error_Attach_UploadFailed", "Attachment upload failed: {0}"), ex.Message);
         }
         finally
         {
@@ -563,7 +580,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
         }
     }
 
-    private void RefreshComponentOptions(IEnumerable<Component> components)
+    private void RefreshComponentOptions(IEnumerable<ComponentEntity> components)
     {
         ComponentOptions.Clear();
         foreach (var component in components
@@ -598,7 +615,7 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             new("Status", string.IsNullOrWhiteSpace(capa.Status) ? "-" : capa.Status),
             new("Opened", capa.DateOpen == default ? "-" : capa.DateOpen.ToString("d", CultureInfo.CurrentCulture)),
             new("Assigned To", capa.AssignedTo?.FullName ?? capa.AssignedTo?.Username ?? "-"),
-            new("Component", capa.ComponentId.ToString(CultureInfo.InvariantCulture))
+            new("ComponentEntity", capa.ComponentId.ToString(CultureInfo.InvariantCulture))
         };
 
         return new ModuleRecord(
@@ -611,171 +628,9 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
-
-    private void UpdateWorkflowCommandState()
     {
-        AddCommand.NotifyCanExecuteChanged();
-        ApproveCommand.NotifyCanExecuteChanged();
-        ExecuteCommand.NotifyCanExecuteChanged();
-        CloseCommand.NotifyCanExecuteChanged();
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
     }
-
-    private async Task AddAsync()
-    {
-        if (!CanAdd())
-        {
-            return;
-        }
-
-        try
-        {
-            IsBusy = true;
-            var capa = Editor.ToCapaCase(null);
-            capa.Status = _capaService.NormalizeStatus("ACTION_DEFINED");
-            capa.Priority = _capaService.NormalizePriority(capa.Priority);
-            capa.DateOpen = DateTime.UtcNow;
-
-            _capaService.Validate(capa);
-
-            var context = CapaCrudContext.Create(
-                _authContext.CurrentUser?.Id ?? 0,
-                _authContext.CurrentIpAddress,
-                _authContext.CurrentDeviceInfo,
-                _authContext.CurrentSessionId);
-
-            var result = await _capaService.CreateAsync(capa, context).ConfigureAwait(false);
-            if (capa.Id == 0 && result.Id > 0)
-            {
-                capa.Id = result.Id;
-            }
-
-            _loadedCapa = capa;
-            LoadEditor(capa);
-            var record = UpsertRecord(capa);
-            SelectedRecord = record;
-            Mode = FormMode.View;
-            StatusMessage = $"CAPA {capa.Id} added.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to add CAPA: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateAttachmentCommandState();
-            UpdateWorkflowCommandState();
-        }
-    }
-
-    private async Task ApproveAsync()
-    {
-        if (!CanApprove() || _loadedCapa is null)
-        {
-            return;
-        }
-
-        await TransitionAsync("ACTION_APPROVED", "CAPA approved.", updateCloseDate: false).ConfigureAwait(false);
-    }
-
-    private async Task ExecuteAsync()
-    {
-        if (!CanExecute() || _loadedCapa is null)
-        {
-            return;
-        }
-
-        await TransitionAsync("ACTION_EXECUTED", "CAPA executed.", updateCloseDate: false).ConfigureAwait(false);
-    }
-
-    private async Task CloseAsync()
-    {
-        if (!CanClose() || _loadedCapa is null)
-        {
-            return;
-        }
-
-        await TransitionAsync("CLOSED", "CAPA closed.", updateCloseDate: true).ConfigureAwait(false);
-    }
-
-    private async Task TransitionAsync(string targetStatus, string successMessage, bool updateCloseDate)
-    {
-        try
-        {
-            IsBusy = true;
-            var capa = Editor.ToCapaCase(_loadedCapa);
-            capa.Status = _capaService.NormalizeStatus(targetStatus);
-            capa.Priority = _capaService.NormalizePriority(capa.Priority);
-
-            if (updateCloseDate)
-            {
-                capa.DateClose = DateTime.UtcNow;
-            }
-
-            var context = CapaCrudContext.Create(
-                _authContext.CurrentUser?.Id ?? 0,
-                _authContext.CurrentIpAddress,
-                _authContext.CurrentDeviceInfo,
-                _authContext.CurrentSessionId);
-
-            await _capaService.UpdateAsync(capa, context).ConfigureAwait(false);
-
-            _loadedCapa = capa;
-            LoadEditor(capa);
-            var record = UpsertRecord(capa);
-            SelectedRecord = record;
-            Mode = FormMode.View;
-            StatusMessage = successMessage;
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to update CAPA: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-            UpdateAttachmentCommandState();
-            UpdateWorkflowCommandState();
-        }
-    }
-
-    private ModuleRecord UpsertRecord(CapaCase capa)
-    {
-        var record = ToRecord(capa);
-        for (var i = 0; i < Records.Count; i++)
-        {
-            if (Records[i].Key == record.Key)
-            {
-                Records[i] = record;
-                return record;
-            }
-        }
-
-        Records.Add(record);
-        return record;
-    }
-
-    private bool CanAdd()
-        => !IsBusy && Mode == FormMode.Add;
-
-    private bool CanApprove()
-        => !IsBusy
-           && Mode == FormMode.View
-           && _loadedCapa is not null
-           && string.Equals(Editor.Status, "ACTION_DEFINED", StringComparison.OrdinalIgnoreCase);
-
-    private bool CanExecute()
-        => !IsBusy
-           && Mode == FormMode.View
-           && _loadedCapa is not null
-           && string.Equals(Editor.Status, "ACTION_APPROVED", StringComparison.OrdinalIgnoreCase);
-
-    private bool CanClose()
-        => !IsBusy
-           && Mode == FormMode.View
-           && _loadedCapa is not null
-           && string.Equals(Editor.Status, "ACTION_EXECUTED", StringComparison.OrdinalIgnoreCase);
 
     partial void OnEditorChanging(CapaEditor value)
     {
@@ -811,34 +666,24 @@ public sealed partial class CapaModuleViewModel : DataDrivenModuleDocumentViewMo
             _suppressDirtyNotifications = false;
         }
 
-        if (string.Equals(e.PropertyName, nameof(CapaEditor.Status), StringComparison.Ordinal))
-        {
-            UpdateWorkflowCommandState();
-        }
-
         if (IsInEditMode)
         {
             MarkDirty();
         }
     }
 }
-/// <summary>
-/// Executes the struct operation.
-/// </summary>
 
 public readonly record struct ComponentOption(int Id, string Name)
 {
-    /// <summary>
-    /// Executes the to string operation.
-    /// </summary>
+    /// <summary>Executes the to string routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public override string ToString() => Name;
 }
-/// <summary>
-/// Represents the capa editor value.
-/// </summary>
 
 public sealed partial class CapaEditor : ObservableObject
 {
+    /// <summary>Generated property exposing the id for the CAPA module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Capa_Id` resources are available.</remarks>
     [ObservableProperty]
     private int _id;
 
@@ -848,12 +693,16 @@ public sealed partial class CapaEditor : ObservableObject
     [ObservableProperty]
     private string _description = string.Empty;
 
+    /// <summary>Generated property exposing the component id for the CAPA module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Capa_ComponentId` resources are available.</remarks>
     [ObservableProperty]
     private int _componentId;
 
     [ObservableProperty]
     private string _componentName = string.Empty;
 
+    /// <summary>Generated property exposing the assigned to id for the CAPA module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Capa_AssignedToId` resources are available.</remarks>
     [ObservableProperty]
     private int? _assignedToId;
 
@@ -866,6 +715,8 @@ public sealed partial class CapaEditor : ObservableObject
     [ObservableProperty]
     private DateTime _dateOpen = DateTime.UtcNow;
 
+    /// <summary>Generated property exposing the date close for the CAPA module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Capa_DateClose` resources are available.</remarks>
     [ObservableProperty]
     private DateTime? _dateClose;
 
@@ -892,15 +743,13 @@ public sealed partial class CapaEditor : ObservableObject
 
     [ObservableProperty]
     private string _digitalSignature = string.Empty;
-    /// <summary>
-    /// Executes the create empty operation.
-    /// </summary>
 
+    /// <summary>Executes the create empty routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static CapaEditor CreateEmpty() => new();
-    /// <summary>
-    /// Executes the create for new operation.
-    /// </summary>
 
+    /// <summary>Executes the create for new routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static CapaEditor CreateForNew(IAuthContext authContext)
     {
         return new CapaEditor
@@ -911,10 +760,9 @@ public sealed partial class CapaEditor : ObservableObject
             Priority = "Medium"
         };
     }
-    /// <summary>
-    /// Executes the from capa operation.
-    /// </summary>
 
+    /// <summary>Executes the from capa routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static CapaEditor FromCapa(
         CapaCase capa,
         Func<string?, string> normalizeStatus,
@@ -943,10 +791,9 @@ public sealed partial class CapaEditor : ObservableObject
             DigitalSignature = capa.DigitalSignature
         };
     }
-    /// <summary>
-    /// Executes the clone operation.
-    /// </summary>
 
+    /// <summary>Executes the clone routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public CapaEditor Clone()
         => new()
         {
@@ -969,10 +816,9 @@ public sealed partial class CapaEditor : ObservableObject
             Comments = Comments,
             DigitalSignature = DigitalSignature
         };
-    /// <summary>
-    /// Executes the to capa case operation.
-    /// </summary>
 
+    /// <summary>Executes the to capa case routine for the CAPA module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public CapaCase ToCapaCase(CapaCase? existing)
     {
         var capa = existing is null ? new CapaCase() : new CapaCase { Id = existing.Id };
@@ -1000,3 +846,8 @@ public sealed partial class CapaEditor : ObservableObject
         return capa;
     }
 }
+
+
+
+
+

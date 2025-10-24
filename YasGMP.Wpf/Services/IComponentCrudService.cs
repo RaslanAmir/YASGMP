@@ -1,24 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared contract that allows the WPF shell and MAUI client to orchestrate Component
-/// persistence through <see cref="YasGMP.Services.ComponentService"/>.
+/// Abstraction over <see cref="YasGMP.Services.ComponentService"/> so the WPF
+/// shell can execute CRUD operations without pulling in the full database runtime
+/// during unit tests.
 /// </summary>
-/// <remarks>
-/// Module view models call into this interface, the adapter forwards requests to the shared
-/// MAUI services (<see cref="YasGMP.Services.ComponentService"/> and <see cref="YasGMP.Services.AuditService"/>),
-/// and UI updates should be dispatched via <see cref="WpfUiDispatcher"/> after awaiting the returned tasks.
-/// Implementations must return a <see cref="CrudSaveResult"/> populated with identifiers, status text, and
-/// signature metadata so audit records remain in sync and localization can be applied via
-/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> prior to presentation.
-/// </remarks>
 public interface IComponentCrudService
 {
     Task<IReadOnlyList<Component>> GetAllAsync();
@@ -43,15 +35,9 @@ public interface IComponentCrudService
 }
 
 /// <summary>
-/// Context metadata captured when persisting component edits so audit trails and downstream services receive consistent
-/// identifiers. Each value is forwarded into <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/>
-/// to preserve the accepted signature manifest for compliance pipelines.
+/// Context metadata captured when persisting component edits so audit trails
+/// and downstream services receive consistent identifiers.
 /// </summary>
-/// <remarks>
-/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this record before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside component records, and MAUI experiences should propagate the
-/// same payload when presenting or synchronizing components so shared audit history stays aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Machine fingerprint or hostname.</param>
@@ -74,9 +60,6 @@ public readonly record struct ComponentCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ComponentCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -89,9 +72,6 @@ public readonly record struct ComponentCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ComponentCrudContext Create(
         int userId,
@@ -120,3 +100,4 @@ public readonly record struct ComponentCrudContext(
         };
     }
 }
+

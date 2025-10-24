@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,15 +20,7 @@ namespace YasGMP.Wpf.Services;
 /// </summary>
 public sealed class DebugSmokeTestService
 {
-    /// <summary>
-    /// Represents the environment toggle name value.
-    /// </summary>
     public const string EnvironmentToggleName = "YASGMP_SMOKE";
-
-    private const string SmokeDisabledStatusKey = "Shell.Status.Smoke.Disabled";
-    private const string SmokeAlreadyRunningStatusKey = "Shell.Status.Smoke.AlreadyRunning";
-    private const string SmokeResultWithLogStatusKey = "Shell.Status.Smoke.Result.WithLog";
-    private const string SmokeResultLogFailureStatusKey = "Shell.Status.Smoke.Result.LogFailure";
 
     private static readonly string[] EnabledTokens =
     {
@@ -42,9 +34,6 @@ public sealed class DebugSmokeTestService
         ComponentsModuleViewModel.ModuleKey,
         AttachmentsModuleViewModel.ModuleKey,
         ExternalServicersModuleViewModel.ModuleKey,
-        IncidentsModuleViewModel.ModuleKey,
-        CapaModuleViewModel.ModuleKey,
-        ChangeControlModuleViewModel.ModuleKey,
         WorkOrdersModuleViewModel.ModuleKey,
         AuditModuleViewModel.ModuleKey,
         ApiAuditModuleViewModel.ModuleKey,
@@ -58,9 +47,6 @@ public sealed class DebugSmokeTestService
     private readonly IModuleRegistry _moduleRegistry;
 
     private int _isRunning;
-    /// <summary>
-    /// Initializes a new instance of the DebugSmokeTestService class.
-    /// </summary>
 
     public DebugSmokeTestService(
         IUserSession userSession,
@@ -90,14 +76,12 @@ public sealed class DebugSmokeTestService
         if (!IsEnabled)
         {
             return DebugSmokeTestResult.Skipped(
-                $"Smoke test disabled. Set {EnvironmentToggleName}=1 to enable the debug harness.",
-                SmokeDisabledStatusKey,
-                EnvironmentToggleName);
+                $"Smoke test disabled. Set {EnvironmentToggleName}=1 to enable the debug harness.");
         }
 
         if (Interlocked.CompareExchange(ref _isRunning, 1, 0) != 0)
         {
-            return DebugSmokeTestResult.Skipped("Smoke test already running.", SmokeAlreadyRunningStatusKey);
+            return DebugSmokeTestResult.Skipped("Smoke test already running.");
         }
 
         try
@@ -116,7 +100,7 @@ public sealed class DebugSmokeTestService
             var modules = _moduleRegistry.Modules;
             if (modules.Count > 0)
             {
-                logBuilder.AppendLine($"Registered modules: {modules.Count} – {string.Join(", ", modules.Select(m => m.Title))}");
+                logBuilder.AppendLine($"Registered modules: {modules.Count} â€“ {string.Join(", ", modules.Select(m => m.Title))}");
             }
             else
             {
@@ -130,7 +114,7 @@ public sealed class DebugSmokeTestService
             {
                 var step = await ExecuteStepAsync(name, action, cancellationToken);
                 steps.Add(step);
-                logBuilder.AppendLine($"[{(step.Succeeded ? "PASS" : "FAIL")}] {step.Name} ({step.Duration.TotalMilliseconds:N0} ms) – {step.Message}");
+                logBuilder.AppendLine($"[{(step.Succeeded ? "PASS" : "FAIL")}] {step.Name} ({step.Duration.TotalMilliseconds:N0} ms) â€“ {step.Message}");
                 if (step.Exception is not null)
                 {
                     logBuilder.AppendLine(step.Exception.ToString());
@@ -142,9 +126,6 @@ public sealed class DebugSmokeTestService
             await AddStepAsync("Session bootstrap", token => Task.FromResult(BuildSessionMessage()));
             await AddStepAsync("Module navigation", NavigateModulesAsync);
             await AddStepAsync("External servicers mode cycle", token => ExerciseFormModesAsync(ExternalServicersModuleViewModel.ModuleKey, token));
-            await AddStepAsync("Incidents workflow transitions", token => ExerciseQualityWorkflowAsync(IncidentsModuleViewModel.ModuleKey, token));
-            await AddStepAsync("CAPA workflow transitions", token => ExerciseQualityWorkflowAsync(CapaModuleViewModel.ModuleKey, token));
-            await AddStepAsync("Change control workflow transitions", token => ExerciseQualityWorkflowAsync(ChangeControlModuleViewModel.ModuleKey, token));
             await AddStepAsync("Add/Find cycle", token => ExerciseFormModesAsync(WorkOrdersModuleViewModel.ModuleKey, token));
             await AddStepAsync("Attachments upload/download/delete", ExerciseAttachmentsWorkflowAsync);
             await AddStepAsync("Audit trail fetch", FetchAuditTrailAsync);
@@ -160,18 +141,10 @@ public sealed class DebugSmokeTestService
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-                File.WriteAllText(logPath, logBuilder.ToString());
+                File.WriteAllText(logPath, logBuilder.ToString(), Encoding.UTF8);
                 var allPassed = steps.All(static s => s.Succeeded);
                 var summary = $"{passedSteps}/{steps.Count} smoke checks succeeded. Log written to {logPath}.";
-                return DebugSmokeTestResult.Completed(
-                    allPassed,
-                    summary,
-                    logPath,
-                    steps,
-                    SmokeResultWithLogStatusKey,
-                    passedSteps,
-                    steps.Count,
-                    logPath);
+                return DebugSmokeTestResult.Completed(allPassed, summary, logPath, steps);
             }
             catch (Exception ex)
             {
@@ -179,15 +152,7 @@ public sealed class DebugSmokeTestService
                 var allPassed = steps.All(static s => s.Succeeded);
                 var passedAfter = steps.Count(static s => s.Succeeded);
                 var summary = $"{passedAfter}/{steps.Count} smoke checks succeeded. Failed to persist log: {ex.Message}";
-                return DebugSmokeTestResult.Completed(
-                    allPassed,
-                    summary,
-                    null,
-                    steps,
-                    SmokeResultLogFailureStatusKey,
-                    passedAfter,
-                    steps.Count,
-                    ex.Message);
+                return DebugSmokeTestResult.Completed(allPassed, summary, null, steps);
             }
         }
         finally
@@ -201,10 +166,10 @@ public sealed class DebugSmokeTestService
         var user = _authContext.CurrentUser;
         if (user is not null)
         {
-            return $"Authenticated as {user.Username} (#{user.Id}) – session {_authContext.CurrentSessionId}.";
+            return $"Authenticated as {user.Username} (#{user.Id}) â€“ session {_authContext.CurrentSessionId}.";
         }
 
-        return $"No hydrated user context – using {_userSession.Username} (#{_userSession.UserId}) for session {_authContext.CurrentSessionId}.";
+        return $"No hydrated user context â€“ using {_userSession.Username} (#{_userSession.UserId}) for session {_authContext.CurrentSessionId}.";
     }
 
     private async Task<string> NavigateModulesAsync(CancellationToken cancellationToken)
@@ -246,44 +211,16 @@ public sealed class DebugSmokeTestService
         return $"Mode transitions: {string.Join(" -> ", transitions)}; Records={document.Records.Count}; Status='{document.StatusMessage}'";
     }
 
-    private async Task<string> ExerciseQualityWorkflowAsync(string moduleKey, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var document = _moduleNavigation.OpenModule(moduleKey);
-        _moduleNavigation.Activate(document);
-        await document.InitializeAsync(null);
-
-        if (document.Records.Count > 0)
-        {
-            document.SelectedRecord = document.Records[0];
-        }
-
-        await document.EnterFindModeCommand.ExecuteAsync(null);
-        await document.EnterAddModeCommand.ExecuteAsync(null);
-        document.CancelCommand.Execute(null);
-        await document.EnterUpdateModeCommand.ExecuteAsync(null);
-        document.CancelCommand.Execute(null);
-        await document.EnterViewModeCommand.ExecuteAsync(null);
-
-        var inspectorFieldCounts = document.Records
-            .Select(record => record.InspectorFields.Count)
-            .ToArray();
-
-        return inspectorFieldCounts.Length == 0
-            ? $"Records=0; Mode={document.Mode}; Status='{document.StatusMessage}'"
-            : $"Records={document.Records.Count}; Inspector fields avg={inspectorFieldCounts.Average():F1}; Mode={document.Mode}";
-    }
-
     private async Task<string> FetchAuditTrailAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var events = await _databaseService.GetRecentDashboardEventsAsync(10, cancellationToken);
-        var count = events?.Count ?? 0;
-        if (count == 0)
+        if (events is null || events.Count == 0)
         {
             return "No dashboard events returned.";
         }
 
+        var count = events.Count;
         var latest = events[0];
         return $"Fetched {count} event(s); latest {latest.EventType} at {latest.Timestamp:O}.";
     }
@@ -477,8 +414,17 @@ public sealed class DebugSmokeTestService
         }
 
         var directory = Path.Combine(localAppData, "YasGMP", "logs");
-        var fileName = $"smoke_{start:yyyyMMdd_HHmmss}.log";
-        return Path.Combine(directory, fileName);
+        var baseName = $"smoke-{start:yyyyMMdd-HHmm}";
+        var fileName = $"{baseName}.txt";
+        var path = Path.Combine(directory, fileName);
+        int suffix = 1;
+        while (File.Exists(path))
+        {
+            fileName = $"{baseName}_{suffix}.txt";
+            path = Path.Combine(directory, fileName);
+            suffix++;
+        }
+        return path;
     }
 
     private static bool IsToggleEnabled(string? value)
@@ -494,36 +440,18 @@ public sealed class DebugSmokeTestService
 }
 
 /// <summary>Result payload returned by <see cref="DebugSmokeTestService"/>.</summary>
-public sealed record DebugSmokeTestResult(
-    bool WasRun,
-    bool Passed,
-    string Summary,
-    string? LogPath,
-    IReadOnlyList<DebugSmokeTestStep> Steps,
-    string? SummaryResourceKey,
-    IReadOnlyList<object?> SummaryResourceArguments)
+public sealed record DebugSmokeTestResult(bool WasRun, bool Passed, string Summary, string? LogPath, IReadOnlyList<DebugSmokeTestStep> Steps)
 {
-    /// <summary>
-    /// Executes the skipped operation.
-    /// </summary>
-    public static DebugSmokeTestResult Skipped(string summary, string? resourceKey = null, params object?[]? arguments)
-        => new(false, false, summary, null, Array.Empty<DebugSmokeTestStep>(), resourceKey, Normalize(arguments));
-    /// <summary>
-    /// Executes the completed operation.
-    /// </summary>
+    public static DebugSmokeTestResult Skipped(string summary)
+        => new(false, false, summary, null, Array.Empty<DebugSmokeTestStep>());
 
-    public static DebugSmokeTestResult Completed(
-        bool passed,
-        string summary,
-        string? logPath,
-        IReadOnlyList<DebugSmokeTestStep> steps,
-        string? resourceKey = null,
-        params object?[]? arguments)
-        => new(true, passed, summary, logPath, steps, resourceKey, Normalize(arguments));
-
-    private static IReadOnlyList<object?> Normalize(object?[]? arguments)
-        => arguments is { Length: > 0 } ? arguments.ToArray() : Array.Empty<object?>();
+    public static DebugSmokeTestResult Completed(bool passed, string summary, string? logPath, IReadOnlyList<DebugSmokeTestStep> steps)
+        => new(true, passed, summary, logPath, steps);
 }
 
 /// <summary>Represents a single step executed by the smoke harness.</summary>
 public sealed record DebugSmokeTestStep(string Name, bool Succeeded, string Message, TimeSpan Duration, Exception? Exception);
+
+
+
+

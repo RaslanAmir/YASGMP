@@ -42,10 +42,8 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the created by navigation.
-        /// </summary>
         [ForeignKey(nameof(CreatedBy))]
         public virtual User? CreatedByNavigation { get; set; }
     }
 }
+

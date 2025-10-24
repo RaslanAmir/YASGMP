@@ -13,9 +13,6 @@ namespace YasGMP.Views.Debug
     /// </summary>
     public partial class LogViewerPage : ContentPage
     {
-        /// <summary>
-        /// Initializes a new instance of the LogViewerPage class.
-        /// </summary>
         public LogViewerPage()
         {
             InitializeComponent();

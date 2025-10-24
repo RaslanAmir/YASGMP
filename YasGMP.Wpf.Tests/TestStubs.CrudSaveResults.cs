@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Models
@@ -20,18 +19,6 @@ namespace YasGMP.Models
         {
             await UpdateCoreAsync(machine, context).ConfigureAwait(false);
             return new CrudSaveResult(machine.Id, BuildMetadata(context, machine.DigitalSignature));
-        }
-
-        public Task DeleteAsync(int id, MachineCrudContext context)
-        {
-            var existing = _store.FirstOrDefault(machine => machine.Id == id);
-            if (existing is not null)
-            {
-                _store.Remove(existing);
-            }
-
-            TrackDeletion(id, context);
-            return Task.CompletedTask;
         }
 
         private SignatureMetadataDto BuildMetadata(MachineCrudContext context, string? signature)
@@ -120,27 +107,15 @@ namespace YasGMP.Models
     public sealed partial class FakeIncidentCrudService
     {
         public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
-        public Exception? NextValidationException { get; set; }
-        public Func<Exception?>? ValidationExceptionFactory { get; set; }
 
         public async Task<CrudSaveResult> CreateAsync(Incident incident, IncidentCrudContext context)
         {
-            if (ResolveValidationException() is Exception validationException)
-            {
-                throw validationException;
-            }
-
             var id = await CreateCoreAsync(incident, context).ConfigureAwait(false);
             return new CrudSaveResult(id, BuildMetadata(context, incident.DigitalSignature));
         }
 
         public async Task<CrudSaveResult> UpdateAsync(Incident incident, IncidentCrudContext context)
         {
-            if (ResolveValidationException() is Exception validationException)
-            {
-                throw validationException;
-            }
-
             await UpdateCoreAsync(incident, context).ConfigureAwait(false);
             return new CrudSaveResult(incident.Id, BuildMetadata(context, incident.DigitalSignature));
         }
@@ -160,83 +135,20 @@ namespace YasGMP.Models
 
         private int? ResolveMetadataId(int? contextSignatureId)
             => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
-
-        private Exception? ResolveValidationException()
-        {
-            var fromFactory = ValidationExceptionFactory?.Invoke();
-            if (fromFactory is not null)
-            {
-                return fromFactory;
-            }
-
-            if (NextValidationException is null)
-            {
-                return null;
-            }
-
-            var captured = NextValidationException;
-            NextValidationException = null;
-            return captured;
-        }
-    }
-
-    public sealed partial class FakeDeviationCrudService
-    {
-        public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
-
-        public async Task<CrudSaveResult> CreateAsync(Deviation deviation, DeviationCrudContext context)
-        {
-            var id = await CreateCoreAsync(deviation, context).ConfigureAwait(false);
-            return new CrudSaveResult(id, BuildMetadata(context, deviation.DigitalSignature));
-        }
-
-        public async Task<CrudSaveResult> UpdateAsync(Deviation deviation, DeviationCrudContext context)
-        {
-            await UpdateCoreAsync(deviation, context).ConfigureAwait(false);
-            return new CrudSaveResult(deviation.Id, BuildMetadata(context, deviation.DigitalSignature));
-        }
-
-        private SignatureMetadataDto BuildMetadata(DeviationCrudContext context, string? signature)
-            => new()
-            {
-                Id = ResolveMetadataId(context.SignatureId),
-                Hash = string.IsNullOrWhiteSpace(signature) ? context.SignatureHash : signature,
-                Method = context.SignatureMethod,
-                Status = context.SignatureStatus,
-                Note = context.SignatureNote,
-                Session = context.SessionId,
-                Device = context.DeviceInfo,
-                IpAddress = context.Ip
-            };
-
-        private int? ResolveMetadataId(int? contextSignatureId)
-            => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 
     public sealed partial class FakeChangeControlCrudService
     {
         public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
-        public Exception? NextValidationException { get; set; }
-        public Func<Exception?>? ValidationExceptionFactory { get; set; }
 
         public async Task<CrudSaveResult> CreateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
-            if (ResolveValidationException() is Exception validationException)
-            {
-                throw validationException;
-            }
-
             var id = await CreateCoreAsync(changeControl, context).ConfigureAwait(false);
             return new CrudSaveResult(id, BuildMetadata(context, changeControl.DigitalSignature));
         }
 
         public async Task<CrudSaveResult> UpdateAsync(ChangeControl changeControl, ChangeControlCrudContext context)
         {
-            if (ResolveValidationException() is Exception validationException)
-            {
-                throw validationException;
-            }
-
             await UpdateCoreAsync(changeControl, context).ConfigureAwait(false);
             return new CrudSaveResult(changeControl.Id, BuildMetadata(context, changeControl.DigitalSignature));
         }
@@ -256,50 +168,20 @@ namespace YasGMP.Models
 
         private int? ResolveMetadataId(int? contextSignatureId)
             => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
-
-        private Exception? ResolveValidationException()
-        {
-            var fromFactory = ValidationExceptionFactory?.Invoke();
-            if (fromFactory is not null)
-            {
-                return fromFactory;
-            }
-
-            if (NextValidationException is null)
-            {
-                return null;
-            }
-
-            var captured = NextValidationException;
-            NextValidationException = null;
-            return captured;
-        }
     }
 
     public sealed partial class FakeCapaCrudService
     {
         public Func<int?, int?>? SignatureMetadataIdSource { get; set; }
-        public Exception? NextValidationException { get; set; }
-        public Func<Exception?>? ValidationExceptionFactory { get; set; }
 
         public async Task<CrudSaveResult> CreateAsync(CapaCase capa, CapaCrudContext context)
         {
-            if (ResolveValidationException() is Exception validationException)
-            {
-                throw validationException;
-            }
-
             var id = await CreateCoreAsync(capa, context).ConfigureAwait(false);
             return new CrudSaveResult(id, BuildMetadata(context, capa.DigitalSignature));
         }
 
         public async Task<CrudSaveResult> UpdateAsync(CapaCase capa, CapaCrudContext context)
         {
-            if (ResolveValidationException() is Exception validationException)
-            {
-                throw validationException;
-            }
-
             await UpdateCoreAsync(capa, context).ConfigureAwait(false);
             return new CrudSaveResult(capa.Id, BuildMetadata(context, capa.DigitalSignature));
         }
@@ -319,24 +201,6 @@ namespace YasGMP.Models
 
         private int? ResolveMetadataId(int? contextSignatureId)
             => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
-
-        private Exception? ResolveValidationException()
-        {
-            var fromFactory = ValidationExceptionFactory?.Invoke();
-            if (fromFactory is not null)
-            {
-                return fromFactory;
-            }
-
-            if (NextValidationException is null)
-            {
-                return null;
-            }
-
-            var captured = NextValidationException;
-            NextValidationException = null;
-            return captured;
-        }
     }
 
     public sealed partial class FakeValidationCrudService
@@ -570,3 +434,4 @@ namespace YasGMP.Models
             => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 }
+

@@ -1,14 +1,10 @@
 using System;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Interop;
 using Fluent;
-using YasGMP.Common;
-using YasGMP.Wpf.Automation;
+using Microsoft.Extensions.DependencyInjection;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
-using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf
 {
@@ -19,10 +15,6 @@ namespace YasGMP.Wpf
     {
         private readonly MainWindowViewModel _viewModel;
         private readonly ShellLayoutController _layoutController;
-        private HwndSource? _windowSource;
-        /// <summary>
-        /// Initializes a new instance of the MainWindow class.
-        /// </summary>
 
         public MainWindow(MainWindowViewModel viewModel, ShellLayoutController layoutController)
         {
@@ -31,23 +23,17 @@ namespace YasGMP.Wpf
             _layoutController = layoutController;
             DataContext = _viewModel;
 
+            _layoutController.RegisterAnchorableContent(ModulesPaneContent, InspectorPaneContent);
             _viewModel.WindowCommands.SaveLayoutRequested += OnSaveLayoutRequested;
             _viewModel.WindowCommands.ResetLayoutRequested += OnResetLayoutRequested;
-        }
-
-        /// <inheritdoc />
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-
-            var helper = new WindowInteropHelper(this);
-            _windowSource = HwndSource.FromHwnd(helper.Handle);
-            _windowSource?.AddHook(WndProc);
+            _viewModel.WindowCommands.OpenAiAssistantRequested += OnOpenAiAssistantRequested;
         }
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
             _layoutController.Attach(DockManager, _viewModel);
+            ModulesPaneContent.DataContext = _viewModel.ModulesPane;
+            InspectorPaneContent.DataContext = _viewModel.InspectorPane;
             _viewModel.InitializeWorkspace();
             _layoutController.CaptureDefaultLayout();
             await _layoutController.RestoreLayoutAsync(this);
@@ -56,18 +42,6 @@ namespace YasGMP.Wpf
         private async void OnClosing(object? sender, CancelEventArgs e)
         {
             await _layoutController.SaveLayoutAsync(this);
-        }
-
-        /// <inheritdoc />
-        protected override void OnClosed(EventArgs e)
-        {
-            if (_windowSource is not null)
-            {
-                _windowSource.RemoveHook(WndProc);
-                _windowSource = null;
-            }
-
-            base.OnClosed(e);
         }
 
         private async void OnSaveLayoutRequested(object? sender, EventArgs e)
@@ -82,86 +56,27 @@ namespace YasGMP.Wpf
             await _layoutController.ResetLayoutAsync(this);
         }
 
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        private void OnOpenAiAssistantRequested(object? sender, EventArgs e)
         {
-            if (msg == NativeMethods.WmCopyData)
+            try
             {
-                var data = Marshal.PtrToStructure<NativeMethods.CopyDataStruct>(lParam);
-
-                switch ((SmokeAutomationCommand)data.dwData)
+                var vm = (Application.Current as App)?.Host?.Services
+                    .GetService(typeof(YasGMP.Wpf.ViewModels.AiAssistantDialogViewModel)) as YasGMP.Wpf.ViewModels.AiAssistantDialogViewModel;
+                if (vm is null)
                 {
-                    case SmokeAutomationCommand.SetLanguage:
-                        HandleSetLanguage(data, ref handled);
-                        break;
-                    case SmokeAutomationCommand.ResetInspector:
-                        HandleResetInspector(ref handled);
-                        break;
-                }
-            }
-
-            return IntPtr.Zero;
-        }
-
-        private void HandleSetLanguage(NativeMethods.CopyDataStruct data, ref bool handled)
-        {
-            var payload = NativeMethods.ReadUnicodeString(data);
-            if (string.IsNullOrWhiteSpace(payload))
-            {
-                return;
-            }
-
-            Dispatcher.Invoke(() =>
-            {
-                var localization = ServiceLocator.GetService<ILocalizationService>();
-                localization?.SetLanguage(payload);
-            });
-
-            handled = true;
-        }
-
-        private void HandleResetInspector(ref bool handled)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                var inspector = _viewModel.InspectorPane;
-                inspector.Update(new InspectorContext(
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    Array.Empty<InspectorField>()));
-            });
-
-            handled = true;
-        }
-
-        private static class NativeMethods
-        {
-            public const int WmCopyData = 0x004A;
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct CopyDataStruct
-            {
-                public IntPtr dwData;
-                public int cbData;
-                public IntPtr lpData;
-            }
-
-            public static string? ReadUnicodeString(CopyDataStruct data)
-            {
-                if (data.cbData <= 0 || data.lpData == IntPtr.Zero)
-                {
-                    return null;
+                    _viewModel.StatusText = "AI assistant unavailable (service not resolved).";
+                    return;
                 }
 
-                var length = data.cbData / sizeof(char);
-                if (length <= 0)
+                var dialog = new YasGMP.Wpf.Dialogs.AiAssistantDialog(vm)
                 {
-                    return null;
-                }
-
-                var text = Marshal.PtrToStringUni(data.lpData, length);
-                return text?.TrimEnd('\0');
+                    Owner = this
+                };
+                dialog.Show();
+            }
+            catch (Exception ex)
+            {
+                _viewModel.StatusText = $"Failed to open AI assistant: {ex.Message}";
             }
         }
     }

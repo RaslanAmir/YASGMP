@@ -15,13 +15,13 @@
                   CanUserDeleteRows="False"
                   Margin="8">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="80" />
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2*" />
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
-                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="160" />
-                <DataGridTextColumn Header="OEE %" Binding="{Binding Oee, StringFormat=F1}" Width="90" />
-                <DataGridTextColumn Header="Last Maintenance" Binding="{Binding LastMaintenance}" Width="160" />
-                <DataGridTextColumn Header="Next Maintenance" Binding="{Binding NextMaintenance}" Width="160" />
+                <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Id}" Width="80" />
+                <DataGridTextColumn Header="{DynamicResource Column_Name}" Binding="{Binding Name}" Width="2*" />
+                <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="120" />
+                <DataGridTextColumn Header="{DynamicResource Column_Location}" Binding="{Binding Location}" Width="160" />
+                <DataGridTextColumn Header="{DynamicResource Column_Oee}" Binding="{Binding Oee, StringFormat=F1}" Width="90" />
+                <DataGridTextColumn Header="{DynamicResource Column_LastMaintenance}" Binding="{Binding LastMaintenance}" Width="160" />
+                <DataGridTextColumn Header="{DynamicResource Column_NextMaintenance}" Binding="{Binding NextMaintenance}" Width="160" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

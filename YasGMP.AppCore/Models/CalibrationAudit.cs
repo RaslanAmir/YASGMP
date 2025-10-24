@@ -100,3 +100,4 @@ namespace YasGMP.Models
         public virtual Calibration Calibration { get; set; } = null!;
     }
 }
+

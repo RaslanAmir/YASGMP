@@ -3,53 +3,32 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Bridges the External Servicer module in the WPF shell with the shared MAUI
-/// <see cref="YasGMP.Services.ExternalServicerService"/> and persistence stack.
+/// Adapter that allows the WPF shell to reuse the shared external servicer services while capturing
+/// the extra audit metadata required by desktop saves.
 /// </summary>
-/// <remarks>
-/// Module view models call into this adapter before delegating to <see cref="YasGMP.Services.ExternalServicerService"/> and
-/// <see cref="YasGMP.Services.DatabaseService"/>, mirroring the MAUI call flow while allowing the WPF shell to stamp
-/// additional metadata. Methods are awaited away from the UI thread; callers should marshal UI updates using
-/// <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> conveys identifiers, status text, and signature context that
-/// must be localized with <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before display.
-/// Audit details are persisted via <see cref="YasGMP.Services.DatabaseServiceSuppliersExtensions.LogSupplierAuditAsync(YasGMP.Services.DatabaseService,int,string,int,string?,string,string,string?,System.Threading.CancellationToken)"/>,
-/// ensuring the shared <see cref="YasGMP.Services.AuditService"/> surfaces the same events inside the MAUI experience.
-/// </remarks>
 public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudService
 {
     private readonly ExternalServicerService _externalServicerService;
     private readonly DatabaseService _databaseService;
-    /// <summary>
-    /// Initializes a new instance of the ExternalServicerCrudServiceAdapter class.
-    /// </summary>
 
     public ExternalServicerCrudServiceAdapter(ExternalServicerService externalServicerService, DatabaseService databaseService)
     {
         _externalServicerService = externalServicerService ?? throw new ArgumentNullException(nameof(externalServicerService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
     }
-    /// <summary>
-    /// Executes the get all async operation.
-    /// </summary>
 
     public async Task<IReadOnlyList<ExternalServicer>> GetAllAsync()
         => await _externalServicerService.GetAllAsync().ConfigureAwait(false);
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public async Task<ExternalServicer?> TryGetByIdAsync(int id)
         => await _externalServicerService.TryGetByIdAsync(id).ConfigureAwait(false);
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
     {
@@ -65,9 +44,6 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
         await StampAsync(servicer, context, "CREATE").ConfigureAwait(false);
         return new CrudSaveResult(servicer.Id, metadata);
     }
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(ExternalServicer servicer, ExternalServicerCrudContext context)
     {
@@ -83,17 +59,11 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
         await StampAsync(servicer, context, "UPDATE").ConfigureAwait(false);
         return new CrudSaveResult(servicer.Id, metadata);
     }
-    /// <summary>
-    /// Executes the delete async operation.
-    /// </summary>
 
     public async Task DeleteAsync(int id, ExternalServicerCrudContext context)
     {
         await _externalServicerService.DeleteAsync(id, context.UserId).ConfigureAwait(false);
     }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(ExternalServicer servicer)
     {
@@ -118,9 +88,6 @@ public sealed class ExternalServicerCrudServiceAdapter : IExternalServicerCrudSe
             throw new InvalidOperationException("Cooperation end cannot precede its start date.");
         }
     }
-    /// <summary>
-    /// Executes the normalize status operation.
-    /// </summary>
 
     public string NormalizeStatus(string? status) => ExternalServicerCrudExtensions.NormalizeStatusDefault(status);
 
@@ -193,3 +160,4 @@ WHERE id=@id";
             IpAddress = context.Ip
         };
 }
+

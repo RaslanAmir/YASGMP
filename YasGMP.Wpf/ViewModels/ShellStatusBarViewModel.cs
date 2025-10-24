@@ -1,209 +1,130 @@
 using System;
-using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using YasGMP.Services;
-using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels;
 
-/// <summary>Status bar view-model displayed along the bottom edge of the shell.</summary>
+/// <summary>
+/// Status bar view-model displayed along the bottom edge of the shell.
+/// Exposes environment diagnostics required for SAP B1 parity and Part 11 overlays.
+/// </summary>
 public partial class ShellStatusBarViewModel : ObservableObject
 {
-    private const string CompanyFallbackKey = "Shell.StatusBar.Company.Default";
-    private const string EnvironmentFallbackKey = "Shell.StatusBar.Environment.Default";
-    private const string ServerFallbackKey = "Shell.StatusBar.Server.Default";
-    private const string DatabaseFallbackKey = "Shell.StatusBar.Database.Default";
-    private const string UserFallbackKey = "Shell.StatusBar.User.Default";
-
-    private readonly TimeProvider _timeProvider;
     private readonly DispatcherTimer _utcTimer;
-    private readonly IConfiguration _configuration;
-    private readonly DatabaseOptions _databaseOptions;
-    private readonly IHostEnvironment _hostEnvironment;
-    private readonly IUserSession _userSession;
-    private readonly ILocalizationService _localization;
-    private readonly ISignalRClientService _realtime;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ShellStatusBarViewModel"/> class.
-    /// </summary>
-    public ShellStatusBarViewModel(
-        TimeProvider timeProvider,
-        IConfiguration configuration,
-        DatabaseOptions databaseOptions,
-        IHostEnvironment hostEnvironment,
-        IUserSession userSession,
-        ILocalizationService localization,
-        ISignalRClientService realtime)
+    /// <summary>Initializes a new instance of the <see cref="ShellStatusBarViewModel"/> class.</summary>
+    /// <param name="userSession">User session for current username.</param>
+    /// <param name="dbOptions">Database connection settings to display DB and host.</param>
+    /// <param name="hostEnvironment">Host environment for environment name.</param>
+    public ShellStatusBarViewModel(IUserSession userSession, DatabaseOptions dbOptions, IHostEnvironment hostEnvironment)
     {
-        _timeProvider = timeProvider;
-        _configuration = configuration;
-        _databaseOptions = databaseOptions;
-        _hostEnvironment = hostEnvironment;
-        _userSession = userSession;
-        _localization = localization;
-        _realtime = realtime ?? throw new ArgumentNullException(nameof(realtime));
+        _statusText = "Ready";
+        _activeModule = string.Empty;
 
-        _localization.LanguageChanged += OnLanguageChanged;
-        _realtime.ConnectionStateChanged += OnRealtimeStateChanged;
-
-        RefreshMetadata();
-        UtcTime = FormatUtc(_timeProvider.GetUtcNow());
-        StatusText = FormatRealtimeStatus(_realtime.ConnectionState, _realtime.LastError, _realtime.NextRetryUtc);
-
-        _utcTimer = new DispatcherTimer
+        UserName = string.IsNullOrWhiteSpace(userSession.Username) ? "wpf-shell" : userSession.Username;
+        (ServerName, DatabaseName) = TryParseServerAndDb(dbOptions.ConnectionString);
+        EnvironmentName = string.IsNullOrWhiteSpace(hostEnvironment.EnvironmentName) ? "Production" : hostEnvironment.EnvironmentName;
+        SmokeStatus = GetLastSmokeStatus();
+        if (IsStrictEnabled())
         {
-            Interval = TimeSpan.FromSeconds(1)
+            SmokeStatus = string.IsNullOrWhiteSpace(SmokeStatus) ? "Smoke: Strict" : $"{SmokeStatus} • Strict";
+        }
+        UtcNow = DateTime.UtcNow.ToString("u");
+
+        _utcTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _utcTimer.Tick += (_, _) =>
+        {
+            UtcNow = DateTime.UtcNow.ToString("u");
         };
-        _utcTimer.Tick += (_, _) => UtcTime = FormatUtc(_timeProvider.GetUtcNow());
         _utcTimer.Start();
     }
 
-    /// <summary>
-    /// Gets or sets the normalized company name resolved from <see cref="IConfiguration"/> or
-    /// session-provided metadata.
-    /// </summary>
     [ObservableProperty]
-    private string _company = string.Empty;
+    private string _statusText;
 
-    /// <summary>
-    /// Gets or sets the normalized database name extracted from the injected
-    /// <see cref="DatabaseOptions"/> instance.
-    /// </summary>
     [ObservableProperty]
-    private string _database = string.Empty;
+    private string _activeModule;
 
-    /// <summary>
-    /// Gets or sets the normalized interactive user label pulled from the active
-    /// <see cref="IUserSession"/>.
-    /// </summary>
+    /// <summary>Gets or sets the current UTC timestamp string.</summary>
     [ObservableProperty]
-    private string _user = string.Empty;
+    private string _utcNow = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the normalized environment descriptor derived from
-    /// <see cref="IHostEnvironment"/> and configuration values.
-    /// </summary>
+    /// <summary>Gets or sets the logical deployment environment (e.g., Development/Staging/Production).</summary>
     [ObservableProperty]
-    private string _environment = string.Empty;
+    private string _environmentName = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the normalized database server host name extracted from
-    /// <see cref="DatabaseOptions"/>.
-    /// </summary>
+    /// <summary>Gets or sets the connected database name.</summary>
     [ObservableProperty]
-    private string _server = string.Empty;
+    private string _databaseName = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the formatted UTC timestamp refreshed via the injected <see cref="TimeProvider"/>.
-    /// </summary>
+    /// <summary>Gets or sets the database server or host name.</summary>
     [ObservableProperty]
-    private string _utcTime = string.Empty;
+    private string _serverName = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the localized shell status message presented to the operator.
-    /// </summary>
+    /// <summary>Gets or sets the signed-in user label for the status bar.</summary>
     [ObservableProperty]
-    private string _statusText = string.Empty;
+    private string _userName = string.Empty;
 
-    /// <summary>Gets or sets the label for the module currently in focus.</summary>
+    /// <summary>Gets or sets the latest smoke harness status short message.</summary>
     [ObservableProperty]
-    private string _activeModule = string.Empty;
+    private string _smokeStatus = string.Empty;
 
-    /// <summary>
-    /// Refreshes shell metadata from the injected configuration, environment, and session services.
-    /// </summary>
-    public void RefreshMetadata()
+    private static (string server, string database) TryParseServerAndDb(string connectionString)
     {
-        Company = NormalizeCompany(ResolveCompany());
-        Environment = NormalizeEnvironment(ResolveEnvironment());
-        Server = NormalizeServer(_databaseOptions.Server);
-        Database = NormalizeDatabase(_databaseOptions.Database);
-        User = NormalizeUser(ResolveUser());
-    }
-
-    private static string FormatUtc(DateTimeOffset timestamp)
-        => timestamp.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'", CultureInfo.InvariantCulture);
-
-    private string ResolveCompany()
-    {
-        var company = _configuration["Shell:Company"]
-                       ?? _configuration["Company"]
-                       ?? _configuration["AppTitle"]
-                       ?? string.Empty;
-
-        return company;
-    }
-
-    private string ResolveEnvironment()
-    {
-        var environment = _configuration["Shell:Environment"]
-                          ?? _configuration["Environment"]
-                          ?? _hostEnvironment.EnvironmentName
-                          ?? string.Empty;
-
-        return environment;
-    }
-
-    private string ResolveUser()
-    {
-        if (!string.IsNullOrWhiteSpace(_userSession.FullName))
+        if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return _userSession.FullName!;
+            return ("localhost", "YASGMP");
         }
 
-        if (!string.IsNullOrWhiteSpace(_userSession.Username))
+        // Very small parser for common MySql connection string keys
+        string server = Extract(connectionString, "Server|Host|Data Source");
+        string database = Extract(connectionString, "Database|Initial Catalog");
+        if (string.IsNullOrWhiteSpace(server)) server = "localhost";
+        if (string.IsNullOrWhiteSpace(database)) database = "YASGMP";
+        return (server, database);
+
+        static string Extract(string cs, string keyPattern)
         {
-            return _userSession.Username!;
+            var rx = new Regex($@"(?i)(?:^|;)\s*(?:{keyPattern})\s*=\s*([^;]+)");
+            var m = rx.Match(cs);
+            return m.Success ? m.Groups[1].Value.Trim() : string.Empty;
         }
-
-        return string.Empty;
     }
 
-    private string NormalizeCompany(string? company)
-        => string.IsNullOrWhiteSpace(company) ? _localization.GetString(CompanyFallbackKey) : company;
-
-    private string NormalizeEnvironment(string? environment)
-        => string.IsNullOrWhiteSpace(environment) ? _localization.GetString(EnvironmentFallbackKey) : environment;
-
-    private string NormalizeServer(string? server)
-        => string.IsNullOrWhiteSpace(server) ? _localization.GetString(ServerFallbackKey) : server;
-
-    private string NormalizeDatabase(string? database)
-        => string.IsNullOrWhiteSpace(database) ? _localization.GetString(DatabaseFallbackKey) : database;
-
-    private string NormalizeUser(string? user)
-        => string.IsNullOrWhiteSpace(user) ? _localization.GetString(UserFallbackKey) : user;
-
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    private static string GetLastSmokeStatus()
     {
-        RefreshMetadata();
-        StatusText = FormatRealtimeStatus(_realtime.ConnectionState, _realtime.LastError, _realtime.NextRetryUtc);
-    }
-
-    private void OnRealtimeStateChanged(object? sender, ConnectionStateChangedEventArgs e)
-    {
-        StatusText = FormatRealtimeStatus(e.State, e.Message, e.NextRetryUtc);
-    }
-
-    private string FormatRealtimeStatus(RealtimeConnectionState state, string? message, DateTimeOffset? nextRetry)
-    {
-        return state switch
+        try
         {
-            RealtimeConnectionState.Connecting => _localization.GetString("Shell.Status.SignalR.Connecting"),
-            RealtimeConnectionState.Connected => _localization.GetString("Shell.Status.SignalR.Connected"),
-            RealtimeConnectionState.Retrying when nextRetry.HasValue =>
-                _localization.GetString(
-                    "Shell.Status.SignalR.Retrying",
-                    nextRetry.Value.ToString("HH:mm:ss 'UTC'", CultureInfo.InvariantCulture)),
-            RealtimeConnectionState.Retrying => _localization.GetString("Shell.Status.SignalR.RetryingShort"),
-            _ when !string.IsNullOrWhiteSpace(message) =>
-                _localization.GetString("Shell.Status.SignalR.DisconnectedWithError", message!),
-            _ => _localization.GetString("Shell.Status.SignalR.Disconnected")
-        };
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YasGMP", "logs");
+            if (!Directory.Exists(dir))
+            {
+                return "Smoke: idle";
+            }
+            var latest = Directory.EnumerateFiles(dir, "smoke-*.txt").Concat(Directory.EnumerateFiles(dir, "smoke_*.log")).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
+            if (string.IsNullOrEmpty(latest)) return "Smoke: idle";
+            return $"Smoke: {File.GetLastWriteTimeUtc(latest):u}";
+        }
+        catch
+        {
+            return "Smoke: n/a";
+        }
+    }
+
+    private static bool IsStrictEnabled()
+    {
+        try
+        {
+            var v = Environment.GetEnvironmentVariable("YASGMP_STRICT_SMOKE");
+            if (string.IsNullOrWhiteSpace(v)) return false;
+            v = v.Trim().ToLowerInvariant();
+            return v is "1" or "true" or "yes" or "y" or "on" or "enable" or "enabled";
+        }
+        catch { return false; }
     }
 }
+

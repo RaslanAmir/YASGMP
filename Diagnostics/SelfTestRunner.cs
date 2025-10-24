@@ -11,25 +11,16 @@ using YasGMP.Services;
 
 namespace YasGMP.Diagnostics
 {
-    /// <summary>
-    /// Represents the Self Test Runner.
-    /// </summary>
     public sealed class SelfTestRunner
     {
         private readonly DatabaseService _db;
         private readonly ITrace _trace;
         private readonly DiagnosticContext _ctx;
-        /// <summary>
-        /// Initializes a new instance of the SelfTestRunner class.
-        /// </summary>
 
         public SelfTestRunner(DatabaseService db, ITrace trace, DiagnosticContext ctx)
         {
             _db = db; _trace = trace; _ctx = ctx;
         }
-        /// <summary>
-        /// Executes the run all operation.
-        /// </summary>
 
         public async Task RunAll(CancellationToken token = default)
         {

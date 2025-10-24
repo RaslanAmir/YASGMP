@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -7,28 +8,31 @@ using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
 {
-    /// <summary>
-    /// Wraps the WPF <see cref="OpenFileDialog"/> so MAUI <see cref="IFilePicker"/> consumers keep
-    /// baseline file-open parity when running inside the desktop shell.
-    /// </summary>
-    /// <remarks>
-    /// <para><strong>Feature parity:</strong> mirrors MAUI's multi-select behaviour and file type
-    /// filtering, but does not implement folder picking or save dialogs yet. Consumers must branch or
-    /// provide alternative UX for those workflows.</para>
-    /// <para><strong>Known gaps:</strong> MIME types cannot be inferred from Windows filters and default
-    /// to <c>application/octet-stream</c>. Folder prompts, file writing, and drag/drop will require
-    /// future shell services.</para>
-    /// <para><strong>Localization:</strong> callers own dialog titles and filter captions; they should be
-    /// sourced from the shared localization dictionaries so WPF and MAUI stay aligned.</para>
-    /// </remarks>
+    /// <summary>WPF implementation of <see cref="IFilePicker"/> using <see cref="OpenFileDialog"/>.</summary>
     public sealed class WpfFilePicker : IFilePicker
     {
-        /// <summary>
-        /// Executes the pick files async operation.
-        /// </summary>
         public Task<IReadOnlyList<PickedFile>> PickFilesAsync(FilePickerRequest request, CancellationToken cancellationToken = default)
         {
             request ??= new FilePickerRequest();
+
+            var smoke = Environment.GetEnvironmentVariable("YASGMP_SMOKE");
+            var smokeAttach = Environment.GetEnvironmentVariable("YASGMP_SMOKE_ATTACH_FAKE");
+            if (!string.IsNullOrWhiteSpace(smoke) || string.Equals(smokeAttach, "1", StringComparison.OrdinalIgnoreCase))
+            {
+                // In smoke mode, avoid opening the OS dialog. Create a deterministic temp file and return it.
+                var smokeFiles = new List<PickedFile>();
+                var tempDir = Path.Combine(Path.GetTempPath(), "YasGMP", "Smoke");
+                Directory.CreateDirectory(tempDir);
+                var tempPath = Path.Combine(tempDir, $"attach-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}.txt");
+                File.WriteAllText(tempPath, "YasGMP Smoke Attachment\nGenerated: " + DateTime.UtcNow.ToString("O"));
+                var info = new FileInfo(tempPath);
+                smokeFiles.Add(new PickedFile(
+                    info.Name,
+                    "text/plain",
+                    () => Task.FromResult<Stream>(File.OpenRead(tempPath)),
+                    info.Exists ? info.Length : null));
+                return Task.FromResult<IReadOnlyList<PickedFile>>(smokeFiles);
+            }
 
             var dialog = new OpenFileDialog
             {
@@ -62,3 +66,4 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
+

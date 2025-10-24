@@ -125,30 +125,12 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ========================================================
-        /// <summary>
-        /// Gets or sets the load settings command.
-        /// </summary>
 
         public ICommand LoadSettingsCommand { get; }
-        /// <summary>
-        /// Gets or sets the save setting command.
-        /// </summary>
         public ICommand SaveSettingCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete setting command.
-        /// </summary>
         public ICommand DeleteSettingCommand { get; }
-        /// <summary>
-        /// Gets or sets the rollback setting command.
-        /// </summary>
         public ICommand RollbackSettingCommand { get; }
-        /// <summary>
-        /// Gets or sets the export settings command.
-        /// </summary>
         public ICommand ExportSettingsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

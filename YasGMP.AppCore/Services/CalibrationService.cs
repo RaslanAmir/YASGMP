@@ -261,9 +261,11 @@ namespace YasGMP.Services
         #region === DIGITAL SIGNATURES ===
 
         /// <summary>
-        /// Generates a digital signature for the calibration (Base64 SHA-256).
+        /// Applies signature metadata to the calibration or computes a fallback signature.
         /// </summary>
         /// <param name="cal">Calibration entity to sign.</param>
+        /// <param name="metadata">Optional signature metadata (hash/IP).</param>
+        /// <param name="legacyFactory">Fallback signature factory.</param>
         private static void ApplySignatureMetadata(Calibration cal, SignatureMetadataDto? metadata, Func<string> legacyFactory)
         {
             if (cal == null) throw new ArgumentNullException(nameof(cal));
@@ -372,5 +374,4 @@ namespace YasGMP.Services
         #endregion
     }
 }
-
 

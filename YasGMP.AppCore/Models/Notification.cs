@@ -250,21 +250,9 @@ namespace YasGMP.Models
         /// </summary>
         public static class Priorities
         {
-            /// <summary>
-            /// Represents the low value.
-            /// </summary>
             public const string Low = "low";
-            /// <summary>
-            /// Represents the normal value.
-            /// </summary>
             public const string Normal = "normal";
-            /// <summary>
-            /// Represents the high value.
-            /// </summary>
             public const string High = "high";
-            /// <summary>
-            /// Represents the critical value.
-            /// </summary>
             public const string Critical = "critical";
         }
 
@@ -273,21 +261,9 @@ namespace YasGMP.Models
         /// </summary>
         public static class Types
         {
-            /// <summary>
-            /// Represents the alert value.
-            /// </summary>
             public const string Alert = "alert";
-            /// <summary>
-            /// Represents the reminder value.
-            /// </summary>
             public const string Reminder = "reminder";
-            /// <summary>
-            /// Represents the escalation value.
-            /// </summary>
             public const string Escalation = "escalation";
-            /// <summary>
-            /// Represents the system value.
-            /// </summary>
             public const string System = "system";
         }
     }
@@ -377,3 +353,4 @@ namespace YasGMP.Models
         }
     }
 }
+

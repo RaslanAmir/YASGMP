@@ -10,9 +10,6 @@ namespace YasGMP.Views.Debug
     /// </summary>
     public partial class HealthPage : ContentPage
     {
-        /// <summary>
-        /// Initializes a new instance of the HealthPage class.
-        /// </summary>
         public HealthPage()
         {
             InitializeComponent();

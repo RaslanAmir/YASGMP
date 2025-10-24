@@ -45,3 +45,4 @@ namespace YasGMP.Services
         public string GenerateMachineCode() => GenerateMachineCode(null, null);
     }
 }
+

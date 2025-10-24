@@ -12,33 +12,21 @@ namespace YasGMP.Diagnostics
     {
         private readonly DiagnosticContext _ctx;
         private readonly ITrace _trace;
-        /// <summary>
-        /// Initializes a new instance of the EfSqlInterceptor class.
-        /// </summary>
 
         public EfSqlInterceptor(DiagnosticContext ctx, ITrace trace)
         {
             _ctx = ctx; _trace = trace;
         }
-        /// <summary>
-        /// Executes the reader executing async operation.
-        /// </summary>
 
         public override async ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
         {
             return await WrapAsync(command, eventData, () => base.ReaderExecutingAsync(command, eventData, result, cancellationToken));
         }
-        /// <summary>
-        /// Executes the non query executing async operation.
-        /// </summary>
 
         public override async ValueTask<InterceptionResult<int>> NonQueryExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
         {
             return await WrapAsync(command, eventData, () => base.NonQueryExecutingAsync(command, eventData, result, cancellationToken));
         }
-        /// <summary>
-        /// Executes the scalar executing async operation.
-        /// </summary>
 
         public override async ValueTask<InterceptionResult<object>> ScalarExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<object> result, CancellationToken cancellationToken = default)
         {

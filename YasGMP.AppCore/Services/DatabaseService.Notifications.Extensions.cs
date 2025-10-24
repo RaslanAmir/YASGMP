@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceNotificationsExtensions
     {
-        /// <summary>
-        /// Executes the get all notifications full async operation.
-        /// </summary>
         public static async Task<List<Notification>> GetAllNotificationsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             try
@@ -58,9 +55,6 @@ ORDER BY nq.created_at DESC, nq.id DESC;";
                 return list;
             }
         }
-        /// <summary>
-        /// Executes the send notification async operation.
-        /// </summary>
 
         public static async Task<int> SendNotificationAsync(this DatabaseService db, Notification n, CancellationToken token = default)
         {
@@ -112,9 +106,6 @@ ORDER BY nq.created_at DESC, nq.id DESC;";
         }
 
         // Overload matching ViewModel call order (notification, actorUserId, ip, deviceInfo, sessionId)
-        /// <summary>
-        /// Executes the send notification async operation.
-        /// </summary>
         public static async Task<int> SendNotificationAsync(this DatabaseService db, Notification notification, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             notification.SenderId = actorUserId;
@@ -123,42 +114,27 @@ ORDER BY nq.created_at DESC, nq.id DESC;";
             notification.SessionId = sessionId;
             return await db.SendNotificationAsync(notification, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the log notification audit async operation.
-        /// </summary>
 
         public static Task LogNotificationAuditAsync(this DatabaseService db, int notificationId, int userId, string action, string ip, string deviceInfo, string? sessionId, string? note, CancellationToken token = default)
             => db.LogSystemEventAsync(userId, $"NOTIF_{action}", "notifications", "Notifications", notificationId == 0 ? null : notificationId, note, ip, "audit", deviceInfo, sessionId, token: token);
-        /// <summary>
-        /// Executes the acknowledge notification async operation.
-        /// </summary>
 
         public static async Task AcknowledgeNotificationAsync(this DatabaseService db, int notificationId, int actorUserId, string ip, string deviceInfo, string? sessionId, string? note = null, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE notifications /* ANALYZER_IGNORE: legacy table */ SET status='acknowledged', acked_by=@u, acked_at=NOW() WHERE id=@id", new[] { new MySqlParameter("@u", actorUserId), new MySqlParameter("@id", notificationId) }, token).ConfigureAwait(false); } catch { }
             await db.LogNotificationAuditAsync(notificationId, actorUserId, "ACK", ip, deviceInfo, sessionId, note, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the mute notification async operation.
-        /// </summary>
 
         public static async Task MuteNotificationAsync(this DatabaseService db, int notificationId, DateTime mutedUntilUtc, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("UPDATE notifications /* ANALYZER_IGNORE: legacy table */ SET status='muted', muted_until=@until WHERE id=@id", new[] { new MySqlParameter("@until", mutedUntilUtc), new MySqlParameter("@id", notificationId) }, token).ConfigureAwait(false); } catch { }
             await db.LogNotificationAuditAsync(notificationId, actorUserId, "MUTE", ip, deviceInfo, sessionId, $"until={mutedUntilUtc:u}", token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the delete notification async operation.
-        /// </summary>
 
         public static async Task DeleteNotificationAsync(this DatabaseService db, int notificationId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("DELETE FROM notifications /* ANALYZER_IGNORE: legacy table */ WHERE id=@id", new[] { new MySqlParameter("@id", notificationId) }, token).ConfigureAwait(false); } catch { }
             await db.LogNotificationAuditAsync(notificationId, actorUserId, "DELETE", ip, deviceInfo, sessionId, null, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the export notifications async operation.
-        /// </summary>
 
         public static async Task<int> ExportNotificationsAsync(this DatabaseService db, List<Notification> rows, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
         {
@@ -196,3 +172,4 @@ ORDER BY nq.created_at DESC, nq.id DESC;";
         }
     }
 }
+

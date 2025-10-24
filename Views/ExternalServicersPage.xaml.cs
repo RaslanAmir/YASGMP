@@ -55,12 +55,12 @@ namespace YasGMP
         {
             InitializeComponent();
 
-            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
+            this._dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
 
             BindingContext = this;
 
-            _ = LoadLookupsAsync();
-            _ = LoadExternalServicersAsync();
+            _ = this.LoadLookupsAsync();
+            _ = this.LoadExternalServicersAsync();
         }
 
         /// <summary>Parameterless ctor za Shell/XAML (ServiceLocator fallback).</summary>
@@ -69,8 +69,6 @@ namespace YasGMP
         {
         }
 
-
-        #region === Reflection helpers (schema tolerant) ===
 
         private static bool TrySet(object obj, string propName, object? value)
         {
@@ -145,19 +143,15 @@ namespace YasGMP
             return 0;
         }
 
-        #endregion
-
-        #region === Data Loading ===
-
         private async Task LoadLookupsAsync()
         {
             try
             {
-                _users = await _dbService.GetAllUsersAsync().ConfigureAwait(false) ?? new List<User>();
+                this._users = await this._dbService.GetAllUsersAsync().ConfigureAwait(false) ?? new List<User>();
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Neuspješno učitavanje korisnika: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Neuspješno učitavanje korisnika: {ex.Message}", "OK");
             }
         }
 
@@ -165,24 +159,20 @@ namespace YasGMP
         {
             try
             {
-                var list = await _dbService.GetAllExternalServicersAsync().ConfigureAwait(false) ?? new List<ExternalServicer>();
+                var list = await this._dbService.GetAllExternalServicersAsync().ConfigureAwait(false) ?? new List<ExternalServicer>();
 
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    ExternalServicers.Clear();
+                    this.ExternalServicers.Clear();
                     foreach (var s in list)
-                        ExternalServicers.Add(s);
+                        this.ExternalServicers.Add(s);
                 });
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Neuspješno učitavanje servisera: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Neuspješno učitavanje servisera: {ex.Message}", "OK");
             }
         }
-
-        #endregion
-
-        #region === CRUD Handlers ===
 
         private async void OnAddServicerClicked(object? sender, EventArgs e)
         {
@@ -203,12 +193,12 @@ namespace YasGMP
                 var ok = await ShowServicerFormAsync(ext, "Novi vanjski serviser/lab");
                 if (!ok) return;
 
-                await _dbService.InsertOrUpdateExternalServicerAsync(ext, update: false).ConfigureAwait(false);
-                await LoadExternalServicersAsync().ConfigureAwait(false);
+                await this._dbService.InsertOrUpdateExternalServicerAsync(ext, update: false).ConfigureAwait(false);
+                await this.LoadExternalServicersAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Spremanje nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Spremanje nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -216,11 +206,11 @@ namespace YasGMP
         {
             try
             {
-                ExternalServicer? selected = ServicersListViewControl?.SelectedItem as ExternalServicer;
+                ExternalServicer? selected = this.ServicersListViewControl?.SelectedItem as ExternalServicer;
 
                 if (selected is null)
                 {
-                    await Services.SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite servisera za uređivanje.", "OK");
+                    await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite servisera za uređivanje.", "OK");
                     return;
                 }
 
@@ -232,12 +222,12 @@ namespace YasGMP
                 TrySet(selected, "LastModified", DateTime.UtcNow);
                 TrySet(selected, "LastModifiedById", userId);
 
-                await _dbService.InsertOrUpdateExternalServicerAsync(selected, update: true).ConfigureAwait(false);
-                await LoadExternalServicersAsync().ConfigureAwait(false);
+                await this._dbService.InsertOrUpdateExternalServicerAsync(selected, update: true).ConfigureAwait(false);
+                await this.LoadExternalServicersAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Uređivanje nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Uređivanje nije uspjelo: {ex.Message}", "OK");
             }
         }
 
@@ -245,31 +235,27 @@ namespace YasGMP
         {
             try
             {
-                ExternalServicer? selected = ServicersListViewControl?.SelectedItem as ExternalServicer;
+                ExternalServicer? selected = this.ServicersListViewControl?.SelectedItem as ExternalServicer;
 
                 if (selected is null)
                 {
-                    await Services.SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite servisera za brisanje.", "OK");
+                    await SafeNavigator.ShowAlertAsync("Obavijest", "Odaberite servisera za brisanje.", "OK");
                     return;
                 }
 
                 var displayName = GetString(selected, "Name", "CompanyName");
-                bool conf = await Services.SafeNavigator.ConfirmAsync("Potvrda", $"Obriši servisera: {displayName}?", "Da", "Ne");
+                bool conf = await SafeNavigator.ConfirmAsync("Potvrda", $"Obriši servisera: {displayName}?", "Da", "Ne");
                 if (!conf) return;
 
                 var id = GetInt(selected, "Id");
-                await _dbService.DeleteExternalServicerAsync(id).ConfigureAwait(false);
-                await LoadExternalServicersAsync().ConfigureAwait(false);
+                await this._dbService.DeleteExternalServicerAsync(id).ConfigureAwait(false);
+                await this.LoadExternalServicersAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await Services.SafeNavigator.ShowAlertAsync("Greška", $"Brisanje nije uspjelo: {ex.Message}", "OK");
+                await SafeNavigator.ShowAlertAsync("Greška", $"Brisanje nije uspjelo: {ex.Message}", "OK");
             }
         }
-
-        #endregion
-
-        #region === Form ===
 
         private async Task<bool> ShowServicerFormAsync(ExternalServicer ext, string title)
         {
@@ -338,7 +324,5 @@ namespace YasGMP
 
             return true;
         }
-
-        #endregion
     }
 }

@@ -1,3 +1,4 @@
+﻿using AppFilePicker = YasGMP.Services.IFilePicker;
 // MauiProgram.cs
 using CommunityToolkit.Maui;                       // builder.UseMauiCommunityToolkit()
 using Microsoft.EntityFrameworkCore;
@@ -104,10 +105,26 @@ namespace YasGMP
 
             builder.Services.AddSingleton(encryptionOptions);
 
+            // AI assistant options + services (shared across WPF/MAUI)
+            var aiOptions = new YasGMP.AppCore.Services.Ai.OpenAiOptions
+            {
+                ApiKey = diagConfig["Ai:OpenAI:ApiKey"],
+                Organization = diagConfig["Ai:OpenAI:Organization"],
+                Project = diagConfig["Ai:OpenAI:Project"],
+                BaseUrl = diagConfig["Ai:OpenAI:BaseUrl"],
+                ChatModel = diagConfig["Ai:OpenAI:Model"] ?? "gpt-4o-mini",
+                EmbeddingModel = diagConfig["Ai:OpenAI:EmbeddingModel"] ?? "text-embedding-3-small",
+                ModerationModel = diagConfig["Ai:OpenAI:ModerationModel"] ?? "omni-moderation-latest"
+            };
+            aiOptions.ApplyEnvironmentOverrides();
+            builder.Services.AddSingleton(aiOptions);
+            builder.Services.AddHttpClient();
+            builder.Services.AddSingleton<YasGMP.AppCore.Services.Ai.IAiAssistantService, YasGMP.AppCore.Services.Ai.OpenAiAssistantService>();
+
             // Optional: register Syncfusion license if provided (prevents trial watermark)
             try
             {
-                // Priority: env var → appsettings.json (AppData/bin) → none
+                // Priority: env var â†’ appsettings.json (AppData/bin) â†’ none
                 var sfKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")
                            ?? Environment.GetEnvironmentVariable("YASGMP_SYNCFUSION_LICENSE")
                            ?? diagConfig["Syncfusion:LicenseKey"];
@@ -132,7 +149,7 @@ namespace YasGMP
 #endif
             }
 
-            // Resolve connection string (env → bin\AppSettings.json → AppData\AppSettings.json → fallback)
+            // Resolve connection string (env â†’ bin\AppSettings.json â†’ AppData\AppSettings.json â†’ fallback)
             string mysqlConnStr = ResolveMySqlConnString();
 
             builder.Services.AddYasGmpCoreServices(core =>
@@ -185,7 +202,7 @@ namespace YasGMP
                 services.AddSingleton<IPlatformService, MauiPlatformService>();
                 services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
                 services.AddSingleton<IDialogService, MauiDialogService>();
-                services.AddSingleton<IFilePicker, MauiFilePicker>();
+                services.AddSingleton<AppFilePicker, MauiFilePicker>();
                 services.AddSingleton<IUserSession, MauiUserSession>();
                 services.AddSingleton<AuditService>();
                 services.AddSingleton<AuthService>();
@@ -241,7 +258,7 @@ namespace YasGMP
                 services.AddSingleton<YasGMP.Diagnostics.SelfTestRunner>();
             });
 
-            // Global exception hooks → JSONL framework log (DEBUG)
+            // Global exception hooks â†’ JSONL framework log (DEBUG)
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 var ex = e.ExceptionObject as Exception;
@@ -374,7 +391,7 @@ namespace YasGMP
 
     internal static class AppConfigurationHelper
     {
-        internal static Microsoft.Extensions.Configuration.IConfiguration LoadMerged()
+        public static Microsoft.Extensions.Configuration.IConfiguration LoadMerged()
         {
             var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
             try
@@ -395,7 +412,7 @@ namespace YasGMP
 
     internal static class DiagnosticsSinksFactory
     {
-        internal static System.Collections.Generic.IEnumerable<YasGMP.Diagnostics.ILogSink> CreateSinks(
+        public static System.Collections.Generic.IEnumerable<YasGMP.Diagnostics.ILogSink> CreateSinks(
             Microsoft.Extensions.Configuration.IConfiguration cfg,
             YasGMP.Diagnostics.DiagnosticContext ctx)
         {
@@ -422,16 +439,8 @@ namespace YasGMP
     {
         private readonly object _sync = new();
 
-        /// <summary>
-        /// Creates a logger that mirrors framework diagnostics to AppData JSON logs.
-        /// </summary>
-        /// <param name="categoryName">The logging category requested by the framework.</param>
-        /// <returns>A logger instance that writes to the AppData log directory.</returns>
         public ILogger CreateLogger(string categoryName) => new AppDataFileLogger(categoryName, _sync);
 
-        /// <summary>
-        /// Releases resources held by the provider. No-op because only static state is used.
-        /// </summary>
         public void Dispose() { }
 
         internal static void WriteFrameworkLine(string category, string level, string message)
@@ -463,18 +472,12 @@ namespace YasGMP
     {
         private sealed class NullScope : IDisposable
         {
-            /// <summary>Singleton scope instance used when logging does not require additional state.</summary>
             public static readonly NullScope Instance = new();
-
-            /// <summary>Disposes the scope instance (no-op).</summary>
             public void Dispose() { }
         }
 
         private readonly string _category;
         private readonly object _sync;
-        /// <summary>
-        /// Initializes a new instance of the AppDataFileLogger class.
-        /// </summary>
 
         public AppDataFileLogger(string category, object sync)
         {
@@ -482,11 +485,6 @@ namespace YasGMP
             _sync = sync;
         }
 
-        /// <summary>
-        /// Indicates whether logging is enabled for the specified <paramref name="logLevel"/>. Always true for AppData logging.
-        /// </summary>
-        /// <param name="logLevel">The level being queried.</param>
-        /// <returns>Always <see langword="true"/>.</returns>
         public bool IsEnabled(LogLevel logLevel) => true;
 
         IDisposable ILogger.BeginScope<TState>(TState state) => NullScope.Instance;

@@ -1,23 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared contract that lets the WPF shell and MAUI client drive CAPA workflows through
-/// <see cref="YasGMP.Services.CAPAService"/> while reusing the same audit pipeline.
+/// Adapter abstraction over <see cref="YasGMP.Services.CAPAService"/> so the WPF shell
+/// can execute CAPA CRUD operations without binding directly to infrastructure types.
 /// </summary>
-/// <remarks>
-/// Module view models call these members from the UI thread, adapters forward the work to the shared
-/// <see cref="YasGMP.Services.CAPAService"/> and <see cref="YasGMP.Services.AuditService"/> so persistence and auditing stay unified.
-/// Awaited results should be marshalled back via <see cref="WpfUiDispatcher"/>, and the <see cref="CrudSaveResult"/> must include
-/// identifiers, signature context, and localization-ready status/priority text so MAUI/WPF surfaces can translate them using
-/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before displaying to users.
-/// </remarks>
 public interface ICapaCrudService
 {
     Task<IReadOnlyList<CapaCase>> GetAllAsync();
@@ -42,15 +34,8 @@ public interface ICapaCrudService
 }
 
 /// <summary>
-/// Captures authenticated metadata that must flow alongside CAPA saves. Each value feeds
-/// <see cref="CrudSaveResult.SignatureMetadata"/> through <see cref="SignatureMetadataDto"/> to preserve the accepted signature
-/// manifest for compliance pipelines.
+/// Captures authenticated metadata that must flow alongside CAPA saves.
 /// </summary>
-/// <remarks>
-/// Adapters project this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside CAPA records, and MAUI experiences should propagate the same
-/// payload when presenting or synchronizing cases so shared audit history remains aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated operator identifier.</param>
 /// <param name="Ip">Source IP recorded for audit.</param>
 /// <param name="DeviceInfo">Client device fingerprint.</param>
@@ -73,9 +58,6 @@ public readonly record struct CapaCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static CapaCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -88,9 +70,6 @@ public readonly record struct CapaCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static CapaCrudContext Create(
         int userId,
@@ -119,3 +98,4 @@ public readonly record struct CapaCrudContext(
         };
     }
 }
+

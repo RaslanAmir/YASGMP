@@ -373,3 +373,4 @@ public sealed class TestElectronicSignatureDialogService : IElectronicSignatureD
 
     private readonly record struct CaptureOutcome(ElectronicSignatureDialogResult? Result, Exception? Exception);
 }
+

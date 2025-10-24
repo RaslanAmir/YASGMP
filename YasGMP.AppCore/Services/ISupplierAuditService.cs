@@ -12,3 +12,4 @@ namespace YasGMP.Services.Interfaces
         // Add other relevant methods as needed
     }
 }
+

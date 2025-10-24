@@ -9,26 +9,17 @@ using System.Threading.Tasks;
 
 namespace YasGMP.Diagnostics
 {
-    /// <summary>
-    /// Represents the i log writer value.
-    /// </summary>
     public interface ILogWriter
     {
         void Enqueue(DiagnosticEvent evt);
         void Flush(TimeSpan? timeout = null);
     }
-    /// <summary>
-    /// Represents the i log sink value.
-    /// </summary>
 
     public interface ILogSink
     {
         string Name { get; }
         void WriteBatch(IReadOnlyList<DiagnosticEvent> batch);
     }
-    /// <summary>
-    /// Represents the Log Writer.
-    /// </summary>
 
     public sealed class LogWriter : ILogWriter, IDisposable
     {
@@ -40,9 +31,6 @@ namespace YasGMP.Diagnostics
         private readonly CancellationTokenSource _cts = new();
         private readonly Task _drainLoop;
         private int _count;
-        /// <summary>
-        /// Initializes a new instance of the LogWriter class.
-        /// </summary>
 
         public LogWriter(int capacity, int drainBatch, int drainIntervalMs, IEnumerable<ILogSink> sinks)
         {
@@ -52,9 +40,6 @@ namespace YasGMP.Diagnostics
             _sinks.AddRange(sinks ?? Enumerable.Empty<ILogSink>());
             _drainLoop = Task.Run(DrainLoopAsync);
         }
-        /// <summary>
-        /// Executes the enqueue operation.
-        /// </summary>
 
         public void Enqueue(DiagnosticEvent evt)
         {
@@ -71,9 +56,6 @@ namespace YasGMP.Diagnostics
             _queue.Enqueue(evt);
             Interlocked.Increment(ref _count);
         }
-        /// <summary>
-        /// Executes the flush operation.
-        /// </summary>
 
         public void Flush(TimeSpan? timeout = null)
         {
@@ -121,9 +103,6 @@ namespace YasGMP.Diagnostics
                 catch { /* never throw from sinks */ }
             }
         }
-        /// <summary>
-        /// Executes the dispose operation.
-        /// </summary>
 
         public void Dispose()
         {
@@ -132,115 +111,34 @@ namespace YasGMP.Diagnostics
             DrainOnce(forceAll: true);
         }
     }
-    /// <summary>
-    /// Represents the Diagnostic Event.
-    /// </summary>
 
     public sealed class DiagnosticEvent
     {
-        /// <summary>
-        /// Gets or sets the ts utc.
-        /// </summary>
         public DateTimeOffset TsUtc { get; set; }
-        /// <summary>
-        /// Gets or sets the level.
-        /// </summary>
         public DiagLevel Level { get; set; }
-        /// <summary>
-        /// Gets or sets the category.
-        /// </summary>
         public string Category { get; set; } = string.Empty;
-        /// <summary>
-        /// Gets or sets the event.
-        /// </summary>
         public string Event { get; set; } = string.Empty;
-        /// <summary>
-        /// Gets or sets the message.
-        /// </summary>
         public string Message { get; set; } = string.Empty;
-        /// <summary>
-        /// Gets or sets the correlation id.
-        /// </summary>
         public string? CorrelationId { get; set; }
-        /// <summary>
-        /// Gets or sets the span id.
-        /// </summary>
         public string? SpanId { get; set; }
-        /// <summary>
-        /// Gets or sets the parent span id.
-        /// </summary>
         public string? ParentSpanId { get; set; }
-        /// <summary>
-        /// Gets or sets the user id.
-        /// </summary>
         public int? UserId { get; set; }
-        /// <summary>
-        /// Gets or sets the username.
-        /// </summary>
         public string? Username { get; set; }
-        /// <summary>
-        /// Gets or sets the role ids.
-        /// </summary>
         public string? RoleIds { get; set; }
-        /// <summary>
-        /// Gets or sets the ip.
-        /// </summary>
         public string? Ip { get; set; }
-        /// <summary>
-        /// Gets or sets the session id.
-        /// </summary>
         public string? SessionId { get; set; }
-        /// <summary>
-        /// Gets or sets the device.
-        /// </summary>
         public string? Device { get; set; }
-        /// <summary>
-        /// Gets or sets the os ver.
-        /// </summary>
         public string? OsVer { get; set; }
-        /// <summary>
-        /// Gets or sets the app ver.
-        /// </summary>
         public string? AppVer { get; set; }
-        /// <summary>
-        /// Gets or sets the git commit.
-        /// </summary>
         public string? GitCommit { get; set; }
-        /// <summary>
-        /// Gets or sets the db schema hash.
-        /// </summary>
         public string? DbSchemaHash { get; set; }
-        /// <summary>
-        /// Gets or sets the exception type.
-        /// </summary>
         public string? ExceptionType { get; set; }
-        /// <summary>
-        /// Gets or sets the exception message.
-        /// </summary>
         public string? ExceptionMessage { get; set; }
-        /// <summary>
-        /// Gets or sets the stack.
-        /// </summary>
         public string? Stack { get; set; }
-        /// <summary>
-        /// Gets or sets the object.
-        /// </summary>
         public Dictionary<string, object?>? Data { get; set; }
-        /// <summary>
-        /// Gets or sets the sig reason.
-        /// </summary>
         public string? SigReason { get; set; }
-        /// <summary>
-        /// Gets or sets the sig doc ref.
-        /// </summary>
         public string? SigDocRef { get; set; }
-        /// <summary>
-        /// Gets or sets the sig hash.
-        /// </summary>
         public string? SigHash { get; set; }
-        /// <summary>
-        /// Executes the to json operation.
-        /// </summary>
 
         public string ToJson()
         {

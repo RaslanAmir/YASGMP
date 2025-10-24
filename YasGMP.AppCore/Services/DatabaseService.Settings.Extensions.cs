@@ -11,19 +11,161 @@ using YasGMP.Models;
 
 namespace YasGMP.Services
 {
+    public sealed class SettingsFetchResult
+    {
+        public required List<Setting> Items { get; init; }
+        public required string Source { get; init; }
+        public required string OrderBy { get; init; }
+    }
+
     /// <summary>
     /// DatabaseService extensions that read and update system settings.
     /// </summary>
     public static class DatabaseServiceSettingsExtensions
     {
         /// <summary>
-        /// Executes the get all settings full async operation.
+        /// Returns settings with provenance details (source table and order by expression).
+        /// Preserves legacy fallbacks for older schemas.
         /// </summary>
+        public static async Task<SettingsFetchResult> GetAllSettingsWithProvenanceAsync(this DatabaseService db, CancellationToken token = default)
+        {
+            try
+            {
+                var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* ANALYZER_IGNORE: legacy table */ ORDER BY `key`", null, token).ConfigureAwait(false);
+                return new SettingsFetchResult
+                {
+                    Items = ToSettingsList(dt),
+                    Source = "settings",
+                    OrderBy = "`key`"
+                };
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                // Unknown column 'key' – older schema; order by id
+                var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* LEGACY ORDER */ ORDER BY id", null, token).ConfigureAwait(false);
+                return new SettingsFetchResult
+                {
+                    Items = ToSettingsList(dt),
+                    Source = "settings",
+                    OrderBy = "id"
+                };
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                // Table missing – map from system_parameters
+                const string sql = @"
+SELECT id,
+       param_name AS `key`,
+       param_value AS `value`,
+       NULL AS default_value,
+       NULL AS value_type,
+       NULL AS min_value,
+       NULL AS max_value,
+       note AS description,
+       'system' AS category,
+       NULL AS subcategory,
+       0 AS is_sensitive,
+       1 AS is_global,
+       NULL AS user_id,
+       NULL AS role_id,
+       NULL AS approved_by_id,
+       NULL AS approved_at,
+       digital_signature,
+       '' AS status,
+       updated_at,
+       NULL AS updated_by_id,
+       NULL AS expiry_date
+FROM system_parameters
+ORDER BY param_name;";
+                var dt = await db.ExecuteSelectAsync(sql, null, token).ConfigureAwait(false);
+                return new SettingsFetchResult
+                {
+                    Items = ToSettingsList(dt),
+                    Source = "system_parameters",
+                    OrderBy = "param_name"
+                };
+            }
+        }
+
+        private static List<Setting> ToSettingsList(System.Data.DataTable dt)
+        {
+            var list = new List<Setting>(dt.Rows.Count);
+            foreach (System.Data.DataRow r in dt.Rows)
+            {
+                string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+                int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
+                DateTime? DN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
+
+                list.Add(new Setting
+                {
+                    Id = r.Table.Columns.Contains("id") && r["id"] != System.DBNull.Value ? Convert.ToInt32(r["id"]) : 0,
+                    Key = S("key"),
+                    Value = S("value"),
+                    DefaultValue = S("default_value"),
+                    ValueType = S("value_type"),
+                    MinValue = S("min_value"),
+                    MaxValue = S("max_value"),
+                    Description = S("description"),
+                    Category = S("category"),
+                    Subcategory = S("subcategory"),
+                    IsSensitive = r.Table.Columns.Contains("is_sensitive") && r["is_sensitive"] != System.DBNull.Value && Convert.ToBoolean(r["is_sensitive"]),
+                    IsGlobal = !(r.Table.Columns.Contains("is_global") && r["is_global"] != System.DBNull.Value) || Convert.ToBoolean(r["is_global"]),
+                    UserId = IN("user_id"),
+                    RoleId = IN("role_id"),
+                    ApprovedById = IN("approved_by_id"),
+                    ApprovedAt = DN("approved_at"),
+                    DigitalSignature = S("digital_signature"),
+                    Status = S("status"),
+                    UpdatedAt = DN("updated_at") ?? DateTime.UtcNow,
+                    UpdatedById = IN("updated_by_id"),
+                    ExpiryDate = DN("expiry_date")
+                });
+            }
+            return list;
+        }
         public static async Task<List<Setting>> GetAllSettingsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             try
             {
                 var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* ANALYZER_IGNORE: legacy table */ ORDER BY `key`", null, token).ConfigureAwait(false);
+                var list = new List<Setting>(dt.Rows.Count);
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+                    int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
+                    DateTime? DN(string c) => r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
+
+                    list.Add(new Setting
+                    {
+                        Id = Convert.ToInt32(r["id"]),
+                        Key = S("key"),
+                        Value = S("value"),
+                        DefaultValue = S("default_value"),
+                        ValueType = S("value_type"),
+                        MinValue = S("min_value"),
+                        MaxValue = S("max_value"),
+                        Description = S("description"),
+                        Category = S("category"),
+                        Subcategory = S("subcategory"),
+                        IsSensitive = r.Table.Columns.Contains("is_sensitive") && r["is_sensitive"] != System.DBNull.Value && Convert.ToBoolean(r["is_sensitive"]),
+                        IsGlobal = !(r.Table.Columns.Contains("is_global") && r["is_global"] != System.DBNull.Value) || Convert.ToBoolean(r["is_global"]),
+                        UserId = IN("user_id"),
+                        RoleId = IN("role_id"),
+                        ApprovedById = IN("approved_by_id"),
+                        ApprovedAt = DN("approved_at"),
+                        DigitalSignature = S("digital_signature"),
+                        Status = S("status"),
+                        UpdatedAt = DN("updated_at") ?? DateTime.UtcNow,
+                        UpdatedById = IN("updated_by_id"),
+                        ExpiryDate = DN("expiry_date")
+                    });
+                }
+                return list;
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                // Unknown column 'key' – fall back to ordering by id for older schemas
+                var dt = await db.ExecuteSelectAsync("SELECT * FROM settings /* LEGACY ORDER */ ORDER BY id", null, token).ConfigureAwait(false);
                 var list = new List<Setting>(dt.Rows.Count);
                 foreach (System.Data.DataRow r in dt.Rows)
                 {
@@ -120,9 +262,6 @@ ORDER BY param_name;";
                 return list;
             }
         }
-        /// <summary>
-        /// Executes the upsert setting async operation.
-        /// </summary>
 
         public static async Task<int> UpsertSettingAsync(this DatabaseService db, Setting setting, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -189,31 +328,19 @@ ORDER BY param_name;";
         }
 
         // Overload with explicit 'update' flag for ViewModel named-arg compatibility
-        /// <summary>
-        /// Executes the upsert setting async operation.
-        /// </summary>
         public static Task<int> UpsertSettingAsync(this DatabaseService db, Setting setting, bool update, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.UpsertSettingAsync(setting, actorUserId, ip, device, sessionId, token);
-        /// <summary>
-        /// Executes the delete setting async operation.
-        /// </summary>
         public static async Task DeleteSettingAsync(this DatabaseService db, int settingId, int actorUserId, string ip, string device, CancellationToken token = default)
         {
             try { await db.ExecuteNonQueryAsync("DELETE FROM settings /* ANALYZER_IGNORE: legacy table */ WHERE id=@id", new[] { new MySqlParameter("@id", settingId) }, token).ConfigureAwait(false); }
             catch (MySqlException ex) when (ex.Number == 1146) { /* no-op for system_parameters; not keyed by id */ }
             await db.LogSystemEventAsync(actorUserId, "SETTING_DELETE", "settings", "SettingsModule", settingId, null, ip, "audit", device, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the rollback setting async operation.
-        /// </summary>
 
         public static Task RollbackSettingAsync(this DatabaseService db, int settingId, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SETTING_ROLLBACK", "settings", "SettingsModule", settingId, null, ip, "audit", device, sessionId, token: token);
 
         // Name-keyed mapping helpers for system_parameters compatibility
-        /// <summary>
-        /// Executes the upsert setting by key async operation.
-        /// </summary>
         public static async Task<int> UpsertSettingByKeyAsync(this DatabaseService db, string key, string value, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("Key required", nameof(key));
@@ -238,9 +365,6 @@ ORDER BY param_name;";
                 return 0;
             }
         }
-        /// <summary>
-        /// Executes the delete setting by key async operation.
-        /// </summary>
 
         public static async Task DeleteSettingByKeyAsync(this DatabaseService db, string key, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -255,9 +379,6 @@ ORDER BY param_name;";
             }
             await db.LogSystemEventAsync(actorUserId, "SETTING_DELETE", "settings", "SettingsModule", null, key, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the rollback setting by key async operation.
-        /// </summary>
 
         public static async Task RollbackSettingByKeyAsync(this DatabaseService db, string key, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -273,15 +394,9 @@ ORDER BY param_name;";
             }
             await db.LogSystemEventAsync(actorUserId, "SETTING_ROLLBACK", "settings", "SettingsModule", null, key, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the export settings async operation.
-        /// </summary>
 
         public static Task ExportSettingsAsync(this DatabaseService db, List<Setting> items, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
             => db.ExportSettingsAsync(items, format: "csv", actorUserId, ip, device, sessionId, token);
-        /// <summary>
-        /// Executes the export settings async operation.
-        /// </summary>
 
         public static Task ExportSettingsAsync(this DatabaseService db, List<Setting> items, string format, int actorUserId, string ip, string device, string? sessionId, CancellationToken token = default)
         {
@@ -323,12 +438,10 @@ ORDER BY param_name;";
             }
             return db.LogSystemEventAsync(actorUserId, "SETTING_EXPORT", "settings", "SettingsModule", null, $"format={format}; count={items?.Count ?? 0}; file={path}", ip, "info", device, sessionId, token: token);
         }
-        /// <summary>
-        /// Executes the log setting audit async operation.
-        /// </summary>
 
         public static Task LogSettingAuditAsync(this DatabaseService db, Setting? setting, string action, string ip, string device, string? sessionId, string? details, CancellationToken token = default)
             => db.LogSystemEventAsync(0, $"SETTING_{action}", "settings", "SettingsModule", setting?.Id, details ?? setting?.Value, ip, "audit", device, sessionId, token: token);
     }
 }
+
 

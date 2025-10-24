@@ -7,14 +7,8 @@ using QuestPDF.Infrastructure;
 
 namespace YasGMP.Helpers
 {
-    /// <summary>
-    /// Represents the pdf exporter value.
-    /// </summary>
     public static class PdfExporter
     {
-        /// <summary>
-        /// Executes the write table operation.
-        /// </summary>
         public static string WriteTable<T>(IEnumerable<T> rows, string filePrefix, IEnumerable<(string Header, Func<T, object?> Selector)> columns, string? title = null)
         {
             string dir = CsvExportHelper.EnsureExportDirectory();
@@ -79,9 +73,6 @@ namespace YasGMP.Helpers
 
             return path;
         }
-        /// <summary>
-        /// Executes the write simple text pdf operation.
-        /// </summary>
 
         public static void WriteSimpleTextPdf(string filePath, string title, IEnumerable<string> lines)
         {

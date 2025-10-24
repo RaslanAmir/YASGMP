@@ -45,7 +45,6 @@ public class CalibrationModuleViewModelTests
             CurrentIpAddress = "10.0.0.5"
         };
         var signatureDialog = new TestElectronicSignatureDialogService();
-        var certificateDialog = new TestCalibrationCertificateDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -62,7 +61,6 @@ public class CalibrationModuleViewModelTests
             filePicker,
             attachmentService,
             signatureDialog,
-            certificateDialog,
             dialog,
             shell,
             navigation);
@@ -135,7 +133,6 @@ public class CalibrationModuleViewModelTests
         };
         var signatureDialog = new TestElectronicSignatureDialogService();
         signatureDialog.QueueCancellation();
-        var certificateDialog = new TestCalibrationCertificateDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -152,7 +149,6 @@ public class CalibrationModuleViewModelTests
             filePicker,
             attachmentService,
             signatureDialog,
-            certificateDialog,
             dialog,
             shell,
             navigation);
@@ -210,7 +206,6 @@ public class CalibrationModuleViewModelTests
         };
         var signatureDialog = new TestElectronicSignatureDialogService();
         signatureDialog.QueueCaptureException(new InvalidOperationException("Capture failure"));
-        var certificateDialog = new TestCalibrationCertificateDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -227,7 +222,6 @@ public class CalibrationModuleViewModelTests
             filePicker,
             attachmentService,
             signatureDialog,
-            certificateDialog,
             dialog,
             shell,
             navigation);
@@ -284,7 +278,6 @@ public class CalibrationModuleViewModelTests
             CurrentIpAddress = "10.0.0.15"
         };
         var signatureDialog = new TestElectronicSignatureDialogService();
-        var certificateDialog = new TestCalibrationCertificateDialogService();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -310,7 +303,6 @@ public class CalibrationModuleViewModelTests
             filePicker,
             attachmentService,
             signatureDialog,
-            certificateDialog,
             dialog,
             shell,
             navigation);
@@ -367,3 +359,4 @@ public class CalibrationModuleViewModelTests
         public void Activate(ModuleDocumentViewModel document) { }
     }
 }
+

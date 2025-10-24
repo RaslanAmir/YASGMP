@@ -20,3 +20,4 @@ namespace YasGMP.Models
         public string? UsageLogsSnapshot { get; set; }
     }
 }
+

@@ -23,18 +23,9 @@ using YasGMP.Views.Dialogs;
 
 namespace YasGMP.Views
 {
-    /// <summary>
-    /// Represents the Machines Page.
-    /// </summary>
     public partial class MachinesPage : ContentPage
     {
-        /// <summary>
-        /// Gets or sets the machines.
-        /// </summary>
         public ObservableCollection<Machine> Machines { get; } = new();
-        /// <summary>
-        /// Gets or sets the selected machine.
-        /// </summary>
         public Machine? SelectedMachine { get; set; }
         private List<Machine> _allMachines = new();
         private readonly DatabaseService _dbService;
@@ -42,9 +33,6 @@ namespace YasGMP.Views
         private readonly QRCodeService _qrService;
         private readonly IAttachmentService _attachmentService;
         private readonly AuthService _authService;
-        /// <summary>
-        /// Initializes a new instance of the MachinesPage class.
-        /// </summary>
 
         public MachinesPage(DatabaseService dbService, CodeGeneratorService codeService, QRCodeService qrService, IAttachmentService attachmentService, AuthService authService)
         {

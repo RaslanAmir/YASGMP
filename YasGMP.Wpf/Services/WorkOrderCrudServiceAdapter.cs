@@ -1,37 +1,22 @@
 using System;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Bridges Work Order module view models in the WPF shell to the shared MAUI
-/// <see cref="YasGMP.Services.WorkOrderService"/> and related infrastructure.
+/// Adapter that bridges the WPF shell to the domain <see cref="WorkOrderService"/>.
 /// </summary>
-/// <remarks>
-/// The WPF module view models call this adapter, which then invokes
-/// <see cref="YasGMP.Services.WorkOrderService"/> and the shared <see cref="YasGMP.Services.AuditService"/>
-/// so the persisted data and audit trail match the MAUI implementation. Operations should be awaited off the
-/// dispatcher thread, with UI updates marshalled through <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/>
-/// returned by save operations must propagate identifiers, status text, and signature metadata which callers localize through
-/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before surfacing to operators.
-/// </remarks>
 public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
 {
     private readonly WorkOrderService _service;
-    /// <summary>
-    /// Initializes a new instance of the WorkOrderCrudServiceAdapter class.
-    /// </summary>
 
     public WorkOrderCrudServiceAdapter(WorkOrderService service)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public async Task<WorkOrder?> TryGetByIdAsync(int id)
     {
@@ -44,9 +29,6 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             return null;
         }
     }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
@@ -65,9 +47,6 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             workOrder.DigitalSignature = signature;
             return new CrudSaveResult(workOrder.Id, metadata);
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(WorkOrder workOrder, WorkOrderCrudContext context)
         {
@@ -86,9 +65,6 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             workOrder.DigitalSignature = signature;
             return new CrudSaveResult(workOrder.Id, metadata);
         }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(WorkOrder workOrder)
     {
@@ -164,3 +140,4 @@ public sealed class WorkOrderCrudServiceAdapter : IWorkOrderCrudService
             IpAddress = context.Ip
         };
 }
+

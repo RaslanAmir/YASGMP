@@ -1,29 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the audit module view model value.
-/// </summary>
 
-public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
+/// <summary>Provides a WPF-first audit trail browser built on the SAP B1 module pattern.</summary>
+/// <remarks>
+/// Form Modes: Find filters audits by user/entity/action, View presents immutable results, and Add/Update are present for parity but no edits are allowed.
+/// Audit &amp; Logging: Reads audit history through <see cref="AuditService"/> and supports exports via <see cref="ExportService"/>; this module never mutates data or creates new audit entries.
+/// Localization: Relies on inline strings such as `"Audit Trail"`, `"All"`, filter prompts, and export status messages while waiting on corresponding resource keys.
+/// Navigation: Declares ModuleKey `Audit` so the dashboard, status bar, and Golden Arrow consumers can route to the audit browser; status messages (e.g. `"Loaded {count} audit entries."`) keep shell chrome synchronized.
+/// </remarks>
+public partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Audit";
-    /// <summary>
-    /// Initializes a new instance of the AuditModuleViewModel class.
-    /// </summary>
+    public new const string ModuleKey = "Audit";
 
     public AuditModuleViewModel(
         DatabaseService databaseService,
@@ -31,51 +30,29 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         ExportService exportService,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization,
-        IServiceProvider serviceProvider)
-        : base(ModuleKey, localization.GetString("Module.Title.AuditTrail"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Audit Trail", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
-        _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-
-        ActionOptions = new[]
-        {
-            _localization.GetString("Module.Audit.Action.All"),
-            _localization.GetString("Module.Audit.Action.Create"),
-            _localization.GetString("Module.Audit.Action.Update"),
-            _localization.GetString("Module.Audit.Action.Delete"),
-            _localization.GetString("Module.Audit.Action.Sign"),
-            _localization.GetString("Module.Audit.Action.Rollback"),
-            _localization.GetString("Module.Audit.Action.Export")
-        };
 
         _exportToPdfCommand = new AsyncRelayCommand(ExportToPdfAsync, CanExecuteExport);
         _exportToExcelCommand = new AsyncRelayCommand(ExportToExcelAsync, CanExecuteExport);
-        _rollbackPreviewCommand = new AsyncRelayCommand(ExecuteRollbackPreviewAsync, CanExecuteRollbackPreview);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
+        PropertyChanged += OnSelfPropertyChanged;
 
         FilterFrom = DateTime.Today.AddDays(-30);
         FilterTo = DateTime.Today;
         SelectedAction = ActionOptions[0];
     }
-    /// <summary>
-    /// Gets or sets the export to pdf command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportToPdfCommand => _exportToPdfCommand;
-    /// <summary>
-    /// Gets or sets the export to excel command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportToExcelCommand => _exportToExcelCommand;
-    /// <summary>
-    /// Gets the command that opens the rollback preview document.
-    /// </summary>
 
-    public IAsyncRelayCommand RollbackPreviewCommand => _rollbackPreviewCommand;
+    /// <summary>Opens the AI module and runs an audit summary with current filters.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -98,7 +75,6 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
                 normalizedRange.QueryTo).ConfigureAwait(false);
 
             var auditEntries = audits?.ToList() ?? new List<AuditEntryDto>();
-            _auditEntryLookup = auditEntries.ToDictionary(GetRecordKey, entry => entry, StringComparer.Ordinal);
             _lastAuditEntries = auditEntries;
             _lastFilterDescription = FormatFilterDescription(
                 FilterUser,
@@ -158,11 +134,17 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
                 Status = "audit"
             })
         };
-    /// <summary>
-    /// Gets or sets the action options.
-    /// </summary>
 
-    public IReadOnlyList<string> ActionOptions { get; }
+    public IReadOnlyList<string> ActionOptions { get; } = new[]
+    {
+        "All",
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "SIGN",
+        "ROLLBACK",
+        "EXPORT"
+    };
 
     [ObservableProperty]
     private string? _filterUser;
@@ -196,16 +178,11 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
     partial void OnFilterToChanged(DateTime? value) => TriggerRefreshForFilterChange();
 
     private readonly AuditService _auditService;
-    private readonly ILocalizationService _localization;
     private readonly ExportService _exportService;
-    private readonly IShellInteractionService _shellInteraction;
-    private readonly IServiceProvider _serviceProvider;
     private readonly AsyncRelayCommand _exportToPdfCommand;
     private readonly AsyncRelayCommand _exportToExcelCommand;
-    private readonly AsyncRelayCommand _rollbackPreviewCommand;
     private IReadOnlyList<AuditEntryDto>? _lastAuditEntries;
     private string? _lastFilterDescription;
-    private Dictionary<string, AuditEntryDto> _auditEntryLookup = new(StringComparer.Ordinal);
 
     private void TriggerRefreshForFilterChange()
     {
@@ -216,7 +193,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
 
         HasError = false;
         HasResults = false;
-        StatusMessage = _localization.GetString("Module.Status.Loading", Title);
+        StatusMessage = $"Loading {Title} records...";
         _ = RefreshCommand.ExecuteAsync(null);
     }
 
@@ -256,15 +233,8 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
            || record.InspectorFields.Any(field =>
                field.Value?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
 
-    protected override Task OnRecordSelectedAsync(ModuleRecord? record)
-    {
-        _rollbackPreviewCommand.NotifyCanExecuteChanged();
-        return Task.CompletedTask;
-    }
-
     partial void OnHasResultsChanged(bool value) => UpdateExportCommandStates();
 
-    partial void OnIsBusyChanged(bool value) => UpdateExportCommandStates();
 
     private ModuleRecord MapToRecord(AuditEntryDto entry)
     {
@@ -304,7 +274,8 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
             new("Reason", entry.Note ?? string.Empty)
         };
 
-        var key = GetRecordKey(entry);
+        var key = entry.Id?.ToString(CultureInfo.InvariantCulture)
+            ?? $"{entry.Timestamp:O}|{entry.Entity}|{entry.Action}";
 
         return new ModuleRecord(
             key,
@@ -369,51 +340,25 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         }
     }
 
+    private void OnSelfPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(IsBusy), StringComparison.Ordinal))
+        {
+            UpdateExportCommandStates();
+        }
+    }
+
     private void UpdateExportCommandStates()
     {
         _exportToPdfCommand.NotifyCanExecuteChanged();
         _exportToExcelCommand.NotifyCanExecuteChanged();
-        _rollbackPreviewCommand.NotifyCanExecuteChanged();
     }
 
-    private static string GetRecordKey(AuditEntryDto entry)
-        => entry.Id?.ToString(CultureInfo.InvariantCulture)
-           ?? $"{entry.Timestamp:O}|{entry.Entity}|{entry.Action}";
-
-    private bool CanExecuteRollbackPreview()
-        => !IsBusy
-           && SelectedRecord is not null
-           && _auditEntryLookup.ContainsKey(SelectedRecord.Key);
-
-    private Task ExecuteRollbackPreviewAsync()
+    private void OpenAiSummary()
     {
-        if (SelectedRecord is null)
-        {
-            StatusMessage = _localization.GetString("Audit.Rollback.Status.NoSelection") ?? "Select an audit entry to preview.";
-            return Task.CompletedTask;
-        }
-
-        if (!_auditEntryLookup.TryGetValue(SelectedRecord.Key, out var entry))
-        {
-            StatusMessage = _localization.GetString("Audit.Rollback.Status.MissingSnapshot") ?? "Rollback payloads are unavailable for the selected entry.";
-            return Task.CompletedTask;
-        }
-
-        try
-        {
-            var document = ActivatorUtilities.CreateInstance<RollbackPreviewDocumentViewModel>(_serviceProvider, entry);
-            _shellInteraction.OpenDocument(document);
-            var openedFormat = _localization.GetString("Audit.Rollback.Status.Opened") ?? "Rollback preview opened for {0}.";
-            var label = entry.EntityName ?? entry.Entity ?? "record";
-            StatusMessage = string.Format(CultureInfo.CurrentCulture, openedFormat, label);
-        }
-        catch (Exception ex)
-        {
-            var failureFormat = _localization.GetString("Audit.Rollback.Status.OpenError") ?? "Failed to open rollback preview: {0}";
-            StatusMessage = string.Format(CultureInfo.CurrentCulture, failureFormat, ex.Message);
-        }
-
-        return Task.CompletedTask;
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, "summary:audit");
+        shell.Activate(doc);
     }
 
     private static string FormatFilterDescription(
@@ -435,3 +380,7 @@ public sealed partial class AuditModuleViewModel : DataDrivenModuleDocumentViewM
         return $"User: {userText}; Entity: {entityText}; Action: {actionText}; Range: {fromText} – {toText}";
     }
 }
+
+
+
+

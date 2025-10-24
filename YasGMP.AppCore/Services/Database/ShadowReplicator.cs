@@ -17,9 +17,6 @@ namespace YasGMP.Services.Database
         private readonly string? _shadowConn;
         private readonly DiagnosticContext _ctx;
         private readonly ITrace _trace;
-        /// <summary>
-        /// Initializes a new instance of the ShadowReplicator class.
-        /// </summary>
 
         public ShadowReplicator(string primaryConnectionString, string? shadowConnectionString, DiagnosticContext ctx, ITrace trace)
         {
@@ -27,14 +24,8 @@ namespace YasGMP.Services.Database
             _shadowConn = shadowConnectionString;
             _ctx = ctx; _trace = trace;
         }
-        /// <summary>
-        /// Executes the enabled operation.
-        /// </summary>
 
         public bool Enabled => !string.IsNullOrWhiteSpace(_shadowConn);
-        /// <summary>
-        /// Executes the try shadow execute non query async operation.
-        /// </summary>
 
         public async Task<int?> TryShadowExecuteNonQueryAsync(string sql, IEnumerable<MySqlParameter>? parameters, int primaryRows, CancellationToken token)
         {
@@ -246,3 +237,4 @@ namespace YasGMP.Services.Database
         }
     }
 }
+

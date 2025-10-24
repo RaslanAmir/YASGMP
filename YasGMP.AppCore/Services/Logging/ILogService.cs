@@ -23,3 +23,4 @@ namespace YasGMP.Services.Logging
         Task ErrorAsync(string source, Exception ex, string? message = null, IDictionary<string, object>? context = null);
     }
 }
+

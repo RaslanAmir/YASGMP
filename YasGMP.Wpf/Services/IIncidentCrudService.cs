@@ -1,21 +1,14 @@
 using System;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared contract that routes incident CRUD operations through <see cref="YasGMP.Services.IncidentService"/> and the shared MAUI audit stack.
+/// Abstraction over <see cref="YasGMP.Services.IncidentService"/> so the WPF shell can
+/// run CRUD logic without binding directly to the infrastructure layer.
 /// </summary>
-/// <remarks>
-/// Module view models call these members on the dispatcher thread, adapters forward the work to the shared
-/// <see cref="YasGMP.Services.IncidentService"/> and <see cref="YasGMP.Services.AuditService"/>, and callers marshal UI updates with
-/// <see cref="WpfUiDispatcher"/> after awaiting the asynchronous work. Implementations must return <see cref="CrudSaveResult"/> values populated with identifiers,
-/// signature context, and localization-ready status text so <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> can translate
-/// them consistently with the MAUI shell.
-/// </remarks>
 public interface IIncidentCrudService
 {
     Task<Incident?> TryGetByIdAsync(int id);
@@ -36,16 +29,8 @@ public interface IIncidentCrudService
 }
 
 /// <summary>
-/// Captures the authenticated context required when persisting incident changes. Each value flows into
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so audit and compliance
-/// pipelines receive the accepted signature manifest.
+/// Captures the authenticated context required when persisting incident changes.
 /// </summary>
-/// <remarks>
-/// Adapters materialize <see cref="SignatureMetadataDto"/> from this context before returning
-/// <see cref="CrudSaveResult"/>. Consumers in the WPF shell must persist the DTO alongside incident records and
-/// surface the signature manifest in inspection panes, while MAUI screens should propagate the same payload when
-/// displaying or synchronizing the record to keep the shared audit history aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP address recorded for audit trails.</param>
 /// <param name="DeviceInfo">Client device identifier.</param>
@@ -68,9 +53,6 @@ public readonly record struct IncidentCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static IncidentCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -83,9 +65,6 @@ public readonly record struct IncidentCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static IncidentCrudContext Create(
         int userId,
@@ -114,3 +93,4 @@ public readonly record struct IncidentCrudContext(
         };
     }
 }
+

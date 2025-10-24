@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 
 namespace YasGMP.Services
 {
@@ -24,6 +24,7 @@ namespace YasGMP.Services
         /// <param name="ip">Source IP address.</param>
         /// <param name="deviceInfo">Client device information.</param>
         /// <param name="sessionId">Optional session identifier.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>The newly created machine's primary key.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="db"/> or <paramref name="m"/> is <see langword="null"/>.</exception>
@@ -53,6 +54,7 @@ namespace YasGMP.Services
         /// <param name="ip">Source IP address.</param>
         /// <param name="deviceInfo">Client device information.</param>
         /// <param name="sessionId">Optional session identifier.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>The affected machine's primary key.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="db"/> or <paramref name="m"/> is <see langword="null"/>.</exception>
@@ -81,6 +83,7 @@ namespace YasGMP.Services
         /// <param name="ip">Source IP address.</param>
         /// <param name="deviceInfo">Client device information.</param>
         /// <param name="sessionId">Optional session identifier.</param>
+        /// <param name="signatureMetadata">Optional electronic signature metadata (hash/IP/device/session).</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>The affected machine's primary key.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="db"/> or <paramref name="snapshot"/> is <see langword="null"/>.</exception>
@@ -131,9 +134,6 @@ namespace YasGMP.Services
         }
 
         // Overload matching MachineViewModel invocation order (rows, actorUserId, ip, device, session)
-        /// <summary>
-        /// Executes the export machines from view async operation.
-        /// </summary>
         public static Task<string> ExportMachinesFromViewAsync(
             this DatabaseService db,
             IEnumerable<Machine> rows,
@@ -143,9 +143,6 @@ namespace YasGMP.Services
             string? sessionId,
             CancellationToken token = default)
             => db.ExportMachinesFromViewAsync(rows, ip, deviceInfo, sessionId, format: "zip", actorUserId: actorUserId, token: token);
-        /// <summary>
-        /// Executes the log machine audit async operation.
-        /// </summary>
 
         public static Task LogMachineAuditAsync(
             this DatabaseService db,

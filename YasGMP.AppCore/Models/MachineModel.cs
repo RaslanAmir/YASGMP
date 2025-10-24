@@ -39,16 +39,11 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the manufacturer.
-        /// </summary>
         [ForeignKey(nameof(ManufacturerId))]
         public virtual Manufacturer? Manufacturer { get; set; }
 
-        /// <summary>
-        /// Gets or sets the machine type.
-        /// </summary>
         [ForeignKey(nameof(MachineTypeId))]
         public virtual MachineType? MachineType { get; set; }
     }
 }
+

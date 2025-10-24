@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceRiskAssessmentsExtensions
     {
-        /// <summary>
-        /// Executes the get all risk assessments full async operation.
-        /// </summary>
         public static async Task<List<RiskAssessment>> GetAllRiskAssessmentsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await db.ExecuteSelectAsync("SELECT id FROM risk_assessments ORDER BY id DESC", null, token).ConfigureAwait(false);
@@ -28,46 +25,25 @@ namespace YasGMP.Services
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the initiate risk assessment async operation.
-        /// </summary>
 
         public static Task InitiateRiskAssessmentAsync(this DatabaseService db, RiskAssessment risk, CancellationToken token = default)
             => db.LogRiskAssessmentAuditAsync(risk, "INITIATE", risk.IpAddress ?? string.Empty, risk.DeviceInfo ?? string.Empty, risk.SessionId, null, token);
-        /// <summary>
-        /// Executes the update risk assessment async operation.
-        /// </summary>
 
         public static Task UpdateRiskAssessmentAsync(this DatabaseService db, RiskAssessment risk, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogRiskAssessmentAuditAsync(risk, "UPDATE", ip, deviceInfo, sessionId, null, token);
-        /// <summary>
-        /// Executes the approve risk assessment async operation.
-        /// </summary>
 
         public static Task ApproveRiskAssessmentAsync(this DatabaseService db, int riskId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogRiskAssessmentAuditAsync(new RiskAssessment { Id = riskId }, "APPROVE", ip, deviceInfo, sessionId, null, token);
-        /// <summary>
-        /// Executes the close risk assessment async operation.
-        /// </summary>
 
         public static Task CloseRiskAssessmentAsync(this DatabaseService db, int riskId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogRiskAssessmentAuditAsync(new RiskAssessment { Id = riskId }, "CLOSE", ip, deviceInfo, sessionId, null, token);
 
         // Overload with note parameter to match VM call
-        /// <summary>
-        /// Executes the close risk assessment async operation.
-        /// </summary>
         public static Task CloseRiskAssessmentAsync(this DatabaseService db, int riskId, int actorUserId, string ip, string deviceInfo, string? sessionId, string? note, CancellationToken token = default)
             => db.LogRiskAssessmentAuditAsync(new RiskAssessment { Id = riskId }, "CLOSE", ip, deviceInfo, sessionId, note, token);
-        /// <summary>
-        /// Executes the export risk assessments async operation.
-        /// </summary>
 
         public static Task ExportRiskAssessmentsAsync(this DatabaseService db, List<RiskAssessment> items, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogRiskAssessmentAuditAsync(null, "EXPORT", ip, deviceInfo, sessionId, $"count={items?.Count ?? 0}", token);
-        /// <summary>
-        /// Executes the log risk assessment audit async operation.
-        /// </summary>
 
         public static Task LogRiskAssessmentAuditAsync(this DatabaseService db, RiskAssessment? risk, string action, string ip, string deviceInfo, string? sessionId, string? details, CancellationToken token = default)
             => db.LogSystemEventAsync(null, $"RA_{action}", "risk_assessments", "RiskAssessment", risk?.Id, details ?? risk?.Code, ip, "audit", deviceInfo, sessionId, token: token);
@@ -110,3 +86,4 @@ namespace YasGMP.Services
         }
     }
 }
+

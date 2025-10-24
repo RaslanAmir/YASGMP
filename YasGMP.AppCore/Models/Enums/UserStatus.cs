@@ -60,3 +60,4 @@ namespace YasGMP.Models.Enums
         Retired = 9
     }
 }
+

@@ -17,3 +17,4 @@ namespace YasGMP.Services
         Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default);
     }
 }
+

@@ -11,9 +11,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceAuditHelpers
     {
-        /// <summary>
-        /// Executes the log exception async operation.
-        /// </summary>
         public static Task LogExceptionAsync(
             this DatabaseService db,
             Exception ex,
@@ -120,3 +117,4 @@ namespace YasGMP.Services
         }
     }
 }
+

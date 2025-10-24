@@ -1,11 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using AvalonDock;
 using AvalonDock.Layout.Serialization;
-using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 
 namespace YasGMP.Wpf.Services
@@ -13,35 +13,30 @@ namespace YasGMP.Wpf.Services
     /// <summary>Coordinates AvalonDock with layout persistence and view-model resolution.</summary>
     public sealed class ShellLayoutController
     {
-        private const string LayoutResetStatusKey = "Shell.Status.LayoutReset";
-
         private readonly DockLayoutPersistenceService _persistence;
-        private readonly ILocalizationService _localization;
         private DockingManager? _dockManager;
         private MainWindowViewModel? _viewModel;
         private string? _defaultLayout;
         private const string LayoutKey = "YasGmp.Wpf.Shell";
-        /// <summary>
-        /// Initializes a new instance of the ShellLayoutController class.
-        /// </summary>
+        private FrameworkElement? _modulesContent;
+        private FrameworkElement? _inspectorContent;
 
-        public ShellLayoutController(DockLayoutPersistenceService persistence, ILocalizationService localization)
+        public ShellLayoutController(DockLayoutPersistenceService persistence)
         {
             _persistence = persistence;
-            _localization = localization;
         }
-        /// <summary>
-        /// Executes the attach operation.
-        /// </summary>
 
         public void Attach(DockingManager dockManager, MainWindowViewModel viewModel)
         {
             _dockManager = dockManager ?? throw new ArgumentNullException(nameof(dockManager));
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         }
-        /// <summary>
-        /// Executes the capture default layout operation.
-        /// </summary>
+
+        public void RegisterAnchorableContent(FrameworkElement modulesContent, FrameworkElement inspectorContent)
+        {
+            _modulesContent = modulesContent;
+            _inspectorContent = inspectorContent;
+        }
 
         public void CaptureDefaultLayout()
         {
@@ -55,9 +50,6 @@ namespace YasGMP.Wpf.Services
             serializer.Serialize(writer);
             _defaultLayout = writer.ToString();
         }
-        /// <summary>
-        /// Executes the restore layout async operation.
-        /// </summary>
 
         public async Task RestoreLayoutAsync(Window window, CancellationToken token = default)
         {
@@ -66,27 +58,35 @@ namespace YasGMP.Wpf.Services
                 return;
             }
 
-            var snapshot = await _persistence.LoadAsync(LayoutKey, token).ConfigureAwait(false);
-            if (snapshot == null || string.IsNullOrWhiteSpace(snapshot.Value.LayoutXml))
+            try
             {
-                return;
+                var snapshot = await _persistence.LoadAsync(LayoutKey, token).ConfigureAwait(false);
+                if (snapshot == null || string.IsNullOrWhiteSpace(snapshot.Value.LayoutXml))
+                {
+                    return;
+                }
+
+                _viewModel?.PrepareForLayoutImport();
+                await window.Dispatcher.InvokeAsync(() =>
+                {
+                    var serializer = new XmlLayoutSerializer(_dockManager);
+                    serializer.LayoutSerializationCallback += OnLayoutSerializationCallback;
+                    using var reader = new StringReader(snapshot.Value.LayoutXml);
+                    serializer.Deserialize(reader);
+                    serializer.LayoutSerializationCallback -= OnLayoutSerializationCallback;
+                });
+
+                ApplyGeometry(window, snapshot.Value.Geometry);
             }
-
-            _viewModel?.PrepareForLayoutImport();
-            await window.Dispatcher.InvokeAsync(() =>
+            catch (Exception ex)
             {
-                var serializer = new XmlLayoutSerializer(_dockManager);
-                serializer.LayoutSerializationCallback += OnLayoutSerializationCallback;
-                using var reader = new StringReader(snapshot.Value.LayoutXml);
-                serializer.Deserialize(reader);
-                serializer.LayoutSerializationCallback -= OnLayoutSerializationCallback;
-            });
-
-            ApplyGeometry(window, snapshot.Value.Geometry);
+                Debug.WriteLine($"[ShellLayout] Restore failed: {ex}");
+                if (_viewModel != null)
+                {
+                    window.Dispatcher.Invoke(() => _viewModel.StatusText = $"Layout restore failed: {ex.Message}");
+                }
+            }
         }
-        /// <summary>
-        /// Executes the save layout async operation.
-        /// </summary>
 
         public async Task SaveLayoutAsync(Window window, CancellationToken token = default)
         {
@@ -104,11 +104,19 @@ namespace YasGMP.Wpf.Services
             }
 
             var geometry = CaptureGeometry(window);
-            await _persistence.SaveAsync(LayoutKey, layoutXml, geometry, token).ConfigureAwait(false);
+            try
+            {
+                await _persistence.SaveAsync(LayoutKey, layoutXml, geometry, token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ShellLayout] Save failed: {ex}");
+                if (_viewModel != null)
+                {
+                    window.Dispatcher.Invoke(() => _viewModel.StatusText = $"Layout save failed: {ex.Message}");
+                }
+            }
         }
-        /// <summary>
-        /// Executes the reset layout async operation.
-        /// </summary>
 
         public async Task ResetLayoutAsync(Window window, CancellationToken token = default)
         {
@@ -129,11 +137,8 @@ namespace YasGMP.Wpf.Services
 
             if (_viewModel != null)
             {
-                var localizedMessage = _localization.GetString(LayoutResetStatusKey);
-                _viewModel.UpdateStatusFromResource(LayoutResetStatusKey, localizedMessage);
+                _viewModel.StatusText = "Layout reset to default";
             }
-
-            await _persistence.ResetAsync(LayoutKey, token).ConfigureAwait(false);
             await SaveLayoutAsync(window, token).ConfigureAwait(false);
         }
 
@@ -147,10 +152,10 @@ namespace YasGMP.Wpf.Services
             switch (e.Model.ContentId)
             {
                 case "YasGmp.Shell.Modules":
-                    e.Content = _viewModel.ModulesPane;
+                    e.Content = (object?)_modulesContent ?? _viewModel?.ModulesPane;
                     break;
                 case "YasGmp.Shell.Inspector":
-                    e.Content = _viewModel.InspectorPane;
+                    e.Content = (object?)_inspectorContent ?? _viewModel?.InspectorPane;
                     break;
                 default:
                     if (!string.IsNullOrWhiteSpace(e.Model.ContentId))
@@ -201,3 +206,4 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
+

@@ -10,13 +10,7 @@ namespace YasGMP.Views
     /// </summary>
     public partial class DocumentControlPage : ContentPage
     {
-        /// <summary>
-        /// Gets or sets the view model.
-        /// </summary>
         public DocumentControlViewModel ViewModel { get; }
-        /// <summary>
-        /// Initializes a new instance of the DocumentControlPage class.
-        /// </summary>
 
         public DocumentControlPage(DocumentControlViewModel viewModel)
         {
@@ -24,9 +18,6 @@ namespace YasGMP.Views
             ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             BindingContext = ViewModel;
         }
-        /// <summary>
-        /// Initializes a new instance of the DocumentControlPage class.
-        /// </summary>
 
         public DocumentControlPage()
             : this(ServiceLocator.GetRequiredService<DocumentControlViewModel>())

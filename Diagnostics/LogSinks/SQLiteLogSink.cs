@@ -1,34 +1,23 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Data.Sqlite;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics.LogSinks
 {
     internal sealed class SQLiteLogSink : ILogSink
     {
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
         public string Name => "sqlite";
 
         private readonly object _sync = new();
         private readonly string _dbPath;
-        /// <summary>
-        /// Initializes a new instance of the SQLiteLogSink class.
-        /// </summary>
 
         public SQLiteLogSink()
         {
-            var dir = Path.Combine(FileSystem.AppDataDirectory, "logs");
-            Directory.CreateDirectory(dir);
+            var dir = DiagnosticsPathProvider.GetLogsDirectory();
             _dbPath = Path.Combine(dir, "diag.db");
             EnsureSchema();
         }
-        /// <summary>
-        /// Executes the write batch operation.
-        /// </summary>
 
         public void WriteBatch(IReadOnlyList<DiagnosticEvent> batch)
         {
@@ -82,4 +71,5 @@ namespace YasGMP.Diagnostics.LogSinks
         }
     }
 }
+
 

@@ -90,3 +90,4 @@ public class ValidationCrudServiceAdapterTests
             => Task.CompletedTask;
     }
 }
+

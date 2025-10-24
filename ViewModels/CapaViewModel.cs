@@ -22,31 +22,13 @@ namespace YasGMP.ViewModels
 
         private CapaCase? _selectedCapa;
         private bool _isRefreshing;
-        /// <summary>
-        /// Gets or sets the capa cases.
-        /// </summary>
 
         public ObservableCollection<CapaCase> CapaCases { get; } = new();
-        /// <summary>
-        /// Gets or sets the add new command.
-        /// </summary>
 
         public ICommand AddNewCommand { get; }
-        /// <summary>
-        /// Gets or sets the edit command.
-        /// </summary>
         public ICommand EditCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete command.
-        /// </summary>
         public ICommand DeleteCommand { get; }
-        /// <summary>
-        /// Gets or sets the refresh command.
-        /// </summary>
         public ICommand RefreshCommand { get; }
-        /// <summary>
-        /// Represents the selected capa value.
-        /// </summary>
 
         public CapaCase? SelectedCapa
         {
@@ -61,9 +43,6 @@ namespace YasGMP.ViewModels
                 }
             }
         }
-        /// <summary>
-        /// Represents the is refreshing value.
-        /// </summary>
 
         public bool IsRefreshing
         {
@@ -77,14 +56,8 @@ namespace YasGMP.ViewModels
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets the is empty.
-        /// </summary>
 
         public bool IsEmpty => CapaCases.Count == 0;
-        /// <summary>
-        /// Initializes a new instance of the CapaViewModel class.
-        /// </summary>
 
         public CapaViewModel()
             : this(
@@ -93,9 +66,6 @@ namespace YasGMP.ViewModels
                 ServiceLocator.GetRequiredService<IUiDispatcher>())
         {
         }
-        /// <summary>
-        /// Initializes a new instance of the CapaViewModel class.
-        /// </summary>
 
         public CapaViewModel(DatabaseService dbService, IDialogService dialogService, IUiDispatcher dispatcher)
         {
@@ -112,9 +82,6 @@ namespace YasGMP.ViewModels
 
             _ = LoadCapaCasesAsync();
         }
-        /// <summary>
-        /// Executes the open capa dialog async operation.
-        /// </summary>
 
         public async Task OpenCapaDialogAsync(CapaCase? existing = null)
         {
@@ -164,9 +131,6 @@ namespace YasGMP.ViewModels
                 OnPropertyChanged(nameof(IsEmpty));
             }).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the load capa cases async operation.
-        /// </summary>
 
         public async Task LoadCapaCasesAsync()
         {
@@ -200,9 +164,6 @@ namespace YasGMP.ViewModels
             if (DeleteCommand is AsyncDelegateCommand delete)
                 delete.RaiseCanExecuteChanged();
         }
-        /// <summary>
-        /// Occurs when property changed event handler is raised.
-        /// </summary>
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

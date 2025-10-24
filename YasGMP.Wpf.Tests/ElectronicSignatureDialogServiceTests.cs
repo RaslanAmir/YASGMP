@@ -395,3 +395,4 @@ public sealed class ElectronicSignatureDialogServiceTests : IDisposable
         public string GetUserName() => "tester";
     }
 }
+

@@ -54,10 +54,8 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the sensor data.
-        /// </summary>
         [ForeignKey(nameof(SensorDataId))]
         public virtual IotSensorData? SensorData { get; set; }
     }
 }
+

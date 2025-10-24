@@ -21,9 +21,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceDigitalSignaturesExtensions
     {
-        /// <summary>
-        /// Executes the get all signatures full async operation.
-        /// </summary>
         public static async Task<List<DigitalSignature>> GetAllSignaturesFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sqlPreferred = @"SELECT id, table_name, record_id, user_id, signature_hash, method, status, signed_at, device_info, ip_address, note, public_key, session_id
@@ -43,9 +40,6 @@ FROM digital_signatures ORDER BY signed_at DESC, id DESC";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the insert digital signature async operation.
-        /// </summary>
 
         public static async Task<int> InsertDigitalSignatureAsync(this DatabaseService db, DigitalSignature sig, CancellationToken token = default)
         {
@@ -120,9 +114,6 @@ FROM digital_signatures ORDER BY signed_at DESC, id DESC";
             await db.LogSystemEventAsync(sig.UserId, "SIG_CREATE", "digital_signatures", "DigitalSignatures", sig.Id, sig.SignatureHash, sig.IpAddress, "audit", sig.DeviceInfo, sig.SessionId, token: token).ConfigureAwait(false);
             return sig.Id;
         }
-        /// <summary>
-        /// Executes the revoke signature async operation.
-        /// </summary>
         public static async Task RevokeSignatureAsync(this DatabaseService db, int id, string reason, CancellationToken token = default)
         {
             try
@@ -136,9 +127,6 @@ FROM digital_signatures ORDER BY signed_at DESC, id DESC";
             catch { /* tolerate schema differences */ }
             await db.LogSystemEventAsync(null, "SIG_REVOKE", "digital_signatures", "DigitalSignatures", id, reason, null, "audit", null, null, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the verify signature async operation.
-        /// </summary>
 
         public static async Task<bool> VerifySignatureAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -184,9 +172,6 @@ FROM digital_signatures ORDER BY signed_at DESC, id DESC";
 
             return true;
         }
-        /// <summary>
-        /// Executes the export signatures async operation.
-        /// </summary>
 
         public static Task ExportSignaturesAsync(this DatabaseService db, List<DigitalSignature> rows, string format, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SIG_EXPORT", "digital_signatures", "DigitalSignatures", null, $"count={rows?.Count ?? 0}; fmt={format}", ip, "info", deviceInfo, sessionId, token: token);
@@ -404,3 +389,4 @@ FROM digital_signatures WHERE id=@id LIMIT 1";
         }
     }
 }
+

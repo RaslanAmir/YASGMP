@@ -15,9 +15,6 @@ using YasGMP.ViewModels;
 
 namespace YasGMP
 {
-    /// <summary>
-    /// Represents the Capa Edit Dialog.
-    /// </summary>
     public partial class CapaEditDialog : ContentPage
     {
         /// <summary>

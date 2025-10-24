@@ -32,9 +32,9 @@
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
-                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
-                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
-                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+                ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.GoldenArrow.ToolTip}"
+                AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.GoldenArrow.AutomationName}"
+                AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.GoldenArrow.AutomationId}" />
             <Separator />
             <Button Content="Stock In"
                     Command="{Binding ReceiveStockCommand}"

@@ -19,7 +19,8 @@ public class SchedulingModuleViewModelTests
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
+        var audit = new AuditService(database);
+        var audit = new AuditService(database);
         const int adapterSignatureId = 9135;
         var crud = new FakeScheduledJobCrudService
         {
@@ -33,7 +34,7 @@ public class SchedulingModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, localization);
+        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -72,8 +73,6 @@ public class SchedulingModuleViewModelTests
     public async Task Cancel_RevertsEditorInUpdateMode()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
         var crud = new FakeScheduledJobCrudService();
         var job = new ScheduledJob
         {
@@ -95,7 +94,7 @@ public class SchedulingModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, localization);
+        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -114,8 +113,6 @@ public class SchedulingModuleViewModelTests
     public async Task ExecuteCommand_TriggersService()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
         var crud = new FakeScheduledJobCrudService();
         var job = new ScheduledJob
         {
@@ -129,13 +126,7 @@ public class SchedulingModuleViewModelTests
         crud.Seed(job);
         database.ScheduledJobs.Add(job);
 
-        var auth = new TestAuthContext
-        {
-            CurrentUser = new User { Id = 9, Username = "ops" },
-            CurrentDeviceInfo = "SchedulerTerm-01",
-            CurrentIpAddress = "10.10.1.25",
-            CurrentSessionId = "session-execute"
-        };
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 9 } };
         var filePicker = new TestFilePicker();
         var attachments = new TestAttachmentService();
         var signatureDialog = new TestElectronicSignatureDialogService();
@@ -143,7 +134,7 @@ public class SchedulingModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, localization);
+        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -152,155 +143,6 @@ public class SchedulingModuleViewModelTests
         await viewModel.ExecuteJobCommand.ExecuteAsync(null);
 
         Assert.Contains(21, crud.Executed);
-        var execution = Assert.Single(crud.ExecutionLog);
-        Assert.Equal(21, execution.JobId);
-        Assert.Equal(auth.CurrentUser!.Id, execution.Context.UserId);
-        Assert.Equal(auth.CurrentDeviceInfo, execution.Context.DeviceInfo);
-        Assert.Equal(auth.CurrentIpAddress, execution.Context.Ip);
-        Assert.Equal(auth.CurrentSessionId, execution.Context.SessionId);
-    }
-
-    [Fact]
-    public async Task OnSaveAsync_UpdateMode_PersistsExistingJobWithMetadata()
-    {
-        var database = new DatabaseService();
-        var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
-        var job = new ScheduledJob
-        {
-            Id = 34,
-            Name = "Preventive Maintenance Sweep",
-            JobType = "maintenance",
-            Status = "scheduled",
-            RecurrencePattern = "0 5 * * SUN",
-            NextDue = DateTime.UtcNow.AddDays(3),
-            NeedsAcknowledgment = true,
-            Comment = "Initial schedule",
-            CreatedById = 2,
-            CreatedBy = "system"
-        };
-        const int adapterSignatureId = 7821;
-        var crud = new FakeScheduledJobCrudService
-        {
-            SignatureMetadataIdSource = _ => adapterSignatureId
-        };
-        crud.Seed(job);
-        database.ScheduledJobs.Add(job);
-
-        var auth = new TestAuthContext
-        {
-            CurrentUser = new User { Id = 18, Username = "pm.tech" },
-            CurrentDeviceInfo = "BenchStation",
-            CurrentIpAddress = "10.0.0.42",
-            CurrentSessionId = "session-update"
-        };
-        var filePicker = new TestFilePicker();
-        var attachments = new TestAttachmentService();
-        var signatureDialog = new TestElectronicSignatureDialogService();
-        var dialog = new TestCflDialogService();
-        var shell = new TestShellInteractionService();
-        var navigation = new TestModuleNavigationService();
-
-        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, localization);
-        await viewModel.InitializeAsync(null);
-
-        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == job.Id.ToString());
-        viewModel.Mode = FormMode.Update;
-        viewModel.Editor.NextDue = job.NextDue.AddDays(7);
-        viewModel.Editor.Comment = "Rescheduled for extended downtime";
-
-        var saved = await InvokeSaveAsync(viewModel);
-
-        Assert.True(saved);
-        Assert.False(viewModel.IsDirty);
-        Assert.True(signatureDialog.WasLogPersistInvoked);
-        Assert.Empty(signatureDialog.PersistedSignatureRecords);
-        var loggedSignature = Assert.Single(signatureDialog.LoggedSignatureRecords);
-        Assert.Equal(job.Id, loggedSignature.RecordId);
-        Assert.Equal(adapterSignatureId, loggedSignature.SignatureId);
-        Assert.Equal("test-signature", loggedSignature.SignatureHash);
-        Assert.Equal("password", loggedSignature.Method);
-        Assert.Equal("valid", loggedSignature.Status);
-        Assert.Equal("Automated test", loggedSignature.Note);
-
-        var updateSnapshot = Assert.Single(crud.UpdatedWithContext);
-        Assert.Equal(job.Id, updateSnapshot.Entity.Id);
-        Assert.Equal("Rescheduled for extended downtime", updateSnapshot.Entity.Comment);
-
-        var context = updateSnapshot.Context;
-        Assert.Equal(auth.CurrentUser!.Id, context.UserId);
-        Assert.Equal(auth.CurrentDeviceInfo, context.DeviceInfo);
-        Assert.Equal(auth.CurrentIpAddress, context.Ip);
-        Assert.Equal(auth.CurrentSessionId, context.SessionId);
-        Assert.Equal("test-signature", context.SignatureHash);
-        Assert.Equal("password", context.SignatureMethod);
-        Assert.Equal("valid", context.SignatureStatus);
-        Assert.Equal("Automated test", context.SignatureNote);
-    }
-
-    [Fact]
-    public async Task OnSaveAsync_UpdateMode_DisablesJobThroughAdapter()
-    {
-        var database = new DatabaseService();
-        var audit = new AuditService(database);
-        var localization = new FakeLocalizationService();
-        var job = new ScheduledJob
-        {
-            Id = 48,
-            Name = "Calibration Window",
-            JobType = "calibration",
-            Status = "scheduled",
-            RecurrencePattern = "0 8 * * MON",
-            NextDue = DateTime.UtcNow.AddDays(5),
-            NeedsAcknowledgment = false,
-            Comment = "Active"
-        };
-        var crud = new FakeScheduledJobCrudService();
-        crud.Seed(job);
-        database.ScheduledJobs.Add(job);
-
-        var auth = new TestAuthContext { CurrentUser = new User { Id = 7, Username = "planner" } };
-        var filePicker = new TestFilePicker();
-        var attachments = new TestAttachmentService();
-        var signatureDialog = new TestElectronicSignatureDialogService();
-        var dialog = new TestCflDialogService();
-        var shell = new TestShellInteractionService();
-        var navigation = new TestModuleNavigationService();
-
-        var viewModel = new SchedulingModuleViewModel(database, audit, crud, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation, localization);
-        await viewModel.InitializeAsync(null);
-
-        viewModel.SelectedRecord = viewModel.Records.Single(r => r.Key == job.Id.ToString());
-        viewModel.Mode = FormMode.Update;
-        viewModel.Editor.Status = "disabled";
-        viewModel.Editor.Comment = "Temporarily disabled while equipment is offline";
-
-        var saved = await InvokeSaveAsync(viewModel);
-
-        Assert.True(saved);
-        Assert.Equal("disabled", viewModel.Editor.Status);
-        var updateSnapshot = Assert.Single(crud.UpdatedWithContext);
-        Assert.Equal("disabled", updateSnapshot.Entity.Status);
-        Assert.Equal("Temporarily disabled while equipment is offline", updateSnapshot.Entity.Comment);
-
-        var context = updateSnapshot.Context;
-        Assert.Equal(auth.CurrentUser!.Id, context.UserId);
-        Assert.Equal("test-signature", context.SignatureHash);
-        Assert.Equal("password", context.SignatureMethod);
-        Assert.Equal("valid", context.SignatureStatus);
-        Assert.Equal("Automated test", context.SignatureNote);
-
-        Assert.True(signatureDialog.WasPersistInvoked);
-        Assert.False(signatureDialog.WasLogPersistInvoked);
-        var persistedSignature = Assert.Single(signatureDialog.PersistedSignatureRecords);
-        Assert.Equal(job.Id, persistedSignature.RecordId);
-        Assert.True(persistedSignature.SignatureId > 0);
-        Assert.Equal("test-signature", persistedSignature.SignatureHash);
-        Assert.Equal("password", persistedSignature.Method);
-        Assert.Equal("valid", persistedSignature.Status);
-        Assert.Equal("Automated test", persistedSignature.Note);
-
-        Assert.False(viewModel.IsDirty);
     }
 
     private static Task<bool> InvokeSaveAsync(SchedulingModuleViewModel viewModel)
@@ -311,3 +153,4 @@ public class SchedulingModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

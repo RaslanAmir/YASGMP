@@ -22,9 +22,6 @@ namespace YasGMP.Services
     public static class DatabaseServiceDeviationAuditExtensions
     {
         // Create
-        /// <summary>
-        /// Executes the insert deviation audit async operation.
-        /// </summary>
         public static async Task<int> InsertDeviationAuditAsync(this DatabaseService db, DeviationAudit a, CancellationToken token = default)
         {
             const string sql = @"INSERT INTO deviation_audit (deviation_id, user_id, action, details, changed_at, device_info, source_ip, session_id, digital_signature, regulatory_status, ai_anomaly_score, validated, comment, old_value, new_value, signature_type, signature_valid, export_status, export_time, exported_by, restored_from_snapshot, restoration_reference, approval_status, approval_time, approved_by, deleted, deleted_at, deleted_by, created_at, updated_at, related_file, related_photo, iot_event_id)
@@ -39,9 +36,6 @@ namespace YasGMP.Services
         }
 
         // Update
-        /// <summary>
-        /// Executes the update deviation audit async operation.
-        /// </summary>
         public static async Task UpdateDeviationAuditAsync(this DatabaseService db, DeviationAudit a, CancellationToken token = default)
         {
             const string sql = @"UPDATE deviation_audit SET deviation_id=@dev, user_id=@uid, action=@act, details=@det, changed_at=@chg, device_info=@devinfo, source_ip=@ip, session_id=@sid, digital_signature=@sig, regulatory_status=@reg, ai_anomaly_score=@ais, validated=@val, comment=@com, old_value=@old, new_value=@new, signature_type=@sigtype, signature_valid=@sigok, export_status=@expst, export_time=@exptm, exported_by=@expby, restored_from_snapshot=@restored, restoration_reference=@restref, approval_status=@apprst, approval_time=@apprtm, approved_by=@apprby, deleted=@del, deleted_at=@delat, deleted_by=@delby, updated_at=NOW(), related_file=@rfile, related_photo=@rphoto, iot_event_id=@iot WHERE id=@id";
@@ -52,9 +46,6 @@ namespace YasGMP.Services
         }
 
         // Delete
-        /// <summary>
-        /// Executes the delete deviation audit async operation.
-        /// </summary>
         public static async Task DeleteDeviationAuditAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
             await db.ExecuteNonQueryAsync("DELETE FROM deviation_audit WHERE id=@id", new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
@@ -62,9 +53,6 @@ namespace YasGMP.Services
         }
 
         // Get by id
-        /// <summary>
-        /// Executes the get deviation audit by id async operation.
-        /// </summary>
         public static async Task<DeviationAudit?> GetDeviationAuditByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
             var dt = await db.ExecuteSelectAsync(
@@ -74,9 +62,6 @@ namespace YasGMP.Services
         }
 
         // Queries
-        /// <summary>
-        /// Executes the get deviation audits by deviation id async operation.
-        /// </summary>
         public static async Task<List<DeviationAudit>> GetDeviationAuditsByDeviationIdAsync(this DatabaseService db, int deviationId, CancellationToken token = default)
         {
             var dt = await db.ExecuteSelectAsync(
@@ -84,9 +69,6 @@ namespace YasGMP.Services
                 new[] { new MySqlParameter("@id", deviationId) }, token).ConfigureAwait(false);
             return MapMany(dt);
         }
-        /// <summary>
-        /// Executes the get deviation audits by user id async operation.
-        /// </summary>
 
         public static async Task<List<DeviationAudit>> GetDeviationAuditsByUserIdAsync(this DatabaseService db, int userId, CancellationToken token = default)
         {
@@ -95,9 +77,6 @@ namespace YasGMP.Services
                 new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
             return MapMany(dt);
         }
-        /// <summary>
-        /// Executes the get deviation audits by action type async operation.
-        /// </summary>
 
         public static async Task<List<DeviationAudit>> GetDeviationAuditsByActionTypeAsync(this DatabaseService db, string action, CancellationToken token = default)
         {
@@ -106,9 +85,6 @@ namespace YasGMP.Services
                 new[] { new MySqlParameter("@a", action) }, token).ConfigureAwait(false);
             return MapMany(dt);
         }
-        /// <summary>
-        /// Executes the get deviation audits by date range async operation.
-        /// </summary>
 
         public static async Task<List<DeviationAudit>> GetDeviationAuditsByDateRangeAsync(this DatabaseService db, DateTime from, DateTime to, CancellationToken token = default)
         {
@@ -119,9 +95,6 @@ namespace YasGMP.Services
         }
 
         // Export shim: creates a lightweight CSV and logs the event. Returns file path.
-        /// <summary>
-        /// Executes the export deviation audit logs async operation.
-        /// </summary>
         public static async Task<string> ExportDeviationAuditLogsAsync(this DatabaseService db, IReadOnlyList<DeviationAudit> audits, string format = "csv", CancellationToken token = default)
         {
             format = string.IsNullOrWhiteSpace(format) ? "csv" : format.ToLowerInvariant();
@@ -242,3 +215,4 @@ namespace YasGMP.Services
         }
     }
 }
+

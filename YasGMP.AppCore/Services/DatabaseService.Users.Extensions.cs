@@ -510,3 +510,4 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
         #endregion
     }
 }
+

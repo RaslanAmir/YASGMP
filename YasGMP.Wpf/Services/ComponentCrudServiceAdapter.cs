@@ -1,46 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Models;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Routes Component module interactions from the WPF shell into the shared MAUI
-/// <see cref="YasGMP.Services.ComponentService"/> implementation.
+/// Default <see cref="IComponentCrudService"/> implementation backed by the
+/// shared <see cref="ComponentService"/> from <c>YasGMP.AppCore</c>.
 /// </summary>
-/// <remarks>
-/// View models issue commands to this adapter, which forwards them to
-/// <see cref="YasGMP.Services.ComponentService"/> (and the associated <see cref="YasGMP.Services.AuditService"/>)
-/// so the same AppCore logic is exercised regardless of shell. Methods are awaited off the UI thread;
-/// callers are expected to marshal updates via <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/>
-/// payload contains identifiers, signature metadata, and status text that should be localized with
-/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before being shown in the ribbon.
-/// Audit entries emitted here surface within the MAUI experiences because the shared <see cref="YasGMP.Services.AuditService"/>
-/// is used to capture them.
-/// </remarks>
 public sealed class ComponentCrudServiceAdapter : IComponentCrudService
 {
     private readonly ComponentService _inner;
-    /// <summary>
-    /// Initializes a new instance of the ComponentCrudServiceAdapter class.
-    /// </summary>
 
     public ComponentCrudServiceAdapter(ComponentService inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }
-    /// <summary>
-    /// Executes the get all async operation.
-    /// </summary>
 
     public async Task<IReadOnlyList<Component>> GetAllAsync()
         => await _inner.GetAllAsync().ConfigureAwait(false);
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public async Task<Component?> TryGetByIdAsync(int id)
     {
@@ -53,9 +34,6 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
             return null;
         }
     }
-    /// <summary>
-    /// Executes the create async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> CreateAsync(Component component, ComponentCrudContext context)
     {
@@ -71,9 +49,6 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
 
         return new CrudSaveResult(component.Id, CreateMetadata(context, signature));
     }
-    /// <summary>
-    /// Executes the update async operation.
-    /// </summary>
 
     public async Task<CrudSaveResult> UpdateAsync(Component component, ComponentCrudContext context)
     {
@@ -89,9 +64,6 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
 
         return new CrudSaveResult(component.Id, CreateMetadata(context, signature));
     }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(Component component)
     {
@@ -120,9 +92,6 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
             throw new InvalidOperationException("SOP document is required.");
         }
     }
-    /// <summary>
-    /// Executes the normalize status operation.
-    /// </summary>
 
     public string NormalizeStatus(string? status)
         => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLowerInvariant();
@@ -147,3 +116,4 @@ public sealed class ComponentCrudServiceAdapter : IComponentCrudService
             IpAddress = context.Ip
         };
 }
+

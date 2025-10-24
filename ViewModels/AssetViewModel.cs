@@ -156,34 +156,13 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ===
-        /// <summary>
-        /// Gets or sets the load assets command.
-        /// </summary>
 
         public ICommand LoadAssetsCommand { get; }
-        /// <summary>
-        /// Gets or sets the add asset command.
-        /// </summary>
         public ICommand AddAssetCommand { get; }
-        /// <summary>
-        /// Gets or sets the update asset command.
-        /// </summary>
         public ICommand UpdateAssetCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete asset command.
-        /// </summary>
         public ICommand DeleteAssetCommand { get; }
-        /// <summary>
-        /// Gets or sets the rollback asset command.
-        /// </summary>
         public ICommand RollbackAssetCommand { get; }
-        /// <summary>
-        /// Gets or sets the export assets command.
-        /// </summary>
         public ICommand ExportAssetsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

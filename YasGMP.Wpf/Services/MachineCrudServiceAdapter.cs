@@ -2,43 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Routes Machine module requests from the WPF shell into the shared MAUI
-    /// <see cref="YasGMP.Services.MachineService"/> pipeline.
+    /// Default <see cref="IMachineCrudService"/> implementation that forwards calls to
+    /// the shared <see cref="MachineService"/> from <c>YasGMP.AppCore</c>.
     /// </summary>
-    /// <remarks>
-    /// Module view models issue CRUD commands through this adapter, which immediately forwards to
-    /// <see cref="YasGMP.Services.MachineService"/> and the shared <see cref="YasGMP.Services.AuditService"/> so MAUI and WPF
-    /// stay aligned. Operations should be awaited off the dispatcher thread with UI updates dispatched via
-    /// <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> contains identifiers, signature metadata, and status/note
-    /// text that callers translate using <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/> before
-    /// presenting them in the shell.
-    /// </remarks>
     public sealed class MachineCrudServiceAdapter : IMachineCrudService
     {
         private readonly MachineService _inner;
-        /// <summary>
-        /// Initializes a new instance of the MachineCrudServiceAdapter class.
-        /// </summary>
 
         public MachineCrudServiceAdapter(MachineService inner)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
         }
-        /// <summary>
-        /// Executes the get all async operation.
-        /// </summary>
 
         public async Task<IReadOnlyList<Machine>> GetAllAsync()
             => await _inner.GetAllAsync().ConfigureAwait(false);
-        /// <summary>
-        /// Executes the try get by id async operation.
-        /// </summary>
 
         public async Task<Machine?> TryGetByIdAsync(int id)
         {
@@ -51,9 +34,6 @@ namespace YasGMP.Wpf.Services
                 return null;
             }
         }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Machine machine, MachineCrudContext context)
         {
@@ -69,9 +49,6 @@ namespace YasGMP.Wpf.Services
             machine.DigitalSignature = signature;
             return new CrudSaveResult(machine.Id, metadata);
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Machine machine, MachineCrudContext context)
         {
@@ -87,27 +64,11 @@ namespace YasGMP.Wpf.Services
             return new CrudSaveResult(machine.Id, metadata);
         }
 
-        /// <summary>
-        /// Executes the delete async operation.
-        /// </summary>
-
-        public async Task DeleteAsync(int id, MachineCrudContext context)
-        {
-            await _inner.DeleteAsync(id, context.UserId, context.Ip, context.DeviceInfo, context.SessionId)
-                .ConfigureAwait(false);
-        }
-        /// <summary>
-        /// Executes the validate operation.
-        /// </summary>
-
         public void Validate(Machine machine)
         {
             if (machine is null) throw new ArgumentNullException(nameof(machine));
             _inner.ValidateMachine(machine);
         }
-        /// <summary>
-        /// Executes the normalize status operation.
-        /// </summary>
 
         public string NormalizeStatus(string? status) => MachineService.NormalizeStatus(status);
 
@@ -164,3 +125,4 @@ namespace YasGMP.Wpf.Services
             };
     }
 }
+

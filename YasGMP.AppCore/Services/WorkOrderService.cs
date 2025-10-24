@@ -160,7 +160,6 @@ namespace YasGMP.Services
         /// </summary>
         /// <param name="workOrderId">ID radnog naloga za brisanje.</param>
         /// <param name="userId">Korisnik koji izvodi radnju.</param>
-        /// <param name="signatureMetadata">Opcionalno elektroničko potpisivanje (hash/IP/uređaj/sesija).</param>
         /// <returns>Asinhroni zadatak.</returns>
         public async Task DeleteAsync(int workOrderId, int userId)
         {

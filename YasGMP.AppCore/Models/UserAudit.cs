@@ -53,10 +53,8 @@ namespace YasGMP.Models
         [Column("details")]
         public string? Details { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user.
-        /// </summary>
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }
     }
 }
+

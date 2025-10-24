@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Maui.Controls;
 using YasGMP.Common;
 using YasGMP.Models.DTO;
@@ -12,20 +14,14 @@ namespace YasGMP.Views.Dialogs
     public partial class ReauthenticationDialog : ContentPage
     {
         private readonly TaskCompletionSource<ReauthenticationResult?> _tcs = new();
-        /// <summary>
-        /// Gets or sets the result.
-        /// </summary>
 
         public Task<ReauthenticationResult?> Result => _tcs.Task;
-        /// <summary>
-        /// Initializes a new instance of the ReauthenticationDialog class.
-        /// </summary>
 
         public ReauthenticationDialog(string? defaultUsername = null)
         {
             InitializeComponent();
             UsernameEntry.Text = defaultUsername ?? string.Empty;
-            ReasonPicker.ItemsSource = WorkOrderSignatureReasonCodes.All;
+            ReasonPicker.ItemsSource = WorkOrderSignatureReasonCodes.All.ToList();
         }
 
         private void OnReasonChanged(object? sender, EventArgs e)

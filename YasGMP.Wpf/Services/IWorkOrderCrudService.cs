@@ -1,23 +1,15 @@
 using System;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared contract consumed by the WPF shell and MAUI host to orchestrate Work Order persistence
-/// through <see cref="YasGMP.Services.WorkOrderService"/> and the shared audit infrastructure.
+/// Abstraction over the <see cref="YasGMP.Services.WorkOrderService"/> so the WPF shell
+/// can execute CRUD operations in a testable manner without connecting to the full
+/// database runtime.
 /// </summary>
-/// <remarks>
-/// Module view models call these members on the dispatcher thread, adapters forward the work to
-/// <see cref="YasGMP.Services.WorkOrderService"/> and <see cref="YasGMP.Services.AuditService"/>, and callers must
-/// marshal UI updates back through <see cref="WpfUiDispatcher"/> after awaiting the result. Implementations are responsible
-/// for returning a <see cref="CrudSaveResult"/> containing identifiers, signature context, and localization-ready status text
-/// so MAUI and WPF shells emit identical audit logs and can localize notes through
-/// <see cref="LocalizationServiceExtensions"/> or <see cref="ILocalizationService"/>.
-/// </remarks>
 public interface IWorkOrderCrudService
 {
     Task<WorkOrder?> TryGetByIdAsync(int id);
@@ -36,15 +28,9 @@ public interface IWorkOrderCrudService
 }
 
 /// <summary>
-/// Context metadata captured when persisting work-order edits so audit trails receive consistent identifiers. Each value feeds
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> to preserve the accepted signature
-/// manifest for compliance pipelines.
+/// Context metadata captured when persisting work-order edits so audit trails receive
+/// consistent identifiers.
 /// </summary>
-/// <remarks>
-/// Adapters hydrate <see cref="SignatureMetadataDto"/> from this context before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO beside work orders, and MAUI experiences should propagate the same
-/// payload when presenting or synchronizing records to keep shared audit history aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="Ip">Source IP captured from the current session.</param>
 /// <param name="DeviceInfo">Machine fingerprint or hostname.</param>
@@ -67,9 +53,6 @@ public readonly record struct WorkOrderCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static WorkOrderCrudContext Create(int userId, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -82,9 +65,6 @@ public readonly record struct WorkOrderCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static WorkOrderCrudContext Create(
         int userId,
@@ -113,3 +93,4 @@ public readonly record struct WorkOrderCrudContext(
         };
     }
 }
+

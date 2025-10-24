@@ -4,36 +4,21 @@ using System.Globalization;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Bridges the Parts module view models in the WPF shell to the shared MAUI
-    /// <see cref="YasGMP.Services.PartService"/> pipeline and related infrastructure.
+    /// Concrete adapter that routes CRUD requests from the WPF shell to the
+    /// shared <see cref="PartService"/> and <see cref="DatabaseService"/>.
     /// </summary>
-    /// <remarks>
-    /// Requests originate from module view models (for example the docked Parts editor),
-    /// travel through this adapter, and end at the shared <see cref="YasGMP.Services.PartService"/>
-    /// and <see cref="YasGMP.Services.DatabaseService"/> just as they do in the MAUI shell.
-    /// Callers should await the asynchronous operations off the UI thread and marshal UI updates
-    /// back to the dispatcher via <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/>
-    /// returned by create/update operations includes the persisted identifier together with status,
-    /// signature, and session metadata that must be localized with <see cref="LocalizationServiceExtensions"/>
-    /// (or an <see cref="ILocalizationService"/>) before presenting any status or note text.
-    /// Audit trails are recorded through the shared <see cref="YasGMP.Services.AuditService"/>, ensuring
-    /// WPF operations remain visible to the cross-platform MAUI auditing experiences.
-    /// </remarks>
     public sealed class PartCrudServiceAdapter : IPartCrudService
     {
         private readonly PartService _partService;
         private readonly DatabaseService _database;
         private readonly AuditService _audit;
-        /// <summary>
-        /// Initializes a new instance of the PartCrudServiceAdapter class.
-        /// </summary>
 
         public PartCrudServiceAdapter(PartService partService, DatabaseService database, AuditService auditService)
         {
@@ -41,18 +26,12 @@ namespace YasGMP.Wpf.Services
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _audit = auditService ?? throw new ArgumentNullException(nameof(auditService));
         }
-        /// <summary>
-        /// Executes the get all async operation.
-        /// </summary>
 
         public async Task<IReadOnlyList<Part>> GetAllAsync()
         {
             var parts = await _partService.GetAllAsync().ConfigureAwait(false);
             return parts.AsReadOnly();
         }
-        /// <summary>
-        /// Executes the try get by id async operation.
-        /// </summary>
 
         public async Task<Part?> TryGetByIdAsync(int id)
         {
@@ -65,9 +44,6 @@ namespace YasGMP.Wpf.Services
                 return null;
             }
         }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Part part, PartCrudContext context)
         {
@@ -80,9 +56,6 @@ namespace YasGMP.Wpf.Services
             await StampAsync(part, context, signature).ConfigureAwait(false);
             return new CrudSaveResult(part.Id, metadata);
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Part part, PartCrudContext context)
         {
@@ -95,9 +68,6 @@ namespace YasGMP.Wpf.Services
             await StampAsync(part, context, signature).ConfigureAwait(false);
             return new CrudSaveResult(part.Id, metadata);
         }
-        /// <summary>
-        /// Executes the validate operation.
-        /// </summary>
 
         public void Validate(Part part)
         {
@@ -121,9 +91,6 @@ namespace YasGMP.Wpf.Services
                 throw new InvalidOperationException("Default supplier is required.");
             }
         }
-        /// <summary>
-        /// Executes the normalize status operation.
-        /// </summary>
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "active" : status.Trim().ToLower(CultureInfo.InvariantCulture);
@@ -163,17 +130,7 @@ namespace YasGMP.Wpf.Services
                 context.SignatureMethod ?? "-",
                 context.SignatureStatus ?? "-",
                 string.IsNullOrWhiteSpace(context.SignatureNote) ? "-" : context.SignatureNote);
-            await _audit.LogSystemEventAsync(
-                context.UserId,
-                "PART_STAMP",
-                "parts",
-                "PartCrud",
-                part.Id,
-                details,
-                context.Ip,
-                "wpf",
-                context.DeviceInfo,
-                context.SessionId).ConfigureAwait(false);
+            await _audit.LogSystemEventAsync("PART_STAMP", details, "parts", part.Id).ConfigureAwait(false);
         }
 
         private static string ApplyContext(Part part, PartCrudContext context)
@@ -208,3 +165,4 @@ namespace YasGMP.Wpf.Services
             };
 }
 }
+

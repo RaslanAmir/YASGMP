@@ -2,43 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Connects the WPF calibration module view models to the shared MAUI
-/// <see cref="YasGMP.Services.CalibrationService"/> pipeline.
+/// Default <see cref="ICalibrationCrudService"/> implementation backed by the shared
+/// <see cref="CalibrationService"/>.
 /// </summary>
-/// <remarks>
-/// The docked calibration editors call into this adapter, which forwards work to
-/// <see cref="YasGMP.Services.CalibrationService"/> and the cross-shell <see cref="YasGMP.Services.AuditService"/>
-/// so MAUI and WPF share identical persistence and auditing. Operations should be awaited off the UI thread,
-/// then marshalled back with <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> payload provides identifiers,
-/// signature context, and status/note values that callers localize via <see cref="LocalizationServiceExtensions"/>
-/// or <see cref="ILocalizationService"/> before surfacing them to the operator.
-/// </remarks>
 public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
 {
     private readonly CalibrationService _inner;
-    /// <summary>
-    /// Initializes a new instance of the CalibrationCrudServiceAdapter class.
-    /// </summary>
 
     public CalibrationCrudServiceAdapter(CalibrationService inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }
-    /// <summary>
-    /// Executes the get all async operation.
-    /// </summary>
 
     public async Task<IReadOnlyList<Calibration>> GetAllAsync()
         => await _inner.GetAllAsync().ConfigureAwait(false);
-    /// <summary>
-    /// Executes the try get by id async operation.
-    /// </summary>
 
     public async Task<Calibration?> TryGetByIdAsync(int id)
     {
@@ -51,9 +34,6 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             return null;
         }
     }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Calibration calibration, CalibrationCrudContext context)
         {
@@ -68,9 +48,6 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             calibration.DigitalSignature = signature;
             return new CrudSaveResult(calibration.Id, metadata);
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Calibration calibration, CalibrationCrudContext context)
         {
@@ -85,9 +62,6 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             calibration.DigitalSignature = signature;
             return new CrudSaveResult(calibration.Id, metadata);
         }
-    /// <summary>
-    /// Executes the validate operation.
-    /// </summary>
 
     public void Validate(Calibration calibration)
     {
@@ -158,3 +132,4 @@ public sealed class CalibrationCrudServiceAdapter : ICalibrationCrudService
             IpAddress = context.Ip
         };
 }
+

@@ -13,18 +13,12 @@ namespace YasGMP.Services.Database
     {
         private static readonly ConcurrentQueue<(int dur, string sig, DateTime ts)> Q = new();
         private const int MaxKeep = 2000;
-        /// <summary>
-        /// Executes the record operation.
-        /// </summary>
 
         public static void Record(int durationMs, string signature)
         {
             Q.Enqueue((durationMs, signature, DateTime.UtcNow));
             while (Q.Count > MaxKeep && Q.TryDequeue(out _)) { }
         }
-        /// <summary>
-        /// Executes the is in top n operation.
-        /// </summary>
 
         public static bool IsInTopN(int durationMs, int topN)
         {
@@ -33,9 +27,6 @@ namespace YasGMP.Services.Database
             if (top.Count < topN) return durationMs >= (top.LastOrDefault().dur);
             return durationMs >= top.Last().dur;
         }
-        /// <summary>
-        /// Executes the try get snapshot operation.
-        /// </summary>
 
         public static object? TryGetSnapshot()
         {
@@ -48,4 +39,5 @@ namespace YasGMP.Services.Database
         }
     }
 }
+
 

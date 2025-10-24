@@ -23,7 +23,7 @@ namespace YasGMP.ViewModels
     /// Supports dynamic report generation by date range, report type and linked entity metadata.
     /// Provides rich in-memory search/filtering and PDF/Excel export via helper utilities.
     /// </summary>
-public sealed class ReportViewModel : IReportAnalyticsViewModel
+    public sealed class ReportViewModel : INotifyPropertyChanged
     {
         private readonly DatabaseService _dbService;
         private readonly AuthService _authService;

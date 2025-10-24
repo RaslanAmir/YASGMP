@@ -13,3 +13,4 @@ namespace YasGMP.Models.Enums
         CLOSE = 7
     }
 }
+

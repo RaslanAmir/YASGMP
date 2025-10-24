@@ -97,6 +97,7 @@
     <Compile Remove="Helpers\CsvExportHelper.cs" />
     <Compile Remove="Helpers\PdfExporter.cs" />
     <Compile Remove="Helpers\XlsxExporter.cs" />
+    <Compile Remove="Helpers\DigitalSignatureHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

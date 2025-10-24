@@ -1,100 +1,180 @@
-
-- id: I-001
-  file: docs/codex_plan.md
-  module: Environment
-  context: Current Compile Status
-  type: BuildEnv
-  severity: "❌ High"
-  description: |
-    .NET SDK 9.0.100 is now installed in the container, but the Windows 10 SDK 19041+ and MAUI workloads are still missing.
-    Restore/build/test for Windows-targeted projects fail with NETSDK1100/NETSDK1147 and the WPF build hits unresolved YasGMP.Helpers/Diagnostics references and signature DTO types.
-    Use a Windows host with the Windows desktop SDK/workloads to unblock the release build/test cadence.
+﻿- id: I-2025-10-03-001
+  file: Diagnostics/CrashHandler.cs
+  module: Diagnostics
+  context: build
+  type: dependency
+  severity: critical
+  description: YasGMP.AppCore net9.0 previously pulled Microsoft.Maui.* diagnostics and legacy YasGMP.ViewModels, breaking MAUI/WPF builds when the assemblies were unavailable.
   references:
-    - docs/codex_plan.md
-    - docs/codex_progress.json
-  suggested_fix: |
-    Install the Windows 10 SDK (19041+) and required MAUI workloads on a Windows environment, then rerun `dotnet restore`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Release -p:EnableWindowsTargeting=true`, and `dotnet test YasGMP.Wpf.Tests --filter DockLayoutPersistenceServiceTests`.
-  status: open
-  resolved_in: null
-  tags: [buildenv, net9]
-- id: I-002
-  file: docs/codex_plan.md
-  module: Planning
-  context: Increment 1 backlog
-  type: Planning
-  severity: "⚠️ Medium"
-  description: |
-    Repository-wide folder/module inventory and entity traceability maps required for SAP B1 parity and compliance are still outstanding.
-    Increment 1 logged the backlog but no concrete mappings exist yet.
+    - logs/20251003-dotnet-build-maui.txt
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Segregate MAUI-only diagnostics into conditional targets or provide platform-neutral services before re-running builds.
+  status: resolved
+  resolved_in: increment-20251003-02
+  tags:
+    - build
+    - cross-targeting
+    - diagnostics
+- id: I-2025-10-03-002
+  file: YasGMP.Wpf/MainWindow.xaml
+  module: WpfShell
+  context: build
+  type: markup
+  severity: critical
+  description: Fluent Ribbon upgrade removed `RibbonWindow.Ribbon`; the current XAML still binds the property causing .NET build failure (MC3072).
   references:
-    - docs/codex_plan.md
-    - docs/codex_progress.json
-  suggested_fix: |
-    Produce the per-folder inventory and entity traceability map during Increment 2, aligning Views/ViewModels/Services/DB artifacts.
-  status: closed
-  resolved_in: docs/codex_plan.md
-  tags: [planning, parity, compliance]
-
-- id: I-003
-  file: Services/DatabaseService
-  module: Compliance
-  context: Audit hash-chain implementation
-  type: Compliance
-  severity: "⚠️ Medium"
-  description: |
-    Increment 2 documentation outlines the AuditEnvelopeHash model and AppendAuditHashAsync workflow, but the DatabaseService extensions,
-    signature manifest updates, and verification routines remain unimplemented.
-    Implement the outlined hash-chain persistence and expose verification cues in the inspector/status bar once SDK validation is possible.
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Update MainWindow to use the Fluent Ribbon 11 ribbon host pattern (e.g., `<fluent:RibbonWindow>` with `<fluent:Ribbon Title="...">`).
+  status: resolved
+  resolved_in: increment-20251003-03
+  tags:
+    - wpf
+    - ribbon
+    - build
+- id: I-2025-10-03-003
+  file: YasGMP.Wpf/Views/AttachmentsModuleView.xaml
+  module: Attachments
+  context: build
+  type: markup
+  severity: critical
+  description: AttachmentsModuleView has mismatched DockPanel/Grid tags which trigger MC3000 XAML parsing errors during WPF build.
   references:
-    - docs/codex_plan.md
-    - docs/codex_progress.json
-  suggested_fix: |
-    Add the AuditEnvelopeHash storage schema, extend DatabaseService with AppendAuditHashAsync, update IElectronicSignatureDialogService consumers
-    to include hash metadata, and surface the resulting tokens through relevant view-models and dashboards.
-  status: open
-  resolved_in: null
-  tags: [audit, signature, backlog]
-
-- id: I-004
-  file: YasGMP.Wpf/Views/AssetsModuleView.xaml
-  module: Assets
-  context: Accessibility validation
-  type: Accessibility
-  severity: "⚠️ Medium"
-  description: |
-    AssetsModuleView now binds localized ToolTip/Automation metadata for search, grid, and editor controls.
-    Accessibility inspector validation remains pending because the Windows-specific tooling is unavailable inside the Linux container.
-  references:
-    - YasGMP.Wpf/Views/AssetsModuleView.xaml
-    - docs/codex_plan.md
-    - docs/codex_progress.json
-    - ACTIVITY_LOG.json
-  suggested_fix: |
-    Re-run the Windows Accessibility Insights or FlaUI-based automation suite on a Windows host to confirm each control exposes the expected tooltip,
-    AutomationName, and AutomationId metadata once the dotnet CLI and desktop tooling are available.
-  status: open
-  resolved_in: null
-  tags: [accessibility, localization, env-guard]
-
-- id: I-005
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Correct the DockPanel/Grid nesting (ensure DockPanel end tag matches start tag) so the view compiles.
+  status: resolved
+  resolved_in: increment-20251003-03
+  tags:
+    - wpf
+    - attachments
+    - build
+- id: I-2025-10-03-004
   file: YasGMP.Wpf/ViewModels/Modules/AssetsModuleViewModel.cs
   module: Assets
-  context: Localized status verification
-  type: Localization
-  severity: "⚠️ Medium"
-  description: |
-    AssetsModuleViewModel now sources status messages from ShellStrings, but build/test execution is blocked by the missing dotnet CLI.
-    Runtime verification that EN↔HR switching updates status messaging in the WPF shell is pending until the Windows toolchain is available.
+  context: build
+  type: source
+  severity: critical
+  description: AssetsModuleViewModel.cs contains duplicated partial class definitions and stray sample data blocks, leading to syntax errors once WPF XAML compilation progresses past markup fixes.
   references:
-    - YasGMP.Wpf/ViewModels/Modules/AssetsModuleViewModel.cs
-    - YasGMP.Wpf/Resources/ShellStrings.resx
-    - docs/codex_plan.md
-    - docs/codex_progress.json
-    - ACTIVITY_LOG.json
-  suggested_fix: |
-    Once the Windows build environment is restored, run the WPF shell and associated tests to confirm localized status strings refresh at runtime,
-    covering both English and Croatian resource dictionaries for the Assets module.
-  status: open
-  resolved_in: null
-  tags: [localization, testing, env-guard]
+    - logs/20251003-dotnet-build-wpf.txt
+  suggested_fix: Remove the duplicated class body, restore the intended method implementation, and ensure the file compiles under C# 12 (file-scoped namespace).
+  status: resolved
+  resolved_in: increment-20251010-01
+  tags:
+    - wpf
+    - assets
+    - build
 
+- id: I-2025-10-10-001
+  file: YasGMP.Wpf/MainWindow.xaml
+  module: WpfShell
+  context: i18n
+  type: localization
+  severity: major
+  description: Many UI labels (Ribbon groups, module registry titles, tooltips) are hardcoded in English and not bound to resources.
+  references:
+    - YasGMP.Wpf/MainWindow.xaml
+    - YasGMP.Wpf/App.xaml.cs
+  suggested_fix: Expand EN↔HR ResourceDictionaries to cover all Ribbon groups/buttons and migrate ModuleRegistry titles and view-model status strings to resources.
+  status: in_progress
+  resolved_in: null
+  progress: |
+    Increment 2 migrated ModuleRegistry titles/categories/descriptions to EN↔HR resources and replaced hardcoded Home ribbon/group/button labels with DynamicResource bindings. Added AutomationProperties.Name + ToolTips on ribbon items; localized ModulesPane groups via localized categories. Remaining: translate field labels inside editor views and surface i18n for status messages.
+  tags:
+    - wpf
+    - i18n
+    - accessibility
+
+- id: I-2025-10-13-005
+  file: YasGMP.Wpf/ViewModels/Modules/WorkOrdersModuleViewModel.cs
+  module: WorkOrders
+  context: i18n
+  type: localization
+  severity: minor
+  description: Work Orders ViewModel returned inline English status and validation strings.
+  suggested_fix: Use a small resource helper to fetch EN↔HR strings and add keys for status/validation; keep fallbacks for safety.
+  status: resolved
+  resolved_in: increment-20251013-03
+  tags:
+    - wpf
+    - i18n
+
+- id: I-2025-10-13-006
+  file: YasGMP.Wpf/Views/Dialogs/ElectronicSignatureDialog.xaml
+  module: ESignature
+  context: a11y
+  type: accessibility
+  severity: minor
+  description: Dialog inputs and buttons lacked AutomationProperties.Name bindings.
+  suggested_fix: Bind AutomationProperties.Name to label/button resource keys and localize OK/Cancel button content.
+  status: resolved
+  resolved_in: increment-20251013-03
+  tags:
+    - wpf
+    - accessibility
+
+- id: I-2025-10-13-007
+  file: YasGMP.Wpf/ViewModels/Modules/WarehouseModuleViewModel.cs
+  module: Warehouse
+  context: i18n
+  type: localization
+  severity: minor
+  description: Warehouse ViewModel used inline English strings for CFL title, filtered-status, and not-found messages.
+  suggested_fix: Use Loc helper with EN↔HR resource keys for CFL title and status messages.
+  status: resolved
+  resolved_in: increment-20251013-04
+  tags:
+    - wpf
+    - i18n
+
+- id: I-2025-10-10-002
+  file: YasGMP.Wpf/Shell/ModulesPane.xaml
+  module: WpfShell
+  context: a11y
+  type: accessibility
+  severity: moderate
+  description: Not all user-visible controls expose AutomationProperties.Name or ToolTip content; a11y coverage is incomplete.
+  references:
+    - YasGMP.Wpf/Shell/ModulesPane.xaml
+    - YasGMP.Wpf/MainWindow.xaml
+  suggested_fix: Bind AutomationProperties.Name to headers/titles consistently and ensure every visible control has a meaningful ToolTip; add unit checks where feasible.
+  status: in_progress
+  resolved_in: null
+  progress: |
+    Added AutomationProperties.Name and ToolTip content for Backstage + Ribbon buttons and module view roots; propagated automation/tooltips to toolbar ToggleButtons (caption-bound) and common view buttons (CFL/Attach/Golden Arrow). Next: extend coverage to grid columns, input controls, and dialog launchers.
+  tags:
+    - wpf
+    - accessibility
+
+- id: I-2025-10-13-003
+  file: YasGMP.Wpf/Views/WorkOrdersModuleView.xaml
+  module: WorkOrders
+  context: i18n-a11y
+  type: localization
+  severity: moderate
+  description: Toolbar buttons bound to hardcoded captions lacked resource-backed i18n and AutomationProperties bindings.
+  references:
+    - YasGMP.Wpf/ViewModels/Modules/ModuleToolbarCommand.cs
+  suggested_fix: Bind toolbar Content/AutomationProperties/ToolTip via CaptionKey/AutomationNameKey/ToolTipKey using ResourceStringConverter.
+  status: resolved
+  resolved_in: increment-20251013-02
+  tags:
+    - wpf
+    - i18n
+    - accessibility
+
+- id: I-2025-10-13-004
+  file: YasGMP.Wpf/Views/WarehouseModuleView.xaml
+  module: Warehouse
+  context: i18n-a11y
+  type: localization
+  severity: moderate
+  description: Toolbar used raw Caption bindings; CFL/Attach/Golden Arrow buttons missed AutomationProperties.Name.
+  references:
+    - YasGMP.Wpf/Views/AssetsModuleView.xaml
+  suggested_fix: Mirror Assets toolbar i18n pattern and set a11y names/tooltips; add grid/search a11y bindings.
+  status: resolved
+  resolved_in: increment-20251013-02
+  tags:
+    - wpf
+    - i18n
+    - accessibility

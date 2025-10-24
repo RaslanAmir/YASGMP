@@ -59,17 +59,11 @@ UPDATE attachments
  WHERE id = @id;";
 
         private const string SqlDropLinks = "DELETE FROM attachment_links WHERE attachment_id = @id";
-        /// <summary>
-        /// Initializes a new instance of the AttachmentRetentionEnforcer class.
-        /// </summary>
 
         public AttachmentRetentionEnforcer(DatabaseService db)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
         }
-        /// <summary>
-        /// Executes the run once async operation.
-        /// </summary>
 
         public async Task<AttachmentRetentionEnforcerResult> RunOnceAsync(CancellationToken token = default)
         {
@@ -191,31 +185,14 @@ UPDATE attachments
         private static DateTime? ToDate(DataRow row, string column)
             => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToDateTime(row[column]) : (DateTime?)null;
     }
-    /// <summary>
-    /// Represents the Attachment Retention Enforcer Result.
-    /// </summary>
 
     public sealed class AttachmentRetentionEnforcerResult
     {
-        /// <summary>
-        /// Gets or sets the soft deletes.
-        /// </summary>
         public int SoftDeletes { get; set; }
-        /// <summary>
-        /// Gets or sets the hard purges.
-        /// </summary>
         public int HardPurges { get; set; }
-        /// <summary>
-        /// Gets or sets the hold notices.
-        /// </summary>
         public int HoldNotices { get; set; }
-        /// <summary>
-        /// Gets or sets the review notices.
-        /// </summary>
         public int ReviewNotices { get; set; }
-        /// <summary>
-        /// Gets or sets the already deleted.
-        /// </summary>
         public int AlreadyDeleted { get; set; }
     }
 }
+

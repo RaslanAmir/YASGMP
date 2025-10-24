@@ -15,9 +15,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceSchedulerExtensions
     {
-        /// <summary>
-        /// Executes the get all scheduled jobs full async operation.
-        /// </summary>
         public static async Task<List<ScheduledJob>> GetAllScheduledJobsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
             var dt = await db.ExecuteSelectAsync("SELECT id, name, job_type, status, next_due, recurrence_pattern, entity_type, entity_id, created_by, created_at, last_modified_at, device_info, session_id, ip_address, digital_signature, escalation_note, comment FROM scheduled_jobs ORDER BY next_due, id", null, token).ConfigureAwait(false);
@@ -51,37 +48,19 @@ namespace YasGMP.Services
             }
             return list;
         }
-        /// <summary>
-        /// Executes the add scheduled job async operation.
-        /// </summary>
         public static Task AddScheduledJobAsync(this DatabaseService db, ScheduledJob job, CancellationToken token = default)
             => db.LogSystemEventAsync(0, "SCHED_CREATE", "scheduled_jobs", "SchedulerModule", null, job?.Name, job?.IpAddress, "audit", job?.DeviceInfo, job?.SessionId, token: token);
-        /// <summary>
-        /// Executes the update scheduled job async operation.
-        /// </summary>
 
         public static Task UpdateScheduledJobAsync(this DatabaseService db, ScheduledJob job, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SCHED_UPDATE", "scheduled_jobs", "SchedulerModule", job?.Id, job?.Name, ip, "audit", deviceInfo, sessionId, token: token);
-        /// <summary>
-        /// Executes the delete scheduled job async operation.
-        /// </summary>
 
         public static Task DeleteScheduledJobAsync(this DatabaseService db, int jobId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(0, "SCHED_DELETE", "scheduled_jobs", "SchedulerModule", jobId, null, ip, "audit", deviceInfo, sessionId, token: token);
-        /// <summary>
-        /// Executes the acknowledge scheduled job async operation.
-        /// </summary>
         public static Task AcknowledgeScheduledJobAsync(this DatabaseService db, int jobId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SCHED_ACK", "scheduled_jobs", "SchedulerModule", jobId, null, ip, "audit", deviceInfo, sessionId, token: token);
-        /// <summary>
-        /// Executes the execute scheduled job async operation.
-        /// </summary>
 
         public static Task ExecuteScheduledJobAsync(this DatabaseService db, int jobId, int actorUserId, string ip, string deviceInfo, string? sessionId, CancellationToken token = default)
             => db.LogSystemEventAsync(actorUserId, "SCHED_EXECUTE", "scheduled_jobs", "SchedulerModule", jobId, null, ip, "audit", deviceInfo, sessionId, token: token);
-        /// <summary>
-        /// Executes the export scheduled jobs async operation.
-        /// </summary>
 
         public static Task ExportScheduledJobsAsync(this DatabaseService db, List<ScheduledJob> items, string ip, string deviceInfo, string? sessionId, string format = "csv", CancellationToken token = default)
         {
@@ -128,13 +107,11 @@ namespace YasGMP.Services
             }
             return db.LogSystemEventAsync(0, "SCHED_EXPORT", "scheduled_jobs", "SchedulerModule", null, $"count={items?.Count ?? 0}; fmt={format}; file={path}", ip, "info", deviceInfo, sessionId, token: token);
         }
-        /// <summary>
-        /// Executes the log scheduled job audit async operation.
-        /// </summary>
 
         public static Task LogScheduledJobAuditAsync(this DatabaseService db, ScheduledJob? job, string action, string ip, string deviceInfo, string? sessionId, string? details, CancellationToken token = default)
             => db.LogSystemEventAsync(0, $"SCHED_{action}", "scheduled_jobs", "SchedulerModule", job?.Id, details, ip, "audit", deviceInfo, sessionId, token: token);
     }
 }
+
 
 

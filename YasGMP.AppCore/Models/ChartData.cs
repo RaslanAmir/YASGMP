@@ -82,3 +82,4 @@ namespace YasGMP.Models
         public string Note { get; set; } = string.Empty;
     }
 }
+

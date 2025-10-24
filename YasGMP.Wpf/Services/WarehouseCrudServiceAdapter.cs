@@ -2,56 +2,35 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
 using YasGMP.Models;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
-using YasGMP.Wpf.ViewModels.Dialogs;
-using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>
-    /// Connects WPF warehouse view models to the shared MAUI persistence stack provided by
-    /// <see cref="YasGMP.Services.DatabaseService"/> and <see cref="YasGMP.Services.AuditService"/>.
+    /// Adapter that exposes warehouse CRUD operations to the WPF shell while
+    /// delegating to the shared database service for persistence.
     /// </summary>
-    /// <remarks>
-    /// Warehouse module view models call into this adapter, which relays operations to the same database routines and audit
-    /// pipeline used by MAUI so ledgers stay in sync across shells. Asynchronous calls should execute off the dispatcher thread,
-    /// with UI updates marshalled via <see cref="WpfUiDispatcher"/>. The <see cref="CrudSaveResult"/> payload carries identifiers,
-    /// status text, and signature metadata that callers localize using <see cref="LocalizationServiceExtensions"/> or
-    /// <see cref="ILocalizationService"/> before surfacing to users.
-    /// </remarks>
     public sealed class WarehouseCrudServiceAdapter : IWarehouseCrudService
     {
         private readonly DatabaseService _database;
         private readonly AuditService _auditService;
-        private readonly IElectronicSignatureDialogService _signatureDialog;
-        /// <summary>
-        /// Initializes a new instance of the WarehouseCrudServiceAdapter class.
-        /// </summary>
 
-        public WarehouseCrudServiceAdapter(DatabaseService database, AuditService auditService, IElectronicSignatureDialogService signatureDialog)
+        public WarehouseCrudServiceAdapter(DatabaseService database, AuditService auditService)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
-            _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         }
-        /// <summary>
-        /// Executes the get all async operation.
-        /// </summary>
 
         public async Task<IReadOnlyList<Warehouse>> GetAllAsync()
         {
             var warehouses = await _database.GetWarehousesAsync().ConfigureAwait(false);
             return warehouses.AsReadOnly();
         }
-        /// <summary>
-        /// Executes the try get by id async operation.
-        /// </summary>
 
         public async Task<Warehouse?> TryGetByIdAsync(int id)
         {
@@ -66,9 +45,6 @@ namespace YasGMP.Wpf.Services
 
             return null;
         }
-        /// <summary>
-        /// Executes the create async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> CreateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
@@ -78,9 +54,6 @@ namespace YasGMP.Wpf.Services
             await UpdateWarehouseDetailsAsync(warehouse, context).ConfigureAwait(false);
             return new CrudSaveResult(id, CreateMetadata(context, signature));
         }
-        /// <summary>
-        /// Executes the update async operation.
-        /// </summary>
 
         public async Task<CrudSaveResult> UpdateAsync(Warehouse warehouse, WarehouseCrudContext context)
         {
@@ -88,9 +61,6 @@ namespace YasGMP.Wpf.Services
             await UpdateWarehouseDetailsAsync(warehouse, context).ConfigureAwait(false);
             return new CrudSaveResult(warehouse.Id, CreateMetadata(context, signature));
         }
-        /// <summary>
-        /// Executes the validate operation.
-        /// </summary>
 
         public void Validate(Warehouse warehouse)
         {
@@ -109,15 +79,9 @@ namespace YasGMP.Wpf.Services
                 throw new InvalidOperationException("Warehouse location is required.");
             }
         }
-        /// <summary>
-        /// Executes the normalize status operation.
-        /// </summary>
 
         public string NormalizeStatus(string? status)
             => string.IsNullOrWhiteSpace(status) ? "qualified" : status.Trim().ToLower(CultureInfo.InvariantCulture);
-        /// <summary>
-        /// Executes the get stock snapshot async operation.
-        /// </summary>
 
         public async Task<IReadOnlyList<WarehouseStockSnapshot>> GetStockSnapshotAsync(int warehouseId)
         {
@@ -160,9 +124,6 @@ ORDER BY part_name, part_code";
 
             return results;
         }
-        /// <summary>
-        /// Executes the get recent movements async operation.
-        /// </summary>
 
         public async Task<IReadOnlyList<InventoryMovementEntry>> GetRecentMovementsAsync(int warehouseId, int take = 10)
         {
@@ -185,127 +146,6 @@ ORDER BY part_name, part_code";
             }
 
             return items;
-        }
-
-        public async Task<InventoryTransactionResult> ExecuteInventoryTransactionAsync(
-            InventoryTransactionRequest request,
-            WarehouseCrudContext context,
-            ElectronicSignatureDialogResult signatureResult,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(signatureResult);
-            ArgumentNullException.ThrowIfNull(signatureResult.Signature);
-
-            var userId = context.UserId <= 0 ? 1 : context.UserId;
-            var ip = string.IsNullOrWhiteSpace(context.Ip) ? "unknown" : context.Ip;
-            var device = string.IsNullOrWhiteSpace(context.DeviceInfo) ? "WPF" : context.DeviceInfo;
-            var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? Guid.NewGuid().ToString("N") : context.SessionId!;
-
-            switch (request.Type)
-            {
-                case InventoryTransactionType.Receive:
-                    await _database.ReceiveStockAsync(
-                        request.PartId,
-                        request.WarehouseId,
-                        request.Quantity,
-                        userId,
-                        request.Document,
-                        request.Note,
-                        ip,
-                        device,
-                        sessionId,
-                        cancellationToken).ConfigureAwait(false);
-                    break;
-                case InventoryTransactionType.Issue:
-                    await _database.IssueStockAsync(
-                        request.PartId,
-                        request.WarehouseId,
-                        request.Quantity,
-                        userId,
-                        request.Document,
-                        request.Note,
-                        ip,
-                        device,
-                        sessionId,
-                        cancellationToken).ConfigureAwait(false);
-                    break;
-                case InventoryTransactionType.Adjust:
-                    if (!request.AdjustmentDelta.HasValue)
-                    {
-                        throw new InvalidOperationException("Adjustment transactions require a delta value.");
-                    }
-
-                    var reason = string.IsNullOrWhiteSpace(request.AdjustmentReason)
-                        ? request.Note
-                        : request.AdjustmentReason;
-                    if (string.IsNullOrWhiteSpace(reason))
-                    {
-                        reason = "Manual adjustment";
-                    }
-
-                    await _database.AdjustStockAsync(
-                        request.PartId,
-                        request.WarehouseId,
-                        request.AdjustmentDelta.Value,
-                        reason!,
-                        userId,
-                        ip,
-                        device,
-                        sessionId,
-                        cancellationToken).ConfigureAwait(false);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(request.Type), request.Type, "Unsupported inventory transaction type.");
-            }
-
-            SignaturePersistenceHelper.ApplyEntityMetadata(
-                signatureResult,
-                tableName: "inventory_transactions",
-                recordId: request.PartId,
-                metadata: CreateMetadata(context, signatureResult.Signature!.SignatureHash),
-                fallbackSignatureHash: signatureResult.Signature!.SignatureHash,
-                fallbackMethod: signatureResult.Signature.Method,
-                fallbackStatus: signatureResult.Signature.Status,
-                fallbackNote: signatureResult.Signature.Note,
-                signedAt: signatureResult.Signature.SignedAt,
-                fallbackDeviceInfo: device,
-                fallbackIpAddress: ip,
-                fallbackSessionId: sessionId);
-
-            await SignaturePersistenceHelper
-                .PersistIfRequiredAsync(_signatureDialog, signatureResult, cancellationToken)
-                .ConfigureAwait(false);
-
-            await _auditService.LogSystemEventAsync(
-                userId,
-                "STOCK_TRANSACTION_SIGNATURE",
-                "inventory_transactions",
-                "Inventory",
-                request.PartId,
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "type={0};warehouse={1};qty={2};doc={3}",
-                    request.Type,
-                    request.WarehouseId,
-                    request.Quantity,
-                    string.IsNullOrWhiteSpace(request.Document) ? "-" : request.Document),
-                ip,
-                "wpf",
-                device,
-                sessionId,
-                cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            return new InventoryTransactionResult
-            {
-                Type = request.Type,
-                PartId = request.PartId,
-                WarehouseId = request.WarehouseId,
-                Quantity = request.Quantity,
-                Document = request.Document,
-                Note = request.Note,
-                Signature = signatureResult
-            };
         }
 
         private async Task UpdateWarehouseDetailsAsync(Warehouse warehouse, WarehouseCrudContext context)
@@ -360,17 +200,7 @@ WHERE id=@id";
             };
 
             await _database.ExecuteNonQueryAsync(update, parameters).ConfigureAwait(false);
-            await _auditService.LogSystemEventAsync(
-                context.UserId,
-                "WAREHOUSE_SAVE",
-                "warehouses",
-                "WarehouseCrud",
-                warehouse.Id,
-                warehouse.DigitalSignature,
-                context.Ip,
-                "wpf",
-                context.DeviceInfo,
-                context.SessionId).ConfigureAwait(false);
+            await _auditService.LogSystemEventAsync("WAREHOUSE_SAVE", $"WarehouseCrud; sig={warehouse.DigitalSignature}", "warehouses", warehouse.Id).ConfigureAwait(false);
         }
 
         private static string ApplyContext(Warehouse warehouse, WarehouseCrudContext context)
@@ -409,3 +239,4 @@ WHERE id=@id";
                 : null;
     }
 }
+

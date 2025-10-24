@@ -140,38 +140,14 @@ namespace YasGMP.ViewModels
         #endregion
 
         #region === Commands ========================================================
-        /// <summary>
-        /// Gets or sets the load jobs command.
-        /// </summary>
 
         public ICommand LoadJobsCommand { get; }
-        /// <summary>
-        /// Gets or sets the add job command.
-        /// </summary>
         public ICommand AddJobCommand { get; }
-        /// <summary>
-        /// Gets or sets the update job command.
-        /// </summary>
         public ICommand UpdateJobCommand { get; }
-        /// <summary>
-        /// Gets or sets the delete job command.
-        /// </summary>
         public ICommand DeleteJobCommand { get; }
-        /// <summary>
-        /// Gets or sets the acknowledge job command.
-        /// </summary>
         public ICommand AcknowledgeJobCommand { get; }
-        /// <summary>
-        /// Gets or sets the execute job command.
-        /// </summary>
         public ICommand ExecuteJobCommand { get; }
-        /// <summary>
-        /// Gets or sets the export jobs command.
-        /// </summary>
         public ICommand ExportJobsCommand { get; }
-        /// <summary>
-        /// Gets or sets the filter changed command.
-        /// </summary>
         public ICommand FilterChangedCommand { get; }
 
         #endregion

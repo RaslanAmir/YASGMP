@@ -55,22 +55,14 @@ namespace YasGMP.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user.
-        /// </summary>
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }
 
-        /// <summary>
-        /// Gets or sets the permission.
-        /// </summary>
         [ForeignKey(nameof(PermissionId))]
         public virtual Permission? Permission { get; set; }
 
-        /// <summary>
-        /// Gets or sets the reviewed by navigation.
-        /// </summary>
         [ForeignKey(nameof(ReviewedBy))]
         public virtual User? ReviewedByNavigation { get; set; }
     }
 }
+

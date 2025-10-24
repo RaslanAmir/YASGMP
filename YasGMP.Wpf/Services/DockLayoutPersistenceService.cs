@@ -1,103 +1,115 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using MySqlConnector;
 using YasGMP.Services;
-using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Wpf.Services
 {
     /// <summary>Persists and restores AvalonDock layouts using the shared user_window_layouts table.</summary>
     public sealed class DockLayoutPersistenceService
     {
-        private readonly DatabaseService _database;
+        private readonly string _connectionString;
         private readonly IUserSession _session;
-        private readonly IAuthContext _authContext;
-        /// <summary>
-        /// Initializes a new instance of the DockLayoutPersistenceService class.
-        /// </summary>
-        public DockLayoutPersistenceService(DatabaseService database, IUserSession session, IAuthContext authContext)
+
+        public DockLayoutPersistenceService(DatabaseOptions options, IUserSession session)
         {
-            _database = database ?? throw new ArgumentNullException(nameof(database));
+            if (options is null) throw new ArgumentNullException(nameof(options));
+            _connectionString = options.ConnectionString;
             _session = session ?? throw new ArgumentNullException(nameof(session));
-            _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         }
-        /// <summary>
-        /// Executes the load async operation.
-        /// </summary>
 
         public async Task<LayoutSnapshot?> LoadAsync(string layoutKey, CancellationToken token = default)
         {
-            var snapshot = await _database
-                .GetUserWindowLayoutAsync(GetUserId(), layoutKey, token)
-                .ConfigureAwait(false);
+            const string sql = @"
+SELECT layout_xml, pos_x, pos_y, width, height
+FROM user_window_layouts
+WHERE user_id=@u AND page_type=@p
+LIMIT 1;";
 
-            if (snapshot is null)
+            var parameters = new[]
             {
+                new MySqlParameter("@u", _session.UserId),
+                new MySqlParameter("@p", layoutKey)
+            };
+
+            try
+            {
+                await using var conn = CreateConnection();
+                await conn.OpenAsync(token).ConfigureAwait(false);
+                await using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddRange(parameters);
+
+                await using var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false);
+                if (!await reader.ReadAsync(token).ConfigureAwait(false))
+                {
+                    return null;
+                }
+
+                string layoutXml = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                double? posX = reader.IsDBNull(1) ? null : reader.GetDouble(1);
+                double? posY = reader.IsDBNull(2) ? null : reader.GetDouble(2);
+                double? width = reader.IsDBNull(3) ? null : reader.GetDouble(3);
+                double? height = reader.IsDBNull(4) ? null : reader.GetDouble(4);
+
+                return new LayoutSnapshot(layoutXml, posX, posY, width, height);
+            }
+            catch (MySqlException ex) when (IsSchemaMissing(ex))
+            {
+                Debug.WriteLine($"[DockLayoutPersistence] Layout table schema incomplete. Skipping restore for '{layoutKey}': {ex.Message}");
                 return null;
             }
-
-            var geometry = snapshot.Geometry;
-            return new LayoutSnapshot(
-                snapshot.LayoutXml ?? string.Empty,
-                geometry.Left,
-                geometry.Top,
-                geometry.Width,
-                geometry.Height);
         }
-        /// <summary>
-        /// Executes the save async operation.
-        /// </summary>
 
         public async Task SaveAsync(string layoutKey, string layoutXml, WindowGeometry geometry, CancellationToken token = default)
         {
-            var layoutGeometry = new DatabaseServiceLayoutsExtensions.UserWindowLayoutGeometry(
-                geometry.Left,
-                geometry.Top,
-                geometry.Width,
-                geometry.Height);
+            const string sql = @"
+INSERT INTO user_window_layouts (user_id, page_type, layout_xml, pos_x, pos_y, width, height, saved_at)
+VALUES (@u,@p,@layout,@x,@y,@w,@h,UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+layout_xml=VALUES(layout_xml),
+pos_x=VALUES(pos_x),
+pos_y=VALUES(pos_y),
+width=VALUES(width),
+height=VALUES(height),
+saved_at=UTC_TIMESTAMP();";
 
-            var auditContext = new DatabaseServiceLayoutsExtensions.UserWindowLayoutAuditContext(
-                _authContext.CurrentIpAddress,
-                _authContext.CurrentDeviceInfo,
-                _session.SessionId);
+            var parameters = new[]
+            {
+                new MySqlParameter("@u", _session.UserId),
+                new MySqlParameter("@p", layoutKey),
+                new MySqlParameter("@layout", layoutXml),
+                new MySqlParameter("@x", geometry.Left.HasValue ? geometry.Left.Value : (object)DBNull.Value),
+                new MySqlParameter("@y", geometry.Top.HasValue ? geometry.Top.Value : (object)DBNull.Value),
+                new MySqlParameter("@w", geometry.Width.HasValue ? geometry.Width.Value : (object)DBNull.Value),
+                new MySqlParameter("@h", geometry.Height.HasValue ? geometry.Height.Value : (object)DBNull.Value)
+            };
 
-            await _database
-                .SaveUserWindowLayoutAsync(GetUserId(), layoutKey, layoutXml, layoutGeometry, auditContext, token)
-                .ConfigureAwait(false);
+            try
+            {
+                await using var conn = CreateConnection();
+                await conn.OpenAsync(token).ConfigureAwait(false);
+                await using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddRange(parameters);
+                await cmd.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (IsSchemaMissing(ex))
+            {
+                Debug.WriteLine($"[DockLayoutPersistence] Layout table schema incomplete. Skipping save for '{layoutKey}': {ex.Message}");
+            }
         }
 
-        /// <summary>
-        /// Deletes the persisted layout for the current user.
-        /// </summary>
-        public Task ResetAsync(string layoutKey, CancellationToken token = default)
-        {
-            var auditContext = new DatabaseServiceLayoutsExtensions.UserWindowLayoutAuditContext(
-                _authContext.CurrentIpAddress,
-                _authContext.CurrentDeviceInfo,
-                _session.SessionId);
+        private MySqlConnection CreateConnection() => new(_connectionString);
 
-            return _database.DeleteUserWindowLayoutAsync(GetUserId(), layoutKey, auditContext, token);
-        }
-
-        private int GetUserId()
-        {
-            return _session.UserId ?? throw new InvalidOperationException("Current session does not have a user id.");
-        }
+        private static bool IsSchemaMissing(MySqlException ex) => ex.Number == 1054 /* Unknown column */ || ex.Number == 1146 /* Table doesn't exist */;
     }
-    /// <summary>
-    /// Executes the struct operation.
-    /// </summary>
 
     public readonly record struct WindowGeometry(double? Left, double? Top, double? Width, double? Height);
-    /// <summary>
-    /// Executes the struct operation.
-    /// </summary>
 
     public readonly record struct LayoutSnapshot(string LayoutXml, double? Left, double? Top, double? Width, double? Height)
     {
-        /// <summary>
-        /// Executes the geometry operation.
-        /// </summary>
         public WindowGeometry Geometry => new(Left, Top, Width, Height);
     }
 }
+

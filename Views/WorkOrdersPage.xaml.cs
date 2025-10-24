@@ -1,5 +1,6 @@
 using YasGMP.Common;
 using YasGMP.Services;
+
 // ==============================================================================
 //  File: Views/WorkOrdersPage.xaml.cs
 //  Project: YasGMP
@@ -138,6 +139,7 @@ namespace YasGMP.Views
                 if (await dlg.Result)
                 {
                     await _dbService.InsertOrUpdateWorkOrderAsync(wo, false, 0, "ui", "WorkOrdersPage", null, signatureMetadata: null);
+
                     // attempt to refresh via VM if present
                     var vm = BindingContext;
                     var cmd = vm?.GetType().GetProperty("LoadWorkOrdersCommand")?.GetValue(vm) as System.Windows.Input.ICommand;
@@ -185,6 +187,7 @@ namespace YasGMP.Views
                 var prop = vm.GetType().GetProperty("SelectedWorkOrder", BindingFlags.Public | BindingFlags.Instance);
                 if (prop == null || !prop.CanWrite) return;
                 object? selected = (e != null && e.AddedRows != null && e.AddedRows.Count > 0) ? e.AddedRows[0] : null;
+
                 // Set the selection on the VM
                 prop.SetValue(vm, selected);
             }

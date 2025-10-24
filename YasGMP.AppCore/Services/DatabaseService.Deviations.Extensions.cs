@@ -18,9 +18,6 @@ namespace YasGMP.Services
     /// </summary>
     public static class DatabaseServiceDeviationsExtensions
     {
-        /// <summary>
-        /// Executes the get all deviations async operation.
-        /// </summary>
         public static async Task<List<Deviation>> GetAllDeviationsAsync(this DatabaseService db, CancellationToken token = default)
         {
             const string sql = @"SELECT 
@@ -34,9 +31,6 @@ FROM deviations ORDER BY id DESC";
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
         }
-        /// <summary>
-        /// Executes the get deviation by id async operation.
-        /// </summary>
 
         public static async Task<Deviation?> GetDeviationByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
@@ -49,9 +43,6 @@ FROM deviations WHERE id=@id LIMIT 1";
             var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
             return dt.Rows.Count == 1 ? Map(dt.Rows[0]) : null;
         }
-        /// <summary>
-        /// Executes the insert or update deviation async operation.
-        /// </summary>
 
         public static async Task<int> InsertOrUpdateDeviationAsync(this DatabaseService db, Deviation d, bool update, int actorUserId, string? ip = null, string? device = null, string? sessionId = null, CancellationToken token = default)
         {
@@ -100,9 +91,6 @@ FROM deviations WHERE id=@id LIMIT 1";
             await db.LogSystemEventAsync(actorUserId, update ? "DEVIATION_UPDATE" : "DEVIATION_CREATE", "deviations", "DeviationModule", d.Id, d.Title, ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
             return d.Id;
         }
-        /// <summary>
-        /// Executes the delete deviation async operation.
-        /// </summary>
 
         public static async Task DeleteDeviationAsync(this DatabaseService db, int id, int actorUserId, string? ip = null, string? device = null, string? sessionId = null, CancellationToken token = default)
         {
@@ -148,3 +136,4 @@ FROM deviations WHERE id=@id LIMIT 1";
         }
     }
 }
+

@@ -5,42 +5,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="400"
-             d:DesignWidth="280"
-             ToolTipService.ToolTip="{Binding HelpText}"
-             AutomationProperties.Name="{Binding AutomationName}"
-             AutomationProperties.AutomationId="{Binding AutomationId}"
-             AutomationProperties.HelpText="{Binding HelpText}">
+             d:DesignWidth="280">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding Groups}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Expander Margin="0,0,0,8"
-                              IsExpanded="True"
-                              ToolTipService.ToolTip="{Binding ToolTip}"
-                              AutomationProperties.Name="{Binding AutomationName}"
-                              AutomationProperties.AutomationId="{Binding AutomationId}"
-                              AutomationProperties.HelpText="{Binding ToolTip}">
-                        <Expander.HeaderTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Header}"
-                                           ToolTipService.ToolTip="{Binding ToolTip}"
-                                           AutomationProperties.Name="{Binding AutomationName}"
-                                           AutomationProperties.AutomationId="{Binding AutomationId}"
-                                           AutomationProperties.HelpText="{Binding ToolTip}" />
-                            </DataTemplate>
-                        </Expander.HeaderTemplate>
+                    <Expander Header="{Binding Name}"
+                              Margin="0,0,0,8"
+                              IsExpanded="True">
                         <ItemsControl ItemsSource="{Binding Modules}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Margin="12,4,0,4"
-                                            HorizontalContentAlignment="Left"
-                                            Content="{Binding Title}"
+                                    <Button Content="{Binding Metadata.Title}"
+                                            AutomationProperties.Name="{Binding Metadata.Title}"
                                             Command="{Binding OpenCommand}"
                                             CommandParameter="{Binding}"
-                                            ToolTipService.ToolTip="{Binding ToolTip}"
-                                            AutomationProperties.Name="{Binding AutomationName}"
-                                            AutomationProperties.AutomationId="{Binding AutomationId}"
-                                            AutomationProperties.HelpText="{Binding ToolTip}" />
+                                            Margin="12,4,0,4"
+                                            HorizontalContentAlignment="Left"
+                                            ToolTip="{Binding Metadata.Description}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

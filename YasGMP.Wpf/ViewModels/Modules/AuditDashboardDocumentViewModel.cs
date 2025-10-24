@@ -15,18 +15,16 @@ using YasGMP.Wpf.Services;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
 
-/// <summary>
-/// WPF shell adapter that projects the MAUI audit dashboard onto the B1 form host.
-/// </summary>
+/// <summary>Projects the MAUI audit dashboard into the WPF shell while keeping SAP B1 semantics.</summary>
+/// <remarks>
+/// Form Modes: Primarily operates in Find/View modes—filter application mimics Find, while Add/Update remain disabled because the dashboard is read-only.
+/// Audit &amp; Logging: Reads from <see cref="AuditService"/> and exports via <see cref="ExportService"/>; no additional audit entries are emitted by this adapter.
+/// Localization: Uses inline toolbar captions (`"Apply Filters"`, `"Export PDF"`, `"Export Excel"`) and status messages mirroring the MAUI view model; resource keys are yet to be mapped.
+/// Navigation: Publishes ModuleKey `AuditDashboard`, forwards status messages from the underlying dashboard to the shell, and maps Golden Arrow navigation through projected <see cref="ModuleRecord"/> links.
+/// </remarks>
 public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "AuditDashboard";
-    /// <summary>
-    /// Initializes a new instance of the AuditDashboardDocumentViewModel class.
-    /// </summary>
+    public new const string ModuleKey = "AuditDashboard";
 
     public AuditDashboardDocumentViewModel(
         AuditService auditService,
@@ -35,13 +33,11 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        ILocalizationService localization,
         Func<AuditDashboardViewModel, Task<IReadOnlyList<AuditEntryDto>>>? loadOverride = null,
         Func<AuditDashboardViewModel, Task<string>>? exportPdfOverride = null,
         Func<AuditDashboardViewModel, Task<string>>? exportExcelOverride = null)
-        : base(ModuleKey, localization.GetString("Module.Title.AuditDashboard"), localization, cflDialogService, shellInteraction, navigation)
+        : base(ModuleKey, "Audit Dashboard", cflDialogService, shellInteraction, navigation)
     {
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         _dashboardViewModel = dashboardViewModel ?? throw new ArgumentNullException(nameof(dashboardViewModel));
@@ -58,53 +54,20 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
         _exportPdfCommand = new AsyncRelayCommand(ExecuteExportPdfAsync, CanExecuteExport);
         _exportExcelCommand = new AsyncRelayCommand(ExecuteExportExcelAsync, CanExecuteExport);
 
-        Toolbar.Add(new ModuleToolbarCommand(
-            "AuditDashboard.Toolbar.Command.ApplyFilters.Content",
-            _applyFilterCommand,
-            _localization,
-            "AuditDashboard.Toolbar.Command.ApplyFilters.ToolTip",
-            "AuditDashboard.Toolbar.Command.ApplyFilters.AutomationName",
-            "AuditDashboard.Toolbar.Command.ApplyFilters.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "AuditDashboard.Toolbar.Command.ExportPdf.Content",
-            _exportPdfCommand,
-            _localization,
-            "AuditDashboard.Toolbar.Command.ExportPdf.ToolTip",
-            "AuditDashboard.Toolbar.Command.ExportPdf.AutomationName",
-            "AuditDashboard.Toolbar.Command.ExportPdf.AutomationId"));
-        Toolbar.Add(new ModuleToolbarCommand(
-            "AuditDashboard.Toolbar.Command.ExportExcel.Content",
-            _exportExcelCommand,
-            _localization,
-            "AuditDashboard.Toolbar.Command.ExportExcel.ToolTip",
-            "AuditDashboard.Toolbar.Command.ExportExcel.AutomationName",
-            "AuditDashboard.Toolbar.Command.ExportExcel.AutomationId"));
+        Toolbar.Add(new ModuleToolbarCommand("Apply Filters", _applyFilterCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Export PDF", _exportPdfCommand));
+        Toolbar.Add(new ModuleToolbarCommand("Export Excel", _exportExcelCommand));
 
         PropertyChanged += OnPropertyChanged;
     }
-    /// <summary>
-    /// Gets or sets the apply filter command.
-    /// </summary>
 
     public IAsyncRelayCommand ApplyFilterCommand => _applyFilterCommand;
-    /// <summary>
-    /// Gets or sets the export pdf command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportPdfCommand => _exportPdfCommand;
-    /// <summary>
-    /// Gets or sets the export excel command.
-    /// </summary>
 
     public IAsyncRelayCommand ExportExcelCommand => _exportExcelCommand;
-    /// <summary>
-    /// Gets or sets the dashboard.
-    /// </summary>
 
     public AuditDashboardViewModel Dashboard => _dashboardViewModel;
-    /// <summary>
-    /// Executes the initialize async operation.
-    /// </summary>
 
     public new async Task InitializeAsync(object? parameter = null)
     {
@@ -197,7 +160,6 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
     [ObservableProperty]
     private bool _hasError;
 
-    private readonly ILocalizationService _localization;
     private readonly AuditService _auditService;
     private readonly ExportService _exportService;
     private readonly AuditDashboardViewModel _dashboardViewModel;
@@ -401,8 +363,18 @@ public sealed partial class AuditDashboardDocumentViewModel : ModuleDocumentView
 
     private void UpdateCommandStates()
     {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(new Action(UpdateCommandStates));
+            return;
+        }
         _applyFilterCommand.NotifyCanExecuteChanged();
         _exportPdfCommand.NotifyCanExecuteChanged();
         _exportExcelCommand.NotifyCanExecuteChanged();
     }
 }
+
+
+
+

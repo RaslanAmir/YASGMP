@@ -15,16 +15,19 @@ using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the scheduling module view model value.
-/// </summary>
 
+/// <summary>Controls scheduled job definitions within the WPF shell using SAP B1 semantics.</summary>
+/// <remarks>
+/// Form Modes: Find surfaces job listings, Add seeds <see cref="ScheduledJobEditor.CreateEmpty"/>, View allows read-only runtime operations, and Update unlocks editing, attachment capture, and acknowledgment flows.
+/// Audit &amp; Logging: Persists jobs through <see cref="IScheduledJobCrudService"/> with signature enforcement, logs execution/acknowledgement outcomes through domain services, and defers retention to the attachment workflow.
+/// Localization: Inline strings such as `"Scheduled Jobs"`, `"Execute job failed"`, and status prompts remain until module-specific resource keys land.
+/// Navigation: ModuleKey `Scheduling` registers the module; `ModuleRecord` entries include related module keys (e.g. Work Orders, Calibration) so Golden Arrow jumps locate targets, while status messages keep the shell informed about execution and attachment results.
+/// </remarks>
 public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "Scheduling";
+    /// <summary>Shell registration key that binds Scheduled Jobs into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Scheduled Jobs" until `Modules_Scheduling_Title` is introduced.</remarks>
+    public new const string ModuleKey = "Scheduling";
 
     private readonly IScheduledJobCrudService _scheduledJobService;
     private readonly IAuthContext _authContext;
@@ -35,10 +38,9 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
     private ScheduledJob? _loadedJob;
     private ScheduledJobEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
-    /// <summary>
-    /// Initializes a new instance of the SchedulingModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Scheduled Jobs module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public SchedulingModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -49,9 +51,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.ScheduledJobs"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Scheduled Jobs", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _scheduledJobService = scheduledJobService ?? throw new ArgumentNullException(nameof(scheduledJobService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
@@ -64,35 +65,45 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
         ExecuteJobCommand = new AsyncRelayCommand(ExecuteJobAsync, CanExecuteJob);
         AcknowledgeJobCommand = new AsyncRelayCommand(AcknowledgeJobAsync, CanAcknowledgeJob);
+        SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the Scheduled Jobs module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Scheduling_Editor` resources are available.</remarks>
     [ObservableProperty]
     private ScheduledJobEditor _editor;
 
+    /// <summary>Opens the AI module to summarize the selected scheduled job.</summary>
+    public IRelayCommand SummarizeWithAiCommand { get; }
+
+    /// <summary>Generated property exposing the is editor enabled for the Scheduled Jobs module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Scheduling_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
+    /// <summary>Command executing the attach document workflow for the Scheduled Jobs module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Scheduling_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
-    /// <summary>
-    /// Gets or sets the execute job command.
-    /// </summary>
 
+    /// <summary>Command executing the execute job workflow for the Scheduled Jobs module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Scheduling_ExecuteJob` resources are authored.</remarks>
     public IAsyncRelayCommand ExecuteJobCommand { get; }
-    /// <summary>
-    /// Gets or sets the acknowledge job command.
-    /// </summary>
 
+    /// <summary>Command executing the acknowledge job workflow for the Scheduled Jobs module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Scheduling_AcknowledgeJob` resources are authored.</remarks>
     public IAsyncRelayCommand AcknowledgeJobCommand { get; }
 
+    /// <summary>Loads Scheduled Jobs records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Scheduling_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var jobs = await Database.GetAllScheduledJobsFullAsync().ConfigureAwait(false);
         return jobs.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Scheduled Jobs designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
         => new List<ModuleRecord>
         {
@@ -128,6 +139,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 4)
         };
 
+    /// <summary>Loads editor payloads for the selected Scheduled Jobs record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Scheduling". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Scheduling` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (IsInEditMode)
@@ -159,6 +172,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         LoadEditor(job);
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -186,6 +201,26 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         return Task.CompletedTask;
     }
 
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedJob is null)
+        {
+            StatusMessage = "Select a job to summarize.";
+            return;
+        }
+
+        var j = _loadedJob;
+        string prompt = j is null
+            ? $"Summarize scheduled job: {SelectedRecord?.Title}. Provide type, schedule, dependencies and next actions in <= 8 bullets."
+            : $"Summarize this scheduled job (<= 8 bullets). Name={j.Name}; Type={j.JobType}; Status={j.Status}; Recurrence={j.RecurrencePattern}; NextDue={j.NextDue:yyyy-MM-dd}; RequiresAck={j.NeedsAcknowledgment}.";
+
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
+
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -218,6 +253,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         return await Task.FromResult(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Mode == FormMode.Update && _loadedJob is null)
@@ -337,6 +374,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -561,9 +600,10 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
     private void UpdateActionStates()
     {
-        AttachDocumentCommand.NotifyCanExecuteChanged();
-        ExecuteJobCommand.NotifyCanExecuteChanged();
-        AcknowledgeJobCommand.NotifyCanExecuteChanged();
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyManyOnUi(
+            AttachDocumentCommand,
+            ExecuteJobCommand,
+            AcknowledgeJobCommand);
     }
 
     private static ModuleRecord ToRecord(ScheduledJob job)
@@ -594,9 +634,6 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
             relatedModule,
             job.EntityId);
     }
-    /// <summary>
-    /// Represents the scheduled job editor value.
-    /// </summary>
 
     public sealed partial class ScheduledJobEditor : ObservableObject
     {
@@ -677,14 +714,8 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
 
         [ObservableProperty]
         private string _ipAddress = string.Empty;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
 
         public static ScheduledJobEditor CreateEmpty() => new();
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
 
         public static ScheduledJobEditor CreateForNew(IAuthContext authContext)
         {
@@ -706,9 +737,6 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 IpAddress = authContext.CurrentIpAddress
             };
         }
-        /// <summary>
-        /// Executes the from entity operation.
-        /// </summary>
 
         public static ScheduledJobEditor FromEntity(ScheduledJob entity)
         {
@@ -742,9 +770,6 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 IpAddress = entity.IpAddress ?? string.Empty
             };
         }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public ScheduledJobEditor Clone()
             => new()
@@ -776,9 +801,6 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
                 SessionId = SessionId,
                 IpAddress = IpAddress
             };
-        /// <summary>
-        /// Executes the to entity operation.
-        /// </summary>
 
         public ScheduledJob ToEntity(ScheduledJob? existing)
         {
@@ -813,3 +835,5 @@ public sealed partial class SchedulingModuleViewModel : DataDrivenModuleDocument
         }
     }
 }
+
+

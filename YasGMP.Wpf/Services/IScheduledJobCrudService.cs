@@ -1,23 +1,14 @@
 using System;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
 using YasGMP.Models;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services;
 
 /// <summary>
-/// Shared contract that routes scheduled job CRUD/operations through <see cref="YasGMP.Services.DatabaseService"/>
-/// and the MAUI audit infrastructure.
+/// Adapter-friendly abstraction for scheduled job persistence so the WPF shell can
+/// operate without binding directly to database-specific infrastructure.
 /// </summary>
-/// <remarks>
-/// Module view models invoke these members on the dispatcher thread; adapters execute the work against
-/// <see cref="YasGMP.Services.DatabaseService"/> so the MAUI app and WPF shell share persistence and audit history surfaced by
-/// <see cref="YasGMP.Services.AuditService"/>. Callers should marshal UI updates via <see cref="WpfUiDispatcher"/> after
-/// awaiting the returned tasks. Implementations must populate <see cref="CrudSaveResult"/> with identifiers, scheduling status,
-/// and signature context so the values can be localized with <see cref="LocalizationServiceExtensions"/> or
-/// <see cref="ILocalizationService"/> before operators see them.
-/// </remarks>
 public interface IScheduledJobCrudService
 {
     Task<ScheduledJob?> TryGetByIdAsync(int id);
@@ -42,15 +33,8 @@ public interface IScheduledJobCrudService
 }
 
 /// <summary>
-/// Ambient metadata required for auditing scheduled job operations. Each value feeds
-/// <see cref="CrudSaveResult.SignatureMetadata"/> via <see cref="SignatureMetadataDto"/> so compliance pipelines receive the
-/// accepted signature manifest.
+/// Ambient metadata required for auditing scheduled job operations.
 /// </summary>
-/// <remarks>
-/// Adapters shape this record into <see cref="SignatureMetadataDto"/> before returning <see cref="CrudSaveResult"/>.
-/// WPF shell consumers must persist and surface the DTO alongside scheduled jobs, and MAUI screens should propagate the same
-/// payload when presenting or synchronizing records so the shared audit history remains aligned.
-/// </remarks>
 /// <param name="UserId">Authenticated user identifier.</param>
 /// <param name="UserName">Display/user name captured for audit manifest.</param>
 /// <param name="Ip">Source IP address.</param>
@@ -75,9 +59,6 @@ public readonly record struct ScheduledJobCrudContext(
 {
     private const string DefaultSignatureMethod = "password";
     private const string DefaultSignatureStatus = "valid";
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ScheduledJobCrudContext Create(int userId, string? userName, string ip, string deviceInfo, string? sessionId)
         => new(
@@ -91,9 +72,6 @@ public readonly record struct ScheduledJobCrudContext(
             DefaultSignatureMethod,
             DefaultSignatureStatus,
             null);
-    /// <summary>
-    /// Executes the create operation.
-    /// </summary>
 
     public static ScheduledJobCrudContext Create(
         int userId,
@@ -123,3 +101,4 @@ public readonly record struct ScheduledJobCrudContext(
         };
     }
 }
+

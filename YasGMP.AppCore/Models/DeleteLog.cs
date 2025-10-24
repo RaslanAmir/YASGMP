@@ -77,10 +77,8 @@ namespace YasGMP.Models
         [Column("details")]
         public string? Details { get; set; }
 
-        /// <summary>
-        /// Gets or sets the deleted by navigation.
-        /// </summary>
         [ForeignKey(nameof(DeletedBy))]
         public virtual User? DeletedByNavigation { get; set; }
     }
 }
+

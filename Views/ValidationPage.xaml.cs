@@ -287,16 +287,16 @@ namespace YasGMP.Views
                 // Let users attach even before selecting a persisted record; we write to EditValidation
                 var fileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
                 {
-                    { DevicePlatform.iOS,         new[] { "com.adobe.pdf" } },
+                    { DevicePlatform.iOS, new[] { "com.adobe.pdf" } },
                     { DevicePlatform.MacCatalyst, new[] { "com.adobe.pdf" } },
-                    { DevicePlatform.Android,     new[] { "application/pdf" } },
-                    { DevicePlatform.WinUI,       new[] { ".pdf" } }
+                    { DevicePlatform.Android, new[] { "application/pdf" } },
+                    { DevicePlatform.WinUI, new[] { ".pdf" } }
                 });
 
                 var pickOptions = new PickOptions
                 {
                     PickerTitle = "Odaberite PDF dokument",
-                    FileTypes   = fileTypes
+                    FileTypes = fileTypes
                 };
 
                 var file = await FilePicker.Default.PickAsync(pickOptions);
@@ -307,11 +307,11 @@ namespace YasGMP.Views
                 }
 
                 // Copy into app data for durable access
-                var docsDir  = Path.Combine(FileSystem.AppDataDirectory, "validation_docs");
+                var docsDir = Path.Combine(FileSystem.AppDataDirectory, "validation_docs");
                 Directory.CreateDirectory(docsDir);
 
                 var safeName = SanitizeFileName(string.IsNullOrWhiteSpace(file.FileName) ? "dokument.pdf" : file.FileName);
-                var stamp    = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+                var stamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
                 var destPath = Path.Combine(docsDir, $"{stamp}_{safeName}");
 
                 using (var src = await file.OpenReadAsync())

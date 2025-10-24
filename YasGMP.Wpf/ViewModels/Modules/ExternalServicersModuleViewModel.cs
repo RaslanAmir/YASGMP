@@ -5,120 +5,128 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
-using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
+using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the external servicers module view model value.
-/// </summary>
 
+/// <summary>Maintains external servicer vendors within the WPF SAP B1 shell.</summary>
+/// <remarks>
+/// Form Modes: Find searches vendor roster, Add provisions <see cref="ExternalServicerEditor.CreateEmpty"/>, View locks the fields, and Update enables editing with status/service-type picklists.
+/// Audit &amp; Logging: Persists through <see cref="IExternalServicerCrudService"/> while enforcing electronic signatures; vendor audit history remains in the service layer.
+/// Localization: Uses inline strings such as `"External Servicers"`, `"Attachment upload failed"`, and status prompts; localisation keys have not yet been plumbed.
+/// Navigation: ModuleKey `ExternalServicers` keeps shell docking aligned; CFL overrides feed Choose-From-List dialogs and Golden Arrow links from other modules back to vendor records, with status messages updating the ribbon.
+/// </remarks>
 public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
-    public const string ModuleKey = "ExternalServicers";
+    /// <summary>Shell registration key that binds External Servicers into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "External Servicers" until `Modules_ExternalServicers_Title` is introduced.</remarks>
+    public new const string ModuleKey = "ExternalServicers";
 
-    private readonly DatabaseService _databaseService;
+    private static readonly IReadOnlyList<string> DefaultStatusOptions = new ReadOnlyCollection<string>(new[]
+    {
+        "Active",
+        "Pending",
+        "Suspended",
+        "Expired",
+        "On Hold"
+    });
+
+    private static readonly IReadOnlyList<string> DefaultServiceTypeOptions = new ReadOnlyCollection<string>(new[]
+    {
+        "Calibration",
+        "Maintenance",
+        "Validation",
+        "Laboratory",
+        "Audit",
+        "IT Services",
+        "Logistics"
+    });
+
     private readonly IExternalServicerCrudService _servicerService;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly ILocalizationService _localization;
-    private readonly IModuleNavigationService _navigation;
 
     private ExternalServicer? _loadedServicer;
     private ExternalServicerEditor? _snapshot;
     private bool _suppressDirtyNotifications;
     private int? _lastSavedServicerId;
-    private List<ContractorIntervention> _interventions = new();
-    /// <summary>
-    /// Initializes a new instance of the ExternalServicersModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the External Servicers module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public ExternalServicersModuleViewModel(
-        DatabaseService databaseService,
         IExternalServicerCrudService servicerService,
         IAuthContext authContext,
         IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.ExternalServicers"), localization, cflDialogService, shellInteraction, navigation)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "External Servicers", cflDialogService, shellInteraction, navigation)
     {
-        _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _servicerService = servicerService ?? throw new ArgumentNullException(nameof(servicerService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
-        _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
 
         Editor = ExternalServicerEditor.CreateEmpty();
-        StatusOptions = new ReadOnlyCollection<string>(new[]
-        {
-            _localization.GetString("Module.ExternalServicers.Status.Active"),
-            _localization.GetString("Module.ExternalServicers.Status.Pending"),
-            _localization.GetString("Module.ExternalServicers.Status.Suspended"),
-            _localization.GetString("Module.ExternalServicers.Status.Expired"),
-            _localization.GetString("Module.ExternalServicers.Status.OnHold"),
-            _localization.GetString("Module.ExternalServicers.Status.Inactive")
-        });
-        ServiceTypeOptions = new ReadOnlyCollection<string>(new[]
-        {
-            _localization.GetString("Module.ExternalServicers.ServiceType.Calibration"),
-            _localization.GetString("Module.ExternalServicers.ServiceType.Maintenance"),
-            _localization.GetString("Module.ExternalServicers.ServiceType.Validation"),
-            _localization.GetString("Module.ExternalServicers.ServiceType.Laboratory"),
-            _localization.GetString("Module.ExternalServicers.ServiceType.Audit"),
-            _localization.GetString("Module.ExternalServicers.ServiceType.ItServices"),
-            _localization.GetString("Module.ExternalServicers.ServiceType.Logistics")
-        });
-
-        OversightMetrics = new ObservableCollection<ContractorOversightMetric>();
-        InterventionTimeline = new ObservableCollection<ContractorInterventionTimelineItem>();
-        OversightAnalytics = new ObservableCollection<ContractorOversightAnalyticsRow>();
-
-        RefreshOversightCommand = new AsyncRelayCommand(ExecuteRefreshOversightAsync, () => !IsOversightBusy);
-        DrillIntoOversightCommand = new RelayCommand(DrillIntoOversight, CanDrillIntoOversight);
+        StatusOptions = DefaultStatusOptions;
+        ServiceTypeOptions = DefaultServiceTypeOptions;
+        SummarizeWithAiCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(OpenAiSummary);
+        Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
     }
 
+    /// <summary>Generated property exposing the editor for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_Editor` resources are available.</remarks>
     [ObservableProperty]
     private ExternalServicerEditor _editor;
 
+    /// <summary>Generated property exposing the is editor enabled for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
+    /// <summary>Generated property exposing the status options for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_StatusOptions` resources are available.</remarks>
     [ObservableProperty]
     private IReadOnlyList<string> _statusOptions;
 
+    /// <summary>Generated property exposing the service type options for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_ServiceTypeOptions` resources are available.</remarks>
     [ObservableProperty]
     private IReadOnlyList<string> _serviceTypeOptions;
 
-    [ObservableProperty]
-    private ObservableCollection<ContractorOversightMetric> _oversightMetrics;
+    /// <summary>Opens the AI module to summarize the selected external servicer (vendor/lab).</summary>
+    public CommunityToolkit.Mvvm.Input.IRelayCommand SummarizeWithAiCommand { get; }
 
-    [ObservableProperty]
-    private ObservableCollection<ContractorInterventionTimelineItem> _interventionTimeline;
+    private void OpenAiSummary()
+    {
+        if (SelectedRecord is null && _loadedServicer is null)
+        {
+            StatusMessage = "Select a servicer to summarize.";
+            return;
+        }
 
-    [ObservableProperty]
-    private ObservableCollection<ContractorOversightAnalyticsRow> _oversightAnalytics;
+        var s = _loadedServicer;
+        string prompt;
+        if (s is null)
+        {
+            prompt = $"Summarize external servicer: {SelectedRecord?.Title}. Provide status/risks/contracts and next steps in <= 8 bullets.";
+        }
+        else
+        {
+            prompt = $"Summarize this external servicer (<= 8 bullets). Name={s.Name}; Code={s.Code}; Type={s.Type}; Status={s.Status}; Contact={s.ContactPerson}; Email={s.Email}; Phone={s.Phone}; Cooperation={s.CooperationStart:yyyy-MM-dd}..{s.CooperationEnd:yyyy-MM-dd}; Notes={s.Comment}.";
+        }
 
-    [ObservableProperty]
-    private bool _isOversightBusy;
+        var shell = YasGMP.Common.ServiceLocator.GetRequiredService<IShellInteractionService>();
+        var doc = shell.OpenModule(AiModuleViewModel.ModuleKey, $"prompt:{prompt}");
+        shell.Activate(doc);
+    }
 
-    public IAsyncRelayCommand RefreshOversightCommand { get; }
-
-    public IRelayCommand DrillIntoOversightCommand { get; }
-
+    /// <summary>Loads External Servicers records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_ExternalServicers_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         var servicers = await _servicerService.GetAllAsync().ConfigureAwait(false);
@@ -127,8 +135,6 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             .ThenBy(s => s.Id)
             .Select(ToRecord)
             .ToList();
-
-        await UpdateOversightMetricsAsync(reloadData: true).ConfigureAwait(false);
 
         if (_lastSavedServicerId.HasValue)
         {
@@ -147,37 +153,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         return ordered;
     }
 
-    private List<ContractorIntervention> FilterInterventionsForSelection(List<ContractorIntervention> interventions)
-    {
-        if (SelectedRecord is null || !int.TryParse(SelectedRecord.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
-        {
-            return interventions;
-        }
-
-        return interventions.Where(i => i.ContractorId == id).ToList();
-    }
-
-    private static void ReplaceCollection<T>(ObservableCollection<T> target, IEnumerable<T> items)
-    {
-        target.Clear();
-        foreach (var item in items)
-        {
-            target.Add(item);
-        }
-    }
-
-    private static Task RunOnDispatcherAsync(Action action)
-    {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null || dispatcher.CheckAccess())
-        {
-            action();
-            return Task.CompletedTask;
-        }
-
-        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
-    }
-
+    /// <summary>Provides design-time sample data for the External Servicers designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
         var sample = new[]
@@ -187,8 +164,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 Id = 1,
                 Name = "Contoso Calibration",
                 Code = "EXT-001",
-                Type = ServiceTypeOptions[0],
-                Status = StatusOptions[0],
+                Type = "Calibration",
+                Status = "active",
                 ContactPerson = "Ivana Horvat",
                 Email = "calibration@contoso.example",
                 Phone = "+385 91 111 222",
@@ -199,9 +176,9 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 Id = 2,
                 Name = "Globex Maintenance",
                 Code = "EXT-002",
-                Type = ServiceTypeOptions[1],
-                Status = StatusOptions[2],
-                ContactPerson = "Marko Barić",
+                Type = "Maintenance",
+                Status = "suspended",
+                ContactPerson = "Marko BariÄ‡",
                 Email = "support@globex.example",
                 Phone = "+385 91 555 666",
                 Comment = "Pending contract renewal"
@@ -210,12 +187,13 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 
         return sample.Select(ToRecord).ToList();
     }
-
-    protected override async Task OnActivatedAsync(object? parameter)
+    /// <summary>Executes the on activated async routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
+    protected override Task OnActivatedAsync(object? parameter)
     {
         if (parameter is null)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         string key = parameter switch
@@ -227,7 +205,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
 
         if (string.IsNullOrWhiteSpace(key))
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var match = Records.FirstOrDefault(r =>
@@ -239,29 +217,28 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         {
             SelectedRecord = match;
         }
+
+        return Task.CompletedTask;
     }
 
+    /// <summary>Loads editor payloads for the selected External Servicers record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "ExternalServicers". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_ExternalServicers` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
         {
             _loadedServicer = null;
             SetEditor(ExternalServicerEditor.CreateEmpty());
-            await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
-            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
         if (IsInEditMode)
         {
-            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
         if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
         {
-            await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
-            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
@@ -269,17 +246,15 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         if (entity is null)
         {
             StatusMessage = $"External servicer #{id} could not be located.";
-            await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
-            DrillIntoOversightCommand.NotifyCanExecuteChanged();
             return;
         }
 
         _loadedServicer = entity;
         LoadEditor(entity);
-        await UpdateOversightMetricsAsync(reloadData: false).ConfigureAwait(false);
-        DrillIntoOversightCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -306,12 +281,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         return Task.CompletedTask;
     }
 
-    partial void OnIsOversightBusyChanged(bool value)
-    {
-        RefreshOversightCommand.NotifyCanExecuteChanged();
-        DrillIntoOversightCommand.NotifyCanExecuteChanged();
-    }
-
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -335,6 +306,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Mode == FormMode.Update && _loadedServicer is null)
@@ -396,7 +369,7 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
             }
             else if (Mode == FormMode.Update)
             {
-                servicer.Id = _loadedServicer.Id;
+                servicer.Id = _loadedServicer!.Id;
                 saveResult = await _servicerService.UpdateAsync(servicer, context).ConfigureAwait(false);
                 adapterResult = servicer;
             }
@@ -413,7 +386,6 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         _loadedServicer = servicer;
         _lastSavedServicerId = servicer.Id;
         LoadEditor(servicer);
-        UpdateAttachmentCommandState();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
@@ -446,6 +418,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -465,6 +439,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         }
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "ExternalServicers". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_ExternalServicers` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var servicers = await _servicerService.GetAllAsync().ConfigureAwait(false);
@@ -487,290 +463,15 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
                 descriptionParts.Add(servicer.ContactPerson!);
             }
 
-            var description = descriptionParts.Count > 0 ? string.Join(" • ", descriptionParts) : null;
+            var description = descriptionParts.Count > 0 ? string.Join(" â€˘ ", descriptionParts) : null;
             return new CflItem(key, servicer.Name, description);
         }).ToList();
 
         return new CflRequest("Select External Servicer", items);
     }
 
-    private Task ExecuteRefreshOversightAsync()
-        => UpdateOversightMetricsAsync(reloadData: true);
-
-    private bool CanDrillIntoOversight()
-        => !IsOversightBusy && SelectedRecord is not null;
-
-    private void DrillIntoOversight()
-    {
-        if (SelectedRecord is null)
-        {
-            StatusMessage = _localization.GetString("Module.ExternalServicers.Oversight.Status.SelectServicer");
-            return;
-        }
-
-        try
-        {
-            var document = _navigation.OpenModule(SchedulingModuleViewModel.ModuleKey, SelectedRecord.Key);
-            _navigation.Activate(document);
-            StatusMessage = string.Format(
-                CultureInfo.CurrentCulture,
-                _localization.GetString("Module.ExternalServicers.Oversight.Status.DrilledIn"),
-                SelectedRecord.Title);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = string.Format(
-                CultureInfo.CurrentCulture,
-                _localization.GetString("Module.ExternalServicers.Oversight.Status.DrillFailed"),
-                ex.Message);
-        }
-    }
-
-    private async Task UpdateOversightMetricsAsync(bool reloadData)
-    {
-        try
-        {
-            if (IsOversightBusy)
-            {
-                return;
-            }
-
-            IsOversightBusy = true;
-
-            if (reloadData || _interventions.Count == 0)
-            {
-                var data = await _databaseService
-                    .GetAllContractorInterventionsAsync()
-                    .ConfigureAwait(false);
-                _interventions = data ?? new List<ContractorIntervention>();
-            }
-
-            var scoped = FilterInterventionsForSelection(_interventions);
-
-            var now = DateTime.UtcNow;
-            var currentStart = now.AddDays(-30);
-            var previousStart = now.AddDays(-60);
-            var currentWindow = scoped.Where(i => i.InterventionDate >= currentStart).ToList();
-            var previousWindow = scoped
-                .Where(i => i.InterventionDate >= previousStart && i.InterventionDate < currentStart)
-                .ToList();
-
-            var metrics = BuildMetrics(scoped, currentWindow.Count, previousWindow.Count);
-            var timeline = BuildTimeline(scoped);
-            var analytics = BuildAnalytics(scoped);
-
-            await RunOnDispatcherAsync(() =>
-            {
-                ReplaceCollection(OversightMetrics, metrics);
-                ReplaceCollection(InterventionTimeline, timeline);
-                ReplaceCollection(OversightAnalytics, analytics);
-            }).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = string.Format(
-                CultureInfo.CurrentCulture,
-                _localization.GetString("Module.ExternalServicers.Oversight.Status.RefreshFailed"),
-                ex.Message);
-        }
-        finally
-        {
-            IsOversightBusy = false;
-        }
-    }
-
-    private IReadOnlyList<ContractorOversightMetric> BuildMetrics(
-        IReadOnlyCollection<ContractorIntervention> scoped,
-        int currentWindowCount,
-        int previousWindowCount)
-    {
-        var culture = CultureInfo.CurrentCulture;
-        var metrics = new List<ContractorOversightMetric>
-        {
-            new(
-                _localization.GetString("Module.ExternalServicers.Oversight.Metric.Total"),
-                scoped.Count.ToString("N0", culture),
-                BuildTrendText(currentWindowCount, previousWindowCount),
-                Brushes.SlateBlue)
-        };
-
-        var openStatuses = scoped
-            .Count(i => !string.IsNullOrWhiteSpace(i.Status) && !IsClosedStatus(i.Status));
-        metrics.Add(new ContractorOversightMetric(
-            _localization.GetString("Module.ExternalServicers.Oversight.Metric.Open"),
-            openStatuses.ToString("N0", culture),
-            _localization.GetString(openStatuses == 0
-                ? "Module.ExternalServicers.Oversight.Trend.NoBacklog"
-                : "Module.ExternalServicers.Oversight.Trend.Backlog"),
-            Brushes.Teal));
-
-        var upcomingThreshold = DateTime.UtcNow.AddDays(30);
-        var upcoming = scoped.Count(i => i.EndDate is { } end && end <= upcomingThreshold && end >= DateTime.UtcNow);
-        metrics.Add(new ContractorOversightMetric(
-            _localization.GetString("Module.ExternalServicers.Oversight.Metric.UpcomingExpirations"),
-            upcoming.ToString("N0", culture),
-            upcoming > 0
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Trend.ActionRequired")
-                : _localization.GetString("Module.ExternalServicers.Oversight.Trend.OnTrack"),
-            Brushes.Orange));
-
-        var mttr = CalculateAverageDuration(scoped);
-        metrics.Add(new ContractorOversightMetric(
-            _localization.GetString("Module.ExternalServicers.Oversight.Metric.AverageMttr"),
-            mttr is null
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
-                : FormatDuration(mttr.Value, culture),
-            mttr is null
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Trend.InsufficientData")
-                : _localization.GetString("Module.ExternalServicers.Oversight.Trend.Mttr"),
-            Brushes.MediumPurple));
-
-        return metrics;
-    }
-
-    private IReadOnlyList<ContractorOversightAnalyticsRow> BuildAnalytics(IReadOnlyCollection<ContractorIntervention> scoped)
-    {
-        var culture = CultureInfo.CurrentCulture;
-        var analytics = new List<ContractorOversightAnalyticsRow>();
-
-        if (scoped.Count == 0)
-        {
-            analytics.Add(new ContractorOversightAnalyticsRow(
-                _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.NoData"),
-                _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable"),
-                "-",
-                _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.Waiting")));
-            return analytics;
-        }
-
-        var statusGroups = scoped
-            .Where(i => !string.IsNullOrWhiteSpace(i.Status))
-            .GroupBy(i => i.Status!.Trim())
-            .Select(g => $"{g.Key}: {g.Count():N0}")
-            .ToList();
-
-        analytics.Add(new ContractorOversightAnalyticsRow(
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.StatusDistribution"),
-            statusGroups.Count == 0
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
-                : string.Join(" | ", statusGroups),
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Balanced"),
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.Info")));
-
-        var complianceCount = scoped.Count(i => i.GmpCompliance);
-        var complianceRate = scoped.Count == 0 ? 0 : (double)complianceCount / scoped.Count;
-        analytics.Add(new ContractorOversightAnalyticsRow(
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.Compliance"),
-            complianceRate.ToString("P0", culture),
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Compliance"),
-            complianceRate >= 0.9
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.OnTrack")
-                : _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.AtRisk")));
-
-        var activeAges = scoped
-            .Where(i => !string.IsNullOrWhiteSpace(i.Status) && !IsClosedStatus(i.Status))
-            .Select(i => (DateTime.UtcNow - i.InterventionDate).TotalDays)
-            .Where(days => days >= 0)
-            .ToList();
-
-        var averageAge = activeAges.Count == 0 ? 0 : activeAges.Average();
-        analytics.Add(new ContractorOversightAnalyticsRow(
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.BacklogAge"),
-            averageAge == 0
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
-                : string.Format(culture, "{0:F1} d", averageAge),
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Age"),
-            averageAge <= 14
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.OnTrack")
-                : _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.AtRisk")));
-
-        var mttr = CalculateAverageDuration(scoped);
-        analytics.Add(new ContractorOversightAnalyticsRow(
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Metric.Mttr"),
-            mttr is null
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NotAvailable")
-                : FormatDuration(mttr.Value, culture),
-            _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Target.Mttr"),
-            mttr is not null && mttr.Value.TotalHours <= 72
-                ? _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.OnTrack")
-                : _localization.GetString("Module.ExternalServicers.Oversight.Analytics.Status.AtRisk")));
-
-        return analytics;
-    }
-
-    private static string BuildTrendText(int currentCount, int previousCount)
-    {
-        if (previousCount == 0 && currentCount == 0)
-        {
-            return "▬ 0";
-        }
-
-        if (previousCount == 0)
-        {
-            return $"▲ {currentCount}";
-        }
-
-        var delta = currentCount - previousCount;
-        if (delta == 0)
-        {
-            return "▬ 0";
-        }
-
-        var symbol = delta > 0 ? "▲" : "▼";
-        return $"{symbol} {Math.Abs(delta)}";
-    }
-
-    private static bool IsClosedStatus(string status)
-    {
-        var normalized = status.Trim().ToLowerInvariant();
-        return normalized is "closed" or "completed" or "done" or "resolved" or "archived";
-    }
-
-    private static TimeSpan? CalculateAverageDuration(IEnumerable<ContractorIntervention> scoped)
-    {
-        var durations = scoped
-            .Where(i => i.StartDate.HasValue && i.EndDate.HasValue && i.EndDate >= i.StartDate)
-            .Select(i => i.EndDate!.Value - i.StartDate!.Value)
-            .Where(duration => duration.TotalMinutes >= 0)
-            .ToList();
-
-        if (durations.Count == 0)
-        {
-            return null;
-        }
-
-        var averageTicks = Convert.ToInt64(durations.Average(d => d.Ticks));
-        return new TimeSpan(averageTicks);
-    }
-
-    private static string FormatDuration(TimeSpan duration, CultureInfo culture)
-    {
-        if (duration.TotalHours < 24)
-        {
-            return string.Format(culture, "{0:F1} h", duration.TotalHours);
-        }
-
-        return string.Format(culture, "{0:F1} d", duration.TotalDays);
-    }
-
-    private IReadOnlyList<ContractorInterventionTimelineItem> BuildTimeline(IEnumerable<ContractorIntervention> scoped)
-        => scoped
-            .OrderByDescending(i => i.InterventionDate)
-            .Take(15)
-            .Select(i => new ContractorInterventionTimelineItem(
-                i.InterventionDate,
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    _localization.GetString("Module.ExternalServicers.Oversight.Timeline.Summary"),
-                    string.IsNullOrWhiteSpace(i.InterventionType) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.UnknownType") : i.InterventionType,
-                    string.IsNullOrWhiteSpace(i.Status) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.UnknownStatus") : i.Status),
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    _localization.GetString("Module.ExternalServicers.Oversight.Timeline.Detail"),
-                    string.IsNullOrWhiteSpace(i.Reason) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NoReason") : i.Reason,
-                    string.IsNullOrWhiteSpace(i.Result) ? _localization.GetString("Module.ExternalServicers.Oversight.Value.NoResult") : i.Result)))
-            .ToList();
-
+    /// <summary>Applies CFL selections back into the External Servicers workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "ExternalServicers". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_ExternalServicers_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var match = Records.FirstOrDefault(r => r.Key == result.Selected.Key);
@@ -788,6 +489,8 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
         return Task.CompletedTask;
     }
 
+    /// <summary>Executes the matches search routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
         if (base.MatchesSearch(record, searchText))
@@ -874,65 +577,10 @@ public sealed partial class ExternalServicersModuleViewModel : ModuleDocumentVie
     }
 }
 
-public sealed class ContractorOversightMetric
-{
-    public ContractorOversightMetric(string title, string formattedValue, string trendText, Brush accentBrush)
-    {
-        Title = title;
-        FormattedValue = formattedValue;
-        TrendText = trendText;
-        AccentBrush = accentBrush;
-    }
-
-    public string Title { get; }
-
-    public string FormattedValue { get; }
-
-    public string TrendText { get; }
-
-    public Brush AccentBrush { get; }
-}
-
-public sealed class ContractorInterventionTimelineItem
-{
-    public ContractorInterventionTimelineItem(DateTime timestamp, string summary, string details)
-    {
-        Timestamp = timestamp;
-        Summary = summary;
-        Details = details;
-    }
-
-    public DateTime Timestamp { get; }
-
-    public string Summary { get; }
-
-    public string Details { get; }
-}
-
-public sealed class ContractorOversightAnalyticsRow
-{
-    public ContractorOversightAnalyticsRow(string metric, string value, string target, string status)
-    {
-        Metric = metric;
-        Value = value;
-        Target = target;
-        Status = status;
-    }
-
-    public string Metric { get; }
-
-    public string Value { get; }
-
-    public string Target { get; }
-
-    public string Status { get; }
-}
-/// <summary>
-/// Represents the external servicer editor value.
-/// </summary>
-
 public sealed partial class ExternalServicerEditor : ObservableObject
 {
+    /// <summary>Generated property exposing the id for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_Id` resources are available.</remarks>
     [ObservableProperty]
     private int _id;
 
@@ -963,9 +611,13 @@ public sealed partial class ExternalServicerEditor : ObservableObject
     [ObservableProperty]
     private string _address = string.Empty;
 
+    /// <summary>Generated property exposing the cooperation start for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_CooperationStart` resources are available.</remarks>
     [ObservableProperty]
     private DateTime? _cooperationStart;
 
+    /// <summary>Generated property exposing the cooperation end for the External Servicers module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_ExternalServicers_CooperationEnd` resources are available.</remarks>
     [ObservableProperty]
     private DateTime? _cooperationEnd;
 
@@ -980,25 +632,22 @@ public sealed partial class ExternalServicerEditor : ObservableObject
 
     [ObservableProperty]
     private string _certificateFiles = string.Empty;
-    /// <summary>
-    /// Executes the create empty operation.
-    /// </summary>
 
+    /// <summary>Executes the create empty routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static ExternalServicerEditor CreateEmpty() => new();
-    /// <summary>
-    /// Executes the create for new operation.
-    /// </summary>
 
+    /// <summary>Executes the create for new routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static ExternalServicerEditor CreateForNew()
         => new()
         {
             Status = "Active",
             CooperationStart = DateTime.UtcNow.Date
         };
-    /// <summary>
-    /// Executes the from servicer operation.
-    /// </summary>
 
+    /// <summary>Executes the from servicer routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public static ExternalServicerEditor FromServicer(ExternalServicer servicer)
         => new()
         {
@@ -1023,10 +672,9 @@ public sealed partial class ExternalServicerEditor : ObservableObject
                 ? string.Empty
                 : string.Join(Environment.NewLine, servicer.CertificateFiles)
         };
-    /// <summary>
-    /// Executes the clone operation.
-    /// </summary>
 
+    /// <summary>Executes the clone routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public ExternalServicerEditor Clone()
         => new()
         {
@@ -1047,10 +695,9 @@ public sealed partial class ExternalServicerEditor : ObservableObject
             DigitalSignature = DigitalSignature,
             CertificateFiles = CertificateFiles
         };
-    /// <summary>
-    /// Executes the to servicer operation.
-    /// </summary>
 
+    /// <summary>Executes the to servicer routine for the External Servicers module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public ExternalServicer ToServicer(ExternalServicer? existing)
     {
         var target = existing is null ? new ExternalServicer() : CloneServicer(existing);
@@ -1110,3 +757,10 @@ public sealed partial class ExternalServicerEditor : ObservableObject
             .ToList();
     }
 }
+
+
+
+
+
+
+

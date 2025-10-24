@@ -1,30 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
-using Microsoft.Maui.Storage;
 
 namespace YasGMP.Diagnostics
 {
-    /// <summary>
-    /// Represents the Crash Handler.
-    /// </summary>
     public sealed class CrashHandler
     {
         private readonly ITrace _trace;
         private readonly DiagnosticContext _ctx;
-        /// <summary>
-        /// Initializes a new instance of the CrashHandler class.
-        /// </summary>
 
         public CrashHandler(ITrace trace, DiagnosticContext ctx)
         {
             _trace = trace; _ctx = ctx;
         }
-        /// <summary>
-        /// Executes the register global operation.
-        /// </summary>
 
         public void RegisterGlobal()
         {
@@ -44,8 +34,8 @@ namespace YasGMP.Diagnostics
         {
             try
             {
-                var dir = Path.Combine(FileSystem.AppDataDirectory, "logs", "crash");
-                Directory.CreateDirectory(dir);
+                var dir = Path.Combine(DiagnosticsPathProvider.GetLogsDirectory(), "crash");
+                DiagnosticsPathProvider.EnsureDirectory(dir);
                 var zipName = $"{DateTime.UtcNow:yyyyMMdd_HHmm}_{_ctx.CorrId}.zip";
                 var zipPath = Path.Combine(dir, zipName);
                 using var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create);
@@ -79,7 +69,7 @@ namespace YasGMP.Diagnostics
                 // appsettings snapshot (from AppData if present)
                 try
                 {
-                    var appCfg = Path.Combine(FileSystem.AppDataDirectory, "appsettings.json");
+                    var appCfg = Path.Combine(DiagnosticsPathProvider.GetAppDataDirectory(), "appsettings.json");
                     if (File.Exists(appCfg))
                     {
                         var entry = zip.CreateEntry("appsettings_snapshot.json");
@@ -111,7 +101,7 @@ namespace YasGMP.Diagnostics
         {
             try
             {
-                var dir = Path.Combine(FileSystem.AppDataDirectory, "logs");
+                var dir = DiagnosticsPathProvider.GetLogsDirectory();
                 var file = Path.Combine(dir, $"{DateTime.UtcNow:yyyy-MM-dd}_diag.log");
                 if (!File.Exists(file)) return;
                 var entry = zip.CreateEntry("breadcrumbs.json");
@@ -123,3 +113,4 @@ namespace YasGMP.Diagnostics
         }
     }
 }
+

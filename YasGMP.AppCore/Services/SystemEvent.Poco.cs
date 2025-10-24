@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace YasGMP.Services
 {
@@ -41,3 +41,4 @@ namespace YasGMP.Services
         public bool Processed { get; set; }
     }
 }
+

@@ -1,28 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using ComponentEntity = YasGMP.Models.Component;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the calibration module view model value.
-/// </summary>
 
+/// <summary>Handles equipment calibration records with SAP B1 workflows inside the WPF shell.</summary>
+/// <remarks>
+/// Form Modes: Find filters calibrations via CFL, Add seeds <see cref="CalibrationEditor.CreateEmpty"/>, View locks the editor, and Update enables editing with attachment and supplier/component selectors.
+/// Audit &amp; Logging: Delegates persistence to <see cref="ICalibrationCrudService"/> with required e-signatures and attachment handling; actual audit hashes are written by the underlying services rather than this view-model.
+/// Localization: Emits inline strings such as `"Calibration"`, `"Select Calibration"`, status prompts for due dates, and attachment notifications; resource keys are pending.
+/// Navigation: ModuleKey `Calibration` aligns docking, while overrides of `CreateCflRequestAsync` and related status strings drive Golden Arrow/CFL routing between components, suppliers, and calibration records.
+/// </remarks>
 public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
+    /// <summary>Shell registration key that binds Calibration into the docking layout.</summary>
+    /// <remarks>Execution: Resolved when the shell composes modules and persists layouts. Form Mode: Identifier applies across Find/Add/View/Update. Localization: Currently paired with the inline caption "Calibration" until `Modules_Calibration_Title` is introduced.</remarks>
     public new const string ModuleKey = "Calibration";
 
     private readonly ICalibrationCrudService _calibrationService;
@@ -31,19 +34,15 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     private readonly IFilePicker _filePicker;
     private readonly IAttachmentWorkflowService _attachmentWorkflow;
     private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly ICalibrationCertificateDialogService _certificateDialog;
 
     private Calibration? _loadedCalibration;
     private CalibrationEditor? _snapshot;
     private bool _suppressEditorDirtyNotifications;
-    private IReadOnlyList<Component> _components = Array.Empty<Component>();
+    private IReadOnlyList<ComponentEntity> _components = Array.Empty<ComponentEntity>();
     private IReadOnlyList<Supplier> _suppliers = Array.Empty<Supplier>();
-    private CalibrationCertificateDialogResult? _pendingCertificate;
-    private int? _pendingAttachmentRemoval;
-    /// <summary>
-    /// Initializes a new instance of the CalibrationModuleViewModel class.
-    /// </summary>
 
+    /// <summary>Initializes the Calibration module view model with domain and shell services.</summary>
+    /// <remarks>Execution: Invoked when the shell activates the module or Golden Arrow navigation materializes it. Form Mode: Seeds Find/View immediately while deferring Add/Update wiring to later transitions. Localization: Relies on inline strings for tab titles and prompts until module resources exist.</remarks>
     public CalibrationModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -53,12 +52,10 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         IFilePicker filePicker,
         IAttachmentWorkflowService attachmentWorkflow,
         IElectronicSignatureDialogService signatureDialog,
-        ICalibrationCertificateDialogService certificateDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
-        IModuleNavigationService navigation,
-        ILocalizationService localization)
-        : base(ModuleKey, localization.GetString("Module.Title.Calibration"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
+        IModuleNavigationService navigation)
+        : base(ModuleKey, "Calibration", databaseService, cflDialogService, shellInteraction, navigation, auditService)
     {
         _calibrationService = calibrationService ?? throw new ArgumentNullException(nameof(calibrationService));
         _componentService = componentService ?? throw new ArgumentNullException(nameof(componentService));
@@ -66,47 +63,38 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _filePicker = filePicker ?? throw new ArgumentNullException(nameof(filePicker));
         _attachmentWorkflow = attachmentWorkflow ?? throw new ArgumentNullException(nameof(attachmentWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        _certificateDialog = certificateDialog ?? throw new ArgumentNullException(nameof(certificateDialog));
 
         Editor = CalibrationEditor.CreateEmpty();
         ComponentOptions = new ObservableCollection<ComponentOption>();
         SupplierOptions = new ObservableCollection<SupplierOption>();
 
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
-        ManageCertificateCommand = new AsyncRelayCommand(ManageCertificateAsync, CanManageCertificate);
-        ClearCertificateCommand = new RelayCommand(ClearCertificate, CanClearCertificate);
     }
 
+    /// <summary>Generated property exposing the editor for the Calibration module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Calibration_Editor` resources are available.</remarks>
     [ObservableProperty]
     private CalibrationEditor _editor;
 
+    /// <summary>Generated property exposing the is editor enabled for the Calibration module.</summary>
+    /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Calibration_IsEditorEnabled` resources are available.</remarks>
     [ObservableProperty]
     private bool _isEditorEnabled;
 
-    partial void OnIsEditorEnabledChanged(bool value)
-        => UpdateCertificateCommandState();
-    /// <summary>
-    /// Gets or sets the component options.
-    /// </summary>
-
+    /// <summary>Collection presenting the component options for the Calibration document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Calibration_Grid` resources exist.</remarks>
     public ObservableCollection<ComponentOption> ComponentOptions { get; }
-    /// <summary>
-    /// Gets or sets the supplier options.
-    /// </summary>
 
+    /// <summary>Collection presenting the supplier options for the Calibration document host.</summary>
+    /// <remarks>Execution: Populated as records load or staging mutates. Form Mode: Visible in all modes with editing reserved for Add/Update. Localization: Grid headers/tooltips remain inline until `Modules_Calibration_Grid` resources exist.</remarks>
     public ObservableCollection<SupplierOption> SupplierOptions { get; }
-    /// <summary>
-    /// Gets or sets the attach document command.
-    /// </summary>
 
+    /// <summary>Command executing the attach document workflow for the Calibration module.</summary>
+    /// <remarks>Execution: Invoked when the correlated ribbon or toolbar control is activated. Form Mode: Enabled only when the current mode supports the action (generally Add/Update). Localization: Uses inline button labels/tooltips until `Ribbon_Calibration_AttachDocument` resources are authored.</remarks>
     public IAsyncRelayCommand AttachDocumentCommand { get; }
 
-    /// <summary>Gets the command that opens the calibration certificate dialog.</summary>
-    public IAsyncRelayCommand ManageCertificateCommand { get; }
-
-    /// <summary>Gets the command that clears the staged certificate metadata.</summary>
-    public IRelayCommand ClearCertificateCommand { get; }
-
+    /// <summary>Loads Calibration records from domain services.</summary>
+    /// <remarks>Execution: Triggered by Find refreshes and shell activation. Form Mode: Supplies data for Find/View while Add/Update reuse cached results. Localization: Emits inline status strings pending `Status_Calibration_Loaded` resources.</remarks>
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
         _components = await _componentService.GetAllAsync().ConfigureAwait(false);
@@ -119,9 +107,11 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         return calibrations.Select(ToRecord).ToList();
     }
 
+    /// <summary>Provides design-time sample data for the Calibration designer experience.</summary>
+    /// <remarks>Execution: Invoked only by design-mode checks to support Blend/preview tooling. Form Mode: Mirrors Find mode to preview list layouts. Localization: Sample literals remain inline for clarity.</remarks>
     protected override IReadOnlyList<ModuleRecord> CreateDesignTimeRecords()
     {
-        _components = new List<Component>
+        _components = new List<ComponentEntity>
         {
             new() { Id = 201, Name = "Temperature Probe" },
             new() { Id = 202, Name = "Pressure Transducer" }
@@ -164,6 +154,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         return sample.Select(ToRecord).ToList();
     }
 
+    /// <summary>Builds the Choose-From-List request used for Golden Arrow navigation.</summary>
+    /// <remarks>Execution: Called when the shell launches CFL dialogs, routing via `ModuleKey` "Calibration". Form Mode: Provides lookup data irrespective of current mode. Localization: Dialog titles and descriptions use inline strings until `CFL_Calibration` resources exist.</remarks>
     protected override async Task<CflRequest?> CreateCflRequestAsync()
     {
         var calibrations = await _calibrationService.GetAllAsync().ConfigureAwait(false);
@@ -174,7 +166,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 var label = $"Calibration #{calibration.Id}";
                 var descriptionParts = new List<string>
                 {
-                    FindComponentName(calibration.ComponentId) ?? $"Component #{calibration.ComponentId}",
+                    FindComponentName(calibration.ComponentId) ?? $"ComponentEntity #{calibration.ComponentId}",
                     calibration.CalibrationDate.ToString("d", CultureInfo.CurrentCulture),
                     calibration.NextDue.ToString("d", CultureInfo.CurrentCulture)
                 };
@@ -191,6 +183,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         return new CflRequest("Select Calibration", items);
     }
 
+    /// <summary>Applies CFL selections back into the Calibration workspace.</summary>
+    /// <remarks>Execution: Runs after CFL or Golden Arrow completion, updating `StatusMessage` for `ModuleKey` "Calibration". Form Mode: Navigates records without disturbing active edits. Localization: Status feedback uses inline phrases pending `Status_Calibration_Filtered`.</remarks>
     protected override Task OnCflSelectionAsync(CflResult result)
     {
         var search = result.Selected.Label;
@@ -206,6 +200,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         return Task.CompletedTask;
     }
 
+    /// <summary>Loads editor payloads for the selected Calibration record.</summary>
+    /// <remarks>Execution: Triggered when document tabs change or shell routing targets `ModuleKey` "Calibration". Form Mode: Honors Add/Update safeguards to avoid overwriting dirty state. Localization: Inline status/error strings remain until `Status_Calibration` resources are available.</remarks>
     protected override async Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         if (record is null)
@@ -213,9 +209,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             _loadedCalibration = null;
             SetEditor(CalibrationEditor.CreateEmpty());
             UpdateAttachmentCommandState();
-            _pendingCertificate = null;
-            _pendingAttachmentRemoval = null;
-            UpdateCertificateCommandState();
             return;
         }
 
@@ -237,13 +230,12 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         _loadedCalibration = calibration;
-        _pendingCertificate = null;
-        _pendingAttachmentRemoval = null;
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
-        UpdateCertificateCommandState();
     }
 
+    /// <summary>Adjusts command enablement and editor state when the form mode changes.</summary>
+    /// <remarks>Execution: Fired by the SAP B1 style form state machine when Find/Add/View/Update transitions occur. Form Mode: Governs which controls are writable and which commands are visible. Localization: Mode change prompts use inline strings pending localization resources.</remarks>
     protected override Task OnModeChangedAsync(FormMode mode)
     {
         IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
@@ -255,8 +247,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 _loadedCalibration = null;
                 SetEditor(CalibrationEditor.CreateForNew());
                 ApplyDefaultLookupSelections();
-                _pendingCertificate = null;
-                _pendingAttachmentRemoval = null;
                 break;
             case FormMode.Update:
                 _snapshot = Editor.Clone();
@@ -267,11 +257,12 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         UpdateAttachmentCommandState();
-        UpdateCertificateCommandState();
 
         return Task.CompletedTask;
     }
 
+    /// <summary>Validates the current editor payload before persistence.</summary>
+    /// <remarks>Execution: Invoked immediately prior to OK/Update actions. Form Mode: Only Add/Update trigger validation. Localization: Error messages flow from inline literals until validation resources are added.</remarks>
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
         var errors = new List<string>();
@@ -292,6 +283,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         return await Task.FromResult<IReadOnlyList<string>>(errors).ConfigureAwait(false);
     }
 
+    /// <summary>Persists the current record and coordinates signatures, attachments, and audits.</summary>
+    /// <remarks>Execution: Runs after validation when OK/Update is confirmed. Form Mode: Exclusive to Add/Update operations. Localization: Success/failure messaging remains inline pending dedicated resources.</remarks>
     protected override async Task<bool> OnSaveAsync()
     {
         if (Mode == FormMode.Update && _loadedCalibration is null)
@@ -368,17 +361,8 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         _loadedCalibration = calibration;
-
-        var (certificateSnapshot, certificateMessage) = await HandlePendingCertificateAsync(adapterResult).ConfigureAwait(false);
-
         LoadEditor(calibration);
         UpdateAttachmentCommandState();
-
-        if (certificateSnapshot is not null)
-        {
-            Editor.Certificate = certificateSnapshot;
-            Editor.CertDoc = certificateSnapshot.DisplayName;
-        }
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
@@ -407,12 +391,12 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             return false;
         }
 
-        StatusMessage = string.IsNullOrWhiteSpace(certificateMessage)
-            ? $"Electronic signature captured ({signatureResult.ReasonDisplay})."
-            : $"Electronic signature captured ({signatureResult.ReasonDisplay}). {certificateMessage}";
+        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
         return true;
     }
 
+    /// <summary>Reverts in-flight edits and restores the last committed snapshot.</summary>
+    /// <remarks>Execution: Activated when Cancel is chosen mid-edit. Form Mode: Applies to Add/Update; inert elsewhere. Localization: Cancellation prompts use inline text until localized resources exist.</remarks>
     protected override void OnCancel()
     {
         if (Mode == FormMode.Add)
@@ -421,9 +405,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 ? CalibrationEditor.CreateEmpty()
                 : CalibrationEditor.FromCalibration(_loadedCalibration, FindComponentName, FindSupplierName));
             UpdateAttachmentCommandState();
-            _pendingCertificate = null;
-            _pendingAttachmentRemoval = null;
-            UpdateCertificateCommandState();
             return;
         }
 
@@ -431,9 +412,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         {
             SetEditor(_snapshot.Clone());
             UpdateAttachmentCommandState();
-            _pendingCertificate = null;
-            _pendingAttachmentRemoval = null;
-            UpdateCertificateCommandState();
             return;
         }
 
@@ -443,9 +421,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         }
 
         UpdateAttachmentCommandState();
-        _pendingCertificate = null;
-        _pendingAttachmentRemoval = null;
-        UpdateCertificateCommandState();
     }
 
     partial void OnEditorChanging(CalibrationEditor value)
@@ -468,7 +443,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         value.PropertyChanged += OnEditorPropertyChanged;
     }
 
-    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnEditorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (_suppressEditorDirtyNotifications)
         {
@@ -482,10 +457,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         else if (e.PropertyName == nameof(CalibrationEditor.SupplierId))
         {
             Editor.SupplierName = FindSupplierName(Editor.SupplierId) ?? string.Empty;
-        }
-        else if (e.PropertyName == nameof(CalibrationEditor.Certificate))
-        {
-            UpdateCertificateCommandState();
         }
 
         if (IsInEditMode)
@@ -514,7 +485,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateAttachmentCommandState();
-        UpdateCertificateCommandState();
     }
 
     private void SetEditor(CalibrationEditor editor)
@@ -524,10 +494,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         _suppressEditorDirtyNotifications = false;
         ResetDirty();
         UpdateAttachmentCommandState();
-        UpdateCertificateCommandState();
     }
 
-    private void RefreshComponentOptions(IEnumerable<Component> components)
+    private void RefreshComponentOptions(IEnumerable<ComponentEntity> components)
     {
         ComponentOptions.Clear();
         foreach (var component in components)
@@ -556,7 +525,7 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     {
         var fields = new List<InspectorField>
         {
-            new("Component", FindComponentName(calibration.ComponentId) ?? $"Component #{calibration.ComponentId}"),
+            new("ComponentEntity", FindComponentName(calibration.ComponentId) ?? $"ComponentEntity #{calibration.ComponentId}"),
             new("Supplier", FindSupplierName(calibration.SupplierId) ?? "-"),
             new("Calibrated", calibration.CalibrationDate.ToString("d", CultureInfo.CurrentCulture)),
             new("Next Due", calibration.NextDue.ToString("d", CultureInfo.CurrentCulture)),
@@ -655,226 +624,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
     }
 
     private void UpdateAttachmentCommandState()
-        => AttachDocumentCommand.NotifyCanExecuteChanged();
-
-    private bool CanManageCertificate()
-        => IsEditorEnabled;
-
-    private bool CanClearCertificate()
-        => IsEditorEnabled && Editor.Certificate is not null;
-
-    private async Task ManageCertificateAsync()
     {
-        if (!CanManageCertificate())
-        {
-            return;
-        }
-
-        var request = new CalibrationCertificateDialogRequest(
-            Editor.Certificate,
-            BuildCertificateDialogCaption(),
-            AllowFileSelection: true);
-
-        CalibrationCertificateDialogResult? result;
-        try
-        {
-            result = await _certificateDialog
-                .ShowAsync(request)
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Certificate dialog failed: {ex.Message}";
-            return;
-        }
-
-        if (result is null)
-        {
-            StatusMessage = "Certificate update cancelled.";
-            return;
-        }
-
-        ApplyCertificateSelection(result);
-        StatusMessage = "Certificate metadata staged.";
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AttachDocumentCommand);
     }
-
-    private void ClearCertificate()
-    {
-        if (!CanClearCertificate())
-        {
-            return;
-        }
-
-        _pendingCertificate = null;
-        _pendingAttachmentRemoval = Editor.Certificate?.AttachmentId;
-
-        Editor.Certificate = null;
-        Editor.CertDoc = string.Empty;
-
-        if (IsInEditMode)
-        {
-            MarkDirty();
-        }
-
-        UpdateCertificateCommandState();
-        UpdateAttachmentCommandState();
-        StatusMessage = "Certificate metadata cleared.";
-    }
-
-    private void ApplyCertificateSelection(CalibrationCertificateDialogResult result)
-    {
-        _pendingCertificate = result;
-        _pendingAttachmentRemoval = result.FileCleared ? result.RemovedAttachmentId : null;
-
-        Editor.Certificate = result.Certificate;
-        Editor.CertDoc = result.Certificate.DisplayName;
-
-        if (IsInEditMode)
-        {
-            MarkDirty();
-        }
-
-        UpdateCertificateCommandState();
-        UpdateAttachmentCommandState();
-    }
-
-    private string? BuildCertificateDialogCaption()
-    {
-        if (_loadedCalibration is { Id: > 0 } calibration)
-        {
-            return $"Calibration #{calibration.Id}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(Editor.ComponentName))
-        {
-            return Editor.ComponentName;
-        }
-
-        return null;
-    }
-
-    private void UpdateCertificateCommandState()
-    {
-        ManageCertificateCommand.NotifyCanExecuteChanged();
-        ClearCertificateCommand.NotifyCanExecuteChanged();
-    }
-
-    private async Task<(CalibrationCertificateSnapshot? Snapshot, string? Message)> HandlePendingCertificateAsync(Calibration calibration)
-    {
-        if (calibration is null || calibration.Id <= 0)
-        {
-            _pendingCertificate = null;
-            _pendingAttachmentRemoval = null;
-            return (null, null);
-        }
-
-        var messages = new List<string>();
-        CalibrationCertificateSnapshot? snapshot = null;
-
-        if (_pendingAttachmentRemoval is int removeId && removeId > 0)
-        {
-            try
-            {
-                await _attachmentWorkflow
-                    .RemoveLinkAsync("calibrations", calibration.Id, removeId)
-                    .ConfigureAwait(false);
-                messages.Add($"Removed certificate attachment #{removeId}.");
-            }
-            catch (Exception ex)
-            {
-                _pendingAttachmentRemoval = null;
-                return (null, $"Certificate attachment removal failed: {ex.Message}");
-            }
-
-            _pendingAttachmentRemoval = null;
-        }
-
-        if (_pendingCertificate is { File: not null } pendingFile)
-        {
-            try
-            {
-                await using var stream = await pendingFile.File.OpenReadAsync().ConfigureAwait(false);
-                var request = new AttachmentUploadRequest
-                {
-                    FileName = pendingFile.File.FileName,
-                    ContentType = pendingFile.File.ContentType,
-                    EntityType = "calibrations",
-                    EntityId = calibration.Id,
-                    UploadedById = _authContext.CurrentUser?.Id,
-                    DisplayName = pendingFile.Certificate.DisplayName,
-                    RetainUntil = pendingFile.Certificate.ExpiresOn,
-                    Reason = $"calibration-cert:{calibration.Id}",
-                    SourceIp = _authContext.CurrentIpAddress,
-                    SourceHost = _authContext.CurrentDeviceInfo,
-                    Notes = BuildCertificateNotes(pendingFile.Certificate)
-                };
-
-                var uploadResult = await _attachmentWorkflow
-                    .UploadAsync(stream, request)
-                    .ConfigureAwait(false);
-
-                var attachment = uploadResult.Attachment;
-                var updatedCertificate = pendingFile.Certificate with
-                {
-                    AttachmentId = attachment.Id,
-                    FileName = attachment.FileName,
-                    FileSize = attachment.FileSize,
-                    ContentType = attachment.FileType,
-                    Sha256 = attachment.Sha256
-                };
-
-                snapshot = updatedCertificate;
-                messages.Add($"Uploaded certificate '{attachment.FileName}'.");
-            }
-            catch (Exception ex)
-            {
-                return (snapshot, $"Certificate upload failed: {ex.Message}");
-            }
-        }
-        else if (_pendingCertificate is { File: null } pendingSnapshot)
-        {
-            snapshot = pendingSnapshot.Certificate;
-        }
-
-        _pendingCertificate = null;
-        var message = messages.Count > 0 ? string.Join(" ", messages) : null;
-        return (snapshot, message);
-    }
-
-    private static string? BuildCertificateNotes(CalibrationCertificateSnapshot certificate)
-    {
-        var parts = new List<string>();
-
-        if (!string.IsNullOrWhiteSpace(certificate.CertificateNumber))
-        {
-            parts.Add($"number={certificate.CertificateNumber}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(certificate.Issuer))
-        {
-            parts.Add($"issuer={certificate.Issuer}");
-        }
-
-        if (certificate.IssuedOn.HasValue)
-        {
-            parts.Add($"issued={certificate.IssuedOn:yyyy-MM-dd}");
-        }
-
-        if (certificate.ExpiresOn.HasValue)
-        {
-            parts.Add($"expires={certificate.ExpiresOn:yyyy-MM-dd}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(certificate.Notes))
-        {
-            parts.Add($"notes={certificate.Notes}");
-        }
-
-        return parts.Count == 0 ? null : string.Join("; ", parts);
-    }
-    /// <summary>
-    /// Represents the calibration editor value.
-    /// </summary>
 
     public sealed partial class CalibrationEditor : ObservableObject
     {
@@ -908,21 +660,9 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
         [ObservableProperty]
         private string _comment = string.Empty;
 
-        [ObservableProperty]
-        private CalibrationCertificateSnapshot? _certificate;
-        /// <summary>
-        /// Executes the create empty operation.
-        /// </summary>
-
         public static CalibrationEditor CreateEmpty() => new();
-        /// <summary>
-        /// Executes the create for new operation.
-        /// </summary>
 
         public static CalibrationEditor CreateForNew() => new();
-        /// <summary>
-        /// Executes the from calibration operation.
-        /// </summary>
 
         public static CalibrationEditor FromCalibration(
             Calibration calibration,
@@ -939,16 +679,10 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 CalibrationDate = calibration.CalibrationDate,
                 NextDue = calibration.NextDue,
                 CertDoc = calibration.CertDoc ?? string.Empty,
-                Certificate = string.IsNullOrWhiteSpace(calibration.CertDoc)
-                    ? null
-                    : new CalibrationCertificateSnapshot(calibration.CertDoc!, FileName: calibration.CertDoc),
                 Result = calibration.Result ?? string.Empty,
                 Comment = calibration.Comment ?? string.Empty
             };
         }
-        /// <summary>
-        /// Executes the to calibration operation.
-        /// </summary>
 
         public Calibration ToCalibration(Calibration? existing)
         {
@@ -958,14 +692,11 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             calibration.SupplierId = SupplierId;
             calibration.CalibrationDate = CalibrationDate;
             calibration.NextDue = NextDue;
-            calibration.CertDoc = Certificate?.DisplayName ?? CertDoc;
+            calibration.CertDoc = CertDoc;
             calibration.Result = Result;
             calibration.Comment = Comment;
             return calibration;
         }
-        /// <summary>
-        /// Executes the clone operation.
-        /// </summary>
 
         public CalibrationEditor Clone()
             => new()
@@ -978,7 +709,6 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
                 CalibrationDate = CalibrationDate,
                 NextDue = NextDue,
                 CertDoc = CertDoc,
-                Certificate = Certificate,
                 Result = Result,
                 Comment = Comment
             };
@@ -998,26 +728,23 @@ public sealed partial class CalibrationModuleViewModel : DataDrivenModuleDocumen
             };
         }
     }
-    /// <summary>
-    /// Executes the struct operation.
-    /// </summary>
 
+    /// <summary>Executes the component option routine for the Calibration module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public readonly record struct ComponentOption(int Id, string Name)
     {
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
         public override string ToString() => Name;
     }
-    /// <summary>
-    /// Executes the struct operation.
-    /// </summary>
 
+    /// <summary>Executes the supplier option routine for the Calibration module.</summary>
+    /// <remarks>Execution: Part of the module lifecycle. Form Mode: Applies as dictated by the calling sequence. Localization: Emits inline text pending localized resources.</remarks>
     public readonly record struct SupplierOption(int Id, string Name)
     {
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
         public override string ToString() => Name;
     }
 }
+
+
+
+
+

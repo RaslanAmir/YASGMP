@@ -16,6 +16,48 @@ namespace YasGMP.Wpf.Tests;
 public class WorkOrdersModuleViewModelTests
 {
     [Fact]
+    public async Task Validation_UsesResourceStrings_WhenResourcesPresent()
+    {
+        // Arrange resources with sentinel values
+        if (System.Windows.Application.Current == null)
+        {
+            _ = new System.Windows.Application();
+        }
+        var res = System.Windows.Application.Current.Resources;
+        res["Validation_WorkOrders_TitleRequired"] = "RES:TitleRequired";
+        res["Validation_WorkOrders_DescriptionRequired"] = "RES:DescriptionRequired";
+        res["Validation_WorkOrders_TypeRequired"] = "RES:TypeRequired";
+
+        var database = new DatabaseService();
+        var audit = new RecordingAuditService(database);
+        var workOrders = new FakeWorkOrderCrudService();
+        var auth = new TestAuthContext { CurrentUser = new User { Id = 9, FullName = "QA" } };
+        var filePicker = new TestFilePicker();
+        var attachmentService = new TestAttachmentService();
+        var attachments = new AttachmentWorkflowService(attachmentService, database, new AttachmentEncryptionOptions(), audit);
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+
+        var vm = new WorkOrdersModuleViewModel(database, audit, workOrders, auth, filePicker, attachments, signatureDialog, dialog, shell, navigation);
+        await vm.InitializeAsync(null);
+        vm.Mode = FormMode.Add; // enable save/validation
+
+        // leave Title/Description/Type blank to trigger sentinels
+        vm.Editor.Title = string.Empty;
+        vm.Editor.Description = string.Empty;
+        vm.Editor.Type = string.Empty;
+
+        // Act
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        // Assert: validation messages contain resource values, not hardcoded literals
+        Assert.Contains("RES:TitleRequired", vm.ValidationMessages);
+        Assert.Contains("RES:DescriptionRequired", vm.ValidationMessages);
+        Assert.Contains("RES:TypeRequired", vm.ValidationMessages);
+    }
+    [Fact]
     public async Task OnSaveAsync_AddMode_PersistsWorkOrderThroughAdapter()
     {
         const int adapterSignatureId = 7204;
@@ -357,3 +399,4 @@ public class WorkOrdersModuleViewModelTests
         return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
+

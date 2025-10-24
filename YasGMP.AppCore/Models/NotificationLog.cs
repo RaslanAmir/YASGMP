@@ -10,146 +10,68 @@ namespace YasGMP.Models
     /// </summary>
     public class NotificationLog
     {
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
         [Key]
         public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user id.
-        /// </summary>
         [Required]
         public int UserId { get; set; }
-        /// <summary>
-        /// Gets or sets the user.
-        /// </summary>
 
         public User? User { get; set; }
 
-        /// <summary>
-        /// Gets or sets the notification type.
-        /// </summary>
         [Required, StringLength(40)]
         public string NotificationType { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the related type.
-        /// </summary>
         [StringLength(64)]
         public string? RelatedType { get; set; }
-        /// <summary>
-        /// Gets or sets the related id.
-        /// </summary>
 
         public int? RelatedId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the message.
-        /// </summary>
         [Required, StringLength(4000)]
         public string Message { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the title.
-        /// </summary>
         [StringLength(200)]
         public string? Title { get; set; }
-        /// <summary>
-        /// Gets or sets the sent at.
-        /// </summary>
 
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
-        /// <summary>
-        /// Gets or sets the delivered at.
-        /// </summary>
 
         public DateTime? DeliveredAt { get; set; }
-        /// <summary>
-        /// Gets or sets the read at.
-        /// </summary>
 
         public DateTime? ReadAt { get; set; }
-        /// <summary>
-        /// Gets or sets the actioned at.
-        /// </summary>
 
         public DateTime? ActionedAt { get; set; }
 
-        /// <summary>
-        /// Gets or sets the status.
-        /// </summary>
         [StringLength(32)]
         public string? Status { get; set; }
-        /// <summary>
-        /// Gets or sets the channel history.
-        /// </summary>
 
         public List<NotificationChannelEvent> ChannelHistory { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the priority.
-        /// </summary>
         [StringLength(32)]
         public string? Priority { get; set; }
-        /// <summary>
-        /// Gets or sets the is escalated.
-        /// </summary>
 
         public bool IsEscalated { get; set; }
 
-        /// <summary>
-        /// Gets or sets the fallback channel.
-        /// </summary>
         [StringLength(64)]
         public string? FallbackChannel { get; set; }
-        /// <summary>
-        /// Gets or sets the attachments.
-        /// </summary>
 
         public List<Attachment> Attachments { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the digital signature.
-        /// </summary>
         [StringLength(128)]
         public string? DigitalSignature { get; set; }
 
-        /// <summary>
-        /// Gets or sets the source ip.
-        /// </summary>
         [StringLength(64)]
         public string? SourceIp { get; set; }
 
-        /// <summary>
-        /// Gets or sets the geo location.
-        /// </summary>
         [StringLength(128)]
         public string? GeoLocation { get; set; }
-        /// <summary>
-        /// Gets or sets the anomaly score.
-        /// </summary>
 
         public double? AnomalyScore { get; set; }
-        /// <summary>
-        /// Gets or sets the last modified.
-        /// </summary>
 
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
-        /// <summary>
-        /// Gets or sets the last modified by id.
-        /// </summary>
 
         public int? LastModifiedById { get; set; }
-        /// <summary>
-        /// Gets or sets the last modified by.
-        /// </summary>
 
         public User? LastModifiedBy { get; set; }
 
-        /// <summary>
-        /// Gets or sets the audit note.
-        /// </summary>
         [StringLength(1000)]
         public string? AuditNote { get; set; }
 
@@ -195,9 +117,6 @@ namespace YasGMP.Models
                 AuditNote = this.AuditNote
             };
         }
-        /// <summary>
-        /// Executes the to string operation.
-        /// </summary>
 
         public override string ToString()
         {
@@ -205,3 +124,4 @@ namespace YasGMP.Models
         }
     }
 }
+

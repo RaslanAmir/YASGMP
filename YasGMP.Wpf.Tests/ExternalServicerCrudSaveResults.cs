@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Models.DTO;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Models
@@ -38,3 +38,4 @@ namespace YasGMP.Models
             => SignatureMetadataIdSource?.Invoke(contextSignatureId) ?? contextSignatureId;
     }
 }
+

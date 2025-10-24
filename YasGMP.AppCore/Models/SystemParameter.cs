@@ -43,10 +43,8 @@ namespace YasGMP.Models
         [StringLength(255)]
         public string? DigitalSignature { get; set; }
 
-        /// <summary>
-        /// Gets or sets the updated by navigation.
-        /// </summary>
         [ForeignKey(nameof(UpdatedBy))]
         public virtual User? UpdatedByNavigation { get; set; }
     }
 }
+

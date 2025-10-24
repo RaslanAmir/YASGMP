@@ -229,3 +229,4 @@ public class UserCrudServiceAdapterSignatureTests
         public Task DenyPermissionRequestAsync(int requestId, int deniedBy, string comment) => Task.CompletedTask;
     }
 }
+

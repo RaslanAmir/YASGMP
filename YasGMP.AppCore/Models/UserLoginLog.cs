@@ -119,9 +119,6 @@ namespace YasGMP.Models
         /// </summary>
         [Column("updated_at")]
         public DateTime? LastModified { get; set; }
-        /// <summary>
-        /// Gets or sets the created at.
-        /// </summary>
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 
@@ -140,3 +137,4 @@ namespace YasGMP.Models
         public string? Note { get; set; }
     }
 }
+

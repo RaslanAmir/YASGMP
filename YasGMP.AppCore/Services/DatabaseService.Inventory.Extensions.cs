@@ -63,9 +63,6 @@ namespace YasGMP.Services
         }
 
         // ---------- Core operations ----------
-        /// <summary>
-        /// Executes the receive stock async operation.
-        /// </summary>
 
         public static async Task ReceiveStockAsync(
             this DatabaseService db,
@@ -116,9 +113,6 @@ VALUES (@p,@w,'in',@q,@u,@doc,@note)";
 
             await db.LogSystemEventAsync(performedById, "STOCK_IN", "stock_levels", "Inventory", partId, $"w={warehouseId}; qty={quantity}; doc={doc}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the issue stock async operation.
-        /// </summary>
 
         public static async Task IssueStockAsync(
             this DatabaseService db,
@@ -164,9 +158,6 @@ VALUES (@p,@w,'out',@q,@u,@doc,@note)";
 
             await db.LogSystemEventAsync(performedById, "STOCK_OUT", "stock_levels", "Inventory", partId, $"w={warehouseId}; qty={quantity}; doc={doc}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the adjust stock async operation.
-        /// </summary>
 
         public static async Task AdjustStockAsync(
             this DatabaseService db,
@@ -212,9 +203,6 @@ VALUES (@p,@w,'adjust',@q,@u,NULL,@note)";
 
             await db.LogSystemEventAsync(performedById, "STOCK_ADJUST", "stock_levels", "Inventory", partId, $"w={warehouseId}; delta={delta}; reason={reason}", ip, "audit", device, sessionId, token: token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the get stock async operation.
-        /// </summary>
 
         public static async Task<int> GetStockAsync(this DatabaseService db, int partId, int warehouseId, CancellationToken token = default)
         {
@@ -224,9 +212,6 @@ VALUES (@p,@w,'adjust',@q,@u,NULL,@note)";
             if (dt.Rows.Count == 0) return 0;
             return Convert.ToInt32(dt.Rows[0]["quantity"]);
         }
-        /// <summary>
-        /// Executes the get stock by warehouse async operation.
-        /// </summary>
 
         public static async Task<Dictionary<int,int>> GetStockByWarehouseAsync(this DatabaseService db, int partId, CancellationToken token = default)
         {
@@ -238,9 +223,6 @@ VALUES (@p,@w,'adjust',@q,@u,NULL,@note)";
                 dict[Convert.ToInt32(r["warehouse_id"])] = Convert.ToInt32(r["quantity"]);
             return dict;
         }
-        /// <summary>
-        /// Executes the task operation.
-        /// </summary>
 
         public static async Task<List<(int warehouseId, string warehouseName, int quantity, int? min, int? max)>> GetStockLevelsForPartAsync(
             this DatabaseService db,
@@ -265,59 +247,6 @@ ORDER BY wname, sl.warehouse_id";
                 list.Add((wid, name, qty, min, max));
             }
             return list;
-        }
-        /// <summary>
-        /// Executes the get inventory movement preview async operation.
-        /// </summary>
-
-        public static async Task<System.Data.DataTable> GetInventoryZoneDashboardAsync(
-            this DatabaseService db,
-            int take = 25,
-            CancellationToken token = default)
-        {
-            await db.EnsureInventorySchemaAsync(token).ConfigureAwait(false);
-
-            if (take <= 0)
-            {
-                take = 25;
-            }
-            else if (take > 500)
-            {
-                take = 500;
-            }
-
-            const string sql = @"SELECT
-    sl.part_id,
-    COALESCE(p.name, CONCAT('Part #', sl.part_id)) AS part_name,
-    COALESCE(p.code, CONCAT('PRT-', sl.part_id)) AS part_code,
-    sl.warehouse_id,
-    COALESCE(w.name, CONCAT('WH-', sl.warehouse_id)) AS warehouse_name,
-    sl.quantity,
-    sl.min_threshold,
-    sl.max_threshold,
-    CASE
-        WHEN sl.min_threshold IS NOT NULL AND sl.quantity < sl.min_threshold THEN 'Critical'
-        WHEN sl.max_threshold IS NOT NULL AND sl.quantity > sl.max_threshold THEN 'Overflow'
-        WHEN sl.min_threshold IS NOT NULL AND sl.quantity <= CEIL(sl.min_threshold * 1.2) THEN 'Warning'
-        ELSE 'Healthy'
-    END AS zone
-FROM stock_levels sl
-LEFT JOIN parts p ON p.id = sl.part_id
-LEFT JOIN warehouses w ON w.id = sl.warehouse_id
-ORDER BY
-    CASE
-        WHEN sl.min_threshold IS NOT NULL AND sl.quantity < sl.min_threshold THEN 0
-        WHEN sl.max_threshold IS NOT NULL AND sl.quantity > sl.max_threshold THEN 1
-        WHEN sl.min_threshold IS NOT NULL AND sl.quantity <= CEIL(sl.min_threshold * 1.2) THEN 2
-        ELSE 3
-    END,
-    sl.quantity,
-    sl.part_id,
-    sl.warehouse_id
-LIMIT @take";
-
-            return await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@take", take) }, token)
-                .ConfigureAwait(false);
         }
 
         public static async Task<System.Data.DataTable> GetInventoryMovementPreviewAsync(
@@ -376,9 +305,6 @@ LIMIT @take";
 
             return await db.ExecuteSelectAsync(sql.ToString(), parameters, token).ConfigureAwait(false);
         }
-        /// <summary>
-        /// Executes the update stock thresholds async operation.
-        /// </summary>
 
         public static Task UpdateStockThresholdsAsync(
             this DatabaseService db,
@@ -398,9 +324,6 @@ LIMIT @take";
                     new MySqlParameter("@w", warehouseId)
                 }, token);
         }
-        /// <summary>
-        /// Executes the get inventory transactions for part async operation.
-        /// </summary>
 
         public static async Task<System.Data.DataTable> GetInventoryTransactionsForPartAsync(
             this DatabaseService db,
@@ -418,3 +341,4 @@ LIMIT @take";
         }
     }
 }
+

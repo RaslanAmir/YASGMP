@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,11 +6,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace YasGMP.Models
 {
     /// <summary>
-    /// <b>WorkOrder</b> â€“ Ultra-robust GMP-compliant maintenance, calibration, and inspection entity.
+    /// <b>WorkOrder</b> – Ultra-robust GMP-compliant maintenance, calibration, and inspection entity.
     /// <para>
-    /// âś… All core and bonus fields for maximum compatibility and futureproofing<br/>
-    /// âś… Full forensic audit, rollback, AI/ML support, signatures, attachments, CAPA, incidents<br/>
-    /// âś… Compatible with all past/future UIs, reporting, and data migration needs
+    /// ✅ All core and bonus fields for maximum compatibility and futureproofing<br/>
+    /// ✅ Full forensic audit, rollback, AI/ML support, signatures, attachments, CAPA, incidents<br/>
+    /// ✅ Compatible with all past/future UIs, reporting, and data migration needs
     /// </para>
     /// </summary>
     [Table("work_orders")]
@@ -69,7 +69,7 @@ namespace YasGMP.Models
 
         /// <summary>Date due (planned close).</summary>
         [Column("due_date")]
-        [Display(Name = "Rok izvrĹˇenja")]
+        [Display(Name = "Rok izvršenja")]
         public DateTime? DueDate { get; set; }
 
         /// <summary>Date actually closed.</summary>
@@ -87,7 +87,7 @@ namespace YasGMP.Models
         /// <summary>ID of the user who requested the work order.</summary>
         [Required]
         [Column("requested_by_id")]
-        [Display(Name = "ZatraĹľio korisnik")]
+        [Display(Name = "Zatražio korisnik")]
         public int RequestedById { get; set; }
 
         /// <summary>Navigation to requesting user.</summary>
@@ -107,7 +107,7 @@ namespace YasGMP.Models
         /// <summary>ID of assigned technician.</summary>
         [Required]
         [Column("assigned_to_id")]
-        [Display(Name = "Dodijeljeno tehniÄŤaru")]
+        [Display(Name = "Dodijeljeno tehničaru")]
         public int AssignedToId { get; set; }
 
         /// <summary>Navigation to assigned user.</summary>
@@ -135,28 +135,16 @@ namespace YasGMP.Models
         public virtual MachineComponent? Component { get; set; }
 
         // ========== CAPA & INCIDENT ==========
-        /// <summary>
-        /// Gets or sets the capa case id.
-        /// </summary>
         [Column("capa_case_id")]
-        [Display(Name = "CAPA sluÄŤaj")]
+        [Display(Name = "CAPA slučaj")]
         public int? CapaCaseId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the capa case.
-        /// </summary>
         [ForeignKey("CapaCaseId")]
         public virtual CapaCase? CapaCase { get; set; }
 
-        /// <summary>
-        /// Gets or sets the incident id.
-        /// </summary>
         [Column("incident_id")]
         [Display(Name = "Incident")]
         public int? IncidentId { get; set; }
-        /// <summary>
-        /// Gets or sets the incident.
-        /// </summary>
 
         public virtual Incident? Incident { get; set; }
 
@@ -174,147 +162,81 @@ namespace YasGMP.Models
         public string Notes { get; set; } = string.Empty;
 
         // ========== ADVANCED / FORENSIC ==========
-        /// <summary>
-        /// Gets or sets the digital signature id.
-        /// </summary>
         [Column("digital_signature_id")]
         [Display(Name = "ID digitalnog potpisa")]
         public int? DigitalSignatureId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the digital signature.
-        /// </summary>
         [StringLength(128)]
         [Column("digital_signature")]
         [Display(Name = "Digitalni potpis")]
         public string DigitalSignature { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the last modified.
-        /// </summary>
         [Column("last_modified")]
         [Display(Name = "Zadnja izmjena")]
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// Gets or sets the last modified by id.
-        /// </summary>
         [Column("last_modified_by_id")]
         [Display(Name = "Zadnji izmijenio")]
         public int? LastModifiedById { get; set; }
 
-        /// <summary>
-        /// Gets or sets the last modified by.
-        /// </summary>
         [ForeignKey("LastModifiedById")]
         public virtual User? LastModifiedBy { get; set; }
 
-        /// <summary>
-        /// Gets or sets the device info.
-        /// </summary>
         [StringLength(256)]
         [Column("device_info")]
-        [Display(Name = "ForenziÄŤki ureÄ‘aj/IP/session")]
+        [Display(Name = "Forenzički uređaj/IP/session")]
         public string DeviceInfo { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the source ip.
-        /// </summary>
         [StringLength(45)]
         [Column("source_ip")]
-        [Display(Name = "ForenziÄŤki IP")]
+        [Display(Name = "Forenzički IP")]
         public string SourceIp { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the session id.
-        /// </summary>
         [StringLength(64)]
         [Column("session_id")]
-        [Display(Name = "ForenziÄŤki session")]
+        [Display(Name = "Forenzički session")]
         public string SessionId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the document path.
-        /// </summary>
         [StringLength(512)]
         [Column("document_path")]
         public string DocumentPath { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the next due.
-        /// </summary>
         [Column("next_due")]
         public DateTime? NextDue { get; set; }
 
-        /// <summary>
-        /// Gets or sets the external ref.
-        /// </summary>
         [StringLength(100)]
         [Column("external_ref")]
         public string ExternalRef { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the entry hash.
-        /// </summary>
         [StringLength(128)]
         [Column("entry_hash")]
         public string EntryHash { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the audit flag.
-        /// </summary>
         [Column("audit_flag")]
         public bool AuditFlag { get; set; }
 
-        /// <summary>
-        /// Gets or sets the anomaly score.
-        /// </summary>
         [Column("anomaly_score")]
         public double? AnomalyScore { get; set; }
 
         // ========== PHOTOS, PARTS, COMMENTS, LOGS, ETC ==========
-        /// <summary>
-        /// Gets or sets the photo before ids.
-        /// </summary>
         [Display(Name = "Slike prije intervencije")]
         [NotMapped]
         public List<int> PhotoBeforeIds { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the photo after ids.
-        /// </summary>
         [Display(Name = "Slike nakon intervencije")]
         [NotMapped]
         public List<int> PhotoAfterIds { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the used parts.
-        /// </summary>
         [Display(Name = "Upotrijebljeni dijelovi")]
         public virtual ICollection<WorkOrderPart> UsedParts { get; set; } = new List<WorkOrderPart>();
-        /// <summary>
-        /// Gets or sets the photos.
-        /// </summary>
 
         public virtual ICollection<Photo> Photos { get; set; } = new List<Photo>();
-        /// <summary>
-        /// Gets or sets the comments.
-        /// </summary>
 
         public virtual ICollection<WorkOrderComment> Comments { get; set; } = new List<WorkOrderComment>();
-        /// <summary>
-        /// Gets or sets the status timeline.
-        /// </summary>
 
         public virtual ICollection<WorkOrderStatusLog> StatusTimeline { get; set; } = new List<WorkOrderStatusLog>();
-        /// <summary>
-        /// Gets or sets the signatures.
-        /// </summary>
 
         public virtual ICollection<WorkOrderSignature> Signatures { get; set; } = new List<WorkOrderSignature>();
-        /// <summary>
-        /// Gets or sets the audit trail.
-        /// </summary>
 
         public virtual ICollection<WorkOrderAudit> AuditTrail { get; set; } = new List<WorkOrderAudit>();
 
@@ -326,7 +248,7 @@ namespace YasGMP.Models
 
         // ========== COPY/CLONE ==========
         /// <summary>
-        /// DeepCopy â€“ makes a full, isolated copy for dialog editing/rollback/audit/inspection.
+        /// DeepCopy – makes a full, isolated copy for dialog editing/rollback/audit/inspection.
         /// </summary>
         public WorkOrder DeepCopy()
         {
@@ -382,20 +304,15 @@ namespace YasGMP.Models
                 AuditTrail = new List<WorkOrderAudit>(this.AuditTrail)
             };
         }
-        /// <summary>
-        /// Gets or sets the photos count.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Broj slika")]
         public int PhotosCount { get; set; }
 
-        /// <summary>
-        /// Gets or sets the parts count.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Broj dijelova")]
         public int PartsCount { get; set; }
     }
 }
+
 
 

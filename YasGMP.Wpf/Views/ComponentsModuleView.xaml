@@ -4,51 +4,46 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
-             mc:Ignorable="d">
+             xmlns:conv="clr-namespace:YasGMP.Wpf.Converters"
+             mc:Ignorable="d"
+             AutomationProperties.Name="{DynamicResource Module_Components_Title}"
+             ToolTipService.ToolTip="{DynamicResource Module_Components_Tooltip}">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+        <conv:ResourceStringConverter x:Key="ResourceString" />
     </UserControl.Resources>
-
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
-            <ItemsControl ItemsSource="{Binding Toolbar}"
-                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
+            <ItemsControl ItemsSource="{Binding Toolbar}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ToggleButton Content="{Binding CaptionKey, Converter={StaticResource ResourceString}}"
+                                      AutomationProperties.Name="{Binding AutomationNameKey, Converter={StaticResource ResourceString}}"
+                                      Command="{Binding Command}"
+                                      IsChecked="{Binding IsChecked}"
+                                       Margin="0,0,4,0" AutomationProperties.AutomationId="{Binding AutomationIdKey}">
+                            <ToggleButton.ToolTip>
+                                <ToolTip Content="{Binding ToolTipKey, Converter={StaticResource ResourceString}}" />
+                            </ToggleButton.ToolTip>
+                        </ToggleButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
-            <Button Content="{DynamicResource Module.Toolbar.Button.Cfl.Content}" Command="{Binding ShowCflCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Cfl.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Cfl.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Cfl.AutomationId}"/>
-            <Button Content="{DynamicResource Module.Toolbar.Button.Attach.Content}"
-                    Command="{Binding AttachDocumentCommand}"
-                    Margin="8,0,0,0"
-                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.Attach.ToolTip}"
-                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.Attach.AutomationName}"
-                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.Attach.AutomationId}" />
-            <Button Content="{DynamicResource Module.Toolbar.Button.GenerateCode.Content}"
-                    Command="{Binding GenerateCodeCommand}"
-                    Margin="8,0,0,0"
-                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.GenerateCode.ToolTip}"
-                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.GenerateCode.AutomationName}"
-                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.GenerateCode.AutomationId}" />
-            <Button Content="{DynamicResource Module.Toolbar.Button.PreviewQr.Content}"
-                    Command="{Binding PreviewQrCommand}"
-                    Margin="8,0,0,0"
-                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Button.PreviewQr.ToolTip}"
-                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Button.PreviewQr.AutomationName}"
-                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Button.PreviewQr.AutomationId}" />
-            <controls:GoldenArrowButton
-                Command="{Binding GoldenArrowCommand}"
-                Margin="8,0,0,0"
-                ToolTipKey="Module.Toolbar.Button.GoldenArrow.ToolTip"
-                AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
-                AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
+            <Button Content="CFL"
+                    AutomationProperties.Name="{DynamicResource Button_CFL}"
+                    AutomationProperties.AutomationId="CflButton"
+                    ToolTip="{DynamicResource Tooltip_CFL}"
+                    Command="{Binding ShowCflCommand}" />
+            <controls:GoldenArrowButton Command="{Binding GoldenArrowCommand}"
+                                       AutomationProperties.Name="{DynamicResource Button_GoldenArrow}"
+                                       AutomationProperties.AutomationId="GoldenArrowButton"
+                                       ToolTip="{DynamicResource Tooltip_GoldenArrow}"
+                                       Margin="8,0,0,0" />
         </ToolBar>
         <Grid Margin="8">
             <Grid.RowDefinitions>
@@ -61,8 +56,10 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
-                <TextBlock Text="{DynamicResource Dashboard.Search.Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{DynamicResource Label_Search}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{DynamicResource Label_Search}"
+                         ToolTip="{DynamicResource Tooltip_SearchBox}" />
             </DockPanel>
             <DataGrid Grid.Row="1"
                       Grid.Column="0"
@@ -72,13 +69,17 @@
                       IsReadOnly="True"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      Margin="0,0,8,0">
+                      Margin="0,0,8,0"
+                      AutomationProperties.Name="{DynamicResource Module_Components_Title}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Code.Header}" Binding="{Binding Code}" Width="120" />
-                    <DataGridTextColumn Header="{DynamicResource Module.Assets.Text.Name}" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="{DynamicResource Module.Components.Header.Machine}" Binding="{Binding InspectorFields[0].Value}" Width="180" />
-                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="140" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Code}" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Title}" Binding="{Binding Title}" Width="2*" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Machine}" Binding="{Binding InspectorFields[0].Value}" Width="180" />
+                    <DataGridTextColumn Header="{DynamicResource Column_Status}" Binding="{Binding Status}" Width="140" />
                 </DataGrid.Columns>
+                <DataGrid.ToolTip>
+                    <ToolTip Content="{DynamicResource Tooltip_RecordsGrid}" />
+                </DataGrid.ToolTip>
             </DataGrid>
             <Border Grid.Row="1"
                     Grid.Column="1"
@@ -88,7 +89,7 @@
                     BorderThickness="1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="{DynamicResource Module.Components.Text.ComponentDetails}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource Label_Component}" FontWeight="Bold" FontSize="14" Margin="0,0,0,12" />
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="150" />
@@ -108,91 +109,127 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="{DynamicResource Module.Components.Header.Machine}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Machine}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="0"
                                       Grid.Column="1"
                                       ItemsSource="{Binding MachineOptions}"
                                       SelectedValue="{Binding Editor.MachineId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       SelectedValuePath="Id"
                                       DisplayMemberPath="Name"
+                                      AutomationProperties.Name="{DynamicResource Label_Machine}"
+                                      AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Machine}"
+                                      ToolTip="{DynamicResource Tooltip_Components_Machine}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Code.Header}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Code}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Code, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Code}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Code}"
+                                     ToolTip="{DynamicResource Tooltip_Components_Code}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.Name}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Name}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="2"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Name, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Name}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Name}"
+                                     ToolTip="{DynamicResource Tooltip_Components_Name}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Components.Text.Type}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Type}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="3"
                                       Grid.Column="1"
                                       ItemsSource="{Binding TypeOptions}"
                                       SelectedItem="{Binding Editor.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"
+                                      AutomationProperties.Name="{DynamicResource Label_Type}"
+                                      AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Type}"
+                                      ToolTip="{DynamicResource Tooltip_Components_Type}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Dashboard.Grid.Column.Status.Header}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Status}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <ComboBox Grid.Row="4"
                                       Grid.Column="1"
                                       ItemsSource="{Binding StatusOptions}"
                                       SelectedItem="{Binding Editor.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      AutomationProperties.Name="{DynamicResource Label_Status}"
+                                      AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Status}"
+                                      ToolTip="{DynamicResource Tooltip_Components_Status}"
                                       IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Components.Text.SOPDocument}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Documentation}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
                                      Text="{Binding Editor.SopDoc, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Documentation}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Documentation}"
+                                     ToolTip="{DynamicResource Tooltip_Components_Documentation}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.InstallDate}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_InstallDate}" Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="6"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.InstallDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        AutomationProperties.Name="{DynamicResource Label_InstallDate}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_Components_InstallDate}"
+                                        ToolTip="{DynamicResource Tooltip_Components_InstallDate}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Components.Text.SerialNumber}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_SerialNo}" Grid.Row="7" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
                                      Text="{Binding Editor.SerialNumber, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_SerialNo}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Components_SerialNumber}"
+                                     ToolTip="{DynamicResource Tooltip_Components_SerialNumber}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Calibration.Text.Supplier}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_Suppliers}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
                                      Grid.Column="1"
                                      Text="{Binding Editor.Supplier, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_Suppliers}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Supplier}"
+                                     ToolTip="{DynamicResource Tooltip_Components_Supplier}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Assets.Text.WarrantyUntil}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_WarrantyUntil}" Grid.Row="9" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <DatePicker Grid.Row="9"
                                         Grid.Column="1"
                                         SelectedDate="{Binding Editor.WarrantyUntil, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        AutomationProperties.Name="{DynamicResource Label_WarrantyUntil}"
+                                        AutomationProperties.HelpText="{DynamicResource Tooltip_Components_WarrantyUntil}"
+                                        ToolTip="{DynamicResource Tooltip_Components_WarrantyUntil}"
                                         IsEnabled="{Binding IsEditorEnabled}" />
 
-                            <TextBlock Text="{DynamicResource Module.Components.Text.LifecycleState}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Label_LifecyclePhase}" Grid.Row="10" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="10"
                                      Grid.Column="1"
                                      Text="{Binding Editor.LifecycleState, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="{DynamicResource Label_LifecyclePhase}"
+                                     AutomationProperties.HelpText="{DynamicResource Tooltip_Components_LifecycleState}"
+                                     ToolTip="{DynamicResource Tooltip_Components_LifecycleState}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
                         </Grid>
 
-                        <TextBlock Text="{DynamicResource Module.Calibration.Text.Comments}" Margin="0,0,0,4" />
+                        <TextBlock Text="{DynamicResource Label_Comments}" Margin="0,0,0,4" />
                         <TextBox Text="{Binding Editor.Comments, UpdateSourceTrigger=PropertyChanged}"
                                  Height="80"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
+                                 AutomationProperties.Name="{DynamicResource Label_Comments}"
+                                 AutomationProperties.HelpText="{DynamicResource Tooltip_Components_Comments}"
+                                 ToolTip="{DynamicResource Tooltip_Components_Comments}"
                                  IsEnabled="{Binding IsEditorEnabled}" />
 
                         <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                        <TextBlock Text="{DynamicResource Module.Assets.Text.Value}" Foreground="DarkRed" Margin="0,0,4,0" />
+                                        <TextBlock Text="•" Foreground="DarkRed" Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding}" Foreground="DarkRed" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </DataTemplate>

@@ -56,41 +56,14 @@ namespace YasGMP.Services.Interfaces
     /// </summary>
     public class AttachmentUploadRequest
     {
-        /// <summary>
-        /// Gets or sets the file name.
-        /// </summary>
         public string FileName { get; set; } = string.Empty;
-        /// <summary>
-        /// Gets or sets the content type.
-        /// </summary>
         public string? ContentType { get; set; }
-        /// <summary>
-        /// Gets or sets the entity type.
-        /// </summary>
         public string EntityType { get; set; } = string.Empty;
-        /// <summary>
-        /// Gets or sets the entity id.
-        /// </summary>
         public int EntityId { get; set; }
-        /// <summary>
-        /// Gets or sets the uploaded by id.
-        /// </summary>
         public int? UploadedById { get; set; }
-        /// <summary>
-        /// Gets or sets the display name.
-        /// </summary>
         public string? DisplayName { get; set; }
-        /// <summary>
-        /// Gets or sets the retain until.
-        /// </summary>
         public DateTime? RetainUntil { get; set; }
-        /// <summary>
-        /// Gets or sets the retention policy name.
-        /// </summary>
         public string? RetentionPolicyName { get; set; }
-        /// <summary>
-        /// Gets or sets the notes.
-        /// </summary>
         public string? Notes { get; set; }
 
         /// <summary>Optional tenant owning the attachment.</summary>
@@ -176,3 +149,4 @@ namespace YasGMP.Services.Interfaces
         bool IsPartial,
         AttachmentReadRequest? Request);
 }
+

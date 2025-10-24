@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 namespace YasGMP.Diagnostics
 {
-    /// <summary>
-    /// Represents the i trace value.
-    /// </summary>
     public interface ITrace
     {
         void Log(
