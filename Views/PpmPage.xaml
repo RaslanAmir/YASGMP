@@ -9,7 +9,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:conv="clr-namespace:YasGMP.Converters"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
+    xmlns:models="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
     x:Class="YasGMP.Pages.PpmPage"
+    x:DataType="vm:PpmViewModel"
     Title="Planovi Preventivnog Održavanja (PPM)">
 
     <ContentPage.Resources>
@@ -39,7 +42,7 @@
             HeightRequest="300"
             AutomationId="PlansCollectionView">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:PreventiveMaintenancePlan">
                     <Frame BorderColor="#bdbdbd" CornerRadius="14" Margin="0,4">
                         <VerticalStackLayout Spacing="2">
                             <Label 

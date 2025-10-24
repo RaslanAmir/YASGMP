@@ -54,6 +54,18 @@ Next batches (warnings focus):
   - `Views/AdminPanelPage.xaml`: Root `TabbedPage` `x:DataType="vm:AdminViewModel"`; roles list template typed to `models:Role`.
 - Result: Fewer XC0022 warnings (≈ 14096 → ≈ 14007). Remaining ones are in PpmPage and RollbackPreviewPage where `x:DataType` is still pending.
 
+## 2025-10-24 – Warnings reduction (batch 5)
+
+- Added compiled bindings for PPM and Rollback pages:
+  - `Views/PpmPage.xaml`: `x:DataType="vm:PpmViewModel"`, item template typed to `models:PreventiveMaintenancePlan` (AppCore assembly).
+  - `Views/RollbackPreviewPage.xaml`: `x:DataType="vm:RollbackPreviewViewModel"`.
+- Build results: MAUI warnings reduced further (~14007 → ~13977). Remaining XC0022 are on MainPage and a few other views pending typed bindings.
+
+Validation:
+- dotnet restore: OK
+- dotnet build (MAUI Windows): OK
+- dotnet build (WPF): OK
+
 Validation:
 - dotnet restore: OK
 - dotnet build (MAUI Windows): OK; warnings trend downward
