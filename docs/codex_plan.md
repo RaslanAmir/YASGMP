@@ -61,6 +61,17 @@ Next batches (warnings focus):
   - `Views/RollbackPreviewPage.xaml`: `x:DataType="vm:RollbackPreviewViewModel"`.
 - Build results: MAUI warnings reduced further (~14007 → ~13977). Remaining XC0022 are on MainPage and a few other views pending typed bindings.
 
+## 2025-10-24 – Warnings reduction (batch 6)
+
+- Added compiled bindings:
+  - `Views/MainPage.xaml`: `x:DataType="vm:MainPageViewModel"` to type top-level bindings (Welcome text + command buttons).
+- Build results: MAUI warnings dropped again (~13977 → ~13965). Remaining XC0022 clusters are in LoginPage and WorkOrderEditDialog where nested sections still need typing; will address next.
+
+Validation:
+- dotnet restore: OK
+- dotnet build (MAUI Windows): OK
+- dotnet build (WPF): OK
+
 Validation:
 - dotnet restore: OK
 - dotnet build (MAUI Windows): OK
