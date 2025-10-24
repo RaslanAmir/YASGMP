@@ -176,6 +176,14 @@
       "id": "B3",
       "name": "Editor framework",
       "status": "pending"
+    },
+    {
+      "id": "B4",
+      "name": "Module rollout",
+      "status": "in-progress",
+      "notes": [
+        "2026-06-16: Risk assessments dashboard delivered—RiskAssessmentsModuleView + RiskAssessmentsModuleViewModel now project the shared RiskAssessmentViewModel with synchronized filters, workflow commands, and inspector telemetry; dotnet restore/build/test still exit with 'command not found: dotnet' pending Windows tooling."
+      ]
     }
   ],
   "modules": {
