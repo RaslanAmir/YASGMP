@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.IO;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,65 +16,39 @@ namespace YasGMP.Wpf.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ObservableObject
 {
-    private const string ReadyStatusKey = "Shell.Status.Ready";
-    private const string LayoutResetStatusKey = "Shell.Status.LayoutReset";
-    private const string SmokeDisabledStatusKey = "Shell.Status.Smoke.Disabled";
-    private const string SmokeRunningStatusKey = "Shell.Status.Smoke.Running";
-    private const string SmokeFailedStatusKey = "Shell.Status.Smoke.Failed";
-
     private readonly IModuleRegistry _moduleRegistry;
     private readonly ShellInteractionService _shellInteraction;
     private readonly DebugSmokeTestService _smokeTestService;
-    private readonly ILocalizationService _localization;
-    private readonly IShellAlertService _alertService;
-    private string _statusText = string.Empty;
-    private string? _statusResourceKey;
-    private object?[]? _statusResourceArguments;
+    private string _statusText = "Ready";
 
     [ObservableProperty]
     private DocumentViewModel? _activeDocument;
-    /// <summary>
-    /// Initializes a new instance of the MainWindowViewModel class.
-    /// </summary>
 
     public MainWindowViewModel(
         IModuleRegistry moduleRegistry,
         ModulesPaneViewModel modulesPane,
-        NotificationsPaneViewModel notificationsPane,
         InspectorPaneViewModel inspectorPane,
         ShellStatusBarViewModel statusBar,
         ShellInteractionService shellInteraction,
-        DebugSmokeTestService smokeTestService,
-        ILocalizationService localization,
-        IShellAlertService alertService)
+        DebugSmokeTestService smokeTestService)
     {
         _moduleRegistry = moduleRegistry;
         _shellInteraction = shellInteraction;
         _smokeTestService = smokeTestService;
-        _localization = localization;
-        _alertService = alertService;
         ModulesPane = modulesPane;
-        NotificationsPane = notificationsPane;
         InspectorPane = inspectorPane;
         StatusBar = statusBar;
         Documents = new ObservableCollection<DocumentViewModel>();
         WindowCommands = new WindowMenuViewModel(this);
         RunSmokeTestCommand = new AsyncRelayCommand(RunSmokeTestAsync, () => _smokeTestService.IsEnabled);
-        Toasts = alertService?.Toasts
-            ?? new ReadOnlyObservableCollection<ToastNotificationViewModel>(new ObservableCollection<ToastNotificationViewModel>());
+        OpenSmokeLogCommand = new RelayCommand(OpenSmokeLog);
 
-        _localization.LanguageChanged += OnLanguageChanged;
-
-        _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update, OpenDocumentInternal, CloseDocumentInternal);
-        RefreshShellContext();
-        SetStatusFromResource(ReadyStatusKey);
+        _shellInteraction.Configure(OpenModuleInternal, ActivateInternal, UpdateStatusInternal, InspectorPane.Update);
+        StatusBar.StatusText = _statusText;
     }
 
     /// <summary>Left-hand navigation pane listing modules.</summary>
     public ModulesPaneViewModel ModulesPane { get; }
-
-    /// <summary>Anchorable pane exposing notifications analytics.</summary>
-    public NotificationsPaneViewModel NotificationsPane { get; }
 
     /// <summary>Inspector pane rendered along the right side of the shell.</summary>
     public InspectorPaneViewModel InspectorPane { get; }
@@ -89,8 +65,8 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Runs the debug smoke test harness surfaced on the Tools ribbon tab.</summary>
     public IAsyncRelayCommand RunSmokeTestCommand { get; }
 
-    /// <summary>Toast notifications rendered in the top-right corner of the shell.</summary>
-    public ReadOnlyObservableCollection<ToastNotificationViewModel> Toasts { get; }
+    /// <summary>Opens the latest smoke log file from %LOCALAPPDATA%/YasGMP/logs.</summary>
+    public IRelayCommand OpenSmokeLogCommand { get; }
 
     /// <summary>Gets or sets the status text exposed for legacy bindings.</summary>
     public string StatusText
@@ -155,30 +131,7 @@ public partial class MainWindowViewModel : ObservableObject
         ActiveDocument = null;
         StatusBar.ActiveModule = string.Empty;
         OpenModule(DashboardModuleViewModel.ModuleKey);
-        SetStatusFromResource(LayoutResetStatusKey);
-    }
-
-    /// <summary>Re-evaluates and pushes connection/session metadata into the status bar.</summary>
-    public void RefreshShellContext()
-    {
-        StatusBar.RefreshMetadata();
-    }
-
-    /// <summary>Updates the shell status bar using a localization resource key.</summary>
-    /// <param name="resourceKey">Localization resource key resolved through the injected service.</param>
-    /// <param name="arguments">Optional format arguments applied with the current culture.</param>
-    public void UpdateStatusFromResource(string resourceKey, params object?[] arguments)
-    {
-        SetStatusFromResource(resourceKey, arguments);
-    }
-
-    /// <summary>Updates the shell status bar using a pre-localized message while tracking the resource key.</summary>
-    /// <param name="resourceKey">Localization resource key associated with the message.</param>
-    /// <param name="localizedMessage">Localized message previously resolved by the caller.</param>
-    /// <param name="arguments">Optional format arguments to replay when languages change.</param>
-    public void UpdateStatusFromResource(string resourceKey, string localizedMessage, params object?[] arguments)
-    {
-        SetStatusFromResourceWithMessage(resourceKey, localizedMessage, arguments);
+        StatusText = "Layout reset to default";
     }
 
     private ModuleDocumentViewModel OpenModuleInternal(string moduleKey, object? parameter)
@@ -207,132 +160,69 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
-    private void ActivateInternal(DocumentViewModel document)
+    private void ActivateInternal(ModuleDocumentViewModel document)
     {
         ActiveDocument = document;
         StatusBar.ActiveModule = document.Title;
     }
 
-    private DocumentViewModel OpenDocumentInternal(DocumentViewModel document, bool activate)
-    {
-        if (document is null)
-        {
-            throw new ArgumentNullException(nameof(document));
-        }
-
-        var existing = Documents.FirstOrDefault(d => string.Equals(d.ContentId, document.ContentId, StringComparison.Ordinal));
-        if (existing is null)
-        {
-            Documents.Add(document);
-            existing = document;
-        }
-
-        if (activate)
-        {
-            ActivateInternal(existing);
-        }
-
-        return existing;
-    }
-
-    private void CloseDocumentInternal(DocumentViewModel document)
-    {
-        if (document is null)
-        {
-            throw new ArgumentNullException(nameof(document));
-        }
-
-        var wasActive = ReferenceEquals(ActiveDocument, document);
-        if (!Documents.Remove(document))
-        {
-            return;
-        }
-
-        if (wasActive)
-        {
-            var fallback = Documents.LastOrDefault();
-            if (fallback is not null)
-            {
-                ActivateInternal(fallback);
-            }
-            else
-            {
-                ActiveDocument = null;
-                StatusBar.ActiveModule = string.Empty;
-            }
-        }
-    }
-
     private void UpdateStatusInternal(string message)
     {
-        SetStatusRaw(message);
+        StatusText = message;
     }
 
     private async Task RunSmokeTestAsync()
     {
         if (!_smokeTestService.IsEnabled)
         {
-            SetStatusFromResource(SmokeDisabledStatusKey, DebugSmokeTestService.EnvironmentToggleName);
-            RunSmokeTestCommand.NotifyCanExecuteChanged();
+            StatusText = $"Smoke test disabled. Set {DebugSmokeTestService.EnvironmentToggleName}=1 to enable.";
+            YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(RunSmokeTestCommand);
             return;
         }
 
         try
         {
-            SetStatusFromResource(SmokeRunningStatusKey);
+            StatusText = "Running debug smoke test...";
             var result = await _smokeTestService.RunAsync();
-            if (!string.IsNullOrWhiteSpace(result.SummaryResourceKey))
-            {
-                var args = result.SummaryResourceArguments?.ToArray() ?? Array.Empty<object?>();
-                SetStatusFromResource(result.SummaryResourceKey!, args);
-            }
-            else
-            {
-                SetStatusRaw(result.Summary);
-            }
+            StatusText = result.Summary;
         }
         catch (Exception ex)
         {
-            SetStatusFromResource(SmokeFailedStatusKey, ex.Message);
+            StatusText = $"Smoke test failed: {ex.Message}";
         }
         finally
         {
-            RunSmokeTestCommand.NotifyCanExecuteChanged();
+            YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(RunSmokeTestCommand);
         }
     }
 
-    private void SetStatusFromResource(string resourceKey, params object?[] arguments)
+    private void OpenSmokeLog()
     {
-        var args = arguments is { Length: > 0 } ? arguments.ToArray() : Array.Empty<object?>();
-        _statusResourceKey = resourceKey;
-        _statusResourceArguments = args;
-        StatusText = _localization.GetString(resourceKey, args);
-    }
-
-    private void SetStatusFromResourceWithMessage(string resourceKey, string localizedMessage, params object?[] arguments)
-    {
-        var args = arguments is { Length: > 0 } ? arguments.ToArray() : Array.Empty<object?>();
-        _statusResourceKey = resourceKey;
-        _statusResourceArguments = args;
-        StatusText = localizedMessage;
-    }
-
-    private void SetStatusRaw(string message)
-    {
-        _statusResourceKey = null;
-        _statusResourceArguments = null;
-        StatusText = message;
-    }
-
-    private void OnLanguageChanged(object? sender, EventArgs e)
-    {
-        if (_statusResourceKey is null)
+        try
         {
-            return;
-        }
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YasGMP", "logs");
+            if (!Directory.Exists(dir))
+            {
+                StatusText = "No smoke logs found.";
+                return;
+            }
 
-        var args = _statusResourceArguments ?? Array.Empty<object?>();
-        StatusText = _localization.GetString(_statusResourceKey, args);
+            var latest = Directory.EnumerateFiles(dir, "smoke-*.txt").Concat(Directory.EnumerateFiles(dir, "smoke_*.log"))
+                .OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
+            if (string.IsNullOrEmpty(latest))
+            {
+                StatusText = "No smoke logs found.";
+                return;
+            }
+
+            var psi = new ProcessStartInfo { FileName = latest, UseShellExecute = true };
+            Process.Start(psi);
+            StatusText = $"Opened {Path.GetFileName(latest)}";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Open smoke log failed: {ex.Message}";
+        }
     }
 
     private static string? TryParseModuleKey(string contentId)
@@ -350,5 +240,4 @@ public partial class MainWindowViewModel : ObservableObject
 
         return null;
     }
-
 }
