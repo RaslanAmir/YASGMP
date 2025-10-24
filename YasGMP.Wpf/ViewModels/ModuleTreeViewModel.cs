@@ -141,6 +141,11 @@ namespace YasGMP.Wpf.ViewModels
                 "ModuleTree.Node.Quality.DocumentControl.ToolTip",
                 "ModuleTree.Node.Quality.DocumentControl.AutomationName",
                 "ModuleTree.Node.Quality.DocumentControl.AutomationId"));
+            quality.Children.Add(new ModuleNodeViewModel(localization,
+                "ModuleTree.Node.Quality.RiskAssessments.Title",
+                "ModuleTree.Node.Quality.RiskAssessments.ToolTip",
+                "ModuleTree.Node.Quality.RiskAssessments.AutomationName",
+                "ModuleTree.Node.Quality.RiskAssessments.AutomationId"));
 
             var maintenance = new ModuleNodeViewModel(
                 localization,
