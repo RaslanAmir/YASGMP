@@ -450,6 +450,89 @@ public sealed partial class FakeMachineCrudService : IMachineCrudService
     }
 }
 
+namespace YasGMP.Services
+{
+    using System;
+    using System.Reflection;
+    using YasGMP.Models;
+    using YasGMP.Services.Interfaces;
+
+    public static class AuthServiceTestHelper
+    {
+        public static AuthService CreateAuthenticatedAuthService(
+            DatabaseService database,
+            AuditService auditService,
+            IRBACService? rbacService = null,
+            User? user = null,
+            string? sessionId = null)
+        {
+            if (database is null)
+            {
+                throw new ArgumentNullException(nameof(database));
+            }
+
+            if (auditService is null)
+            {
+                throw new ArgumentNullException(nameof(auditService));
+            }
+
+            var rbac = rbacService ?? new StubRbacService();
+            var userService = new UserService(database, auditService, rbac);
+            var authService = new AuthService(userService, auditService);
+
+            if (user is not null)
+            {
+                SetPrivateProperty(authService, nameof(AuthService.CurrentUser), user);
+            }
+
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                SetPrivateProperty(authService, nameof(AuthService.CurrentSessionId), sessionId);
+            }
+
+            return authService;
+        }
+
+        public static void SetAuthenticatedUser(AuthService authService, User user)
+        {
+            if (authService is null)
+            {
+                throw new ArgumentNullException(nameof(authService));
+            }
+
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            SetPrivateProperty(authService, nameof(AuthService.CurrentUser), user);
+        }
+
+        public static void SetSessionId(AuthService authService, string sessionId)
+        {
+            if (authService is null)
+            {
+                throw new ArgumentNullException(nameof(authService));
+            }
+
+            if (sessionId is null)
+            {
+                throw new ArgumentNullException(nameof(sessionId));
+            }
+
+            SetPrivateProperty(authService, nameof(AuthService.CurrentSessionId), sessionId);
+        }
+
+        private static void SetPrivateProperty<T>(AuthService authService, string propertyName, T value)
+        {
+            var property = typeof(AuthService).GetProperty(
+                propertyName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            property?.GetSetMethod(true)?.Invoke(authService, new object?[] { value });
+        }
+    }
+}
+
 namespace YasGMP.Wpf.Tests.TestStubs;
 
 using System;
@@ -909,6 +992,78 @@ namespace YasGMP.Services.Interfaces
         public string CurrentSessionId { get; set; } = Guid.NewGuid().ToString("N");
         public string CurrentDeviceInfo { get; set; } = "TestRig";
         public string CurrentIpAddress { get; set; } = "127.0.0.1";
+    }
+
+    public sealed class StubRbacService : IRBACService
+    {
+        public Task AssertPermissionAsync(int userId, string permissionCode)
+            => Task.CompletedTask;
+
+        public Task<bool> HasPermissionAsync(int userId, string permissionCode)
+            => Task.FromResult(true);
+
+        public Task<List<string>> GetAllUserPermissionsAsync(int userId)
+            => Task.FromResult(new List<string>());
+
+        public Task GrantRoleAsync(int userId, int roleId, int grantedBy, DateTime? expiresAt = null, string reason = "")
+            => Task.CompletedTask;
+
+        public Task RevokeRoleAsync(int userId, int roleId, int revokedBy, string reason = "")
+            => Task.CompletedTask;
+
+        public Task<List<Role>> GetRolesForUserAsync(int userId)
+            => Task.FromResult(new List<Role>());
+
+        public Task<List<Role>> GetAvailableRolesForUserAsync(int userId)
+            => Task.FromResult(new List<Role>());
+
+        public Task GrantPermissionAsync(int userId, string permissionCode, int grantedBy, DateTime? expiresAt = null, string reason = "")
+            => Task.CompletedTask;
+
+        public Task RevokePermissionAsync(int userId, string permissionCode, int revokedBy, string reason = "")
+            => Task.CompletedTask;
+
+        public Task DelegatePermissionAsync(int fromUserId, int toUserId, string permissionCode, int grantedBy, DateTime expiresAt, string reason = "")
+            => Task.CompletedTask;
+
+        public Task RevokeDelegatedPermissionAsync(int delegatedPermissionId, int revokedBy, string reason = "")
+            => Task.CompletedTask;
+
+        public Task<List<Role>> GetAllRolesAsync()
+            => Task.FromResult(new List<Role>());
+
+        public Task<List<Permission>> GetAllPermissionsAsync()
+            => Task.FromResult(new List<Permission>());
+
+        public Task<List<Permission>> GetPermissionsForRoleAsync(int roleId)
+            => Task.FromResult(new List<Permission>());
+
+        public Task<List<Permission>> GetPermissionsNotInRoleAsync(int roleId)
+            => Task.FromResult(new List<Permission>());
+
+        public Task AddPermissionToRoleAsync(int roleId, int permissionId, int adminUserId, string reason = "")
+            => Task.CompletedTask;
+
+        public Task RemovePermissionFromRoleAsync(int roleId, int permissionId, int adminUserId, string reason = "")
+            => Task.CompletedTask;
+
+        public Task<int> CreateRoleAsync(Role role, int adminUserId)
+            => Task.FromResult(role.Id);
+
+        public Task UpdateRoleAsync(Role role, int adminUserId)
+            => Task.CompletedTask;
+
+        public Task DeleteRoleAsync(int roleId, int adminUserId, string reason = "")
+            => Task.CompletedTask;
+
+        public Task<int> RequestPermissionAsync(int userId, string permissionCode, string reason)
+            => Task.FromResult(0);
+
+        public Task ApprovePermissionRequestAsync(int requestId, int approvedBy, string comment)
+            => Task.CompletedTask;
+
+        public Task DenyPermissionRequestAsync(int requestId, int deniedBy, string comment)
+            => Task.CompletedTask;
     }
 
     public sealed class TestAttachmentService : IAttachmentService
