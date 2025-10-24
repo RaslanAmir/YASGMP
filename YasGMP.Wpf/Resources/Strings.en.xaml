@@ -21,6 +21,7 @@
   <sys:String x:Key="Button_ApiAuditTrail">API Audit Trail</sys:String>
   <sys:String x:Key="Button_RunSmokeTest">Run Smoke Test</sys:String>
   <sys:String x:Key="Button_OpenSmokeLog">Open Smoke Log</sys:String>
+  <sys:String x:Key="Tooltip_RunSmokeTest">Run the debug smoke harness.</sys:String>
   <sys:String x:Key="Button_Find">Find</sys:String>
   <sys:String x:Key="Button_Add">Add</sys:String>
   <sys:String x:Key="Button_View">View</sys:String>

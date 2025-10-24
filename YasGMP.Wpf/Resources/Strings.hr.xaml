@@ -21,6 +21,7 @@
   <sys:String x:Key="Button_ApiAuditTrail">API revizijski zapis</sys:String>
   <sys:String x:Key="Button_RunSmokeTest">Pokreni brzi test</sys:String>
   <sys:String x:Key="Button_OpenSmokeLog">Otvori zapisnik brzog testa</sys:String>
+  <sys:String x:Key="Tooltip_RunSmokeTest">Pokreni debug brzi test.</sys:String>
   <sys:String x:Key="Button_Find">Pretraži</sys:String>
   <sys:String x:Key="Button_Add">Dodaj</sys:String>
   <sys:String x:Key="Button_View">Prikaz</sys:String>

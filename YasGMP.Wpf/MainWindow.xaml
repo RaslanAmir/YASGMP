@@ -88,6 +88,7 @@
                                                Width="220"
                                                Margin="0,0,0,8"
                                                AutomationProperties.Name="{DynamicResource Button_OpenSmokeLog}"
+                                               KeyTip="OL"
                                                Command="{Binding OpenSmokeLogCommand}">
                                     <fluent:Button.LargeIcon>
                                         <TextBlock Text="&#xE7BA;"
@@ -235,12 +236,22 @@
                 <fluent:RibbonGroupBox Header="{DynamicResource Group_Diagnostics}">
                     <fluent:Button Header="{DynamicResource Button_RunSmokeTest}"
                                    AutomationProperties.Name="{DynamicResource Button_RunSmokeTest}"
-                                   ToolTip="{DynamicResource Button_RunSmokeTest}"
-                                   Command="{Binding RunSmokeTestCommand}" />
+                                   ToolTip="{DynamicResource Tooltip_RunSmokeTest}"
+                                   KeyTip="RS"
+                                   Command="{Binding RunSmokeTestCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="24" />
+                        </fluent:Button.LargeIcon>
+                    </fluent:Button>
                     <fluent:Button Header="{DynamicResource Button_OpenSmokeLog}"
                                    AutomationProperties.Name="{DynamicResource Button_OpenSmokeLog}"
                                    ToolTip="{DynamicResource Tooltip_OpenSmokeLog}"
-                                   Command="{Binding OpenSmokeLogCommand}" />
+                                   KeyTip="OL"
+                                   Command="{Binding OpenSmokeLogCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="24" />
+                        </fluent:Button.LargeIcon>
+                    </fluent:Button>
                 </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="AI">
                     <fluent:Button Header="Ask AI Assistant"
