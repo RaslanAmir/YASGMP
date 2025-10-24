@@ -12,6 +12,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
+    xmlns:model="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+    x:DataType="vm:PartViewModel"
     Title="Rezervni dijelovi – YasGMP">
 
   <ContentPage.Content>
@@ -93,7 +96,7 @@
                           HeightRequest="440"
                           BackgroundColor="{StaticResource YtSurface}">
             <CollectionView.ItemTemplate>
-              <DataTemplate>
+              <DataTemplate x:DataType="model:Part">
                 <Frame Margin="0,2,0,2"
                        CornerRadius="8"
                        Padding="10"

@@ -10,6 +10,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:dlg="clr-namespace:YasGMP.Views.Dialogs"
+    xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+    x:DataType="dlg:WorkOrderEditDialog"
     Title="Radni Nalog – Uredi / Dodaj"
     Padding="24">
 
@@ -19,7 +22,10 @@
           RowSpacing="16">
 
       <!-- Header Card -->
-      <Frame Grid.Row="0" Padding="20">
+      <Border Grid.Row="0" Padding="20">
+        <Border.StrokeShape>
+          <shapes:RoundRectangle CornerRadius="10" />
+        </Border.StrokeShape>
         <VerticalStackLayout Spacing="8">
           <Label Text="Radni Nalog"
                  Style="{StaticResource YtH1}"
@@ -29,10 +35,13 @@
                  Style="{StaticResource YtCaption}"
                  HorizontalOptions="Center" />
         </VerticalStackLayout>
-      </Frame>
+      </Border>
 
       <!-- Form Card -->
-      <Frame Grid.Row="1" Padding="20">
+      <Border Grid.Row="1" Padding="20">
+        <Border.StrokeShape>
+          <shapes:RoundRectangle CornerRadius="10" />
+        </Border.StrokeShape>
         <VerticalStackLayout Spacing="16">
 
           <!-- Tip naloga -->
@@ -141,7 +150,7 @@
                  Style="{StaticResource YtCaption}"
                  HorizontalOptions="Center" />
         </VerticalStackLayout>
-      </Frame>
+      </Border>
 
     </Grid>
   </ScrollView>

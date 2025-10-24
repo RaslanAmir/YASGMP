@@ -11,6 +11,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
+    x:DataType="vm:WorkOrderViewModel"
     Title="Radni nalozi"
     BackgroundColor="{StaticResource YtSurface}">
           
@@ -26,30 +29,34 @@
 
       <!-- KPI tiles -->
       <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
-        <Frame Padding="14" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtPrimary600}">
+        <Border Padding="14" Background="{StaticResource YtPrimary600}">
+          <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
           <VerticalStackLayout Spacing="2">
             <Label Text="Otvoreni" FontSize="12" TextColor="White"/>
             <Label Text="{Binding CountOpen}" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
           </VerticalStackLayout>
-        </Frame>
+        </Border>
 
-        <Frame Grid.Column="1" Padding="14" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtDanger700}">
+        <Border Grid.Column="1" Padding="14" Background="{StaticResource YtDanger700}">
+          <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
           <VerticalStackLayout Spacing="2">
             <Label Text="KritiÄŤni" FontSize="12" TextColor="White"/>
             <Label Text="{Binding CountCritical}" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
           </VerticalStackLayout>
-        </Frame>
+        </Border>
 
-        <Frame Grid.Column="2" Padding="14" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtAccent700}">
+        <Border Grid.Column="2" Padding="14" Background="{StaticResource YtAccent700}">
+          <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
           <VerticalStackLayout Spacing="2">
             <Label Text="Overdue" FontSize="12" TextColor="White"/>
             <Label Text="{Binding CountOverdue}" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
           </VerticalStackLayout>
-        </Frame>
+        </Border>
       </Grid>
 
       <!-- Filters -->
-      <Frame Padding="16" CornerRadius="14" HasShadow="True" BackgroundColor="{StaticResource YtSurfaceCard}">
+      <Border Padding="16" Background="{StaticResource YtSurfaceCard}">
+        <Border.StrokeShape><shapes:RoundRectangle CornerRadius="14" /></Border.StrokeShape>
         <VerticalStackLayout Spacing="12">
           <SearchBar
               Placeholder="PretraĹľi (stroj, naslov, opis)"
@@ -79,13 +86,13 @@
                    maui:ToolTipProperties.Text="Neobavezno: upiĹˇite ime stroja/opreme"/>
           </Grid>
         </VerticalStackLayout>
-      </Frame>
+      </Border>
 
       <!-- Busy -->
       <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource YtPrimary700}"/>
 
       <!-- Work orders list -->
-      <Frame Padding="0" HasShadow="True">
+      <Border Padding="0">
         <VerticalStackLayout Spacing="0">
 
                               <sf:SfDataGrid xmlns:sf="http://schemas.syncfusion.com/maui"
@@ -125,7 +132,7 @@
             </sf:SfDataGrid.Columns>
           </sf:SfDataGrid>
         </VerticalStackLayout>
-      </Frame>
+      </Border>
 
       <!-- Actions -->
       <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">

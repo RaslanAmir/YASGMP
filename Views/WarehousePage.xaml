@@ -3,6 +3,9 @@
     x:Class="YasGMP.Views.WarehousePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:YasGMP.ViewModels"
+    xmlns:model="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+    x:DataType="vm:WarehouseViewModel"
     Title="Skladišta – YasGMP">
   <ScrollView>
     <Grid Padding="24"
@@ -43,7 +46,7 @@
                           HeightRequest="360"
                           BackgroundColor="{StaticResource YtSurface}">
             <CollectionView.ItemTemplate>
-              <DataTemplate>
+              <DataTemplate x:DataType="model:Warehouse">
                 <Frame Margin="0,4"
                        Padding="10"
                        CornerRadius="10"
@@ -108,7 +111,7 @@
                             HeightRequest="260"
                             BackgroundColor="{StaticResource YtSurface}">
               <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:WarehouseViewModel+WarehousePartRow">
                   <Frame Margin="0,4"
                          Padding="10"
                          CornerRadius="10"
@@ -178,7 +181,7 @@
                 </VerticalStackLayout>
               </CollectionView.EmptyView>
               <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:WarehouseViewModel+MovementPreview">
                   <Frame Margin="0,4"
                          Padding="10"
                          CornerRadius="10"
