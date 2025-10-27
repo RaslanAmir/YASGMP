@@ -87,6 +87,15 @@
   <data name="Backstage.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Pokreni radni prostor za kontrolirane dokumente i revizije SOP-a.</value>
   </data>
+  <data name="Backstage.Button.Qualifications.Header" xml:space="preserve">
+    <value>Kvalifikacije</value>
+  </data>
+  <data name="Backstage.Button.Qualifications.ToolTip" xml:space="preserve">
+    <value>Upravljajte protokolima i zapisnicima kvalifikacija.</value>
+  </data>
+  <data name="Backstage.Button.Qualifications.AutomationId" xml:space="preserve">
+    <value>Backstage.Qualifications</value>
+  </data>
   <data name="Backstage.Button.RiskAssessments.Header" xml:space="preserve">
     <value>Procjene rizika</value>
   </data>
@@ -236,6 +245,12 @@
   </data>
   <data name="Ribbon.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Upravljaj kontroliranim dokumentima i revizijama SOP-a.</value>
+  </data>
+  <data name="Ribbon.Button.Qualifications.Header" xml:space="preserve">
+    <value>Kvalifikacije</value>
+  </data>
+  <data name="Ribbon.Button.Qualifications.ToolTip" xml:space="preserve">
+    <value>Otvorite radni prostor za kvalifikacije u doku.</value>
   </data>
   <data name="Ribbon.Button.RiskAssessments.Header" xml:space="preserve">
     <value>Procjene rizika</value>
@@ -534,6 +549,9 @@
   <data name="Module.Title.Validations" xml:space="preserve">
     <value>Validacije</value>
   </data>
+  <data name="Module.Title.Qualifications" xml:space="preserve">
+    <value>Kvalifikacije</value>
+  </data>
   <data name="Module.Title.Warehouse" xml:space="preserve">
     <value>Skladište</value>
   </data>
@@ -546,8 +564,50 @@
   <data name="Module.Description.DocumentControl" xml:space="preserve">
     <value>Životni ciklus SOP-a i upravljanje dokumentima.</value>
   </data>
+  <data name="Module.Description.Qualifications" xml:space="preserve">
+    <value>Upravljajte IQ/OQ/PQ/DQ/VQ, SAT/FAT i rekvalifikacijama uz praćenje statusa.</value>
+  </data>
   <data name="Module.Title.TrainingRecords" xml:space="preserve">
     <value>Evidencija obuka</value>
+  </data>
+  <data name="Module.Qualifications.Status.Valid" xml:space="preserve">
+    <value>Valjano</value>
+  </data>
+  <data name="Module.Qualifications.Status.Expired" xml:space="preserve">
+    <value>Isteklo</value>
+  </data>
+  <data name="Module.Qualifications.Status.Scheduled" xml:space="preserve">
+    <value>Planirano</value>
+  </data>
+  <data name="Module.Qualifications.Status.InProgress" xml:space="preserve">
+    <value>U tijeku</value>
+  </data>
+  <data name="Module.Qualifications.Status.Rejected" xml:space="preserve">
+    <value>Odbijeno</value>
+  </data>
+  <data name="Module.Qualifications.Type.IQ" xml:space="preserve">
+    <value>Kvalifikacija instalacije (IQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.OQ" xml:space="preserve">
+    <value>Operativna kvalifikacija (OQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.PQ" xml:space="preserve">
+    <value>Kvalifikacija performansi (PQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.DQ" xml:space="preserve">
+    <value>Kvalifikacija dizajna (DQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.VQ" xml:space="preserve">
+    <value>Kvalifikacija dobavljača (VQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.SAT" xml:space="preserve">
+    <value>Prihvatni test na lokaciji (SAT)</value>
+  </data>
+  <data name="Module.Qualifications.Type.FAT" xml:space="preserve">
+    <value>Prihvatni test u tvornici (FAT)</value>
+  </data>
+  <data name="Module.Qualifications.Type.Requalification" xml:space="preserve">
+    <value>Rekvalifikacija</value>
   </data>
   <data name="Module.Description.TrainingRecords" xml:space="preserve">
     <value>Životni ciklus obuka zaposlenika, dodjele, odobrenja i provjere učinkovitosti</value>
@@ -1667,6 +1727,18 @@
   </data>
   <data name="ModuleTree.Node.Quality.DocumentControl.AutomationId" xml:space="preserve">
     <value>ModuleTree.Node.Quality.DocumentControl</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.Title" xml:space="preserve">
+    <value>Kvalifikacije</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.ToolTip" xml:space="preserve">
+    <value>Protokoli kvalifikacija, izvršenja i praćenje statusa.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.AutomationName" xml:space="preserve">
+    <value>Čvor modula Kvalifikacije</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Qualifications</value>
   </data>
   <data name="ModuleTree.Node.Quality.TrainingRecords.Title" xml:space="preserve">
     <value>Evidencija obuka</value>
@@ -4275,6 +4347,15 @@
   </data>
   <data name="ModuleTree.Node.Quality.RiskAssessments.AutomationId" xml:space="preserve">
     <value>ModuleTree.Quality.RiskAssessments</value>
+  </data>
+  <data name="Menu.Quality.Qualifications.Header" xml:space="preserve">
+    <value>Kvalifikacije</value>
+  </data>
+  <data name="Menu.Quality.Qualifications.ToolTip" xml:space="preserve">
+    <value>Otvorite radni prostor za kvalifikacije.</value>
+  </data>
+  <data name="Menu.Quality.Qualifications.AutomationId" xml:space="preserve">
+    <value>Menu.Quality.Qualifications</value>
   </data>
   <data name="Menu.Quality.RiskAssessments.Header" xml:space="preserve">
     <value>Procjene rizika</value>

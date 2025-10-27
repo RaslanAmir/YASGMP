@@ -140,7 +140,8 @@
         "2026-04-18: Components module WPF tests now assert generate/preview command enablement, QR payload persistence, and busy gating parity; dotnet restore/build/test still fail with 'command not found' until the CLI is available on a Windows host.",
         "2026-04-22: YasGMP.Wpf.Smoke adds an Assets module scenario covering Find→Add→Update transitions, attachment guardrails, and signature cancellation messaging; dotnet restore/build/test remain blocked with 'command not found' until the CLI is provisioned on a Windows host.",
         "2026-06-08: Training Records and SOP Governance module view-models now monitor filtered collection subscriptions and implement IDisposable so event handlers are released when documents close; dotnet restore/build/test still fail with 'command not found' in this container.",
-        "2026-06-09: WPF shell now registers the shared Training Record/SOP view-models in DI, localizes ModuleRegistry metadata for navigation automation, and wires ribbon shortcuts; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 continue to return 'command not found: dotnet'."
+        "2026-06-09: WPF shell now registers the shared Training Record/SOP view-models in DI, localizes ModuleRegistry metadata for navigation automation, and wires ribbon shortcuts; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 continue to return 'command not found: dotnet'.",
+        "2026-06-13: ShellStrings neutral/EN/HR now expose Qualifications backstage, ribbon, menu, module tree, and status/type captions so the workspace localizes headers/tooltips/automation metadata; dotnet restore/build remain blocked with 'command not found: dotnet'."
       ]
     },
     {

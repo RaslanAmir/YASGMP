@@ -87,6 +87,15 @@
   <data name="Backstage.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Launch the controlled documents workspace for SOP and policy revisions.</value>
   </data>
+  <data name="Backstage.Button.Qualifications.Header" xml:space="preserve">
+    <value>Qualifications</value>
+  </data>
+  <data name="Backstage.Button.Qualifications.ToolTip" xml:space="preserve">
+    <value>Manage qualification protocols and execution records.</value>
+  </data>
+  <data name="Backstage.Button.Qualifications.AutomationId" xml:space="preserve">
+    <value>Backstage.Qualifications</value>
+  </data>
   <data name="Backstage.Button.RiskAssessments.Header" xml:space="preserve">
     <value>Risk Assessments</value>
   </data>
@@ -236,6 +245,12 @@
   </data>
   <data name="Ribbon.Button.DocumentControl.ToolTip" xml:space="preserve">
     <value>Manage controlled documents and SOP revisions.</value>
+  </data>
+  <data name="Ribbon.Button.Qualifications.Header" xml:space="preserve">
+    <value>Qualifications</value>
+  </data>
+  <data name="Ribbon.Button.Qualifications.ToolTip" xml:space="preserve">
+    <value>Open the qualifications workspace in the dock.</value>
   </data>
   <data name="Ribbon.Button.RiskAssessments.Header" xml:space="preserve">
     <value>Risk Assessments</value>
@@ -531,6 +546,9 @@
   <data name="Module.Title.Validations" xml:space="preserve">
     <value>Validations</value>
   </data>
+  <data name="Module.Title.Qualifications" xml:space="preserve">
+    <value>Qualifications</value>
+  </data>
   <data name="Module.Title.Warehouse" xml:space="preserve">
     <value>Warehouse</value>
   </data>
@@ -543,8 +561,50 @@
   <data name="Module.Description.DocumentControl" xml:space="preserve">
     <value>SOP lifecycle and document governance.</value>
   </data>
+  <data name="Module.Description.Qualifications" xml:space="preserve">
+    <value>Manage IQ/OQ/PQ/DQ/VQ, SAT/FAT, and requalification activities with status tracking.</value>
+  </data>
   <data name="Module.Title.TrainingRecords" xml:space="preserve">
     <value>Training Records</value>
+  </data>
+  <data name="Module.Qualifications.Status.Valid" xml:space="preserve">
+    <value>Valid</value>
+  </data>
+  <data name="Module.Qualifications.Status.Expired" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="Module.Qualifications.Status.Scheduled" xml:space="preserve">
+    <value>Scheduled</value>
+  </data>
+  <data name="Module.Qualifications.Status.InProgress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
+  <data name="Module.Qualifications.Status.Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="Module.Qualifications.Type.IQ" xml:space="preserve">
+    <value>Installation Qualification (IQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.OQ" xml:space="preserve">
+    <value>Operational Qualification (OQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.PQ" xml:space="preserve">
+    <value>Performance Qualification (PQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.DQ" xml:space="preserve">
+    <value>Design Qualification (DQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.VQ" xml:space="preserve">
+    <value>Vendor Qualification (VQ)</value>
+  </data>
+  <data name="Module.Qualifications.Type.SAT" xml:space="preserve">
+    <value>Site Acceptance Test (SAT)</value>
+  </data>
+  <data name="Module.Qualifications.Type.FAT" xml:space="preserve">
+    <value>Factory Acceptance Test (FAT)</value>
+  </data>
+  <data name="Module.Qualifications.Type.Requalification" xml:space="preserve">
+    <value>Requalification</value>
   </data>
   <data name="Module.Description.TrainingRecords" xml:space="preserve">
     <value>Employee training lifecycle, assignments, approvals, and effectiveness tracking</value>
@@ -1661,6 +1721,18 @@
   </data>
   <data name="ModuleTree.Node.Quality.DocumentControl.AutomationId" xml:space="preserve">
     <value>ModuleTree.Node.Quality.DocumentControl</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.Title" xml:space="preserve">
+    <value>Qualifications</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.ToolTip" xml:space="preserve">
+    <value>Qualification protocols, executions, and status tracking.</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.AutomationName" xml:space="preserve">
+    <value>Qualifications module node</value>
+  </data>
+  <data name="ModuleTree.Node.Quality.Qualifications.AutomationId" xml:space="preserve">
+    <value>ModuleTree.Node.Quality.Qualifications</value>
   </data>
   <data name="ModuleTree.Node.Quality.TrainingRecords.Title" xml:space="preserve">
     <value>Training Records</value>
@@ -3843,6 +3915,15 @@
   </data>
   <data name="ModuleTree.Node.Quality.RiskAssessments.AutomationId" xml:space="preserve">
     <value>ModuleTree.Quality.RiskAssessments</value>
+  </data>
+  <data name="Menu.Quality.Qualifications.Header" xml:space="preserve">
+    <value>Qualifications</value>
+  </data>
+  <data name="Menu.Quality.Qualifications.ToolTip" xml:space="preserve">
+    <value>Open the qualifications workspace.</value>
+  </data>
+  <data name="Menu.Quality.Qualifications.AutomationId" xml:space="preserve">
+    <value>Menu.Quality.Qualifications</value>
   </data>
   <data name="Menu.Quality.RiskAssessments.Header" xml:space="preserve">
     <value>Risk Assessments</value>
