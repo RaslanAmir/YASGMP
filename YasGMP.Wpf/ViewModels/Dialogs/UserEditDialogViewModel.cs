@@ -29,6 +29,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     private readonly ObservableCollection<string> _validationMessages = new();
     private readonly ObservableCollection<UserSummary> _impersonationTargets = new();
     private readonly List<Role> _availableRoles = new();
+    private bool _rolesLoaded;
     private bool _suppressRoleNotifications;
     private bool _suppressEditorNotifications;
     private User? _loadedUser;
@@ -129,7 +130,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         _loadedUser = user is null ? null : CloneUser(user);
         SetEditor(user is null ? UserEditor.CreateForNew() : UserEditor.FromUser(user));
 
-        await LoadRolesAsync().ConfigureAwait(false);
+        await EnsureRolesLoadedAsync().ConfigureAwait(false);
         ApplyRoleSelection(Editor.RoleIds ?? Array.Empty<int>());
         await LoadImpersonationTargetsAsync().ConfigureAwait(false);
 
@@ -168,6 +169,17 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     private bool CanEndImpersonation()
         => !IsBusy && (IsImpersonating || _impersonationWorkflow.IsImpersonating);
 
+    public async Task EnsureRolesLoadedAsync()
+    {
+        if (_rolesLoaded)
+        {
+            return;
+        }
+
+        await LoadRolesAsync().ConfigureAwait(false);
+        _rolesLoaded = true;
+    }
+
     private async Task LoadRolesAsync()
     {
         var roles = await _userService.GetAllRolesAsync().ConfigureAwait(false);
@@ -194,6 +206,29 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         _suppressRoleNotifications = false;
     }
 
+    /// <summary>Replaces the current editor state with the supplied instance.</summary>
+    public void LoadEditor(UserEditor editor)
+        => SetEditor(editor);
+
+    /// <summary>Refreshes the selected role options based on the supplied identifiers.</summary>
+    public void ApplyRoleSelection(IEnumerable<int> roleIds)
+    {
+        var selected = new HashSet<int>(roleIds ?? Array.Empty<int>());
+        _suppressRoleNotifications = true;
+        foreach (var option in _roleOptions)
+        {
+            option.IsSelected = selected.Contains(option.RoleId);
+        }
+        _suppressRoleNotifications = false;
+        UpdateEditorRoleSelectionFromOptions();
+    }
+
+    /// <summary>Updates the stored reference used for validation and save defaults.</summary>
+    public void UpdateLoadedUser(User user)
+    {
+        _loadedUser = CloneUser(user);
+    }
+
     private async Task LoadImpersonationTargetsAsync()
     {
         var targets = await _impersonationWorkflow.GetImpersonationCandidatesAsync().ConfigureAwait(false);
@@ -218,18 +253,6 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
 
         Editor = editor;
         Editor.PropertyChanged += OnEditorPropertyChanged;
-    }
-
-    private void ApplyRoleSelection(IEnumerable<int> roleIds)
-    {
-        var selected = new HashSet<int>(roleIds ?? Array.Empty<int>());
-        _suppressRoleNotifications = true;
-        foreach (var option in _roleOptions)
-        {
-            option.IsSelected = selected.Contains(option.RoleId);
-        }
-        _suppressRoleNotifications = false;
-        UpdateEditorRoleSelectionFromOptions();
     }
 
     private void UpdateEditorRoleSelectionFromOptions()

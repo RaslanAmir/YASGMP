@@ -6,6 +6,7 @@ using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.Tests.TestDoubles;
+using YasGMP.Wpf.ViewModels.Dialogs;
 using YasGMP.Wpf.ViewModels.Modules;
 
 namespace YasGMP.Wpf.Tests;
@@ -16,7 +17,6 @@ public class SecurityModuleViewModelTests
     public async Task OnSaveAsync_AddMode_CreatesUserAndAssignsRoles()
     {
         var database = new DatabaseService();
-        var audit = new AuditService(database);
         var audit = new AuditService(database);
         const int adapterSignatureId = 4623;
         var userService = new FakeUserCrudService
@@ -37,19 +37,23 @@ public class SecurityModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation);
+        var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
+        var userDialog = new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+
+        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, userDialog);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
-        viewModel.Editor.Username = "new.user";
-        viewModel.Editor.FullName = "New User";
-        viewModel.Editor.Email = "new.user@example.com";
-        viewModel.Editor.Role = "Administrator";
-        viewModel.Editor.DepartmentName = "IT";
-        viewModel.Editor.NewPassword = "TempPass123!";
-        viewModel.Editor.ConfirmPassword = "TempPass123!";
+        await viewModel.Dialog.EnsureRolesLoadedAsync();
+        viewModel.Dialog.Editor.Username = "new.user";
+        viewModel.Dialog.Editor.FullName = "New User";
+        viewModel.Dialog.Editor.Email = "new.user@example.com";
+        viewModel.Dialog.Editor.Role = "Administrator";
+        viewModel.Dialog.Editor.DepartmentName = "IT";
+        viewModel.Dialog.Editor.NewPassword = "TempPass123!";
+        viewModel.Dialog.Editor.ConfirmPassword = "TempPass123!";
 
-        var adminRole = viewModel.RoleOptions.First();
+        var adminRole = viewModel.Dialog.RoleOptions.First();
         adminRole.IsSelected = true;
 
         var saved = await InvokeSaveAsync(viewModel);
@@ -114,17 +118,21 @@ public class SecurityModuleViewModelTests
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
 
-        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation);
+        var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
+        var userDialog = new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+
+        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, userDialog);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
         viewModel.Mode = FormMode.Update;
-        viewModel.Editor.Email = "updated@example.com";
-        viewModel.Editor.Role = "Administrator";
-        viewModel.Editor.NewPassword = "UpdatedPass!1";
-        viewModel.Editor.ConfirmPassword = "UpdatedPass!1";
+        await viewModel.Dialog.EnsureRolesLoadedAsync();
+        viewModel.Dialog.Editor.Email = "updated@example.com";
+        viewModel.Dialog.Editor.Role = "Administrator";
+        viewModel.Dialog.Editor.NewPassword = "UpdatedPass!1";
+        viewModel.Dialog.Editor.ConfirmPassword = "UpdatedPass!1";
 
-        var qualityRole = viewModel.RoleOptions.First(r => r.RoleId == 2);
+        var qualityRole = viewModel.Dialog.RoleOptions.First(r => r.RoleId == 2);
         qualityRole.IsSelected = true;
 
         var saved = await InvokeSaveAsync(viewModel);
@@ -134,8 +142,8 @@ public class SecurityModuleViewModelTests
         var updated = Assert.Single(userService.UpdatedUsers);
         Assert.Equal("updated@example.com", updated.Email);
         Assert.Equal(7, updated.Id);
-        Assert.Equal(string.Empty, viewModel.Editor.NewPassword);
-        Assert.Equal(string.Empty, viewModel.Editor.ConfirmPassword);
+        Assert.Equal(string.Empty, viewModel.Dialog.Editor.NewPassword);
+        Assert.Equal(string.Empty, viewModel.Dialog.Editor.ConfirmPassword);
         var contexts = userService.SavedContexts.ToList();
         Assert.NotEmpty(contexts);
         var context = contexts[^1];
