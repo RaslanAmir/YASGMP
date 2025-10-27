@@ -17,6 +17,7 @@
     <sys:String x:Key="Backstage.Button.AuditDashboard.AutomationId">Backstage.Button.AuditDashboard</sys:String>
     <sys:String x:Key="Backstage.Button.ApiAuditTrail.AutomationId">Backstage.Button.ApiAuditTrail</sys:String>
     <sys:String x:Key="Backstage.Button.RiskAssessments.AutomationId">Backstage.Button.RiskAssessments</sys:String>
+    <sys:String x:Key="Backstage.Button.Qualifications.AutomationId">Backstage.Button.Qualifications</sys:String>
 
     <sys:String x:Key="Ribbon.Tab.Home.AutomationId">Ribbon.Tab.Home</sys:String>
     <sys:String x:Key="Ribbon.Tab.View.AutomationId">Ribbon.Tab.View</sys:String>
@@ -50,6 +51,7 @@
     <sys:String x:Key="Ribbon.Button.AuditTrail.AutomationId">Ribbon.Button.AuditTrail</sys:String>
     <sys:String x:Key="Ribbon.Button.AuditDashboard.AutomationId">Ribbon.Button.AuditDashboard</sys:String>
     <sys:String x:Key="Ribbon.Button.ApiAuditTrail.AutomationId">Ribbon.Button.ApiAuditTrail</sys:String>
+    <sys:String x:Key="Ribbon.Button.Qualifications.AutomationId">Ribbon.Button.Qualifications</sys:String>
     <sys:String x:Key="Ribbon.Button.Suppliers.AutomationId">Ribbon.Button.Suppliers</sys:String>
     <sys:String x:Key="Ribbon.Button.Security.AutomationId">Ribbon.Button.Security</sys:String>
     <sys:String x:Key="Ribbon.Button.Administration.AutomationId">Ribbon.Button.Administration</sys:String>
@@ -135,6 +137,7 @@
     <sys:String x:Key="ModuleTree.Node.Quality.SopGovernance.AutomationId">ModuleTree.Node.Quality.SopGovernance</sys:String>
     <sys:String x:Key="ModuleTree.Node.Quality.Validations.AutomationId">ModuleTree.Node.Quality.Validations</sys:String>
     <sys:String x:Key="ModuleTree.Node.Quality.RiskAssessments.AutomationId">ModuleTree.Node.Quality.RiskAssessments</sys:String>
+    <sys:String x:Key="ModuleTree.Node.Quality.Qualifications.AutomationId">ModuleTree.Node.Quality.Qualifications</sys:String>
 
     <sys:String x:Key="ModuleTree.Node.Planning.Scheduling.AutomationId">ModuleTree.Node.Planning.Scheduling</sys:String>
 
@@ -146,6 +149,7 @@
     <sys:String x:Key="ModuleTree.Node.Quality &amp; Compliance.ApiAudit.AutomationId">ModuleTree.Node.QualityCompliance.ApiAuditTrail</sys:String>
 
     <sys:String x:Key="Menu.Quality.RiskAssessments.AutomationId">Menu.Quality.RiskAssessments</sys:String>
+    <sys:String x:Key="Menu.Quality.Qualifications.AutomationId">Menu.Quality.Qualifications</sys:String>
 
     <sys:String x:Key="ModuleTree.Node.Diagnostics.Diagnostics.AutomationId">ModuleTree.Node.Diagnostics.Diagnostics</sys:String>
 
