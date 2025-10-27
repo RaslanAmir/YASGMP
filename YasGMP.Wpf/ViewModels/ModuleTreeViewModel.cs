@@ -132,10 +132,10 @@ namespace YasGMP.Wpf.ViewModels
                 "ModuleTree.Node.Quality.Capa.AutomationName",
                 "ModuleTree.Node.Quality.Capa.AutomationId"));
             quality.Children.Add(new ModuleNodeViewModel(localization,
-                "ModuleTree.Node.Quality.Audits.Title",
-                "ModuleTree.Node.Quality.Audits.ToolTip",
-                "ModuleTree.Node.Quality.Audits.AutomationName",
-                "ModuleTree.Node.Quality.Audits.AutomationId"));
+                "ModuleTree.Node.Quality.Qualifications.Title",
+                "ModuleTree.Node.Quality.Qualifications.ToolTip",
+                "ModuleTree.Node.Quality.Qualifications.AutomationName",
+                "ModuleTree.Node.Quality.Qualifications.AutomationId"));
             quality.Children.Add(new ModuleNodeViewModel(localization,
                 "ModuleTree.Node.Quality.DocumentControl.Title",
                 "ModuleTree.Node.Quality.DocumentControl.ToolTip",

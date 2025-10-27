@@ -142,6 +142,13 @@
 - Added Qualifications module resources across the neutral/EN/HR ShellStrings to supply backstage, ribbon, menu, module tree, and status/type captions so the new workspace can resolve localized bindings immediately.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` remain blocked with `bash: command not found: dotnet` in this container; Windows validation still required.
 
+### Increment 3 Follow-up — Qualifications workspace entrypoints (2026-06-18)
+
+- Backstage Quality & Compliance tab now includes the localized Qualifications navigation button bound to `WindowCommands.OpenQualificationsCommand` with the MDL2 certificate glyph so operators can launch the workspace alongside Audit Trail and Document Control.
+- Quality ribbon group surfaces the same command with a large icon plus EN/HR automation metadata, keeping ribbon/backstage/menu/module tree bindings aligned on the new `Qualifications` localization keys.
+- Updated module tree configuration to target the Qualifications resource keys so accessibility metadata and smoke automation lookups remain accurate after the localization refresh.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried for this batch but still exit with `bash: command not found: dotnet`; Windows-host validation remains required.
+
 ### Increment 2 Follow-up — Training & SOP governance documentation (2026-06-09)
 
 - Refreshed `docs/WPF_MAPPING.md` to replace the placeholder Training/SOP row with dedicated Training Records and SOP Governance entries detailing ribbon/module tree access, toolbar workflows, filters, and Golden Arrow/CFL parity delivered in the WPF shell.【F:docs/WPF_MAPPING.md†L72-L101】

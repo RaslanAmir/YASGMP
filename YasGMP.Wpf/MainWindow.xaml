@@ -83,7 +83,7 @@
                                                Margin="0,0,0,8"
                                                Command="{Binding WindowCommands.OpenQualificationsCommand}">
                                     <fluent:Button.LargeIcon>
-                                        <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE81C2}"
+                                        <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE81C}"
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="24" />
                                     </fluent:Button.LargeIcon>
@@ -216,7 +216,13 @@
                                    ToolTipService.ToolTip="{DynamicResource Ribbon.Button.Qualifications.ToolTip}"
                                    AutomationProperties.Name="{DynamicResource Ribbon.Button.Qualifications.Header}"
                                    AutomationProperties.AutomationId="{DynamicResource Ribbon.Button.Qualifications.AutomationId}"
-                                   Command="{Binding WindowCommands.OpenQualificationsCommand}" />
+                                   Command="{Binding WindowCommands.OpenQualificationsCommand}">
+                        <fluent:Button.LargeIcon>
+                            <TextBlock Text="{DynamicResource Shell.MainWindow.Text.XE81C}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20" />
+                        </fluent:Button.LargeIcon>
+                    </fluent:Button>
                     <fluent:Button Header="{DynamicResource Ribbon.Button.RiskAssessments.Header}"
                                    ToolTipService.ToolTip="{DynamicResource Ribbon.Button.RiskAssessments.ToolTip}"
                                    AutomationProperties.Name="{DynamicResource Ribbon.Button.RiskAssessments.Header}"
