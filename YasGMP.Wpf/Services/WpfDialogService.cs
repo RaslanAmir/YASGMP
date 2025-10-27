@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using YasGMP.Services;
+using YasGMP.Wpf.Dialogs;
+using YasGMP.Wpf.ViewModels.Dialogs;
 
 namespace YasGMP.Wpf.Services
 {
@@ -14,11 +17,11 @@ namespace YasGMP.Wpf.Services
     /// <para><strong>Supported MAUI APIs:</strong> <see cref="ShowAlertAsync"/> and
     /// <see cref="ShowConfirmationAsync"/> translate directly to information/question message boxes and
     /// therefore keep existing MAUI flows working without code changes.</para>
-    /// <para><strong>Unsupported APIs:</strong> <see cref="ShowActionSheetAsync"/> and
-    /// <see cref="ShowDialogAsync{T}(string, object?, CancellationToken)"/> do not have WPF shell
-    /// equivalents yet. Callers migrating from MAUI must replace action sheets with dedicated ribbon
-    /// commands, docked panes, or module views, and throw or short-circuit optional workflows until a
-    /// desktop UX is defined.</para>
+    /// <para><strong>Unsupported APIs:</strong> <see cref="ShowActionSheetAsync"/> currently has no WPF shell
+    /// equivalent. <see cref="ShowDialogAsync{T}(string, object?, CancellationToken)"/> supports
+    /// <see cref="DialogIds.UserEdit"/> while additional dialogs await dedicated desktop UX.
+    /// Callers migrating from MAUI should replace action sheets with ribbon commands, docked panes, or
+    /// module views, and document TODOs for dialogs not yet implemented.</para>
     /// <para><strong>Localization:</strong> the service does not look up resources on its own; callers
     /// are responsible for passing fully localized titles/buttons sourced from the shared localization
     /// dictionaries (RESX, <c>ShellStrings</c>, etc.) so WPF mirrors MAUI translations.</para>
@@ -60,8 +63,125 @@ namespace YasGMP.Wpf.Services
 
         public Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
         {
-            // The WPF shell uses dedicated modules for editing; modal dialogs are not yet implemented.
-            throw new NotSupportedException($"Dialog '{dialogId}' is not available in the WPF shell.");
+            return dialogId switch
+            {
+                DialogIds.UserEdit => ShowUserEditDialogAsync<T>(parameter, cancellationToken),
+                _ => throw new NotSupportedException($"Dialog '{dialogId}' is not available in the WPF shell."),
+            };
+        }
+
+        private static Task<T?> ShowUserEditDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
+        {
+            if (typeof(T) != typeof(UserEditDialogViewModel.UserEditDialogResult))
+            {
+                throw new InvalidOperationException($"Dialog '{DialogIds.UserEdit}' expects result type '{typeof(UserEditDialogViewModel.UserEditDialogResult).FullName}'.");
+            }
+
+            return (Task<T?>)(object)ShowUserEditDialogAsyncCore(parameter, cancellationToken);
+        }
+
+        private static Task<UserEditDialogViewModel.UserEditDialogResult?> ShowUserEditDialogAsyncCore(object? parameter, CancellationToken cancellationToken)
+        {
+            if (parameter is not UserEditDialogRequest request)
+            {
+                throw new ArgumentException($"Dialog parameter must be of type {nameof(UserEditDialogRequest)}.", nameof(parameter));
+            }
+
+            if (Application.Current?.Dispatcher is null)
+            {
+                throw new InvalidOperationException("The WPF application dispatcher is not available.");
+            }
+
+            var completionSource = new TaskCompletionSource<UserEditDialogViewModel.UserEditDialogResult?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (completionSource.Task.IsCompleted)
+                {
+                    return;
+                }
+
+                var dialog = new UserEditDialogWindow
+                {
+                    DataContext = request.ViewModel,
+                };
+
+                AttachOwner(dialog);
+
+                var cancellationRegistration = default(CancellationTokenRegistration);
+                var handlersDetached = false;
+
+                void DetachHandlers()
+                {
+                    if (handlersDetached)
+                    {
+                        return;
+                    }
+
+                    handlersDetached = true;
+                    request.ViewModel.RequestClose -= OnRequestClose;
+                    dialog.Closed -= OnDialogClosed;
+                    cancellationRegistration.Dispose();
+                }
+
+                void OnDialogClosed(object? sender, EventArgs e)
+                {
+                    DetachHandlers();
+                    completionSource.TrySetResult(request.ViewModel.Result);
+                }
+
+                void OnRequestClose(object? sender, bool _)
+                {
+                    request.ViewModel.RequestClose -= OnRequestClose;
+                    if (dialog.IsVisible)
+                    {
+                        dialog.Close();
+                    }
+                    else
+                    {
+                        DetachHandlers();
+                        completionSource.TrySetResult(request.ViewModel.Result);
+                    }
+                }
+
+                request.ViewModel.RequestClose += OnRequestClose;
+                dialog.Closed += OnDialogClosed;
+
+                if (cancellationToken.CanBeCanceled)
+                {
+                    cancellationRegistration = cancellationToken.Register(() =>
+                    {
+                        dialog.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            if (dialog.IsVisible)
+                            {
+                                dialog.Close();
+                            }
+                        }));
+                    });
+                }
+
+                dialog.ShowDialog();
+            }));
+
+            return completionSource.Task;
+        }
+
+        private static void AttachOwner(Window dialog)
+        {
+            if (Application.Current?.Windows is null)
+            {
+                return;
+            }
+
+            var owner = Application.Current.Windows
+                .OfType<Window>()
+                .FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+
+            if (owner is not null && owner != dialog)
+            {
+                dialog.Owner = owner;
+            }
         }
     }
 }
