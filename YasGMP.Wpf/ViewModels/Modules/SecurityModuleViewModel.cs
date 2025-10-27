@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,10 +48,18 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         _inspectorDialog = _userDialogFactory();
+        _inspectorDialog.PropertyChanged += OnInspectorDialogPropertyChanged;
+        PropertyChanged += OnViewModelPropertyChanged;
 
         OpenUserEditDialogCommand = new AsyncRelayCommand<OpenUserEditDialogContext?>(ExecuteOpenUserEditDialogAsync);
         CreateUserCommand = new AsyncRelayCommand(CreateUserAsync);
         EditUserCommand = new AsyncRelayCommand(EditUserAsync);
+        OpenUserDialogCommand = new RelayCommand<object?>(OnOpenUserDialog, CanExecuteOpenUserDialog);
+        SaveUserCommand = new RelayCommand(OnSaveUser, CanExecuteSaveUser);
+        BeginImpersonationCommand = new RelayCommand(OnBeginImpersonation, CanExecuteBeginImpersonation);
+        EndImpersonationCommand = new RelayCommand(OnEndImpersonation, CanExecuteEndImpersonation);
+
+        UpdateInspectorCommandStates();
     }
 
     /// <summary>Dialog-oriented editor surface used by the module view.</summary>
@@ -64,6 +73,18 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
     /// <summary>Command invoked when Update mode is triggered.</summary>
     public IAsyncRelayCommand EditUserCommand { get; }
+
+    /// <summary>Command wrapper used by XAML bindings to launch the edit dialog.</summary>
+    public IRelayCommand OpenUserDialogCommand { get; }
+
+    /// <summary>Command wrapper used by XAML bindings to persist the current inspector user.</summary>
+    public IRelayCommand SaveUserCommand { get; }
+
+    /// <summary>Command wrapper used by XAML bindings to begin impersonation from the inspector.</summary>
+    public IRelayCommand BeginImpersonationCommand { get; }
+
+    /// <summary>Command wrapper used by XAML bindings to end impersonation from the inspector.</summary>
+    public IRelayCommand EndImpersonationCommand { get; }
 
     /// <summary>
     /// Provides a binding-friendly dialog context for the currently loaded user so the view can
@@ -235,6 +256,44 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         await ApplyDialogResultAsync(result).ConfigureAwait(false);
     }
 
+    private async void OnOpenUserDialog(object? parameter)
+    {
+        try
+        {
+            await ExecuteOpenUserDialogFromCommandAsync(parameter);
+        }
+        finally
+        {
+            UpdateInspectorCommandStates();
+        }
+    }
+
+    private bool CanExecuteOpenUserDialog(object? parameter)
+        => !IsBusy && !_inspectorDialog.IsBusy;
+
+    private async Task ExecuteOpenUserDialogFromCommandAsync(object? parameter)
+    {
+        if (IsBusy || _inspectorDialog.IsBusy)
+        {
+            return;
+        }
+
+        OpenUserEditDialogContext? context = parameter switch
+        {
+            OpenUserEditDialogContext explicitContext => explicitContext,
+            FormMode formMode when formMode == FormMode.Add => new OpenUserEditDialogContext(FormMode.Add, null, SelectedRecord),
+            FormMode formMode when formMode == FormMode.Update => SelectedUserDialogContext,
+            _ => SelectedUserDialogContext,
+        };
+
+        if (context is null)
+        {
+            return;
+        }
+
+        await ExecuteOpenUserEditDialogAsync(context);
+    }
+
     private Task CreateUserAsync()
     {
         if (IsBusy)
@@ -324,6 +383,83 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         if (result.ImpersonationEnded)
         {
             StatusMessage = _localization.GetString("Dialog.UserEdit.Status.ImpersonationEnded");
+        }
+    }
+
+    private async void OnSaveUser()
+    {
+        await ExecuteInspectorCommandAsync(_inspectorDialog.SaveCommand);
+    }
+
+    private bool CanExecuteSaveUser()
+        => !IsBusy && _inspectorDialog.SaveCommand.CanExecute(null);
+
+    private async void OnBeginImpersonation()
+    {
+        await ExecuteInspectorCommandAsync(_inspectorDialog.BeginImpersonationCommand);
+    }
+
+    private bool CanExecuteBeginImpersonation()
+        => !IsBusy && _inspectorDialog.BeginImpersonationCommand.CanExecute(null);
+
+    private async void OnEndImpersonation()
+    {
+        await ExecuteInspectorCommandAsync(_inspectorDialog.EndImpersonationCommand);
+    }
+
+    private bool CanExecuteEndImpersonation()
+        => !IsBusy && _inspectorDialog.EndImpersonationCommand.CanExecute(null);
+
+    private async Task ExecuteInspectorCommandAsync(IAsyncRelayCommand command)
+    {
+        if (IsBusy || !command.CanExecute(null))
+        {
+            UpdateInspectorCommandStates();
+            return;
+        }
+
+        try
+        {
+            await command.ExecuteAsync(null);
+            await ApplyInspectorDialogResultAsync();
+        }
+        finally
+        {
+            UpdateInspectorCommandStates();
+        }
+    }
+
+    private async Task ApplyInspectorDialogResultAsync()
+    {
+        var result = _inspectorDialog.Result;
+        if (result is not null)
+        {
+            await ApplyDialogResultAsync(result);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_inspectorDialog.StatusMessage))
+        {
+            StatusMessage = _inspectorDialog.StatusMessage!;
+        }
+    }
+
+    private void UpdateInspectorCommandStates()
+    {
+        OpenUserDialogCommand.NotifyCanExecuteChanged();
+        SaveUserCommand.NotifyCanExecuteChanged();
+        BeginImpersonationCommand.NotifyCanExecuteChanged();
+        EndImpersonationCommand.NotifyCanExecuteChanged();
+    }
+
+    private void OnInspectorDialogPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        => UpdateInspectorCommandStates();
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(IsBusy))
+        {
+            UpdateInspectorCommandStates();
         }
     }
 
