@@ -606,6 +606,123 @@
   <data name="Module.Qualifications.Type.Requalification" xml:space="preserve">
     <value>Requalification</value>
   </data>
+  <data name="Module.Qualifications.Field.Equipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="Module.Qualifications.Field.Type" xml:space="preserve">
+    <value>Qualification type</value>
+  </data>
+  <data name="Module.Qualifications.Field.Certificate" xml:space="preserve">
+    <value>Certificate</value>
+  </data>
+  <data name="Module.Qualifications.Field.EffectiveDate" xml:space="preserve">
+    <value>Effective date</value>
+  </data>
+  <data name="Module.Qualifications.Field.DueDate" xml:space="preserve">
+    <value>Due date</value>
+  </data>
+  <data name="Module.Qualifications.Field.QualifiedBy" xml:space="preserve">
+    <value>Qualified by</value>
+  </data>
+  <data name="Module.Qualifications.Field.ApprovedBy" xml:space="preserve">
+    <value>Approved by</value>
+  </data>
+  <data name="Module.Qualifications.Field.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.Qualifications.Title.UnknownEquipment" xml:space="preserve">
+    <value>Unassigned equipment</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.ToolTip" xml:space="preserve">
+    <value>Add a new qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.AutomationName" xml:space="preserve">
+    <value>Add qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Add</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.Content" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.ToolTip" xml:space="preserve">
+    <value>Update the selected qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.AutomationName" xml:space="preserve">
+    <value>Update qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Update</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.ToolTip" xml:space="preserve">
+    <value>Delete the selected qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.AutomationName" xml:space="preserve">
+    <value>Delete qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Delete</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.Content" xml:space="preserve">
+    <value>Rollback</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.ToolTip" xml:space="preserve">
+    <value>Rollback the selected qualification to the previous revision</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.AutomationName" xml:space="preserve">
+    <value>Rollback qualification</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Rollback</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.Content" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.ToolTip" xml:space="preserve">
+    <value>Export filtered qualifications</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.AutomationName" xml:space="preserve">
+    <value>Export qualifications</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Export</value>
+  </data>
+  <data name="Module.Qualifications.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.Qualifications.Filter.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Qualifications.Search.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Search</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.Equipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.DueDate" xml:space="preserve">
+    <value>Due date</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.Certificate" xml:space="preserve">
+    <value>Certificate</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.QualifiedBy" xml:space="preserve">
+    <value>Qualified by</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.ApprovedBy" xml:space="preserve">
+    <value>Approved by</value>
+  </data>
+  <data name="Module.Qualifications.Inspector.Header" xml:space="preserve">
+    <value>Qualification details</value>
+  </data>
   <data name="Module.Description.TrainingRecords" xml:space="preserve">
     <value>Employee training lifecycle, assignments, approvals, and effectiveness tracking</value>
   </data>
