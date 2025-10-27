@@ -36,7 +36,11 @@ public class SecurityModuleViewModelTests
             {
                 ["neutral"] = new Dictionary<string, string>
                 {
-                    ["Module.Title.Security"] = "Security"
+                    ["Module.Title.Security"] = "Security",
+                    ["Dialog.UserEdit.Status.Saved"] = "User saved successfully.",
+                    ["Dialog.UserEdit.Status.ImpersonationRequested"] = "Impersonation requested.",
+                    ["Dialog.UserEdit.Status.ImpersonationRequestedWithTarget"] = "Impersonation requested for #{0}.",
+                    ["Dialog.UserEdit.Status.ImpersonationEnded"] = "Impersonation session ended."
                 }
             },
             "neutral");
@@ -68,7 +72,7 @@ public class SecurityModuleViewModelTests
         };
 
         Func<UserEditDialogViewModel> userDialogFactory = () =>
-            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell, localization);
 
         var viewModel = new SecurityModuleViewModel(
             database,
@@ -126,7 +130,11 @@ public class SecurityModuleViewModelTests
             {
                 ["neutral"] = new Dictionary<string, string>
                 {
-                    ["Module.Title.Security"] = "Security"
+                    ["Module.Title.Security"] = "Security",
+                    ["Dialog.UserEdit.Status.Saved"] = "User saved successfully.",
+                    ["Dialog.UserEdit.Status.ImpersonationRequested"] = "Impersonation requested.",
+                    ["Dialog.UserEdit.Status.ImpersonationRequestedWithTarget"] = "Impersonation requested for #{0}.",
+                    ["Dialog.UserEdit.Status.ImpersonationEnded"] = "Impersonation session ended."
                 }
             },
             "neutral");
@@ -161,7 +169,7 @@ public class SecurityModuleViewModelTests
         };
 
         Func<UserEditDialogViewModel> userDialogFactory = () =>
-            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell, localization);
 
         var viewModel = new SecurityModuleViewModel(
             database,

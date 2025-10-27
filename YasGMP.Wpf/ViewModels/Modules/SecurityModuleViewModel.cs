@@ -25,6 +25,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
     private readonly IDialogService _dialogService;
     private readonly Func<UserEditDialogViewModel> _userDialogFactory;
     private readonly UserEditDialogViewModel _inspectorDialog;
+    private readonly ILocalizationService _localization;
     private User? _loadedUser;
 
     /// <summary>Initializes a new instance of the <see cref="SecurityModuleViewModel"/> class.</summary>
@@ -43,6 +44,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _userDialogFactory = userDialogFactory ?? throw new ArgumentNullException(nameof(userDialogFactory));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         _inspectorDialog = _userDialogFactory();
 
@@ -301,7 +303,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         {
             if (string.IsNullOrWhiteSpace(StatusMessage))
             {
-                StatusMessage = "User saved successfully.";
+                StatusMessage = _localization.GetString("Dialog.UserEdit.Status.Saved");
             }
 
             await RefreshAsync().ConfigureAwait(false);
@@ -312,14 +314,16 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         if (result.ImpersonationRequested)
         {
             StatusMessage = result.ImpersonationTargetId.HasValue
-                ? $"Impersonation requested for #{result.ImpersonationTargetId}."
-                : "Impersonation requested.";
+                ? _localization.GetString(
+                    "Dialog.UserEdit.Status.ImpersonationRequestedWithTarget",
+                    result.ImpersonationTargetId)
+                : _localization.GetString("Dialog.UserEdit.Status.ImpersonationRequested");
             return;
         }
 
         if (result.ImpersonationEnded)
         {
-            StatusMessage = "Impersonation session ended.";
+            StatusMessage = _localization.GetString("Dialog.UserEdit.Status.ImpersonationEnded");
         }
     }
 

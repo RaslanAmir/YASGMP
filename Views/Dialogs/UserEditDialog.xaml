@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:helpers="clr-namespace:YasGMP.Helpers"
              x:Class="YasGMP.Views.Dialogs.UserEditDialog"
-             Title="{helpers:ShellString Key=Module.Security.Text.UserDetails}">
+             Title="{helpers:ShellString Key=Dialog.UserEdit.Title}">
   <ScrollView>
     <VerticalStackLayout Padding="24" Spacing="14">
-      <Label Text="{helpers:ShellString Key=Module.Security.Text.UserDetails}"
+      <Label Text="{helpers:ShellString Key=Dialog.UserEdit.Title}"
              FontSize="20"
              FontAttributes="Bold" />
 
@@ -124,7 +124,7 @@
              Margin="0,12,0,0" />
 
       <HorizontalStackLayout Spacing="12">
-        <Label Text="{helpers:ShellString Key=Module.Security.Content.Active}" VerticalOptions="Center" />
+        <Label Text="{helpers:ShellString Key=Dialog.UserEdit.Toggle.Impersonation.Label}" VerticalOptions="Center" />
         <Switch x:Name="ImpersonationSwitch"
                 IsToggled="{Binding IsImpersonating}" />
       </HorizontalStackLayout>
@@ -146,7 +146,7 @@
                 Command="{Binding SaveCommand}" />
         <Button Text="{helpers:ShellString Key=Module.Toolbar.Command.Cancel.Content}"
                 Command="{Binding CancelCommand}" />
-        <Button Text="{helpers:ShellString Key=Module.Toolbar.Command.Refresh.Content}"
+        <Button Text="{helpers:ShellString Key=Dialog.UserEdit.Command.BeginImpersonation.Content}"
                 Command="{Binding ImpersonateCommand}"
                 IsEnabled="{Binding Source={x:Reference ImpersonationSwitch}, Path=IsToggled}" />
       </HorizontalStackLayout>
