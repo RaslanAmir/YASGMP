@@ -135,6 +135,11 @@
 - 2026-06-11: Added `ISopGovernanceService`/`SopGovernanceServiceAdapter` to wrap the DatabaseService SOP helpers with attachment workflows and electronic signatures, refactored `SopGovernanceModuleViewModel` to drive busy/status/inspector refresh through the adapter, and registered the service in `App.xaml.cs`; `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` remain blocked with `bash: command not found: dotnet` in this container.
 - 2026-06-12: Introduced `TrainingRecordServiceAdapterTests` with dedicated DatabaseService/auth/attachment/signature fakes so every training workflow path (load, initiate, assign, approve, complete, close, export) asserts signature persistence, manifest refresh, and attachment uploads including cancellation short-circuits; reran `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` — each still returns `bash: command not found: dotnet` in this Linux container.
 
+### Increment 3 Follow-up — Qualifications localization (2026-06-13)
+
+- Added Qualifications module resources across the neutral/EN/HR ShellStrings to supply backstage, ribbon, menu, module tree, and status/type captions so the new workspace can resolve localized bindings immediately.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` remain blocked with `bash: command not found: dotnet` in this container; Windows validation still required.
+
 ### Increment 2 Follow-up — Training & SOP governance documentation (2026-06-09)
 
 - Refreshed `docs/WPF_MAPPING.md` to replace the placeholder Training/SOP row with dedicated Training Records and SOP Governance entries detailing ribbon/module tree access, toolbar workflows, filters, and Golden Arrow/CFL parity delivered in the WPF shell.【F:docs/WPF_MAPPING.md†L72-L101】
