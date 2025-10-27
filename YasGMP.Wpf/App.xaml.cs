@@ -118,6 +118,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<ISupplierCrudService, SupplierCrudServiceAdapter>();
                         svc.AddTransient<IExternalServicerCrudService, ExternalServicerCrudServiceAdapter>();
                         svc.AddTransient<IUserCrudService, UserCrudServiceAdapter>();
+                        svc.AddSingleton<ISecurityImpersonationWorkflowService, SecurityImpersonationWorkflowService>();
                         svc.AddTransient<IScheduledJobCrudService, ScheduledJobCrudServiceAdapter>();
                         svc.AddSingleton<ShellInteractionService>();
                         svc.AddSingleton<IModuleNavigationService>(sp => sp.GetRequiredService<ShellInteractionService>());
@@ -168,6 +169,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<DocumentControlViewModel>();
                         svc.AddTransient<LoginViewModel>();
                         svc.AddTransient<ReauthenticationDialogViewModel>();
+                        svc.AddTransient<UserEditDialogViewModel>();
                         svc.AddTransient<DigitalSignatureViewModel>();
                         svc.AddTransient<ElectronicSignatureDialogViewModel>();
                         svc.AddTransient<AuditLogViewModel>(sp =>
