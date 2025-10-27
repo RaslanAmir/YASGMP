@@ -2361,6 +2361,9 @@
   <data name="Module.Diagnostics.Text.Filter" xml:space="preserve">
     <value>Filter:</value>
   </data>
+  <data name="Module.Diagnostics.Text.Session" xml:space="preserve">
+    <value>Session</value>
+  </data>
   <data name="Module.ExternalServicers.Header.Contact" xml:space="preserve">
     <value>Contact</value>
   </data>
