@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models;
@@ -36,11 +36,20 @@ public class SecurityModuleViewModelTests
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
+        var localization = new FakeLocalizationService(
+            new Dictionary<string, IDictionary<string, string>>
+            {
+                ["neutral"] = new Dictionary<string, string>
+                {
+                    ["Module.Title.Security"] = "Security"
+                }
+            },
+            "neutral");
 
         var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
         var userDialog = new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
 
-        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, userDialog);
+        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, localization, userDialog);
         await viewModel.InitializeAsync(null);
 
         viewModel.Mode = FormMode.Add;
@@ -56,9 +65,12 @@ public class SecurityModuleViewModelTests
         var adminRole = viewModel.Dialog.RoleOptions.First();
         adminRole.IsSelected = true;
 
-        var saved = await InvokeSaveAsync(viewModel);
+        await viewModel.Dialog.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(saved);
+        var result = Assert.NotNull(viewModel.Dialog.Result);
+        Assert.True(result.Saved);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Empty(viewModel.Dialog.ValidationMessages);
         Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var created = Assert.Single(userService.CreatedUsers);
         Assert.Equal("new.user", created.Username);
@@ -89,6 +101,7 @@ public class SecurityModuleViewModelTests
     public async Task OnSaveAsync_UpdateMode_UpdatesExistingUserAndClearsPassword()
     {
         var database = new DatabaseService();
+        var audit = new AuditService(database);
         const int updateAdapterSignatureId = 5824;
         var userService = new FakeUserCrudService
         {
@@ -117,11 +130,20 @@ public class SecurityModuleViewModelTests
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
+        var localization = new FakeLocalizationService(
+            new Dictionary<string, IDictionary<string, string>>
+            {
+                ["neutral"] = new Dictionary<string, string>
+                {
+                    ["Module.Title.Security"] = "Security"
+                }
+            },
+            "neutral");
 
         var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
         var userDialog = new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
 
-        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, userDialog);
+        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, localization, userDialog);
         await viewModel.InitializeAsync(null);
 
         viewModel.SelectedRecord = viewModel.Records.First();
@@ -135,9 +157,12 @@ public class SecurityModuleViewModelTests
         var qualityRole = viewModel.Dialog.RoleOptions.First(r => r.RoleId == 2);
         qualityRole.IsSelected = true;
 
-        var saved = await InvokeSaveAsync(viewModel);
+        await viewModel.Dialog.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(saved);
+        var result = Assert.NotNull(viewModel.Dialog.Result);
+        Assert.True(result.Saved);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Empty(viewModel.Dialog.ValidationMessages);
         Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
         var updated = Assert.Single(userService.UpdatedUsers);
         Assert.Equal("updated@example.com", updated.Email);
@@ -164,13 +189,5 @@ public class SecurityModuleViewModelTests
         Assert.Equal(0, signatureDialog.PersistInvocationCount);
         var assignment = userService.RoleAssignments.Last();
         Assert.Contains(2, assignment.Roles);
-    }
-
-    private static Task<bool> InvokeSaveAsync(SecurityModuleViewModel viewModel)
-    {
-        var method = typeof(SecurityModuleViewModel)
-            .GetMethod("OnSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?? throw new MissingMethodException(nameof(SecurityModuleViewModel), "OnSaveAsync");
-        return (Task<bool>)method.Invoke(viewModel, null)!;
     }
 }
