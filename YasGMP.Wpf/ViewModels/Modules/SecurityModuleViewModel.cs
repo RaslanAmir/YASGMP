@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -11,34 +11,27 @@ using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Dialogs;
-using RoleOption = YasGMP.Wpf.ViewModels.Dialogs.UserEditDialogViewModel.RoleOption;
-using UserEditor = YasGMP.Wpf.ViewModels.Dialogs.UserEditDialogViewModel.UserEditor;
 
 namespace YasGMP.Wpf.ViewModels.Modules;
-/// <summary>
-/// Represents the security module view model value.
-/// </summary>
 
+/// <summary>
+/// Represents the security module view model surfaced inside the WPF shell.
+/// </summary>
 public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentViewModel
 {
-    /// <summary>
-    /// Represents the module key value.
-    /// </summary>
+    /// <summary>Stable registration key for the module.</summary>
     public const string ModuleKey = "Security";
 
     private readonly IUserCrudService _userService;
     private readonly IAuthContext _authContext;
     private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly ObservableCollection<RoleOption> _roleOptions = new();
-    private readonly List<Role> _availableRoles = new();
+    private readonly UserEditDialogViewModel _dialog;
     private User? _loadedUser;
-    private UserEditor? _snapshot;
-    private bool _suppressEditorDirty;
-    private bool _suppressRoleDirty;
-    /// <summary>
-    /// Initializes a new instance of the SecurityModuleViewModel class.
-    /// </summary>
+    private UserEditDialogViewModel.UserEditor? _snapshot;
+    private UserEditDialogViewModel.UserEditor? _currentEditor;
+    private bool _suppressDialogNotifications;
 
+    /// <summary>Initializes a new instance of the <see cref="SecurityModuleViewModel"/> class.</summary>
     public SecurityModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
@@ -48,26 +41,29 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        UserEditDialogViewModel dialogViewModel)
         : base(ModuleKey, localization.GetString("Module.Title.Security"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        Editor = UserEditor.CreateEmpty();
-        RoleOptions = new ReadOnlyObservableCollection<RoleOption>(_roleOptions);
+        _dialog = dialogViewModel ?? throw new ArgumentNullException(nameof(dialogViewModel));
+
+        _dialog.RequestClose += OnDialogRequestClose;
+        _dialog.ValidationMessages.CollectionChanged += OnDialogValidationMessagesChanged;
+        _dialog.PropertyChanged += OnDialogPropertyChanged;
+        _dialog.SaveCallback = ExecuteDialogSaveAsync;
+
+        HookEditor(_dialog.Editor);
+        SyncValidationMessages();
     }
 
-    [ObservableProperty]
-    private UserEditor _editor;
+    /// <summary>Dialog-oriented editor surface used by the module view.</summary>
+    public UserEditDialogViewModel Dialog => _dialog;
 
     [ObservableProperty]
     private bool _isEditorEnabled;
-    /// <summary>
-    /// Gets or sets the role options.
-    /// </summary>
-
-    public ReadOnlyObservableCollection<RoleOption> RoleOptions { get; }
 
     protected override async Task<IReadOnlyList<ModuleRecord>> LoadAsync(object? parameter)
     {
@@ -138,11 +134,13 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         if (record is null)
         {
             _loadedUser = null;
-            SetEditor(UserEditor.CreateEmpty());
-            if (_roleOptions.Count > 0)
+            await _dialog.EnsureRolesLoadedAsync().ConfigureAwait(false);
+            SuppressDialogNotifications(() =>
             {
-                ApplyRoleSelection(Array.Empty<int>());
-            }
+                _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateEmpty());
+                _dialog.ApplyRoleSelection(Array.Empty<int>());
+            });
+            ResetDirty();
             return;
         }
 
@@ -165,9 +163,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         }
 
         _loadedUser = user;
-        SetEditor(UserEditor.FromUser(user));
-        await EnsureRolesLoadedAsync().ConfigureAwait(false);
-        ApplyRoleSelection(user.RoleIds ?? Array.Empty<int>());
+        await InitializeDialogAsync(user).ConfigureAwait(false);
         ResetDirty();
     }
 
@@ -177,7 +173,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
         if (mode is FormMode.Add or FormMode.Update)
         {
-            await EnsureRolesLoadedAsync().ConfigureAwait(false);
+            await _dialog.EnsureRolesLoadedAsync().ConfigureAwait(false);
         }
 
         switch (mode)
@@ -185,15 +181,21 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             case FormMode.Add:
                 _snapshot = null;
                 _loadedUser = null;
-                SetEditor(UserEditor.CreateForNew());
-                ApplyRoleSelection(Array.Empty<int>());
+                SuppressDialogNotifications(() =>
+                {
+                    _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateForNew());
+                    _dialog.ApplyRoleSelection(Array.Empty<int>());
+                });
                 break;
             case FormMode.Update:
-                _snapshot = Editor.Clone();
+                _snapshot = _dialog.Editor.Clone();
                 break;
             case FormMode.Find:
-                SetEditor(UserEditor.CreateEmpty());
-                ApplyRoleSelection(Array.Empty<int>());
+                SuppressDialogNotifications(() =>
+                {
+                    _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateEmpty());
+                    _dialog.ApplyRoleSelection(Array.Empty<int>());
+                });
                 break;
         }
     }
@@ -202,99 +204,76 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
     {
         if (Mode == FormMode.Add)
         {
-            SetEditor(UserEditor.CreateEmpty());
-            ApplyRoleSelection(Array.Empty<int>());
+            SuppressDialogNotifications(() =>
+            {
+                _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateEmpty());
+                _dialog.ApplyRoleSelection(Array.Empty<int>());
+            });
+            ResetDirty();
             return;
         }
 
         if (Mode == FormMode.Update)
         {
-            if (_snapshot is not null)
+            SuppressDialogNotifications(() =>
             {
-                SetEditor(_snapshot.Clone());
-                ApplyRoleSelection(_snapshot.RoleIds);
-            }
-            else if (_loadedUser is not null)
-            {
-                SetEditor(UserEditor.FromUser(_loadedUser));
-                ApplyRoleSelection(_loadedUser.RoleIds ?? Array.Empty<int>());
-            }
+                if (_snapshot is not null)
+                {
+                    _dialog.LoadEditor(_snapshot.Clone());
+                    _dialog.ApplyRoleSelection(_snapshot.RoleIds);
+                }
+                else if (_loadedUser is not null)
+                {
+                    _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.FromUser(_loadedUser));
+                    _dialog.ApplyRoleSelection(_loadedUser.RoleIds ?? Array.Empty<int>());
+                }
+            });
         }
     }
 
     protected override async Task<IReadOnlyList<string>> ValidateAsync()
     {
-        var errors = new List<string>();
-        var editor = Editor;
-
-        if (string.IsNullOrWhiteSpace(editor.Username))
-        {
-            errors.Add("Username is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(editor.FullName))
-        {
-            errors.Add("Full name is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(editor.Role))
-        {
-            errors.Add("Primary role description is required.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(editor.Email) && !editor.Email.Contains('@', StringComparison.Ordinal))
-        {
-            errors.Add("Email address appears to be invalid.");
-        }
-
-        if (Mode == FormMode.Add && string.IsNullOrWhiteSpace(editor.NewPassword))
-        {
-            errors.Add("Password is required when creating a new user.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(editor.NewPassword) &&
-            !string.Equals(editor.NewPassword, editor.ConfirmPassword, StringComparison.Ordinal))
-        {
-            errors.Add("Password confirmation must match the new password.");
-        }
-
-        if (editor.RoleIds is null || editor.RoleIds.Length == 0)
-        {
-            errors.Add("At least one role must be assigned to the user.");
-        }
-
-        try
-        {
-            var probe = _loadedUser is null ? new User() : CloneUser(_loadedUser);
-            editor.ApplyTo(probe);
-            probe.RoleIds = editor.RoleIds ?? Array.Empty<int>();
-            _userService.Validate(probe);
-        }
-        catch (Exception ex)
-        {
-            errors.Add(ex.Message);
-        }
-
-        await Task.CompletedTask;
-        return errors;
+        await _dialog.ValidateAsync().ConfigureAwait(false);
+        SyncValidationMessages();
+        return _dialog.ValidationMessages.ToList();
     }
 
     protected override async Task<bool> OnSaveAsync()
     {
-        await EnsureRolesLoadedAsync().ConfigureAwait(false);
+        var result = await PersistDialogAsync().ConfigureAwait(false);
+        return result.Saved;
+    }
 
-        var editor = Editor;
+    protected override bool MatchesSearch(ModuleRecord record, string searchText)
+    {
+        if (base.MatchesSearch(record, searchText))
+        {
+            return true;
+        }
+
+        return record.InspectorFields.Any(field =>
+            field.Value.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private Task InitializeDialogAsync(User? user)
+        => SuppressDialogNotificationsAsync(() => _dialog.InitializeAsync(user));
+
+    private async Task<UserEditDialogViewModel.UserEditDialogResult> PersistDialogAsync()
+    {
+        await _dialog.EnsureRolesLoadedAsync().ConfigureAwait(false);
+
+        var editor = _dialog.Editor;
         var user = _loadedUser is null ? new User() : CloneUser(_loadedUser);
         editor.ApplyTo(user);
         user.RoleIds = editor.RoleIds ?? Array.Empty<int>();
 
-        if (user.RoleIds.Length == 0 && _availableRoles.Count > 0)
+        if (user.RoleIds.Length == 0 && _dialog.RoleOptions.Count > 0)
         {
-            var primary = _availableRoles.FirstOrDefault(r =>
+            var primary = _dialog.RoleOptions.FirstOrDefault(r =>
                 string.Equals(r.Name, user.Role, StringComparison.OrdinalIgnoreCase));
             if (primary is not null)
             {
-                user.RoleIds = new[] { primary.Id };
+                user.RoleIds = new[] { primary.RoleId };
             }
         }
 
@@ -303,37 +282,36 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         if (Mode == FormMode.Update && _loadedUser is null)
         {
             StatusMessage = "Select a user before saving.";
-            return false;
+            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
         }
 
         var password = string.IsNullOrWhiteSpace(editor.NewPassword)
             ? null
             : editor.NewPassword.Trim();
 
-        var recordId = user.Id;
         ElectronicSignatureDialogResult? signatureResult;
         try
         {
             signatureResult = await _signatureDialog
-                .CaptureSignatureAsync(new ElectronicSignatureContext("users", recordId))
+                .CaptureSignatureAsync(new ElectronicSignatureContext("users", user.Id))
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             StatusMessage = $"Electronic signature failed: {ex.Message}";
-            return false;
+            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
         }
 
         if (signatureResult is null)
         {
             StatusMessage = "Electronic signature cancelled. Save aborted.";
-            return false;
+            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
         }
 
         if (signatureResult.Signature is null)
         {
             StatusMessage = "Electronic signature was not captured.";
-            return false;
+            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
         }
 
         var context = UserCrudContext.Create(
@@ -349,18 +327,17 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         user.LastModified = DateTime.UtcNow;
         user.LastModifiedById = _authContext.CurrentUser?.Id;
 
-        User adapterResult = user;
         CrudSaveResult saveResult;
         try
         {
             if (user.Id == 0)
             {
-                if (password is null)
+                if (string.IsNullOrWhiteSpace(password))
                 {
                     throw new InvalidOperationException("Password is required for new users.");
                 }
 
-                saveResult = await _userService.CreateAsync(user, password, context).ConfigureAwait(false);
+                saveResult = await _userService.CreateAsync(user, password!, context).ConfigureAwait(false);
                 if (user.Id == 0 && saveResult.Id > 0)
                 {
                     user.Id = saveResult.Id;
@@ -376,7 +353,10 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
                 saveResult = await _userService.UpdateAsync(user, password, context).ConfigureAwait(false);
             }
 
-            await _userService.UpdateRoleAssignmentsAsync(user.Id, user.RoleIds, context).ConfigureAwait(false);
+            await _userService.UpdateRoleAssignmentsAsync(
+                user.Id,
+                user.RoleIds ?? Array.Empty<int>(),
+                context).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -384,22 +364,24 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         }
 
         _loadedUser = user;
+        _dialog.UpdateLoadedUser(user);
         _snapshot = null;
 
-        _suppressEditorDirty = true;
-        Editor.NewPassword = string.Empty;
-        Editor.ConfirmPassword = string.Empty;
-        _suppressEditorDirty = false;
+        SuppressDialogNotifications(() =>
+        {
+            _dialog.Editor.NewPassword = string.Empty;
+            _dialog.Editor.ConfirmPassword = string.Empty;
+            _dialog.ApplyRoleSelection(user.RoleIds ?? Array.Empty<int>());
+        });
 
-        ApplyRoleSelection(user.RoleIds);
         ResetDirty();
 
         SignaturePersistenceHelper.ApplyEntityMetadata(
             signatureResult,
             tableName: "users",
-            recordId: adapterResult.Id,
+            recordId: user.Id,
             metadata: saveResult.SignatureMetadata,
-            fallbackSignatureHash: adapterResult.DigitalSignature,
+            fallbackSignatureHash: user.DigitalSignature,
             fallbackMethod: context.SignatureMethod,
             fallbackStatus: context.SignatureStatus,
             fallbackNote: context.SignatureNote,
@@ -418,22 +400,118 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         {
             StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
             Mode = FormMode.Update;
-            return false;
+            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
         }
 
         StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-        return true;
+        return CreateResult(saved: true, impersonationRequested: false, impersonationEnded: false);
     }
 
-    protected override bool MatchesSearch(ModuleRecord record, string searchText)
+    private Task<UserEditDialogViewModel.UserEditDialogResult> ExecuteDialogSaveAsync(UserEditDialogViewModel dialog)
+        => PersistDialogAsync();
+
+    private void OnDialogPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (base.MatchesSearch(record, searchText))
+        if (e.PropertyName == nameof(UserEditDialogViewModel.Editor))
         {
-            return true;
+            HookEditor(_dialog.Editor);
+        }
+    }
+
+    private void HookEditor(UserEditDialogViewModel.UserEditor? editor)
+    {
+        if (_currentEditor is not null)
+        {
+            _currentEditor.PropertyChanged -= OnDialogEditorPropertyChanged;
         }
 
-        return record.InspectorFields.Any(field =>
-            field.Value.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        _currentEditor = editor;
+        if (_currentEditor is not null)
+        {
+            _currentEditor.PropertyChanged += OnDialogEditorPropertyChanged;
+        }
+    }
+
+    private void OnDialogEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_suppressDialogNotifications)
+        {
+            return;
+        }
+
+        if (IsInEditMode)
+        {
+            MarkDirty();
+        }
+    }
+
+    private void OnDialogValidationMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        => SyncValidationMessages();
+
+    private void SyncValidationMessages()
+    {
+        ValidationMessages.Clear();
+        foreach (var message in _dialog.ValidationMessages)
+        {
+            ValidationMessages.Add(message);
+        }
+    }
+
+    private void OnDialogRequestClose(object? sender, bool saved)
+    {
+        var result = _dialog.Result;
+        if (result is null)
+        {
+            return;
+        }
+
+        if (result.Saved)
+        {
+            Mode = FormMode.View;
+            return;
+        }
+
+        if (result.ImpersonationRequested)
+        {
+            StatusMessage = result.ImpersonationTargetId.HasValue
+                ? $"Impersonation requested for #{result.ImpersonationTargetId}."
+                : "Impersonation requested.";
+        }
+        else if (result.ImpersonationEnded)
+        {
+            StatusMessage = "Impersonation session ended.";
+        }
+
+        if (!result.Saved && !result.ImpersonationRequested && !result.ImpersonationEnded && Mode is FormMode.Add or FormMode.Update)
+        {
+            Mode = FormMode.View;
+        }
+    }
+
+    private void SuppressDialogNotifications(Action action)
+    {
+        try
+        {
+            _suppressDialogNotifications = true;
+            action();
+        }
+        finally
+        {
+            _suppressDialogNotifications = false;
+        }
+    }
+
+    private async Task SuppressDialogNotificationsAsync(Func<Task> action)
+    {
+        _suppressDialogNotifications = true;
+        try
+        {
+            await action().ConfigureAwait(false);
+        }
+        finally
+        {
+            _suppressDialogNotifications = false;
+        }
     }
 
     private static ModuleRecord ToRecord(User user)
@@ -459,98 +537,6 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             user.Id);
     }
 
-    private void SetEditor(UserEditor editor)
-    {
-        _suppressEditorDirty = true;
-        Editor = editor;
-        _suppressEditorDirty = false;
-        ResetDirty();
-    }
-
-    private async Task EnsureRolesLoadedAsync()
-    {
-        if (_roleOptions.Count > 0)
-        {
-            return;
-        }
-
-        var roles = await _userService.GetAllRolesAsync().ConfigureAwait(false);
-        _availableRoles.Clear();
-
-        foreach (var role in roles.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase))
-        {
-            _availableRoles.Add(role);
-        }
-
-        _suppressRoleDirty = true;
-        foreach (var option in _roleOptions)
-        {
-            option.PropertyChanged -= OnRoleOptionPropertyChanged;
-        }
-
-        _roleOptions.Clear();
-        foreach (var role in _availableRoles)
-        {
-            var option = new RoleOption(role.Id, role.Name, role.Description);
-            option.PropertyChanged += OnRoleOptionPropertyChanged;
-            _roleOptions.Add(option);
-        }
-
-        _suppressRoleDirty = false;
-    }
-
-    private void ApplyRoleSelection(IEnumerable<int> roleIds)
-    {
-        var set = new HashSet<int>(roleIds ?? Array.Empty<int>());
-        _suppressRoleDirty = true;
-        foreach (var option in _roleOptions)
-        {
-            option.IsSelected = set.Contains(option.RoleId);
-        }
-        _suppressRoleDirty = false;
-
-        UpdateEditorRoleSelectionFromOptions();
-    }
-
-    private void UpdateEditorRoleSelectionFromOptions()
-    {
-        var selected = _roleOptions
-            .Where(o => o.IsSelected)
-            .Select(o => o.RoleId)
-            .ToArray();
-
-        _suppressEditorDirty = true;
-        Editor.RoleIds = selected;
-        _suppressEditorDirty = false;
-    }
-
-    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (_suppressEditorDirty)
-        {
-            return;
-        }
-
-        if (IsInEditMode)
-        {
-            MarkDirty();
-        }
-    }
-
-    private void OnRoleOptionPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName != nameof(RoleOption.IsSelected) || _suppressRoleDirty)
-        {
-            return;
-        }
-
-        UpdateEditorRoleSelectionFromOptions();
-        if (IsInEditMode)
-        {
-            MarkDirty();
-        }
-    }
-
     private static User CloneUser(User source)
     {
         return new User
@@ -572,19 +558,15 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         };
     }
 
-    partial void OnEditorChanging(UserEditor value)
+    private UserEditDialogViewModel.UserEditDialogResult CreateResult(bool saved, bool impersonationRequested, bool impersonationEnded)
     {
-        if (value is not null)
-        {
-            value.PropertyChanged -= OnEditorPropertyChanged;
-        }
-    }
-
-    partial void OnEditorChanged(UserEditor value)
-    {
-        if (value is not null)
-        {
-            value.PropertyChanged += OnEditorPropertyChanged;
-        }
+        return new UserEditDialogViewModel.UserEditDialogResult(
+            saved,
+            impersonationRequested,
+            impersonationEnded,
+            _dialog.Editor.Clone(),
+            _dialog.SelectedImpersonationTarget?.Id,
+            _dialog.ImpersonationReason,
+            _dialog.ImpersonationNotes);
     }
 }

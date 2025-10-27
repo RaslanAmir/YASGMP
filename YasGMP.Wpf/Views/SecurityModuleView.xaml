@@ -99,70 +99,70 @@
                             <TextBlock Text="{DynamicResource Module.Security.Header.Username}" Grid.Row="0" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="0"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.Username, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.Username, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.Security.Text.FullName}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="1"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.FullName, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.FullName, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Email}" Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="2"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.Email, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.Email, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.ExternalServicers.Text.Phone}" Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="3"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.Phone, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.Phone, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.Security.Text.PrimaryRole}" Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.Role, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.Role, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.Security.Text.Department}" Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="5"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.DepartmentName, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.DepartmentName, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
                                 <CheckBox Content="{DynamicResource Module.Security.Content.Active}"
-                                          IsChecked="{Binding Editor.Active, Mode=TwoWay}"
+                                          IsChecked="{Binding Dialog.Editor.Active, Mode=TwoWay}"
                                           IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                 <CheckBox Content="{DynamicResource Module.Security.Content.Locked}"
                                           Margin="16,0,0,0"
-                                          IsChecked="{Binding Editor.IsLocked, Mode=TwoWay}"
+                                          IsChecked="{Binding Dialog.Editor.IsLocked, Mode=TwoWay}"
                                           IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                 <CheckBox Content="{DynamicResource Module.Security.Content.TwoFactor}"
                                           Margin="16,0,0,0"
-                                          IsChecked="{Binding Editor.IsTwoFactorEnabled, Mode=TwoWay}"
+                                          IsChecked="{Binding Dialog.Editor.IsTwoFactorEnabled, Mode=TwoWay}"
                                           IsEnabled="{Binding DataContext.IsEditorEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </StackPanel>
 
                             <TextBlock Text="{DynamicResource Module.Security.Text.NewPassword}" Grid.Row="7" Grid.Column="0" Margin="0,8,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="7"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.NewPassword, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.NewPassword, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.Security.Text.ConfirmPassword}" Grid.Row="8" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Center" />
                             <TextBox Grid.Row="8"
                                      Grid.Column="1"
-                                     Text="{Binding Editor.ConfirmPassword, UpdateSourceTrigger=PropertyChanged}"
+                                     Text="{Binding Dialog.Editor.ConfirmPassword, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding IsEditorEnabled}" />
 
                             <TextBlock Text="{DynamicResource Module.Security.Text.AssignedRoles}" Grid.Row="9" Grid.Column="0" Margin="0,12,8,0" VerticalAlignment="Top" />
                             <ItemsControl Grid.Row="9"
                                           Grid.Column="1"
                                           Margin="0,12,0,0"
-                                          ItemsSource="{Binding RoleOptions}">
+                                          ItemsSource="{Binding Dialog.RoleOptions}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -180,7 +180,7 @@
                             </ItemsControl>
                         </Grid>
 
-                        <ItemsControl ItemsSource="{Binding ValidationMessages}" Margin="0,12,0,0">
+                        <ItemsControl ItemsSource="{Binding Dialog.ValidationMessages}" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
