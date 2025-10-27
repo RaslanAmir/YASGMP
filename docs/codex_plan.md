@@ -587,6 +587,8 @@
 - 2026-05-28: Training Records module now has dedicated WPF regression tests covering adapter load, status/type filters, initiate/assign/approve/complete/close/export workflows, export prompt mocking, and filtered-record projection while the module exposes an injectable export prompt delegate; `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` continue to fail with `command not found: dotnet` until the CLI is available.
 - 2026-06-13: Added SopGovernanceModuleViewModel regression tests covering adapter load, filter proxies, CRUD workflow success/failure paths, busy gating, and shared-view-model property propagation with refreshed SOP test doubles; `dotnet --version`, `dotnet restore`, `dotnet build`, and `dotnet test` continue to fail with `command not found: dotnet` in this container.
 
+- 2026-06-20: Extended the WPF test harness with a qualifications database stub (seed, CRUD/export hooks, audit logging) and regression tests covering QualificationsModuleViewModel initialization, search/filter synchronization, toolbar workflows, status messaging, and disposal cleanup; `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still fail with `command not found: dotnet` inside this container.
+
 ### Increment 2 Follow-up — Qualifications module registration (2025-10-27)
 
 - Registered the shared `QualificationViewModel` singleton and wired `QualificationsModuleViewModel` into the WPF host so the Quality workspace can reuse the shared MAUI state.
