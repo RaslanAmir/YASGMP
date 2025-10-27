@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,8 +48,11 @@ namespace YasGMP.Wpf.Services
                 throw new ArgumentNullException(nameof(preferences));
             }
 
-            await PersistAsync(StatusBarKey, preferences.ShowStatusBarAlerts, token).ConfigureAwait(false);
-            await PersistAsync(ToastKey, preferences.ShowToastAlerts, token).ConfigureAwait(false);
+            var existingSettings = await _database.GetAllSettingsFullAsync(token).ConfigureAwait(false);
+            var lookup = BuildLookup(existingSettings);
+
+            await PersistAsync(StatusBarKey, preferences.ShowStatusBarAlerts, lookup, token).ConfigureAwait(false);
+            await PersistAsync(ToastKey, preferences.ShowToastAlerts, lookup, token).ConfigureAwait(false);
 
             _current = preferences.Clone();
             PreferencesChanged?.Invoke(this, _current.Clone());
@@ -96,7 +100,22 @@ namespace YasGMP.Wpf.Services
             };
         }
 
-        private async Task PersistAsync(string key, bool value, CancellationToken token)
+        private static IReadOnlyDictionary<string, Setting> BuildLookup(IEnumerable<Setting> settings)
+        {
+            var lookup = new Dictionary<string, Setting>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var setting in settings)
+            {
+                if (!string.IsNullOrWhiteSpace(setting.Key))
+                {
+                    lookup[setting.Key] = setting;
+                }
+            }
+
+            return lookup;
+        }
+
+        private async Task PersistAsync(string key, bool value, IReadOnlyDictionary<string, Setting> existing, CancellationToken token)
         {
             var actorUserId = _session.UserId ?? 0;
             var ip = _platform.GetLocalIpAddress() ?? string.Empty;
@@ -115,6 +134,11 @@ namespace YasGMP.Wpf.Services
                 Subcategory = "ui",
                 Status = "active",
             };
+
+            if (existing != null && existing.TryGetValue(key, out var resolved) && resolved is not null)
+            {
+                setting.Id = resolved.Id;
+            }
 
             await _database.UpsertSettingAsync(setting, actorUserId, ip, device, sessionId, token).ConfigureAwait(false);
         }
