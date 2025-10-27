@@ -159,6 +159,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<TrainingRecordViewModel>();
                         svc.AddTransient<SopViewModel>();
                         svc.AddSingleton<RiskAssessmentViewModel>();
+                        svc.AddSingleton<QualificationViewModel>();
                         svc.AddSingleton<ModulesPaneViewModel>();
                         svc.AddSingleton<NotificationsPaneViewModel>();
                         svc.AddSingleton<InspectorPaneViewModel>();
@@ -224,6 +225,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<TrainingRecordsModuleViewModel>();
                         svc.AddTransient<SopGovernanceModuleViewModel>();
                         svc.AddTransient<RiskAssessmentsModuleViewModel>();
+                        svc.AddTransient<QualificationsModuleViewModel>();
                         svc.AddTransient<DiagnosticsModuleViewModel>();
                         svc.AddTransient(sp => new AttachmentsModuleViewModel(
                             sp.GetRequiredService<DatabaseService>(),
@@ -273,6 +275,11 @@ namespace YasGMP.Wpf
                                 localization.GetString("Module.Title.RiskAssessments"),
                                 "Quality",
                                 localization.GetString("Module.Description.RiskAssessments"));
+                            registry.Register<QualificationsModuleViewModel>(
+                                QualificationsModuleViewModel.ModuleKey,
+                                localization.GetString("Module.Title.Qualifications"),
+                                "Quality",
+                                localization.GetString("Module.Description.Qualifications"));
                             registry.Register<ValidationsModuleViewModel>(ValidationsModuleViewModel.ModuleKey, "Validations", "Quality", "IQ/OQ/PQ lifecycle and requalification");
                             registry.Register<SchedulingModuleViewModel>(SchedulingModuleViewModel.ModuleKey, "Scheduling", "Planning", "Automated job schedules");
                             registry.Register<SecurityModuleViewModel>(SecurityModuleViewModel.ModuleKey, "Security", "Administration", "Users and security roles");
