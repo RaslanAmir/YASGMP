@@ -2892,6 +2892,42 @@
   <data name="Module.Security.Toolbar.Open.AutomationId" xml:space="preserve">
     <value>Toolbar.Security.Open</value>
   </data>
+  <data name="Module.Security.Toolbar.Save.Content" xml:space="preserve">
+    <value>Spremi</value>
+  </data>
+  <data name="Module.Security.Toolbar.Save.ToolTip" xml:space="preserve">
+    <value>Spremi promjene za korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Save.AutomationName" xml:space="preserve">
+    <value>Spremi promjene korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Save.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Save</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.Content" xml:space="preserve">
+    <value>Započni oponašanje</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.ToolTip" xml:space="preserve">
+    <value>Preuzmi identitet odabranog korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.AutomationName" xml:space="preserve">
+    <value>Započni oponašanje korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Impersonation.Begin</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.Content" xml:space="preserve">
+    <value>Završi oponašanje</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.ToolTip" xml:space="preserve">
+    <value>Vrati svoj izvorni identitet</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.AutomationName" xml:space="preserve">
+    <value>Završi oponašanje korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Impersonation.End</value>
+  </data>
   <data name="Module.Suppliers.Content.Qualified" xml:space="preserve">
     <value>Qualified</value>
   </data>

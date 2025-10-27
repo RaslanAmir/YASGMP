@@ -53,6 +53,25 @@
                     ToolTipService.ToolTip="{DynamicResource Module.Security.Toolbar.Open.ToolTip}"
                     AutomationProperties.Name="{DynamicResource Module.Security.Toolbar.Open.AutomationName}"
                     AutomationProperties.AutomationId="{DynamicResource Module.Security.Toolbar.Open.AutomationId}" />
+            <Button Content="{DynamicResource Module.Security.Toolbar.Save.Content}"
+                    Command="{Binding SaveUserCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Security.Toolbar.Save.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Security.Toolbar.Save.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Security.Toolbar.Save.AutomationId}" />
+            <Separator />
+            <Button Content="{DynamicResource Module.Security.Toolbar.BeginImpersonation.Content}"
+                    Command="{Binding BeginImpersonationCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Security.Toolbar.BeginImpersonation.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Security.Toolbar.BeginImpersonation.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Security.Toolbar.BeginImpersonation.AutomationId}" />
+            <Button Content="{DynamicResource Module.Security.Toolbar.EndImpersonation.Content}"
+                    Command="{Binding EndImpersonationCommand}"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="{DynamicResource Module.Security.Toolbar.EndImpersonation.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Security.Toolbar.EndImpersonation.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Security.Toolbar.EndImpersonation.AutomationId}" />
         </ToolBar>
 
         <Grid Margin="8">
