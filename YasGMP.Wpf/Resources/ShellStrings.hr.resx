@@ -609,6 +609,123 @@
   <data name="Module.Qualifications.Type.Requalification" xml:space="preserve">
     <value>Rekvalifikacija</value>
   </data>
+  <data name="Module.Qualifications.Field.Equipment" xml:space="preserve">
+    <value>Oprema</value>
+  </data>
+  <data name="Module.Qualifications.Field.Type" xml:space="preserve">
+    <value>Tip kvalifikacije</value>
+  </data>
+  <data name="Module.Qualifications.Field.Certificate" xml:space="preserve">
+    <value>Certifikat</value>
+  </data>
+  <data name="Module.Qualifications.Field.EffectiveDate" xml:space="preserve">
+    <value>Datum stupanja na snagu</value>
+  </data>
+  <data name="Module.Qualifications.Field.DueDate" xml:space="preserve">
+    <value>Datum isteka</value>
+  </data>
+  <data name="Module.Qualifications.Field.QualifiedBy" xml:space="preserve">
+    <value>Izvršio</value>
+  </data>
+  <data name="Module.Qualifications.Field.ApprovedBy" xml:space="preserve">
+    <value>Odobrio</value>
+  </data>
+  <data name="Module.Qualifications.Field.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.Qualifications.Title.UnknownEquipment" xml:space="preserve">
+    <value>Nepoznata oprema</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.Content" xml:space="preserve">
+    <value>Dodaj</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.ToolTip" xml:space="preserve">
+    <value>Dodaj novu kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.AutomationName" xml:space="preserve">
+    <value>Dodaj kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Add.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Add</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.Content" xml:space="preserve">
+    <value>Ažuriraj</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.ToolTip" xml:space="preserve">
+    <value>Ažuriraj odabranu kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.AutomationName" xml:space="preserve">
+    <value>Ažuriraj kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Update.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Update</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.Content" xml:space="preserve">
+    <value>Izbriši</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.ToolTip" xml:space="preserve">
+    <value>Izbriši odabranu kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.AutomationName" xml:space="preserve">
+    <value>Izbriši kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Delete.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Delete</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.Content" xml:space="preserve">
+    <value>Povrat</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.ToolTip" xml:space="preserve">
+    <value>Vrati odabranu kvalifikaciju na prethodnu reviziju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.AutomationName" xml:space="preserve">
+    <value>Vrati kvalifikaciju</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Rollback.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Rollback</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.Content" xml:space="preserve">
+    <value>Izvoz</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.ToolTip" xml:space="preserve">
+    <value>Izvezi filtrirane kvalifikacije</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.AutomationName" xml:space="preserve">
+    <value>Izvoz kvalifikacija</value>
+  </data>
+  <data name="Module.Qualifications.Toolbar.Export.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Toolbar.Export</value>
+  </data>
+  <data name="Module.Qualifications.Filter.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Module.Qualifications.Filter.Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Module.Qualifications.Search.AutomationId" xml:space="preserve">
+    <value>Module.Qualifications.Search</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.Equipment" xml:space="preserve">
+    <value>Oprema</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.DueDate" xml:space="preserve">
+    <value>Datum isteka</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.Certificate" xml:space="preserve">
+    <value>Certifikat</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.QualifiedBy" xml:space="preserve">
+    <value>Izvršio</value>
+  </data>
+  <data name="Module.Qualifications.Grid.Column.ApprovedBy" xml:space="preserve">
+    <value>Odobrio</value>
+  </data>
+  <data name="Module.Qualifications.Inspector.Header" xml:space="preserve">
+    <value>Detalji kvalifikacije</value>
+  </data>
   <data name="Module.Description.TrainingRecords" xml:space="preserve">
     <value>Životni ciklus obuka zaposlenika, dodjele, odobrenja i provjere učinkovitosti</value>
   </data>
