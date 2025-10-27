@@ -205,6 +205,7 @@ namespace YasGMP
                 services.AddTransient<LoginViewModel>();
                 services.AddTransient<CapaViewModel>();
                 services.AddTransient<WorkOrderEditDialogViewModel>();
+                services.AddTransient<UserEditDialogViewModel>();
                 services.AddTransient<WorkOrderViewModel>();
                 services.AddTransient<AuditLogViewModel>();
                 services.AddTransient<AdminViewModel>();

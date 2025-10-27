@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:conv="clr-namespace:YasGMP.Converters"
+    xmlns:helpers="clr-namespace:YasGMP.Helpers"
     Title="Users">
 
     <ContentPage.Resources>
@@ -64,6 +65,10 @@
                     Margin="0,12,0,0"
                     Command="{Binding UserVM.AddUserCommand}"
                     IsEnabled="{Binding UserVM.SelectedUser, Converter={StaticResource NullToBool}}" />
+
+            <Button Text="{helpers:ShellString Key=Module.Toolbar.Toggle.Update.Content}"
+                    Margin="0,4,0,0"
+                    Clicked="OnEditUserClicked" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

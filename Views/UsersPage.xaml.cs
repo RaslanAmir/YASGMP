@@ -14,6 +14,7 @@
 using System;
 using Microsoft.Maui.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using YasGMP.Models;
 using YasGMP.ViewModels;
 
 namespace YasGMP.Views
@@ -25,6 +26,8 @@ namespace YasGMP.Views
     /// </summary>
     public partial class UsersPage : ContentPage
     {
+        private readonly IServiceProvider _services;
+
         /// <summary>
         /// ViewModel handling user CRUD, filtering, and search.
         /// Bind in XAML with <c>{Binding UserVM.*}</c>.
@@ -47,15 +50,56 @@ namespace YasGMP.Views
         {
             InitializeComponent();
 
-            var services = Application.Current?.Handler?.MauiContext?.Services
+            _services = Application.Current?.Handler?.MauiContext?.Services
                 ?? throw new InvalidOperationException(
                     "Service provider unavailable. Ensure UsersPage and its ViewModels are registered in MauiProgram.");
 
-            UserVM    = services.GetRequiredService<UserViewModel>();
-            RolePermVM = services.GetRequiredService<UserRolePermissionViewModel>();
+            UserVM    = _services.GetRequiredService<UserViewModel>();
+            RolePermVM = _services.GetRequiredService<UserRolePermissionViewModel>();
 
             // Expose both VMs (and any helper props) through this page as the BindingContext.
             BindingContext = this;
+        }
+
+        private async void OnEditUserClicked(object? sender, EventArgs e)
+        {
+            var dialogViewModel = _services.GetRequiredService<UserEditDialogViewModel>();
+
+            var selectedUser = UserVM.SelectedUser;
+            dialogViewModel.Initialize(
+                selectedUser,
+                RolePermVM.Roles,
+                UserVM.Users);
+
+            var dialog = new Views.Dialogs.UserEditDialog(dialogViewModel);
+            await Navigation.PushModalAsync(dialog);
+
+            var result = await dialog.Result;
+            if (result is null)
+            {
+                return;
+            }
+
+            if (result.ImpersonationRequested)
+            {
+                UserVM.StatusMessage = $"Impersonation requested for #{result.ImpersonationTargetId}.";
+                return;
+            }
+
+            if (result.Saved)
+            {
+                var editor = result.EditorState;
+                var target = selectedUser ?? new User();
+                editor.ApplyTo(target);
+
+                if (selectedUser is null)
+                {
+                    UserVM.Users.Add(target);
+                }
+
+                UserVM.SelectedUser = target;
+                UserVM.StatusMessage = "User details updated from dialog.";
+            }
         }
     }
 }
