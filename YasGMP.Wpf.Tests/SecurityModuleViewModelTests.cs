@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using YasGMP.Models;
@@ -14,17 +16,99 @@ namespace YasGMP.Wpf.Tests;
 public class SecurityModuleViewModelTests
 {
     [Fact]
-    public async Task OnSaveAsync_AddMode_CreatesUserAndAssignsRoles()
+    public async Task CreateUserCommand_SavedResultRefreshesSelection()
     {
         var database = new DatabaseService();
         var audit = new AuditService(database);
-        const int adapterSignatureId = 4623;
-        var userService = new FakeUserCrudService
+        var userService = new FakeUserCrudService();
+        var auth = new TestAuthContext
         {
-            SignatureMetadataIdSource = _ => adapterSignatureId
+            CurrentUser = new User { Id = 42, Username = "admin" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "127.0.0.1"
         };
-        userService.SeedRole(new Role { Id = 1, Name = "Administrator", Description = "Admin" });
-        userService.SeedRole(new Role { Id = 2, Name = "Quality", Description = "QA" });
+        var signatureDialog = new TestElectronicSignatureDialogService();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var localization = new FakeLocalizationService(
+            new Dictionary<string, IDictionary<string, string>>
+            {
+                ["neutral"] = new Dictionary<string, string>
+                {
+                    ["Module.Title.Security"] = "Security"
+                }
+            },
+            "neutral");
+
+        var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
+        var dialogService = new RecordingDialogService();
+        dialogService.OnShowUserEdit = request =>
+        {
+            var createdUser = new User
+            {
+                Id = 5,
+                Username = "new.user",
+                FullName = "New User",
+                Email = "new.user@example.com",
+                Role = "Administrator",
+                Active = true
+            };
+            userService.SeedUser(createdUser);
+
+            return Task.FromResult<UserEditDialogViewModel.UserEditDialogResult?>(
+                new UserEditDialogViewModel.UserEditDialogResult(
+                    true,
+                    false,
+                    false,
+                    UserEditDialogViewModel.UserEditor.FromUser(createdUser),
+                    null,
+                    null,
+                    null));
+        };
+
+        Func<UserEditDialogViewModel> userDialogFactory = () =>
+            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+
+        var viewModel = new SecurityModuleViewModel(
+            database,
+            audit,
+            userService,
+            dialog,
+            shell,
+            navigation,
+            localization,
+            dialogService,
+            userDialogFactory);
+
+        await viewModel.InitializeAsync(null);
+
+        await viewModel.CreateUserCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(dialogService.UserEditRequests);
+        Assert.Equal(FormMode.Add, request.Mode);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal("User saved successfully.", viewModel.StatusMessage);
+        Assert.Contains(viewModel.Records, record => record.Key == "5");
+        Assert.Equal("5", viewModel.SelectedRecord?.Key);
+        Assert.Equal("new.user", viewModel.Dialog.Editor.Username);
+    }
+
+    [Fact]
+    public async Task EditUserCommand_SavedResultKeepsSelectionAndUpdatesInspector()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var userService = new FakeUserCrudService();
+        userService.SeedUser(new User
+        {
+            Id = 7,
+            Username = "existing",
+            FullName = "Existing User",
+            Email = "existing@example.com",
+            Role = "Administrator",
+            Active = true
+        });
 
         var auth = new TestAuthContext
         {
@@ -47,147 +131,92 @@ public class SecurityModuleViewModelTests
             "neutral");
 
         var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
-        var userDialog = new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
-
-        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, localization, userDialog);
-        await viewModel.InitializeAsync(null);
-
-        viewModel.Mode = FormMode.Add;
-        await viewModel.Dialog.EnsureRolesLoadedAsync();
-        viewModel.Dialog.Editor.Username = "new.user";
-        viewModel.Dialog.Editor.FullName = "New User";
-        viewModel.Dialog.Editor.Email = "new.user@example.com";
-        viewModel.Dialog.Editor.Role = "Administrator";
-        viewModel.Dialog.Editor.DepartmentName = "IT";
-        viewModel.Dialog.Editor.NewPassword = "TempPass123!";
-        viewModel.Dialog.Editor.ConfirmPassword = "TempPass123!";
-
-        var adminRole = viewModel.Dialog.RoleOptions.First();
-        adminRole.IsSelected = true;
-
-        await viewModel.Dialog.SaveCommand.ExecuteAsync(null);
-
-        var result = Assert.NotNull(viewModel.Dialog.Result);
-        Assert.True(result.Saved);
-        Assert.Equal(FormMode.View, viewModel.Mode);
-        Assert.Empty(viewModel.Dialog.ValidationMessages);
-        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
-        var created = Assert.Single(userService.CreatedUsers);
-        Assert.Equal("new.user", created.Username);
-        Assert.Equal("New User", created.FullName);
-        Assert.Equal("test-signature", created.DigitalSignature);
-        var context = Assert.Single(userService.SavedContexts);
-        Assert.Equal("test-signature", context.SignatureHash);
-        Assert.Equal("password", context.SignatureMethod);
-        Assert.Equal("valid", context.SignatureStatus);
-        Assert.Equal("Automated test", context.SignatureNote);
-        Assert.Collection(signatureDialog.Requests, ctx =>
+        var dialogService = new RecordingDialogService();
+        dialogService.OnShowUserEdit = request =>
         {
-            Assert.Equal("users", ctx.TableName);
-            Assert.Equal(0, ctx.RecordId);
-        });
-        var capturedResult = Assert.Single(signatureDialog.CapturedResults);
-        var signatureResult = Assert.NotNull(capturedResult);
-        Assert.Equal(created.Id, signatureResult.Signature.RecordId);
-        Assert.Equal(adapterSignatureId, signatureResult.Signature.Id);
-        Assert.Empty(signatureDialog.PersistedResults);
-        Assert.Equal(0, signatureDialog.PersistInvocationCount);
-        var assignment = Assert.Single(userService.RoleAssignments);
-        Assert.Equal(created.Id, assignment.UserId);
-        Assert.Contains(adminRole.RoleId, assignment.Roles);
+            Assert.Equal(FormMode.Update, request.Mode);
+            Assert.Equal(7, request.ViewModel.Editor.Id);
+
+            var updatedUser = new User
+            {
+                Id = 7,
+                Username = "existing",
+                FullName = "Existing User",
+                Email = "updated@example.com",
+                Role = "Administrator",
+                Active = true
+            };
+            userService.SeedUser(updatedUser);
+
+            return Task.FromResult<UserEditDialogViewModel.UserEditDialogResult?>(
+                new UserEditDialogViewModel.UserEditDialogResult(
+                    true,
+                    false,
+                    false,
+                    UserEditDialogViewModel.UserEditor.FromUser(updatedUser),
+                    null,
+                    null,
+                    null));
+        };
+
+        Func<UserEditDialogViewModel> userDialogFactory = () =>
+            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+
+        var viewModel = new SecurityModuleViewModel(
+            database,
+            audit,
+            userService,
+            dialog,
+            shell,
+            navigation,
+            localization,
+            dialogService,
+            userDialogFactory);
+
+        await viewModel.InitializeAsync(null);
+        viewModel.SelectedRecord = viewModel.Records.First();
+
+        await viewModel.EditUserCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(dialogService.UserEditRequests);
+        Assert.Equal(FormMode.Update, request.Mode);
+        Assert.Equal(FormMode.View, viewModel.Mode);
+        Assert.Equal("User saved successfully.", viewModel.StatusMessage);
+        Assert.Equal("7", viewModel.SelectedRecord?.Key);
+        Assert.Equal("updated@example.com", viewModel.Dialog.Editor.Email);
     }
 
-    [Fact]
-    public async Task OnSaveAsync_UpdateMode_UpdatesExistingUserAndClearsPassword()
+    private sealed class RecordingDialogService : IDialogService
     {
-        var database = new DatabaseService();
-        var audit = new AuditService(database);
-        const int updateAdapterSignatureId = 5824;
-        var userService = new FakeUserCrudService
-        {
-            SignatureMetadataIdSource = _ => updateAdapterSignatureId
-        };
-        userService.SeedRole(new Role { Id = 1, Name = "Administrator" });
-        userService.SeedRole(new Role { Id = 2, Name = "Quality" });
-        userService.SeedUser(new User
-        {
-            Id = 7,
-            Username = "existing",
-            FullName = "Existing User",
-            Email = "existing@example.com",
-            Role = "Administrator",
-            Active = true,
-            RoleIds = new[] { 1 }
-        });
+        public List<UserEditDialogRequest> UserEditRequests { get; } = new();
 
-        var auth = new TestAuthContext
+        public Func<UserEditDialogRequest, Task<UserEditDialogViewModel.UserEditDialogResult?>>? OnShowUserEdit { get; set; }
+
+        public Task ShowAlertAsync(string title, string message, string cancel)
+            => Task.CompletedTask;
+
+        public Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
+            => Task.FromResult(false);
+
+        public Task<string?> ShowActionSheetAsync(string title, string cancel, string? destruction, params string[] buttons)
+            => Task.FromResult<string?>(null);
+
+        public async Task<T?> ShowDialogAsync<T>(string dialogId, object? parameter = null, CancellationToken cancellationToken = default)
         {
-            CurrentUser = new User { Id = 99, Username = "admin" },
-            CurrentDeviceInfo = "UnitTest",
-            CurrentIpAddress = "127.0.0.1"
-        };
-        var signatureDialog = new TestElectronicSignatureDialogService();
-        var dialog = new TestCflDialogService();
-        var shell = new TestShellInteractionService();
-        var navigation = new TestModuleNavigationService();
-        var localization = new FakeLocalizationService(
-            new Dictionary<string, IDictionary<string, string>>
+            if (dialogId == DialogIds.UserEdit)
             {
-                ["neutral"] = new Dictionary<string, string>
+                var request = Assert.IsType<UserEditDialogRequest>(parameter);
+                UserEditRequests.Add(request);
+                if (OnShowUserEdit is null)
                 {
-                    ["Module.Title.Security"] = "Security"
+                    return default;
                 }
-            },
-            "neutral");
 
-        var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
-        var userDialog = new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell);
+                var result = await OnShowUserEdit(request).ConfigureAwait(false);
+                return (T?)(object?)result;
+            }
 
-        var viewModel = new SecurityModuleViewModel(database, audit, userService, auth, signatureDialog, dialog, shell, navigation, localization, userDialog);
-        await viewModel.InitializeAsync(null);
-
-        viewModel.SelectedRecord = viewModel.Records.First();
-        viewModel.Mode = FormMode.Update;
-        await viewModel.Dialog.EnsureRolesLoadedAsync();
-        viewModel.Dialog.Editor.Email = "updated@example.com";
-        viewModel.Dialog.Editor.Role = "Administrator";
-        viewModel.Dialog.Editor.NewPassword = "UpdatedPass!1";
-        viewModel.Dialog.Editor.ConfirmPassword = "UpdatedPass!1";
-
-        var qualityRole = viewModel.Dialog.RoleOptions.First(r => r.RoleId == 2);
-        qualityRole.IsSelected = true;
-
-        await viewModel.Dialog.SaveCommand.ExecuteAsync(null);
-
-        var result = Assert.NotNull(viewModel.Dialog.Result);
-        Assert.True(result.Saved);
-        Assert.Equal(FormMode.View, viewModel.Mode);
-        Assert.Empty(viewModel.Dialog.ValidationMessages);
-        Assert.Equal("Electronic signature captured (QA Reason).", viewModel.StatusMessage);
-        var updated = Assert.Single(userService.UpdatedUsers);
-        Assert.Equal("updated@example.com", updated.Email);
-        Assert.Equal(7, updated.Id);
-        Assert.Equal(string.Empty, viewModel.Dialog.Editor.NewPassword);
-        Assert.Equal(string.Empty, viewModel.Dialog.Editor.ConfirmPassword);
-        var contexts = userService.SavedContexts.ToList();
-        Assert.NotEmpty(contexts);
-        var context = contexts[^1];
-        Assert.Equal("test-signature", context.SignatureHash);
-        Assert.Equal("password", context.SignatureMethod);
-        Assert.Equal("valid", context.SignatureStatus);
-        Assert.Equal("Automated test", context.SignatureNote);
-        Assert.Collection(signatureDialog.Requests, ctx =>
-        {
-            Assert.Equal("users", ctx.TableName);
-            Assert.Equal(7, ctx.RecordId);
-        });
-        var capturedUpdateResult = Assert.Single(signatureDialog.CapturedResults);
-        var updateSignatureResult = Assert.NotNull(capturedUpdateResult);
-        Assert.Equal(7, updateSignatureResult.Signature.RecordId);
-        Assert.Equal(updateAdapterSignatureId, updateSignatureResult.Signature.Id);
-        Assert.Empty(signatureDialog.PersistedResults);
-        Assert.Equal(0, signatureDialog.PersistInvocationCount);
-        var assignment = userService.RoleAssignments.Last();
-        Assert.Contains(2, assignment.Roles);
+            return default;
+        }
     }
 }
