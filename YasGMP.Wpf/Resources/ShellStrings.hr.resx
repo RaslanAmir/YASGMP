@@ -2844,11 +2844,50 @@
   <data name="Module.Security.Text.UserDetails" xml:space="preserve">
     <value>User Details</value>
   </data>
+  <data name="Module.Security.Text.NoSelection" xml:space="preserve">
+    <value>Odaberite korisnika za prikaz sažetka</value>
+  </data>
   <data name="Module.Security.Text.Username" xml:space="preserve">
     <value>Username</value>
   </data>
   <data name="Module.Security.Text.Value" xml:space="preserve">
     <value>•</value>
+  </data>
+  <data name="Module.Security.Toolbar.Create.Content" xml:space="preserve">
+    <value>Kreiraj</value>
+  </data>
+  <data name="Module.Security.Toolbar.Create.ToolTip" xml:space="preserve">
+    <value>Kreiraj novog korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Create.AutomationName" xml:space="preserve">
+    <value>Kreiraj korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Create.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Create</value>
+  </data>
+  <data name="Module.Security.Toolbar.Edit.Content" xml:space="preserve">
+    <value>Uredi</value>
+  </data>
+  <data name="Module.Security.Toolbar.Edit.ToolTip" xml:space="preserve">
+    <value>Uredi odabranog korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Edit.AutomationName" xml:space="preserve">
+    <value>Uredi korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Edit.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Edit</value>
+  </data>
+  <data name="Module.Security.Toolbar.Open.Content" xml:space="preserve">
+    <value>Otvori</value>
+  </data>
+  <data name="Module.Security.Toolbar.Open.ToolTip" xml:space="preserve">
+    <value>Otvori uređivač korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Open.AutomationName" xml:space="preserve">
+    <value>Otvori uređivač korisnika</value>
+  </data>
+  <data name="Module.Security.Toolbar.Open.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Open</value>
   </data>
   <data name="Module.Suppliers.Content.Qualified" xml:space="preserve">
     <value>Qualified</value>

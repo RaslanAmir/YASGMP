@@ -63,6 +63,15 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
     /// <summary>Command invoked when Update mode is triggered.</summary>
     public IAsyncRelayCommand EditUserCommand { get; }
 
+    /// <summary>
+    /// Provides a binding-friendly dialog context for the currently loaded user so the view can
+    /// launch the shared dialog command without rebuilding parameters in XAML.
+    /// </summary>
+    public OpenUserEditDialogContext? SelectedUserDialogContext
+        => _loadedUser is null
+            ? null
+            : new OpenUserEditDialogContext(FormMode.Update, CloneUser(_loadedUser), SelectedRecord);
+
     [ObservableProperty]
     private bool _isEditorEnabled;
 
@@ -135,12 +144,15 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         if (record is null)
         {
             _loadedUser = null;
+            NotifySelectedUserDialogContextChanged();
             await _inspectorDialog.InitializeAsync(null).ConfigureAwait(false);
             return;
         }
 
         if (!int.TryParse(record.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
         {
+            _loadedUser = null;
+            NotifySelectedUserDialogContextChanged();
             StatusMessage = "Invalid user identifier.";
             return;
         }
@@ -148,11 +160,14 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         var user = await _userService.TryGetByIdAsync(id).ConfigureAwait(false);
         if (user is null)
         {
+            _loadedUser = null;
+            NotifySelectedUserDialogContextChanged();
             StatusMessage = $"Unable to locate user #{id}.";
             return;
         }
 
         _loadedUser = user;
+        NotifySelectedUserDialogContextChanged();
         await _inspectorDialog.InitializeAsync(user).ConfigureAwait(false);
     }
 
@@ -267,6 +282,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         }
 
         _loadedUser = user;
+        NotifySelectedUserDialogContextChanged();
         var context = new OpenUserEditDialogContext(FormMode.Update, CloneUser(user), SelectedRecord);
         await ExecuteOpenUserEditDialogAsync(context).ConfigureAwait(false);
     }
@@ -334,6 +350,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             SelectedRecord = match;
         }
     }
+
+    private void NotifySelectedUserDialogContextChanged()
+        => OnPropertyChanged(nameof(SelectedUserDialogContext));
 
     private static ModuleRecord ToRecord(User user)
     {
