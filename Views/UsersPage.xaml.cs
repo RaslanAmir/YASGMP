@@ -12,9 +12,10 @@
 
 #nullable enable
 using System;
-using Microsoft.Maui.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls;
 using YasGMP.Models;
+using YasGMP.Services;
 using YasGMP.ViewModels;
 
 namespace YasGMP.Views
@@ -27,6 +28,7 @@ namespace YasGMP.Views
     public partial class UsersPage : ContentPage
     {
         private readonly IServiceProvider _services;
+        private readonly IDialogService _dialogService;
 
         /// <summary>
         /// ViewModel handling user CRUD, filtering, and search.
@@ -54,8 +56,9 @@ namespace YasGMP.Views
                 ?? throw new InvalidOperationException(
                     "Service provider unavailable. Ensure UsersPage and its ViewModels are registered in MauiProgram.");
 
-            UserVM    = _services.GetRequiredService<UserViewModel>();
+            UserVM     = _services.GetRequiredService<UserViewModel>();
             RolePermVM = _services.GetRequiredService<UserRolePermissionViewModel>();
+            _dialogService = _services.GetRequiredService<IDialogService>();
 
             // Expose both VMs (and any helper props) through this page as the BindingContext.
             BindingContext = this;
@@ -63,18 +66,24 @@ namespace YasGMP.Views
 
         private async void OnEditUserClicked(object? sender, EventArgs e)
         {
-            var dialogViewModel = _services.GetRequiredService<UserEditDialogViewModel>();
-
             var selectedUser = UserVM.SelectedUser;
-            dialogViewModel.Initialize(
+            var request = new UserEditDialogRequest(
                 selectedUser,
                 RolePermVM.Roles,
                 UserVM.Users);
 
-            var dialog = new Views.Dialogs.UserEditDialog(dialogViewModel);
-            await Navigation.PushModalAsync(dialog);
+            UserEditDialogResult? result;
+            try
+            {
+                result = await _dialogService
+                    .ShowDialogAsync<UserEditDialogResult>(DialogIds.UserEdit, request)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
 
-            var result = await dialog.Result;
             if (result is null)
             {
                 return;

@@ -82,8 +82,84 @@ namespace YasGMP.Services.Platform
             {
                 DialogIds.CapaEdit        => ShowCapaDialogAsync<T>(parameter, cancellationToken),
                 DialogIds.CalibrationEdit => ShowCalibrationDialogAsync<T>(parameter, cancellationToken),
+                DialogIds.UserEdit        => ShowUserEditDialogAsync<T>(parameter, cancellationToken),
                 _ => throw new NotSupportedException($"Dialog '{dialogId}' is not registered.")
             };
+        }
+
+        private Task<T?> ShowUserEditDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
+        {
+            if (typeof(T) != typeof(UserEditDialogResult))
+                throw new InvalidOperationException($"Dialog '{DialogIds.UserEdit}' expects result type '{typeof(UserEditDialogResult).FullName}'.");
+
+            return (Task<T?>)(object)ShowUserEditDialogAsyncCore(parameter, cancellationToken);
+        }
+
+        private async Task<UserEditDialogResult?> ShowUserEditDialogAsyncCore(object? parameter, CancellationToken cancellationToken)
+        {
+            if (parameter is not UserEditDialogRequest request)
+                throw new ArgumentException($"Dialog parameter must be of type {nameof(UserEditDialogRequest)}.", nameof(parameter));
+
+            var viewModel = _serviceProvider.GetRequiredService<UserEditDialogViewModel>();
+            viewModel.Initialize(request.User, request.Roles, request.ImpersonationCandidates);
+
+            var dialogPage = new UserEditDialog(viewModel);
+            return await PresentUserEditDialogAsync(dialogPage, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<UserEditDialogResult?> PresentUserEditDialogAsync(UserEditDialog dialogPage, CancellationToken cancellationToken)
+        {
+            var completion = new TaskCompletionSource<UserEditDialogResult?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            _ = dialogPage.Result.ContinueWith(t =>
+            {
+                if (t.IsCanceled)
+                {
+                    completion.TrySetCanceled();
+                }
+                else if (t.IsFaulted)
+                {
+                    completion.TrySetException(t.Exception!.InnerExceptions);
+                }
+                else
+                {
+                    completion.TrySetResult(t.Result);
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+
+            await _dispatcher.InvokeAsync(async () =>
+            {
+                await Application.Current!.MainPage!.Navigation.PushModalAsync(dialogPage);
+            }).ConfigureAwait(false);
+
+            using var registration = cancellationToken.Register(() =>
+            {
+                completion.TrySetCanceled(cancellationToken);
+                _ = _dispatcher.InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        var navigation = Application.Current?.MainPage?.Navigation;
+                        if (navigation is null)
+                            return;
+
+                        for (var i = navigation.ModalStack.Count - 1; i >= 0; i--)
+                        {
+                            if (ReferenceEquals(navigation.ModalStack[i], dialogPage))
+                            {
+                                await navigation.PopModalAsync();
+                                break;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Swallow navigation failures triggered during cancellation.
+                    }
+                });
+            });
+
+            return await completion.Task.ConfigureAwait(false);
         }
 
         private async Task<T?> ShowCapaDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
