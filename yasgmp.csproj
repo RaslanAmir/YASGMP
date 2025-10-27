@@ -83,6 +83,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Surface shared ShellStrings resources so MAUI dialogs can bind to the same localization keys as the WPF shell. -->
+    <EmbeddedResource Include="YasGMP.Wpf/Resources/ShellStrings.resx">
+      <LogicalName>YasGMP.Wpf.Resources.ShellStrings.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="YasGMP.Wpf/Resources/ShellStrings.en.resx">
+      <LogicalName>YasGMP.Wpf.Resources.ShellStrings.en.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="YasGMP.Wpf/Resources/ShellStrings.hr.resx">
+      <LogicalName>YasGMP.Wpf.Resources.ShellStrings.hr.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\YASGMP\YasGMP.AppCore\YasGMP.AppCore.csproj" />
   </ItemGroup>
 
