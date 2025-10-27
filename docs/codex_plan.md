@@ -606,3 +606,11 @@
 - Registered the shared `QualificationViewModel` singleton and wired `QualificationsModuleViewModel` into the WPF host so the Quality workspace can reuse the shared MAUI state.
 - Added the Qualifications module to the `ModuleRegistry` with localized metadata under the Quality group for immediate navigation exposure.
 - Attempted `dotnet restore`; the container still responds with `bash: command not found: dotnet`, so Windows-host validation remains pending.
+
+### Increment 3 Follow-up — User dialog payload unification (2026-07-12)
+
+- Promoted `UserEditDialogRequest` into `YasGMP.AppCore/Services` with a shared `UserEditDialogMode` enum so MAUI and WPF build identical payloads containing the dialog mode, optional user, role lookups, and impersonation candidates.
+- Updated MAUI `UsersPage` to populate the new request before invoking `IDialogService.ShowDialogAsync`, preserving role and impersonation collections when forwarding to the modal editor.
+- Refactored `WpfDialogService` to resolve a transient `UserEditDialogViewModel` via factory injection, initialize it from the shared request, attach dispatcher-safe close handlers, and decouple the service from the WPF-specific request wrapper.
+- Adjusted `SecurityModuleViewModel` and its unit tests to emit the shared request, map `FormMode` to `UserEditDialogMode`, and consume dialog results without passing a pre-created view-model; removed the obsolete WPF-local request type.
+- dotnet restore/build for the solution, MAUI Windows target, and WPF target remain blocked with `bash: command not found: dotnet` until executed on a Windows host; smoke harness still pending.

@@ -86,7 +86,8 @@ public class SecurityModuleViewModelTests
         await viewModel.CreateUserCommand.ExecuteAsync(null);
 
         var request = Assert.Single(dialogService.UserEditRequests);
-        Assert.Equal(FormMode.Add, request.Mode);
+        Assert.Equal(UserEditDialogMode.Add, request.Mode);
+        Assert.Null(request.User);
         Assert.Equal(FormMode.View, viewModel.Mode);
         Assert.Equal("User saved successfully.", viewModel.StatusMessage);
         Assert.Contains(viewModel.Records, record => record.Key == "5");
@@ -134,8 +135,8 @@ public class SecurityModuleViewModelTests
         var dialogService = new RecordingDialogService();
         dialogService.OnShowUserEdit = request =>
         {
-            Assert.Equal(FormMode.Update, request.Mode);
-            Assert.Equal(7, request.ViewModel.Editor.Id);
+            Assert.Equal(UserEditDialogMode.Update, request.Mode);
+            Assert.Equal(7, request.User?.Id);
 
             var updatedUser = new User
             {
@@ -179,7 +180,8 @@ public class SecurityModuleViewModelTests
         await viewModel.EditUserCommand.ExecuteAsync(null);
 
         var request = Assert.Single(dialogService.UserEditRequests);
-        Assert.Equal(FormMode.Update, request.Mode);
+        Assert.Equal(UserEditDialogMode.Update, request.Mode);
+        Assert.Equal(7, request.User?.Id);
         Assert.Equal(FormMode.View, viewModel.Mode);
         Assert.Equal("User saved successfully.", viewModel.StatusMessage);
         Assert.Equal("7", viewModel.SelectedRecord?.Key);

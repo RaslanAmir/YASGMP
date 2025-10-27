@@ -67,7 +67,12 @@ namespace YasGMP.Views
         private async void OnEditUserClicked(object? sender, EventArgs e)
         {
             var selectedUser = UserVM.SelectedUser;
+            var mode = selectedUser is null
+                ? UserEditDialogMode.Add
+                : UserEditDialogMode.Update;
+
             var request = new UserEditDialogRequest(
+                mode,
                 selectedUser,
                 RolePermVM.Roles,
                 UserVM.Users);
