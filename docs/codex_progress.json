@@ -7,6 +7,7 @@
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
       "2026-06-03: dotnet --version retried while documenting the Document Control milestone wrap-up; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-06-09: dotnet --version and dotnet restore yasgmp.sln retried before documenting the Training/SOP modules; CLI still missing so each command exits with 'command not found'.",
+      "2026-06-17: dotnet restore yasgmp.sln retried while appending Qualifications automation identifiers; the command still exits with 'command not found' because the dotnet CLI is unavailable in this container.",
       "2026-06-01: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried during Document Control module regression coverage; each command still exits with 'command not found'.",
       "2026-05-21: dotnet restore yasgmp.sln retried while landing Deviation CRUD adapter regression tests; CLI still missing so the command exits with 'command not found'.",
       "2026-04-10: dotnet restore yasgmp.sln retried during AssetsModuleViewModel service injection; CLI still missing so the command exits with 'command not found'.",
@@ -511,6 +512,7 @@
     "2026-06-14: Added SopGovernanceServiceAdapterTests covering load/create/update/delete/export workflows, signature cancellation, attachment hydration/removal metadata, and exception handling; retried dotnet restore/build/test for solution, MAUI, WPF, and smoke harness and each still exits with 'command not found: dotnet' on this Linux host.",
     "2026-06-15: Ribbon, Backstage, window menu, and module tree now surface the Risk Assessments workspace with localized captions/tooltips/automation metadata; dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still fail with 'command not found: dotnet' in this container.",
     "2026-06-16: DatabaseService risk assessment stubs now seed deterministic data, record initiate/update/approve/close/export telemetry, and RiskAssessmentsModuleViewModel tests cover load, search/status/category propagation, toolbar delegation (including export), and status messaging; dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows still return 'command not found: dotnet' in this container.",
+    "2026-06-17: Strings.xaml now exposes Qualifications automation identifiers for Backstage, Ribbon, module tree, and menu entries so localization bindings share keys; dotnet restore yasgmp.sln retried for this batch still exits with 'command not found: dotnet' in this container.",
     "2025-10-27: Registered the shared Qualification view-model and Qualifications module document in the WPF host, updated the ModuleRegistry with localized metadata, and retried dotnet restore which still exits with 'command not found: dotnet' in this container."
   ]
 }
