@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
@@ -23,44 +22,46 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
     public const string ModuleKey = "Security";
 
     private readonly IUserCrudService _userService;
-    private readonly IAuthContext _authContext;
-    private readonly IElectronicSignatureDialogService _signatureDialog;
-    private readonly UserEditDialogViewModel _dialog;
+    private readonly IDialogService _dialogService;
+    private readonly Func<UserEditDialogViewModel> _userDialogFactory;
+    private readonly UserEditDialogViewModel _inspectorDialog;
     private User? _loadedUser;
-    private UserEditDialogViewModel.UserEditor? _snapshot;
-    private UserEditDialogViewModel.UserEditor? _currentEditor;
-    private bool _suppressDialogNotifications;
 
     /// <summary>Initializes a new instance of the <see cref="SecurityModuleViewModel"/> class.</summary>
     public SecurityModuleViewModel(
         DatabaseService databaseService,
         AuditService auditService,
         IUserCrudService userService,
-        IAuthContext authContext,
-        IElectronicSignatureDialogService signatureDialog,
         ICflDialogService cflDialogService,
         IShellInteractionService shellInteraction,
         IModuleNavigationService navigation,
         ILocalizationService localization,
-        UserEditDialogViewModel dialogViewModel)
+        IDialogService dialogService,
+        Func<UserEditDialogViewModel> userDialogFactory)
         : base(ModuleKey, localization.GetString("Module.Title.Security"), databaseService, localization, cflDialogService, shellInteraction, navigation, auditService)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-        _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
-        _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
-        _dialog = dialogViewModel ?? throw new ArgumentNullException(nameof(dialogViewModel));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _userDialogFactory = userDialogFactory ?? throw new ArgumentNullException(nameof(userDialogFactory));
 
-        _dialog.RequestClose += OnDialogRequestClose;
-        _dialog.ValidationMessages.CollectionChanged += OnDialogValidationMessagesChanged;
-        _dialog.PropertyChanged += OnDialogPropertyChanged;
-        _dialog.SaveCallback = ExecuteDialogSaveAsync;
+        _inspectorDialog = _userDialogFactory();
 
-        HookEditor(_dialog.Editor);
-        SyncValidationMessages();
+        OpenUserEditDialogCommand = new AsyncRelayCommand<OpenUserEditDialogContext?>(ExecuteOpenUserEditDialogAsync);
+        CreateUserCommand = new AsyncRelayCommand(CreateUserAsync);
+        EditUserCommand = new AsyncRelayCommand(EditUserAsync);
     }
 
     /// <summary>Dialog-oriented editor surface used by the module view.</summary>
-    public UserEditDialogViewModel Dialog => _dialog;
+    public UserEditDialogViewModel Dialog => _inspectorDialog;
+
+    /// <summary>Command that orchestrates the dialog workflow.</summary>
+    public IAsyncRelayCommand<OpenUserEditDialogContext?> OpenUserEditDialogCommand { get; }
+
+    /// <summary>Command invoked when Add mode is triggered.</summary>
+    public IAsyncRelayCommand CreateUserCommand { get; }
+
+    /// <summary>Command invoked when Update mode is triggered.</summary>
+    public IAsyncRelayCommand EditUserCommand { get; }
 
     [ObservableProperty]
     private bool _isEditorEnabled;
@@ -134,18 +135,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         if (record is null)
         {
             _loadedUser = null;
-            await _dialog.EnsureRolesLoadedAsync().ConfigureAwait(false);
-            SuppressDialogNotifications(() =>
-            {
-                _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateEmpty());
-                _dialog.ApplyRoleSelection(Array.Empty<int>());
-            });
-            ResetDirty();
-            return;
-        }
-
-        if (IsInEditMode)
-        {
+            await _inspectorDialog.InitializeAsync(null).ConfigureAwait(false);
             return;
         }
 
@@ -163,86 +153,32 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         }
 
         _loadedUser = user;
-        await InitializeDialogAsync(user).ConfigureAwait(false);
-        ResetDirty();
+        await _inspectorDialog.InitializeAsync(user).ConfigureAwait(false);
     }
 
     protected override async Task OnModeChangedAsync(FormMode mode)
     {
-        IsEditorEnabled = mode is FormMode.Add or FormMode.Update;
-
-        if (mode is FormMode.Add or FormMode.Update)
-        {
-            await _dialog.EnsureRolesLoadedAsync().ConfigureAwait(false);
-        }
-
         switch (mode)
         {
             case FormMode.Add:
-                _snapshot = null;
-                _loadedUser = null;
-                SuppressDialogNotifications(() =>
-                {
-                    _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateForNew());
-                    _dialog.ApplyRoleSelection(Array.Empty<int>());
-                });
+                await CreateUserCommand.ExecuteAsync(null).ConfigureAwait(false);
                 break;
             case FormMode.Update:
-                _snapshot = _dialog.Editor.Clone();
-                break;
-            case FormMode.Find:
-                SuppressDialogNotifications(() =>
-                {
-                    _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateEmpty());
-                    _dialog.ApplyRoleSelection(Array.Empty<int>());
-                });
+                await EditUserCommand.ExecuteAsync(null).ConfigureAwait(false);
                 break;
         }
     }
 
     protected override void OnCancel()
     {
-        if (Mode == FormMode.Add)
-        {
-            SuppressDialogNotifications(() =>
-            {
-                _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.CreateEmpty());
-                _dialog.ApplyRoleSelection(Array.Empty<int>());
-            });
-            ResetDirty();
-            return;
-        }
-
-        if (Mode == FormMode.Update)
-        {
-            SuppressDialogNotifications(() =>
-            {
-                if (_snapshot is not null)
-                {
-                    _dialog.LoadEditor(_snapshot.Clone());
-                    _dialog.ApplyRoleSelection(_snapshot.RoleIds);
-                }
-                else if (_loadedUser is not null)
-                {
-                    _dialog.LoadEditor(UserEditDialogViewModel.UserEditor.FromUser(_loadedUser));
-                    _dialog.ApplyRoleSelection(_loadedUser.RoleIds ?? Array.Empty<int>());
-                }
-            });
-        }
+        Mode = FormMode.View;
     }
 
-    protected override async Task<IReadOnlyList<string>> ValidateAsync()
-    {
-        await _dialog.ValidateAsync().ConfigureAwait(false);
-        SyncValidationMessages();
-        return _dialog.ValidationMessages.ToList();
-    }
+    protected override Task<IReadOnlyList<string>> ValidateAsync()
+        => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
 
-    protected override async Task<bool> OnSaveAsync()
-    {
-        var result = await PersistDialogAsync().ConfigureAwait(false);
-        return result.Saved;
-    }
+    protected override Task<bool> OnSaveAsync()
+        => Task.FromResult(false);
 
     protected override bool MatchesSearch(ModuleRecord record, string searchText)
     {
@@ -255,211 +191,98 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             field.Value.Contains(searchText, StringComparison.OrdinalIgnoreCase));
     }
 
-    private Task InitializeDialogAsync(User? user)
-        => SuppressDialogNotificationsAsync(() => _dialog.InitializeAsync(user));
-
-    private async Task<UserEditDialogViewModel.UserEditDialogResult> PersistDialogAsync()
+    private async Task ExecuteOpenUserEditDialogAsync(OpenUserEditDialogContext? context)
     {
-        await _dialog.EnsureRolesLoadedAsync().ConfigureAwait(false);
-
-        var editor = _dialog.Editor;
-        var user = _loadedUser is null ? new User() : CloneUser(_loadedUser);
-        editor.ApplyTo(user);
-        user.RoleIds = editor.RoleIds ?? Array.Empty<int>();
-
-        if (user.RoleIds.Length == 0 && _dialog.RoleOptions.Count > 0)
-        {
-            var primary = _dialog.RoleOptions.FirstOrDefault(r =>
-                string.Equals(r.Name, user.Role, StringComparison.OrdinalIgnoreCase));
-            if (primary is not null)
-            {
-                user.RoleIds = new[] { primary.RoleId };
-            }
-        }
-
-        _userService.Validate(user);
-
-        if (Mode == FormMode.Update && _loadedUser is null)
-        {
-            StatusMessage = "Select a user before saving.";
-            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
-        }
-
-        var password = string.IsNullOrWhiteSpace(editor.NewPassword)
-            ? null
-            : editor.NewPassword.Trim();
-
-        ElectronicSignatureDialogResult? signatureResult;
-        try
-        {
-            signatureResult = await _signatureDialog
-                .CaptureSignatureAsync(new ElectronicSignatureContext("users", user.Id))
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Electronic signature failed: {ex.Message}";
-            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
-        }
-
-        if (signatureResult is null)
-        {
-            StatusMessage = "Electronic signature cancelled. Save aborted.";
-            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
-        }
-
-        if (signatureResult.Signature is null)
-        {
-            StatusMessage = "Electronic signature was not captured.";
-            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
-        }
-
-        var context = UserCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId,
-            signatureResult);
-
-        var signatureHash = signatureResult.Signature.SignatureHash ?? string.Empty;
-        user.DigitalSignature = signatureHash;
-        user.LastChangeSignature = signatureHash;
-        user.LastModified = DateTime.UtcNow;
-        user.LastModifiedById = _authContext.CurrentUser?.Id;
-
-        CrudSaveResult saveResult;
-        try
-        {
-            if (user.Id == 0)
-            {
-                if (string.IsNullOrWhiteSpace(password))
-                {
-                    throw new InvalidOperationException("Password is required for new users.");
-                }
-
-                saveResult = await _userService.CreateAsync(user, password!, context).ConfigureAwait(false);
-                if (user.Id == 0 && saveResult.Id > 0)
-                {
-                    user.Id = saveResult.Id;
-                }
-            }
-            else
-            {
-                if (password is null && _loadedUser is not null)
-                {
-                    user.PasswordHash = _loadedUser.PasswordHash;
-                }
-
-                saveResult = await _userService.UpdateAsync(user, password, context).ConfigureAwait(false);
-            }
-
-            await _userService.UpdateRoleAssignmentsAsync(
-                user.Id,
-                user.RoleIds ?? Array.Empty<int>(),
-                context).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to persist user: {ex.Message}", ex);
-        }
-
-        _loadedUser = user;
-        _dialog.UpdateLoadedUser(user);
-        _snapshot = null;
-
-        SuppressDialogNotifications(() =>
-        {
-            _dialog.Editor.NewPassword = string.Empty;
-            _dialog.Editor.ConfirmPassword = string.Empty;
-            _dialog.ApplyRoleSelection(user.RoleIds ?? Array.Empty<int>());
-        });
-
-        ResetDirty();
-
-        SignaturePersistenceHelper.ApplyEntityMetadata(
-            signatureResult,
-            tableName: "users",
-            recordId: user.Id,
-            metadata: saveResult.SignatureMetadata,
-            fallbackSignatureHash: user.DigitalSignature,
-            fallbackMethod: context.SignatureMethod,
-            fallbackStatus: context.SignatureStatus,
-            fallbackNote: context.SignatureNote,
-            signedAt: signatureResult.Signature.SignedAt,
-            fallbackDeviceInfo: context.DeviceInfo,
-            fallbackIpAddress: context.Ip,
-            fallbackSessionId: context.SessionId);
-
-        try
-        {
-            await SignaturePersistenceHelper
-                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed to persist electronic signature: {ex.Message}";
-            Mode = FormMode.Update;
-            return CreateResult(saved: false, impersonationRequested: false, impersonationEnded: false);
-        }
-
-        StatusMessage = $"Electronic signature captured ({signatureResult.ReasonDisplay}).";
-        return CreateResult(saved: true, impersonationRequested: false, impersonationEnded: false);
-    }
-
-    private Task<UserEditDialogViewModel.UserEditDialogResult> ExecuteDialogSaveAsync(UserEditDialogViewModel dialog)
-        => PersistDialogAsync();
-
-    private void OnDialogPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(UserEditDialogViewModel.Editor))
-        {
-            HookEditor(_dialog.Editor);
-        }
-    }
-
-    private void HookEditor(UserEditDialogViewModel.UserEditor? editor)
-    {
-        if (_currentEditor is not null)
-        {
-            _currentEditor.PropertyChanged -= OnDialogEditorPropertyChanged;
-        }
-
-        _currentEditor = editor;
-        if (_currentEditor is not null)
-        {
-            _currentEditor.PropertyChanged += OnDialogEditorPropertyChanged;
-        }
-    }
-
-    private void OnDialogEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (_suppressDialogNotifications)
+        if (context is null || IsBusy)
         {
             return;
         }
 
-        if (IsInEditMode)
+        var dialogViewModel = _userDialogFactory();
+        await dialogViewModel.InitializeAsync(context.User).ConfigureAwait(false);
+
+        UserEditDialogViewModel.UserEditDialogResult? result;
+        try
         {
-            MarkDirty();
+            IsBusy = true;
+            result = await _dialogService
+                .ShowDialogAsync<UserEditDialogViewModel.UserEditDialogResult>(
+                    DialogIds.UserEdit,
+                    new UserEditDialogRequest(context.Mode, dialogViewModel))
+                .ConfigureAwait(false);
         }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        await ApplyDialogResultAsync(dialogViewModel, result).ConfigureAwait(false);
     }
 
-    private void OnDialogValidationMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        => SyncValidationMessages();
-
-    private void SyncValidationMessages()
+    private Task CreateUserAsync()
     {
+        if (IsBusy)
+        {
+            return Task.CompletedTask;
+        }
+
+        var context = new OpenUserEditDialogContext(FormMode.Add, null, SelectedRecord);
+        return ExecuteOpenUserEditDialogAsync(context);
+    }
+
+    private Task EditUserAsync()
+    {
+        if (IsBusy)
+        {
+            return Task.CompletedTask;
+        }
+
+        if (_loadedUser is null && SelectedRecord is not null)
+        {
+            if (int.TryParse(SelectedRecord.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+            {
+                return LoadAndEditAsync(id);
+            }
+        }
+
+        if (_loadedUser is null)
+        {
+            StatusMessage = "Select a user before editing.";
+            Mode = FormMode.View;
+            return Task.CompletedTask;
+        }
+
+        var context = new OpenUserEditDialogContext(FormMode.Update, CloneUser(_loadedUser), SelectedRecord);
+        return ExecuteOpenUserEditDialogAsync(context);
+    }
+
+    private async Task LoadAndEditAsync(int userId)
+    {
+        var user = await _userService.TryGetByIdAsync(userId).ConfigureAwait(false);
+        if (user is null)
+        {
+            StatusMessage = $"Unable to locate user #{userId}.";
+            Mode = FormMode.View;
+            return;
+        }
+
+        _loadedUser = user;
+        var context = new OpenUserEditDialogContext(FormMode.Update, CloneUser(user), SelectedRecord);
+        await ExecuteOpenUserEditDialogAsync(context).ConfigureAwait(false);
+    }
+
+    private async Task ApplyDialogResultAsync(
+        UserEditDialogViewModel dialogViewModel,
+        UserEditDialogViewModel.UserEditDialogResult? result)
+    {
+        Mode = FormMode.View;
         ValidationMessages.Clear();
-        foreach (var message in _dialog.ValidationMessages)
-        {
-            ValidationMessages.Add(message);
-        }
-    }
 
-    private void OnDialogRequestClose(object? sender, bool saved)
-    {
-        var result = _dialog.Result;
+        if (!string.IsNullOrWhiteSpace(dialogViewModel.StatusMessage))
+        {
+            StatusMessage = dialogViewModel.StatusMessage;
+        }
+
         if (result is null)
         {
             return;
@@ -467,7 +290,13 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
         if (result.Saved)
         {
-            Mode = FormMode.View;
+            if (string.IsNullOrWhiteSpace(StatusMessage))
+            {
+                StatusMessage = "User saved successfully.";
+            }
+
+            await RefreshAsync().ConfigureAwait(false);
+            ReselectRecord(result.EditorState);
             return;
         }
 
@@ -476,41 +305,33 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             StatusMessage = result.ImpersonationTargetId.HasValue
                 ? $"Impersonation requested for #{result.ImpersonationTargetId}."
                 : "Impersonation requested.";
+            return;
         }
-        else if (result.ImpersonationEnded)
+
+        if (result.ImpersonationEnded)
         {
             StatusMessage = "Impersonation session ended.";
         }
-
-        if (!result.Saved && !result.ImpersonationRequested && !result.ImpersonationEnded && Mode is FormMode.Add or FormMode.Update)
-        {
-            Mode = FormMode.View;
-        }
     }
 
-    private void SuppressDialogNotifications(Action action)
+    private void ReselectRecord(UserEditDialogViewModel.UserEditor editor)
     {
-        try
+        ModuleRecord? match = null;
+        if (editor.Id > 0)
         {
-            _suppressDialogNotifications = true;
-            action();
+            var key = editor.Id.ToString(CultureInfo.InvariantCulture);
+            match = Records.FirstOrDefault(r => r.Key == key);
         }
-        finally
-        {
-            _suppressDialogNotifications = false;
-        }
-    }
 
-    private async Task SuppressDialogNotificationsAsync(Func<Task> action)
-    {
-        _suppressDialogNotifications = true;
-        try
+        if (match is null && !string.IsNullOrWhiteSpace(editor.Username))
         {
-            await action().ConfigureAwait(false);
+            match = Records.FirstOrDefault(r =>
+                string.Equals(r.Title, editor.Username, StringComparison.OrdinalIgnoreCase));
         }
-        finally
+
+        if (match is not null)
         {
-            _suppressDialogNotifications = false;
+            SelectedRecord = match;
         }
     }
 
@@ -558,15 +379,6 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         };
     }
 
-    private UserEditDialogViewModel.UserEditDialogResult CreateResult(bool saved, bool impersonationRequested, bool impersonationEnded)
-    {
-        return new UserEditDialogViewModel.UserEditDialogResult(
-            saved,
-            impersonationRequested,
-            impersonationEnded,
-            _dialog.Editor.Clone(),
-            _dialog.SelectedImpersonationTarget?.Id,
-            _dialog.ImpersonationReason,
-            _dialog.ImpersonationNotes);
-    }
+    /// <summary>Context passed to <see cref="OpenUserEditDialogCommand"/>.</summary>
+    public sealed record OpenUserEditDialogContext(FormMode Mode, User? User, ModuleRecord? SelectedRecord);
 }
