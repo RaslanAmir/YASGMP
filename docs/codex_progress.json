@@ -199,6 +199,7 @@
     "CAPA": "done",
     "ChangeControl": "done",
     "Validations": "done",
+    "Qualifications": "done",
     "ScheduledJobs": "done",
     "UsersRoles": "done",
     "SopGovernance": "done",
@@ -214,8 +215,9 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: deliver risk assessments workspace",
+  "lastCommitSummary": "docs: document qualifications parity",
   "notes": [
+    "2026-06-21: Documented QualificationsModuleView/QualificationsModuleViewModel parity with the MAUI QualificationViewModel and recorded dotnet restore/build/test attempts for solution, WPF, MAUI, YasGMP.Tests, and smoke harness—each still exits with 'command not found: dotnet' in this container.",
     "2026-06-12: Risk Assessments module now wraps the shared view-model with synchronized filters, records/inspector projection, and delegated initiate/update/approve/close/export toolbar commands; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-06-10: WPF host now registers the shared RiskAssessmentViewModel alongside the new RiskAssessmentsModuleViewModel so the Quality pane surfaces the risk workspace; dotnet restore/build/test remain blocked with 'command not found: dotnet' inside the Linux container.",
     "2026-06-11: Introduced ISopGovernanceService/SopGovernanceServiceAdapter so SOP workflows capture attachment uploads and electronic signatures with session metadata, refactored SopGovernanceModuleViewModel to consume the adapter and refresh inspector projections, and wired the registration into App.xaml.cs; dotnet restore/build remain blocked with 'command not found: dotnet'.",
