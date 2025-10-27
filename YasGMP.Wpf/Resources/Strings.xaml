@@ -158,6 +158,8 @@
     <sys:String x:Key="Dialog.ElectronicSignature.Button.Confirm.AutomationId">Dialog.ElectronicSignature.Button.Confirm</sys:String>
     <sys:String x:Key="Module.Attachments.Button.PickFiles.AutomationId">Attachments.Toolbar.PickFiles</sys:String>
     <sys:String x:Key="Module.Scheduling.Button.ExecuteNow.AutomationId">Scheduling.Toolbar.ExecuteNow</sys:String>
+    <sys:String x:Key="Dialog.UserEdit.ValidationMessages.AutomationId">Dialog.UserEdit.ValidationMessages</sys:String>
+    <sys:String x:Key="Dialog.UserEdit.EndImpersonation.AutomationId">Dialog.UserEdit.EndImpersonation</sys:String>
     <sys:String x:Key="Module.Scheduling.Button.Acknowledge.AutomationId">Scheduling.Toolbar.Acknowledge</sys:String>
 
     <sys:String x:Key="Shell.StatusBar.Container.AutomationId">StatusBar.Container</sys:String>
