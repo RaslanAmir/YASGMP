@@ -2886,6 +2886,42 @@
   <data name="Module.Security.Toolbar.Open.AutomationId" xml:space="preserve">
     <value>Toolbar.Security.Open</value>
   </data>
+  <data name="Module.Security.Toolbar.Save.Content" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Module.Security.Toolbar.Save.ToolTip" xml:space="preserve">
+    <value>Save changes for the inspector user</value>
+  </data>
+  <data name="Module.Security.Toolbar.Save.AutomationName" xml:space="preserve">
+    <value>Save user changes</value>
+  </data>
+  <data name="Module.Security.Toolbar.Save.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Save</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.Content" xml:space="preserve">
+    <value>Begin impersonation</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.ToolTip" xml:space="preserve">
+    <value>Assume the selected user's identity</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.AutomationName" xml:space="preserve">
+    <value>Begin user impersonation</value>
+  </data>
+  <data name="Module.Security.Toolbar.BeginImpersonation.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Impersonation.Begin</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.Content" xml:space="preserve">
+    <value>End impersonation</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.ToolTip" xml:space="preserve">
+    <value>Revert to your original identity</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.AutomationName" xml:space="preserve">
+    <value>End user impersonation</value>
+  </data>
+  <data name="Module.Security.Toolbar.EndImpersonation.AutomationId" xml:space="preserve">
+    <value>Toolbar.Security.Impersonation.End</value>
+  </data>
   <data name="Module.Suppliers.Content.Qualified" xml:space="preserve">
     <value>Qualified</value>
   </data>
