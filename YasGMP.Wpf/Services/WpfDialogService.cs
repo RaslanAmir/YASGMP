@@ -31,6 +31,17 @@ namespace YasGMP.Wpf.Services
     /// </remarks>
     public sealed class WpfDialogService : IDialogService
     {
+        private readonly Func<UserEditDialogViewModel> _userEditDialogFactory;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WpfDialogService"/> class.
+        /// </summary>
+        /// <param name="userEditDialogFactory">Factory that resolves a fresh dialog view-model per invocation.</param>
+        public WpfDialogService(Func<UserEditDialogViewModel> userEditDialogFactory)
+        {
+            _userEditDialogFactory = userEditDialogFactory ?? throw new ArgumentNullException(nameof(userEditDialogFactory));
+        }
+
         /// <summary>
         /// Executes the show alert async operation.
         /// </summary>
@@ -70,23 +81,29 @@ namespace YasGMP.Wpf.Services
             };
         }
 
-        private static Task<T?> ShowUserEditDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
+        private async Task<T?> ShowUserEditDialogAsync<T>(object? parameter, CancellationToken cancellationToken)
         {
             if (typeof(T) != typeof(UserEditDialogViewModel.UserEditDialogResult))
             {
                 throw new InvalidOperationException($"Dialog '{DialogIds.UserEdit}' expects result type '{typeof(UserEditDialogViewModel.UserEditDialogResult).FullName}'.");
             }
 
-            return (Task<T?>)(object)ShowUserEditDialogAsyncCore(parameter, cancellationToken);
-        }
-
-        private static Task<UserEditDialogViewModel.UserEditDialogResult?> ShowUserEditDialogAsyncCore(object? parameter, CancellationToken cancellationToken)
-        {
             if (parameter is not UserEditDialogRequest request)
             {
                 throw new ArgumentException($"Dialog parameter must be of type {nameof(UserEditDialogRequest)}.", nameof(parameter));
             }
 
+            var viewModel = _userEditDialogFactory();
+            await viewModel.InitializeAsync(request.User).ConfigureAwait(false);
+
+            var result = await ShowUserEditDialogAsyncCore(viewModel, cancellationToken).ConfigureAwait(false);
+            return (T?)(object?)result;
+        }
+
+        private Task<UserEditDialogViewModel.UserEditDialogResult?> ShowUserEditDialogAsyncCore(
+            UserEditDialogViewModel viewModel,
+            CancellationToken cancellationToken)
+        {
             if (Application.Current?.Dispatcher is null)
             {
                 throw new InvalidOperationException("The WPF application dispatcher is not available.");
@@ -103,7 +120,7 @@ namespace YasGMP.Wpf.Services
 
                 var dialog = new UserEditDialogWindow
                 {
-                    DataContext = request.ViewModel,
+                    DataContext = viewModel,
                 };
 
                 AttachOwner(dialog);
@@ -119,7 +136,7 @@ namespace YasGMP.Wpf.Services
                     }
 
                     handlersDetached = true;
-                    request.ViewModel.RequestClose -= OnRequestClose;
+                    viewModel.RequestClose -= OnRequestClose;
                     dialog.Closed -= OnDialogClosed;
                     cancellationRegistration.Dispose();
                 }
@@ -127,12 +144,12 @@ namespace YasGMP.Wpf.Services
                 void OnDialogClosed(object? sender, EventArgs e)
                 {
                     DetachHandlers();
-                    completionSource.TrySetResult(request.ViewModel.Result);
+                    completionSource.TrySetResult(viewModel.Result);
                 }
 
                 void OnRequestClose(object? sender, bool _)
                 {
-                    request.ViewModel.RequestClose -= OnRequestClose;
+                    viewModel.RequestClose -= OnRequestClose;
                     if (dialog.IsVisible)
                     {
                         dialog.Close();
@@ -140,11 +157,11 @@ namespace YasGMP.Wpf.Services
                     else
                     {
                         DetachHandlers();
-                        completionSource.TrySetResult(request.ViewModel.Result);
+                        completionSource.TrySetResult(viewModel.Result);
                     }
                 }
 
-                request.ViewModel.RequestClose += OnRequestClose;
+                viewModel.RequestClose += OnRequestClose;
                 dialog.Closed += OnDialogClosed;
 
                 if (cancellationToken.CanBeCanceled)

@@ -67,7 +67,8 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<AuthService>();
                         svc.AddSingleton<IAuthenticator, AuthServiceAuthenticator>();
                         svc.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
-                        svc.AddSingleton<IDialogService, WpfDialogService>();
+                        svc.AddSingleton<IDialogService>(sp =>
+                            new WpfDialogService(() => sp.GetRequiredService<UserEditDialogViewModel>()));
                         svc.AddSingleton<IAuthenticationDialogService, AuthenticationDialogService>();
                         svc.AddSingleton<ILocalizationService, LocalizationService>();
                         svc.AddSingleton<IFilePicker, WpfFilePicker>();

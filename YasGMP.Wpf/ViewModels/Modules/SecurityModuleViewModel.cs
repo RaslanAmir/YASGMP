@@ -213,9 +213,6 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             return;
         }
 
-        var dialogViewModel = _userDialogFactory();
-        await dialogViewModel.InitializeAsync(context.User).ConfigureAwait(false);
-
         UserEditDialogViewModel.UserEditDialogResult? result;
         try
         {
@@ -223,7 +220,9 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             result = await _dialogService
                 .ShowDialogAsync<UserEditDialogViewModel.UserEditDialogResult>(
                     DialogIds.UserEdit,
-                    new UserEditDialogRequest(context.Mode, dialogViewModel))
+                    new UserEditDialogRequest(
+                        ToDialogMode(context.Mode),
+                        context.User))
                 .ConfigureAwait(false);
         }
         finally
@@ -231,7 +230,7 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
             IsBusy = false;
         }
 
-        await ApplyDialogResultAsync(dialogViewModel, result).ConfigureAwait(false);
+        await ApplyDialogResultAsync(result).ConfigureAwait(false);
     }
 
     private Task CreateUserAsync()
@@ -287,17 +286,11 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
         await ExecuteOpenUserEditDialogAsync(context).ConfigureAwait(false);
     }
 
-    private async Task ApplyDialogResultAsync(
-        UserEditDialogViewModel dialogViewModel,
-        UserEditDialogViewModel.UserEditDialogResult? result)
+    private async Task ApplyDialogResultAsync(UserEditDialogViewModel.UserEditDialogResult? result)
     {
         Mode = FormMode.View;
         ValidationMessages.Clear();
-
-        if (!string.IsNullOrWhiteSpace(dialogViewModel.StatusMessage))
-        {
-            StatusMessage = dialogViewModel.StatusMessage;
-        }
+        StatusMessage = string.Empty;
 
         if (result is null)
         {
@@ -353,6 +346,15 @@ public sealed partial class SecurityModuleViewModel : DataDrivenModuleDocumentVi
 
     private void NotifySelectedUserDialogContextChanged()
         => OnPropertyChanged(nameof(SelectedUserDialogContext));
+
+    private static UserEditDialogMode ToDialogMode(FormMode mode)
+        => mode switch
+        {
+            FormMode.Add => UserEditDialogMode.Add,
+            FormMode.Update => UserEditDialogMode.Update,
+            FormMode.View => UserEditDialogMode.View,
+            _ => UserEditDialogMode.Find,
+        };
 
     private static ModuleRecord ToRecord(User user)
     {
