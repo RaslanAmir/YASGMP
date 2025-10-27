@@ -4525,4 +4525,61 @@
   <data name="Menu.Quality.RiskAssessments.AutomationId" xml:space="preserve">
     <value>Menu.Quality.RiskAssessments</value>
   </data>
+  <data name="Dialog.UserEdit.Title" xml:space="preserve">
+    <value>Uređivač korisnika</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.BeginImpersonation.Content" xml:space="preserve">
+    <value>Pokreni impersonaciju</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.BeginImpersonation.ToolTip" xml:space="preserve">
+    <value>Pokreni impersonaciju odabranog korisnika.</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.BeginImpersonation.AutomationName" xml:space="preserve">
+    <value>Pokreni korisničku impersonaciju</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.EndImpersonation.Content" xml:space="preserve">
+    <value>Završi impersonaciju</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.EndImpersonation.ToolTip" xml:space="preserve">
+    <value>Završi aktivnu impersonaciju.</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.EndImpersonation.AutomationName" xml:space="preserve">
+    <value>Završi korisničku impersonaciju</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.Saved" xml:space="preserve">
+    <value>Korisnik je uspješno spremljen.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.UpdatedFromDialog" xml:space="preserve">
+    <value>Podaci korisnika ažurirani su iz dijaloga.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationRequested" xml:space="preserve">
+    <value>Zatražena je impersonacija.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationRequestedWithTarget" xml:space="preserve">
+    <value>Zatražena je impersonacija za #{0}.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationEnded" xml:space="preserve">
+    <value>Sesija impersonacije je završena.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationFailed" xml:space="preserve">
+    <value>Impersonacija nije uspjela: {0}</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.EndImpersonationFailed" xml:space="preserve">
+    <value>Neuspješno završavanje impersonacije: {0}</value>
+  </data>
+  <data name="Dialog.UserEdit.Validation.ImpersonationTargetRequired" xml:space="preserve">
+    <value>Odaberite cilj impersonacije prije nastavka.</value>
+  </data>
+  <data name="Dialog.UserEdit.Validation.ImpersonationReasonRequired" xml:space="preserve">
+    <value>Razlog impersonacije je obavezan.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ResolveValidationBeforeSaving" xml:space="preserve">
+    <value>Riješite pogreške validacije prije spremanja.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.SaveFailed" xml:space="preserve">
+    <value>Spremanje nije uspjelo: {0}</value>
+  </data>
+  <data name="Dialog.UserEdit.Toggle.Impersonation.Label" xml:space="preserve">
+    <value>Impersoniraj odabranog korisnika</value>
+  </data>
 </root>

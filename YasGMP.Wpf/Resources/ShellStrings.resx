@@ -4093,4 +4093,61 @@
   <data name="Menu.Quality.RiskAssessments.AutomationId" xml:space="preserve">
     <value>Menu.Quality.RiskAssessments</value>
   </data>
+  <data name="Dialog.UserEdit.Title" xml:space="preserve">
+    <value>User editor</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.BeginImpersonation.Content" xml:space="preserve">
+    <value>Begin impersonation</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.BeginImpersonation.ToolTip" xml:space="preserve">
+    <value>Start impersonating the selected user.</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.BeginImpersonation.AutomationName" xml:space="preserve">
+    <value>Begin user impersonation</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.EndImpersonation.Content" xml:space="preserve">
+    <value>End impersonation</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.EndImpersonation.ToolTip" xml:space="preserve">
+    <value>End the active impersonation session.</value>
+  </data>
+  <data name="Dialog.UserEdit.Command.EndImpersonation.AutomationName" xml:space="preserve">
+    <value>End user impersonation</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.Saved" xml:space="preserve">
+    <value>User saved successfully.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.UpdatedFromDialog" xml:space="preserve">
+    <value>User details updated from dialog.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationRequested" xml:space="preserve">
+    <value>Impersonation requested.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationRequestedWithTarget" xml:space="preserve">
+    <value>Impersonation requested for #{0}.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationEnded" xml:space="preserve">
+    <value>Impersonation session ended.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ImpersonationFailed" xml:space="preserve">
+    <value>Impersonation failed: {0}</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.EndImpersonationFailed" xml:space="preserve">
+    <value>Failed to end impersonation: {0}</value>
+  </data>
+  <data name="Dialog.UserEdit.Validation.ImpersonationTargetRequired" xml:space="preserve">
+    <value>Select an impersonation target before continuing.</value>
+  </data>
+  <data name="Dialog.UserEdit.Validation.ImpersonationReasonRequired" xml:space="preserve">
+    <value>Impersonation reason is required.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.ResolveValidationBeforeSaving" xml:space="preserve">
+    <value>Resolve validation errors before saving.</value>
+  </data>
+  <data name="Dialog.UserEdit.Status.SaveFailed" xml:space="preserve">
+    <value>Save failed: {0}</value>
+  </data>
+  <data name="Dialog.UserEdit.Toggle.Impersonation.Label" xml:space="preserve">
+    <value>Impersonate selected user</value>
+  </data>
 </root>

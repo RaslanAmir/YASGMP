@@ -12,11 +12,13 @@
 
 #nullable enable
 using System;
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
 using YasGMP.Models;
 using YasGMP.Services;
 using YasGMP.ViewModels;
+using YasGMP.Helpers;
 
 namespace YasGMP.Views
 {
@@ -96,7 +98,13 @@ namespace YasGMP.Views
 
             if (result.ImpersonationRequested)
             {
-                UserVM.StatusMessage = $"Impersonation requested for #{result.ImpersonationTargetId}.";
+                var message = result.ImpersonationTargetId.HasValue
+                    ? string.Format(
+                        CultureInfo.CurrentCulture,
+                        ShellString.Get("Dialog.UserEdit.Status.ImpersonationRequestedWithTarget"),
+                        result.ImpersonationTargetId.Value)
+                    : ShellString.Get("Dialog.UserEdit.Status.ImpersonationRequested");
+                UserVM.StatusMessage = message;
                 return;
             }
 
@@ -112,7 +120,7 @@ namespace YasGMP.Views
                 }
 
                 UserVM.SelectedUser = target;
-                UserVM.StatusMessage = "User details updated from dialog.";
+                UserVM.StatusMessage = ShellString.Get("Dialog.UserEdit.Status.UpdatedFromDialog");
             }
         }
     }

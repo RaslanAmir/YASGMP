@@ -25,6 +25,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     private readonly IElectronicSignatureDialogService _signatureDialog;
     private readonly IAuthContext _authContext;
     private readonly IShellInteractionService _shellInteraction;
+    private readonly ILocalizationService _localization;
     private readonly ObservableCollection<RoleOption> _roleOptions = new();
     private readonly ObservableCollection<string> _validationMessages = new();
     private readonly ObservableCollection<UserSummary> _impersonationTargets = new();
@@ -40,13 +41,15 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         ISecurityImpersonationWorkflowService impersonationWorkflow,
         IElectronicSignatureDialogService signatureDialog,
         IAuthContext authContext,
-        IShellInteractionService shellInteraction)
+        IShellInteractionService shellInteraction,
+        ILocalizationService localization)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _impersonationWorkflow = impersonationWorkflow ?? throw new ArgumentNullException(nameof(impersonationWorkflow));
         _signatureDialog = signatureDialog ?? throw new ArgumentNullException(nameof(signatureDialog));
         _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
         _shellInteraction = shellInteraction ?? throw new ArgumentNullException(nameof(shellInteraction));
+        _localization = localization ?? throw new ArgumentNullException(nameof(localization));
 
         Editor = UserEditor.CreateEmpty();
         Editor.PropertyChanged += OnEditorPropertyChanged;
@@ -375,7 +378,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         {
             if (!await ValidateAsync().ConfigureAwait(false))
             {
-                StatusMessage = "Resolve validation errors before saving.";
+                StatusMessage = _localization.GetString("Dialog.UserEdit.Status.ResolveValidationBeforeSaving");
                 return;
             }
 
@@ -495,7 +498,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
                     .PersistIfRequiredAsync(_signatureDialog, signatureResult)
                     .ConfigureAwait(false);
 
-                _shellInteraction.UpdateStatus("User saved successfully.");
+                _shellInteraction.UpdateStatus(_localization.GetString("Dialog.UserEdit.Status.Saved"));
                 result = CreateResult(saved: true, impersonationRequested: false, impersonationEnded: false);
             }
 
@@ -504,7 +507,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Save failed: {ex.Message}";
+            StatusMessage = _localization.GetString("Dialog.UserEdit.Status.SaveFailed", ex.Message);
         }
         finally
         {
@@ -533,13 +536,13 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         ValidationMessages.Clear();
         if (SelectedImpersonationTarget is null)
         {
-            ValidationMessages.Add("Select an impersonation target before continuing.");
+            ValidationMessages.Add(_localization.GetString("Dialog.UserEdit.Validation.ImpersonationTargetRequired"));
             return;
         }
 
         if (string.IsNullOrWhiteSpace(ImpersonationReason))
         {
-            ValidationMessages.Add("Impersonation reason is required.");
+            ValidationMessages.Add(_localization.GetString("Dialog.UserEdit.Validation.ImpersonationReasonRequired"));
             return;
         }
 
@@ -558,7 +561,9 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
                     SelectedImpersonationTarget.Id,
                     FormatImpersonationReason() ?? string.Empty,
                     FormatImpersonationNotes()).ConfigureAwait(false);
-                _shellInteraction.UpdateStatus($"Impersonation requested for #{SelectedImpersonationTarget.Id}.");
+                _shellInteraction.UpdateStatus(_localization.GetString(
+                    "Dialog.UserEdit.Status.ImpersonationRequestedWithTarget",
+                    SelectedImpersonationTarget.Id));
                 result = CreateResult(saved: false, impersonationRequested: true, impersonationEnded: false);
             }
 
@@ -567,7 +572,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Impersonation failed: {ex.Message}";
+            StatusMessage = _localization.GetString("Dialog.UserEdit.Status.ImpersonationFailed", ex.Message);
         }
         finally
         {
@@ -594,7 +599,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
             else
             {
                 await _impersonationWorkflow.EndImpersonationAsync().ConfigureAwait(false);
-                _shellInteraction.UpdateStatus("Impersonation session ended.");
+                _shellInteraction.UpdateStatus(_localization.GetString("Dialog.UserEdit.Status.ImpersonationEnded"));
                 result = CreateResult(saved: false, impersonationRequested: false, impersonationEnded: true);
             }
 
@@ -603,7 +608,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to end impersonation: {ex.Message}";
+            StatusMessage = _localization.GetString("Dialog.UserEdit.Status.EndImpersonationFailed", ex.Message);
         }
         finally
         {
