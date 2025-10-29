@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Models;
+using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;

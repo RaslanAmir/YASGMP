@@ -311,5 +311,158 @@ namespace YasGMP.Services
         }
 
         #endregion
+
+        #region === IMPERSONATION SUPPORT ===
+
+        /// <inheritdoc />
+        public async Task<ImpersonationContext?> BeginImpersonationAsync(int targetUserId, UserCrudContext context)
+        {
+            if (targetUserId <= 0) throw new ArgumentOutOfRangeException(nameof(targetUserId));
+
+            await _rbac.AssertPermissionAsync(context.UserId, "user.impersonate");
+
+            if (context.UserId == targetUserId)
+            {
+                await _db.LogSystemEventAsync(
+                    context.UserId,
+                    "IMPERSONATION_DENIED",
+                    "session_log",
+                    "UserService",
+                    null,
+                    "actor attempted to impersonate self",
+                    context.Ip,
+                    "warn",
+                    context.DeviceInfo,
+                    context.SessionId,
+                    signatureId: context.SignatureId,
+                    signatureHash: context.SignatureHash).ConfigureAwait(false);
+                return null;
+            }
+
+            var target = await _db.GetUserByIdAsync(targetUserId).ConfigureAwait(false);
+            if (target is null || !target.Active)
+            {
+                await _db.LogSystemEventAsync(
+                    context.UserId,
+                    "IMPERSONATION_DENIED",
+                    "session_log",
+                    "UserService",
+                    targetUserId,
+                    "target user unavailable or inactive",
+                    context.Ip,
+                    "warn",
+                    context.DeviceInfo,
+                    context.SessionId,
+                    signatureId: context.SignatureId,
+                    signatureHash: context.SignatureHash).ConfigureAwait(false);
+                return null;
+            }
+
+            var reason = string.IsNullOrWhiteSpace(context.Reason)
+                ? $"Impersonation of user {targetUserId}"
+                : context.Reason.Trim();
+            var notes = string.IsNullOrWhiteSpace(context.Notes) ? null : context.Notes.Trim();
+            var sessionId = string.IsNullOrWhiteSpace(context.SessionId)
+                ? Guid.NewGuid().ToString("N")
+                : context.SessionId!;
+            var startedAt = DateTime.UtcNow;
+
+            var sessionLogId = await _db.BeginImpersonationSessionAsync(
+                actorUserId: context.UserId,
+                targetUserId: targetUserId,
+                startedAtUtc: startedAt,
+                sessionId: sessionId,
+                ip: context.Ip,
+                deviceInfo: context.DeviceInfo,
+                reason: reason,
+                notes: notes,
+                signatureId: context.SignatureId,
+                signatureHash: context.SignatureHash,
+                signatureMethod: context.SignatureMethod,
+                signatureStatus: context.SignatureStatus,
+                signatureNote: context.SignatureNote).ConfigureAwait(false);
+
+            await _db.LogSystemEventAsync(
+                context.UserId,
+                "IMPERSONATION_BEGIN",
+                "session_log",
+                "UserService",
+                sessionLogId,
+                $"actor={context.UserId}; target={targetUserId}; reason={reason}; notes={notes ?? "-"}",
+                context.Ip,
+                "audit",
+                context.DeviceInfo,
+                sessionId,
+                signatureId: context.SignatureId,
+                signatureHash: context.SignatureHash).ConfigureAwait(false);
+
+            return new ImpersonationContext(
+                context.UserId,
+                targetUserId,
+                sessionLogId,
+                startedAt,
+                reason,
+                notes,
+                context.Ip,
+                context.DeviceInfo,
+                sessionId,
+                context.SignatureId,
+                context.SignatureHash,
+                context.SignatureMethod,
+                context.SignatureStatus,
+                context.SignatureNote);
+        }
+
+        /// <inheritdoc />
+        public async Task EndImpersonationAsync(ImpersonationContext context, UserCrudContext auditContext)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            await _rbac.AssertPermissionAsync(auditContext.UserId, "user.impersonate");
+
+            var mergedSignatureId = auditContext.SignatureId ?? context.SignatureId;
+            var mergedSignatureHash = string.IsNullOrWhiteSpace(auditContext.SignatureHash)
+                ? context.SignatureHash
+                : auditContext.SignatureHash;
+            var mergedSignatureMethod = string.IsNullOrWhiteSpace(auditContext.SignatureMethod)
+                ? context.SignatureMethod
+                : auditContext.SignatureMethod;
+            var mergedSignatureStatus = string.IsNullOrWhiteSpace(auditContext.SignatureStatus)
+                ? context.SignatureStatus
+                : auditContext.SignatureStatus;
+            var mergedSignatureNote = string.IsNullOrWhiteSpace(auditContext.SignatureNote)
+                ? context.SignatureNote
+                : auditContext.SignatureNote;
+            var mergedNotes = string.IsNullOrWhiteSpace(auditContext.Notes)
+                ? context.Notes
+                : auditContext.Notes;
+
+            await _db.EndImpersonationSessionAsync(
+                sessionLogId: context.SessionLogId,
+                actorUserId: auditContext.UserId,
+                endedAtUtc: DateTime.UtcNow,
+                notes: mergedNotes,
+                signatureId: mergedSignatureId,
+                signatureHash: mergedSignatureHash,
+                signatureMethod: mergedSignatureMethod,
+                signatureStatus: mergedSignatureStatus,
+                signatureNote: mergedSignatureNote).ConfigureAwait(false);
+
+            await _db.LogSystemEventAsync(
+                auditContext.UserId,
+                "IMPERSONATION_END",
+                "session_log",
+                "UserService",
+                context.SessionLogId,
+                $"actor={context.ActorUserId}; target={context.TargetUserId}; reason={context.Reason}; notes={mergedNotes ?? "-"}",
+                auditContext.Ip,
+                "audit",
+                auditContext.DeviceInfo,
+                auditContext.SessionId,
+                signatureId: mergedSignatureId,
+                signatureHash: mergedSignatureHash).ConfigureAwait(false);
+        }
+
+        #endregion
     }
 }

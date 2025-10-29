@@ -29,6 +29,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
@@ -417,6 +419,233 @@ FROM users WHERE LOWER(username)=LOWER(@u) LIMIT 1;";
                 new[] { new MySqlParameter("@id", userId) }, token).ConfigureAwait(false);
 
             await db.LogUserAuditShimAsync(actorUserId, "DELETE", ip, deviceInfo, sessionId, $"UserId={userId}", token).ConfigureAwait(false);
+        }
+
+        #endregion
+
+        #region 07a  USERS (impersonation helpers)
+
+        /// <summary>
+        /// Inserts an impersonation session row into <c>session_log</c> capturing the actor, target, and context metadata.
+        /// </summary>
+        public static async Task<int> BeginImpersonationSessionAsync(
+            this DatabaseService db,
+            int actorUserId,
+            int targetUserId,
+            DateTime startedAtUtc,
+            string? sessionId,
+            string? ip,
+            string? deviceInfo,
+            string reason,
+            string? notes,
+            int? signatureId,
+            string? signatureHash,
+            string? signatureMethod,
+            string? signatureStatus,
+            string? signatureNote,
+            CancellationToken token = default)
+        {
+            if (db is null) throw new ArgumentNullException(nameof(db));
+            if (targetUserId <= 0) throw new ArgumentOutOfRangeException(nameof(targetUserId));
+
+            var normalizedReason = string.IsNullOrWhiteSpace(reason) ? "Impersonation" : reason.Trim();
+            var normalizedNotes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+            var normalizedIp = string.IsNullOrWhiteSpace(ip) ? null : ip.Trim();
+            var normalizedDevice = string.IsNullOrWhiteSpace(deviceInfo) ? null : deviceInfo.Trim();
+            var normalizedSession = string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId.Trim();
+            var normalizedSignatureHash = string.IsNullOrWhiteSpace(signatureHash) ? null : signatureHash.Trim();
+            var normalizedSignatureMethod = string.IsNullOrWhiteSpace(signatureMethod) ? null : signatureMethod.Trim();
+            var normalizedSignatureStatus = string.IsNullOrWhiteSpace(signatureStatus) ? null : signatureStatus.Trim();
+            var normalizedSignatureNote = string.IsNullOrWhiteSpace(signatureNote) ? normalizedNotes : signatureNote.Trim();
+            var timestamp = startedAtUtc == default ? DateTime.UtcNow : startedAtUtc;
+
+            static MySqlParameter P(string name, object? value)
+                => new(name, value ?? DBNull.Value);
+
+            var baseParameters = new List<MySqlParameter>
+            {
+                P("@target", targetUserId),
+                P("@actor", actorUserId <= 0 ? DBNull.Value : actorUserId),
+                P("@login", timestamp),
+                P("@sessionId", normalizedSession),
+                P("@sessionToken", normalizedSession),
+                P("@ip", normalizedIp ?? (object)DBNull.Value),
+                P("@device", normalizedDevice ?? (object)DBNull.Value),
+                P("@reason", normalizedReason),
+                P("@note", normalizedNotes ?? (object)DBNull.Value),
+                P("@sigId", signatureId.HasValue && signatureId.Value > 0 ? signatureId : DBNull.Value),
+                P("@sigHash", normalizedSignatureHash ?? (object)DBNull.Value),
+                P("@sigMethod", normalizedSignatureMethod ?? (object)DBNull.Value),
+                P("@sigStatus", normalizedSignatureStatus ?? (object)DBNull.Value),
+                P("@sigNote", normalizedSignatureNote ?? (object)DBNull.Value),
+                P("@created", timestamp),
+                P("@updated", timestamp)
+            };
+
+            const string sqlFull = @"
+INSERT INTO session_log
+    (user_id, impersonated_by_id, is_impersonated, login_time, session_id, session_token,
+     ip_address, device_info, reason, note, digital_signature_id, digital_signature,
+     signature_method, signature_status, signature_note, created_at, updated_at)
+VALUES
+    (@target, @actor, 1, @login, @sessionId, @sessionToken,
+     @ip, @device, @reason, @note, @sigId, @sigHash,
+     @sigMethod, @sigStatus, @sigNote, @created, @updated);";
+
+            const string sqlNoSignatureMeta = @"
+INSERT INTO session_log
+    (user_id, impersonated_by_id, is_impersonated, login_time, session_id, session_token,
+     ip_address, device_info, reason, note, digital_signature_id, digital_signature, created_at, updated_at)
+VALUES
+    (@target, @actor, 1, @login, @sessionId, @sessionToken,
+     @ip, @device, @reason, @note, @sigId, @sigHash, @created, @updated);";
+
+            const string sqlLegacy = @"
+INSERT INTO session_log
+    (user_id, impersonated_by_id, is_impersonated, login_time, session_token,
+     ip_address, device_info, reason, note)
+VALUES
+    (@target, @actor, 1, @login, @sessionToken,
+     @ip, @device, @reason, @note);";
+
+            async Task<int> ExecuteAsync(string sql, IEnumerable<MySqlParameter> parameters)
+            {
+                _ = await db.ExecuteNonQueryAsync(sql, parameters, token).ConfigureAwait(false);
+                var idObj = await db.ExecuteScalarAsync("SELECT LAST_INSERT_ID();", null, token).ConfigureAwait(false);
+                return Convert.ToInt32(idObj, CultureInfo.InvariantCulture);
+            }
+
+            try
+            {
+                return await ExecuteAsync(sqlFull, baseParameters).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
+            {
+                // fall back to schema without signature metadata columns
+            }
+
+            var withoutMeta = baseParameters
+                .Where(p => p.ParameterName is not ("@sigMethod" or "@sigStatus" or "@sigNote"))
+                .ToList();
+
+            try
+            {
+                return await ExecuteAsync(sqlNoSignatureMeta, withoutMeta).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
+            {
+                // fall back to legacy schema lacking session_id and signature columns
+            }
+
+            var legacyParameters = baseParameters
+                .Where(p => p.ParameterName is "@target" or "@actor" or "@login" or "@sessionToken" or "@ip" or "@device" or "@reason" or "@note")
+                .ToList();
+
+            return await ExecuteAsync(sqlLegacy, legacyParameters).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Updates the impersonation session to mark it terminated, capturing logout metadata.
+        /// </summary>
+        public static async Task<int> EndImpersonationSessionAsync(
+            this DatabaseService db,
+            int sessionLogId,
+            int actorUserId,
+            DateTime endedAtUtc,
+            string? notes,
+            int? signatureId,
+            string? signatureHash,
+            string? signatureMethod,
+            string? signatureStatus,
+            string? signatureNote,
+            CancellationToken token = default)
+        {
+            if (db is null) throw new ArgumentNullException(nameof(db));
+            if (sessionLogId <= 0) throw new ArgumentOutOfRangeException(nameof(sessionLogId));
+
+            var normalizedNotes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+            var normalizedSignatureHash = string.IsNullOrWhiteSpace(signatureHash) ? null : signatureHash.Trim();
+            var normalizedSignatureMethod = string.IsNullOrWhiteSpace(signatureMethod) ? null : signatureMethod.Trim();
+            var normalizedSignatureStatus = string.IsNullOrWhiteSpace(signatureStatus) ? null : signatureStatus.Trim();
+            var normalizedSignatureNote = string.IsNullOrWhiteSpace(signatureNote) ? normalizedNotes : signatureNote.Trim();
+            var timestamp = endedAtUtc == default ? DateTime.UtcNow : endedAtUtc;
+
+            static MySqlParameter P(string name, object? value)
+                => new(name, value ?? DBNull.Value);
+
+            var baseParameters = new List<MySqlParameter>
+            {
+                P("@id", sessionLogId),
+                P("@actor", actorUserId <= 0 ? DBNull.Value : actorUserId),
+                P("@logout", timestamp),
+                P("@note", normalizedNotes ?? (object)DBNull.Value),
+                P("@sigId", signatureId.HasValue && signatureId.Value > 0 ? signatureId : DBNull.Value),
+                P("@sigHash", normalizedSignatureHash ?? (object)DBNull.Value),
+                P("@sigMethod", normalizedSignatureMethod ?? (object)DBNull.Value),
+                P("@sigStatus", normalizedSignatureStatus ?? (object)DBNull.Value),
+                P("@sigNote", normalizedSignatureNote ?? (object)DBNull.Value),
+                P("@updated", timestamp)
+            };
+
+            const string sqlFull = @"
+UPDATE session_log
+SET logout_time=@logout,
+    logout_at=@logout,
+    updated_at=@updated,
+    is_terminated=1,
+    terminated_by=@actor,
+    note=COALESCE(@note, note),
+    digital_signature_id=@sigId,
+    digital_signature=@sigHash,
+    signature_method=@sigMethod,
+    signature_status=@sigStatus,
+    signature_note=@sigNote
+WHERE id=@id;";
+
+            const string sqlNoSignatureMeta = @"
+UPDATE session_log
+SET logout_time=@logout,
+    logout_at=@logout,
+    updated_at=@updated,
+    is_terminated=1,
+    terminated_by=@actor,
+    note=COALESCE(@note, note),
+    digital_signature_id=@sigId,
+    digital_signature=@sigHash
+WHERE id=@id;";
+
+            const string sqlLegacy = @"
+UPDATE session_log
+SET logout_time=@logout,
+    is_terminated=1,
+    terminated_by=@actor,
+    note=COALESCE(@note, note)
+WHERE id=@id;";
+
+            try
+            {
+                _ = await db.ExecuteNonQueryAsync(sqlFull, baseParameters, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
+            {
+                var withoutMeta = baseParameters
+                    .Where(p => p.ParameterName is not ("@sigMethod" or "@sigStatus" or "@sigNote"))
+                    .ToList();
+
+                try
+                {
+                    _ = await db.ExecuteNonQueryAsync(sqlNoSignatureMeta, withoutMeta, token).ConfigureAwait(false);
+                }
+                catch (MySqlException inner) when (inner.Number == 1054 || inner.Number == 1146)
+                {
+                    var legacyParameters = baseParameters
+                        .Where(p => p.ParameterName is "@id" or "@actor" or "@logout" or "@note")
+                        .ToList();
+                    _ = await db.ExecuteNonQueryAsync(sqlLegacy, legacyParameters, token).ConfigureAwait(false);
+                }
+            }
+
+            return sessionLogId;
         }
 
         #endregion

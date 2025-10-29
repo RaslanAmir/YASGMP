@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using YasGMP.AppCore.Models.Signatures;
+using YasGMP.Services;
 using YasGMP.Wpf.Services;
 
 namespace YasGMP.Models
