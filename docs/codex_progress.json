@@ -108,7 +108,8 @@
       "2026-05-15: Implemented DeviationCrudServiceAdapter to bridge WPF shell persistence with AppCore DeviationService, normalizing statuses, applying signature/audit context, and returning CrudSaveResult metadata; dotnet restore/build/test remain blocked with 'command not found: dotnet' until Windows tooling is available.",
       "2026-07-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows10.0.19041.0, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried while wiring Security inspector command wrappers; each command still fails with 'command not found: dotnet' because the CLI is unavailable in this container.",
       "2026-08-17: dotnet restore yasgmp.sln retried while adding WPF service registration regression coverage; command still exits with 'command not found: dotnet' in this container.",
-      "2026-08-18: dotnet restore yasgmp.sln retried while documenting shared DatabaseService diagnostics/shadow replication parity; command still exits with 'command not found: dotnet' in this container."
+      "2026-08-18: dotnet restore yasgmp.sln retried while documenting shared DatabaseService diagnostics/shadow replication parity; command still exits with 'command not found: dotnet' in this container.",
+      "2026-08-19: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried for the machine trigger reconciliation batch; each command still exits with 'command not found: dotnet' because the CLI is unavailable in this container."
     ],
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",
@@ -232,7 +233,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "docs: record shared database diagnostics parity",
+  "lastCommitSummary": "fix: guard machine trigger reconciliation at startup",
   "notes": [
     "2026-07-29: DiagnosticsModuleViewModel now consumes DiagnosticsFeedService, publishes telemetry/log/health observable collections with localized ShellStrings, retains a design-time fallback, and dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
     "2026-06-21: Documented QualificationsModuleView/QualificationsModuleViewModel parity with the MAUI QualificationViewModel and recorded dotnet restore/build/test attempts for solution, WPF, MAUI, YasGMP.Tests, and smoke harness\u2014each still exits with 'command not found: dotnet' in this container.",
@@ -429,7 +430,8 @@
     "2026-05-08: Added Suppliers module tests covering audit timeline hydration and contract preview download/preview flows via configurable audit and attachment workflow doubles; dotnet restore/build/test remain blocked with 'command not found: dotnet'.",
     "2026-05-08: Extended External Servicers oversight tests to verify KPI/timeline/analytics projections and drill-in navigation using new recording module navigation stubs; CLI still unavailable so validation must run on a Windows host.",
     "2026-05-09: Dashboard module now projects shared inventory alerts/movements via DatabaseService inventory helpers, updates Parts/Warehouse stock toolbars, and adds dashboard unit tests; dotnet restore/build for yasgmp.sln, YasGMP.Wpf net9.0-windows, and MAUI Windows targets still return 'command not found: dotnet' in this container.",
-    "2026-05-09: Audit module toolbar now opens a rollback preview document with before/after JSON, signature verification, and rollback command wiring through the shell document host; dotnet restore/build/test remain blocked with 'command not found' until Windows tooling is available."
+    "2026-05-09: Audit module toolbar now opens a rollback preview document with before/after JSON, signature verification, and rollback command wiring through the shell document host; dotnet restore/build/test remain blocked with 'command not found' until Windows tooling is available.",
+    "2026-08-19: Startup sequence now reconciles machines triggers post-authentication via DatabaseService with MySQL permission handling and diagnostics logging; dotnet restore/build/test attempts still fail with 'command not found: dotnet' pending Windows tooling."
   ],
   "progress": [
     "2025-10-13: MAUI shell retargeted to net9.0-windows10.0.19041.0 with EF Core 9.x, Pomelo 9.0.0, and AppCore multi-targeting net8/net9 via Directory.Build.props; build/test remain blocked without the dotnet CLI.",
