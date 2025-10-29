@@ -5,6 +5,7 @@
     "detected": true,
     "notes": [
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
+      "2025-10-29T11:35Z: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried to unblock the current documentation batch; each command still exits with 'command not found: dotnet' so the smoke harness remains queued for a Windows host.",
       "2026-06-03: dotnet --version retried while documenting the Document Control milestone wrap-up; CLI remains unavailable so the command exits with 'command not found'.",
       "2026-06-09: dotnet --version and dotnet restore yasgmp.sln retried before documenting the Training/SOP modules; CLI still missing so each command exits with 'command not found'.",
       "2026-06-17: dotnet restore yasgmp.sln retried while appending Qualifications automation identifiers; the command still exits with 'command not found' because the dotnet CLI is unavailable in this container.",
@@ -110,7 +111,8 @@
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",
       "2026-04-20: Documented WPF code/QR parity and operator guidance in docs/WPF_MAPPING.md; restore/build/test remain blocked with 'command not found' until the CLI is available.",
-      "2026-06-09: Documented Training Records and SOP Governance module workflows in docs/WPF_MAPPING.md and README_WPF_SHELL.md; dotnet --version/dotnet restore still fail with 'command not found: dotnet'."
+      "2026-06-09: Documented Training Records and SOP Governance module workflows in docs/WPF_MAPPING.md and README_WPF_SHELL.md; dotnet --version/dotnet restore still fail with 'command not found: dotnet'.",
+      "2025-10-29: Captured renewed environment verification and smoke-harness TODO in docs/codex_plan.md and docs/codex_progress.json so the next Windows-host validation run has up-to-date context."
     ]
   },
   "batches": [
