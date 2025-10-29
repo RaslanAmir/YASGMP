@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -17,16 +19,90 @@ using YasGMP.ViewModels;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
 using YasGMP.Wpf.Configuration;
+using YasGMP.Wpf.Runtime;
+using MySqlConnector;
 
 namespace YasGMP.Wpf.Tests;
 
 public class ServiceRegistrationTests
-{
-    [Fact]
-    public void EnsureAuditServiceSingleton_ReplacesPreviousRegistrations()
     {
-        var services = new ServiceCollection();
-        services.AddSingleton(new DatabaseService("Server=localhost;Database=unit_test;Uid=test;Pwd=test;"));
+        [Fact]
+        public void WpfStartup_WithDeveloperFlag_RunsMachineTriggerMigration()
+        {
+            using var flagScope = new EnvironmentVariableScope(DatabaseTestHookBootstrapper.FlagName, "1");
+
+            var settings = new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:MySqlDb"] = "Server=127.0.0.1;Database=unit_test;Uid=test;Pwd=test;",
+                [DiagnosticsConstants.KeySinks] = "stdout"
+            };
+
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(settings)
+                .Build();
+
+            using var provider = BuildWpfServiceProvider(configuration);
+            var database = provider.GetRequiredService<DatabaseService>();
+
+            var invocationCount = 0;
+            SetExecuteNonQueryOverride(database, (sql, parameters, token) =>
+            {
+                Interlocked.Increment(ref invocationCount);
+                return Task.FromResult(0);
+            });
+
+            RunInStaThread(() =>
+            {
+                var app = new App();
+                try
+                {
+                    var hostField = typeof(App).GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)
+                                   ?? throw new MissingFieldException(typeof(App).FullName, "_host");
+                    hostField.SetValue(app, new TestHost(provider));
+
+                    var ensureMethod = typeof(App).GetMethod("EnsureMachineTriggersSafe", BindingFlags.Instance | BindingFlags.NonPublic)
+                                       ?? throw new MissingMethodException(typeof(App).FullName, "EnsureMachineTriggersSafe");
+                    ensureMethod.Invoke(app, null);
+                }
+                finally
+                {
+                    app.Shutdown();
+                }
+            });
+
+            Assert.True(invocationCount > 0, "Expected EnsureMachineTriggersForMachinesAsync to invoke ExecuteNonQuery.");
+
+            database.ResetTestOverrides();
+        }
+
+        [Fact]
+        public void DatabaseTestHooks_EnableAndResetOverrides()
+        {
+            using var flagScope = new EnvironmentVariableScope(DatabaseTestHookBootstrapper.FlagName, "1");
+
+            var configuration = new ConfigurationBuilder().Build();
+
+            using var provider = BuildWpfServiceProvider(configuration);
+            var database = provider.GetRequiredService<DatabaseService>();
+
+            Assert.NotNull(GetExecuteNonQueryOverride(database));
+            Assert.NotNull(GetExecuteScalarOverride(database));
+            Assert.NotNull(GetExecuteSelectOverride(database));
+
+            flagScope.Dispose();
+
+            database.ResetTestOverrides();
+
+            Assert.Null(GetExecuteNonQueryOverride(database));
+            Assert.Null(GetExecuteScalarOverride(database));
+            Assert.Null(GetExecuteSelectOverride(database));
+        }
+
+        [Fact]
+        public void EnsureAuditServiceSingleton_ReplacesPreviousRegistrations()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton(new DatabaseService("Server=localhost;Database=unit_test;Uid=test;Pwd=test;"));
         services.AddTransient<AuditService>();
 
         YasGmpCoreServiceGuards.EnsureAuditServiceSingleton(services);
@@ -388,5 +464,99 @@ public class ServiceRegistrationTests
             => Task.FromResult(string.Empty);
 
         public Task<double> AnalyzeAnomalyAsync(int deviationId) => Task.FromResult(0d);
+    }
+
+    private static void RunInStaThread(Action action)
+    {
+        Exception? captured = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                captured = ex;
+            }
+        })
+        {
+            IsBackground = true
+        };
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (captured is not null)
+        {
+            throw new TargetInvocationException(captured);
+        }
+    }
+
+    private static void SetExecuteNonQueryOverride(DatabaseService database, Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>> factory)
+    {
+        var property = typeof(DatabaseService).GetProperty("ExecuteNonQueryOverride", BindingFlags.Instance | BindingFlags.NonPublic)
+                       ?? throw new MissingMemberException(nameof(DatabaseService), "ExecuteNonQueryOverride");
+        property.SetValue(database, factory);
+    }
+
+    private static Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>?
+        GetExecuteNonQueryOverride(DatabaseService database)
+    {
+        var property = typeof(DatabaseService).GetProperty("ExecuteNonQueryOverride", BindingFlags.Instance | BindingFlags.NonPublic)
+                       ?? throw new MissingMemberException(nameof(DatabaseService), "ExecuteNonQueryOverride");
+        return property.GetValue(database) as Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>;
+    }
+
+    private static Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>?
+        GetExecuteScalarOverride(DatabaseService database)
+    {
+        var property = typeof(DatabaseService).GetProperty("ExecuteScalarOverride", BindingFlags.Instance | BindingFlags.NonPublic)
+                       ?? throw new MissingMemberException(nameof(DatabaseService), "ExecuteScalarOverride");
+        return property.GetValue(database) as Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>;
+    }
+
+    private static Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>?
+        GetExecuteSelectOverride(DatabaseService database)
+    {
+        var property = typeof(DatabaseService).GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)
+                       ?? throw new MissingMemberException(nameof(DatabaseService), "ExecuteSelectOverride");
+        return property.GetValue(database) as Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>;
+    }
+
+    private sealed class EnvironmentVariableScope : IDisposable
+    {
+        private readonly string _name;
+        private readonly string? _previous;
+
+        public EnvironmentVariableScope(string name, string? value)
+        {
+            _name = name;
+            _previous = Environment.GetEnvironmentVariable(name);
+            Environment.SetEnvironmentVariable(name, value);
+        }
+
+        public void Dispose()
+        {
+            Environment.SetEnvironmentVariable(_name, _previous);
+        }
+    }
+
+    private sealed class TestHost : IHost
+    {
+        public TestHost(IServiceProvider services)
+        {
+            Services = services;
+        }
+
+        public IServiceProvider Services { get; }
+
+        public void Dispose()
+        {
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task StopAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }
