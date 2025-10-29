@@ -118,6 +118,7 @@
 
 ### Increment 2 Follow-up — Alerts & Notification Preferences (2026-04-10)
 
+- 2026-08-16: WPF host `App.xaml` now mirrors the MAUI `UseDatabaseService` configuration so DatabaseService receives DiagnosticContext/ITrace telemetry wiring plus IConfiguration-backed replication flags; retried `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` but the container still reports `bash: command not found: dotnet`, leaving validation pending on a Windows environment.
 - Added cross-platform alert abstractions (`IAlertService` in AppCore and WPF `AlertService`) so shell status updates and toast overlays mirror MAUI alerts while respecting persisted operator preferences; the Admin module now exposes status bar/toast toggles with a save workflow wired to the new service.
 - Introduced `NotificationPreferenceService` persistence, the shared `NotificationPreferences` model, and WPF unit tests covering alert propagation plus AdminModuleViewModel load/save/dirty states to guard the workflow.
 - Refreshed `README_WPF_SHELL.md` and `docs/WPF_MAPPING.md` with alert parity details, toast overlay documentation, and notification preference UI notes.

@@ -183,6 +183,7 @@
         "2026-07-30: DiagnosticsModuleViewModelTests now simulate dispatcher-dispatched telemetry/log/health callbacks, assert module records refresh after the queued UI action runs, and verify the service-unavailable fallback seeds sample data; dotnet restore/build/test still fail with 'command not found: dotnet' pending Windows tooling.",
         "2026-07-31: Documentation refreshed so docs/WPF_MAPPING.md and README_WPF_SHELL.md detail the live diagnostics dashboard, log tail, health cards, and telemetry configuration surfaced by DiagnosticsFeedService; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
         "2025-10-29: DiagnosticsModuleView replaces the placeholder DataGrid with status cards and telemetry/log/health tabs bound to live collections, adds an auto-scroll behavior plus virtualization-friendly templates, and dotnet restore/build/test still report 'command not found: dotnet' in this container."
+        ,"2026-08-16: WPF App.xaml now passes a UseDatabaseService configure callback that resolves DiagnosticContext/ITrace/IConfiguration so DatabaseService.SetDiagnostics and global telemetry configuration mirror the MAUI host; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container."
       ]
     },
     {
@@ -227,7 +228,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: diagnostics feed viewmodel wiring",
+  "lastCommitSummary": "fix: align wpf database service diagnostics",
   "notes": [
     "2026-07-29: DiagnosticsModuleViewModel now consumes DiagnosticsFeedService, publishes telemetry/log/health observable collections with localized ShellStrings, retains a design-time fallback, and dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
     "2026-06-21: Documented QualificationsModuleView/QualificationsModuleViewModel parity with the MAUI QualificationViewModel and recorded dotnet restore/build/test attempts for solution, WPF, MAUI, YasGMP.Tests, and smoke harness\u2014each still exits with 'command not found: dotnet' in this container.",
