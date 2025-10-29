@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MySqlConnector;
 using YasGMP.AppCore.DependencyInjection;
 using YasGMP.Common;
 using YasGMP.Services;
@@ -371,6 +372,8 @@ namespace YasGMP.Wpf
                 return;
             }
 
+            EnsureMachineTriggersSafe();
+
             var realtime = _host.Services.GetRequiredService<ISignalRClientService>();
             realtime.Start();
 
@@ -379,6 +382,29 @@ namespace YasGMP.Wpf
 
             var window = _host.Services.GetRequiredService<MainWindow>();
             window.Show();
+        }
+
+        private void EnsureMachineTriggersSafe()
+        {
+            var trace = _host.Services?.GetService<ITrace>();
+
+            try
+            {
+                var database = _host!.Services.GetRequiredService<DatabaseService>();
+                database.EnsureMachineTriggersForMachinesAsync().GetAwaiter().GetResult();
+            }
+            catch (MySqlException ex)
+            {
+                trace?.Log(DiagLevel.Warn, "startup", "machines_triggers_permission", ex.Message, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                trace?.Log(DiagLevel.Warn, "startup", "machines_triggers_permission", ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                trace?.Log(DiagLevel.Error, "startup", "machines_triggers_failed", ex.Message, ex);
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
