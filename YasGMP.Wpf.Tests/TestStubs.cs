@@ -8041,6 +8041,14 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public List<(ImpersonationContext Context, UserCrudContext AuditContext)> EndImpersonationRequests { get; } = new();
 
+        public UserCrudContext? LastBeginImpersonationRequestContext { get; private set; }
+
+        public ImpersonationContext? LastBeginImpersonationContext { get; private set; }
+
+        public ImpersonationContext? LastEndImpersonationContext { get; private set; }
+
+        public UserCrudContext? LastEndImpersonationAuditContext { get; private set; }
+
         public IReadOnlyList<(User Entity, UserCrudContext Context)> SavedWithContext => _savedSnapshots;
         public UserCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
         public User? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
@@ -8142,6 +8150,7 @@ namespace YasGMP.Wpf.ViewModels.Modules
         public Task<ImpersonationContext?> BeginImpersonationAsync(int targetUserId, UserCrudContext context)
         {
             BeginImpersonationRequests.Add((targetUserId, context));
+            LastBeginImpersonationRequestContext = context;
             var impersonation = new ImpersonationContext(
                 context.UserId,
                 targetUserId,
@@ -8157,12 +8166,15 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 SignatureMethod: context.SignatureMethod,
                 SignatureStatus: context.SignatureStatus,
                 SignatureNote: context.SignatureNote);
+            LastBeginImpersonationContext = impersonation;
             return Task.FromResult<ImpersonationContext?>(impersonation);
         }
 
         public Task EndImpersonationAsync(ImpersonationContext context, UserCrudContext auditContext)
         {
             EndImpersonationRequests.Add((context, auditContext));
+            LastEndImpersonationContext = context;
+            LastEndImpersonationAuditContext = auditContext;
             return Task.CompletedTask;
         }
 
