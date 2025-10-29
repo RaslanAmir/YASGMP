@@ -1,0 +1,77 @@
+{
+  "name": "default-demo",
+  "description": "Minimal demo data for the YasGMP WPF host when MySQL is unavailable.",
+  "nonQuery": [
+    {
+      "match": "INSERT INTO session_log",
+      "result": 1
+    },
+    {
+      "match": "UPDATE session_log",
+      "result": 1
+    },
+    {
+      "match": "INSERT INTO user_window_layouts",
+      "result": 1
+    },
+    {
+      "match": "UPDATE user_window_layouts",
+      "result": 1
+    }
+  ],
+  "scalar": [
+    {
+      "match": "SELECT LAST_INSERT_ID",
+      "result": 1001
+    },
+    {
+      "match": "SELECT COUNT(*) FROM users",
+      "result": 1
+    },
+    {
+      "match": "SELECT layout_xml",
+      "result": null
+    }
+  ],
+  "select": [
+    {
+      "match": "FROM users",
+      "rows": [
+        {
+          "Id": 1,
+          "Username": "wpf-demo",
+          "FullName": "WPF Demo Operator",
+          "PasswordHash": "demo-hash",
+          "Salt": "demo-salt",
+          "IsActive": true,
+          "IsLocked": false,
+          "FailedLogins": 0,
+          "LastLoginAt": "2026-08-20T12:00:00Z"
+        }
+      ]
+    },
+    {
+      "match": "FROM roles",
+      "rows": [
+        { "Id": 1, "Name": "Administrators" },
+        { "Id": 2, "Name": "Quality" }
+      ]
+    },
+    {
+      "match": "FROM user_roles",
+      "rows": [
+        { "UserId": 1, "RoleId": 1 }
+      ]
+    },
+    {
+      "match": "FROM user_window_layouts",
+      "columns": ["layout_xml", "pos_x", "pos_y", "width", "height", "saved_at"],
+      "rows": []
+    },
+    {
+      "match": "FROM notification_preferences",
+      "columns": ["user_id", "toast_enabled", "status_bar_enabled", "updated_at"],
+      "rows": []
+    }
+  ]
+}

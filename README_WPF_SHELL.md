@@ -30,6 +30,32 @@ dotnet publish YasGMP.Wpf -c Release -r win-x64
 
 Visual Studio and MSBuild follow the same steps: open `yasgmp.sln`, set **YasGMP.Wpf** as the startup project, and use **Build → Build Solution** (or `msbuild YasGMP.Wpf/YasGMP.Wpf.csproj /t:Build`).【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L1-L28】
 
+### DatabaseService test hooks & fixture workflow
+
+Local WPF runs can now skip the MySQL dependency by enabling the DatabaseService test hooks. The `scripts/wpf-run-with-testhooks.ps1` helper sets the opt-in flag, optionally wires fixture data, and then launches the command you provide (defaults to `dotnet run --project YasGMP.Wpf`).【F:scripts/wpf-run-with-testhooks.ps1†L1-L61】 The runtime looks for the following environment variables when the flag is present:
+
+- `YASGMP_WPF_TESTHOOKS` — opt-in toggle automatically set to `1` by the helper.【F:YasGMP.Wpf/Runtime/DatabaseTestHookBootstrapper.cs†L20-L70】
+- `YASGMP_WPF_FIXTURE_PATH` — absolute/relative path to a JSON fixture file (see `scripts/fixtures/wpf-demo.json` for the supported shape).【F:YasGMP.Wpf/Runtime/DatabaseTestHookBootstrapper.cs†L225-L273】【F:scripts/fixtures/wpf-demo.json†L1-L64】
+- `YASGMP_WPF_FIXTURE_JSON` — inline JSON payload (useful for ad-hoc datasets in CI). Inline content takes precedence over `..._PATH`.【F:YasGMP.Wpf/Runtime/DatabaseTestHookBootstrapper.cs†L213-L236】
+
+At startup `App.xaml.cs` detects the flag, assigns stub delegates to `DatabaseService.ExecuteNonQueryOverride`, `ExecuteScalarOverride`, and `ExecuteSelectOverride`, and sources canned results from the active fixture so the host never touches MySQL.【F:YasGMP.Wpf/App.xaml.cs†L54-L78】【F:YasGMP.Wpf/Runtime/DatabaseTestHookBootstrapper.cs†L24-L208】 Misses are logged at `DiagLevel.Warning` (first occurrence per SQL snippet) so you can extend the fixture iteratively.【F:YasGMP.Wpf/Runtime/DatabaseTestHookBootstrapper.cs†L80-L141】【F:YasGMP.Wpf/Runtime/DatabaseTestHookBootstrapper.cs†L296-L377】
+
+#### Usage examples
+
+Run the shell with the baked-in demo fixture:
+
+```powershell
+pwsh ./scripts/wpf-run-with-testhooks.ps1 -FixturePath ./scripts/fixtures/wpf-demo.json
+```
+
+Execute WPF smoke tests with an inline stub (note the escaped quotes):
+
+```powershell
+pwsh ./scripts/wpf-run-with-testhooks.ps1 -Command @("dotnet","test","YasGMP.Wpf.Smoke") -FixtureJson '{"select":[{"match":"FROM users","rows":[{"Id":1,"Username":"smoke"}]}]}'
+```
+
+To revert back to a live database simply run your command without the helper (or clear `YASGMP_WPF_TESTHOOKS`, `YASGMP_WPF_FIXTURE_PATH`, and `YASGMP_WPF_FIXTURE_JSON` from the environment). The helper restores the previous environment variables on exit, so closing the PowerShell session resets the overrides automatically.【F:scripts/wpf-run-with-testhooks.ps1†L37-L61】
+
 ## Authentication and re-authentication
 
 - **Startup gating:** The WPF shell now displays a modal [LoginView](YasGMP.Wpf/Views/LoginView.xaml) before AvalonDock initialises. The dialog is driven by [LoginViewModel](YasGMP.Wpf/ViewModels/LoginViewModel.cs) which authenticates through [AuthenticationDialogService](YasGMP.Wpf/Services/AuthenticationDialogService.cs) and the shared [AuthService](YasGMP.AppCore/Services/AuthService.cs). Successful sign-in applies the operator to the shared [UserSession](YasGMP.Wpf/Services/UserSession.cs) and refreshes the status bar via `MainWindowViewModel.RefreshShellContext`.【F:YasGMP.Wpf/App.xaml.cs†L117-L137】【F:YasGMP.Wpf/ViewModels/LoginViewModel.cs†L13-L86】

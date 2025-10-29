@@ -16,6 +16,7 @@ using YasGMP.Diagnostics.LogSinks;
 using YasGMP.Services.Logging;
 using YasGMP.ViewModels;
 using YasGMP.Wpf.Configuration;
+using YasGMP.Wpf.Runtime;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels;
 using YasGMP.Wpf.ViewModels.Dialogs;
@@ -93,6 +94,8 @@ namespace YasGMP.Wpf
                             {
                                 DatabaseService.GlobalConfiguration = configuration;
                             }
+
+                            DatabaseTestHookBootstrapper.Configure(db, sp);
                         });
 
                         var svc = core.Services;
