@@ -123,14 +123,14 @@ This document inventories the YasGMP MAUI experience and tracks the correspondin
 ### Pages & View-Models
 | Feature | MAUI Page(s) | MAUI View-Model(s) | WPF Document | WPF Pane | Notes / TODO |
 | --- | --- | --- | --- | --- | --- |
-| Diagnostics dashboard | [DebugDashboardPage](../Views/Debug/DebugDashboardPage.xaml) | — | [DiagnosticsModuleView](../YasGMP.Wpf/Views/DiagnosticsModuleView.xaml) | — | Placeholder diagnostics hub created; **TODO:** stream live telemetry once instrumentation ports.
-| Log viewer | [LogViewerPage](../Views/Debug/LogViewerPage.xaml) | — | [DiagnosticsModuleView](../YasGMP.Wpf/Views/DiagnosticsModuleView.xaml) | — | Shares diagnostics shell; **TODO:** bind to log service feed.
-| Health checks | [HealthPage](../Views/Debug/HealthPage.xaml) | — | [DiagnosticsModuleView](../YasGMP.Wpf/Views/DiagnosticsModuleView.xaml) | — | Health snapshot placeholders available; **TODO:** wire service ping adapters.
+| Diagnostics dashboard | [DebugDashboardPage](../Views/Debug/DebugDashboardPage.xaml) | — | [DiagnosticsModuleView](../YasGMP.Wpf/Views/DiagnosticsModuleView.xaml) | — | WPF dashboard consumes `DiagnosticsFeedService` telemetry snapshots, localizes ordered key/value summaries, and keeps inspector cards refreshed through `DiagnosticsModuleViewModel`'s live subscription pipeline.
+| Log viewer | [LogViewerPage](../Views/Debug/LogViewerPage.xaml) | — | [DiagnosticsModuleView](../YasGMP.Wpf/Views/DiagnosticsModuleView.xaml) | — | Live tail view buffers the latest 200 log lines streamed by `DiagnosticsFeedService`, auto-scrolls as entries arrive, and exposes localized inspector previews for quick triage.
+| Health checks | [HealthPage](../Views/Debug/HealthPage.xaml) | — | [DiagnosticsModuleView](../YasGMP.Wpf/Views/DiagnosticsModuleView.xaml) | — | Health cards now flatten periodic `HealthReport` snapshots from the feed, highlight the current status banner, and retain the latest inspector preview for environment audits.
 
 ### Services
 | MAUI Service(s) | Responsibility | WPF Adapter | Notes / TODO |
 | --- | --- | --- | --- |
-| [FileLogService](../Services/Logging/FileLogService.cs)<br>[ILogService](../Services/Logging/ILogService.cs) | File-based logging abstraction. | **TODO:** None yet | **TODO:** Bridge logging to WPF status panes.
+| [FileLogService](../Services/Logging/FileLogService.cs)<br>[ILogService](../Services/Logging/ILogService.cs) | File-based logging abstraction. | [DiagnosticsFeedService](../YasGMP.Wpf/Services/DiagnosticsFeedService.cs) | Feed service tails the rolling log file, marshals entries back onto the UI dispatcher, and pushes localized status updates/status-bar messaging while keeping the inspector synchronized.
 | [UiInstrumentationService](../Services/Diagnostics/UiInstrumentationService.cs) | MAUI UI instrumentation hooks. | **TODO:** None yet | **TODO:** Port instrumentation to WPF dispatcher.
 
 ## Shared Infrastructure
