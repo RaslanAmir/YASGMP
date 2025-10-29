@@ -35,6 +35,9 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     private bool _suppressRoleNotifications;
     private bool _suppressEditorNotifications;
     private User? _loadedUser;
+    private ImpersonationContext? _activeImpersonationContext;
+    private UserCrudContext? _pendingImpersonationContext;
+    private UserCrudContext? _pendingImpersonationAuditContext;
 
     /// <summary>Initializes a new instance of the <see cref="UserEditDialogViewModel"/> class.</summary>
     public UserEditDialogViewModel(
@@ -128,6 +131,15 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     /// <summary>Result populated when the dialog completes.</summary>
     public UserEditDialogResult? Result { get; private set; }
 
+    /// <summary>Gets the active impersonation session captured after a successful begin request.</summary>
+    public ImpersonationContext? ActiveImpersonationContext => _activeImpersonationContext;
+
+    /// <summary>Gets the context that will be used when invoking <see cref="BeginImpersonationCallback"/>.</summary>
+    public UserCrudContext? PendingImpersonationContext => _pendingImpersonationContext;
+
+    /// <summary>Gets the context that will be used when invoking <see cref="EndImpersonationCallback"/>.</summary>
+    public UserCrudContext? PendingImpersonationAuditContext => _pendingImpersonationAuditContext;
+
     /// <summary>Hydrates the editor state from the supplied user and refreshes lookup collections.</summary>
     public async Task InitializeAsync(User? user)
     {
@@ -138,7 +150,18 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         ApplyRoleSelection(Editor.RoleIds ?? Array.Empty<int>());
         await LoadImpersonationTargetsAsync().ConfigureAwait(false);
 
+        _activeImpersonationContext = _impersonationWorkflow.ActiveContext;
         IsImpersonating = _impersonationWorkflow.IsImpersonating;
+        if (_activeImpersonationContext is not null)
+        {
+            ImpersonationReason = _activeImpersonationContext.Value.Reason ?? string.Empty;
+            ImpersonationNotes = _activeImpersonationContext.Value.Notes ?? string.Empty;
+        }
+        else
+        {
+            ImpersonationReason = string.Empty;
+            ImpersonationNotes = string.Empty;
+        }
         if (IsImpersonating)
         {
             var active = _impersonationTargets.FirstOrDefault(t => t.Id == _impersonationWorkflow.ImpersonatedUserId);
@@ -527,6 +550,15 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         RequestClose?.Invoke(this, false);
     }
 
+    private UserCrudContext CreateImpersonationContext(string? reason, string? notes)
+        => UserCrudContext.Create(
+            _authContext.CurrentUser?.Id ?? 0,
+            _authContext.CurrentIpAddress,
+            _authContext.CurrentDeviceInfo,
+            _authContext.CurrentSessionId,
+            reason,
+            notes);
+
     private async Task BeginImpersonationAsync()
     {
         if (IsBusy)
@@ -549,6 +581,10 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
 
         IsBusy = true;
         StatusMessage = null;
+        var reason = FormatImpersonationReason();
+        var notes = FormatImpersonationNotes();
+        var context = CreateImpersonationContext(reason, notes);
+        _pendingImpersonationContext = context;
         try
         {
             UserEditDialogResult result;
@@ -558,14 +594,33 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
             }
             else
             {
-                await _impersonationWorkflow.BeginImpersonationAsync(
+                var impersonation = await _impersonationWorkflow.BeginImpersonationAsync(
                     SelectedImpersonationTarget.Id,
-                    FormatImpersonationReason() ?? string.Empty,
-                    FormatImpersonationNotes()).ConfigureAwait(false);
+                    context).ConfigureAwait(false);
+                _activeImpersonationContext = impersonation;
+                IsImpersonating = true;
                 _shellInteraction.UpdateStatus(_localization.GetString(
                     "Dialog.UserEdit.Status.ImpersonationRequestedWithTarget",
                     SelectedImpersonationTarget.Id));
-                result = CreateResult(saved: false, impersonationRequested: true, impersonationEnded: false);
+                result = CreateResult(
+                    saved: false,
+                    impersonationRequested: true,
+                    impersonationEnded: false,
+                    requestContext: context,
+                    impersonationContext: impersonation);
+            }
+
+            if (result.ImpersonationRequested)
+            {
+                IsImpersonating = true;
+                if (result.ActiveImpersonationContext is not null)
+                {
+                    _activeImpersonationContext = result.ActiveImpersonationContext;
+                }
+                else if (_impersonationWorkflow.ActiveContext is not null)
+                {
+                    _activeImpersonationContext = _impersonationWorkflow.ActiveContext;
+                }
             }
 
             Result = result;
@@ -573,10 +628,13 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = _localization.GetString("Dialog.UserEdit.Status.ImpersonationFailed", ex.Message);
+            StatusMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? _localization.GetString("Dialog.UserEdit.Status.ImpersonationFailed", ex.Message)
+                : ex.Message;
         }
         finally
         {
+            _pendingImpersonationContext = null;
             IsBusy = false;
         }
     }
@@ -590,6 +648,10 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
 
         IsBusy = true;
         StatusMessage = null;
+        var reason = _activeImpersonationContext?.Reason ?? FormatImpersonationReason();
+        var notes = _activeImpersonationContext?.Notes ?? FormatImpersonationNotes();
+        var auditContext = CreateImpersonationContext(reason, notes);
+        _pendingImpersonationAuditContext = auditContext;
         try
         {
             UserEditDialogResult result;
@@ -599,9 +661,19 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
             }
             else
             {
-                await _impersonationWorkflow.EndImpersonationAsync().ConfigureAwait(false);
+                await _impersonationWorkflow.EndImpersonationAsync(auditContext).ConfigureAwait(false);
                 _shellInteraction.UpdateStatus(_localization.GetString("Dialog.UserEdit.Status.ImpersonationEnded"));
-                result = CreateResult(saved: false, impersonationRequested: false, impersonationEnded: true);
+                result = CreateResult(
+                    saved: false,
+                    impersonationRequested: false,
+                    impersonationEnded: true,
+                    auditContext: auditContext);
+            }
+
+            if (result.ImpersonationEnded)
+            {
+                _activeImpersonationContext = null;
+                IsImpersonating = false;
             }
 
             Result = result;
@@ -609,15 +681,24 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = _localization.GetString("Dialog.UserEdit.Status.EndImpersonationFailed", ex.Message);
+            StatusMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? _localization.GetString("Dialog.UserEdit.Status.EndImpersonationFailed", ex.Message)
+                : ex.Message;
         }
         finally
         {
+            _pendingImpersonationAuditContext = null;
             IsBusy = false;
         }
     }
 
-    private UserEditDialogResult CreateResult(bool saved, bool impersonationRequested, bool impersonationEnded)
+    private UserEditDialogResult CreateResult(
+        bool saved,
+        bool impersonationRequested,
+        bool impersonationEnded,
+        UserCrudContext? requestContext = null,
+        UserCrudContext? auditContext = null,
+        ImpersonationContext? impersonationContext = null)
         => new(
             saved,
             impersonationRequested,
@@ -625,7 +706,10 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
             Editor.Clone(),
             SelectedImpersonationTarget?.Id,
             FormatImpersonationReason(),
-            FormatImpersonationNotes());
+            FormatImpersonationNotes(),
+            requestContext,
+            auditContext,
+            impersonationContext);
 
     private string? FormatImpersonationReason()
     {
@@ -804,5 +888,8 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         UserEditor EditorState,
         int? ImpersonationTargetId,
         string? ImpersonationReason,
-        string? ImpersonationNotes);
+        string? ImpersonationNotes,
+        UserCrudContext? ImpersonationRequestContext,
+        UserCrudContext? ImpersonationAuditContext,
+        ImpersonationContext? ActiveImpersonationContext);
 }

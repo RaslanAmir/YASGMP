@@ -124,6 +124,18 @@ namespace YasGMP.Wpf.Services
 
         public Task DeactivateAsync(int userId, UserCrudContext context)
             => _userService.DeactivateUserAsync(userId);
+
+        /// <summary>
+        /// Begins an impersonation session for the specified user.
+        /// </summary>
+        public Task<ImpersonationContext?> BeginImpersonationAsync(int targetUserId, UserCrudContext context)
+            => _userService.BeginImpersonationAsync(targetUserId, context);
+
+        /// <summary>
+        /// Ends an impersonation session using the supplied audit context.
+        /// </summary>
+        public Task EndImpersonationAsync(ImpersonationContext context, UserCrudContext auditContext)
+            => _userService.EndImpersonationAsync(context, auditContext);
         /// <summary>
         /// Executes the validate operation.
         /// </summary>

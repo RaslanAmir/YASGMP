@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
 using YasGMP.Services;
-using YasGMP.Services.Interfaces;
 
 namespace YasGMP.Wpf.Services;
 
@@ -16,21 +15,15 @@ namespace YasGMP.Wpf.Services;
 public sealed class SecurityImpersonationWorkflowService : ISecurityImpersonationWorkflowService
 {
     private readonly IUserCrudService _userCrudService;
-    private readonly IUserService _userService;
-    private readonly IAuthContext _authContext;
     private ImpersonationContext? _activeContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SecurityImpersonationWorkflowService"/> class.
     /// </summary>
     public SecurityImpersonationWorkflowService(
-        IUserCrudService userService,
-        IUserService coreUserService,
-        IAuthContext authContext)
+        IUserCrudService userService)
     {
         _userCrudService = userService ?? throw new ArgumentNullException(nameof(userService));
-        _userService = coreUserService ?? throw new ArgumentNullException(nameof(coreUserService));
-        _authContext = authContext ?? throw new ArgumentNullException(nameof(authContext));
     }
 
     /// <inheritdoc />
@@ -40,27 +33,21 @@ public sealed class SecurityImpersonationWorkflowService : ISecurityImpersonatio
     public int? ImpersonatedUserId => _activeContext?.TargetUserId;
 
     /// <inheritdoc />
+    public ImpersonationContext? ActiveContext => _activeContext;
+
+    /// <inheritdoc />
     public Task<IReadOnlyList<User>> GetImpersonationCandidatesAsync()
         => _userCrudService.GetAllAsync();
 
     /// <inheritdoc />
-    public async Task BeginImpersonationAsync(int userId, string reason, string? notes)
+    public async Task<ImpersonationContext> BeginImpersonationAsync(int userId, UserCrudContext context)
     {
         if (IsImpersonating)
         {
             throw new InvalidOperationException("An impersonation session is already active.");
         }
 
-        var actorId = _authContext.CurrentUser?.Id ?? 0;
-        var context = UserCrudContext.Create(
-            actorId,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId,
-            reason,
-            notes);
-
-        var impersonation = await _userService
+        var impersonation = await _userCrudService
             .BeginImpersonationAsync(userId, context)
             .ConfigureAwait(false);
 
@@ -70,26 +57,18 @@ public sealed class SecurityImpersonationWorkflowService : ISecurityImpersonatio
         }
 
         _activeContext = impersonation;
+        return impersonation;
     }
 
     /// <inheritdoc />
-    public async Task EndImpersonationAsync()
+    public async Task EndImpersonationAsync(UserCrudContext auditContext)
     {
         if (!_activeContext.HasValue)
         {
             return;
         }
 
-        var actorId = _authContext.CurrentUser?.Id ?? 0;
-        var auditContext = UserCrudContext.Create(
-            actorId,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId,
-            _activeContext.Value.Reason,
-            _activeContext.Value.Notes);
-
-        await _userService.EndImpersonationAsync(_activeContext.Value, auditContext).ConfigureAwait(false);
+        await _userCrudService.EndImpersonationAsync(_activeContext.Value, auditContext).ConfigureAwait(false);
         _activeContext = null;
     }
 }
