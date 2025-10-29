@@ -175,7 +175,8 @@
         "2026-04-24: Calibration certificate dialog service now supports metadata capture, staged uploads/removals, and CalibrationModuleViewModel synchronization while dotnet restore/build/test remain blocked with 'command not found'.",
         "2026-05-09: Shell interaction service now opens/closes ad-hoc documents and the audit rollback preview document reuses DatabaseService rollback extensions with localized status updates; dotnet restore/build/test remain blocked with 'command not found'.",
         "2026-07-28: WPF host now registers diagnostics instrumentation (DiagnosticContext, LogWriter, TraceManager, crash handler, FileLogService) and starts a DiagnosticsFeedService that streams log tail, telemetry, and HealthReport snapshots via IUiDispatcher; dotnet restore/build/test still return 'command not found: dotnet' in this container.",
-        "2026-07-29: DiagnosticsModuleViewModel now subscribes to DiagnosticsFeedService, maintains telemetry/log/health observable collections with UI-dispatcher updates, localizes new diagnostics labels across ShellStrings (neutral/EN/HR), and seeds design-time data when the feed is unavailable; dotnet restore/build/test remain blocked with 'command not found: dotnet'."
+        "2026-07-29: DiagnosticsModuleViewModel now subscribes to DiagnosticsFeedService, maintains telemetry/log/health observable collections with UI-dispatcher updates, localizes new diagnostics labels across ShellStrings (neutral/EN/HR), and seeds design-time data when the feed is unavailable; dotnet restore/build/test remain blocked with 'command not found: dotnet'.",
+        "2025-10-29: DiagnosticsModuleView replaces the placeholder DataGrid with status cards and telemetry/log/health tabs bound to live collections, adds an auto-scroll behavior plus virtualization-friendly templates, and dotnet restore/build/test still report 'command not found: dotnet' in this container."
       ]
     },
     {
