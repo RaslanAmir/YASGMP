@@ -14,6 +14,47 @@ namespace YasGMP.Wpf.Tests;
 public class UserEditDialogViewModelImpersonationTests
 {
     [Fact]
+    public async Task InitializeAsync_WithRequestPopulatesLookupsFromPayload()
+    {
+        var userService = new FakeUserCrudService();
+        var workflow = new RecordingImpersonationWorkflow();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        var (viewModel, _) = CreateViewModel(userService, workflow, signatureDialog);
+
+        var user = new User
+        {
+            Id = 12,
+            Username = "existing",
+            FullName = "Existing User",
+            RoleIds = new[] { 7 }
+        };
+
+        var roles = new[]
+        {
+            new Role { Id = 7, Name = "QA" },
+            new Role { Id = 8, Name = "Admin" }
+        };
+
+        var candidates = new[]
+        {
+            new User { Id = 42, Username = "delegate", FullName = "Delegate" }
+        };
+
+        var request = new UserEditDialogRequest(UserEditDialogMode.View, user, roles, candidates);
+
+        await viewModel.InitializeAsync(request).ConfigureAwait(false);
+
+        Assert.Equal(UserEditDialogMode.View, viewModel.Mode);
+        Assert.Equal(0, userService.GetAllRolesAsyncCallCount);
+        Assert.Equal(0, workflow.GetCandidatesCallCount);
+        var role = Assert.Single(viewModel.RoleOptions.Where(option => option.RoleId == 7));
+        Assert.True(role.IsSelected);
+        var target = Assert.Single(viewModel.ImpersonationTargets);
+        Assert.Equal(42, target.Id);
+        Assert.Equal("Delegate", target.DisplayName);
+    }
+
+    [Fact]
     public async Task BeginImpersonationAsync_WithValidTargetUpdatesState()
     {
         var userService = new FakeUserCrudService();
@@ -387,6 +428,8 @@ public class UserEditDialogViewModelImpersonationTests
     {
         public List<User> Candidates { get; } = new();
 
+        public int GetCandidatesCallCount { get; private set; }
+
         public List<int> BeginTargets { get; } = new();
 
         public List<UserCrudContext> BeginContexts { get; } = new();
@@ -406,7 +449,10 @@ public class UserEditDialogViewModelImpersonationTests
         public ImpersonationContext? ActiveContext { get; private set; }
 
         public Task<IReadOnlyList<User>> GetImpersonationCandidatesAsync()
-            => Task.FromResult<IReadOnlyList<User>>(Candidates);
+        {
+            GetCandidatesCallCount++;
+            return Task.FromResult<IReadOnlyList<User>>(Candidates);
+        }
 
         public Task<ImpersonationContext> BeginImpersonationAsync(int userId, UserCrudContext context)
         {

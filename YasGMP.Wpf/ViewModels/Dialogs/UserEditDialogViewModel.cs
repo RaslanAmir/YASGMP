@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -79,6 +80,9 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     /// <summary>Callback invoked when the cancel command executes.</summary>
     public Func<UserEditDialogViewModel, Task<UserEditDialogResult>>? CancelCallback { get; set; }
 
+    /// <summary>Gets the dialog mode that initialized the editor.</summary>
+    public UserEditDialogMode Mode { get; private set; } = UserEditDialogMode.View;
+
     /// <summary>Current editor surface reflected in the dialog.</summary>
     [ObservableProperty]
     private UserEditor _editor;
@@ -141,14 +145,69 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
     public UserCrudContext? PendingImpersonationAuditContext => _pendingImpersonationAuditContext;
 
     /// <summary>Hydrates the editor state from the supplied user and refreshes lookup collections.</summary>
-    public async Task InitializeAsync(User? user)
+    public Task InitializeAsync(User? user)
+        => InitializeAsync(
+            user,
+            roles: null,
+            impersonationCandidates: null,
+            user is null ? UserEditDialogMode.Add : UserEditDialogMode.Update,
+            CancellationToken.None);
+
+    /// <summary>
+    /// Hydrates the editor using the shared dialog request payload supplied by callers.
+    /// </summary>
+    public Task InitializeAsync(UserEditDialogRequest request, CancellationToken cancellationToken = default)
     {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        return InitializeAsync(
+            request.User,
+            request.Roles,
+            request.ImpersonationCandidates,
+            request.Mode,
+            cancellationToken);
+    }
+
+    private async Task InitializeAsync(
+        User? user,
+        IEnumerable<Role>? roles,
+        IEnumerable<User>? impersonationCandidates,
+        UserEditDialogMode mode,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        Mode = mode;
         _loadedUser = user is null ? null : CloneUser(user);
         SetEditor(user is null ? UserEditor.CreateForNew() : UserEditor.FromUser(user));
 
-        await EnsureRolesLoadedAsync().ConfigureAwait(false);
+        if (roles is not null)
+        {
+            PopulateRoles(roles);
+            _rolesLoaded = true;
+        }
+        else
+        {
+            _rolesLoaded = false;
+            await LoadRolesAsync(cancellationToken).ConfigureAwait(false);
+            _rolesLoaded = true;
+        }
+
         ApplyRoleSelection(Editor.RoleIds ?? Array.Empty<int>());
-        await LoadImpersonationTargetsAsync().ConfigureAwait(false);
+
+        if (impersonationCandidates is not null)
+        {
+            PopulateImpersonationTargets(impersonationCandidates);
+        }
+        else
+        {
+            await LoadImpersonationTargetsAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         _activeImpersonationContext = _impersonationWorkflow.ActiveContext;
         IsImpersonating = _impersonationWorkflow.IsImpersonating;
@@ -162,6 +221,7 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
             ImpersonationReason = string.Empty;
             ImpersonationNotes = string.Empty;
         }
+
         if (IsImpersonating)
         {
             var active = _impersonationTargets.FirstOrDefault(t => t.Id == _impersonationWorkflow.ImpersonatedUserId);
@@ -203,13 +263,19 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
             return;
         }
 
-        await LoadRolesAsync().ConfigureAwait(false);
+        await LoadRolesAsync(CancellationToken.None).ConfigureAwait(false);
         _rolesLoaded = true;
     }
 
-    private async Task LoadRolesAsync()
+    private async Task LoadRolesAsync(CancellationToken cancellationToken)
     {
         var roles = await _userService.GetAllRolesAsync().ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        PopulateRoles(roles);
+    }
+
+    private void PopulateRoles(IEnumerable<Role> roles)
+    {
         _availableRoles.Clear();
         foreach (var role in roles.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase))
         {
@@ -256,11 +322,17 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         _loadedUser = CloneUser(user);
     }
 
-    private async Task LoadImpersonationTargetsAsync()
+    private async Task LoadImpersonationTargetsAsync(CancellationToken cancellationToken)
     {
         var targets = await _impersonationWorkflow.GetImpersonationCandidatesAsync().ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        PopulateImpersonationTargets(targets);
+    }
+
+    private void PopulateImpersonationTargets(IEnumerable<User> users)
+    {
         _impersonationTargets.Clear();
-        foreach (var user in targets.OrderBy(u => u.FullName ?? u.Username, StringComparer.OrdinalIgnoreCase))
+        foreach (var user in users.OrderBy(u => u.FullName ?? u.Username, StringComparer.OrdinalIgnoreCase))
         {
             if (user.Id == 0)
             {
