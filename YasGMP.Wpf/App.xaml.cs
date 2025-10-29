@@ -74,7 +74,25 @@ namespace YasGMP.Wpf
                     services.AddYasGmpCoreServices(core =>
                     {
                         core.UseConnectionString(connectionString);
-                        core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn));
+                        core.UseDatabaseService<DatabaseService>((sp, conn) => new DatabaseService(conn), (sp, db, _) =>
+                        {
+                            var ctx = sp.GetService<DiagnosticContext>();
+                            var trace = sp.GetService<ITrace>();
+                            var configuration = sp.GetService<IConfiguration>();
+
+                            if (ctx != null && trace != null)
+                            {
+                                db.SetDiagnostics(ctx, trace);
+                            }
+
+                            DatabaseService.GlobalDiagnosticContext = ctx;
+                            DatabaseService.GlobalTrace = trace;
+
+                            if (configuration != null)
+                            {
+                                DatabaseService.GlobalConfiguration = configuration;
+                            }
+                        });
 
                         var svc = core.Services;
                         svc.AddSingleton(databaseOptions);
