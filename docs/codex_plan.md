@@ -291,6 +291,7 @@
   - 2025-10-10: Installed dotnet SDK 9.0.100 via dotnet-install.sh and verified `dotnet --info`; Windows-targeted restore/build/test still require Windows 10 SDK 19041+ and MAUI workloads on a Windows host.
   - 2025-10-07: Reconfirmed CLI absence this run; planning next increment around static analysis, documentation refresh, and schema review until installation is possible.
   - 2025-10-08: Authored `WPF Smoke Tests` GitHub Actions workflow to run restore/build/FlaUI smoke automation on `windows-latest` using .NET 9 when available (falls back to .NET 8). Local validation remains blocked because `dotnet --info` still reports `command not found`.
+  - 2026-08-10: Verified the container still reports `command not found: dotnet` and recorded the Windows host requirement in STATUS/plan docs before attempting further work.
 - **B1 — Shell foundation** (Ribbon, Docking, StatusBar, FormMode state machine) — [ ] todo
   - **Remaining scope:**
     - Validate the Fluent.Ribbon tabs, status bar telemetry, and ModulesPane localization on a Windows host once the .NET CLI and Windows 10 SDK are available.

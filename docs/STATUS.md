@@ -9,9 +9,11 @@ YasGMP centralizes GMP-compliant manufacturing maintenance, calibration, and qua
 
 # Blockers
 
-No active blockers.
+- The Linux container still lacks the .NET SDK/Windows 10 SDK workloads, so
+  `dotnet restore`, Windows builds, and smoke tests cannot run locally.
 
 # Next Steps
 
 - Exercise the new change control diagnostics harness once the open PRs land.
-- Run an end-to-end build after the EF mapping fixes merge.
+- Run an end-to-end build after the EF mapping fixes merge on a Windows host
+  with the .NET 9 workload installed.
