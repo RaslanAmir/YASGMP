@@ -8035,6 +8035,8 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public List<User> UpdatedUsers { get; } = new();
 
+        public int GetAllRolesAsyncCallCount { get; private set; }
+
         public List<(int UserId, IReadOnlyCollection<int> Roles)> RoleAssignments { get; } = new();
 
         public List<(int TargetUserId, UserCrudContext Context)> BeginImpersonationRequests { get; } = new();
@@ -8092,7 +8094,10 @@ namespace YasGMP.Wpf.ViewModels.Modules
         }
 
         public Task<IReadOnlyList<Role>> GetAllRolesAsync()
-            => Task.FromResult<IReadOnlyList<Role>>(_roles.Select(Clone).ToList());
+        {
+            GetAllRolesAsyncCallCount++;
+            return Task.FromResult<IReadOnlyList<Role>>(_roles.Select(Clone).ToList());
+        }
 
         public Task<int> CreateCoreAsync(User user, string password, UserCrudContext context)
         {

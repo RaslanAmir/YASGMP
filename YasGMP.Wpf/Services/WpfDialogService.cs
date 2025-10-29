@@ -94,7 +94,7 @@ namespace YasGMP.Wpf.Services
             }
 
             var viewModel = _userEditDialogFactory();
-            await viewModel.InitializeAsync(request.User).ConfigureAwait(false);
+            await viewModel.InitializeAsync(request, cancellationToken).ConfigureAwait(false);
 
             var result = await ShowUserEditDialogAsyncCore(viewModel, cancellationToken).ConfigureAwait(false);
             return (T?)(object?)result;
