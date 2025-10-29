@@ -2361,6 +2361,141 @@
   <data name="Module.Diagnostics.Text.Session" xml:space="preserve">
     <value>Session</value>
   </data>
+  <data name="Module.Diagnostics.Status.Waiting" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="Module.Diagnostics.Status.Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
+  <data name="Module.Diagnostics.Status.Streaming" xml:space="preserve">
+    <value>Streaming</value>
+  </data>
+  <data name="Module.Diagnostics.Status.Healthy" xml:space="preserve">
+    <value>Healthy</value>
+  </data>
+  <data name="Module.Diagnostics.Status.Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Module.Diagnostics.StatusMessage.Ready" xml:space="preserve">
+    <value>Diagnostics streams ready ({0})</value>
+  </data>
+  <data name="Module.Diagnostics.StatusMessage.TelemetryUpdated" xml:space="preserve">
+    <value>Telemetry snapshot updated at {0}</value>
+  </data>
+  <data name="Module.Diagnostics.StatusMessage.LogStreaming" xml:space="preserve">
+    <value>Streaming live log entries.</value>
+  </data>
+  <data name="Module.Diagnostics.StatusMessage.HealthUpdated" xml:space="preserve">
+    <value>Health snapshot updated at {0}</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Telemetry.Title" xml:space="preserve">
+    <value>Telemetry snapshot</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Telemetry.Code" xml:space="preserve">
+    <value>Telemetry</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Telemetry.Description" xml:space="preserve">
+    <value>Current diagnostic context captured from the running session.</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Log.Title" xml:space="preserve">
+    <value>Recent log events</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Log.Code" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Log.Description" xml:space="preserve">
+    <value>Rolling tail of diagnostics log entries streamed from the host.</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Health.Title" xml:space="preserve">
+    <value>Service health</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Health.Code" xml:space="preserve">
+    <value>Health</value>
+  </data>
+  <data name="Module.Diagnostics.Record.Health.Description" xml:space="preserve">
+    <value>Environment metrics collected from the running process.</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.Empty" xml:space="preserve">
+    <value>Waiting for telemetry snapshot...</value>
+  </data>
+  <data name="Module.Diagnostics.Log.Empty" xml:space="preserve">
+    <value>No log entries received yet.</value>
+  </data>
+  <data name="Module.Diagnostics.Log.Entry" xml:space="preserve">
+    <value>Event #{0}</value>
+  </data>
+  <data name="Module.Diagnostics.Health.Empty" xml:space="preserve">
+    <value>Waiting for health report...</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.ts_utc" xml:space="preserve">
+    <value>Timestamp (UTC)</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.corr_id" xml:space="preserve">
+    <value>Correlation ID</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.span_id" xml:space="preserve">
+    <value>Span ID</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.parent_span" xml:space="preserve">
+    <value>Parent span</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.user_id" xml:space="preserve">
+    <value>User ID</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.roles" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.ip" xml:space="preserve">
+    <value>IP address</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.session_id" xml:space="preserve">
+    <value>Session ID</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.os" xml:space="preserve">
+    <value>Operating system</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.app_version" xml:space="preserve">
+    <value>Application version</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.git_commit" xml:space="preserve">
+    <value>Git commit</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.diag_level" xml:space="preserve">
+    <value>Diagnostics level</value>
+  </data>
+  <data name="Module.Diagnostics.Telemetry.diag_enabled" xml:space="preserve">
+    <value>Diagnostics enabled</value>
+  </data>
+  <data name="Module.Diagnostics.Health.ts_utc" xml:space="preserve">
+    <value>Timestamp (UTC)</value>
+  </data>
+  <data name="Module.Diagnostics.Health.process_id" xml:space="preserve">
+    <value>Process ID</value>
+  </data>
+  <data name="Module.Diagnostics.Health.proc_start_utc" xml:space="preserve">
+    <value>Process start (UTC)</value>
+  </data>
+  <data name="Module.Diagnostics.Health.working_set_mb" xml:space="preserve">
+    <value>Working set (MB)</value>
+  </data>
+  <data name="Module.Diagnostics.Health.os" xml:space="preserve">
+    <value>Operating system</value>
+  </data>
+  <data name="Module.Diagnostics.Health.framework" xml:space="preserve">
+    <value>.NET runtime</value>
+  </data>
+  <data name="Module.Diagnostics.Health.assembly" xml:space="preserve">
+    <value>Assembly</value>
+  </data>
+  <data name="Module.Diagnostics.Health.assembly_ver" xml:space="preserve">
+    <value>Assembly version</value>
+  </data>
   <data name="Module.ExternalServicers.Header.Contact" xml:space="preserve">
     <value>Contact</value>
   </data>
