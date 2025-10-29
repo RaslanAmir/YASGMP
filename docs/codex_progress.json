@@ -235,6 +235,7 @@
   },
   "lastCommitSummary": "fix: guard machine trigger reconciliation at startup",
   "notes": [
+    "2026-08-20: Added scripts/wpf-run-with-testhooks.ps1 plus App.xaml bootstrap glue so DatabaseService overrides hydrate from JSON fixtures when YASGMP_WPF_TESTHOOKS=1, allowing WPF runs and smoke harnesses to execute without MySQL; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-07-29: DiagnosticsModuleViewModel now consumes DiagnosticsFeedService, publishes telemetry/log/health observable collections with localized ShellStrings, retains a design-time fallback, and dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
     "2026-06-21: Documented QualificationsModuleView/QualificationsModuleViewModel parity with the MAUI QualificationViewModel and recorded dotnet restore/build/test attempts for solution, WPF, MAUI, YasGMP.Tests, and smoke harness\u2014each still exits with 'command not found: dotnet' in this container.",
     "2026-06-12: Risk Assessments module now wraps the shared view-model with synchronized filters, records/inspector projection, and delegated initiate/update/approve/close/export toolbar commands; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
