@@ -45,7 +45,9 @@ public class UserCrudServiceAdapterSignatureTests
             SignatureHash: "HASH-001",
             SignatureMethod: "password",
             SignatureStatus: "valid",
-            SignatureNote: "approval");
+            SignatureNote: "approval",
+            Reason: null,
+            Notes: null);
 
         var result = await adapter.CreateAsync(user, "Password!", context).ConfigureAwait(false);
 
@@ -109,7 +111,9 @@ public class UserCrudServiceAdapterSignatureTests
             SignatureHash: "HASH-002",
             SignatureMethod: "password",
             SignatureStatus: "valid",
-            SignatureNote: "edit");
+            SignatureNote: "edit",
+            Reason: null,
+            Notes: null);
 
         var result = await adapter.UpdateAsync(user, password: null, context).ConfigureAwait(false);
 

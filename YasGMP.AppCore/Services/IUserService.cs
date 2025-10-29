@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using YasGMP.Models;
+using YasGMP.Services;
 
 namespace YasGMP.Services.Interfaces
 {
@@ -100,6 +101,14 @@ namespace YasGMP.Services.Interfaces
 
         /// <summary>Updates a user profile with auditing.</summary>
         Task UpdateUserProfileAsync(User user, int adminId = 0);
+
+        // === IMPERSONATION SUPPORT ===
+
+        /// <summary>Begins an impersonation session for the specified target user.</summary>
+        Task<ImpersonationContext?> BeginImpersonationAsync(int targetUserId, UserCrudContext context);
+
+        /// <summary>Ends an impersonation session that was previously started.</summary>
+        Task EndImpersonationAsync(ImpersonationContext context, UserCrudContext auditContext);
     }
 }
 
