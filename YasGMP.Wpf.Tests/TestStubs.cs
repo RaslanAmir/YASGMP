@@ -8037,6 +8037,10 @@ namespace YasGMP.Wpf.ViewModels.Modules
 
         public List<(int UserId, IReadOnlyCollection<int> Roles)> RoleAssignments { get; } = new();
 
+        public List<(int TargetUserId, UserCrudContext Context)> BeginImpersonationRequests { get; } = new();
+
+        public List<(ImpersonationContext Context, UserCrudContext AuditContext)> EndImpersonationRequests { get; } = new();
+
         public IReadOnlyList<(User Entity, UserCrudContext Context)> SavedWithContext => _savedSnapshots;
         public UserCrudContext? LastSavedContext => _savedSnapshots.Count == 0 ? null : _savedSnapshots[^1].Context;
         public User? LastSavedEntity => _savedSnapshots.Count == 0 ? null : Clone(_savedSnapshots[^1].Entity);
@@ -8132,6 +8136,33 @@ namespace YasGMP.Wpf.ViewModels.Modules
                 match.Active = false;
             }
 
+            return Task.CompletedTask;
+        }
+
+        public Task<ImpersonationContext?> BeginImpersonationAsync(int targetUserId, UserCrudContext context)
+        {
+            BeginImpersonationRequests.Add((targetUserId, context));
+            var impersonation = new ImpersonationContext(
+                context.UserId,
+                targetUserId,
+                SessionLogId: BeginImpersonationRequests.Count,
+                StartedAtUtc: DateTime.UtcNow,
+                Reason: context.Reason ?? string.Empty,
+                Notes: context.Notes,
+                Ip: context.Ip,
+                DeviceInfo: context.DeviceInfo,
+                SessionId: context.SessionId,
+                SignatureId: context.SignatureId,
+                SignatureHash: context.SignatureHash,
+                SignatureMethod: context.SignatureMethod,
+                SignatureStatus: context.SignatureStatus,
+                SignatureNote: context.SignatureNote);
+            return Task.FromResult<ImpersonationContext?>(impersonation);
+        }
+
+        public Task EndImpersonationAsync(ImpersonationContext context, UserCrudContext auditContext)
+        {
+            EndImpersonationRequests.Add((context, auditContext));
             return Task.CompletedTask;
         }
 
