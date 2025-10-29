@@ -2358,6 +2358,12 @@
   <data name="Module.Diagnostics.Header.Scope" xml:space="preserve">
     <value>Scope</value>
   </data>
+  <data name="Module.Diagnostics.Header.Field" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="Module.Diagnostics.Header.Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
   <data name="Module.Diagnostics.Header.Summary" xml:space="preserve">
     <value>Summary</value>
   </data>

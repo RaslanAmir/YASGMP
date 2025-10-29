@@ -26,7 +26,11 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
             <Separator />
-            <Button Content="{DynamicResource Module.Toolbar.Command.Refresh.Content}" Command="{Binding RefreshCommand}" ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Refresh.ToolTip}" AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Refresh.AutomationName}" AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Refresh.AutomationId}"/>
+            <Button Content="{DynamicResource Module.Toolbar.Command.Refresh.Content}"
+                    Command="{Binding RefreshCommand}"
+                    ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Refresh.ToolTip}"
+                    AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Refresh.AutomationName}"
+                    AutomationProperties.AutomationId="{DynamicResource Module.Toolbar.Command.Refresh.AutomationId}" />
             <controls:GoldenArrowButton
                 Command="{Binding GoldenArrowCommand}"
                 Margin="8,0,0,0"
@@ -34,31 +38,239 @@
                 AutomationNameKey="Module.Toolbar.Button.GoldenArrow.AutomationName"
                 AutomationIdKey="Module.Toolbar.Button.GoldenArrow.AutomationId" />
         </ToolBar>
+
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                <TextBlock Text="{DynamicResource Module.Diagnostics.Text.Filter}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-            </DockPanel>
-            <DataGrid Grid.Row="1"
-                      ItemsSource="{Binding RecordsView}"
-                      SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="{DynamicResource Module.Diagnostics.Header.Scope}" Binding="{Binding Title}" Width="2*" />
-                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Status.Header}" Binding="{Binding Status}" Width="120" />
-                    <DataGridTextColumn Header="{DynamicResource Dashboard.Grid.Column.Code.Header}" Binding="{Binding Code}" Width="140" />
-                    <DataGridTextColumn Header="{DynamicResource Module.Diagnostics.Header.Summary}" Binding="{Binding Description}" Width="3*" />
-                </DataGrid.Columns>
-            </DataGrid>
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+
+            <ItemsControl Grid.Row="0"
+                          Margin="0,0,0,12"
+                          ItemsSource="{Binding Records}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="4"
+                                Padding="12"
+                                CornerRadius="6"
+                                BorderThickness="1"
+                                BorderBrush="#22000000"
+                                Background="#0C000000">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"
+                                           TextTrimming="CharacterEllipsis" />
+                                <Border Margin="0,8,0,4"
+                                        Padding="8,2"
+                                        CornerRadius="12"
+                                        HorizontalAlignment="Left"
+                                        Background="#FF2F5597">
+                                    <TextBlock Text="{Binding Status}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" />
+                                </Border>
+                                <TextBlock Text="{Binding Description}"
+                                           TextWrapping="Wrap"
+                                           Foreground="#99000000" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TabControl Grid.Row="1">
+                <TabItem Header="{DynamicResource Module.Diagnostics.Record.Telemetry.Title}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0"
+                              Margin="8,8,8,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{DynamicResource Module.Diagnostics.Header.Field}" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{DynamicResource Module.Diagnostics.Header.Value}"
+                                       FontWeight="SemiBold" />
+                        </Grid>
+                        <Grid Grid.Row="1"
+                              Margin="4,0,4,4">
+                            <ListView ItemsSource="{Binding TelemetrySummaries}"
+                                      Margin="4"
+                                      BorderThickness="0"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      ScrollViewer.CanContentScroll="True"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="4" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Value}"
+                                                       TextWrapping="Wrap"
+                                                       Margin="12,0,0,0" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <TextBlock Text="{DynamicResource Module.Diagnostics.Telemetry.Empty}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="#66000000">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TelemetrySummaries.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="{DynamicResource Module.Diagnostics.Record.Log.Title}">
+                    <Grid Margin="4">
+                        <ListBox ItemsSource="{Binding LogEntries}"
+                                 Margin="4"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling"
+                                 controls:AutoScrollBehavior.AutoScrollToEnd="True">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontFamily="Consolas"
+                                               TextWrapping="NoWrap" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="{DynamicResource Module.Diagnostics.Log.Empty}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="#66000000">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LogEntries.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="{DynamicResource Module.Diagnostics.Record.Health.Title}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0"
+                                Margin="12"
+                                Padding="8,4"
+                                CornerRadius="12"
+                                HorizontalAlignment="Left"
+                                Background="#FF2F5597">
+                            <TextBlock Text="{Binding HealthStatus}"
+                                       Foreground="White"
+                                       FontWeight="SemiBold" />
+                        </Border>
+                        <Grid Grid.Row="1"
+                              Margin="4">
+                            <ListView ItemsSource="{Binding HealthResults}"
+                                      Margin="4"
+                                      BorderThickness="0"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      ScrollViewer.CanContentScroll="True"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="4" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Value}"
+                                                       TextWrapping="Wrap"
+                                                       Margin="12,0,0,0" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <TextBlock Text="{DynamicResource Module.Diagnostics.Health.Empty}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="#66000000">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HealthResults.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+
+            <TextBlock Grid.Row="2"
+                       Text="{Binding StatusMessage}"
+                       FontStyle="Italic"
+                       Foreground="Gray"
+                       Margin="0,8,0,0" />
         </Grid>
     </DockPanel>
 </UserControl>
