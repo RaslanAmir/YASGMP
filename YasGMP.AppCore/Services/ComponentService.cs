@@ -83,7 +83,7 @@ namespace YasGMP.Services
             var device = Normalize(context?.DeviceInfo);
             var session = Normalize(context?.SessionId);
 
-            await _db.InsertOrUpdateComponentAsync(
+            component.Id = await _db.InsertOrUpdateComponentAsync(
                 component,
                 update: false,
                 actorUserId: userId,
@@ -133,7 +133,7 @@ namespace YasGMP.Services
             var device = Normalize(context?.DeviceInfo);
             var session = Normalize(context?.SessionId);
 
-            await _db.InsertOrUpdateComponentAsync(
+            component.Id = await _db.InsertOrUpdateComponentAsync(
                 component,
                 update: true,
                 actorUserId: userId,
