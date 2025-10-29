@@ -102,6 +102,12 @@
 | `Services/DatabaseService` | Persistence gateway + layout/audit helpers | Choose-From-List lookups, attachments, signature capture | Hash-chain extension outlined below; implementation blocked on SDK validation | `Planned` |
 | `docs/` | Planning, mapping, parity matrices | Acceptance checklist cross-reference | codex_plan / progress synchronized each batch | `Current` |
 
+### Increment 3 Follow-up — Diagnostics feed bootstrap (2026-07-28)
+
+- Added a WPF `DiagnosticsFeedService` that tails the rolling `FileLogService`, emits telemetry/health snapshots via `IUiDispatcher`, and exposes log/telemetry/health subscriptions for the diagnostics workspace.
+- Registered `DiagnosticContext`, `ILogWriter`, `ITrace`, crash handler, and diagnostics sinks in `App.xaml.cs`, started the feed during startup, and shut it down before disposing the host.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still return `bash: command not found: dotnet`; WPF smoke automation remains pending a Windows host.
+
 ### Increment 2 Follow-up — Alerts & Notification Preferences (2026-04-10)
 
 - Added cross-platform alert abstractions (`IAlertService` in AppCore and WPF `AlertService`) so shell status updates and toast overlays mirror MAUI alerts while respecting persisted operator preferences; the Admin module now exposes status bar/toast toggles with a save workflow wired to the new service.

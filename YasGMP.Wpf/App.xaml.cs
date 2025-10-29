@@ -1,5 +1,7 @@
 using System;
 using System.Windows;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +10,9 @@ using YasGMP.Common;
 using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.Services.Ui;
+using YasGMP.Diagnostics;
+using YasGMP.Diagnostics.LogSinks;
+using YasGMP.Services.Logging;
 using YasGMP.ViewModels;
 using YasGMP.Wpf.Configuration;
 using YasGMP.Wpf.Services;
@@ -26,6 +31,7 @@ namespace YasGMP.Wpf
     public partial class App : Application
     {
         private IHost? _host;
+        private DiagnosticsFeedService? _diagnosticsFeed;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -40,6 +46,27 @@ namespace YasGMP.Wpf
                 .ConfigureServices((ctx, services) =>
                 {
                     services.AddSingleton(ctx.Configuration);
+                    services.AddSingleton(new DiagnosticContext(ctx.Configuration));
+                    services.AddSingleton<IEnumerable<ILogSink>>(sp =>
+                        CreateDiagnosticsSinks(ctx.Configuration, sp.GetRequiredService<DiagnosticContext>()).ToList());
+                    services.AddSingleton<ILogWriter>(sp => new LogWriter(
+                        DiagnosticsConstants.QueueCapacity,
+                        DiagnosticsConstants.QueueDrainBatch,
+                        DiagnosticsConstants.QueueDrainIntervalMs,
+                        sp.GetRequiredService<IEnumerable<ILogSink>>()));
+                    services.AddSingleton<ITrace>(sp => new TraceManager(
+                        sp.GetRequiredService<DiagnosticContext>(),
+                        sp.GetRequiredService<ILogWriter>()));
+                    services.AddSingleton<IProfiler>(sp => new Profiler(sp.GetRequiredService<ITrace>()));
+                    services.AddSingleton(sp =>
+                    {
+                        var crash = new CrashHandler(sp.GetRequiredService<ITrace>(), sp.GetRequiredService<DiagnosticContext>());
+                        crash.RegisterGlobal();
+                        return crash;
+                    });
+                    services.AddSingleton(sp => new DiagnosticsHub(
+                        sp.GetRequiredService<DiagnosticContext>(),
+                        sp.GetRequiredService<IEnumerable<ILogSink>>()));
 
                     var connectionString = ResolveConnectionString(ctx.Configuration);
                     var databaseOptions = DatabaseOptions.FromConnectionString(connectionString);
@@ -59,6 +86,12 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<QRCodeService>();
                         svc.AddSingleton<IQRCodeService, QRCodeServiceAdapter>();
                         svc.AddSingleton<IUserSession, UserSession>();
+                        svc.AddSingleton<FileLogService>(sp =>
+                        {
+                            var session = sp.GetRequiredService<IUserSession>();
+                            return new FileLogService(() => session.UserId, sessionId: session.SessionId);
+                        });
+                        svc.AddSingleton<DiagnosticsFeedService>();
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<WpfAuthContext>();
                         svc.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<WpfAuthContext>());
@@ -309,6 +342,10 @@ namespace YasGMP.Wpf
 
             _host.Start();
 
+            _ = _host.Services.GetRequiredService<CrashHandler>();
+            _diagnosticsFeed = _host.Services.GetRequiredService<DiagnosticsFeedService>();
+            _diagnosticsFeed.StartAsync().GetAwaiter().GetResult();
+
             var authDialogs = _host.Services.GetRequiredService<IAuthenticationDialogService>();
             if (!authDialogs.EnsureAuthenticated())
             {
@@ -328,6 +365,23 @@ namespace YasGMP.Wpf
 
         protected override void OnExit(ExitEventArgs e)
         {
+            if (_diagnosticsFeed is not null)
+            {
+                try
+                {
+                    _diagnosticsFeed.StopAsync().GetAwaiter().GetResult();
+                }
+                catch
+                {
+                    // ignore shutdown failures
+                }
+                finally
+                {
+                    _diagnosticsFeed.Dispose();
+                    _diagnosticsFeed = null;
+                }
+            }
+
             if (_host != null)
             {
                 try
@@ -345,6 +399,31 @@ namespace YasGMP.Wpf
             }
 
             base.OnExit(e);
+        }
+
+        private static IEnumerable<ILogSink> CreateDiagnosticsSinks(IConfiguration configuration, DiagnosticContext context)
+        {
+            var sinks = (configuration[DiagnosticsConstants.KeySinks] ?? "file,stdout")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            foreach (var name in sinks)
+            {
+                switch (name.ToLowerInvariant())
+                {
+                    case "file":
+                        yield return new FileLogSink(context);
+                        break;
+                    case "stdout":
+                        yield return new StdoutLogSink();
+                        break;
+                    case "sqlite":
+                        yield return new SQLiteLogSink();
+                        break;
+                    case "elastic":
+                        yield return new ElasticCompatibleSink(configuration);
+                        break;
+                }
+            }
         }
 
         private static string ResolveConnectionString(IConfiguration configuration)
