@@ -137,6 +137,81 @@ public class UserCrudServiceAdapterSignatureTests
         Assert.Equal(21, Assert.IsType<int>(parameterValues["@lmb"]!));
     }
 
+    [Fact]
+    public async Task BeginImpersonationAsync_DelegatesToUserService()
+    {
+        var userService = new RecordingUserService();
+        var adapter = new UserCrudServiceAdapter(userService, new NullRbacService());
+        var context = UserCrudContext.Create(90, "127.0.0.1", "UnitTest", "sess-imp", "Audit", "Review access");
+        var expected = new ImpersonationContext(
+            ActingUserId: 90,
+            TargetUserId: 12,
+            SessionLogId: 5,
+            StartedAtUtc: DateTime.UtcNow,
+            Reason: "Audit",
+            Notes: "Review access",
+            Ip: "127.0.0.1",
+            DeviceInfo: "UnitTest",
+            SessionId: "sess-imp",
+            SignatureId: 123,
+            SignatureHash: "hash",
+            SignatureMethod: "password",
+            SignatureStatus: "valid",
+            SignatureNote: "note");
+        userService.BeginImpersonationResult = expected;
+
+        var result = await adapter.BeginImpersonationAsync(12, context).ConfigureAwait(false);
+
+        var request = Assert.Single(userService.BeginImpersonationRequests);
+        Assert.Equal(12, request.TargetUserId);
+        Assert.Equal(context, request.Context);
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public async Task BeginImpersonationAsync_WhenServiceReturnsNullYieldsNull()
+    {
+        var userService = new RecordingUserService();
+        var adapter = new UserCrudServiceAdapter(userService, new NullRbacService());
+        var context = UserCrudContext.Create(91, "10.0.0.2", "Lab", "sess-null", "Audit", "Denied");
+
+        var result = await adapter.BeginImpersonationAsync(22, context).ConfigureAwait(false);
+
+        var request = Assert.Single(userService.BeginImpersonationRequests);
+        Assert.Equal(22, request.TargetUserId);
+        Assert.Equal(context, request.Context);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task EndImpersonationAsync_DelegatesToUserService()
+    {
+        var userService = new RecordingUserService();
+        var adapter = new UserCrudServiceAdapter(userService, new NullRbacService());
+        var impersonation = new ImpersonationContext(
+            ActingUserId: 99,
+            TargetUserId: 23,
+            SessionLogId: 9,
+            StartedAtUtc: DateTime.UtcNow.AddMinutes(-5),
+            Reason: "Audit",
+            Notes: "Review",
+            Ip: "10.0.0.5",
+            DeviceInfo: "Surface",
+            SessionId: "sess-end",
+            SignatureId: 555,
+            SignatureHash: "hash",
+            SignatureMethod: "password",
+            SignatureStatus: "valid",
+            SignatureNote: "note");
+        var auditContext = UserCrudContext.Create(99, "10.0.0.5", "Surface", "sess-end", "Audit", "Completed");
+
+        await adapter.EndImpersonationAsync(impersonation, auditContext).ConfigureAwait(false);
+
+        var request = Assert.Single(userService.EndImpersonationRequests);
+        Assert.Equal(impersonation, request.Context);
+        Assert.Equal(auditContext, request.AuditContext);
+    }
+
     private sealed class TestUserService : IUserService
     {
         private readonly DatabaseService _db;
@@ -182,6 +257,67 @@ public class UserCrudServiceAdapterSignatureTests
         public Task SetTwoFactorEnabledAsync(int userId, bool enabled) => Task.CompletedTask;
 
         public Task UpdateUserProfileAsync(User user, int adminId = 0) => Task.CompletedTask;
+    }
+
+    private sealed class RecordingUserService : IUserService
+    {
+        public List<(int TargetUserId, UserCrudContext Context)> BeginImpersonationRequests { get; } = new();
+
+        public List<(ImpersonationContext Context, UserCrudContext AuditContext)> EndImpersonationRequests { get; } = new();
+
+        public ImpersonationContext? BeginImpersonationResult { get; set; }
+
+        public Task<User?> AuthenticateAsync(string username, string password) => Task.FromResult<User?>(null);
+
+        public string HashPassword(string password) => password ?? string.Empty;
+
+        public Task<bool> VerifyTwoFactorCodeAsync(string username, string code) => Task.FromResult(false);
+
+        public Task LockUserAsync(int userId) => Task.CompletedTask;
+
+        public Task<List<User>> GetAllUsersAsync() => Task.FromResult(new List<User>());
+
+        public Task<User?> GetUserByIdAsync(int id) => Task.FromResult<User?>(null);
+
+        public Task<User?> GetUserByUsernameAsync(string username) => Task.FromResult<User?>(null);
+
+        public Task CreateUserAsync(User user, int adminId = 0) => Task.CompletedTask;
+
+        public Task UpdateUserAsync(User user, int adminId = 0) => Task.CompletedTask;
+
+        public Task DeleteUserAsync(int userId, int adminId = 0) => Task.CompletedTask;
+
+        public Task DeactivateUserAsync(int userId) => Task.CompletedTask;
+
+        public bool HasRole(User user, string role) => false;
+
+        public bool IsActive(User user) => user?.Active ?? false;
+
+        public Task ChangePasswordAsync(int userId, string newPassword, int adminId = 0) => Task.CompletedTask;
+
+        public string GenerateDigitalSignature(User user) => string.Empty;
+
+        public bool ValidateDigitalSignature(string signature) => !string.IsNullOrWhiteSpace(signature);
+
+        public Task LogUserEventAsync(int userId, string eventType, string details) => Task.CompletedTask;
+
+        public Task UnlockUserAsync(int userId, int adminId) => Task.CompletedTask;
+
+        public Task SetTwoFactorEnabledAsync(int userId, bool enabled) => Task.CompletedTask;
+
+        public Task UpdateUserProfileAsync(User user, int adminId = 0) => Task.CompletedTask;
+
+        public Task<ImpersonationContext?> BeginImpersonationAsync(int targetUserId, UserCrudContext context)
+        {
+            BeginImpersonationRequests.Add((targetUserId, context));
+            return Task.FromResult(BeginImpersonationResult);
+        }
+
+        public Task EndImpersonationAsync(ImpersonationContext context, UserCrudContext auditContext)
+        {
+            EndImpersonationRequests.Add((context, auditContext));
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class NullRbacService : IRBACService
