@@ -52,6 +52,16 @@ The `WPF Smoke Tests` GitHub Actions workflow (`.github/workflows/wpf-tests.yml`
 
 Smoke logs are uploaded as build artifacts (`wpf-smoke-test-results`) so failures include the FlaUI trace and TRX output. Set the `YASGMP_SMOKE` environment variable to `0` only when a diagnostic build requires skipping UI automation; the workflow enforces `1` by default to guarantee end-to-end coverage.
 
+## Diagnostics dashboard & telemetry feed
+
+- **Feed lifecycle:** During application startup the shell resolves a singleton [`DiagnosticsFeedService`](YasGMP.Wpf/Services/DiagnosticsFeedService.cs) and begins its background loops before showing the main window. The feed tails the rolling log file, captures telemetry snapshots from the shared `DiagnosticContext`, and periodically emits `HealthReport` payloads until shutdown, where the service is stopped and disposed gracefully.【F:YasGMP.Wpf/App.xaml.cs†L327-L381】【F:YasGMP.Wpf/Services/DiagnosticsFeedService.cs†L40-L191】【F:YasGMP.Wpf/Services/DiagnosticsFeedService.cs†L193-L277】
+- **Diagnostics workspace:** [`DiagnosticsModuleViewModel`](YasGMP.Wpf/ViewModels/Modules/DiagnosticsModuleViewModel.cs) subscribes to the feed for telemetry, log, and health channels, projecting the latest payloads into observable collections that drive the dashboard cards, live log viewer, and inspector previews. Status banners and module records refresh automatically as new data arrives, while design-time fallbacks keep the view populated when the feed is unavailable (e.g., during XAML design).【F:YasGMP.Wpf/ViewModels/Modules/DiagnosticsModuleViewModel.cs†L68-L219】
+- **Log tail + auto-scroll:** The live log panel buffers up to 200 lines delivered by the feed, trimming older entries while keeping the viewport anchored through the shared auto-scroll behavior. The feed reads the rolling log asynchronously using [`FileLogService.CurrentLogFilePath`](YasGMP.AppCore/Services/Logging/FileLogService.cs†L18-L78) so the viewer always points at the newest active segment.【F:YasGMP.Wpf/Services/DiagnosticsFeedService.cs†L193-L277】
+
+### Telemetry configuration
+
+Diagnostics settings live under the `Diagnostics` section of `appsettings.json` (or equivalent environment overrides). Use the `Diagnostics:Enabled`, `Diagnostics:Level`, and `Diagnostics:Sinks` keys to control whether the feed emits data, the verbosity (`trace` → `fatal`), and which sinks (e.g., `file`, `stdout`, `elastic`) are active. Retention tuning flows through `Diagnostics:RollingFiles:MaxMB`/`MaxDays`, and the same values can be supplied via `YAS_DIAG_*` environment variables for container deployments.【F:Diagnostics/DiagnosticsConstants.cs†L12-L55】 The feed reads from the rolling file sink managed by `FileLogService`, so ensure the service's base directory (defaulting to the platform app-data path) is writable on operator workstations.【F:YasGMP.AppCore/Services/Logging/FileLogService.cs†L18-L78】
+
 ## Key dependencies
 
 `YasGMP.Wpf` references the shared `YasGMP.AppCore` library, which exposes the `AddYasGmpCoreServices` extension and the `YasGMP.Services` namespace consumed across the MAUI and WPF clients. The project file also pins the following packages critical to the shell experience.【F:YasGMP.Wpf/YasGMP.Wpf.csproj†L9-L28】
