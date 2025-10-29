@@ -1,17 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using YasGMP.AppCore.DependencyInjection;
+using YasGMP.Diagnostics;
+using YasGMP.Diagnostics.LogSinks;
+using YasGMP.Services;
 using YasGMP.Models;
 using YasGMP.Models.Enums;
-using YasGMP.Services;
 using YasGMP.Services.Interfaces;
 using YasGMP.ViewModels;
 using YasGMP.Wpf.Services;
 using YasGMP.Wpf.ViewModels.Modules;
+using YasGMP.Wpf.Configuration;
 
 namespace YasGMP.Wpf.Tests;
 
@@ -153,6 +158,110 @@ public class ServiceRegistrationTests
         var module = provider.GetRequiredService<RiskAssessmentsModuleViewModel>();
         Assert.NotNull(module);
         Assert.Same(shared, module.RiskAssessments);
+    }
+
+    [Fact]
+    public void WpfAppRegistrations_ConfigureDatabaseServiceDiagnostics()
+    {
+        DatabaseService.GlobalDiagnosticContext = null;
+        DatabaseService.GlobalTrace = null;
+        DatabaseService.GlobalConfiguration = null;
+
+        var settings = new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:MySqlDb"] = "Server=127.0.0.1;Database=unit_test;Uid=test;Pwd=test;",
+            [DiagnosticsConstants.KeySinks] = "stdout",
+            ["Diagnostics:DbShadow:Enabled"] = "false",
+            ["Diagnostics:DbShadow:Database"] = "unit_test_shadow"
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(settings)
+            .Build();
+
+        using var provider = BuildWpfServiceProvider(configuration);
+        var database = provider.GetRequiredService<DatabaseService>();
+
+        Assert.NotNull(database);
+        Assert.NotNull(DatabaseService.GlobalDiagnosticContext);
+        Assert.NotNull(DatabaseService.GlobalTrace);
+        Assert.Same(configuration, DatabaseService.GlobalConfiguration);
+
+        var shadowField = typeof(DatabaseService).GetField("_shadow", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(shadowField);
+        Assert.NotNull(shadowField!.GetValue(database));
+    }
+
+    private static ServiceProvider BuildWpfServiceProvider(IConfiguration configuration)
+    {
+        var services = new ServiceCollection();
+
+        services.AddSingleton(configuration);
+        services.AddSingleton(new DiagnosticContext(configuration));
+        services.AddSingleton<IEnumerable<ILogSink>>(_ => new ILogSink[] { new StdoutLogSink() });
+        services.AddSingleton<ILogWriter>(sp => new LogWriter(
+            DiagnosticsConstants.QueueCapacity,
+            DiagnosticsConstants.QueueDrainBatch,
+            DiagnosticsConstants.QueueDrainIntervalMs,
+            sp.GetRequiredService<IEnumerable<ILogSink>>()));
+        services.AddSingleton<ITrace>(sp => new TraceManager(
+            sp.GetRequiredService<DiagnosticContext>(),
+            sp.GetRequiredService<ILogWriter>()));
+        services.AddSingleton<IProfiler>(sp => new Profiler(sp.GetRequiredService<ITrace>()));
+        services.AddSingleton(sp =>
+        {
+            var crash = new CrashHandler(sp.GetRequiredService<ITrace>(), sp.GetRequiredService<DiagnosticContext>());
+            crash.RegisterGlobal();
+            return crash;
+        });
+        services.AddSingleton(sp => new DiagnosticsHub(
+            sp.GetRequiredService<DiagnosticContext>(),
+            sp.GetRequiredService<IEnumerable<ILogSink>>()));
+
+        var connectionString = configuration.GetConnectionString("MySqlDb")
+                               ?? configuration["ConnectionStrings:MySqlDb"]
+                               ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            connectionString = "Server=127.0.0.1;Port=3306;Database=YASGMP;User ID=yasgmp_app;Password=Jasenka1;Character Set=utf8mb4;Connection Timeout=5;Default Command Timeout=30;Pooling=true;Minimum Pool Size=0;Maximum Pool Size=50;";
+        }
+
+        var databaseOptions = DatabaseOptions.FromConnectionString(connectionString);
+
+        services.AddYasGmpCoreServices(core =>
+        {
+            core.UseConnectionString(connectionString);
+            core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn), (sp, db, _) =>
+            {
+                var ctx = sp.GetService<DiagnosticContext>();
+                var trace = sp.GetService<ITrace>();
+                var cfg = sp.GetService<IConfiguration>();
+
+                if (ctx != null && trace != null)
+                {
+                    db.SetDiagnostics(ctx, trace);
+                }
+
+                DatabaseService.GlobalDiagnosticContext = ctx;
+                DatabaseService.GlobalTrace = trace;
+
+                if (cfg != null)
+                {
+                    DatabaseService.GlobalConfiguration = cfg;
+                }
+            });
+
+            var svc = core.Services;
+            svc.AddSingleton(databaseOptions);
+            svc.AddSingleton(TimeProvider.System);
+            svc.AddSingleton<AuditService>();
+            svc.AddSingleton<ExportService>();
+            svc.AddSingleton<ICflDialogService, StubCflDialogService>();
+            svc.AddSingleton<IShellInteractionService, StubShellInteractionService>();
+            svc.AddSingleton<IModuleNavigationService, StubModuleNavigationService>();
+        });
+
+        return services.BuildServiceProvider(validateScopes: true);
     }
 
     private sealed class StubCflDialogService : ICflDialogService

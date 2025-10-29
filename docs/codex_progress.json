@@ -106,7 +106,8 @@
       "2026-04-30: docs/WPF_MAPPING.md updated to mark Parts/Warehouse stock dialogs, alerts, and zone filters as parity features consuming InventoryTransactionServiceAdapter + WarehouseCrudServiceAdapter.",
       "2026-05-06: ExternalServicersModuleViewModel now refreshes contractor oversight metrics on initial load, selection changes, and the refresh command using DatabaseService.GetAllContractorInterventionsAsync with dispatcher marshalling and StatusMessage error surfacing; dotnet restore/build/test remain blocked with 'command not found' on this Linux host.",
       "2026-05-15: Implemented DeviationCrudServiceAdapter to bridge WPF shell persistence with AppCore DeviationService, normalizing statuses, applying signature/audit context, and returning CrudSaveResult metadata; dotnet restore/build/test remain blocked with 'command not found: dotnet' until Windows tooling is available.",
-      "2026-07-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows10.0.19041.0, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried while wiring Security inspector command wrappers; each command still fails with 'command not found: dotnet' because the CLI is unavailable in this container."
+      "2026-07-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows10.0.19041.0, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried while wiring Security inspector command wrappers; each command still fails with 'command not found: dotnet' because the CLI is unavailable in this container.",
+      "2026-08-17: dotnet restore yasgmp.sln retried while adding WPF service registration regression coverage; command still exits with 'command not found: dotnet' in this container."
     ],
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",
@@ -182,8 +183,9 @@
         "2026-07-29: DiagnosticsModuleViewModel now subscribes to DiagnosticsFeedService, maintains telemetry/log/health observable collections with UI-dispatcher updates, localizes new diagnostics labels across ShellStrings (neutral/EN/HR), and seeds design-time data when the feed is unavailable; dotnet restore/build/test remain blocked with 'command not found: dotnet'.",
         "2026-07-30: DiagnosticsModuleViewModelTests now simulate dispatcher-dispatched telemetry/log/health callbacks, assert module records refresh after the queued UI action runs, and verify the service-unavailable fallback seeds sample data; dotnet restore/build/test still fail with 'command not found: dotnet' pending Windows tooling.",
         "2026-07-31: Documentation refreshed so docs/WPF_MAPPING.md and README_WPF_SHELL.md detail the live diagnostics dashboard, log tail, health cards, and telemetry configuration surfaced by DiagnosticsFeedService; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
-        "2025-10-29: DiagnosticsModuleView replaces the placeholder DataGrid with status cards and telemetry/log/health tabs bound to live collections, adds an auto-scroll behavior plus virtualization-friendly templates, and dotnet restore/build/test still report 'command not found: dotnet' in this container."
-        ,"2026-08-16: WPF App.xaml now passes a UseDatabaseService configure callback that resolves DiagnosticContext/ITrace/IConfiguration so DatabaseService.SetDiagnostics and global telemetry configuration mirror the MAUI host; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container."
+        "2025-10-29: DiagnosticsModuleView replaces the placeholder DataGrid with status cards and telemetry/log/health tabs bound to live collections, adds an auto-scroll behavior plus virtualization-friendly templates, and dotnet restore/build/test still report 'command not found: dotnet' in this container.",
+        "2026-08-16: WPF App.xaml now passes a UseDatabaseService configure callback that resolves DiagnosticContext/ITrace/IConfiguration so DatabaseService.SetDiagnostics and global telemetry configuration mirror the MAUI host; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container.",
+        "2026-08-17: WPF ServiceRegistrationTests now bootstrap the App.xaml registrations to resolve DatabaseService, assert diagnostics globals, and verify the private _shadow field so SetDiagnostics stays covered; dotnet restore/build/test remain blocked with 'command not found: dotnet'."
       ]
     },
     {
@@ -228,7 +230,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: align wpf database service diagnostics",
+  "lastCommitSummary": "chore: cover wpf database diagnostics wiring",
   "notes": [
     "2026-07-29: DiagnosticsModuleViewModel now consumes DiagnosticsFeedService, publishes telemetry/log/health observable collections with localized ShellStrings, retains a design-time fallback, and dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
     "2026-06-21: Documented QualificationsModuleView/QualificationsModuleViewModel parity with the MAUI QualificationViewModel and recorded dotnet restore/build/test attempts for solution, WPF, MAUI, YasGMP.Tests, and smoke harness\u2014each still exits with 'command not found: dotnet' in this container.",
