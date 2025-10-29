@@ -32,10 +32,11 @@ public class UserEditDialogViewModelImpersonationTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
         var viewModel = new UserEditDialogViewModel(
             userService,
             workflow,
-            new TestElectronicSignatureDialogService(),
+            signatureDialog,
             auth,
             shell,
             localization);
@@ -71,6 +72,15 @@ public class UserEditDialogViewModelImpersonationTests
         var beginContext = Assert.Single(workflow.BeginContexts);
         Assert.Equal("Audit reason", beginContext.Reason);
         Assert.Equal("Notes", beginContext.Notes);
+        Assert.True(beginContext.SignatureId.HasValue);
+        Assert.Equal("test-signature", beginContext.SignatureHash);
+        Assert.Equal("password", beginContext.SignatureMethod);
+        Assert.Equal("valid", beginContext.SignatureStatus);
+        var activeContext = Assert.NotNull(viewModel.ActiveImpersonationContext);
+        Assert.Equal(beginContext.SignatureId, activeContext.SignatureId);
+        Assert.Equal(beginContext.SignatureHash, activeContext.SignatureHash);
+        Assert.Equal(beginContext.SignatureMethod, activeContext.SignatureMethod);
+        Assert.Equal(beginContext.SignatureStatus, activeContext.SignatureStatus);
     }
 
     [Fact]
@@ -93,6 +103,58 @@ public class UserEditDialogViewModelImpersonationTests
         await viewModel.BeginImpersonationCommand.ExecuteAsync(null);
 
         Assert.Contains("Impersonation reason is required.", viewModel.ValidationMessages);
+        Assert.False(viewModel.IsImpersonating);
+        Assert.Empty(workflow.BeginContexts);
+    }
+
+    [Fact]
+    public async Task BeginImpersonationAsync_WhenSignatureCancelledAddsValidationMessage()
+    {
+        var userService = new FakeUserCrudService();
+        var workflow = new RecordingImpersonationWorkflow
+        {
+            Candidates =
+            {
+                new User { Id = 61, Username = "delegate", FullName = "Delegate" }
+            }
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCancelled();
+        var (viewModel, _) = CreateViewModel(userService, workflow, signatureDialog);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+        viewModel.SelectedImpersonationTarget = viewModel.ImpersonationTargets.First();
+        viewModel.ImpersonationReason = "Audit";
+
+        await viewModel.BeginImpersonationCommand.ExecuteAsync(null);
+
+        Assert.Equal("Impersonation failed: Electronic signature cancelled.", viewModel.StatusMessage);
+        Assert.Contains("Impersonation failed: Electronic signature cancelled.", viewModel.ValidationMessages);
+        Assert.False(viewModel.IsImpersonating);
+        Assert.Empty(workflow.BeginContexts);
+    }
+
+    [Fact]
+    public async Task BeginImpersonationAsync_WhenSignatureCaptureFailsAddsValidationMessage()
+    {
+        var userService = new FakeUserCrudService();
+        var workflow = new RecordingImpersonationWorkflow
+        {
+            Candidates =
+            {
+                new User { Id = 62, Username = "delegate", FullName = "Delegate" }
+            }
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCaptureException(new InvalidOperationException("Offline"));
+        var (viewModel, _) = CreateViewModel(userService, workflow, signatureDialog);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+        viewModel.SelectedImpersonationTarget = viewModel.ImpersonationTargets.First();
+        viewModel.ImpersonationReason = "Audit";
+
+        await viewModel.BeginImpersonationCommand.ExecuteAsync(null);
+
+        Assert.Equal("Impersonation failed: Offline", viewModel.StatusMessage);
+        Assert.Contains("Impersonation failed: Offline", viewModel.ValidationMessages);
         Assert.False(viewModel.IsImpersonating);
         Assert.Empty(workflow.BeginContexts);
     }
@@ -133,7 +195,19 @@ public class UserEditDialogViewModelImpersonationTests
                 new User { Id = 8, Username = "delegate", FullName = "Delegate" }
             }
         };
-        var (viewModel, shell) = CreateViewModel(userService, workflow);
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        signatureDialog.QueueResult(new ElectronicSignatureDialogResult(
+            signatureDialog.DefaultResult.Password,
+            signatureDialog.DefaultResult.ReasonCode,
+            signatureDialog.DefaultResult.ReasonDetail,
+            signatureDialog.DefaultResult.ReasonDisplay,
+            new DigitalSignature
+            {
+                SignatureHash = "end-signature",
+                Method = "password",
+                Status = "valid"
+            }));
+        var (viewModel, shell) = CreateViewModel(userService, workflow, signatureDialog);
         workflow.BeginResult = new ImpersonationContext(
             42,
             8,
@@ -163,6 +237,68 @@ public class UserEditDialogViewModelImpersonationTests
         Assert.Contains("Impersonation session ended.", shell.StatusUpdates);
         var auditContext = Assert.Single(workflow.EndContexts);
         Assert.Equal("Audit", auditContext.Reason);
+        Assert.True(auditContext.SignatureId.HasValue);
+        Assert.Equal("end-signature", auditContext.SignatureHash);
+        Assert.Equal("password", auditContext.SignatureMethod);
+        Assert.Equal("valid", auditContext.SignatureStatus);
+    }
+
+    [Fact]
+    public async Task EndImpersonationAsync_WhenSignatureCancelledMaintainsActiveContext()
+    {
+        var userService = new FakeUserCrudService();
+        var workflow = new RecordingImpersonationWorkflow
+        {
+            Candidates =
+            {
+                new User { Id = 63, Username = "delegate", FullName = "Delegate" }
+            }
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        signatureDialog.QueueCancellation();
+        var (viewModel, _) = CreateViewModel(userService, workflow, signatureDialog);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+        viewModel.SelectedImpersonationTarget = viewModel.ImpersonationTargets.First();
+        viewModel.ImpersonationReason = "Audit";
+        await viewModel.BeginImpersonationCommand.ExecuteAsync(null);
+
+        await viewModel.EndImpersonationCommand.ExecuteAsync(null);
+
+        Assert.Equal("Impersonation failed: Electronic signature cancelled.", viewModel.StatusMessage);
+        Assert.Contains("Impersonation failed: Electronic signature cancelled.", viewModel.ValidationMessages);
+        Assert.True(viewModel.IsImpersonating);
+        Assert.NotNull(viewModel.ActiveImpersonationContext);
+        Assert.Empty(workflow.EndContexts);
+    }
+
+    [Fact]
+    public async Task EndImpersonationAsync_WhenSignatureCaptureFailsMaintainsActiveContext()
+    {
+        var userService = new FakeUserCrudService();
+        var workflow = new RecordingImpersonationWorkflow
+        {
+            Candidates =
+            {
+                new User { Id = 64, Username = "delegate", FullName = "Delegate" }
+            }
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        signatureDialog.QueueCaptureException(new InvalidOperationException("Offline"));
+        var (viewModel, _) = CreateViewModel(userService, workflow, signatureDialog);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+        viewModel.SelectedImpersonationTarget = viewModel.ImpersonationTargets.First();
+        viewModel.ImpersonationReason = "Audit";
+        await viewModel.BeginImpersonationCommand.ExecuteAsync(null);
+
+        await viewModel.EndImpersonationCommand.ExecuteAsync(null);
+
+        Assert.Equal("Impersonation failed: Offline", viewModel.StatusMessage);
+        Assert.Contains("Impersonation failed: Offline", viewModel.ValidationMessages);
+        Assert.True(viewModel.IsImpersonating);
+        Assert.NotNull(viewModel.ActiveImpersonationContext);
+        Assert.Empty(workflow.EndContexts);
     }
 
     [Fact]
@@ -208,7 +344,8 @@ public class UserEditDialogViewModelImpersonationTests
 
     private static (UserEditDialogViewModel ViewModel, TestShellInteractionService Shell) CreateViewModel(
         FakeUserCrudService userService,
-        RecordingImpersonationWorkflow workflow)
+        RecordingImpersonationWorkflow workflow,
+        TestElectronicSignatureDialogService? signatureDialog = null)
     {
         var shell = new TestShellInteractionService();
         var localization = CreateLocalization();
@@ -219,10 +356,11 @@ public class UserEditDialogViewModelImpersonationTests
             CurrentIpAddress = "127.0.0.1"
         };
 
+        var dialog = signatureDialog ?? TestElectronicSignatureDialogService.CreateConfirmed();
         var viewModel = new UserEditDialogViewModel(
             userService,
             workflow,
-            new TestElectronicSignatureDialogService(),
+            dialog,
             auth,
             shell,
             localization);
@@ -287,7 +425,12 @@ public class UserEditDialogViewModelImpersonationTests
                 Notes = context.Notes,
                 Ip = context.Ip,
                 DeviceInfo = context.DeviceInfo,
-                SessionId = context.SessionId
+                SessionId = context.SessionId,
+                SignatureId = context.SignatureId,
+                SignatureHash = context.SignatureHash,
+                SignatureMethod = context.SignatureMethod,
+                SignatureStatus = context.SignatureStatus,
+                SignatureNote = context.SignatureNote
             };
             BeginResult = result;
             ActiveContext = result;

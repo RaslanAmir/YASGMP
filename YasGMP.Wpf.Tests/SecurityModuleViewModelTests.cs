@@ -31,7 +31,7 @@ public class SecurityModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -132,7 +132,7 @@ public class SecurityModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -245,7 +245,18 @@ public class SecurityModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        signatureDialog.QueueResult(new ElectronicSignatureDialogResult(
+            signatureDialog.DefaultResult.Password,
+            signatureDialog.DefaultResult.ReasonCode,
+            signatureDialog.DefaultResult.ReasonDetail,
+            signatureDialog.DefaultResult.ReasonDisplay,
+            new DigitalSignature
+            {
+                SignatureHash = "end-signature",
+                Method = "password",
+                Status = "valid"
+            }));
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -303,8 +314,107 @@ public class SecurityModuleViewModelTests
         Assert.True(viewModel.Dialog.IsImpersonating);
         Assert.NotNull(viewModel.Dialog.ActiveImpersonationContext);
         Assert.Equal("Audit review", viewModel.Dialog.ActiveImpersonationContext?.Reason);
-        Assert.Equal("Audit review", userService.LastBeginImpersonationRequestContext?.Reason);
-        Assert.Equal(11, userService.LastBeginImpersonationContext?.TargetUserId);
+        var requestContext = Assert.NotNull(userService.LastBeginImpersonationRequestContext);
+        Assert.Equal("Audit review", requestContext.Reason);
+        Assert.True(requestContext.SignatureId.HasValue);
+        Assert.Equal("test-signature", requestContext.SignatureHash);
+        Assert.Equal("password", requestContext.SignatureMethod);
+        Assert.Equal("valid", requestContext.SignatureStatus);
+        var beginContext = Assert.NotNull(userService.LastBeginImpersonationContext);
+        Assert.Equal(11, beginContext.TargetUserId);
+        Assert.Equal(requestContext.SignatureId, beginContext.SignatureId);
+        Assert.Equal(requestContext.SignatureHash, beginContext.SignatureHash);
+        Assert.Equal(requestContext.SignatureMethod, beginContext.SignatureMethod);
+        Assert.Equal(requestContext.SignatureStatus, beginContext.SignatureStatus);
+    }
+
+    [Fact]
+    public async Task BeginImpersonationCommand_WhenSignatureCancelledSurfacesValidation()
+    {
+        var database = new DatabaseService();
+        var audit = new AuditService(database);
+        var userService = new FakeUserCrudService();
+        userService.SeedUser(new User
+        {
+            Id = 20,
+            Username = "primary",
+            FullName = "Primary Admin",
+            Email = "primary@example.com",
+            Role = "Administrator",
+            Active = true
+        });
+        userService.SeedUser(new User
+        {
+            Id = 21,
+            Username = "delegate",
+            FullName = "Delegate User",
+            Email = "delegate@example.com",
+            Role = "Quality",
+            Active = true
+        });
+
+        var auth = new TestAuthContext
+        {
+            CurrentUser = new User { Id = 99, Username = "admin" },
+            CurrentDeviceInfo = "UnitTest",
+            CurrentIpAddress = "127.0.0.1"
+        };
+        var signatureDialog = TestElectronicSignatureDialogService.CreateCancelled();
+        var dialog = new TestCflDialogService();
+        var shell = new TestShellInteractionService();
+        var navigation = new TestModuleNavigationService();
+        var localization = new FakeLocalizationService(
+            new Dictionary<string, IDictionary<string, string>>
+            {
+                ["neutral"] = new Dictionary<string, string>
+                {
+                    ["Module.Title.Security"] = "Security",
+                    ["Dialog.UserEdit.Status.Saved"] = "User saved successfully.",
+                    ["Dialog.UserEdit.Status.ImpersonationRequested"] = "Impersonation requested.",
+                    ["Dialog.UserEdit.Status.ImpersonationRequestedWithTarget"] = "Impersonation requested for #{0}.",
+                    ["Dialog.UserEdit.Status.ImpersonationEnded"] = "Impersonation session ended.",
+                    ["Dialog.UserEdit.Status.ImpersonationFailed"] = "Impersonation failed: {0}",
+                    ["Dialog.UserEdit.Status.EndImpersonationFailed"] = "Unable to end impersonation: {0}",
+                    ["Dialog.UserEdit.Validation.ImpersonationTargetRequired"] = "Impersonation target required.",
+                    ["Dialog.UserEdit.Validation.ImpersonationReasonRequired"] = "Impersonation reason is required."
+                }
+            },
+            "neutral");
+
+        var impersonationWorkflow = new SecurityImpersonationWorkflowService(userService);
+        var dialogService = new RecordingDialogService();
+
+        Func<UserEditDialogViewModel> userDialogFactory = () =>
+            new UserEditDialogViewModel(userService, impersonationWorkflow, signatureDialog, auth, shell, localization);
+
+        var viewModel = new SecurityModuleViewModel(
+            database,
+            audit,
+            userService,
+            dialog,
+            shell,
+            navigation,
+            localization,
+            dialogService,
+            userDialogFactory);
+
+        await viewModel.InitializeAsync(null).ConfigureAwait(false);
+        await viewModel.Dialog.InitializeAsync(null).ConfigureAwait(false);
+
+        var target = viewModel.Dialog.ImpersonationTargets.First(t => t.Id == 21);
+        viewModel.Dialog.SelectedImpersonationTarget = target;
+        viewModel.Dialog.ImpersonationReason = "Audit review";
+        viewModel.Dialog.ImpersonationNotes = "Verify permissions";
+
+        viewModel.BeginImpersonationCommand.Execute(null);
+        await WaitForAsync(() => viewModel.StatusMessage is not null).ConfigureAwait(false);
+
+        Assert.Equal("Impersonation failed: Electronic signature cancelled.", viewModel.StatusMessage);
+        Assert.Contains("Impersonation failed: Electronic signature cancelled.", viewModel.Dialog.ValidationMessages);
+        Assert.False(viewModel.Dialog.IsImpersonating);
+        Assert.Empty(userService.BeginImpersonationRequests);
+        Assert.Null(userService.LastBeginImpersonationContext);
+        Assert.Null(userService.LastBeginImpersonationRequestContext);
     }
 
     [Fact]
@@ -336,7 +446,18 @@ public class SecurityModuleViewModelTests
             CurrentDeviceInfo = "UnitTest",
             CurrentIpAddress = "127.0.0.1"
         };
-        var signatureDialog = new TestElectronicSignatureDialogService();
+        var signatureDialog = TestElectronicSignatureDialogService.CreateConfirmed();
+        signatureDialog.QueueResult(new ElectronicSignatureDialogResult(
+            signatureDialog.DefaultResult.Password,
+            signatureDialog.DefaultResult.ReasonCode,
+            signatureDialog.DefaultResult.ReasonDetail,
+            signatureDialog.DefaultResult.ReasonDisplay,
+            new DigitalSignature
+            {
+                SignatureHash = "end-signature",
+                Method = "password",
+                Status = "valid"
+            }));
         var dialog = new TestCflDialogService();
         var shell = new TestShellInteractionService();
         var navigation = new TestModuleNavigationService();
@@ -560,9 +681,14 @@ public class SecurityModuleViewModelTests
         Assert.Contains("Impersonation session ended.", shell.StatusUpdates);
         Assert.False(viewModel.Dialog.IsImpersonating);
         Assert.Null(viewModel.Dialog.ActiveImpersonationContext);
-        Assert.NotNull(userService.LastEndImpersonationContext);
-        Assert.NotNull(userService.LastEndImpersonationAuditContext);
-        Assert.Equal("Audit", userService.LastEndImpersonationAuditContext?.Reason);
+        var endContext = Assert.NotNull(userService.LastEndImpersonationContext);
+        var auditContext = Assert.NotNull(userService.LastEndImpersonationAuditContext);
+        Assert.Equal("Audit", auditContext.Reason);
+        Assert.True(auditContext.SignatureId.HasValue);
+        Assert.Equal("end-signature", auditContext.SignatureHash);
+        Assert.Equal("password", auditContext.SignatureMethod);
+        Assert.Equal("valid", auditContext.SignatureStatus);
+        Assert.Equal(auditContext.SignatureId, endContext.SignatureId);
     }
 
     private static async Task WaitForAsync(Func<bool> condition, int timeoutMilliseconds = 1000, int pollMilliseconds = 10)

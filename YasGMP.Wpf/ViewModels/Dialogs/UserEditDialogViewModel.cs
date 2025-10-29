@@ -550,14 +550,63 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         RequestClose?.Invoke(this, false);
     }
 
-    private UserCrudContext CreateImpersonationContext(string? reason, string? notes)
-        => UserCrudContext.Create(
-            _authContext.CurrentUser?.Id ?? 0,
-            _authContext.CurrentIpAddress,
-            _authContext.CurrentDeviceInfo,
-            _authContext.CurrentSessionId,
-            reason,
-            notes);
+    private UserCrudContext CreateImpersonationContext(
+        string? reason,
+        string? notes,
+        ElectronicSignatureDialogResult? signatureResult = null)
+    {
+        var userId = _authContext.CurrentUser?.Id ?? 0;
+        var ip = _authContext.CurrentIpAddress;
+        var device = _authContext.CurrentDeviceInfo;
+        var sessionId = _authContext.CurrentSessionId;
+
+        return signatureResult is null
+            ? UserCrudContext.Create(userId, ip, device, sessionId, reason, notes)
+            : UserCrudContext.Create(userId, ip, device, sessionId, signatureResult, reason, notes);
+    }
+
+    private async Task<ElectronicSignatureDialogResult?> CaptureImpersonationSignatureAsync(int targetUserId)
+    {
+        try
+        {
+            var signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("user_impersonations", targetUserId))
+                .ConfigureAwait(false);
+
+            if (signatureResult is null)
+            {
+                SetImpersonationSignatureFailure("Electronic signature cancelled.");
+                return null;
+            }
+
+            if (signatureResult.Signature is null)
+            {
+                SetImpersonationSignatureFailure("Electronic signature was not captured.");
+                return null;
+            }
+
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
+
+            return signatureResult;
+        }
+        catch (Exception ex)
+        {
+            SetImpersonationSignatureFailure(ex.Message);
+            return null;
+        }
+    }
+
+    private void SetImpersonationSignatureFailure(string detail)
+    {
+        var message = _localization.GetString("Dialog.UserEdit.Status.ImpersonationFailed", detail);
+        StatusMessage = message;
+        if (!ValidationMessages.Contains(message))
+        {
+            ValidationMessages.Add(message);
+        }
+    }
 
     private async Task BeginImpersonationAsync()
     {
@@ -583,7 +632,13 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         StatusMessage = null;
         var reason = FormatImpersonationReason();
         var notes = FormatImpersonationNotes();
-        var context = CreateImpersonationContext(reason, notes);
+        var signatureResult = await CaptureImpersonationSignatureAsync(SelectedImpersonationTarget.Id).ConfigureAwait(false);
+        if (signatureResult is null)
+        {
+            return;
+        }
+
+        var context = CreateImpersonationContext(reason, notes, signatureResult);
         _pendingImpersonationContext = context;
         try
         {
@@ -650,7 +705,16 @@ public sealed partial class UserEditDialogViewModel : ObservableObject
         StatusMessage = null;
         var reason = _activeImpersonationContext?.Reason ?? FormatImpersonationReason();
         var notes = _activeImpersonationContext?.Notes ?? FormatImpersonationNotes();
-        var auditContext = CreateImpersonationContext(reason, notes);
+        var targetUserId = _activeImpersonationContext?.TargetUserId
+            ?? SelectedImpersonationTarget?.Id
+            ?? 0;
+        var signatureResult = await CaptureImpersonationSignatureAsync(targetUserId).ConfigureAwait(false);
+        if (signatureResult is null)
+        {
+            return;
+        }
+
+        var auditContext = CreateImpersonationContext(reason, notes, signatureResult);
         _pendingImpersonationAuditContext = auditContext;
         try
         {
