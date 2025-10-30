@@ -4714,4 +4714,7 @@
   <data name="Cockpit.Status.LoadFailedWithError" xml:space="preserve">
     <value>Unable to load cockpit data: {0}</value>
   </data>
+  <data name="Module.Admin.Settings.RecordList.Header" xml:space="preserve">
+    <value>Settings</value>
+  </data>
 </root>

@@ -5146,4 +5146,7 @@
   <data name="Dialog.UserEdit.Toggle.Impersonation.Label" xml:space="preserve">
     <value>Impersoniraj odabranog korisnika</value>
   </data>
+  <data name="Module.Admin.Settings.RecordList.Header" xml:space="preserve">
+    <value>Postavke</value>
+  </data>
 </root>
