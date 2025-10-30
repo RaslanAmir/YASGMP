@@ -78,22 +78,15 @@ namespace YasGMP.Wpf
                         core.UseConnectionString(connectionString);
                         core.UseDatabaseService<DatabaseService>((sp, conn) => new DatabaseService(conn), (sp, db, _) =>
                         {
-                            var ctx = sp.GetService<DiagnosticContext>();
-                            var trace = sp.GetService<ITrace>();
-                            var configuration = sp.GetService<IConfiguration>();
+                            var ctx = sp.GetRequiredService<DiagnosticContext>();
+                            var trace = sp.GetRequiredService<ITrace>();
+                            var configuration = sp.GetRequiredService<IConfiguration>();
 
-                            if (ctx != null && trace != null)
-                            {
-                                db.SetDiagnostics(ctx, trace);
-                            }
+                            db.SetDiagnostics(ctx, trace);
 
                             DatabaseService.GlobalDiagnosticContext = ctx;
                             DatabaseService.GlobalTrace = trace;
-
-                            if (configuration != null)
-                            {
-                                DatabaseService.GlobalConfiguration = configuration;
-                            }
+                            DatabaseService.GlobalConfiguration = configuration;
 
                             DatabaseTestHookBootstrapper.Configure(db, sp);
                         });
