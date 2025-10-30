@@ -4459,6 +4459,18 @@
   <data name="Module.Admin.Settings.Form.Category.AutomationId" xml:space="preserve">
     <value>Module.Admin.Settings.Form.Category</value>
   </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.Label" xml:space="preserve">
+    <value>Označi za brisanje</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.ToolTip" xml:space="preserve">
+    <value>Označite ovu postavku za brisanje tijekom sljedećeg spremanja.</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.AutomationName" xml:space="preserve">
+    <value>Oznaka za brisanje postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.MarkedForDeletion</value>
+  </data>
   <data name="Module.Admin.Category.Label" xml:space="preserve">
     <value>Kategorija</value>
   </data>
