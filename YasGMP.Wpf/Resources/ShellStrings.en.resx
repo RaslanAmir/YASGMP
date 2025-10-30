@@ -4456,6 +4456,18 @@
   <data name="Module.Admin.Settings.Form.Category.AutomationId" xml:space="preserve">
     <value>Module.Admin.Settings.Form.Category</value>
   </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.Label" xml:space="preserve">
+    <value>Marked for deletion</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.ToolTip" xml:space="preserve">
+    <value>Mark this setting for deletion during the next save.</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.AutomationName" xml:space="preserve">
+    <value>Marked for deletion flag</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.MarkedForDeletion.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.MarkedForDeletion</value>
+  </data>
   <data name="Module.Admin.Category.Label" xml:space="preserve">
     <value>Category</value>
   </data>
