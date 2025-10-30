@@ -193,7 +193,8 @@
         "2025-10-29: DiagnosticsModuleView replaces the placeholder DataGrid with status cards and telemetry/log/health tabs bound to live collections, adds an auto-scroll behavior plus virtualization-friendly templates, and dotnet restore/build/test still report 'command not found: dotnet' in this container.",
         "2026-08-16: WPF App.xaml now passes a UseDatabaseService configure callback that resolves DiagnosticContext/ITrace/IConfiguration so DatabaseService.SetDiagnostics and global telemetry configuration mirror the MAUI host; dotnet restore/build/test continue to fail with 'command not found: dotnet' in this container.",
         "2026-08-17: WPF ServiceRegistrationTests now bootstrap the App.xaml registrations to resolve DatabaseService, assert diagnostics globals, and verify the private _shadow field so SetDiagnostics stays covered; dotnet restore/build/test remain blocked with 'command not found: dotnet'.",
-        "2026-08-18: docs/WPF_MAPPING.md now records the WPF host wiring the shared DatabaseService diagnostics/shadow replication pipeline (resolving DiagnosticContext/ITrace and assigning global properties) so parity with MAUI is documented; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container."
+        "2026-08-18: docs/WPF_MAPPING.md now records the WPF host wiring the shared DatabaseService diagnostics/shadow replication pipeline (resolving DiagnosticContext/ITrace and assigning global properties) so parity with MAUI is documented; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
+        "2026-09-05: WPF App.xaml now resolves DiagnosticContext/ITrace/IConfiguration via GetRequiredService, always calls DatabaseService.SetDiagnostics, updates the global property bag, extends ServiceRegistrationTests to assert the configured shadow replicator, and marks the shared database TODO complete in docs/WPF_MAPPING.md; dotnet restore/build/test still fail with 'command not found: dotnet' inside this container."
       ]
     },
     {
@@ -238,7 +239,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "feat: hydrate cockpit dashboard from database",
+  "lastCommitSummary": "fix: align WPF database diagnostics callback",
   "notes": [
     "2026-08-20: Added scripts/wpf-run-with-testhooks.ps1 plus App.xaml bootstrap glue so DatabaseService overrides hydrate from JSON fixtures when YASGMP_WPF_TESTHOOKS=1, allowing WPF runs and smoke harnesses to execute without MySQL; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-07-29: DiagnosticsModuleViewModel now consumes DiagnosticsFeedService, publishes telemetry/log/health observable collections with localized ShellStrings, retains a design-time fallback, and dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",
@@ -571,6 +572,7 @@
     "2026-08-22: CockpitViewModel now drives async refreshes for KPI widgets and dashboard notices with cancellation/error handling, CockpitView binds to the new metric/notice view-models, and docs/codex_plan.md codifies the status messaging; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-08-23: DashboardModuleViewModel now loads KPI widgets and dashboard chart series with inspector/status summaries, DashboardModuleView renders localized KPI tiles and chart cards, and dotnet restore yasgmp.sln / dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 / dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows still fail with 'command not found: dotnet' in this container.",
     "2026-08-24: Added a dashboard DatabaseService test double that seeds KPI widgets/charts plus cockpit/dashboard regression tests for success/empty/failure paths; dotnet restore yasgmp.sln and dotnet build yasgmp.sln still fail with 'command not found: dotnet' inside this container.",
-    "2026-08-30: docs/WPF_MAPPING.md and README_WPF_SHELL.md now describe the cockpit/dashboard KPI flow using DatabaseService.DashboardExtensions, note the session/localization hooks, and record that dotnet restore/build commands continue to fail with 'command not found: dotnet' pending a Windows toolchain."
+    "2026-08-30: docs/WPF_MAPPING.md and README_WPF_SHELL.md now describe the cockpit/dashboard KPI flow using DatabaseService.DashboardExtensions, note the session/localization hooks, and record that dotnet restore/build commands continue to fail with 'command not found: dotnet' pending a Windows toolchain.",
+    "2026-09-05: WPF DatabaseService configure callback now mirrors MAUI by requiring DiagnosticContext/ITrace/IConfiguration, forcing SetDiagnostics to run, and resetting docs/tests accordingly; dotnet restore/build/test still exit with 'command not found: dotnet' so smoke automation remains Windows-host only."
   ]
 }

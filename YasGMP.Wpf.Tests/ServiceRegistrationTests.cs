@@ -309,22 +309,15 @@ public class ServiceRegistrationTests
             core.UseConnectionString(connectionString);
             core.UseDatabaseService<DatabaseService>((_, conn) => new DatabaseService(conn), (sp, db, _) =>
             {
-                var ctx = sp.GetService<DiagnosticContext>();
-                var trace = sp.GetService<ITrace>();
-                var cfg = sp.GetService<IConfiguration>();
+                var ctx = sp.GetRequiredService<DiagnosticContext>();
+                var trace = sp.GetRequiredService<ITrace>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
 
-                if (ctx != null && trace != null)
-                {
-                    db.SetDiagnostics(ctx, trace);
-                }
+                db.SetDiagnostics(ctx, trace);
 
                 DatabaseService.GlobalDiagnosticContext = ctx;
                 DatabaseService.GlobalTrace = trace;
-
-                if (cfg != null)
-                {
-                    DatabaseService.GlobalConfiguration = cfg;
-                }
+                DatabaseService.GlobalConfiguration = cfg;
             });
 
             var svc = core.Services;
