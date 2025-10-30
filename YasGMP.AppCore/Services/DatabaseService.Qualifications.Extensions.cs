@@ -79,38 +79,54 @@ ORDER BY cq.qualification_date DESC, cq.id DESC";
 
         public static async Task<Qualification?> GetQualificationByIdAsync(this DatabaseService db, int id, CancellationToken token = default)
         {
-            const string sql = @"SELECT cq.id, cq.component_id, cq.supplier_id, cq.type, cq.qualification_type, cq.status, cq.certificate_number,
-       mc.name AS component_name,
-       s.name  AS supplier_name
+            const string sqlPreferred = @"SELECT
+    cq.id,
+    cq.component_id,
+    cq.machine_id,
+    cq.supplier_id,
+    cq.qualification_type,
+    cq.type,
+    cq.status,
+    cq.qualification_date,
+    cq.expiry_date,
+    cq.next_due,
+    cq.certificate_number,
+    cq.qualified_by_id,
+    qualified.username AS qualified_by_username,
+    qualified.full_name AS qualified_by_full_name,
+    cq.approved_by_id,
+    cq.approved_at,
+    approved.username AS approved_by_username,
+    approved.full_name AS approved_by_full_name,
+    mc.code   AS component_code,
+    mc.name   AS component_name,
+    m.code    AS machine_code,
+    m.name    AS machine_name,
+    s.name    AS supplier_name
 FROM component_qualifications cq
 LEFT JOIN machine_components mc ON mc.id = cq.component_id
-LEFT JOIN suppliers s          ON s.id  = cq.supplier_id
+LEFT JOIN machines m             ON m.id = cq.machine_id
+LEFT JOIN suppliers s            ON s.id = cq.supplier_id
+LEFT JOIN users qualified        ON qualified.id = cq.qualified_by_id
+LEFT JOIN users approved         ON approved.id  = cq.approved_by_id
 WHERE cq.id=@id
 LIMIT 1";
 
-            var dt = await db.ExecuteSelectAsync(sql, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            const string sqlLegacy = "SELECT id, component_id, supplier_id, qualification_type, status, certificate_number FROM component_qualifications WHERE id=@id LIMIT 1";
+
+            System.Data.DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, new[] { new MySqlParameter("@id", id) }, token).ConfigureAwait(false);
+            }
+
             if (dt.Rows.Count != 1) return null;
 
-            var r = dt.Rows[0];
-            string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
-            int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
-
-            string componentName = S("component_name");
-            string supplierName = S("supplier_name");
-            string type = !string.IsNullOrWhiteSpace(S("type")) ? S("type") : S("qualification_type");
-            string code = !string.IsNullOrWhiteSpace(S("certificate_number")) ? S("certificate_number") : S("code");
-
-            return new Qualification
-            {
-                Id = id,
-                Code = string.IsNullOrWhiteSpace(code) ? id.ToString(CultureInfo.InvariantCulture) : code,
-                Type = string.IsNullOrWhiteSpace(type) ? "Component" : type,
-                Status = S("status"),
-                ComponentId = IN("component_id"),
-                SupplierId = IN("supplier_id"),
-                Component = string.IsNullOrWhiteSpace(componentName) ? null : new MachineComponent { Name = componentName },
-                Supplier = string.IsNullOrWhiteSpace(supplierName) ? null : new Supplier { Name = supplierName }
-            };
+            return Map(dt.Rows[0]);
         }
         /// <summary>
         /// Executes the add qualification async operation.
