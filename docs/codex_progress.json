@@ -239,7 +239,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: hydrate qualification alias projections",
+  "lastCommitSummary": "fix: extend qualification detail joins",
   "notes": [
     "2026-09-08: DatabaseService risk assessment mapper now hydrates owner/approver usernames, full names, and display names from joined user metadata and instantiates User projections when IDs exist so inspector/export views surface richer context; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-09-07: Updated docs/WPF_MAPPING.md Home & Shell services to describe the delivered SignalRClientService integration keeping cockpit/dashboard KPIs synchronized with audit pushes, and noted that restore/build/test still require a Windows host because the dotnet CLI is unavailable here.",
@@ -580,6 +580,7 @@
     "2026-09-07: DatabaseService risk assessment listing now selects the full schema with owner/approver joins, hydrates navigation properties for inspector display, and dotnet --version/restore/build/test still fail with 'command not found: dotnet' pending Windows tooling.",
     "2026-09-08: Added DatabaseServiceRiskAssessmentsExtensionsTests to cover the preferred projection joins plus the legacy fallback; dotnet --version still exits with 'command not found: dotnet' in this container.",
     "2026-09-09: DatabaseService qualifications listing now attempts a metadata-rich projection joining machines, components, suppliers, and qualified/approved users with a MySQL 1054 fallback to the legacy query; dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still fail with 'command not found: dotnet' in this container.",
-    "2026-09-10: DatabaseService qualification mapper now hydrates machine/component/supplier/user projections from joined aliases with column guards, coalesces code/type/expiry fallbacks, and dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container."
+    "2026-09-10: DatabaseService qualification mapper now hydrates machine/component/supplier/user projections from joined aliases with column guards, coalesces code/type/expiry fallbacks, and dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
+    "2026-09-11: DatabaseService.GetQualificationByIdAsync now mirrors the rich qualification projection, joining machines, components, suppliers, and qualified/approved users with a MySQL 1054 fallback and mapper reuse to hydrate navigation properties; dotnet --version/restore/build/test still fail with 'command not found: dotnet' in this container."
   ]
 }
