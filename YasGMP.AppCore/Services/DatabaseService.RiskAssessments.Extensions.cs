@@ -126,6 +126,7 @@ ORDER BY ra.id DESC";
         private static RiskAssessment Map(DataRow r)
         {
             string S(string c) => r.Table.Columns.Contains(c) ? (r[c]?.ToString() ?? string.Empty) : string.Empty;
+            string? SN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? r[c]?.ToString() : null;
             int I(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : 0;
             int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
             DateTime? D(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
@@ -159,34 +160,44 @@ ORDER BY ra.id DESC";
                 IpAddress = S("ip_address")
             };
 
+            var ownerUsername = SN("owner_username");
+            var ownerFullName = SN("owner_full_name");
+            var ownerDisplayName = SN("owner_display_name");
+            risk.OwnerUsername = ownerUsername;
+            risk.OwnerFullName = ownerFullName;
+            risk.OwnerDisplayName = ownerDisplayName ?? ownerFullName ?? ownerUsername;
+
             if (risk.OwnerId.HasValue)
             {
-                var ownerFullName = S("owner_full_name");
-                var ownerUsername = S("owner_username");
-                if (!string.IsNullOrWhiteSpace(ownerFullName) || !string.IsNullOrWhiteSpace(ownerUsername))
+                var userFullName = !string.IsNullOrWhiteSpace(ownerFullName)
+                    ? ownerFullName
+                    : (!string.IsNullOrWhiteSpace(ownerDisplayName) ? ownerDisplayName : ownerUsername ?? string.Empty);
+                risk.Owner = new User
                 {
-                    risk.Owner = new User
-                    {
-                        Id = risk.OwnerId.Value,
-                        FullName = string.IsNullOrWhiteSpace(ownerFullName) ? ownerUsername : ownerFullName,
-                        Username = ownerUsername
-                    };
-                }
+                    Id = risk.OwnerId.Value,
+                    FullName = userFullName ?? string.Empty,
+                    Username = ownerUsername ?? string.Empty
+                };
             }
+
+            var approverUsername = SN("approved_by_username");
+            var approverFullName = SN("approved_by_full_name");
+            var approverDisplayName = SN("approved_by_display_name");
+            risk.ApprovedByUsername = approverUsername;
+            risk.ApprovedByFullName = approverFullName;
+            risk.ApprovedByDisplayName = approverDisplayName ?? approverFullName ?? approverUsername;
 
             if (risk.ApprovedById.HasValue)
             {
-                var approverFullName = S("approved_by_full_name");
-                var approverUsername = S("approved_by_username");
-                if (!string.IsNullOrWhiteSpace(approverFullName) || !string.IsNullOrWhiteSpace(approverUsername))
+                var approverName = !string.IsNullOrWhiteSpace(approverFullName)
+                    ? approverFullName
+                    : (!string.IsNullOrWhiteSpace(approverDisplayName) ? approverDisplayName : approverUsername ?? string.Empty);
+                risk.ApprovedBy = new User
                 {
-                    risk.ApprovedBy = new User
-                    {
-                        Id = risk.ApprovedById.Value,
-                        FullName = string.IsNullOrWhiteSpace(approverFullName) ? approverUsername : approverFullName,
-                        Username = approverUsername
-                    };
-                }
+                    Id = risk.ApprovedById.Value,
+                    FullName = approverName ?? string.Empty,
+                    Username = approverUsername ?? string.Empty
+                };
             }
 
             return risk;

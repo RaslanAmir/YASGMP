@@ -239,8 +239,9 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: harden risk assessment query fallback",
+  "lastCommitSummary": "feat: hydrate risk assessment owner metadata",
   "notes": [
+    "2026-09-08: DatabaseService risk assessment mapper now hydrates owner/approver usernames, full names, and display names from joined user metadata and instantiates User projections when IDs exist so inspector/export views surface richer context; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-09-07: Updated docs/WPF_MAPPING.md Home & Shell services to describe the delivered SignalRClientService integration keeping cockpit/dashboard KPIs synchronized with audit pushes, and noted that restore/build/test still require a Windows host because the dotnet CLI is unavailable here.",
     "2026-08-20: Added scripts/wpf-run-with-testhooks.ps1 plus App.xaml bootstrap glue so DatabaseService overrides hydrate from JSON fixtures when YASGMP_WPF_TESTHOOKS=1, allowing WPF runs and smoke harnesses to execute without MySQL; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
     "2026-07-29: DiagnosticsModuleViewModel now consumes DiagnosticsFeedService, publishes telemetry/log/health observable collections with localized ShellStrings, retains a design-time fallback, and dotnet restore/build/test still fail with 'command not found: dotnet' in this container.",

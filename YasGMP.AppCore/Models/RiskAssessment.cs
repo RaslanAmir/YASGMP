@@ -98,6 +98,24 @@ namespace YasGMP.Models
         [ForeignKey(nameof(OwnerId))]
         public User? Owner { get; set; }
 
+        /// <summary>
+        /// Gets or sets the owner username projected from joined metadata.
+        /// </summary>
+        [NotMapped]
+        public string? OwnerUsername { get; set; }
+
+        /// <summary>
+        /// Gets or sets the owner full name projected from joined metadata.
+        /// </summary>
+        [NotMapped]
+        public string? OwnerFullName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the owner display name projected from joined metadata.
+        /// </summary>
+        [NotMapped]
+        public string? OwnerDisplayName { get; set; }
+
         /// <summary>Approval user (FK).</summary>
         [Display(Name = "Odobrio korisnik")]
         public int? ApprovedById { get; set; }
@@ -107,6 +125,24 @@ namespace YasGMP.Models
         /// </summary>
         [ForeignKey(nameof(ApprovedById))]
         public User? ApprovedBy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the approving user username projected from joined metadata.
+        /// </summary>
+        [NotMapped]
+        public string? ApprovedByUsername { get; set; }
+
+        /// <summary>
+        /// Gets or sets the approving user full name projected from joined metadata.
+        /// </summary>
+        [NotMapped]
+        public string? ApprovedByFullName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the approving user display name projected from joined metadata.
+        /// </summary>
+        [NotMapped]
+        public string? ApprovedByDisplayName { get; set; }
 
         /// <summary>Approval date/time (UTC).</summary>
         [Display(Name = "Datum odobravanja (UTC)")]
