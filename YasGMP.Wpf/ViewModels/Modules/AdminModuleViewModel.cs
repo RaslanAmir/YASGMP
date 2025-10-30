@@ -353,7 +353,10 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     protected override Task OnRecordSelectedAsync(ModuleRecord? record)
     {
         UpdateCurrentSetting(record);
-        return Task.CompletedTask;
+        ResetDirty();
+        ClearValidationMessages();
+
+        return base.OnRecordSelectedAsync(record);
     }
 
     protected override async Task OnModeChangedAsync(FormMode mode)
