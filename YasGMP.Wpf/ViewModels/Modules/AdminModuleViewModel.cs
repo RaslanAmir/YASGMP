@@ -1,9 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YasGMP.Common;
 using YasGMP.Models;
@@ -20,6 +26,134 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
 {
     /// <summary>
+    /// Editable representation of a <see cref="Setting"/> instance surfaced to the UI.
+    /// </summary>
+    public sealed class EditableSetting : ObservableObject
+    {
+        private readonly Func<EditableSetting, string?, Task>? _changeCallback;
+        private bool _suppressCallback;
+
+        private string? _key;
+        private string? _value;
+        private string? _category;
+        private string? _description;
+        private bool _isNew;
+        private bool _isMarkedForDeletion;
+
+        public EditableSetting(Func<EditableSetting, string?, Task>? changeCallback)
+        {
+            _changeCallback = changeCallback;
+        }
+
+        public string? Key
+        {
+            get => _key;
+            set => SetPropertyAndNotify(ref _key, value);
+        }
+
+        public string? Value
+        {
+            get => _value;
+            set => SetPropertyAndNotify(ref _value, value);
+        }
+
+        public string? Category
+        {
+            get => _category;
+            set => SetPropertyAndNotify(ref _category, value);
+        }
+
+        public string? Description
+        {
+            get => _description;
+            set => SetPropertyAndNotify(ref _description, value);
+        }
+
+        public bool IsNew
+        {
+            get => _isNew;
+            set => SetPropertyAndNotify(ref _isNew, value);
+        }
+
+        public bool IsMarkedForDeletion
+        {
+            get => _isMarkedForDeletion;
+            set => SetPropertyAndNotify(ref _isMarkedForDeletion, value);
+        }
+
+        public static EditableSetting FromSetting(Setting setting, Func<EditableSetting, string?, Task>? changeCallback)
+        {
+            if (setting is null)
+            {
+                throw new ArgumentNullException(nameof(setting));
+            }
+
+            var editable = new EditableSetting(changeCallback);
+            using (editable.DeferNotifications())
+            {
+                editable.Key = setting.Key;
+                editable.Value = setting.Value;
+                editable.Category = setting.Category;
+                editable.Description = setting.Description;
+                editable.IsNew = false;
+                editable.IsMarkedForDeletion = false;
+            }
+
+            return editable;
+        }
+
+        public static EditableSetting CreateNew(Func<EditableSetting, string?, Task>? changeCallback)
+        {
+            var editable = new EditableSetting(changeCallback);
+            using (editable.DeferNotifications())
+            {
+                editable.IsNew = true;
+                editable.IsMarkedForDeletion = false;
+            }
+
+            return editable;
+        }
+
+        public IDisposable DeferNotifications()
+            => new NotificationSuppression(this);
+
+        private void SetPropertyAndNotify<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (SetProperty(ref storage, value, propertyName) && !_suppressCallback)
+            {
+                var callback = _changeCallback;
+                if (callback is not null)
+                {
+                    _ = callback(this, propertyName);
+                }
+            }
+        }
+
+        private sealed class NotificationSuppression : IDisposable
+        {
+            private readonly EditableSetting _owner;
+            private bool _disposed;
+
+            public NotificationSuppression(EditableSetting owner)
+            {
+                _owner = owner;
+                _owner._suppressCallback = true;
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _owner._suppressCallback = false;
+                _disposed = true;
+            }
+        }
+    }
+
+    /// <summary>
     /// Represents the module key value.
     /// </summary>
     public const string ModuleKey = "Admin";
@@ -32,11 +166,14 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     private readonly IAuthContext _authContext;
     private readonly Dictionary<string, Setting> _settingsByRecordKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Setting> _settingsByCode = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _validationLock = new();
 
     private bool _suppressPreferenceDirty;
     private bool _statusBarAlertsEnabled;
     private bool _toastAlertsEnabled;
     private bool _isNotificationPreferencesDirty;
+    private EditableSetting? _currentSetting;
+    private CancellationTokenSource? _validationCts;
     /// <summary>
     /// Initializes a new instance of the AdminModuleViewModel class.
     /// </summary>
@@ -63,6 +200,8 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
 
         SaveNotificationPreferencesCommand = new AsyncRelayCommand(SaveNotificationPreferencesAsync, CanSaveNotificationPreferences);
         RestoreSettingCommand = new AsyncRelayCommand(RestoreSelectedSettingAsync, CanRestoreSetting);
+        SettingCategories = new ObservableCollection<string>(new[] { "General", "System", "Notifications" });
+        SettingStatuses = new ObservableCollection<string>(new[] { "active", "inactive", "deprecated" });
         PropertyChanged += OnPropertyChanged;
     }
 
@@ -111,6 +250,19 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     /// <summary>Command that reverts the selected setting to its default value.</summary>
     public IAsyncRelayCommand RestoreSettingCommand { get; }
 
+    /// <summary>Currently edited setting payload.</summary>
+    public EditableSetting? CurrentSetting
+    {
+        get => _currentSetting;
+        private set => SetCurrentSetting(value);
+    }
+
+    /// <summary>Lookup values for setting categories exposed to the UI.</summary>
+    public ObservableCollection<string> SettingCategories { get; }
+
+    /// <summary>Lookup values for setting status choices exposed to the UI.</summary>
+    public ObservableCollection<string> SettingStatuses { get; }
+
     private string? _lastSignatureStatus;
 
     /// <summary>Gets the most recent electronic signature status surfaced to QA.</summary>
@@ -137,6 +289,8 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
                 _settingsByCode[setting.Key!] = setting;
             }
         }
+
+        await UpdateChoiceCollectionsAsync(settings).ConfigureAwait(false);
 
         return settings.Select(ToRecord).ToList();
     }
@@ -194,6 +348,12 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
             fields,
             null,
             null);
+    }
+
+    protected override Task OnRecordSelectedAsync(ModuleRecord? record)
+    {
+        UpdateCurrentSetting(record);
+        return Task.CompletedTask;
     }
 
     private async Task LoadNotificationPreferencesAsync()
@@ -276,6 +436,162 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         {
             RestoreSettingCommand.NotifyCanExecuteChanged();
         }
+    }
+
+    private Task OnEditableSettingChangedAsync(EditableSetting setting, string? propertyName)
+    {
+        if (!ReferenceEquals(_currentSetting, setting))
+        {
+            return Task.CompletedTask;
+        }
+
+        MarkDirty();
+        QueueValidation();
+        return Task.CompletedTask;
+    }
+
+    private void OnCurrentSettingPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not EditableSetting editable || !ReferenceEquals(editable, _currentSetting))
+        {
+            return;
+        }
+
+        MarkDirty();
+        QueueValidation();
+    }
+
+    private void QueueValidation()
+    {
+        var next = new CancellationTokenSource();
+        CancellationTokenSource? previous;
+
+        lock (_validationLock)
+        {
+            previous = _validationCts;
+            _validationCts = next;
+        }
+
+        previous?.Cancel();
+        previous?.Dispose();
+
+        _ = RunValidationAsync(next.Token);
+    }
+
+    private async Task RunValidationAsync(CancellationToken token)
+    {
+        try
+        {
+            var validation = await ValidateAsync().ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
+            await RunOnDispatcherAsync(() => ApplyValidation(validation)).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // Swallow cancellation to allow the most recent validation request to win.
+        }
+        catch (Exception ex)
+        {
+            var failure = string.Format(CultureInfo.CurrentCulture, "Validation failed: {0}", ex.Message);
+            StatusMessage = failure;
+            _alerts?.PublishStatus(failure, AlertSeverity.Error);
+        }
+    }
+
+    private async Task UpdateChoiceCollectionsAsync(IEnumerable<Setting> settings)
+    {
+        var categories = settings
+            .Select(s => s.Category)
+            .Where(static c => !string.IsNullOrWhiteSpace(c))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(static c => c, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+        if (categories.Count == 0)
+        {
+            categories.Add("General");
+        }
+
+        var statuses = settings
+            .Select(s => s.Status)
+            .Where(static s => !string.IsNullOrWhiteSpace(s))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(static s => s, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+        if (statuses.Count == 0)
+        {
+            statuses.Add("active");
+            statuses.Add("inactive");
+        }
+
+        await RunOnDispatcherAsync(() =>
+        {
+            ReplaceCollection(SettingCategories, categories);
+            ReplaceCollection(SettingStatuses, statuses);
+        }).ConfigureAwait(false);
+    }
+
+    private void UpdateCurrentSetting(ModuleRecord? record)
+    {
+        if (record is null)
+        {
+            SetCurrentSetting(null);
+            return;
+        }
+
+        if (!_settingsByRecordKey.TryGetValue(record.Key, out var setting) &&
+            !string.IsNullOrWhiteSpace(record.Code) &&
+            !_settingsByCode.TryGetValue(record.Code!, out setting))
+        {
+            SetCurrentSetting(null);
+            return;
+        }
+
+        var editable = EditableSetting.FromSetting(setting!, OnEditableSettingChangedAsync);
+        SetCurrentSetting(editable);
+    }
+
+    private void SetCurrentSetting(EditableSetting? setting)
+    {
+        if (ReferenceEquals(_currentSetting, setting))
+        {
+            return;
+        }
+
+        if (_currentSetting is not null)
+        {
+            _currentSetting.PropertyChanged -= OnCurrentSettingPropertyChanged;
+        }
+
+        _currentSetting = setting;
+        OnPropertyChanged(nameof(CurrentSetting));
+
+        if (_currentSetting is not null)
+        {
+            _currentSetting.PropertyChanged += OnCurrentSettingPropertyChanged;
+        }
+    }
+
+    private static void ReplaceCollection<T>(ObservableCollection<T> target, IEnumerable<T> values)
+    {
+        target.Clear();
+        foreach (var value in values)
+        {
+            target.Add(value);
+        }
+    }
+
+    private static Task RunOnDispatcherAsync(Action action)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
     }
 
     private async Task RestoreSelectedSettingAsync()

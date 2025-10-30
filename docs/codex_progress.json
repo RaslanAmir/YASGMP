@@ -4,6 +4,7 @@
     "wpfTarget": "net9.0-windows10.0.19041.0",
     "detected": true,
     "notes": [
+      "2026-09-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried while introducing the Admin module EditableSetting wrapper; each command still exits with 'command not found: dotnet' inside this Linux container.",
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
       "2026-08-20: dotnet --version retried while extending ServiceRegistrationTests coverage; CLI still missing so the command exits with 'command not found'.",
       "2025-10-29T11:35Z: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried to unblock the current documentation batch; each command still exits with 'command not found: dotnet' so the smoke harness remains queued for a Windows host.",
