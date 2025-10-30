@@ -356,6 +356,35 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         return Task.CompletedTask;
     }
 
+    protected override async Task OnModeChangedAsync(FormMode mode)
+    {
+        if (mode == FormMode.Add)
+        {
+            var editable = EditableSetting.CreateNew(OnEditableSettingChangedAsync);
+            SetCurrentSetting(editable);
+        }
+        else if (mode != FormMode.Update && CurrentSetting is not null)
+        {
+            var current = CurrentSetting;
+            current.PropertyChanged -= OnCurrentSettingPropertyChanged;
+
+            try
+            {
+                using (current.DeferNotifications())
+                {
+                    current.IsMarkedForDeletion = false;
+                    current.IsNew = false;
+                }
+            }
+            finally
+            {
+                current.PropertyChanged += OnCurrentSettingPropertyChanged;
+            }
+        }
+
+        await base.OnModeChangedAsync(mode).ConfigureAwait(false);
+    }
+
     private async Task LoadNotificationPreferencesAsync()
     {
         try
