@@ -4,6 +4,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:YasGMP.Wpf.Controls"
+             xmlns:models="clr-namespace:YasGMP.Models;assembly=YasGMP.AppCore"
+             xmlns:modules="clr-namespace:YasGMP.Wpf.ViewModels.Modules"
              mc:Ignorable="d"
              d:DesignHeight="400"
              d:DesignWidth="600">
@@ -43,6 +45,8 @@
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="2*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -57,9 +61,112 @@
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                         AutomationProperties.Name="{DynamicResource Dashboard.Search.AutomationName}"
                         AutomationProperties.AutomationId="{DynamicResource Dashboard.Search.AutomationId}"
-                        ToolTipService.ToolTip="{DynamicResource Dashboard.Search.ToolTip}" />
+                         ToolTipService.ToolTip="{DynamicResource Dashboard.Search.ToolTip}" />
             </DockPanel>
-            <DataGrid Grid.Row="1"
+            <StackPanel Grid.Row="1"
+                        Margin="0,0,0,12"
+                        ToolTipService.ToolTip="{DynamicResource Dashboard.Section.Kpi.ToolTip}"
+                        AutomationProperties.Name="{DynamicResource Dashboard.Section.Kpi.AutomationName}"
+                        AutomationProperties.AutomationId="{DynamicResource Dashboard.Section.Kpi.AutomationId}">
+                <TextBlock Text="{DynamicResource Dashboard.Section.Kpi.Header}"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           Margin="0,0,0,8" />
+                <ItemsControl ItemsSource="{Binding KpiWidgets}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:KpiWidget}">
+                            <Border CornerRadius="6"
+                                    Margin="0,0,8,8"
+                                    Padding="12"
+                                    MinWidth="150"
+                                    Background="{Binding Color, TargetNullValue=#FF394B6A, FallbackValue=#FF394B6A}"
+                                    BorderBrush="#33000000"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}"
+                                               FontWeight="SemiBold"
+                                               Foreground="White" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <TextBlock FontSize="18" FontWeight="Bold" Foreground="White">
+                                            <TextBlock.Text>
+                                                <PriorityBinding FallbackValue="0">
+                                                    <Binding Path="ValueText" />
+                                                    <Binding Path="Value" StringFormat="{}{0:N0}" />
+                                                </PriorityBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Unit, TargetNullValue=''}" Margin="6,4,0,0" Foreground="White">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Trend, TargetNullValue=''}" FontStyle="Italic" Foreground="White" Margin="0,6,0,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="Text" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+            <StackPanel Grid.Row="2"
+                        Margin="0,0,0,12"
+                        ToolTipService.ToolTip="{DynamicResource Dashboard.Section.Charts.ToolTip}"
+                        AutomationProperties.Name="{DynamicResource Dashboard.Section.Charts.AutomationName}"
+                        AutomationProperties.AutomationId="{DynamicResource Dashboard.Section.Charts.AutomationId}">
+                <TextBlock Text="{DynamicResource Dashboard.Section.Charts.Header}"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           Margin="0,0,0,8" />
+                <ItemsControl ItemsSource="{Binding ChartSeries}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type modules:DashboardChartSeries}">
+                            <GroupBox Header="{Binding Header}"
+                                      Margin="0,0,12,12"
+                                      Width="260">
+                                <ItemsControl ItemsSource="{Binding Points}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:ChartData}">
+                                            <DockPanel LastChildFill="False" Margin="0,0,0,6">
+                                                <TextBlock Text="{Binding Label}" Width="120" />
+                                                <TextBlock Text="{Binding Value, StringFormat={}{0:N0}}" FontWeight="SemiBold" />
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </GroupBox>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+            <DataGrid Grid.Row="3"
                       ItemsSource="{Binding RecordsView}"
                       SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
                       AutoGenerateColumns="False"
@@ -129,13 +236,18 @@
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Grid Grid.Row="2" Margin="0,12,0,0">
+            <Grid Grid.Row="4" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <GroupBox Header="Inventory Alerts" Grid.Column="0" Margin="0,0,8,0">
+                <GroupBox Grid.Column="0"
+                          Margin="0,0,8,0"
+                          Header="{DynamicResource Dashboard.Section.InventoryAlerts.Header}"
+                          ToolTipService.ToolTip="{DynamicResource Dashboard.Section.InventoryAlerts.ToolTip}"
+                          AutomationProperties.Name="{DynamicResource Dashboard.Section.InventoryAlerts.AutomationName}"
+                          AutomationProperties.AutomationId="{DynamicResource Dashboard.Section.InventoryAlerts.AutomationId}">
                     <DataGrid ItemsSource="{Binding InventoryAlerts}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
@@ -143,18 +255,79 @@
                               IsReadOnly="True"
                               MinHeight="160">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Warehouse" Binding="{Binding WarehouseName}" Width="2*" />
-                            <DataGridTextColumn Header="Part" Binding="{Binding PartName}" Width="2*" />
-                            <DataGridTextColumn Header="Code" Binding="{Binding PartCode}" Width="120" />
-                            <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Width="120" />
-                            <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="90" />
-                            <DataGridTextColumn Header="Min" Binding="{Binding Minimum}" Width="80" />
-                            <DataGridTextColumn Header="Max" Binding="{Binding Maximum}" Width="80" />
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Warehouse.Header}" Binding="{Binding WarehouseName}" Width="2*">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Warehouse.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Warehouse.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Warehouse.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Part.Header}" Binding="{Binding PartName}" Width="2*">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Part.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Part.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Part.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Code.Header}" Binding="{Binding PartCode}" Width="120">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Code.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Code.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Code.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Zone.Header}" Binding="{Binding Zone}" Width="120">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Zone.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Zone.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Zone.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Quantity.Header}" Binding="{Binding Quantity}" Width="90">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Quantity.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Quantity.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Quantity.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Minimum.Header}" Binding="{Binding Minimum}" Width="80">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Minimum.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Minimum.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Minimum.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryAlerts.Column.Maximum.Header}" Binding="{Binding Maximum}" Width="80">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Maximum.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Maximum.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryAlerts.Column.Maximum.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>
 
-                <GroupBox Header="Recent Movements" Grid.Column="1" Margin="8,0,0,0">
+                <GroupBox Grid.Column="1"
+                          Margin="8,0,0,0"
+                          Header="{DynamicResource Dashboard.Section.InventoryMovements.Header}"
+                          ToolTipService.ToolTip="{DynamicResource Dashboard.Section.InventoryMovements.ToolTip}"
+                          AutomationProperties.Name="{DynamicResource Dashboard.Section.InventoryMovements.AutomationName}"
+                          AutomationProperties.AutomationId="{DynamicResource Dashboard.Section.InventoryMovements.AutomationId}">
                     <DataGrid ItemsSource="{Binding InventoryMovements}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
@@ -162,18 +335,66 @@
                               IsReadOnly="True"
                               MinHeight="160">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="When" Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="160" />
-                            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" />
-                            <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="90" />
-                            <DataGridTextColumn Header="Document" Binding="{Binding Document}" Width="*" />
-                            <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" />
-                            <DataGridTextColumn Header="User" Binding="{Binding PerformedById}" Width="80" />
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryMovements.Column.Timestamp.Header}" Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="160">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryMovements.Column.Timestamp.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryMovements.Column.Timestamp.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryMovements.Column.Timestamp.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryMovements.Column.Type.Header}" Binding="{Binding Type}" Width="100">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryMovements.Column.Type.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryMovements.Column.Type.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryMovements.Column.Type.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryMovements.Column.Quantity.Header}" Binding="{Binding Quantity}" Width="90">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryMovements.Column.Quantity.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryMovements.Column.Quantity.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryMovements.Column.Quantity.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryMovements.Column.Document.Header}" Binding="{Binding Document}" Width="*">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryMovements.Column.Document.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryMovements.Column.Document.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryMovements.Column.Document.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryMovements.Column.Note.Header}" Binding="{Binding Note}" Width="2*">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryMovements.Column.Note.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryMovements.Column.Note.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryMovements.Column.Note.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource Dashboard.InventoryMovements.Column.User.Header}" Binding="{Binding PerformedById}" Width="80">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ToolTipService.ToolTip" Value="{DynamicResource Dashboard.InventoryMovements.Column.User.ToolTip}" />
+                                        <Setter Property="AutomationProperties.Name" Value="{DynamicResource Dashboard.InventoryMovements.Column.User.AutomationName}" />
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{DynamicResource Dashboard.InventoryMovements.Column.User.AutomationId}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>
             </Grid>
 
-            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
+            <TextBlock Grid.Row="5" Text="{Binding StatusMessage}" FontStyle="Italic" Foreground="Gray" Margin="0,8,0,0" />
         </Grid>
     </DockPanel>
 </UserControl>
