@@ -84,7 +84,7 @@
                     Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
                     BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
                     BorderThickness="1">
-                <Grid DataContext="{Binding CurrentSetting}">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="180" />
                         <ColumnDefinition Width="*" />
@@ -103,7 +103,7 @@
                                Text="{DynamicResource Module.Admin.Settings.Form.Key.Label}" />
                     <TextBox Grid.Row="0"
                              Grid.Column="1"
-                             Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding CurrentSetting.Key, UpdateSourceTrigger=PropertyChanged}"
                              ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Key.Label}"
                              AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Key.AutomationName}"
                              AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Key.AutomationId}">
@@ -126,7 +126,7 @@
                                Text="{DynamicResource Module.Admin.Settings.Form.Value.Label}" />
                     <TextBox Grid.Row="1"
                              Grid.Column="1"
-                             Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding CurrentSetting.Value, UpdateSourceTrigger=PropertyChanged}"
                              ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Value.Label}"
                              AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Value.AutomationName}"
                              AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Value.AutomationId}">
@@ -146,24 +146,25 @@
                                Grid.Column="0"
                                Margin="0,0,12,8"
                                VerticalAlignment="Center"
-                               Text="{DynamicResource Module.Admin.Settings.Form.Category.Label}" />
-                    <TextBox Grid.Row="2"
-                             Grid.Column="1"
-                             Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Category.Label}"
-                             AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Category.AutomationName}"
-                             AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Category.AutomationId}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="IsReadOnly" Value="True" />
+                               Text="{DynamicResource Module.Admin.Category.Label}" />
+                    <ComboBox Grid.Row="2"
+                              Grid.Column="1"
+                              ItemsSource="{Binding SettingCategories}"
+                              SelectedItem="{Binding CurrentSetting.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              ToolTipService.ToolTip="{DynamicResource Module.Admin.Category.ToolTip}"
+                              AutomationProperties.Name="{DynamicResource Module.Admin.Category.AutomationName}"
+                              AutomationProperties.AutomationId="{DynamicResource Module.Admin.Category.AutomationId}">
+                        <ComboBox.Style>
+                            <Style TargetType="ComboBox">
+                                <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
-                                        <Setter Property="IsReadOnly" Value="False" />
+                                        <Setter Property="IsEnabled" Value="True" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                        </ComboBox.Style>
+                    </ComboBox>
 
                     <TextBlock Grid.Row="3"
                                Grid.Column="0"
@@ -172,7 +173,7 @@
                                Text="{DynamicResource Module.Admin.Settings.Form.Description.Label}" />
                     <TextBox Grid.Row="3"
                              Grid.Column="1"
-                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding CurrentSetting.Description, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
                              Height="100"
                              TextWrapping="Wrap"
