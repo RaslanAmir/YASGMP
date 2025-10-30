@@ -239,7 +239,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "pending"
   },
-  "lastCommitSummary": "fix: align WPF database diagnostics callback",
+  "lastCommitSummary": "fix: harden risk assessment query fallback",
   "notes": [
     "2026-09-07: Updated docs/WPF_MAPPING.md Home & Shell services to describe the delivered SignalRClientService integration keeping cockpit/dashboard KPIs synchronized with audit pushes, and noted that restore/build/test still require a Windows host because the dotnet CLI is unavailable here.",
     "2026-08-20: Added scripts/wpf-run-with-testhooks.ps1 plus App.xaml bootstrap glue so DatabaseService overrides hydrate from JSON fixtures when YASGMP_WPF_TESTHOOKS=1, allowing WPF runs and smoke harnesses to execute without MySQL; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
@@ -575,6 +575,7 @@
     "2026-08-24: Added a dashboard DatabaseService test double that seeds KPI widgets/charts plus cockpit/dashboard regression tests for success/empty/failure paths; dotnet restore yasgmp.sln and dotnet build yasgmp.sln still fail with 'command not found: dotnet' inside this container.",
     "2026-08-30: docs/WPF_MAPPING.md and README_WPF_SHELL.md now describe the cockpit/dashboard KPI flow using DatabaseService.DashboardExtensions, note the session/localization hooks, and record that dotnet restore/build commands continue to fail with 'command not found: dotnet' pending a Windows toolchain.",
     "2026-09-05: WPF DatabaseService configure callback now mirrors MAUI by requiring DiagnosticContext/ITrace/IConfiguration, forcing SetDiagnostics to run, and resetting docs/tests accordingly; dotnet restore/build/test still exit with 'command not found: dotnet' so smoke automation remains Windows-host only.",
-    "2026-09-06: Startup now runs the machines trigger reconciliation on a background task with success/permission logging, ServiceRegistrationTests assert the guard and PowerShell helper env alignment, and documentation reflects the workflow; dotnet restore/build/test continue to report 'command not found: dotnet' in this container."
+    "2026-09-06: Startup now runs the machines trigger reconciliation on a background task with success/permission logging, ServiceRegistrationTests assert the guard and PowerShell helper env alignment, and documentation reflects the workflow; dotnet restore/build/test continue to report 'command not found: dotnet' in this container.",
+    "2026-09-07: DatabaseService risk assessment listing now selects the full schema with owner/approver joins, hydrates navigation properties for inspector display, and dotnet --version/restore/build/test still fail with 'command not found: dotnet' pending Windows tooling."
   ]
 }
