@@ -216,9 +216,13 @@ LIMIT 1";
                 return !string.IsNullOrWhiteSpace(code) ? code : I("id").ToString(CultureInfo.InvariantCulture);
             }
 
-            string typeValue = S("type");
-            if (string.IsNullOrWhiteSpace(typeValue)) typeValue = S("qualification_type");
-            if (string.IsNullOrWhiteSpace(typeValue)) typeValue = "Component";
+            const string defaultType = "COMPONENT";
+            string typeValue = NormalizeQualificationType(S("type"));
+            if (string.IsNullOrEmpty(typeValue)) typeValue = NormalizeQualificationType(S("qualification_type"));
+            if (string.IsNullOrEmpty(typeValue)) typeValue = defaultType;
+
+            bool hasStatusColumn = r.Table.Columns.Contains("status");
+            string statusValue = hasStatusColumn ? NormalizeQualificationStatus(S("status")) : S("status");
 
             var qualification = new Qualification
             {
@@ -228,7 +232,7 @@ LIMIT 1";
                 Description = S("qualification_type"),
                 Date = D("qualification_date") ?? DateTime.UtcNow,
                 ExpiryDate = D("expiry_date") ?? D("next_due"),
-                Status = S("status"),
+                Status = statusValue,
                 MachineId = IN("machine_id"),
                 ComponentId = IN("component_id"),
                 SupplierId = IN("supplier_id"),
@@ -310,6 +314,23 @@ LIMIT 1";
             }
 
             return qualification;
+        }
+
+        internal static string NormalizeQualificationType(string? raw)
+            => NormalizeToken(raw, static token => token.ToUpperInvariant());
+
+        internal static string NormalizeQualificationStatus(string? raw)
+            => NormalizeToken(raw, static token => token.ToLowerInvariant());
+
+        private static string NormalizeToken(string? raw, Func<string, string> finalTransform)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+
+            string trimmed = raw.Trim();
+            if (trimmed.Length == 0) return string.Empty;
+
+            string collapsed = string.Join("_", trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+            return collapsed.Length == 0 ? string.Empty : finalTransform(collapsed);
         }
     }
 }
