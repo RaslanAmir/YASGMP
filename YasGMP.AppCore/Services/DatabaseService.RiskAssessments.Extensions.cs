@@ -23,7 +23,58 @@ namespace YasGMP.Services
         /// </summary>
         public static async Task<List<RiskAssessment>> GetAllRiskAssessmentsFullAsync(this DatabaseService db, CancellationToken token = default)
         {
-            var dt = await db.ExecuteSelectAsync("SELECT id FROM risk_assessments ORDER BY id DESC", null, token).ConfigureAwait(false);
+            const string sqlPreferred = @"SELECT
+    ra.id,
+    ra.code,
+    ra.title,
+    ra.description,
+    ra.category,
+    ra.area,
+    ra.status,
+    ra.assessed_by,
+    ra.assessed_at,
+    ra.severity,
+    ra.probability,
+    ra.detection,
+    ra.risk_score,
+    ra.risk_level,
+    ra.mitigation,
+    ra.action_plan,
+    ra.owner_id,
+    owner.username AS owner_username,
+    owner.full_name AS owner_full_name,
+    ra.approved_by_id,
+    approver.username AS approved_by_username,
+    approver.full_name AS approved_by_full_name,
+    ra.approved_at,
+    ra.review_date,
+    ra.digital_signature,
+    ra.note,
+    ra.device_info,
+    ra.session_id,
+    ra.ip_address
+FROM risk_assessments ra
+LEFT JOIN users owner ON owner.id = ra.owner_id
+LEFT JOIN users approver ON approver.id = ra.approved_by_id
+ORDER BY
+    CASE WHEN ra.review_date IS NULL THEN 1 ELSE 0 END,
+    ra.review_date DESC,
+    ra.id DESC";
+
+            const string sqlLegacy = @"SELECT
+    ra.*
+FROM risk_assessments ra
+ORDER BY ra.id DESC";
+
+            System.Data.DataTable dt;
+            try
+            {
+                dt = await db.ExecuteSelectAsync(sqlPreferred, null, token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1054)
+            {
+                dt = await db.ExecuteSelectAsync(sqlLegacy, null, token).ConfigureAwait(false);
+            }
             var list = new List<RiskAssessment>(dt.Rows.Count);
             foreach (DataRow r in dt.Rows) list.Add(Map(r));
             return list;
@@ -79,7 +130,7 @@ namespace YasGMP.Services
             int? IN(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToInt32(r[c]) : (int?)null;
             DateTime? D(string c) => r.Table.Columns.Contains(c) && r[c] != DBNull.Value ? Convert.ToDateTime(r[c]) : (DateTime?)null;
 
-            return new RiskAssessment
+            var risk = new RiskAssessment
             {
                 Id = I("id"),
                 Code = S("code"),
@@ -107,6 +158,38 @@ namespace YasGMP.Services
                 SessionId = S("session_id"),
                 IpAddress = S("ip_address")
             };
+
+            if (risk.OwnerId.HasValue)
+            {
+                var ownerFullName = S("owner_full_name");
+                var ownerUsername = S("owner_username");
+                if (!string.IsNullOrWhiteSpace(ownerFullName) || !string.IsNullOrWhiteSpace(ownerUsername))
+                {
+                    risk.Owner = new User
+                    {
+                        Id = risk.OwnerId.Value,
+                        FullName = string.IsNullOrWhiteSpace(ownerFullName) ? ownerUsername : ownerFullName,
+                        Username = ownerUsername
+                    };
+                }
+            }
+
+            if (risk.ApprovedById.HasValue)
+            {
+                var approverFullName = S("approved_by_full_name");
+                var approverUsername = S("approved_by_username");
+                if (!string.IsNullOrWhiteSpace(approverFullName) || !string.IsNullOrWhiteSpace(approverUsername))
+                {
+                    risk.ApprovedBy = new User
+                    {
+                        Id = risk.ApprovedById.Value,
+                        FullName = string.IsNullOrWhiteSpace(approverFullName) ? approverUsername : approverFullName,
+                        Username = approverUsername
+                    };
+                }
+            }
+
+            return risk;
         }
     }
 }
