@@ -4429,6 +4429,42 @@
   <data name="Module.Admin.Settings.Validation.UpdateRequiresExisting" xml:space="preserve">
     <value>The selected setting could not be located for update.</value>
   </data>
+  <data name="Module.Admin.Settings.Form.Key.Label" xml:space="preserve">
+    <value>Setting Key</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Key.AutomationName" xml:space="preserve">
+    <value>Setting key</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Key.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Key</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Value.Label" xml:space="preserve">
+    <value>Setting Value</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Value.AutomationName" xml:space="preserve">
+    <value>Setting value</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Value.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Value</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Category.Label" xml:space="preserve">
+    <value>Setting Category</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Category.AutomationName" xml:space="preserve">
+    <value>Setting category</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Category.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Category</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Description.Label" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Description.AutomationName" xml:space="preserve">
+    <value>Setting description</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Description.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Description</value>
+  </data>
   <data name="Module.Admin.Settings.Save.Status.CreateSuccess" xml:space="preserve">
     <value>Setting "{0}" created successfully.</value>
   </data>

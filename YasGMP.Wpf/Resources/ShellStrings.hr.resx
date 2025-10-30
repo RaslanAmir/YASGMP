@@ -4432,6 +4432,42 @@
   <data name="Module.Admin.Settings.Validation.UpdateRequiresExisting" xml:space="preserve">
     <value>Odabrana postavka nije pronađena za ažuriranje.</value>
   </data>
+  <data name="Module.Admin.Settings.Form.Key.Label" xml:space="preserve">
+    <value>Ključ postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Key.AutomationName" xml:space="preserve">
+    <value>Ključ postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Key.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Key</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Value.Label" xml:space="preserve">
+    <value>Vrijednost postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Value.AutomationName" xml:space="preserve">
+    <value>Vrijednost postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Value.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Value</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Category.Label" xml:space="preserve">
+    <value>Kategorija postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Category.AutomationName" xml:space="preserve">
+    <value>Kategorija postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Category.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Category</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Description.Label" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Description.AutomationName" xml:space="preserve">
+    <value>Opis postavke</value>
+  </data>
+  <data name="Module.Admin.Settings.Form.Description.AutomationId" xml:space="preserve">
+    <value>Module.Admin.Settings.Form.Description</value>
+  </data>
   <data name="Module.Admin.Settings.Save.Status.CreateSuccess" xml:space="preserve">
     <value>Postavka &quot;{0}&quot; je uspješno stvorena.</value>
   </data>
