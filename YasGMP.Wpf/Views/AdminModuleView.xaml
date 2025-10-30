@@ -80,6 +80,7 @@
                             Command="{Binding SaveNotificationPreferencesCommand}" />
                 </StackPanel>
             </GroupBox>
+
             <Border Grid.Row="2"
                     Padding="12"
                     Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
@@ -87,125 +88,170 @@
                     BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="260" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="0"
-                               Margin="0,0,12,8"
-                               VerticalAlignment="Center"
-                               Text="{DynamicResource Module.Admin.Settings.Form.Key.Label}" />
-                    <TextBox Grid.Row="0"
-                             Grid.Column="1"
-                             Text="{Binding CurrentSetting.Key, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Key.Label}"
-                             AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Key.AutomationName}"
-                             AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Key.AutomationId}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="IsReadOnly" Value="True" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
-                                        <Setter Property="IsReadOnly" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                    <Expander Grid.Column="0"
+                              IsExpanded="True"
+                              Margin="0,0,12,0"
+                              Header="{DynamicResource Module.Admin.Settings.RecordList.Header}"
+                              AutomationProperties.Name="{DynamicResource Module.Admin.Settings.RecordList.Header}">
+                        <ListBox ItemsSource="{Binding RecordsView}"
+                                 SelectedItem="{Binding SelectedRecord, Mode=TwoWay}"
+                                 Margin="0,4,0,0"
+                                 AutomationProperties.AutomationId="Module.Admin.Settings.RecordList">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Description}"
+                                                   FontSize="11"
+                                                   Foreground="Gray"
+                                                   TextWrapping="Wrap">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Description}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Expander>
 
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="0"
-                               Margin="0,0,12,8"
-                               VerticalAlignment="Center"
-                               Text="{DynamicResource Module.Admin.Settings.Form.Value.Label}" />
-                    <TextBox Grid.Row="1"
-                             Grid.Column="1"
-                             Text="{Binding CurrentSetting.Value, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Value.Label}"
-                             AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Value.AutomationName}"
-                             AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Value.AutomationId}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="IsReadOnly" Value="True" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
-                                        <Setter Property="IsReadOnly" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="0"
-                               Margin="0,0,12,8"
-                               VerticalAlignment="Center"
-                               Text="{DynamicResource Module.Admin.Category.Label}" />
-                    <ComboBox Grid.Row="2"
-                              Grid.Column="1"
-                              ItemsSource="{Binding SettingCategories}"
-                              SelectedItem="{Binding CurrentSetting.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              ToolTipService.ToolTip="{DynamicResource Module.Admin.Category.ToolTip}"
-                              AutomationProperties.Name="{DynamicResource Module.Admin.Category.AutomationName}"
-                              AutomationProperties.AutomationId="{DynamicResource Module.Admin.Category.AutomationId}">
-                        <ComboBox.Style>
-                            <Style TargetType="ComboBox">
-                                <Setter Property="IsEnabled" Value="False" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ComboBox.Style>
-                    </ComboBox>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Margin="0,0,12,8"
+                                   VerticalAlignment="Center"
+                                   Text="{DynamicResource Module.Admin.Settings.Form.Key.Label}" />
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Text="{Binding CurrentSetting.Key, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Key.Label}"
+                                 AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Key.AutomationName}"
+                                 AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Key.AutomationId}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="IsReadOnly" Value="True" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
+                                            <Setter Property="IsReadOnly" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
 
-                    <CheckBox Grid.Row="3"
-                              Grid.Column="1"
-                              Margin="0,0,0,8"
-                              Content="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.Label}"
-                              ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.ToolTip}"
-                              AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.AutomationName}"
-                              AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.AutomationId}"
-                              IsChecked="{Binding CurrentSetting.IsMarkedForDeletion, Mode=TwoWay}"
-                              IsEnabled="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Margin="0,0,12,8"
+                                   VerticalAlignment="Center"
+                                   Text="{DynamicResource Module.Admin.Settings.Form.Value.Label}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Text="{Binding CurrentSetting.Value, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Value.Label}"
+                                 AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Value.AutomationName}"
+                                 AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Value.AutomationId}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="IsReadOnly" Value="True" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
+                                            <Setter Property="IsReadOnly" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
 
-                    <TextBlock Grid.Row="4"
-                               Grid.Column="0"
-                               Margin="0,0,12,0"
-                               VerticalAlignment="Top"
-                               Text="{DynamicResource Module.Admin.Settings.Form.Description.Label}" />
-                    <TextBox Grid.Row="4"
-                             Grid.Column="1"
-                             Text="{Binding CurrentSetting.Description, UpdateSourceTrigger=PropertyChanged}"
-                             AcceptsReturn="True"
-                             Height="100"
-                             TextWrapping="Wrap"
-                             VerticalScrollBarVisibility="Auto"
-                             ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Description.Label}"
-                             AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Description.AutomationName}"
-                             AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Description.AutomationId}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="IsReadOnly" Value="True" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
-                                        <Setter Property="IsReadOnly" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Margin="0,0,12,8"
+                                   VerticalAlignment="Center"
+                                   Text="{DynamicResource Module.Admin.Category.Label}" />
+                        <ComboBox Grid.Row="2"
+                                  Grid.Column="1"
+                                  ItemsSource="{Binding SettingCategories}"
+                                  SelectedItem="{Binding CurrentSetting.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  ToolTipService.ToolTip="{DynamicResource Module.Admin.Category.ToolTip}"
+                                  AutomationProperties.Name="{DynamicResource Module.Admin.Category.AutomationName}"
+                                  AutomationProperties.AutomationId="{DynamicResource Module.Admin.Category.AutomationId}">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.Style>
+                        </ComboBox>
+
+                        <CheckBox Grid.Row="3"
+                                  Grid.Column="1"
+                                  Margin="0,0,0,8"
+                                  Content="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.Label}"
+                                  ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.ToolTip}"
+                                  AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.AutomationName}"
+                                  AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.MarkedForDeletion.AutomationId}"
+                                  IsChecked="{Binding CurrentSetting.IsMarkedForDeletion, Mode=TwoWay}"
+                                  IsEnabled="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Margin="0,0,12,0"
+                                   VerticalAlignment="Top"
+                                   Text="{DynamicResource Module.Admin.Settings.Form.Description.Label}" />
+                        <TextBox Grid.Row="4"
+                                 Grid.Column="1"
+                                 Text="{Binding CurrentSetting.Description, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True"
+                                 Height="100"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 ToolTipService.ToolTip="{DynamicResource Module.Admin.Settings.Form.Description.Label}"
+                                 AutomationProperties.Name="{DynamicResource Module.Admin.Settings.Form.Description.AutomationName}"
+                                 AutomationProperties.AutomationId="{DynamicResource Module.Admin.Settings.Form.Description.AutomationId}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="IsReadOnly" Value="True" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsInEditMode, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True">
+                                            <Setter Property="IsReadOnly" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
                 </Grid>
             </Border>
+
             <StackPanel Grid.Row="3" Margin="0,8,0,0">
                 <Border Padding="8"
                         CornerRadius="4"
