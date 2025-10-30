@@ -135,6 +135,7 @@
 - CockpitView replaced the placeholder metric/notice markup with CockpitMetricViewModel/CockpitNoticeViewModel bindings that show trend glyphs, severity indicators, and localized loading/empty overlays driven by the new status properties.
 - Added cancellation-safe refresh orchestration plus status message propagation so manual/automatic updates do not race, and ensured notices project severity/module metadata with tooltip timestamps sourced from the database feed.
 - Added ShellStrings (neutral/EN/HR) entries for cockpit status and placeholder text so both the view-model and XAML share localized messaging; restore/build commands remain blocked with `bash: command not found: dotnet` until executed on a Windows host.
+- 2026-08-23: DashboardModuleViewModel now aggregates KPI widgets and dashboard chart series via DatabaseService, groups chart points for the WPF view, appends inspector/status summaries, seeds design-time data, and the DashboardModuleView surfaces localized KPI tiles, chart cards, and localized inventory grids. `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` still fail with `bash: command not found: dotnet` in this container so validation remains pending on a Windows host.
 
 ### Increment 2 Follow-up — Alerts & Notification Preferences (2026-04-10)
 

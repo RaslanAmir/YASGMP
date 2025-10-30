@@ -1485,6 +1485,255 @@
   <data name="Dashboard.Grid.Column.Description.AutomationName" xml:space="preserve">
     <value>Stupac Opis</value>
   </data>
+  <data name="Dashboard.Section.Kpi.Header" xml:space="preserve">
+    <value>Ključni pokazatelji uspješnosti</value>
+  </data>
+  <data name="Dashboard.Section.Kpi.ToolTip" xml:space="preserve">
+    <value>Živi KPI pokazatelji dohvaćeni iz servisa nadzorne ploče.</value>
+  </data>
+  <data name="Dashboard.Section.Kpi.AutomationName" xml:space="preserve">
+    <value>Sekcija KPI nadzorne ploče</value>
+  </data>
+  <data name="Dashboard.Section.Kpi.AutomationId" xml:space="preserve">
+    <value>Dashboard.Section.Kpi</value>
+  </data>
+  <data name="Dashboard.Section.Charts.Header" xml:space="preserve">
+    <value>Trend grafovi</value>
+  </data>
+  <data name="Dashboard.Section.Charts.ToolTip" xml:space="preserve">
+    <value>Agregirani grafovi nadzorne ploče grupirani po modulu.</value>
+  </data>
+  <data name="Dashboard.Section.Charts.AutomationName" xml:space="preserve">
+    <value>Sekcija grafova nadzorne ploče</value>
+  </data>
+  <data name="Dashboard.Section.Charts.AutomationId" xml:space="preserve">
+    <value>Dashboard.Section.Charts</value>
+  </data>
+  <data name="Dashboard.Section.InventoryAlerts.Header" xml:space="preserve">
+    <value>Upozorenja zaliha</value>
+  </data>
+  <data name="Dashboard.Section.InventoryAlerts.ToolTip" xml:space="preserve">
+    <value>Pragovi zaliha koji zahtijevaju pozornost.</value>
+  </data>
+  <data name="Dashboard.Section.InventoryAlerts.AutomationName" xml:space="preserve">
+    <value>Sekcija upozorenja zaliha</value>
+  </data>
+  <data name="Dashboard.Section.InventoryAlerts.AutomationId" xml:space="preserve">
+    <value>Dashboard.Section.InventoryAlerts</value>
+  </data>
+  <data name="Dashboard.Section.InventoryMovements.Header" xml:space="preserve">
+    <value>Nedavna kretanja</value>
+  </data>
+  <data name="Dashboard.Section.InventoryMovements.ToolTip" xml:space="preserve">
+    <value>Najnoviji prijemi i izdavanja skladišta.</value>
+  </data>
+  <data name="Dashboard.Section.InventoryMovements.AutomationName" xml:space="preserve">
+    <value>Sekcija kretanja zaliha</value>
+  </data>
+  <data name="Dashboard.Section.InventoryMovements.AutomationId" xml:space="preserve">
+    <value>Dashboard.Section.InventoryMovements</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Warehouse.Header" xml:space="preserve">
+    <value>Skladište</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Warehouse.ToolTip" xml:space="preserve">
+    <value>Skladište koje sadrži artikl.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Warehouse.AutomationName" xml:space="preserve">
+    <value>Stupac Skladište (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Warehouse.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Warehouse</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Part.Header" xml:space="preserve">
+    <value>Artikl</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Part.ToolTip" xml:space="preserve">
+    <value>Naziv artikla.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Part.AutomationName" xml:space="preserve">
+    <value>Stupac Artikl (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Part.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Part</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Code.Header" xml:space="preserve">
+    <value>Šifra</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Code.ToolTip" xml:space="preserve">
+    <value>Šifra skladišne evidencije.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Code.AutomationName" xml:space="preserve">
+    <value>Stupac Šifra (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Code.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Code</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Zone.Header" xml:space="preserve">
+    <value>Zona</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Zone.ToolTip" xml:space="preserve">
+    <value>Oznaka zone u skladištu.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Zone.AutomationName" xml:space="preserve">
+    <value>Stupac Zona (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Zone.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Zone</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Quantity.Header" xml:space="preserve">
+    <value>Količina</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Quantity.ToolTip" xml:space="preserve">
+    <value>Trenutačna dostupna količina.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Quantity.AutomationName" xml:space="preserve">
+    <value>Stupac Količina (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Quantity.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Quantity</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Minimum.Header" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Minimum.ToolTip" xml:space="preserve">
+    <value>Postavljeni minimalni prag.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Minimum.AutomationName" xml:space="preserve">
+    <value>Stupac Min (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Minimum.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Minimum</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Maximum.Header" xml:space="preserve">
+    <value>Maks</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Maximum.ToolTip" xml:space="preserve">
+    <value>Postavljeni maksimalni prag.</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Maximum.AutomationName" xml:space="preserve">
+    <value>Stupac Maks (upozorenja)</value>
+  </data>
+  <data name="Dashboard.InventoryAlerts.Column.Maximum.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryAlerts.Column.Maximum</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Timestamp.Header" xml:space="preserve">
+    <value>Vrijeme</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Timestamp.ToolTip" xml:space="preserve">
+    <value>Datum i vrijeme transakcije.</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Timestamp.AutomationName" xml:space="preserve">
+    <value>Stupac Vrijeme (kretanja)</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Timestamp.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryMovements.Column.Timestamp</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Type.Header" xml:space="preserve">
+    <value>Vrsta</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Type.ToolTip" xml:space="preserve">
+    <value>Vrsta kretanja poput izdavanja ili zaprimanja.</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Type.AutomationName" xml:space="preserve">
+    <value>Stupac Vrsta (kretanja)</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Type.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryMovements.Column.Type</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Quantity.Header" xml:space="preserve">
+    <value>Količina</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Quantity.ToolTip" xml:space="preserve">
+    <value>Količina kretanja.</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Quantity.AutomationName" xml:space="preserve">
+    <value>Stupac Količina (kretanja)</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Quantity.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryMovements.Column.Quantity</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Document.Header" xml:space="preserve">
+    <value>Dokument</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Document.ToolTip" xml:space="preserve">
+    <value>Povezani referentni dokument.</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Document.AutomationName" xml:space="preserve">
+    <value>Stupac Dokument (kretanja)</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Document.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryMovements.Column.Document</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Note.Header" xml:space="preserve">
+    <value>Bilješka</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Note.ToolTip" xml:space="preserve">
+    <value>Opcionalna bilješka kretanja.</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Note.AutomationName" xml:space="preserve">
+    <value>Stupac Bilješka (kretanja)</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.Note.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryMovements.Column.Note</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.User.Header" xml:space="preserve">
+    <value>Korisnik</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.User.ToolTip" xml:space="preserve">
+    <value>Identifikator korisnika koji je izvršio kretanje.</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.User.AutomationName" xml:space="preserve">
+    <value>Stupac Korisnik (kretanja)</value>
+  </data>
+  <data name="Dashboard.InventoryMovements.Column.User.AutomationId" xml:space="preserve">
+    <value>Dashboard.InventoryMovements.Column.User</value>
+  </data>
+  <data name="Dashboard.Status.Summary" xml:space="preserve">
+    <value>{0}: {1} događaj(a), {2} KPI, {3} serija grafikona, {4} upozorenja zaliha, {5} kretanja.</value>
+  </data>
+  <data name="Dashboard.Status.KpiError" xml:space="preserve">
+    <value>Neuspješno učitavanje KPI pokazatelja: {0}</value>
+  </data>
+  <data name="Dashboard.Status.ChartError" xml:space="preserve">
+    <value>Neuspješno učitavanje grafova: {0}</value>
+  </data>
+  <data name="Dashboard.Status.InventoryAlertError" xml:space="preserve">
+    <value>Neuspješno učitavanje upozorenja zaliha: {0}</value>
+  </data>
+  <data name="Dashboard.Status.InventoryMovementError" xml:space="preserve">
+    <value>Neuspješno učitavanje kretanja zaliha: {0}</value>
+  </data>
+  <data name="Dashboard.Inspector.KpiCount" xml:space="preserve">
+    <value>KPI pokazatelji</value>
+  </data>
+  <data name="Dashboard.Inspector.ChartSeriesCount" xml:space="preserve">
+    <value>Serije grafova</value>
+  </data>
+  <data name="Dashboard.Inspector.InventoryAlertCount" xml:space="preserve">
+    <value>Upozorenja zaliha</value>
+  </data>
+  <data name="Dashboard.Inspector.InventoryMovementCount" xml:space="preserve">
+    <value>Kretanja zaliha</value>
+  </data>
+  <data name="Dashboard.Inspector.KpiError" xml:space="preserve">
+    <value>Greška KPI</value>
+  </data>
+  <data name="Dashboard.Inspector.ChartError" xml:space="preserve">
+    <value>Greška grafova</value>
+  </data>
+  <data name="Dashboard.Inspector.InventoryAlertError" xml:space="preserve">
+    <value>Greška upozorenja zaliha</value>
+  </data>
+  <data name="Dashboard.Inspector.InventoryMovementError" xml:space="preserve">
+    <value>Greška kretanja zaliha</value>
+  </data>
+  <data name="Dashboard.Chart.Group.Default" xml:space="preserve">
+    <value>Općenito</value>
+  </data>
+  <data name="Dashboard.Chart.Series.Default" xml:space="preserve">
+    <value>Serija</value>
+  </data>
   <data name="Audit.Toolbar.Command.ApplyFilter.Content" xml:space="preserve">
     <value>Primijeni filter</value>
   </data>
