@@ -4423,6 +4423,51 @@
   <data name="Module.Admin.Settings.Validation.DuplicateKey" xml:space="preserve">
     <value>Postavka s ključem &quot;{0}&quot; već postoji.</value>
   </data>
+  <data name="Module.Admin.Settings.Validation.SelectionRequired" xml:space="preserve">
+    <value>Odaberite postavku prije spremanja.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.DeleteRequiresExisting" xml:space="preserve">
+    <value>Nije moguće izbrisati postavku koja još nije spremljena.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.UpdateRequiresExisting" xml:space="preserve">
+    <value>Odabrana postavka nije pronađena za ažuriranje.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.CreateSuccess" xml:space="preserve">
+    <value>Postavka &quot;{0}&quot; je uspješno stvorena.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.UpdateSuccess" xml:space="preserve">
+    <value>Postavka &quot;{0}&quot; je uspješno ažurirana.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.DeleteSuccess" xml:space="preserve">
+    <value>Postavka &quot;{0}&quot; je uspješno izbrisana.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.PersistenceFailed" xml:space="preserve">
+    <value>Spremanje postavke &quot;{0}&quot; nije uspjelo: {1}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.DeleteFailed" xml:space="preserve">
+    <value>Brisanje postavke &quot;{0}&quot; nije uspjelo: {1}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureFailed" xml:space="preserve">
+    <value>Elektronički potpis nije uspio: {0}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureCancelled" xml:space="preserve">
+    <value>Elektronički potpis je otkazan. Spremanje je prekinuto.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureMissing" xml:space="preserve">
+    <value>Elektronički potpis nije zabilježen. Spremanje je prekinuto.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignaturePersistFailed" xml:space="preserve">
+    <value>Spremanje elektroničkog potpisa nije uspjelo: {0}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureCaptured" xml:space="preserve">
+    <value>Elektronički potpis zabilježen ({0}).</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureCaptured.Unknown" xml:space="preserve">
+    <value>neodređeno</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.AuditFailed" xml:space="preserve">
+    <value>Zapisivanje audita postavki nije uspjelo.</value>
+  </data>
   <data name="Module.Admin.Restore.Button.Content" xml:space="preserve">
     <value>Vrati zadanu vrijednost</value>
   </data>

@@ -3970,6 +3970,51 @@
   <data name="Module.Admin.Settings.Validation.DuplicateKey" xml:space="preserve">
     <value>A setting with key "{0}" already exists.</value>
   </data>
+  <data name="Module.Admin.Settings.Validation.SelectionRequired" xml:space="preserve">
+    <value>Select a setting before saving.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.DeleteRequiresExisting" xml:space="preserve">
+    <value>Cannot delete a setting that has not been saved.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.UpdateRequiresExisting" xml:space="preserve">
+    <value>The selected setting could not be located for update.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.CreateSuccess" xml:space="preserve">
+    <value>Setting "{0}" created successfully.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.UpdateSuccess" xml:space="preserve">
+    <value>Setting "{0}" updated successfully.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.DeleteSuccess" xml:space="preserve">
+    <value>Setting "{0}" deleted successfully.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.PersistenceFailed" xml:space="preserve">
+    <value>Failed to save setting "{0}": {1}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.DeleteFailed" xml:space="preserve">
+    <value>Failed to delete setting "{0}": {1}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureFailed" xml:space="preserve">
+    <value>Electronic signature failed: {0}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureCancelled" xml:space="preserve">
+    <value>Electronic signature cancelled. Save aborted.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureMissing" xml:space="preserve">
+    <value>Electronic signature was not captured. Save aborted.</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignaturePersistFailed" xml:space="preserve">
+    <value>Failed to persist electronic signature: {0}</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureCaptured" xml:space="preserve">
+    <value>Electronic signature captured ({0}).</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.SignatureCaptured.Unknown" xml:space="preserve">
+    <value>unspecified</value>
+  </data>
+  <data name="Module.Admin.Settings.Save.Status.AuditFailed" xml:space="preserve">
+    <value>Failed to log settings audit.</value>
+  </data>
   <data name="Module.Admin.Restore.Button.Content" xml:space="preserve">
     <value>Restore Default</value>
   </data>

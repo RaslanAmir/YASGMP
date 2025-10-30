@@ -474,6 +474,58 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         return messages.AsReadOnly();
     }
 
+    protected override async Task<bool> OnSaveAsync()
+    {
+        var editable = CurrentSetting;
+        if (editable is null)
+        {
+            var message = _localizationService.GetString("Module.Admin.Settings.Validation.SelectionRequired");
+            ApplyValidation(new[] { message });
+            StatusMessage = message;
+            _alerts?.PublishStatus(message, AlertSeverity.Warning);
+            return false;
+        }
+
+        var existing = ResolveExistingSetting(editable);
+        var actorUserId = _authContext.CurrentUser?.Id ?? 0;
+        var actorIp = _authContext.CurrentIpAddress ?? string.Empty;
+        var actorDevice = _authContext.CurrentDeviceInfo ?? string.Empty;
+        var actorSession = _authContext.CurrentSessionId;
+        var displayName = GetSettingDisplayName(editable, existing);
+
+        var deleteRequested = editable.IsMarkedForDeletion;
+
+        try
+        {
+            if (deleteRequested)
+            {
+                return await DeleteSettingAsync(
+                        editable,
+                        existing,
+                        actorUserId,
+                        actorIp,
+                        actorDevice,
+                        actorSession,
+                        displayName)
+                    .ConfigureAwait(false);
+            }
+
+            return await UpsertSettingAsync(
+                    editable,
+                    existing,
+                    actorUserId,
+                    actorIp,
+                    actorDevice,
+                    actorSession,
+                    displayName)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            editable.IsMarkedForDeletion = false;
+        }
+    }
+
     private async Task LoadNotificationPreferencesAsync()
     {
         try
@@ -629,6 +681,390 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
             StatusMessage = failure;
             _alerts?.PublishStatus(failure, AlertSeverity.Error);
         }
+    }
+
+    private async Task<bool> DeleteSettingAsync(
+        EditableSetting editable,
+        Setting? existing,
+        int actorUserId,
+        string actorIp,
+        string actorDevice,
+        string actorSession,
+        string displayName)
+    {
+        if (existing is null || editable.IsNew)
+        {
+            var message = _localizationService.GetString("Module.Admin.Settings.Validation.DeleteRequiresExisting");
+            ApplyValidation(new[] { message });
+            StatusMessage = message;
+            _alerts?.PublishStatus(message, AlertSeverity.Warning);
+            return false;
+        }
+
+        var recordId = existing.Id;
+        ElectronicSignatureDialogResult? signatureResult;
+        try
+        {
+            signatureResult = await _signatureDialog
+                .CaptureSignatureAsync(new ElectronicSignatureContext("settings", recordId))
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            var failure = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Settings.Save.Status.SignatureFailed"),
+                ex.Message);
+            LastSignatureStatus = failure;
+            StatusMessage = failure;
+            _alerts?.PublishStatus(failure, AlertSeverity.Error);
+            return false;
+        }
+
+        if (signatureResult is null)
+        {
+            var cancelled = _localizationService.GetString("Module.Admin.Settings.Save.Status.SignatureCancelled");
+            LastSignatureStatus = cancelled;
+            StatusMessage = cancelled;
+            _alerts?.PublishStatus(cancelled, AlertSeverity.Warning);
+            return false;
+        }
+
+        if (signatureResult.Signature is null)
+        {
+            var missing = _localizationService.GetString("Module.Admin.Settings.Save.Status.SignatureMissing");
+            LastSignatureStatus = missing;
+            StatusMessage = missing;
+            _alerts?.PublishStatus(missing, AlertSeverity.Error);
+            return false;
+        }
+
+        var signature = signatureResult.Signature;
+        var reasonDisplay = signatureResult.ReasonDisplay ?? signatureResult.Reason ?? string.Empty;
+        var fallbackReason = string.IsNullOrWhiteSpace(reasonDisplay)
+            ? _localizationService.GetString("Module.Admin.Settings.Save.Status.SignatureCaptured.Unknown")
+            : reasonDisplay;
+        var capturedStatus = string.Format(
+            CultureInfo.CurrentCulture,
+            _localizationService.GetString("Module.Admin.Settings.Save.Status.SignatureCaptured"),
+            fallbackReason);
+
+        SignaturePersistenceHelper.ApplyEntityMetadata(
+            signatureResult,
+            tableName: "settings",
+            recordId: recordId,
+            metadata: null,
+            fallbackSignatureHash: existing.DigitalSignature,
+            fallbackMethod: signature.Method,
+            fallbackStatus: signature.Status,
+            fallbackNote: signature.Note,
+            signedAt: signature.SignedAt,
+            fallbackDeviceInfo: actorDevice,
+            fallbackIpAddress: actorIp,
+            fallbackSessionId: actorSession);
+
+        try
+        {
+            await SignaturePersistenceHelper
+                .PersistIfRequiredAsync(_signatureDialog, signatureResult)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            var persistFailed = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Settings.Save.Status.SignaturePersistFailed"),
+                ex.Message);
+            LastSignatureStatus = persistFailed;
+            StatusMessage = persistFailed;
+            _alerts?.PublishStatus(persistFailed, AlertSeverity.Error);
+            return false;
+        }
+
+        LastSignatureStatus = capturedStatus;
+
+        try
+        {
+            if (existing.Id > 0)
+            {
+                await Database
+                    .DeleteSettingAsync(existing.Id, actorUserId, actorIp, actorDevice)
+                    .ConfigureAwait(false);
+            }
+            else if (!string.IsNullOrWhiteSpace(existing.Key))
+            {
+                await Database
+                    .DeleteSettingByKeyAsync(existing.Key!, actorUserId, actorIp, actorDevice, actorSession)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var message = _localizationService.GetString("Module.Admin.Settings.Validation.DeleteRequiresExisting");
+                ApplyValidation(new[] { message });
+                StatusMessage = message;
+                _alerts?.PublishStatus(message, AlertSeverity.Error);
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            var failure = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Settings.Save.Status.DeleteFailed"),
+                displayName,
+                ex.Message);
+            StatusMessage = failure;
+            _alerts?.PublishStatus(failure, AlertSeverity.Error);
+            return false;
+        }
+
+        var success = string.Format(
+            CultureInfo.CurrentCulture,
+            _localizationService.GetString("Module.Admin.Settings.Save.Status.DeleteSuccess"),
+            displayName);
+        StatusMessage = success;
+        _alerts?.PublishStatus(success, AlertSeverity.Success);
+        ResetDirty();
+
+        var details = ComposeAuditDetails(existing, actorUserId, actorIp, actorDevice, actorSession, signatureResult);
+        await LogAuditAsync(
+                audit => audit.LogEntityAuditAsync("settings", existing.Id, "DELETE", details),
+                _localizationService.GetString("Module.Admin.Settings.Save.Status.AuditFailed"))
+            .ConfigureAwait(false);
+
+        return true;
+    }
+
+    private async Task<bool> UpsertSettingAsync(
+        EditableSetting editable,
+        Setting? existing,
+        int actorUserId,
+        string actorIp,
+        string actorDevice,
+        string actorSession,
+        string displayName)
+    {
+        LastSignatureStatus = null;
+
+        if (!editable.IsNew && existing is null)
+        {
+            var message = _localizationService.GetString("Module.Admin.Settings.Validation.UpdateRequiresExisting");
+            ApplyValidation(new[] { message });
+            StatusMessage = message;
+            _alerts?.PublishStatus(message, AlertSeverity.Error);
+            return false;
+        }
+
+        var settingToPersist = existing is not null
+            ? CloneSetting(existing)
+            : new Setting();
+
+        ApplyEditableToSetting(settingToPersist, editable);
+
+        var update = existing is not null && !editable.IsNew;
+        int persistedId;
+        try
+        {
+            persistedId = await Database
+                .UpsertSettingAsync(settingToPersist, update, actorUserId, actorIp, actorDevice, actorSession)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            var failure = string.Format(
+                CultureInfo.CurrentCulture,
+                _localizationService.GetString("Module.Admin.Settings.Save.Status.PersistenceFailed"),
+                displayName,
+                ex.Message);
+            StatusMessage = failure;
+            _alerts?.PublishStatus(failure, AlertSeverity.Error);
+            return false;
+        }
+
+        if (!update && persistedId > 0)
+        {
+            settingToPersist.Id = persistedId;
+        }
+
+        editable.IsNew = false;
+
+        var successKey = update
+            ? "Module.Admin.Settings.Save.Status.UpdateSuccess"
+            : "Module.Admin.Settings.Save.Status.CreateSuccess";
+        var success = string.Format(
+            CultureInfo.CurrentCulture,
+            _localizationService.GetString(successKey),
+            displayName);
+
+        StatusMessage = success;
+        _alerts?.PublishStatus(success, AlertSeverity.Success);
+        ResetDirty();
+
+        var action = update ? "UPDATE" : "CREATE";
+        var details = ComposeAuditDetails(settingToPersist, actorUserId, actorIp, actorDevice, actorSession, null);
+        await LogAuditAsync(
+                audit => audit.LogEntityAuditAsync("settings", settingToPersist.Id, action, details),
+                _localizationService.GetString("Module.Admin.Settings.Save.Status.AuditFailed"))
+            .ConfigureAwait(false);
+
+        return true;
+    }
+
+    private Setting? ResolveExistingSetting(EditableSetting editable)
+    {
+        var record = SelectedRecord;
+        if (record is not null)
+        {
+            if (_settingsByRecordKey.TryGetValue(record.Key, out var byRecord))
+            {
+                return byRecord;
+            }
+
+            if (!string.IsNullOrWhiteSpace(record.Code)
+                && _settingsByCode.TryGetValue(record.Code!, out var byCode))
+            {
+                return byCode;
+            }
+        }
+
+        var key = editable.Key;
+        if (!string.IsNullOrWhiteSpace(key))
+        {
+            if (_settingsByCode.TryGetValue(key!, out var byKey))
+            {
+                return byKey;
+            }
+
+            var normalized = key!.Trim();
+            if (!string.Equals(normalized, key, StringComparison.Ordinal))
+            {
+                if (_settingsByCode.TryGetValue(normalized, out var byNormalized))
+                {
+                    return byNormalized;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private string GetSettingDisplayName(EditableSetting editable, Setting? existing)
+    {
+        if (!string.IsNullOrWhiteSpace(editable.Key))
+        {
+            return editable.Key!.Trim();
+        }
+
+        if (existing is not null && !string.IsNullOrWhiteSpace(existing.Key))
+        {
+            return existing.Key!;
+        }
+
+        var record = SelectedRecord;
+        if (record is not null)
+        {
+            if (!string.IsNullOrWhiteSpace(record.Title))
+            {
+                return record.Title!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(record.Key))
+            {
+                return record.Key;
+            }
+        }
+
+        return _localizationService.GetString("Module.Title.Administration");
+    }
+
+    private static void ApplyEditableToSetting(Setting target, EditableSetting source)
+    {
+        var key = source.Key?.Trim();
+        target.Key = string.IsNullOrWhiteSpace(key) ? source.Key ?? string.Empty : key;
+        target.Value = source.Value ?? string.Empty;
+        target.Category = source.Category ?? string.Empty;
+        target.Description = source.Description ?? string.Empty;
+    }
+
+    private static Setting CloneSetting(Setting source)
+        => new()
+        {
+            Id = source.Id,
+            Key = source.Key,
+            Value = source.Value,
+            DefaultValue = source.DefaultValue,
+            ValueType = source.ValueType,
+            MinValue = source.MinValue,
+            MaxValue = source.MaxValue,
+            Description = source.Description,
+            Category = source.Category,
+            Subcategory = source.Subcategory,
+            IsSensitive = source.IsSensitive,
+            IsGlobal = source.IsGlobal,
+            UserId = source.UserId,
+            RoleId = source.RoleId,
+            ApprovedById = source.ApprovedById,
+            ApprovedAt = source.ApprovedAt,
+            DigitalSignature = source.DigitalSignature,
+            Status = source.Status,
+            UpdatedAt = source.UpdatedAt,
+            UpdatedById = source.UpdatedById,
+            Versions = source.Versions is null
+                ? new List<SettingVersion>()
+                : new List<SettingVersion>(source.Versions),
+            AuditLogs = source.AuditLogs is null
+                ? new List<SettingAuditLog>()
+                : new List<SettingAuditLog>(source.AuditLogs),
+            ExpiryDate = source.ExpiryDate,
+        };
+
+    private static string ComposeAuditDetails(
+        Setting setting,
+        int actorUserId,
+        string actorIp,
+        string actorDevice,
+        string? actorSession,
+        ElectronicSignatureDialogResult? signatureResult)
+    {
+        var parts = new List<string?>
+        {
+            string.IsNullOrWhiteSpace(setting.Key) ? null : $"key={setting.Key}",
+            string.IsNullOrWhiteSpace(setting.Value) ? null : $"value={setting.Value}",
+            $"user={actorUserId}",
+            string.IsNullOrWhiteSpace(actorIp) ? null : $"ip={actorIp}",
+            string.IsNullOrWhiteSpace(actorDevice) ? null : $"device={actorDevice}",
+            string.IsNullOrWhiteSpace(actorSession) ? null : $"session={actorSession}",
+        };
+
+        if (signatureResult is not null)
+        {
+            var reason = signatureResult.ReasonDisplay ?? signatureResult.ReasonCode;
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                parts.Add($"reason={reason}");
+            }
+
+            var signature = signatureResult.Signature;
+            if (signature is not null)
+            {
+                if (!string.IsNullOrWhiteSpace(signature.SignatureHash))
+                {
+                    parts.Add($"signature={signature.SignatureHash}");
+                }
+
+                if (!string.IsNullOrWhiteSpace(signature.Method))
+                {
+                    parts.Add($"method={signature.Method}");
+                }
+
+                if (!string.IsNullOrWhiteSpace(signature.Status))
+                {
+                    parts.Add($"status={signature.Status}");
+                }
+            }
+        }
+
+        return string.Join(", ", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
     }
 
     private async Task UpdateChoiceCollectionsAsync(IEnumerable<Setting> settings)
