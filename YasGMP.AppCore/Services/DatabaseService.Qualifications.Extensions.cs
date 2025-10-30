@@ -193,22 +193,25 @@ LIMIT 1";
 
             string ResolveCode()
             {
-                var code = S("certificate_number");
+                var code = S("code");
                 if (!string.IsNullOrWhiteSpace(code)) return code;
-                code = S("code");
+
+                code = S("certificate_number");
                 return !string.IsNullOrWhiteSpace(code) ? code : I("id").ToString(CultureInfo.InvariantCulture);
             }
+
+            string typeValue = S("type");
+            if (string.IsNullOrWhiteSpace(typeValue)) typeValue = S("qualification_type");
+            if (string.IsNullOrWhiteSpace(typeValue)) typeValue = "Component";
 
             var qualification = new Qualification
             {
                 Id = I("id"),
                 Code = ResolveCode(),
-                Type = !string.IsNullOrWhiteSpace(S("type"))
-                    ? S("type")
-                    : (!string.IsNullOrWhiteSpace(S("qualification_type")) ? S("qualification_type") : "Component"),
+                Type = typeValue,
                 Description = S("qualification_type"),
                 Date = D("qualification_date") ?? DateTime.UtcNow,
-                ExpiryDate = D("expiry_date"),
+                ExpiryDate = D("expiry_date") ?? D("next_due"),
                 Status = S("status"),
                 MachineId = IN("machine_id"),
                 ComponentId = IN("component_id"),
@@ -221,11 +224,14 @@ LIMIT 1";
 
             string machineCode = S("machine_code");
             string machineName = S("machine_name");
-            if (qualification.MachineId.HasValue || !string.IsNullOrWhiteSpace(machineCode) || !string.IsNullOrWhiteSpace(machineName))
+            int? machineId = qualification.MachineId;
+            if (machineId.HasValue
+                || !string.IsNullOrWhiteSpace(machineCode)
+                || !string.IsNullOrWhiteSpace(machineName))
             {
                 qualification.Machine = new Machine
                 {
-                    Id = qualification.MachineId ?? 0,
+                    Id = machineId ?? 0,
                     Code = string.IsNullOrWhiteSpace(machineCode) ? string.Empty : machineCode,
                     Name = string.IsNullOrWhiteSpace(machineName) ? string.Empty : machineName
                 };
@@ -233,33 +239,40 @@ LIMIT 1";
 
             string componentCode = S("component_code");
             string componentName = S("component_name");
-            if (qualification.ComponentId.HasValue || !string.IsNullOrWhiteSpace(componentCode) || !string.IsNullOrWhiteSpace(componentName))
+            int? componentId = qualification.ComponentId;
+            if (componentId.HasValue
+                || !string.IsNullOrWhiteSpace(componentCode)
+                || !string.IsNullOrWhiteSpace(componentName))
             {
                 qualification.Component = new MachineComponent
                 {
-                    Id = qualification.ComponentId ?? 0,
+                    Id = componentId ?? 0,
                     Code = string.IsNullOrWhiteSpace(componentCode) ? string.Empty : componentCode,
                     Name = string.IsNullOrWhiteSpace(componentName) ? string.Empty : componentName
                 };
             }
 
             string supplierName = S("supplier_name");
-            if (qualification.SupplierId.HasValue || !string.IsNullOrWhiteSpace(supplierName))
+            int? supplierId = qualification.SupplierId;
+            if (supplierId.HasValue || !string.IsNullOrWhiteSpace(supplierName))
             {
                 qualification.Supplier = new Supplier
                 {
-                    Id = qualification.SupplierId ?? 0,
+                    Id = supplierId ?? 0,
                     Name = string.IsNullOrWhiteSpace(supplierName) ? string.Empty : supplierName
                 };
             }
 
             string qualifiedUsername = S("qualified_by_username");
             string qualifiedFullName = S("qualified_by_full_name");
-            if (qualification.QualifiedById.HasValue || !string.IsNullOrWhiteSpace(qualifiedUsername) || !string.IsNullOrWhiteSpace(qualifiedFullName))
+            int? qualifiedById = qualification.QualifiedById;
+            if (qualifiedById.HasValue
+                || !string.IsNullOrWhiteSpace(qualifiedUsername)
+                || !string.IsNullOrWhiteSpace(qualifiedFullName))
             {
                 qualification.QualifiedBy = new User
                 {
-                    Id = qualification.QualifiedById ?? 0,
+                    Id = qualifiedById ?? 0,
                     Username = string.IsNullOrWhiteSpace(qualifiedUsername) ? string.Empty : qualifiedUsername,
                     FullName = string.IsNullOrWhiteSpace(qualifiedFullName) ? string.Empty : qualifiedFullName
                 };
@@ -267,11 +280,14 @@ LIMIT 1";
 
             string approvedUsername = S("approved_by_username");
             string approvedFullName = S("approved_by_full_name");
-            if (qualification.ApprovedById.HasValue || !string.IsNullOrWhiteSpace(approvedUsername) || !string.IsNullOrWhiteSpace(approvedFullName))
+            int? approvedById = qualification.ApprovedById;
+            if (approvedById.HasValue
+                || !string.IsNullOrWhiteSpace(approvedUsername)
+                || !string.IsNullOrWhiteSpace(approvedFullName))
             {
                 qualification.ApprovedBy = new User
                 {
-                    Id = qualification.ApprovedById ?? 0,
+                    Id = approvedById ?? 0,
                     Username = string.IsNullOrWhiteSpace(approvedUsername) ? string.Empty : approvedUsername,
                     FullName = string.IsNullOrWhiteSpace(approvedFullName) ? string.Empty : approvedFullName
                 };
