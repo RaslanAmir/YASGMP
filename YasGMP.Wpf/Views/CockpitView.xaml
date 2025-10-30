@@ -3,14 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:YasGMP.Wpf.ViewModels"
              mc:Ignorable="d"
-             d:DesignHeight="200"
-             d:DesignWidth="600">
+             d:DesignHeight="260"
+             d:DesignWidth="640"
+             d:DataContext="{d:DesignInstance vm:CockpitViewModel, IsDesignTimeCreatable=True}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Text="{DynamicResource Cockpit.Section.Metrics.Header}"
@@ -21,52 +28,171 @@
                    AutomationProperties.Name="{DynamicResource Cockpit.Section.Metrics.AutomationName}"
                    AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Metrics.AutomationId}" />
 
-        <ItemsControl Grid.Row="1"
-                      ItemsSource="{Binding Metrics}"
-                      ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Metrics.Items.ToolTip}"
-                      AutomationProperties.Name="{DynamicResource Cockpit.Section.Metrics.Items.AutomationName}"
-                      AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Metrics.Items.AutomationId}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border CornerRadius="4"
-                            Background="{Binding AccentHex}"
-                            Margin="0,0,8,0"
-                            Padding="12"
-                            MinWidth="120">
-                        <StackPanel>
-                            <TextBlock Text="{Binding Label}" Foreground="White" FontWeight="Bold" />
-                            <TextBlock Text="{Binding FormattedValue}" Foreground="White" FontSize="18" />
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <StackPanel Grid.Row="2" Margin="0,12,0,0">
-            <TextBlock Text="{DynamicResource Cockpit.Section.Notices.Header}"
-                       FontWeight="Bold"
-                       Margin="0,0,0,4"
-                       ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Notices.ToolTip}"
-                       AutomationProperties.Name="{DynamicResource Cockpit.Section.Notices.AutomationName}"
-                       AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Notices.AutomationId}" />
-            <ItemsControl ItemsSource="{Binding Notices}"
-                          ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Notices.Items.ToolTip}"
-                          AutomationProperties.Name="{DynamicResource Cockpit.Section.Notices.Items.AutomationName}"
-                          AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Notices.Items.AutomationId}">
+        <Grid Grid.Row="1"
+              ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Metrics.Items.ToolTip}"
+              AutomationProperties.Name="{DynamicResource Cockpit.Section.Metrics.Items.AutomationName}"
+              AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Metrics.Items.AutomationId}">
+            <ItemsControl ItemsSource="{Binding Metrics}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel IsItemsHost="True" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel Margin="0,0,0,4">
-                            <Ellipse Width="6" Height="6" Fill="#007ACC" Margin="0,6,6,0" />
-                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-                        </DockPanel>
+                    <DataTemplate DataType="{x:Type vm:CockpitMetricViewModel}">
+                        <Border CornerRadius="4"
+                                Background="{Binding AccentBrush}"
+                                BorderBrush="{Binding BorderBrush}"
+                                BorderThickness="1"
+                                Margin="0,0,8,8"
+                                Padding="12"
+                                MinWidth="150"
+                                ToolTip="{Binding LastUpdatedDisplay}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}"
+                                           Foreground="{Binding ForegroundBrush}"
+                                           FontWeight="Bold" />
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,4,0,0">
+                                    <TextBlock Text="{Binding Value}"
+                                               Foreground="{Binding ForegroundBrush}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Unit}"
+                                               Foreground="{Binding ForegroundBrush}"
+                                               Margin="6,6,0,0"
+                                               Visibility="{Binding HasUnit, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,6,0,0"
+                                            Visibility="{Binding HasTrend, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding TrendGlyph}"
+                                               Foreground="{Binding TrendBrush}"
+                                               FontSize="16"
+                                               FontWeight="Bold" />
+                                    <TextBlock Text="{Binding TrendDisplay}"
+                                               Foreground="{Binding TrendBrush}"
+                                               Margin="6,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </StackPanel>
+
+            <Border Background="#99FFFFFF"
+                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="16">
+                    <ProgressBar Width="160" Height="16" IsIndeterminate="True" />
+                    <TextBlock Text="{DynamicResource Cockpit.Status.Loading}"
+                               Foreground="Gray"
+                               Margin="0,8,0,0"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{DynamicResource Cockpit.Metrics.Empty}"
+                       Foreground="Gray"
+                       FontStyle="Italic"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding ShowMetricsPlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </Grid>
+
+        <TextBlock Grid.Row="2"
+                   Text="{DynamicResource Cockpit.Section.Notices.Header}"
+                   FontWeight="Bold"
+                   Margin="0,12,0,4"
+                   ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Notices.ToolTip}"
+                   AutomationProperties.Name="{DynamicResource Cockpit.Section.Notices.AutomationName}"
+                   AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Notices.AutomationId}" />
+
+        <Border Grid.Row="3"
+                BorderBrush="#DDD"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="0"
+                ToolTipService.ToolTip="{DynamicResource Cockpit.Section.Notices.Items.ToolTip}"
+                AutomationProperties.Name="{DynamicResource Cockpit.Section.Notices.Items.AutomationName}"
+                AutomationProperties.AutomationId="{DynamicResource Cockpit.Section.Notices.Items.AutomationId}">
+            <Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Notices}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:CockpitNoticeViewModel}">
+                                <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10,6">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                            <Ellipse Width="8" Height="8" Fill="{Binding SeverityBrush}" Margin="0,4,6,0" />
+                                            <TextBlock Text="{Binding Summary}" TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="FontWeight" Value="Normal" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsUnread}" Value="True">
+                                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" FontSize="11" Foreground="Gray">
+                                            <TextBlock Text="{Binding SeverityDisplay}"
+                                                       Foreground="{Binding SeverityBrush}"
+                                                       Visibility="{Binding HasSeverity, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            <TextBlock Text="{Binding ModuleDisplay}"
+                                                       Margin="12,0,0,0"
+                                                       Visibility="{Binding HasModule, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            <TextBlock Text="{Binding TimestampDisplay}"
+                                                       Margin="12,0,0,0" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <Border Background="#99FFFFFF"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="16">
+                        <ProgressBar Width="160" Height="16" IsIndeterminate="True" />
+                        <TextBlock Text="{DynamicResource Cockpit.Status.Loading}"
+                                   Foreground="Gray"
+                                   Margin="0,8,0,0"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{DynamicResource Cockpit.Notices.Empty}"
+                           Foreground="Gray"
+                           FontStyle="Italic"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding ShowNoticesPlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="4"
+                   Text="{Binding StatusMessage}"
+                   Margin="0,12,0,0"
+                   FontStyle="Italic">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="Gray" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                            <Setter Property="Foreground" Value="Firebrick" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
     </Grid>
 </UserControl>

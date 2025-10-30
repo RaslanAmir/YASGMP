@@ -3904,6 +3904,27 @@
   <data name="Cockpit.Notice.DeviationsAwaitingApproval" xml:space="preserve">
     <value>Dva odstupanja čekaju odobrenje QA</value>
   </data>
+  <data name="Cockpit.Metrics.Empty" xml:space="preserve">
+    <value>Nema dostupnih KPI metrika.</value>
+  </data>
+  <data name="Cockpit.Notices.Empty" xml:space="preserve">
+    <value>Nema nedavnih obavijesti za prikaz.</value>
+  </data>
+  <data name="Cockpit.Status.Loading" xml:space="preserve">
+    <value>Učitavanje podataka kokpita...</value>
+  </data>
+  <data name="Cockpit.Status.Ready" xml:space="preserve">
+    <value>Podaci kokpita su ažurni.</value>
+  </data>
+  <data name="Cockpit.Status.NoData" xml:space="preserve">
+    <value>Nema podataka kokpita za trenutni kontekst.</value>
+  </data>
+  <data name="Cockpit.Status.LoadFailed" xml:space="preserve">
+    <value>Nije moguće učitati podatke kokpita.</value>
+  </data>
+  <data name="Cockpit.Status.LoadFailedWithError" xml:space="preserve">
+    <value>Nije moguće učitati podatke kokpita: {0}</value>
+  </data>
   <data name="Audit.Filter.User.Label" xml:space="preserve">
     <value>Korisnik</value>
   </data>

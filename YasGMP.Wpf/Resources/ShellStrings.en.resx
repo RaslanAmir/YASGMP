@@ -3901,6 +3901,27 @@
   <data name="Cockpit.Notice.DeviationsAwaitingApproval" xml:space="preserve">
     <value>Two deviations awaiting QA approval</value>
   </data>
+  <data name="Cockpit.Metrics.Empty" xml:space="preserve">
+    <value>No KPI metrics are available yet.</value>
+  </data>
+  <data name="Cockpit.Notices.Empty" xml:space="preserve">
+    <value>No recent notices to display.</value>
+  </data>
+  <data name="Cockpit.Status.Loading" xml:space="preserve">
+    <value>Loading cockpit data...</value>
+  </data>
+  <data name="Cockpit.Status.Ready" xml:space="preserve">
+    <value>Cockpit data is current.</value>
+  </data>
+  <data name="Cockpit.Status.NoData" xml:space="preserve">
+    <value>No cockpit data returned for the current context.</value>
+  </data>
+  <data name="Cockpit.Status.LoadFailed" xml:space="preserve">
+    <value>Unable to load cockpit data.</value>
+  </data>
+  <data name="Cockpit.Status.LoadFailedWithError" xml:space="preserve">
+    <value>Unable to load cockpit data: {0}</value>
+  </data>
   <data name="Audit.Filter.User.Label" xml:space="preserve">
     <value>User</value>
   </data>
