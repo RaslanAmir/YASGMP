@@ -26,6 +26,7 @@
 - 2026-08-21T09:15Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried while wiring the cockpit dashboard to DatabaseService; each command still returns `bash: command not found: dotnet` in this container.
   - 2026-08-22T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` retried while finalizing cockpit KPI/notice refresh logic; all still exit with `bash: command not found: dotnet` pending a Windows host.
   - 2026-08-24T09:30Z: `dotnet restore yasgmp.sln` and `dotnet build yasgmp.sln` retried while seeding dashboard test doubles; both commands still return `bash: command not found: dotnet` because the CLI is unavailable in this container.
+  - 2026-08-30T09:30Z: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried during the cockpit/dashboard documentation sync; each command still exits with `bash: command not found: dotnet` in this environment.
   - 2026-07-29T09:35Z: `dotnet restore`, `dotnet build yasgmp.sln -c Debug`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -c Debug` retried during Diagnostics workspace wiring; all three commands still exit with `bash: command not found: dotnet`, so validation remains blocked on a Windows host.
   - 2026-07-30T09:50Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` each still fail with `bash: command not found: dotnet`; Windows tooling remains required for restore/build/test runs.
   - 2026-07-31T09:20Z: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` were retried while landing the ComponentService ID/audit propagation fix; each continues to exit with `bash: command not found: dotnet` inside this container so validation stays Windows-host only.
@@ -197,6 +198,12 @@
 - Quality ribbon group surfaces the same command with a large icon plus EN/HR automation metadata, keeping ribbon/backstage/menu/module tree bindings aligned on the new `Qualifications` localization keys.
 - Updated module tree configuration to target the Qualifications resource keys so accessibility metadata and smoke automation lookups remain accurate after the localization refresh.
 - CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` retried for this batch but still exit with `bash: command not found: dotnet`; Windows-host validation remains required.
+
+### Documentation sync — Cockpit KPI alignment (2026-08-30)
+
+- Updated `docs/WPF_MAPPING.md` to record that `DashboardModuleViewModel` and `CockpitViewModel` now hydrate KPI widgets and activity feeds through `DatabaseService.DashboardExtensions`, removing the stale TODO about wiring the shared extensions.
+- Expanded `README_WPF_SHELL.md` with a cockpit/dashboard integration subsection covering the shared KPI dependencies, configuration defaults (`Shell:UserId`, `Shell:Username`, `Shell:FullName`), and the localization/session hooks (`ILocalizationService.LanguageChanged`, `UserSession.SessionChanged`, `ISignalRClientService.AuditReceived`) that keep operators in sync with live metrics.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0` remain blocked with `bash: command not found: dotnet`; WPF smoke harness execution is still pending a Windows host.
 
 ### Increment 2 Follow-up — Training & SOP governance documentation (2026-06-09)
 
