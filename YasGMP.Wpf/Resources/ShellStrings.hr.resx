@@ -4459,6 +4459,18 @@
   <data name="Module.Admin.Settings.Form.Category.AutomationId" xml:space="preserve">
     <value>Module.Admin.Settings.Form.Category</value>
   </data>
+  <data name="Module.Admin.Category.Label" xml:space="preserve">
+    <value>Kategorija</value>
+  </data>
+  <data name="Module.Admin.Category.ToolTip" xml:space="preserve">
+    <value>Odaberite kategoriju za ovu postavku.</value>
+  </data>
+  <data name="Module.Admin.Category.AutomationName" xml:space="preserve">
+    <value>Kategorija postavke</value>
+  </data>
+  <data name="Module.Admin.Category.AutomationId" xml:space="preserve">
+    <value>Admin_Setting_Category</value>
+  </data>
   <data name="Module.Admin.Settings.Form.Description.Label" xml:space="preserve">
     <value>Opis</value>
   </data>

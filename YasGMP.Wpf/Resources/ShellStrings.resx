@@ -4006,6 +4006,18 @@
   <data name="Module.Admin.Settings.Form.Category.AutomationId" xml:space="preserve">
     <value>Module.Admin.Settings.Form.Category</value>
   </data>
+  <data name="Module.Admin.Category.Label" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Module.Admin.Category.ToolTip" xml:space="preserve">
+    <value>Select the category for this setting.</value>
+  </data>
+  <data name="Module.Admin.Category.AutomationName" xml:space="preserve">
+    <value>Setting category</value>
+  </data>
+  <data name="Module.Admin.Category.AutomationId" xml:space="preserve">
+    <value>Admin_Setting_Category</value>
+  </data>
   <data name="Module.Admin.Settings.Form.Description.Label" xml:space="preserve">
     <value>Description</value>
   </data>

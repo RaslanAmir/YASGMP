@@ -240,8 +240,9 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "in-progress"
   },
-  "lastCommitSummary": "feat: replace admin settings grid with form",
+  "lastCommitSummary": "feat: add admin setting category picker",
   "notes": [
+    "2026-09-18: AdminModuleView now surfaces a localized SettingCategories ComboBox with automation metadata so settings align with other editors; dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release each return 'command not found: dotnet' in this container.",
     "2026-09-15: AdminModuleViewModel now overrides OnModeChangedAsync to spawn a fresh EditableSetting in Add mode and clear delete/new flags when transitioning back to non-edit modes, preventing sticky deletion toggles; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 were retried and each still report 'command not found: dotnet' in this container.",
     "2026-09-13: Added DatabaseServiceQualificationsExtensionsTests to assert preferred projection joins and legacy fallback behaviour for qualifications; dotnet restore/build/test still fail with 'command not found: dotnet' until executed on a Windows host.",
     "2026-09-08: DatabaseService risk assessment mapper now hydrates owner/approver usernames, full names, and display names from joined user metadata and instantiates User projections when IDs exist so inspector/export views surface richer context; dotnet restore/build/test remain blocked with 'command not found: dotnet' in this container.",
