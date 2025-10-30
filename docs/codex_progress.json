@@ -110,13 +110,15 @@
       "2026-07-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows10.0.19041.0, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried while wiring Security inspector command wrappers; each command still fails with 'command not found: dotnet' because the CLI is unavailable in this container.",
       "2026-08-17: dotnet restore yasgmp.sln retried while adding WPF service registration regression coverage; command still exits with 'command not found: dotnet' in this container.",
       "2026-08-18: dotnet restore yasgmp.sln retried while documenting shared DatabaseService diagnostics/shadow replication parity; command still exits with 'command not found: dotnet' in this container.",
-      "2026-08-19: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried for the machine trigger reconciliation batch; each command still exits with 'command not found: dotnet' because the CLI is unavailable in this container."
+      "2026-08-19: dotnet restore yasgmp.sln, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release retried for the machine trigger reconciliation batch; each command still exits with 'command not found: dotnet' because the CLI is unavailable in this container.",
+      "2026-08-21: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried while wiring cockpit KPIs/notices from DatabaseService; every command still returns 'command not found: dotnet' inside this container."
     ],
     "progress": [
       "2025-10-13: Logged Increment 1 backlog for WPF compliance (folder inventory, entity traceability, audit hash-chain) while CLI remains unavailable.",
       "2026-04-20: Documented WPF code/QR parity and operator guidance in docs/WPF_MAPPING.md; restore/build/test remain blocked with 'command not found' until the CLI is available.",
       "2026-06-09: Documented Training Records and SOP Governance module workflows in docs/WPF_MAPPING.md and README_WPF_SHELL.md; dotnet --version/dotnet restore still fail with 'command not found: dotnet'.",
-      "2025-10-29: Captured renewed environment verification and smoke-harness TODO in docs/codex_plan.md and docs/codex_progress.json so the next Windows-host validation run has up-to-date context."
+      "2025-10-29: Captured renewed environment verification and smoke-harness TODO in docs/codex_plan.md and docs/codex_progress.json so the next Windows-host validation run has up-to-date context.",
+      "2026-08-21: CockpitViewModel now sources KPI widgets and dashboard notices from DatabaseService with localized status/empty messaging, and CockpitView renders the new wrappers with loading/error states documented in codex_plan.md."
     ]
   },
   "batches": [
