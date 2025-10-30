@@ -150,7 +150,8 @@
 
 - DatabaseService `GetAllRiskAssessmentsFullAsync` now selects the full risk assessment schema, joins owner/approver users for display metadata, orders review-ready records first while preserving ID-desc sorting for legacy rows, and falls back to a wildcard projection if older installations lack the new columns.
 - The RiskAssessment mapper hydrates `Owner`/`ApprovedBy` navigation properties using the joined usernames/full names so inspector panes surface human-readable ownership without extra service calls.
-- CLI status: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still fail with `bash: command not found: dotnet`; WPF smoke automation remains blocked pending Windows tooling.
+- Added `DatabaseServiceRiskAssessmentsExtensionsTests` to validate the preferred projection owner/approver joins plus the legacy fallback that omits the new columns so owner metadata and review dates default safely.
+- CLI status: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still fail with `bash: command not found: dotnet`; `dotnet --version` retried on 2026-09-08 with the same result so WPF smoke automation remains blocked pending Windows tooling.
 
 ### Increment 2 Follow-up — Alerts & Notification Preferences (2026-04-10)
 

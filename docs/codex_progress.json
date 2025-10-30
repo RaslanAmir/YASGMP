@@ -577,6 +577,7 @@
     "2026-08-30: docs/WPF_MAPPING.md and README_WPF_SHELL.md now describe the cockpit/dashboard KPI flow using DatabaseService.DashboardExtensions, note the session/localization hooks, and record that dotnet restore/build commands continue to fail with 'command not found: dotnet' pending a Windows toolchain.",
     "2026-09-05: WPF DatabaseService configure callback now mirrors MAUI by requiring DiagnosticContext/ITrace/IConfiguration, forcing SetDiagnostics to run, and resetting docs/tests accordingly; dotnet restore/build/test still exit with 'command not found: dotnet' so smoke automation remains Windows-host only.",
     "2026-09-06: Startup now runs the machines trigger reconciliation on a background task with success/permission logging, ServiceRegistrationTests assert the guard and PowerShell helper env alignment, and documentation reflects the workflow; dotnet restore/build/test continue to report 'command not found: dotnet' in this container.",
-    "2026-09-07: DatabaseService risk assessment listing now selects the full schema with owner/approver joins, hydrates navigation properties for inspector display, and dotnet --version/restore/build/test still fail with 'command not found: dotnet' pending Windows tooling."
+    "2026-09-07: DatabaseService risk assessment listing now selects the full schema with owner/approver joins, hydrates navigation properties for inspector display, and dotnet --version/restore/build/test still fail with 'command not found: dotnet' pending Windows tooling.",
+    "2026-09-08: Added DatabaseServiceRiskAssessmentsExtensionsTests to cover the preferred projection joins plus the legacy fallback; dotnet --version still exits with 'command not found: dotnet' in this container."
   ]
 }
