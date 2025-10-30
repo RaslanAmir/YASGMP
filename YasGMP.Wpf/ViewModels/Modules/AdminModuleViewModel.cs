@@ -167,6 +167,8 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
     private readonly Dictionary<string, Setting> _settingsByRecordKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Setting> _settingsByCode = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _validationLock = new();
+    private readonly object _pendingSettingEditsLock = new();
+    private readonly HashSet<EditableSetting> _pendingSettingEdits = new();
 
     private bool _suppressPreferenceDirty;
     private bool _statusBarAlertsEnabled;
@@ -378,6 +380,11 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
                     current.IsMarkedForDeletion = false;
                     current.IsNew = false;
                 }
+
+                lock (_pendingSettingEditsLock)
+                {
+                    _pendingSettingEdits.Remove(current);
+                }
             }
             finally
             {
@@ -386,6 +393,85 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         }
 
         await base.OnModeChangedAsync(mode).ConfigureAwait(false);
+    }
+
+    protected override async Task<IReadOnlyList<string>> ValidateAsync()
+    {
+        var messages = new List<string>();
+        var setting = CurrentSetting;
+
+        if (setting is null)
+        {
+            await RunOnDispatcherAsync(() => ApplyValidation(messages)).ConfigureAwait(false);
+            return messages.AsReadOnly();
+        }
+
+        if (string.IsNullOrWhiteSpace(setting.Key))
+        {
+            messages.Add(_localizationService.GetString("Module.Admin.Settings.Validation.KeyRequired"));
+        }
+
+        if (string.IsNullOrWhiteSpace(setting.Value))
+        {
+            messages.Add(_localizationService.GetString("Module.Admin.Settings.Validation.ValueRequired"));
+        }
+
+        if (string.IsNullOrWhiteSpace(setting.Category))
+        {
+            messages.Add(_localizationService.GetString("Module.Admin.Settings.Validation.CategoryRequired"));
+        }
+
+        if (setting.IsNew)
+        {
+            var rawKey = setting.Key;
+            var normalizedKey = rawKey?.Trim();
+            var comparisonKey = string.IsNullOrWhiteSpace(normalizedKey) ? rawKey : normalizedKey;
+
+            if (!string.IsNullOrWhiteSpace(comparisonKey))
+            {
+                var duplicate = _settingsByCode.ContainsKey(comparisonKey!);
+
+                if (!duplicate && !string.Equals(comparisonKey, rawKey, StringComparison.Ordinal))
+                {
+                    duplicate = !string.IsNullOrWhiteSpace(rawKey) && _settingsByCode.ContainsKey(rawKey!);
+                }
+
+                if (!duplicate)
+                {
+                    List<EditableSetting> pendingSnapshot;
+                    lock (_pendingSettingEditsLock)
+                    {
+                        pendingSnapshot = _pendingSettingEdits.ToList();
+                    }
+
+                    if (pendingSnapshot.Count > 0)
+                    {
+                        duplicate = pendingSnapshot
+                            .Where(edit => !ReferenceEquals(edit, setting))
+                            .Any(edit =>
+                            {
+                                var pendingRawKey = edit.Key;
+                                var pendingNormalized = pendingRawKey?.Trim();
+                                var pendingComparison = string.IsNullOrWhiteSpace(pendingNormalized)
+                                    ? pendingRawKey
+                                    : pendingNormalized;
+
+                                return !string.IsNullOrWhiteSpace(pendingComparison)
+                                    && string.Equals(pendingComparison, comparisonKey, StringComparison.OrdinalIgnoreCase);
+                            });
+                    }
+                }
+
+                if (duplicate)
+                {
+                    var displayKey = string.IsNullOrWhiteSpace(normalizedKey) ? comparisonKey! : normalizedKey!;
+                    messages.Add(_localizationService.GetString("Module.Admin.Settings.Validation.DuplicateKey", displayKey));
+                }
+            }
+        }
+
+        await RunOnDispatcherAsync(() => ApplyValidation(messages)).ConfigureAwait(false);
+        return messages.AsReadOnly();
     }
 
     private async Task LoadNotificationPreferencesAsync()
@@ -487,6 +573,21 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         if (sender is not EditableSetting editable || !ReferenceEquals(editable, _currentSetting))
         {
             return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(EditableSetting.IsNew), StringComparison.Ordinal))
+        {
+            lock (_pendingSettingEditsLock)
+            {
+                if (editable.IsNew)
+                {
+                    _pendingSettingEdits.Add(editable);
+                }
+                else
+                {
+                    _pendingSettingEdits.Remove(editable);
+                }
+            }
         }
 
         MarkDirty();
@@ -594,6 +695,11 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         if (_currentSetting is not null)
         {
             _currentSetting.PropertyChanged -= OnCurrentSettingPropertyChanged;
+
+            lock (_pendingSettingEditsLock)
+            {
+                _pendingSettingEdits.Remove(_currentSetting);
+            }
         }
 
         _currentSetting = setting;
@@ -602,6 +708,14 @@ public sealed class AdminModuleViewModel : DataDrivenModuleDocumentViewModel
         if (_currentSetting is not null)
         {
             _currentSetting.PropertyChanged += OnCurrentSettingPropertyChanged;
+
+            if (_currentSetting.IsNew)
+            {
+                lock (_pendingSettingEditsLock)
+                {
+                    _pendingSettingEdits.Add(_currentSetting);
+                }
+            }
         }
     }
 
