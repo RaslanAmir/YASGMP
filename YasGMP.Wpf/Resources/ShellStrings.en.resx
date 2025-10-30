@@ -4408,6 +4408,18 @@
   <data name="Module.Admin.NotificationPreferences.StatusLoadFailed" xml:space="preserve">
     <value>Could not load notification preferences: {0}</value>
   </data>
+  <data name="Module.Admin.Settings.Validation.KeyRequired" xml:space="preserve">
+    <value>Setting key is required.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.ValueRequired" xml:space="preserve">
+    <value>Setting value is required.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.CategoryRequired" xml:space="preserve">
+    <value>Setting category is required.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.DuplicateKey" xml:space="preserve">
+    <value>A setting with key "{0}" already exists.</value>
+  </data>
   <data name="Module.Admin.Restore.Button.Content" xml:space="preserve">
     <value>Restore Default</value>
   </data>

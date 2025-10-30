@@ -4411,6 +4411,18 @@
   <data name="Module.Admin.NotificationPreferences.StatusLoadFailed" xml:space="preserve">
     <value>Učitavanje postavki obavijesti nije uspjelo: {0}</value>
   </data>
+  <data name="Module.Admin.Settings.Validation.KeyRequired" xml:space="preserve">
+    <value>Potrebno je unijeti ključ postavke.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.ValueRequired" xml:space="preserve">
+    <value>Potrebno je unijeti vrijednost postavke.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.CategoryRequired" xml:space="preserve">
+    <value>Potrebno je odabrati kategoriju postavke.</value>
+  </data>
+  <data name="Module.Admin.Settings.Validation.DuplicateKey" xml:space="preserve">
+    <value>Postavka s ključem &quot;{0}&quot; već postoji.</value>
+  </data>
   <data name="Module.Admin.Restore.Button.Content" xml:space="preserve">
     <value>Vrati zadanu vrijednost</value>
   </data>
