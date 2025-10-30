@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -60,9 +61,10 @@ public class ServiceRegistrationTests
                                    ?? throw new MissingFieldException(typeof(App).FullName, "_host");
                     hostField.SetValue(app, new TestHost(provider));
 
-                    var ensureMethod = typeof(App).GetMethod("EnsureMachineTriggersSafe", BindingFlags.Instance | BindingFlags.NonPublic)
-                                       ?? throw new MissingMethodException(typeof(App).FullName, "EnsureMachineTriggersSafe");
-                    ensureMethod.Invoke(app, null);
+                    var ensureMethod = typeof(App).GetMethod("EnsureMachineTriggersSafeAsync", BindingFlags.Instance | BindingFlags.NonPublic)
+                                       ?? throw new MissingMethodException(typeof(App).FullName, "EnsureMachineTriggersSafeAsync");
+                    var task = ensureMethod.Invoke(app, null) as Task;
+                    task?.GetAwaiter().GetResult();
                 }
                 finally
                 {
@@ -73,6 +75,19 @@ public class ServiceRegistrationTests
             Assert.True(invocationCount > 0, "Expected EnsureMachineTriggersForMachinesAsync to invoke ExecuteNonQuery.");
 
             database.ResetTestOverrides();
+        }
+
+        [Fact]
+        public void TestHookHelperScript_UsesExpectedEnvironmentVariables()
+        {
+            var scriptPath = Path.Combine(GetRepositoryRoot(), "scripts", "wpf-run-with-testhooks.ps1");
+            Assert.True(File.Exists(scriptPath), $"Expected helper script at '{scriptPath}'.");
+
+            var scriptContent = File.ReadAllText(scriptPath);
+
+            Assert.Contains(DatabaseTestHookBootstrapper.FlagName, scriptContent, StringComparison.Ordinal);
+            Assert.Contains(DatabaseTestHookBootstrapper.FixturePathVariable, scriptContent, StringComparison.Ordinal);
+            Assert.Contains(DatabaseTestHookBootstrapper.FixtureJsonVariable, scriptContent, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -331,6 +346,11 @@ public class ServiceRegistrationTests
         });
 
         return services.BuildServiceProvider(validateScopes: true);
+    }
+
+    private static string GetRepositoryRoot()
+    {
+        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
     }
 
     private sealed class StubCflDialogService : ICflDialogService

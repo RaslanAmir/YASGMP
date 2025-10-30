@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -368,7 +369,7 @@ namespace YasGMP.Wpf
                 return;
             }
 
-            EnsureMachineTriggersSafe();
+            _ = EnsureMachineTriggersSafeAsync();
 
             var realtime = _host.Services.GetRequiredService<ISignalRClientService>();
             realtime.Start();
@@ -380,27 +381,36 @@ namespace YasGMP.Wpf
             window.Show();
         }
 
-        private void EnsureMachineTriggersSafe()
+        private Task EnsureMachineTriggersSafeAsync()
         {
-            var trace = _host.Services?.GetService<ITrace>();
+            if (_host?.Services is not IServiceProvider services)
+            {
+                return Task.CompletedTask;
+            }
 
-            try
+            var trace = services.GetService<ITrace>();
+
+            return Task.Run(async () =>
             {
-                var database = _host!.Services.GetRequiredService<DatabaseService>();
-                database.EnsureMachineTriggersForMachinesAsync().GetAwaiter().GetResult();
-            }
-            catch (MySqlException ex)
-            {
-                trace?.Log(DiagLevel.Warn, "startup", "machines_triggers_permission", ex.Message, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                trace?.Log(DiagLevel.Warn, "startup", "machines_triggers_permission", ex.Message, ex);
-            }
-            catch (Exception ex)
-            {
-                trace?.Log(DiagLevel.Error, "startup", "machines_triggers_failed", ex.Message, ex);
-            }
+                try
+                {
+                    var database = services.GetRequiredService<DatabaseService>();
+                    await database.EnsureMachineTriggersForMachinesAsync().ConfigureAwait(false);
+                    trace?.Log(DiagLevel.Info, "startup", "machines_triggers_succeeded", "Machine trigger reconciliation completed.");
+                }
+                catch (MySqlException ex)
+                {
+                    trace?.Log(DiagLevel.Warn, "startup", "machines_triggers_permission", ex.Message, ex);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    trace?.Log(DiagLevel.Warn, "startup", "machines_triggers_permission", ex.Message, ex);
+                }
+                catch (Exception ex)
+                {
+                    trace?.Log(DiagLevel.Error, "startup", "machines_triggers_failed", ex.Message, ex);
+                }
+            });
         }
 
         protected override void OnExit(ExitEventArgs e)
