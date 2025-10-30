@@ -153,6 +153,12 @@
 - Added `DatabaseServiceRiskAssessmentsExtensionsTests` to validate the preferred projection owner/approver joins plus the legacy fallback that omits the new columns so owner metadata and review dates default safely.
 - CLI status: `dotnet --version`, `dotnet restore yasgmp.sln`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` still fail with `bash: command not found: dotnet`; `dotnet --version` retried on 2026-09-08 with the same result so WPF smoke automation remains blocked pending Windows tooling.
 
+### Increment 3 Follow-up — Qualifications metadata enrichment (2026-09-09)
+
+- DatabaseService `GetAllQualificationsAsync` now prefers a projection that joins machines, machine components, suppliers, and qualified/approved users so the shared Qualification model receives machine/component codes, supplier names, and user display metadata alongside qualification type/date columns; the routine catches MySQL 1054 errors to fall back to the legacy minimal query when older schemas lack the new fields.
+- The qualification mapper instantiates navigation objects for machine/component/supplier/qualified-by/approved-by using the joined columns and preserves certificate/type fallbacks for legacy datasets so the WPF/Mobile inspectors show consistent metadata without additional service calls.
+- CLI status: `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows`, and `dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release` retried on 2026-09-09; each still exits with `bash: command not found: dotnet` in this Linux container so restore/build/smoke validation remains pending a Windows environment.
+
 ### Increment 2 Follow-up — Alerts & Notification Preferences (2026-04-10)
 
 - 2026-08-16: WPF host `App.xaml` now mirrors the MAUI `UseDatabaseService` configuration so DatabaseService receives DiagnosticContext/ITrace telemetry wiring plus IConfiguration-backed replication flags; retried `dotnet restore yasgmp.sln`, `dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0`, and `dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows` but the container still reports `bash: command not found: dotnet`, leaving validation pending on a Windows environment.
