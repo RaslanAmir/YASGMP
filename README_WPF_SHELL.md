@@ -56,6 +56,8 @@ pwsh ./scripts/wpf-run-with-testhooks.ps1 -Command @("dotnet","test","YasGMP.Wpf
 
 To revert back to a live database simply run your command without the helper (or clear `YASGMP_WPF_TESTHOOKS`, `YASGMP_WPF_FIXTURE_PATH`, and `YASGMP_WPF_FIXTURE_JSON` from the environment). The helper restores the previous environment variables on exit, so closing the PowerShell session resets the overrides automatically.【F:scripts/wpf-run-with-testhooks.ps1†L37-L61】
 
+The WPF host schedules the machines trigger migration immediately after authentication and logs success/permission failures without blocking the UI thread, mirroring the MAUI safeguard.【F:YasGMP.Wpf/App.xaml.cs†L361-L393】 Regression coverage in `ServiceRegistrationTests` asserts both the migration path and the helper script remain aligned with the expected environment variables so local tooling stays in sync.【F:YasGMP.Wpf.Tests/ServiceRegistrationTests.cs†L28-L69】【F:YasGMP.Wpf.Tests/ServiceRegistrationTests.cs†L71-L88】
+
 ### Cockpit and dashboard KPI integration
 
 - **Shared dependencies:** Both the docked dashboard document and the cockpit anchor use the `DatabaseService.DashboardExtensions` helpers so the WPF shell queries the same KPI widgets, trend charts, and activity feed data that power the MAUI client.【F:YasGMP.AppCore/Services/DatabaseService.DashboardExtensions.cs†L24-L203】 `DashboardModuleViewModel` calls `GetKpiWidgetsAsync`, `GetDashboardChartsAsync`, and `GetRecentDashboardEventsAsync` during its load pipeline, while the cockpit pane scopes the same helpers to the active user session via `CockpitViewModel`.【F:YasGMP.Wpf/ViewModels/Modules/DashboardModuleViewModel.cs†L49-L124】【F:YasGMP.Wpf/ViewModels/CockpitViewModel.cs†L137-L205】
