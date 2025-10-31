@@ -242,8 +242,9 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "in-progress"
   },
-  "lastCommitSummary": "test: cover user role assignment updates",
+  "lastCommitSummary": "fix: dispose closed documents safely",
   "notes": [
+    "2026-09-30: MainWindowViewModel.CloseDocumentInternal now disposes tracked documents before removal and returns early for untracked references to avoid double-disposal; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still report 'command not found: dotnet' in this container.",
     "2026-09-21: AdminModuleView now introduces an Expander-wrapped settings list bound to RecordsView/SelectedRecord so the listing can collapse independently of the editor form; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 still report 'command not found: dotnet' in this container.",
     "2026-09-20: AdminModuleView now surfaces a shared validation presenter beneath the editor with visibility tied to HasValidationErrors so Admin settings align with other modules; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still report 'command not found: dotnet' in this container.",
     "2026-09-19: AdminModuleView now exposes a localized Marked for Deletion checkbox bound to CurrentSetting.IsMarkedForDeletion with edit-mode enablement; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still return 'command not found: dotnet' in this container.",

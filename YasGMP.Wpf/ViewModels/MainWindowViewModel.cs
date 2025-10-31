@@ -242,7 +242,18 @@ public partial class MainWindowViewModel : ObservableObject
             throw new ArgumentNullException(nameof(document));
         }
 
+        if (!Documents.Contains(document))
+        {
+            return;
+        }
+
         var wasActive = ReferenceEquals(ActiveDocument, document);
+
+        if (document is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
         if (!Documents.Remove(document))
         {
             return;
