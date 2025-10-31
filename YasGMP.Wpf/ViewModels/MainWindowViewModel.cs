@@ -140,20 +140,36 @@ public partial class MainWindowViewModel : ObservableObject
         return document;
     }
 
+    private void DisposeDocuments()
+    {
+        if (Documents.Count == 0)
+        {
+            ActiveDocument = null;
+            StatusBar.ActiveModule = string.Empty;
+            return;
+        }
+
+        foreach (var disposable in Documents.OfType<IDisposable>().ToList())
+        {
+            disposable.Dispose();
+        }
+
+        ActiveDocument = null;
+        StatusBar.ActiveModule = string.Empty;
+    }
+
     /// <summary>Prepares state for layout deserialization.</summary>
     public void PrepareForLayoutImport()
     {
+        DisposeDocuments();
         Documents.Clear();
-        ActiveDocument = null;
-        StatusBar.ActiveModule = string.Empty;
     }
 
     /// <summary>Resets the workspace back to a single dashboard module.</summary>
     public void ResetWorkspace()
     {
+        DisposeDocuments();
         Documents.Clear();
-        ActiveDocument = null;
-        StatusBar.ActiveModule = string.Empty;
         OpenModule(DashboardModuleViewModel.ModuleKey);
         SetStatusFromResource(LayoutResetStatusKey);
     }
