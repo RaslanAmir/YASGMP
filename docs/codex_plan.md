@@ -1,4 +1,24 @@
-# Codex Plan — WPF Shell & Full Integration
+# Codex Plan - WPF Shell & Full Integration
+
+## 2025-10-31 - Build fix (AppCore skipped)
+
+- Fixed solution configuration causing Visual Studio to skip building `YasGMP.AppCore` for `Debug|Any CPU`.
+- Change: added missing `Build.0` mapping for AppCore in `yasgmp.sln` so dependent projects (MAUI `yasgmp`, WPF `YasGMP.Wpf`, tests, and smoke) resolve `YasGMP.AppCore.dll`.
+
+Validation:
+- dotnet restore: OK (solution)
+- dotnet build (WPF Debug): OK, 0 warnings.
+- dotnet build (MAUI Windows Debug): OK, warnings unchanged from prior batches (StyleCop + XamlC advisories).
+- dotnet build (WPF Release): OK (to provide exe for smoke harness).
+- WPF smoke harness: invoked with `YASGMP_SMOKE=1`. In this non-interactive session, UI automation output is inconclusive; harness tolerates this and exits. Will re-run on a desktop session to capture a fresh TRX and `%LOCALAPPDATA%/YasGMP/logs/smoke-*.txt`.
+
+Notes / Decisions:
+- SDK is .NET 9 (`9.0.306`) — keeping `net9.0-windows10.0.19041.0` across WPF/MAUI and `net9.0;net8.0` multi-targeting for AppCore.
+- No package changes in this batch.
+
+Next:
+- If VS still shows “Project not selected to build” on any config, mirror the `Build.0` mapping for those projects.
+- Re-run smoke on a full desktop to validate ribbon actions and log creation.
 
 ## 2025-10-24 – Warnings reduction (batch 1)
 

@@ -5,7 +5,30 @@
     "detected": true,
     "notes": [
       "2025-10-24: Reinitialized codex_progress.json after accidental corruption; prior notes are preserved in git history.",
-      "2025-10-24: Warnings batch #6 — x:DataType added to MainPage; typed LoginPage LastLogins template (x:String); MAUI warnings ~13925."
+      "2025-10-24: Warnings batch #6 - x:DataType added to MainPage; typed LoginPage LastLogins template (x:String); MAUI warnings ~13925.",
+      "2025-10-31: Fixed solution config so Debug builds include YasGMP.AppCore (added Build.0 mapping). Verified WPF + MAUI builds on .NET 9 SDK 9.0.306; smoke harness invoked with YASGMP_SMOKE=1 (inconclusive in headless session)."
     ]
-  }
+  },
+  "batches": [
+    {
+      "date": "2025-10-31",
+      "type": "build-fix",
+      "changes": [
+        {
+          "file": "yasgmp.sln",
+          "action": "enable-debug-build",
+          "details": "Added {YasGMP.AppCore GUID}.Debug|Any CPU.Build.0 = Debug|Any CPU"
+        }
+      ],
+      "validation": {
+        "restore": "ok",
+        "build": {
+          "wpf": "ok",
+          "maui_win": "ok",
+          "wpf_release": "ok"
+        },
+        "smoke": "invoked; inconclusive in non-interactive env"
+      }
+    }
+  ]
 }
