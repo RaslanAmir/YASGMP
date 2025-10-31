@@ -43,6 +43,21 @@
         "build": { "appcore": "ok", "wpf": "ok" },
         "runtime": "DB schema differences should no longer crash; audit list tolerates missing columns"
       }
+    },
+    {
+      "date": "2025-10-31",
+      "type": "ui+db-migration",
+      "changes": [
+        { "file": "YasGMP.Wpf/MainWindow.xaml", "action": "avalondock-binding-fix", "details": "Use PriorityBinding for LayoutItem Title/ContentId (Model.* → LayoutElement.* → fallback) to eliminate 'Content property not found' errors and show tab titles." },
+        { "file": "sql/migrations/2025-10-31_add_source_ip_session_device.sql", "action": "idempotent-columns", "details": "Add source_ip/session_id/device_info to core tables; guard against views via TABLE_TYPE='BASE TABLE'." },
+        { "file": "tools/YasGMP.DbMigrator", "action": "new-tool", "details": "Console tool to run SQL with delimiter and @user variable support" }
+      ],
+      "validation": {
+        "restore": "ok",
+        "build": { "wpf": "ok", "maui_win": "ok", "tools": "ok" },
+        "migration": "applied successfully to YASGMP (127.0.0.1)",
+        "smoke": "TODO: rerun FlaUI on desktop session"
+      }
     }
   ]
 }

@@ -37,6 +37,31 @@ Follow-up: toolbar binding failures
 - Added shared `Resources/ModuleToolbarResources.xaml` with `ModuleToolbarToggleButtonTemplate` used by modules. Template binds `ToggleButton.ToolTip` to `ToolTipKey` via `ResourceStringConverter` (instead of binding to a non-existent `ToolTip` property on `ModuleToolbarCommand`).
 - This removes runtime errors like: "BindingExpression path error: 'ToolTip' property not found on 'ModuleToolbarCommand'".
 
+## 2025-10-31 - AvalonDock binding fixes + live DB migration
+
+- Fixed AvalonDock binding failures that logged "Content property not found" on LayoutDocumentItem/LayoutAnchorableItem and produced tabs showing only the close "X".
+  - `YasGMP.Wpf/MainWindow.xaml`: switched `LayoutItemContainerStyle` setters to PriorityBinding, trying `Model.*` first, then `LayoutElement.*`, then local fallback. This removes the erroneous `Content.*` paths and works across AvalonDock versions.
+  - Left `DocumentHeaderTemplate` bound to `Title`, which now resolves correctly.
+  - Attempted to standardize XAML namespace to `http://schemas.xceed.com/wpf/xaml/avalondock` per guardrails, but WPF XAML compiler didn’t resolve `DockingManager` with our assembly-level XmlnsDefinition mapping. Reverted to Dirkster’s published `https://github.com/Dirkster99/AvalonDock` namespace to keep builds green. TODO: revisit once upstream provides the Xceed URI mapping in-package.
+
+- Eliminated MySQL exception spam under smoke/demo runs:
+  - `YASGMP_SMOKE=1` or `YASGMP_DEMO=1` short‑circuit `DatabaseService` reader/select helpers, preventing background queries during UI wiring.
+
+- Live database migration for missing audit columns (fixes `Unknown column 'source_ip'`):
+  - Added an idempotent SQL script `sql/migrations/2025-10-31_add_source_ip_session_device.sql` and a tiny tool `tools/YasGMP.DbMigrator` to execute it safely using MySqlConnector with delimiter handling and user variables.
+  - The script now guards against views by checking `TABLE_TYPE='BASE TABLE'` before attempting to `ALTER TABLE`.
+  - Applied to `YASGMP` on 127.0.0.1 via the configured `appsettings.json` connection string; migration completed successfully.
+
+Validation:
+- dotnet restore: OK (solution)
+- dotnet build Debug: OK for WPF + MAUI + tests + migrator.
+- `YasGMP.DbMigrator`: ran and completed; columns now present or no-ops if already present.
+- Smoke harness: retained TODO to re-run headless FlaUI when desktop automation is available; functional smoke is expected to show proper document titles and no `Content.*` binding failures.
+
+Notes:
+- If you still see any binding failures, capture the Binding Failures panel row (DataContext + Binding Path) and file/element and we’ll target that specific template.
+- For live DBs not matching table list, copy/edit the migration SQL and rerun via `dotnet run --project tools/YasGMP.DbMigrator -- --script <path>`.
+
 ## 2025-10-24 – Warnings reduction (batch 1)
 
 - Replaced deprecated `Application.MainPage` usages with `Application.Current.Windows.FirstOrDefault()?.Page` across MAUI code-behind and view-models to align with .NET 9 multi-window guidance and remove CS0618 warnings.
