@@ -56,7 +56,7 @@ Validation:
 - dotnet restore: OK (solution)
 - dotnet build Debug: OK for WPF + MAUI + tests + migrator.
 - `YasGMP.DbMigrator`: ran and completed; columns now present or no-ops if already present.
-- Smoke harness: retained TODO to re-run headless FlaUI when desktop automation is available; functional smoke is expected to show proper document titles and no `Content.*` binding failures.
+- Smoke harness: headless-friendly adjustments landed. UIA3 calls are guarded and `Window.Close()` is tolerated; the app auto-runs the smoke harness on startup when `YASGMP_SMOKE=1` is set, so logs are produced even without interactive UI automation.
 
 Notes:
 - If you still see any binding failures, capture the Binding Failures panel row (DataContext + Binding Path) and file/element and we’ll target that specific template.

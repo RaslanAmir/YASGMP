@@ -328,6 +328,26 @@ namespace YasGMP.Wpf
             {
                 var window = _host.Services.GetRequiredService<MainWindow>();
                 window.Show();
+
+                // Headless-friendly smoke: if YASGMP_SMOKE=1 is set, trigger the smoke harness
+                // automatically on the UI dispatcher so tests can produce a log without UI automation.
+                try
+                {
+                    var smokeEnv = Environment.GetEnvironmentVariable("YASGMP_SMOKE");
+                    if (!string.IsNullOrWhiteSpace(smokeEnv) && (smokeEnv.Equals("1", StringComparison.OrdinalIgnoreCase) || smokeEnv.Equals("true", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        var smoke = _host.Services.GetService(typeof(DebugSmokeTestService)) as DebugSmokeTestService;
+                        if (smoke != null)
+                        {
+                            _ = Dispatcher.BeginInvoke(new Action(async () =>
+                            {
+                                try { await smoke.RunAsync().ConfigureAwait(false); }
+                                catch { /* ignore smoke failures on startup */ }
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    }
+                }
+                catch { /* ignore auto-smoke wiring issues */ }
             }
             catch (Exception ex)
             {
