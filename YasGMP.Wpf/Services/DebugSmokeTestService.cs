@@ -146,13 +146,28 @@ public sealed class DebugSmokeTestService
                 var summary = $"{passedSteps}/{steps.Count} smoke checks succeeded. Log written to {logPath}.";
                 return DebugSmokeTestResult.Completed(allPassed, summary, logPath, steps);
             }
-            catch (Exception ex)
+            catch (Exception ex1)
             {
-                steps.Add(new DebugSmokeTestStep("Persist log", false, ex.Message, TimeSpan.Zero, ex));
-                var allPassed = steps.All(static s => s.Succeeded);
-                var passedAfter = steps.Count(static s => s.Succeeded);
-                var summary = $"{passedAfter}/{steps.Count} smoke checks succeeded. Failed to persist log: {ex.Message}";
-                return DebugSmokeTestResult.Completed(allPassed, summary, null, steps);
+                // Fallback: write under %TEMP% when LocalAppData is not writable/available
+                try
+                {
+                    var fallback = ResolveLogPath(start, useTemp: true);
+                    Directory.CreateDirectory(Path.GetDirectoryName(fallback)!);
+                    File.WriteAllText(fallback, logBuilder.ToString(), Encoding.UTF8);
+                    steps.Add(new DebugSmokeTestStep("Persist log (fallback)", true, $"wrote to {fallback}", TimeSpan.Zero, null));
+                    var allPassed = steps.All(static s => s.Succeeded);
+                    var summary = $"{passedSteps}/{steps.Count} smoke checks succeeded. Log written to {fallback}.";
+                    return DebugSmokeTestResult.Completed(allPassed, summary, fallback, steps);
+                }
+                catch (Exception ex2)
+                {
+                    steps.Add(new DebugSmokeTestStep("Persist log", false, ex1.Message, TimeSpan.Zero, ex1));
+                    steps.Add(new DebugSmokeTestStep("Persist log (fallback)", false, ex2.Message, TimeSpan.Zero, ex2));
+                    var allPassed = steps.All(static s => s.Succeeded);
+                    var passedAfter = steps.Count(static s => s.Succeeded);
+                    var summary = $"{passedAfter}/{steps.Count} smoke checks succeeded. Failed to persist log (both locations): {ex1.Message} | {ex2.Message}";
+                    return DebugSmokeTestResult.Completed(allPassed, summary, null, steps);
+                }
             }
         }
         finally
@@ -405,15 +420,24 @@ public sealed class DebugSmokeTestService
         }
     }
 
-    private static string ResolveLogPath(DateTimeOffset start)
+    private static string ResolveLogPath(DateTimeOffset start, bool useTemp = false)
     {
-        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        if (string.IsNullOrWhiteSpace(localAppData))
+        string root = string.Empty;
+        if (!useTemp)
         {
-            localAppData = Environment.CurrentDirectory;
+            root = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                useTemp = true;
+            }
         }
 
-        var directory = Path.Combine(localAppData, "YasGMP", "logs");
+        if (useTemp)
+        {
+            root = Path.GetTempPath();
+        }
+
+        var directory = Path.Combine(root, "YasGMP", "logs");
         var baseName = $"smoke-{start:yyyyMMdd-HHmm}";
         var fileName = $"{baseName}.txt";
         var path = Path.Combine(directory, fileName);
@@ -451,7 +475,5 @@ public sealed record DebugSmokeTestResult(bool WasRun, bool Passed, string Summa
 
 /// <summary>Represents a single step executed by the smoke harness.</summary>
 public sealed record DebugSmokeTestStep(string Name, bool Succeeded, string Message, TimeSpan Duration, Exception? Exception);
-
-
 
 

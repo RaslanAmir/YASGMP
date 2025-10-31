@@ -56,7 +56,7 @@
         "restore": "ok",
         "build": { "wpf": "ok", "maui_win": "ok", "tools": "ok" },
         "migration": "applied successfully to YASGMP (127.0.0.1)",
-        "smoke": "headless-friendly; tests pass (18/18) with YASGMP_SMOKE=1; app auto-runs smoke at startup to produce logs"
+        "smoke": "headless-friendly; tests pass (18/18) with YASGMP_SMOKE=1; app auto-runs smoke at startup; log writes fall back to %TEMP% when LocalAppData is unavailable"
       }
     }
   ]

@@ -57,6 +57,7 @@ Validation:
 - dotnet build Debug: OK for WPF + MAUI + tests + migrator.
 - `YasGMP.DbMigrator`: ran and completed; columns now present or no-ops if already present.
 - Smoke harness: headless-friendly adjustments landed. UIA3 calls are guarded and `Window.Close()` is tolerated; the app auto-runs the smoke harness on startup when `YASGMP_SMOKE=1` is set, so logs are produced even without interactive UI automation.
+  - Log persistence now falls back from `%LOCALAPPDATA%/YasGMP/logs` to `%TEMP%/YasGMP/logs` if LocalAppData isn’t writable/available in headless sessions.
 
 Notes:
 - If you still see any binding failures, capture the Binding Failures panel row (DataContext + Binding Path) and file/element and we’ll target that specific template.
