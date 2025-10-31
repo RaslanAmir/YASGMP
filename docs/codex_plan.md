@@ -20,6 +20,19 @@ Next:
 - If VS still shows “Project not selected to build” on any config, mirror the `Build.0` mapping for those projects.
 - Re-run smoke on a full desktop to validate ribbon actions and log creation.
 
+## 2025-10-31 - WPF runtime hardening (schema tolerance)
+
+- Fixed InvalidCastException during layout restore when `user_window_layouts.pos_x/pos_y/width/height` are stored as `INT` instead of `DOUBLE`.
+  - `YasGMP.Wpf/Services/DockLayoutPersistenceService.cs`: read numeric columns via `Convert.ToDouble(reader.GetValue(...))` with null safety.
+- Hardened API Audit list against schema variance where `api_keys.key` may be `api_key`/`value`/`token`.
+  - `YasGMP.AppCore/Services/AuditService.cs`: detect available column and build SELECT/filters accordingly.
+- Made system event logging resilient when `system_event_log.source_ip` is absent.
+  - `YasGMP.AppCore/Services/DatabaseService.cs`: metadata probe for IP-like column; dynamic minimal INSERT without IP if none found; early table existence check.
+
+Validation:
+- dotnet build WPF/MAUI: OK.
+- Manual run expected to avoid crashes even when DB schema differs; audit queries degrade gracefully (log row added or list loads without key text).
+
 ## 2025-10-24 – Warnings reduction (batch 1)
 
 - Replaced deprecated `Application.MainPage` usages with `Application.Current.Windows.FirstOrDefault()?.Page` across MAUI code-behind and view-models to align with .NET 9 multi-window guidance and remove CS0618 warnings.

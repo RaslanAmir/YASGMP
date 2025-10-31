@@ -310,6 +310,16 @@ namespace YasGMP.Services
                     : $"{descriptionWithSignature} [{suffix}]";
             }
 
+            // Quick table existence check; if table is missing, quietly return (dev/demo DBs)
+            try
+            {
+                if (!await TableExistsAsync("system_event_log").ConfigureAwait(false))
+                {
+                    return;
+                }
+            }
+            catch { /* ignore metadata lookup failures */ }
+
             // Preferred full insert including device/session/field deltas
             const string sqlFull = @"
 INSERT INTO system_event_log
@@ -356,7 +366,7 @@ VALUES
             }
             catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
             {
-                // Unknown column or missing table -> try minimal legacy shape
+                // Unknown column or missing table -> try (1) hash-only, (2) dynamic minimal without IP column
             }
             catch
             {
@@ -375,7 +385,7 @@ VALUES
             }
             catch (MySqlException ex) when (ex.Number == 1054 || ex.Number == 1146)
             {
-                // Unknown column or missing table -> try minimal legacy shape
+                // Unknown column or missing table -> proceed to dynamic minimal
             }
             catch
             {
@@ -385,10 +395,18 @@ VALUES
 
             try
             {
-                const string sqlMinimal = @"
-INSERT INTO system_event_log (user_id, event_type, table_name, related_module, record_id, description, source_ip, severity)
-VALUES (@uid, @etype, @table, @module, @rid, @desc, @ip, @sev);";
+                // Determine which IP-like column is available, otherwise omit it entirely
+                string? ipCol = null;
+                try
+                {
+                    if (await ColumnExistsAsync("system_event_log", "source_ip").ConfigureAwait(false)) ipCol = "source_ip";
+                    else if (await ColumnExistsAsync("system_event_log", "ip_address").ConfigureAwait(false)) ipCol = "ip_address";
+                    else if (await ColumnExistsAsync("system_event_log", "ip").ConfigureAwait(false)) ipCol = "ip";
+                }
+                catch { /* information_schema not available; omit ip */ }
 
+                var colList = "user_id, event_type, table_name, related_module, record_id, description, severity";
+                var valList = "@uid, @etype, @table, @module, @rid, @desc, @sev";
                 var minPars = new List<MySqlParameter>
                 {
                     new("@uid",   (object?)userId ?? DBNull.Value),
@@ -397,15 +415,38 @@ VALUES (@uid, @etype, @table, @module, @rid, @desc, @ip, @sev);";
                     new("@module", (object?)module ?? DBNull.Value),
                     new("@rid",   (object?)recordId ?? DBNull.Value),
                     new("@desc",  (object?)descriptionWithSignature ?? DBNull.Value),
-                    new("@ip",    (object?)ip ?? DBNull.Value),
                     new("@sev",   sev ?? "info"),
                 };
-                _ = await ExecuteNonQueryAsync(sqlMinimal, minPars, token).ConfigureAwait(false);
+
+                if (!string.IsNullOrWhiteSpace(ipCol))
+                {
+                    colList = $"{colList}, {ipCol}";
+                    valList = $"{valList}, @ip";
+                    minPars.Add(new("@ip", (object?)ip ?? DBNull.Value));
+                }
+
+                var sqlMinimalDynamic = $"INSERT INTO system_event_log ({colList}) VALUES ({valList});";
+                _ = await ExecuteNonQueryAsync(sqlMinimalDynamic, minPars, token).ConfigureAwait(false);
             }
             catch
             {
                 // Give up silently; audit tables may not exist in dev databases.
             }
+        }
+
+        // === information_schema helpers (local copy; used by logger) ===
+        private async Task<bool> TableExistsAsync(string table)
+        {
+            const string sql = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME=@t;";
+            var obj = await ExecuteScalarAsync(sql, new[] { new MySqlParameter("@t", table) }).ConfigureAwait(false);
+            return Convert.ToInt32(obj) > 0;
+        }
+
+        private async Task<bool> ColumnExistsAsync(string table, string column)
+        {
+            const string sql = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME=@t AND COLUMN_NAME=@c;";
+            var obj = await ExecuteScalarAsync(sql, new[] { new MySqlParameter("@t", table), new MySqlParameter("@c", column) }).ConfigureAwait(false);
+            return Convert.ToInt32(obj) > 0;
         }
         /// <summary>
         /// Writes a permission-change style audit entry (used by RBAC shims).

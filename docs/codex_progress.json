@@ -30,5 +30,19 @@
         "smoke": "invoked; inconclusive in non-interactive env"
       }
     }
+    ,
+    {
+      "date": "2025-10-31",
+      "type": "runtime-hardening",
+      "changes": [
+        { "file": "YasGMP.Wpf/Services/DockLayoutPersistenceService.cs", "action": "tolerant-double-read", "details": "Convert numeric layout fields from any numeric type to double to avoid InvalidCastException." },
+        { "file": "YasGMP.AppCore/Services/AuditService.cs", "action": "api-keys-key-variants", "details": "Handle api_keys key column variants (key/api_key/value/token) in SELECT and filters." },
+        { "file": "YasGMP.AppCore/Services/DatabaseService.cs", "action": "system-event-ip-fallback", "details": "Dynamic minimal INSERT without IP when system_event_log has no source_ip/ip_address/ip column; early table existence check." }
+      ],
+      "validation": {
+        "build": { "appcore": "ok", "wpf": "ok" },
+        "runtime": "DB schema differences should no longer crash; audit list tolerates missing columns"
+      }
+    }
   ]
 }

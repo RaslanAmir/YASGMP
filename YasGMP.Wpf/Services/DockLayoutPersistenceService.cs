@@ -48,10 +48,10 @@ LIMIT 1;";
                 }
 
                 string layoutXml = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-                double? posX = reader.IsDBNull(1) ? null : reader.GetDouble(1);
-                double? posY = reader.IsDBNull(2) ? null : reader.GetDouble(2);
-                double? width = reader.IsDBNull(3) ? null : reader.GetDouble(3);
-                double? height = reader.IsDBNull(4) ? null : reader.GetDouble(4);
+                double? posX = ReadFlexibleDouble(reader, 1);
+                double? posY = ReadFlexibleDouble(reader, 2);
+                double? width = ReadFlexibleDouble(reader, 3);
+                double? height = ReadFlexibleDouble(reader, 4);
 
                 return new LayoutSnapshot(layoutXml, posX, posY, width, height);
             }
@@ -102,6 +102,22 @@ saved_at=UTC_TIMESTAMP();";
 
         private MySqlConnection CreateConnection() => new(_connectionString);
 
+        private static double? ReadFlexibleDouble(MySqlDataReader reader, int ordinal)
+        {
+            if (reader.IsDBNull(ordinal)) return null;
+            try
+            {
+                // Handles DOUBLE/FLOAT/DECIMAL/INT/SMALLINT/TINYINT seamlessly.
+                var value = reader.GetValue(ordinal);
+                if (value is null || value is DBNull) return null;
+                return Convert.ToDouble(value);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private static bool IsSchemaMissing(MySqlException ex) => ex.Number == 1054 /* Unknown column */ || ex.Number == 1146 /* Table doesn't exist */;
     }
 
@@ -112,4 +128,3 @@ saved_at=UTC_TIMESTAMP();";
         public WindowGeometry Geometry => new(Left, Top, Width, Height);
     }
 }
-

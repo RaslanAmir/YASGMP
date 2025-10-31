@@ -469,6 +469,11 @@ VALUES
             bool hasOwnerColumn = hasApiKeysTable && await ColumnExistsAsync("api_keys", "owner_id").ConfigureAwait(false);
             bool hasKeyUpdated = hasApiKeysTable && await ColumnExistsAsync("api_keys", "updated_at").ConfigureAwait(false);
             bool hasKeyLastUsed = hasApiKeysTable && await ColumnExistsAsync("api_keys", "last_used_at").ConfigureAwait(false);
+            // api_keys key column variants across installations
+            bool hasKeyCol_key      = hasApiKeysTable && await ColumnExistsAsync("api_keys", "key").ConfigureAwait(false);
+            bool hasKeyCol_api_key  = hasApiKeysTable && await ColumnExistsAsync("api_keys", "api_key").ConfigureAwait(false);
+            bool hasKeyCol_value    = hasApiKeysTable && await ColumnExistsAsync("api_keys", "value").ConfigureAwait(false);
+            bool hasKeyCol_token    = hasApiKeysTable && await ColumnExistsAsync("api_keys", "token").ConfigureAwait(false);
 
             var dateColumns = new List<string>();
             if (hasTimestamp) dateColumns.Add("a.`timestamp`");
@@ -506,7 +511,11 @@ VALUES
 
             if (hasApiKeysTable)
             {
-                columns.Add("k.`key` AS ApiKeyValue");
+                if (hasKeyCol_key) columns.Add("k.`key` AS ApiKeyValue");
+                else if (hasKeyCol_api_key) columns.Add("k.api_key AS ApiKeyValue");
+                else if (hasKeyCol_value) columns.Add("k.value AS ApiKeyValue");
+                else if (hasKeyCol_token) columns.Add("k.token AS ApiKeyValue");
+                else columns.Add("NULL AS ApiKeyValue");
                 columns.Add("k.description AS ApiKeyDescription");
                 columns.Add("k.is_active AS ApiKeyIsActive");
                 columns.Add("k.created_at AS ApiKeyCreatedAt");
@@ -584,7 +593,10 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
                 if (hasApiKeysTable)
                 {
                     apiKeyConditions.Add("k.description LIKE @apiKey");
-                    apiKeyConditions.Add("k.`key` LIKE @apiKey");
+                    if (hasKeyCol_key)     { apiKeyConditions.Add("k.`key` LIKE @apiKey"); }
+                    if (hasKeyCol_api_key) { apiKeyConditions.Add("k.api_key LIKE @apiKey"); }
+                    if (hasKeyCol_value)   { apiKeyConditions.Add("k.value LIKE @apiKey"); }
+                    if (hasKeyCol_token)   { apiKeyConditions.Add("k.token LIKE @apiKey"); }
                 }
 
                 if (hasApiKeysTable && hasUsersTable && hasOwnerColumn)
@@ -944,5 +956,4 @@ WHERE {rangeExpression} BETWEEN @from AND @to";
         #endregion
     }
 }
-
 
