@@ -436,6 +436,185 @@ public class AdminModuleViewModelTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SaveCommand_WhenPersistenceThrows_KeepsDirtyStateAndValidation(bool useUpdateMode)
+    {
+        var existing = new Setting
+        {
+            Id = 21,
+            Key = "cfg.update.fail",
+            Value = "enabled",
+            Category = "system",
+            Description = "Existing setting",
+            UpdatedAt = DateTime.UtcNow.AddDays(-5),
+        };
+
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
+
+            DatabaseCommandCapture capture;
+            DatabaseService database;
+
+            if (useUpdateMode)
+            {
+                database = CreateDatabaseService(out _, out capture, existing);
+            }
+            else
+            {
+                database = CreateDatabaseService(out _, out capture);
+            }
+
+            capture.FailNonQueryWhenSqlContains(
+                useUpdateMode ? "UPDATE settings" : "INSERT INTO settings",
+                () => new InvalidOperationException("write denied"));
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+
+            if (useUpdateMode)
+            {
+                viewModel.SelectedRecord = viewModel.Records.First();
+                await viewModel.EnterUpdateModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+            }
+            else
+            {
+                await viewModel.EnterAddModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+            }
+
+            var editable = Assert.IsType<AdminModuleViewModel.EditableSetting>(viewModel.CurrentSetting);
+            var targetKey = useUpdateMode ? existing.Key : "cfg.add.fail";
+            editable.Key = targetKey;
+            editable.Value = "enabled";
+            editable.Category = "system";
+            editable.Description = useUpdateMode ? "Updated description" : "New description";
+
+            var baselineValidation = viewModel.ValidationMessages.ToArray();
+
+            await viewModel.SaveCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var expectedStatus = string.Format(
+                CultureInfo.CurrentCulture,
+                localization.GetString("Module.Admin.Settings.Save.Status.PersistenceFailed"),
+                targetKey,
+                "write denied");
+
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Error, alertService.LastSeverity);
+
+            Assert.True(viewModel.IsDirty);
+            Assert.Equal(baselineValidation, viewModel.ValidationMessages.ToArray());
+            Assert.Equal(1, capture.ExecuteNonQueryCallCount);
+            Assert.Empty(capture.ScalarCommands);
+            Assert.Null(viewModel.LastSignatureStatus);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task SaveCommand_WhenDeleteThrows_KeepsDirtyStateAndSignatureStatus()
+    {
+        var existing = new Setting
+        {
+            Id = 44,
+            Key = "cfg.delete.fail",
+            Value = "active",
+            Category = "system",
+            Description = "Delete candidate",
+            DigitalSignature = "sig",
+            UpdatedAt = DateTime.UtcNow.AddDays(-3),
+        };
+
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
+            var database = CreateDatabaseService(out _, out var capture, existing);
+            capture.FailNonQueryWhenSqlContains(
+                "DELETE FROM settings",
+                () => new InvalidOperationException("permission denied"));
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            viewModel.SelectedRecord = viewModel.Records.First();
+            await viewModel.EnterUpdateModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var editable = Assert.IsType<AdminModuleViewModel.EditableSetting>(viewModel.CurrentSetting);
+            editable.IsMarkedForDeletion = true;
+
+            var baselineValidation = viewModel.ValidationMessages.ToArray();
+
+            await viewModel.SaveCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var expectedStatus = string.Format(
+                CultureInfo.CurrentCulture,
+                localization.GetString("Module.Admin.Settings.Save.Status.DeleteFailed"),
+                existing.Key,
+                "permission denied");
+
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Error, alertService.LastSeverity);
+
+            Assert.True(viewModel.IsDirty);
+            Assert.Equal(baselineValidation, viewModel.ValidationMessages.ToArray());
+            Assert.True(editable.IsMarkedForDeletion);
+
+            var expectedSignatureStatus = string.Format(
+                CultureInfo.CurrentCulture,
+                localization.GetString("Module.Admin.Settings.Save.Status.SignatureCaptured"),
+                "QA Reason");
+            Assert.Equal(expectedSignatureStatus, viewModel.LastSignatureStatus);
+
+            Assert.Equal(1, capture.ExecuteNonQueryCallCount);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
     [Fact]
     public async Task RestoreSettingCommand_WhenConfirmedAndSignatureCaptured_RestoresSetting()
     {
@@ -851,8 +1030,8 @@ public class AdminModuleViewModelTests
         var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) => Task.FromResult(table.Copy()));
         var nonQueryOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>)((sql, parameters, _) =>
         {
-            capture.CaptureNonQuery(sql, parameters);
-            return Task.FromResult(capture.DequeueNonQueryResult());
+            var result = capture.ExecuteNonQuery(sql, parameters);
+            return Task.FromResult(result);
         });
         var scalarOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>)((sql, parameters, _) =>
         {
@@ -882,16 +1061,54 @@ public class AdminModuleViewModelTests
 
         public List<CapturedCommand> ScalarCommands { get; } = new();
 
+        private readonly List<Func<CapturedCommand, Exception?>> _nonQueryFailureRules = new();
+
         public void QueueNonQueryResult(int result)
             => _nonQueryResults.Enqueue(result);
 
         public void QueueScalarResult(object? result)
             => _scalarResults.Enqueue(result);
 
-        public void CaptureNonQuery(string sql, IEnumerable<MySqlParameter>? parameters)
+        public void FailNonQueryWhen(Func<CapturedCommand, bool> predicate, Func<Exception>? exceptionFactory = null)
         {
+            if (predicate is null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
+            _nonQueryFailureRules.Add(command => predicate(command)
+                ? exceptionFactory?.Invoke() ?? new InvalidOperationException("Simulated non-query failure.")
+                : null);
+        }
+
+        public void FailNonQueryWhenSqlContains(string fragment, Func<Exception>? exceptionFactory = null)
+        {
+            if (string.IsNullOrWhiteSpace(fragment))
+            {
+                throw new ArgumentException("SQL fragment must be provided.", nameof(fragment));
+            }
+
+            FailNonQueryWhen(
+                command => !string.IsNullOrEmpty(command.Sql)
+                    && command.Sql.IndexOf(fragment, StringComparison.OrdinalIgnoreCase) >= 0,
+                exceptionFactory);
+        }
+
+        public int ExecuteNonQuery(string sql, IEnumerable<MySqlParameter>? parameters)
+        {
+            var command = CapturedCommand.Create(sql, parameters);
             ExecuteNonQueryCallCount++;
-            NonQueryCommands.Add(CapturedCommand.Create(sql, parameters));
+            NonQueryCommands.Add(command);
+
+            foreach (var factory in _nonQueryFailureRules)
+            {
+                if (factory(command) is { } exception)
+                {
+                    throw exception;
+                }
+            }
+
+            return DequeueNonQueryResult();
         }
 
         public void CaptureScalar(string sql, IEnumerable<MySqlParameter>? parameters)
@@ -1028,6 +1245,16 @@ public class AdminModuleViewModelTests
             ["Module.Admin.NotificationPreferences.StatusSaveFailed"] = "Failed to save notification preferences: {0}",
             ["Module.Admin.Settings.Save.Status.CreateSuccess"] = "Setting \"{0}\" created.",
             ["Module.Admin.Settings.Save.Status.UpdateSuccess"] = "Setting \"{0}\" updated.",
+            ["Module.Admin.Settings.Save.Status.DeleteSuccess"] = "Setting \"{0}\" deleted successfully.",
+            ["Module.Admin.Settings.Save.Status.PersistenceFailed"] = "Failed to save setting \"{0}\": {1}",
+            ["Module.Admin.Settings.Save.Status.DeleteFailed"] = "Failed to delete setting \"{0}\": {1}",
+            ["Module.Admin.Settings.Save.Status.SignatureFailed"] = "Electronic signature failed: {0}",
+            ["Module.Admin.Settings.Save.Status.SignatureCancelled"] = "Electronic signature cancelled. Save aborted.",
+            ["Module.Admin.Settings.Save.Status.SignatureMissing"] = "Electronic signature was not captured. Save aborted.",
+            ["Module.Admin.Settings.Save.Status.SignaturePersistFailed"] = "Failed to persist electronic signature: {0}",
+            ["Module.Admin.Settings.Save.Status.SignatureCaptured"] = "Electronic signature captured ({0}).",
+            ["Module.Admin.Settings.Save.Status.SignatureCaptured.Unknown"] = "unspecified",
+            ["Module.Admin.Settings.Save.Status.AuditFailed"] = "Failed to log settings audit.",
             ["Module.Admin.Settings.Validation.KeyRequired"] = "Setting key is required.",
             ["Module.Admin.Settings.Validation.ValueRequired"] = "Setting value is required.",
             ["Module.Admin.Settings.Validation.CategoryRequired"] = "Setting category is required.",
