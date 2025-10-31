@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -217,6 +218,158 @@ public class AdminModuleViewModelTests
             Assert.Equal("Failed to save notification preferences: write denied", viewModel.StatusMessage);
             Assert.Equal("Failed to save notification preferences: write denied", alertService.LastMessage);
             Assert.Equal(AlertSeverity.Error, alertService.LastSeverity);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task SaveCommand_WhenInAddMode_PersistsTrimmedKeyAndPublishesCreateStatus()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
+            var database = CreateDatabaseService(out _, out var capture);
+            capture.QueueNonQueryResult(1);
+            capture.QueueScalarResult(42);
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            await viewModel.EnterAddModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var editable = Assert.IsType<AdminModuleViewModel.EditableSetting>(viewModel.CurrentSetting);
+            editable.Key = "  cfg.new.key  ";
+            editable.Value = "enabled";
+            editable.Category = "system";
+            editable.Description = "Created during test";
+
+            Assert.True(viewModel.IsDirty);
+
+            await viewModel.SaveCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var insertCommand = capture.NonQueryCommands.First(command =>
+                command.Sql.Contains("INSERT INTO settings", StringComparison.OrdinalIgnoreCase));
+            var parameters = insertCommand.Parameters.ToDictionary(p => p.ParameterName, p => p.Value);
+
+            Assert.Equal("cfg.new.key", Assert.IsType<string>(parameters["@key"]));
+            Assert.Equal("enabled", Assert.IsType<string>(parameters["@val"]));
+            Assert.Equal("system", Assert.IsType<string>(parameters["@cat"]));
+            Assert.Equal("Created during test", Assert.IsType<string>(parameters["@desc"]));
+
+            var scalar = Assert.Single(capture.ScalarCommands);
+            Assert.Contains("SELECT LAST_INSERT_ID()", scalar.Sql, StringComparison.OrdinalIgnoreCase);
+
+            var expectedStatus = string.Format(
+                CultureInfo.CurrentCulture,
+                localization.GetString("Module.Admin.Settings.Save.Status.CreateSuccess"),
+                "cfg.new.key");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Success, alertService.LastSeverity);
+
+            Assert.False(editable.IsNew);
+            Assert.False(viewModel.IsDirty);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task SaveCommand_WhenInUpdateMode_PersistsChangesAndPublishesUpdateStatus()
+    {
+        var existing = new Setting
+        {
+            Id = 12,
+            Key = "cfg.locale",
+            Value = "en-US",
+            Category = "system",
+            Description = "Original",
+            UpdatedAt = DateTime.UtcNow.AddDays(-2),
+        };
+
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
+            var database = CreateDatabaseService(out _, out var capture, existing);
+            capture.QueueNonQueryResult(1);
+
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            viewModel.SelectedRecord = viewModel.Records.First();
+            await viewModel.EnterUpdateModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var editable = Assert.IsType<AdminModuleViewModel.EditableSetting>(viewModel.CurrentSetting);
+            editable.Key = "  cfg.locale  ";
+            editable.Value = "hr-HR";
+            editable.Category = "system-updated";
+            editable.Description = "Updated locale";
+
+            Assert.True(viewModel.IsDirty);
+
+            await viewModel.SaveCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var updateCommand = capture.NonQueryCommands.First(command =>
+                command.Sql.Contains("UPDATE settings", StringComparison.OrdinalIgnoreCase));
+            var parameters = updateCommand.Parameters.ToDictionary(p => p.ParameterName, p => p.Value);
+
+            Assert.Equal("cfg.locale", Assert.IsType<string>(parameters["@key"]));
+            Assert.Equal("hr-HR", Assert.IsType<string>(parameters["@val"]));
+            Assert.Equal("system-updated", Assert.IsType<string>(parameters["@cat"]));
+            Assert.Equal("Updated locale", Assert.IsType<string>(parameters["@desc"]));
+            Assert.Equal(existing.Id, Assert.IsType<int>(parameters["@id"]));
+
+            Assert.Empty(capture.ScalarCommands);
+
+            var expectedStatus = string.Format(
+                CultureInfo.CurrentCulture,
+                localization.GetString("Module.Admin.Settings.Save.Status.UpdateSuccess"),
+                "cfg.locale");
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Success, alertService.LastSeverity);
+
+            Assert.False(editable.IsNew);
+            Assert.False(viewModel.IsDirty);
         }
         finally
         {
@@ -604,11 +757,19 @@ public class AdminModuleViewModelTests
     }
 
     private static DatabaseService CreateDatabaseService(params Setting[] settings)
-        => CreateDatabaseService(out _, settings);
+        => CreateDatabaseService(out _, out _, settings);
 
     private static DatabaseService CreateDatabaseService(out DataTable table, params Setting[] settings)
+        => CreateDatabaseService(out table, out _, settings);
+
+    private static DatabaseService CreateDatabaseService(
+        out DataTable table,
+        out DatabaseCommandCapture capture,
+        params Setting[] settings)
     {
         var database = new DatabaseService("Server=stub;Database=stub;Uid=stub;Pwd=stub;");
+        capture = new DatabaseCommandCapture();
+
         table = new DataTable();
         table.Columns.Add("id", typeof(int));
         table.Columns.Add("key", typeof(string));
@@ -630,11 +791,74 @@ public class AdminModuleViewModelTests
         }
 
         var selectOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<DataTable>>)((_, _, _) => Task.FromResult(table.Copy()));
+        var nonQueryOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<int>>)((sql, parameters, _) =>
+        {
+            capture.CaptureNonQuery(sql, parameters);
+            return Task.FromResult(capture.DequeueNonQueryResult());
+        });
+        var scalarOverride = (Func<string, IEnumerable<MySqlParameter>?, CancellationToken, Task<object?>>)((sql, parameters, _) =>
+        {
+            capture.CaptureScalar(sql, parameters);
+            return Task.FromResult(capture.DequeueScalarResult());
+        });
+
         typeof(DatabaseService)
             .GetProperty("ExecuteSelectOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
             .SetValue(database, selectOverride);
+        typeof(DatabaseService)
+            .GetProperty("ExecuteNonQueryOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .SetValue(database, nonQueryOverride);
+        typeof(DatabaseService)
+            .GetProperty("ExecuteScalarOverride", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .SetValue(database, scalarOverride);
 
         return database;
+    }
+
+    private sealed class DatabaseCommandCapture
+    {
+        private readonly Queue<int> _nonQueryResults = new();
+        private readonly Queue<object?> _scalarResults = new();
+
+        public List<CapturedCommand> NonQueryCommands { get; } = new();
+
+        public List<CapturedCommand> ScalarCommands { get; } = new();
+
+        public void QueueNonQueryResult(int result)
+            => _nonQueryResults.Enqueue(result);
+
+        public void QueueScalarResult(object? result)
+            => _scalarResults.Enqueue(result);
+
+        public void CaptureNonQuery(string sql, IEnumerable<MySqlParameter>? parameters)
+            => NonQueryCommands.Add(CapturedCommand.Create(sql, parameters));
+
+        public void CaptureScalar(string sql, IEnumerable<MySqlParameter>? parameters)
+            => ScalarCommands.Add(CapturedCommand.Create(sql, parameters));
+
+        public int DequeueNonQueryResult()
+            => _nonQueryResults.Count > 0 ? _nonQueryResults.Dequeue() : 1;
+
+        public object? DequeueScalarResult()
+            => _scalarResults.Count > 0 ? _scalarResults.Dequeue() : null;
+
+        public sealed record CapturedCommand(string Sql, IReadOnlyList<MySqlParameter> Parameters)
+        {
+            public static CapturedCommand Create(string sql, IEnumerable<MySqlParameter>? parameters)
+            {
+                var list = new List<MySqlParameter>();
+                if (parameters is not null)
+                {
+                    foreach (var parameter in parameters)
+                    {
+                        var clone = new MySqlParameter(parameter.ParameterName, parameter.Value);
+                        list.Add(clone);
+                    }
+                }
+
+                return new CapturedCommand(sql, list);
+            }
+        }
     }
 
     private sealed class CapturingAlertService : IShellAlertService
@@ -738,6 +962,8 @@ public class AdminModuleViewModelTests
             ["Module.Admin.NotificationPreferences.StatusLoadFailed"] = "Failed to load notification preferences: {0}",
             ["Module.Admin.NotificationPreferences.StatusSaved"] = "Notification preferences saved.",
             ["Module.Admin.NotificationPreferences.StatusSaveFailed"] = "Failed to save notification preferences: {0}",
+            ["Module.Admin.Settings.Save.Status.CreateSuccess"] = "Setting \"{0}\" created.",
+            ["Module.Admin.Settings.Save.Status.UpdateSuccess"] = "Setting \"{0}\" updated.",
             ["Module.Admin.Restore.Status.NoSelection"] = "Select a setting to restore.",
             ["Module.Admin.Restore.Status.NotFound"] = "Unable to resolve the selected setting.",
             ["Module.Admin.Restore.Status.ConfirmationDeclined"] = "Restore skipped for \"{0}\".",
