@@ -4,6 +4,7 @@
     "wpfTarget": "net9.0-windows10.0.19041.0",
     "detected": true,
     "notes": [
+      "2026-09-18: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet test YasGMP.Wpf.Tests/YasGMP.Wpf.Tests.csproj retried while adding AdminModuleViewModel validation regression coverage; each command still exits with 'command not found: dotnet' in this container.",
       "2026-09-14: dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 retried while introducing the Admin module EditableSetting wrapper; each command still exits with 'command not found: dotnet' inside this Linux container.",
       "`dotnet` CLI missing from PATH; cannot enumerate installed SDKs.",
       "2026-08-20: dotnet --version retried while extending ServiceRegistrationTests coverage; CLI still missing so the command exits with 'command not found'.",
@@ -121,7 +122,8 @@
       "2026-06-09: Documented Training Records and SOP Governance module workflows in docs/WPF_MAPPING.md and README_WPF_SHELL.md; dotnet --version/dotnet restore still fail with 'command not found: dotnet'.",
       "2025-10-29: Captured renewed environment verification and smoke-harness TODO in docs/codex_plan.md and docs/codex_progress.json so the next Windows-host validation run has up-to-date context.",
       "2026-08-21: CockpitViewModel now sources KPI widgets and dashboard notices from DatabaseService with localized status/empty messaging, and CockpitView renders the new wrappers with loading/error states documented in codex_plan.md.",
-      "2026-08-22: Cockpit refresh now guards concurrent updates with cancellation tokens, pushes status text/localization updates through SetStatus, and notice view-models expose severity/module/timestamp details; codex_plan.md updated accordingly."
+      "2026-08-22: Cockpit refresh now guards concurrent updates with cancellation tokens, pushes status text/localization updates through SetStatus, and notice view-models expose severity/module/timestamp details; codex_plan.md updated accordingly.",
+      "2026-09-18: AdminModuleViewModelTests now cover Add-mode validation failures with localized messaging and ensure DatabaseService overrides skip ExecuteNonQuery when validation prevents a save; TestLocalizationService includes validation/status keys for comparisons."
     ]
   },
   "batches": [

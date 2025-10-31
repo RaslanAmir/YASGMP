@@ -227,6 +227,64 @@ public class AdminModuleViewModelTests
     }
 
     [Fact]
+    public async Task SaveCommand_WhenValidationFailsInAddMode_SurfacesLocalizedErrorsAndSkipsDatabase()
+    {
+        var authContext = new StubAuthContext();
+        var provider = RegisterAlertService(out var alertService, authContext);
+        try
+        {
+            var signatureService = TestElectronicSignatureDialogService.CreateConfirmed();
+            var dialogService = new StubDialogService();
+            var database = CreateDatabaseService(out _, out var capture);
+            var audit = new AuditService(database);
+            var localization = new TestLocalizationService();
+            var notificationPreferences = new FakeNotificationPreferenceService();
+            var viewModel = new AdminModuleViewModel(
+                database,
+                audit,
+                signatureService,
+                dialogService,
+                authContext,
+                new StubCflDialogService(),
+                new StubShellInteractionService(),
+                new StubModuleNavigationService(),
+                localization,
+                notificationPreferences);
+
+            await viewModel.InitializeAsync(null).ConfigureAwait(false);
+            await viewModel.EnterAddModeCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            await viewModel.SaveCommand.ExecuteAsync(null).ConfigureAwait(false);
+
+            var expectedMessages = new[]
+            {
+                localization.GetString("Module.Admin.Settings.Validation.KeyRequired"),
+                localization.GetString("Module.Admin.Settings.Validation.ValueRequired"),
+                localization.GetString("Module.Admin.Settings.Validation.CategoryRequired"),
+            };
+
+            Assert.Equal(expectedMessages, viewModel.ValidationMessages);
+
+            var expectedStatus = string.Format(
+                CultureInfo.CurrentCulture,
+                localization.GetString("Module.Status.ValidationIssues"),
+                localization.GetString("Module.Title.Administration"),
+                expectedMessages.Length);
+
+            Assert.Equal(expectedStatus, viewModel.StatusMessage);
+            Assert.Equal(expectedStatus, alertService.LastMessage);
+            Assert.Equal(AlertSeverity.Warning, alertService.LastSeverity);
+            Assert.Equal(0, capture.ExecuteNonQueryCallCount);
+            Assert.Empty(capture.NonQueryCommands);
+        }
+        finally
+        {
+            ServiceLocator.RegisterFallback(() => null);
+            provider.Dispose();
+        }
+    }
+
+    [Fact]
     public async Task SaveCommand_WhenInAddMode_PersistsTrimmedKeyAndPublishesCreateStatus()
     {
         var authContext = new StubAuthContext();
@@ -831,7 +889,10 @@ public class AdminModuleViewModelTests
             => _scalarResults.Enqueue(result);
 
         public void CaptureNonQuery(string sql, IEnumerable<MySqlParameter>? parameters)
-            => NonQueryCommands.Add(CapturedCommand.Create(sql, parameters));
+        {
+            ExecuteNonQueryCallCount++;
+            NonQueryCommands.Add(CapturedCommand.Create(sql, parameters));
+        }
 
         public void CaptureScalar(string sql, IEnumerable<MySqlParameter>? parameters)
             => ScalarCommands.Add(CapturedCommand.Create(sql, parameters));
@@ -841,6 +902,8 @@ public class AdminModuleViewModelTests
 
         public object? DequeueScalarResult()
             => _scalarResults.Count > 0 ? _scalarResults.Dequeue() : null;
+
+        public int ExecuteNonQueryCallCount { get; private set; }
 
         public sealed record CapturedCommand(string Sql, IReadOnlyList<MySqlParameter> Parameters)
         {
@@ -959,11 +1022,19 @@ public class AdminModuleViewModelTests
             ["Module.Status.Ready"] = "Ready",
             ["Module.Status.Loading"] = "Loading {0} record(s)...",
             ["Module.Status.Loaded"] = "Loaded {0} record(s).",
+            ["Module.Status.ValidationIssues"] = "{0} has {1} validation issue(s).",
             ["Module.Admin.NotificationPreferences.StatusLoadFailed"] = "Failed to load notification preferences: {0}",
             ["Module.Admin.NotificationPreferences.StatusSaved"] = "Notification preferences saved.",
             ["Module.Admin.NotificationPreferences.StatusSaveFailed"] = "Failed to save notification preferences: {0}",
             ["Module.Admin.Settings.Save.Status.CreateSuccess"] = "Setting \"{0}\" created.",
             ["Module.Admin.Settings.Save.Status.UpdateSuccess"] = "Setting \"{0}\" updated.",
+            ["Module.Admin.Settings.Validation.KeyRequired"] = "Setting key is required.",
+            ["Module.Admin.Settings.Validation.ValueRequired"] = "Setting value is required.",
+            ["Module.Admin.Settings.Validation.CategoryRequired"] = "Setting category is required.",
+            ["Module.Admin.Settings.Validation.DuplicateKey"] = "A setting with key \"{0}\" already exists.",
+            ["Module.Admin.Settings.Validation.SelectionRequired"] = "Select a setting before saving.",
+            ["Module.Admin.Settings.Validation.DeleteRequiresExisting"] = "Cannot delete a setting that has not been saved.",
+            ["Module.Admin.Settings.Validation.UpdateRequiresExisting"] = "The selected setting could not be located for update.",
             ["Module.Admin.Restore.Status.NoSelection"] = "Select a setting to restore.",
             ["Module.Admin.Restore.Status.NotFound"] = "Unable to resolve the selected setting.",
             ["Module.Admin.Restore.Status.ConfirmationDeclined"] = "Restore skipped for \"{0}\".",
