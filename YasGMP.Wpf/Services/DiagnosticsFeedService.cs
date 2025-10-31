@@ -14,7 +14,7 @@ namespace YasGMP.Wpf.Services
     /// <summary>
     /// Streams diagnostics data (telemetry, log tail, and health snapshots) to UI consumers.
     /// </summary>
-    public sealed class DiagnosticsFeedService : IAsyncDisposable, IDisposable
+    public class DiagnosticsFeedService : IAsyncDisposable, IDisposable
     {
         private readonly FileLogService _fileLog;
         private readonly DiagnosticContext _context;
@@ -131,7 +131,7 @@ namespace YasGMP.Wpf.Services
         /// <summary>
         /// Subscribes to periodic telemetry snapshots captured from the diagnostic context.
         /// </summary>
-        public IDisposable SubscribeTelemetry(Action<IReadOnlyDictionary<string, object?>> callback)
+        public virtual IDisposable SubscribeTelemetry(Action<IReadOnlyDictionary<string, object?>> callback)
         {
             if (callback is null)
             {
@@ -147,7 +147,7 @@ namespace YasGMP.Wpf.Services
         }
 
         /// <summary>Subscribes to live log entries appended to the rolling file logger.</summary>
-        public IDisposable SubscribeLog(Action<string> callback)
+        public virtual IDisposable SubscribeLog(Action<string> callback)
         {
             if (callback is null)
             {
@@ -163,7 +163,7 @@ namespace YasGMP.Wpf.Services
         }
 
         /// <summary>Subscribes to periodic health snapshots built from <see cref="HealthReport"/>.</summary>
-        public IDisposable SubscribeHealth(Action<IReadOnlyDictionary<string, object?>> callback)
+        public virtual IDisposable SubscribeHealth(Action<IReadOnlyDictionary<string, object?>> callback)
         {
             if (callback is null)
             {
