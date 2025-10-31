@@ -652,6 +652,40 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         [ObservableProperty]
         private string _notes = string.Empty;
 
+        // Electronic signature + audit surfacing (read-only for display)
+        [ObservableProperty]
+        private string _signatureHash = string.Empty;
+
+        [ObservableProperty]
+        private string _signatureReason = string.Empty;
+
+        [ObservableProperty]
+        private string _signatureNote = string.Empty;
+
+        [ObservableProperty]
+        private string _signerUserName = string.Empty;
+
+        [ObservableProperty]
+        private int _signerUserId;
+
+        [ObservableProperty]
+        private DateTime? _signatureTimestampUtc;
+
+        [ObservableProperty]
+        private string _sourceIp = string.Empty;
+
+        [ObservableProperty]
+        private string _sessionId = string.Empty;
+
+        [ObservableProperty]
+        private string _deviceInfo = string.Empty;
+
+        [ObservableProperty]
+        private DateTime? _lastModifiedUtc;
+
+        [ObservableProperty]
+        private string _lastModifiedByName = string.Empty;
+
         public static WorkOrderEditor CreateEmpty() => new();
 
         public static WorkOrderEditor CreateForNew(IAuthContext authContext)
@@ -741,5 +775,4 @@ public sealed partial class WorkOrdersModuleViewModel : DataDrivenModuleDocument
         }
     }
 }
-
 

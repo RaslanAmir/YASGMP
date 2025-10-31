@@ -10,7 +10,12 @@
              AutomationProperties.Name="{DynamicResource Module_Attachments_Title}"
              ToolTipService.ToolTip="{DynamicResource Module_Attachments_Tooltip}">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <Style x:Key="WorkflowVisibleElementStyle" TargetType="FrameworkElement">
             <Setter Property="Visibility" Value="Collapsed" />
             <Style.Triggers>
@@ -23,26 +28,18 @@
         <Style x:Key="WorkflowButtonStyle" TargetType="Button" BasedOn="{StaticResource WorkflowVisibleElementStyle}">
             <Setter Property="Margin" Value="0,0,8,0" />
         </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
-            <ItemsControl ItemsSource="{Binding Toolbar}">
+            <ItemsControl ItemsSource="{Binding Toolbar}"
+                          ItemTemplate="{StaticResource ModuleToolbarToggleButtonTemplate}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <ToggleButton Content="{Binding Caption}"
-                                      Command="{Binding Command}"
-                                      IsChecked="{Binding IsChecked}"
-                                      Margin="0,0,4,0"
-                                      ToolTipService.ToolTip="{Binding ToolTip}"
-                                      AutomationProperties.Name="{Binding Caption}" AutomationProperties.AutomationId="{Binding AutomationIdKey}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Separator />
             <Button Content="{DynamicResource Button_CFL}"

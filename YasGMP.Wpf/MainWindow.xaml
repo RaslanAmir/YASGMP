@@ -273,10 +273,9 @@
                 </ad:DockingManager.Theme>
 
                 <ad:DockingManager.DocumentHeaderTemplate>
-                    <!-- Bind header text to the underlying ViewModel's Title.
-                         In AvalonDock, the DataContext here is a LayoutItem; the ViewModel is available via Model.Content. -->
+                    <!-- Bind to the LayoutDocument's Title (kept in sync via LayoutItemContainerStyle). -->
                     <DataTemplate>
-                        <TextBlock Text="{Binding Model.Content.Title}" />
+                        <TextBlock Text="{Binding Title}" />
                     </DataTemplate>
                 </ad:DockingManager.DocumentHeaderTemplate>
 

@@ -63,12 +63,32 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         AttachDocumentCommand = new AsyncRelayCommand(AttachDocumentAsync, CanAttachDocument);
         SummarizeWithAiCommand = new RelayCommand(OpenAiSummary);
         Toolbar.Add(new ModuleToolbarCommand("Summarize (AI)", SummarizeWithAiCommand));
+
+        // Initialize optional UI-only properties used by the XAML view
+        ReceiveStockCommand = new RelayCommand(() => StatusMessage = "Receive stock: TODO (stub)");
+        IssueStockCommand = new RelayCommand(() => StatusMessage = "Issue stock: TODO (stub)");
+        AdjustStockCommand = new RelayCommand(() => StatusMessage = "Adjust stock: TODO (stub)");
+        TransactionAlerts = new ObservableCollection<string>();
+        ZoneFilters = new ObservableCollection<string>(new[] { "All", "Zone A", "Zone B" });
+        SelectedZoneFilter = ZoneFilters.FirstOrDefault();
+        ZoneSummariesView = new ObservableCollection<ZoneSummary>();
     }
 
     /// <summary>Generated property exposing the editor for the Warehouse module.</summary>
     /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Warehouse_Editor` resources are available.</remarks>
     [ObservableProperty]
     private WarehouseEditor _editor;
+
+    // UI-only commands and collections to satisfy bindings in the view (safe stubs until full implementation)
+    public IRelayCommand ReceiveStockCommand { get; }
+    public IRelayCommand IssueStockCommand { get; }
+    public IRelayCommand AdjustStockCommand { get; }
+    public ObservableCollection<string> TransactionAlerts { get; }
+    public ObservableCollection<string> ZoneFilters { get; }
+    public string? SelectedZoneFilter { get; set; }
+    public ObservableCollection<ZoneSummary> ZoneSummariesView { get; }
+
+    public sealed record ZoneSummary(string PartName, string PartCode, string ZoneLabel, int Quantity, int Minimum, int Maximum);
 
     /// <summary>Generated property exposing the is editor enabled for the Warehouse module.</summary>
     /// <remarks>Execution: Set during data loads and user edits with notifications raised by the source generators. Form Mode: Bound in Add/Update while rendered read-only for Find/View. Localization: Field labels remain inline until `Modules_Warehouse_IsEditorEnabled` resources are available.</remarks>
@@ -676,6 +696,5 @@ public sealed partial class WarehouseModuleViewModel : DataDrivenModuleDocumentV
         }
     }
 }
-
 
 
