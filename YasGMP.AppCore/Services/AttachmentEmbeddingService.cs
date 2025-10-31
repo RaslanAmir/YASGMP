@@ -11,6 +11,8 @@ using YasGMP.Models;
 using YasGMP.Services.Interfaces;
 using System.IO;
 using System.Text;
+using MySqlConnector;
+using System.Data.Common;
 
 namespace YasGMP.Services
 {
@@ -72,20 +74,47 @@ namespace YasGMP.Services
             }
 
             _db.AttachmentEmbeddings.Add(record);
-            await _db.SaveChangesAsync(token).ConfigureAwait(false);
-            return record.Id;
+            try
+            {
+                await _db.SaveChangesAsync(token).ConfigureAwait(false);
+                return record.Id;
+            }
+            catch (DbUpdateException ex) when (IsMissingTable(ex))
+            {
+                // Schema not provisioned yet (attachment_embeddings missing); degrade gracefully
+                return 0;
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                // Table doesn't exist; tolerate and return 0 so callers can proceed
+                return 0;
+            }
         }
 
         /// <summary>Finds similar attachments using cosine similarity against stored vectors.</summary>
         public async Task<IReadOnlyList<AttachmentSimilarity>> FindSimilarAsync(int attachmentId, int topK = 5, CancellationToken token = default)
         {
-            var target = await _db.AttachmentEmbeddings.AsNoTracking()
-                .FirstOrDefaultAsync(e => e.AttachmentId == attachmentId, token).ConfigureAwait(false);
-            if (target is null) return Array.Empty<AttachmentSimilarity>();
+            AttachmentEmbedding? target;
+            List<AttachmentEmbedding> all;
+            try
+            {
+                target = await _db.AttachmentEmbeddings.AsNoTracking()
+                    .FirstOrDefaultAsync(e => e.AttachmentId == attachmentId, token).ConfigureAwait(false);
+                if (target is null) return Array.Empty<AttachmentSimilarity>();
 
-            var all = await _db.AttachmentEmbeddings.AsNoTracking()
-                .Where(e => e.Model == target.Model && e.AttachmentId != attachmentId)
-                .ToListAsync(token).ConfigureAwait(false);
+                all = await _db.AttachmentEmbeddings.AsNoTracking()
+                    .Where(e => e.Model == target.Model && e.AttachmentId != attachmentId)
+                    .ToListAsync(token).ConfigureAwait(false);
+            }
+            catch (MySqlException ex) when (ex.Number == 1146)
+            {
+                // Table doesn't exist; no similarity can be computed
+                return Array.Empty<AttachmentSimilarity>();
+            }
+            catch (DbException) // e.g., SQLite "no such table" in demo/test
+            {
+                return Array.Empty<AttachmentSimilarity>();
+            }
 
             var targetVec = FromBytes(target.Vector);
             var list = new List<AttachmentSimilarity>(all.Count);
@@ -195,6 +224,16 @@ namespace YasGMP.Services
             }
             if (na == 0 || nb == 0) return 0;
             return dot / (Math.Sqrt(na) * Math.Sqrt(nb));
+        }
+
+        private static bool IsMissingTable(Exception ex)
+        {
+            for (var cur = ex; cur != null; cur = cur.InnerException!)
+            {
+                if (cur is MySqlException mex && mex.Number == 1146)
+                    return true;
+            }
+            return false;
         }
     }
 

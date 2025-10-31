@@ -59,5 +59,20 @@
         "smoke": "headless-friendly; tests pass (18/18) with YASGMP_SMOKE=1; app auto-runs smoke at startup; log writes fall back to %TEMP% when LocalAppData is unavailable"
       }
     }
+    ,
+    {
+      "date": "2025-10-31",
+      "type": "db+resilience",
+      "changes": [
+        { "file": "sql/migrations/2025-10-31_add_attachments_encryption_and_embeddings.sql", "action": "new-migration", "details": "Create attachment_embeddings + add attachment encryption/ocr/score columns (idempotent)." },
+        { "file": "YasGMP.AppCore/Services/AttachmentEmbeddingService.cs", "action": "graceful-missing-table", "details": "Catch MySQL 1146/DbUpdateException on insert and query; return 0/empty respectively to avoid AppDomain.UnhandledException when table absent." }
+      ],
+      "validation": {
+        "restore": "ok",
+        "build": { "wpf": "ok", "maui_win": "ok" },
+        "migration": "applied successfully; table present",
+        "smoke": "passed 18/18 with RUN_WPF_SMOKE=1, YASGMP_SMOKE=1"
+      }
+    }
   ]
 }

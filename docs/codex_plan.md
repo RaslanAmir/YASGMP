@@ -822,3 +822,23 @@ This file records the step-by-step plan and key decisions while delivering the W
 - MAUI host registers the AI services (no UI changes, keeps APIs stable).
 
 Windows build/smoke validation pending — run the standard restore/build/test commands on a Windows host with .NET 9 + Windows Desktop SDK.
+
+## 2025-10-31 – Attachment embeddings table + service resilience
+
+- Added SQL migration to provision `attachment_embeddings` and related attachment columns used by AI features:
+  - `sql/migrations/2025-10-31_add_attachments_encryption_and_embeddings.sql`
+  - Idempotent: duplicate column/table errors are tolerated by DbMigrator.
+- Hardened `AttachmentEmbeddingService` against missing schema to prevent AppDomain.UnhandledException:
+  - On insert/update (`IndexAttachmentAsync`): catch MySQL 1146 (table not found) and `DbUpdateException` → return 0 and continue.
+  - On query (`FindSimilarAsync`): catch MySQL 1146 and generic `DbException` (e.g., SQLite "no such table") → return empty results.
+- Applied migration via `tools/YasGMP.DbMigrator` using the appsettings connection string.
+
+Validation:
+- dotnet restore (solution): OK
+- Build: WPF Debug OK, MAUI Windows Debug OK
+- Migration: completed successfully; table now present
+- WPF smoke (RUN_WPF_SMOKE=1, YASGMP_SMOKE=1): Passed 18/18; log written to %LOCALAPPDATA%/YasGMP/logs
+
+Notes / Decisions:
+- Kept .NET 9 targets (`net9.0-windows10.0.19041.0`) as SDK is available.
+- Did not change DbMigrator default script; invoked with `--script` to run the embeddings migration. Consider a roll‑up script later.
