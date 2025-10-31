@@ -1139,9 +1139,9 @@ namespace YasGMP.Wpf.ViewModels.Modules;
 
     private void UpdateAttachmentCommands()
     {
-        UploadCommand.NotifyCanExecuteChanged();
-        DownloadCommand.NotifyCanExecuteChanged();
-        DeleteCommand.NotifyCanExecuteChanged();
+        // Ensure CanExecute notifications are raised on the UI dispatcher to avoid
+        // cross-thread violations when smoke runs steps off the UI thread.
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyManyOnUi(UploadCommand, DownloadCommand, DeleteCommand);
     }
 
     private StagedAttachmentUploadViewModel CreateStagedUpload(PickedFile file)
