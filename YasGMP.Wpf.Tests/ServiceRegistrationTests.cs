@@ -262,7 +262,7 @@ public class ServiceRegistrationTests
         {
             ["ConnectionStrings:MySqlDb"] = "Server=127.0.0.1;Database=unit_test;Uid=test;Pwd=test;",
             [DiagnosticsConstants.KeySinks] = "stdout",
-            ["Diagnostics:DbShadow:Enabled"] = "false",
+            ["Diagnostics:DbShadow:Enabled"] = "true",
             ["Diagnostics:DbShadow:Database"] = "unit_test_shadow"
         };
 
@@ -272,15 +272,25 @@ public class ServiceRegistrationTests
 
         using var provider = BuildWpfServiceProvider(configuration);
         var database = provider.GetRequiredService<DatabaseService>();
+        var ctx = provider.GetRequiredService<DiagnosticContext>();
+        var trace = provider.GetRequiredService<ITrace>();
 
         Assert.NotNull(database);
-        Assert.NotNull(DatabaseService.GlobalDiagnosticContext);
-        Assert.NotNull(DatabaseService.GlobalTrace);
+        Assert.Same(database, provider.GetRequiredService<DatabaseService>());
+
+        Assert.Same(ctx, DatabaseService.GlobalDiagnosticContext);
+        Assert.Same(trace, DatabaseService.GlobalTrace);
         Assert.Same(configuration, DatabaseService.GlobalConfiguration);
 
         var shadowField = typeof(DatabaseService).GetField("_shadow", BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.NotNull(shadowField);
-        Assert.NotNull(shadowField!.GetValue(database));
+
+        var shadow = shadowField!.GetValue(database);
+        Assert.NotNull(shadow);
+
+        var enabledProperty = shadow!.GetType().GetProperty("Enabled", BindingFlags.Instance | BindingFlags.Public);
+        Assert.NotNull(enabledProperty);
+        Assert.True(enabledProperty!.GetValue(shadow) as bool? ?? false);
     }
 
     private static ServiceProvider BuildWpfServiceProvider(IConfiguration configuration)
