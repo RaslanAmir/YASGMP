@@ -280,9 +280,10 @@
                 </ad:DockingManager.DocumentHeaderTemplate>
 
                 <ad:DockingManager.LayoutItemContainerStyle>
+                    <!-- Keep LayoutItem header in sync with the hosted ViewModel -->
                     <Style TargetType="{x:Type ad:LayoutItem}">
-                        <Setter Property="Title" Value="{Binding LayoutElement.Title}" />
-                        <Setter Property="ContentId" Value="{Binding LayoutElement.ContentId}" />
+                        <Setter Property="Title" Value="{Binding Content.Title}" />
+                        <Setter Property="ContentId" Value="{Binding Content.ContentId}" />
                     </Style>
                 </ad:DockingManager.LayoutItemContainerStyle>
                 <ad:DockingManager.Layout>

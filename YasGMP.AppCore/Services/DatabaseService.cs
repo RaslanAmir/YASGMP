@@ -17,6 +17,17 @@ namespace YasGMP.Services
     /// </summary>
     public sealed partial class DatabaseService
     {
+        private static bool IsDemoMode()
+        {
+            try
+            {
+                var smoke = Environment.GetEnvironmentVariable("YASGMP_SMOKE");
+                var demo  = Environment.GetEnvironmentVariable("YASGMP_DEMO");
+                return string.Equals(smoke, "1", StringComparison.OrdinalIgnoreCase)
+                       || string.Equals(demo, "1", StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
+        }
         private readonly string _connectionString;
         private DiagnosticContext? _diagCtx;
         private ITrace? _trace;
@@ -103,6 +114,11 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (IsDemoMode())
+            {
+                // Skip DB in demo/smoke mode to avoid noisy exceptions on machines without DB
+                return 0;
+            }
             if (ExecuteNonQueryOverride != null)
                 return await ExecuteNonQueryOverride(sql, parameters, token).ConfigureAwait(false);
             await using var conn = CreateConnection();
@@ -133,6 +149,10 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (IsDemoMode())
+            {
+                return null;
+            }
             if (ExecuteScalarOverride != null)
                 return await ExecuteScalarOverride(sql, parameters, token).ConfigureAwait(false);
             await using var conn = CreateConnection();
@@ -157,6 +177,10 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (IsDemoMode())
+            {
+                return new DataTable();
+            }
             if (ExecuteSelectOverride != null)
                 return await ExecuteSelectOverride(sql, parameters, token).ConfigureAwait(false);
             await using var conn = CreateConnection();
@@ -188,6 +212,10 @@ namespace YasGMP.Services
             CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
+            if (IsDemoMode())
+            {
+                return null;
+            }
             var conn = CreateConnection();
             await conn.OpenAsync(token).ConfigureAwait(false);
             var cmd = new MySqlCommand(sql, conn);
