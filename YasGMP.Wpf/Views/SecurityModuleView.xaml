@@ -11,7 +11,27 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/ModuleToolbarResources.xaml" />
+                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/UserEditorResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="InspectorEditorSectionStyle" TargetType="FrameworkElement">
+                <Setter Property="IsEnabled" Value="True" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Dialog.IsBusy}" Value="True">
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Dialog.IsImpersonating}" Value="True">
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="InspectorBusySectionStyle" TargetType="FrameworkElement">
+                <Setter Property="IsEnabled" Value="True" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Dialog.IsBusy}" Value="True">
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -112,63 +132,233 @@
                     Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
                     BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
                     BorderThickness="1">
-                <StackPanel>
-                    <TextBlock Text="{DynamicResource Module.Security.Text.UserDetails}"
-                               FontWeight="Bold"
-                               FontSize="14"
-                               Margin="0,0,0,12" />
-                    <ContentControl Content="{Binding SelectedRecord}">
-                        <ContentControl.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Margin="0,0,0,4"
-                                               TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding Status}"
-                                               FontStyle="Italic"
-                                               Foreground="Gray"
-                                               Margin="0,0,0,12" />
-                                    <ItemsControl ItemsSource="{Binding InspectorFields}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="0,0,0,6">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="160" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Label}"
-                                                               FontWeight="SemiBold"
-                                                               Margin="0,0,8,0"
-                                                               TextWrapping="Wrap" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding Value}"
-                                                               TextWrapping="Wrap" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ContentControl.ContentTemplate>
-                    </ContentControl>
-                    <TextBlock Text="{DynamicResource Module.Security.Text.NoSelection}"
-                               Foreground="Gray"
-                               FontStyle="Italic"
-                               Margin="0,12,0,0">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedRecord}" Value="{x:Null}">
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <TextBlock Text="{DynamicResource Module.Security.Text.UserDetails}"
+                                       FontWeight="Bold"
+                                       FontSize="14"
+                                       Margin="0,0,0,12" />
+
+                            <TextBlock Text="{DynamicResource Module.Security.Text.NoSelection}"
+                                       Foreground="Gray"
+                                       FontStyle="Italic"
+                                       Margin="0,0,0,12">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedRecord}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <Grid ColumnDefinitions="Auto,*"
+                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                                  RowSpacing="12"
+                                  ColumnSpacing="16"
+                                  Style="{StaticResource InspectorEditorSectionStyle}">
+                                <TextBlock Text="{DynamicResource Module.Security.Text.Username}"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Dialog.Editor.Username, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Security.Text.Username}" />
+
+                                <TextBlock Grid.Row="1"
+                                           Text="{DynamicResource Module.Security.Text.FullName}"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Text="{Binding Dialog.Editor.FullName, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Security.Text.FullName}" />
+
+                                <TextBlock Grid.Row="2"
+                                           Text="{DynamicResource Module.Security.Text.Email}"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Text="{Binding Dialog.Editor.Email, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Security.Text.Email}" />
+
+                                <TextBlock Grid.Row="3"
+                                           Text="{DynamicResource Module.Security.Text.Phone}"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Row="3"
+                                         Grid.Column="1"
+                                         Text="{Binding Dialog.Editor.Phone, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Security.Text.Phone}" />
+
+                                <TextBlock Grid.Row="4"
+                                           Text="{DynamicResource Module.Security.Text.PrimaryRole}"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="1"
+                                         Text="{Binding Dialog.Editor.Role, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Security.Text.PrimaryRole}" />
+
+                                <TextBlock Grid.Row="5"
+                                           Text="{DynamicResource Module.Security.Text.Department}"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Row="5"
+                                         Grid.Column="1"
+                                         Text="{Binding Dialog.Editor.DepartmentName, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTipService.ToolTip="{DynamicResource Module.Security.Text.Department}" />
+
+                                <TextBlock Grid.Row="6"
+                                           Text="{DynamicResource Module.Security.Content.Active}"
+                                           VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="6"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding Dialog.Editor.Active}"
+                                          HorizontalAlignment="Left" />
+
+                                <TextBlock Grid.Row="7"
+                                           Text="{DynamicResource Module.Security.Content.Locked}"
+                                           VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="7"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding Dialog.Editor.IsLocked}"
+                                          HorizontalAlignment="Left" />
+
+                                <TextBlock Grid.Row="8"
+                                           Text="{DynamicResource Module.Security.Content.TwoFactor}"
+                                           VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="8"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding Dialog.Editor.IsTwoFactorEnabled}"
+                                          HorizontalAlignment="Left" />
+                            </Grid>
+
+                            <TextBlock Text="{DynamicResource Module.Security.Text.AssignedRoles}"
+                                       FontWeight="SemiBold"
+                                       Margin="0,20,0,8" />
+
+                            <ItemsControl ItemsSource="{Binding Dialog.RoleOptions}"
+                                          Margin="0,0,0,12"
+                                          ItemTemplate="{StaticResource UserEditor.RoleOptionTemplate}">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl" BasedOn="{StaticResource InspectorEditorSectionStyle}" />
+                                </ItemsControl.Style>
+                            </ItemsControl>
+
+                            <TextBlock Text="{DynamicResource Module.Diagnostics.Text.Session}"
+                                       FontWeight="SemiBold"
+                                       Margin="0,12,0,8" />
+
+                            <CheckBox Content="{DynamicResource Dialog.UserEdit.Toggle.Impersonation.Label}"
+                                      IsChecked="{Binding Dialog.IsImpersonating, Mode=TwoWay}"
+                                      HorizontalAlignment="Left">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox" BasedOn="{StaticResource InspectorBusySectionStyle}" />
+                                </CheckBox.Style>
+                            </CheckBox>
+
+                            <ComboBox ItemsSource="{Binding Dialog.ImpersonationTargets}"
+                                      DisplayMemberPath="DisplayName"
+                                      SelectedItem="{Binding Dialog.SelectedImpersonationTarget, Mode=TwoWay}"
+                                      Margin="0,8,0,0"
+                                      ToolTipService.ToolTip="{DynamicResource Module.Diagnostics.Text.Session}">
+                                <ComboBox.Style>
+                                    <Style TargetType="ComboBox" BasedOn="{StaticResource InspectorBusySectionStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Dialog.IsImpersonating}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ComboBox.Style>
+                            </ComboBox>
+
+                            <TextBox Text="{Binding Dialog.ImpersonationReason, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,8,0,0"
+                                     ToolTipService.ToolTip="{DynamicResource Dialog.ElectronicSignature.Text.ReasonCode}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource InspectorBusySectionStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Dialog.IsImpersonating}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+
+                            <TextBox Text="{Binding Dialog.ImpersonationNotes, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     Height="80"
+                                     Margin="0,8,0,0"
+                                     ToolTipService.ToolTip="{DynamicResource Dialog.ElectronicSignature.Text.ReasonNote}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource InspectorBusySectionStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Dialog.IsImpersonating}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+
+                            <ItemsControl ItemsSource="{Binding Dialog.ValidationMessages}"
+                                          Margin="0,12,0,0"
+                                          AutomationProperties.AutomationId="{StaticResource Dialog.UserEdit.ValidationMessages.AutomationId}"
+                                          ItemTemplate="{StaticResource UserEditor.ValidationMessageTemplate}" />
+
+                            <TextBlock Text="{Binding Dialog.StatusMessage}"
+                                       Foreground="DarkRed"
+                                       Margin="0,8,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
+                                        <Style.Triggers>
+                                            <Trigger Property="Text" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </Trigger>
+                                            <Trigger Property="Text" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <ProgressBar IsIndeterminate="True"
+                                         Height="4"
+                                         Margin="0,12,0,0"
+                                         Visibility="{Binding Dialog.IsBusy, Converter={StaticResource UserEditor.BooleanToVisibilityConverter}}" />
+
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,20,0,0">
+                                <Button Content="{DynamicResource Module.Toolbar.Command.Save.Content}"
+                                        Command="{Binding SaveUserCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Module.Toolbar.Command.Save.ToolTip}"
+                                        AutomationProperties.Name="{DynamicResource Module.Toolbar.Command.Save.AutomationName}"
+                                        AutomationProperties.AutomationId="{StaticResource Module.Toolbar.Command.Save.AutomationId}"
+                                        Margin="0,0,12,0"
+                                        Width="120" />
+                                <Button Content="{DynamicResource Dialog.UserEdit.Command.BeginImpersonation.Content}"
+                                        Command="{Binding BeginImpersonationCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Dialog.UserEdit.Command.BeginImpersonation.ToolTip}"
+                                        AutomationProperties.Name="{DynamicResource Dialog.UserEdit.Command.BeginImpersonation.AutomationName}"
+                                        AutomationProperties.AutomationId="{StaticResource Dialog.UserEdit.BeginImpersonation.AutomationId}"
+                                        Margin="0,0,12,0"
+                                        Width="140" />
+                                <Button Content="{DynamicResource Dialog.UserEdit.Command.EndImpersonation.Content}"
+                                        Command="{Binding EndImpersonationCommand}"
+                                        ToolTipService.ToolTip="{DynamicResource Dialog.UserEdit.Command.EndImpersonation.ToolTip}"
+                                        AutomationProperties.Name="{DynamicResource Dialog.UserEdit.Command.EndImpersonation.AutomationName}"
+                                        AutomationProperties.AutomationId="{StaticResource Dialog.UserEdit.EndImpersonation.AutomationId}"
+                                        Width="160" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
             <TextBlock Grid.Row="2"

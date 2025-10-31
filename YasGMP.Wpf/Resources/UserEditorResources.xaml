@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dialogs="clr-namespace:YasGMP.Wpf.ViewModels.Dialogs">
+    <BooleanToVisibilityConverter x:Key="UserEditor.BooleanToVisibilityConverter" />
+
+    <DataTemplate x:Key="UserEditor.RoleOptionTemplate"
+                  DataType="{x:Type dialogs:UserEditDialogViewModel+RoleOption}">
+        <StackPanel Orientation="Horizontal" Margin="0,4,0,4" VerticalAlignment="Top">
+            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                      VerticalAlignment="Top"
+                      Margin="0,0,8,0" />
+            <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}"
+                           FontSize="12"
+                           Foreground="Gray"
+                           TextWrapping="Wrap"
+                           MaxWidth="340" />
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="UserEditor.ValidationMessageTemplate">
+        <TextBlock Foreground="DarkRed" TextWrapping="Wrap">
+            <Run Text="• " />
+            <Run Text="{Binding}" />
+        </TextBlock>
+    </DataTemplate>
+</ResourceDictionary>

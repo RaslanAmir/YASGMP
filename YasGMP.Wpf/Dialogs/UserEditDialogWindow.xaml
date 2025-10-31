@@ -11,7 +11,11 @@
         MinHeight="640"
         ResizeMode="CanResizeWithGrip">
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/YasGMP.Wpf;component/Resources/UserEditorResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
@@ -122,25 +126,8 @@
                            Margin="0,20,0,8" />
 
                 <ItemsControl ItemsSource="{Binding RoleOptions}"
-                              Margin="0,0,0,12">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,4" VerticalAlignment="Top">
-                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                          VerticalAlignment="Top"
-                                          Margin="0,0,8,0" />
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Description}"
-                                               FontSize="12"
-                                               Foreground="Gray"
-                                               TextWrapping="Wrap"
-                                               MaxWidth="340" />
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                              Margin="0,0,0,12"
+                              ItemTemplate="{StaticResource UserEditor.RoleOptionTemplate}" />
 
                 <TextBlock Text="{DynamicResource Module.Diagnostics.Text.Session}"
                            FontWeight="SemiBold"
@@ -169,16 +156,8 @@
 
                 <ItemsControl ItemsSource="{Binding ValidationMessages}"
                               Margin="0,12,0,0"
-                              AutomationProperties.AutomationId="{StaticResource Dialog.UserEdit.ValidationMessages.AutomationId}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Foreground="DarkRed" TextWrapping="Wrap">
-                                <Run Text="• " />
-                                <Run Text="{Binding}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                              AutomationProperties.AutomationId="{StaticResource Dialog.UserEdit.ValidationMessages.AutomationId}"
+                              ItemTemplate="{StaticResource UserEditor.ValidationMessageTemplate}" />
 
                 <TextBlock Text="{Binding StatusMessage}"
                            Foreground="DarkRed"
@@ -201,7 +180,7 @@
                 <ProgressBar IsIndeterminate="True"
                              Height="4"
                              Margin="0,12,0,0"
-                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                             Visibility="{Binding IsBusy, Converter={StaticResource UserEditor.BooleanToVisibilityConverter}}" />
 
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Right"
