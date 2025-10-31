@@ -33,6 +33,10 @@ Validation:
 - dotnet build WPF/MAUI: OK.
 - Manual run expected to avoid crashes even when DB schema differs; audit queries degrade gracefully (log row added or list loads without key text).
 
+Follow-up: toolbar binding failures
+- Added shared `Resources/ModuleToolbarResources.xaml` with `ModuleToolbarToggleButtonTemplate` used by modules. Template binds `ToggleButton.ToolTip` to `ToolTipKey` via `ResourceStringConverter` (instead of binding to a non-existent `ToolTip` property on `ModuleToolbarCommand`).
+- This removes runtime errors like: "BindingExpression path error: 'ToolTip' property not found on 'ModuleToolbarCommand'".
+
 ## 2025-10-24 – Warnings reduction (batch 1)
 
 - Replaced deprecated `Application.MainPage` usages with `Application.Current.Windows.FirstOrDefault()?.Page` across MAUI code-behind and view-models to align with .NET 9 multi-window guidance and remove CS0618 warnings.
