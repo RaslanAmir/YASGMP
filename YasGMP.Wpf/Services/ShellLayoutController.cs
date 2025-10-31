@@ -66,7 +66,8 @@ namespace YasGMP.Wpf.Services
                     return;
                 }
 
-                _viewModel?.PrepareForLayoutImport();
+                // Ensure we touch view-model collections on the UI thread to avoid cross-thread WPF access
+                await window.Dispatcher.InvokeAsync(() => _viewModel?.PrepareForLayoutImport());
                 await window.Dispatcher.InvokeAsync(() =>
                 {
                     var serializer = new XmlLayoutSerializer(_dockManager);
@@ -125,7 +126,8 @@ namespace YasGMP.Wpf.Services
                 return;
             }
 
-            _viewModel?.PrepareForLayoutImport();
+            // Run on UI thread to avoid DockingManager collection change from a worker thread
+            await window.Dispatcher.InvokeAsync(() => _viewModel?.PrepareForLayoutImport());
             await window.Dispatcher.InvokeAsync(() =>
             {
                 var serializer = new XmlLayoutSerializer(_dockManager);
@@ -206,4 +208,3 @@ namespace YasGMP.Wpf.Services
         }
     }
 }
-

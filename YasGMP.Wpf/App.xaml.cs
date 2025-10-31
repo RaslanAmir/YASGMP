@@ -237,6 +237,7 @@ namespace YasGMP.Wpf
                         svc.AddTransient<SchedulingModuleViewModel>();
                         svc.AddTransient<SecurityModuleViewModel>();
                         svc.AddTransient<AdminModuleViewModel>();
+                        svc.AddTransient<ReportsModuleViewModel>();
                         svc.AddTransient<AuditModuleViewModel>();
                         svc.AddTransient<AuditLogDocumentViewModel>(sp => new AuditLogDocumentViewModel(
                             sp.GetRequiredService<AuditService>(),
