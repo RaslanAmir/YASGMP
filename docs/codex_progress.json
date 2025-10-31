@@ -242,7 +242,7 @@
     "RiskAssessments": "done",
     "SettingsAdmin": "in-progress"
   },
-  "lastCommitSummary": "docs: document admin form modes and validation",
+  "lastCommitSummary": "test: cover user role assignment updates",
   "notes": [
     "2026-09-21: AdminModuleView now introduces an Expander-wrapped settings list bound to RecordsView/SelectedRecord so the listing can collapse independently of the editor form; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 still report 'command not found: dotnet' in this container.",
     "2026-09-20: AdminModuleView now surfaces a shared validation presenter beneath the editor with visibility tied to HasValidationErrors so Admin settings align with other modules; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still report 'command not found: dotnet' in this container.",
@@ -450,7 +450,8 @@
     "2026-05-09: Dashboard module now projects shared inventory alerts/movements via DatabaseService inventory helpers, updates Parts/Warehouse stock toolbars, and adds dashboard unit tests; dotnet restore/build for yasgmp.sln, YasGMP.Wpf net9.0-windows, and MAUI Windows targets still return 'command not found: dotnet' in this container.",
     "2026-05-09: Audit module toolbar now opens a rollback preview document with before/after JSON, signature verification, and rollback command wiring through the shell document host; dotnet restore/build/test remain blocked with 'command not found' until Windows tooling is available.",
     "2026-08-19: Startup sequence now reconciles machines triggers post-authentication via DatabaseService with MySQL permission handling and diagnostics logging; dotnet restore/build/test attempts still fail with 'command not found: dotnet' pending Windows tooling.",
-    "2026-09-17: Replaced Admin module settings DataGrid with a localized editable form bound to CurrentSetting fields; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still fail with 'command not found: dotnet' in this container."
+    "2026-09-17: Replaced Admin module settings DataGrid with a localized editable form bound to CurrentSetting fields; dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0, and dotnet test YasGMP.Wpf.Smoke/YasGMP.Wpf.Smoke.csproj -c Release still fail with 'command not found: dotnet' in this container.",
+    "2026-09-27: Added UserCrudServiceAdapter role assignment regression tests covering grant/revoke/no-op flows; dotnet --version, dotnet restore yasgmp.sln, dotnet build YasGMP.Wpf/YasGMP.Wpf.csproj -f net9.0-windows, and dotnet build yasgmp.csproj -f net9.0-windows10.0.19041.0 still report 'command not found: dotnet' in this container."
   ],
   "progress": [
     "2025-10-13: MAUI shell retargeted to net9.0-windows10.0.19041.0 with EF Core 9.x, Pomelo 9.0.0, and AppCore multi-targeting net8/net9 via Directory.Build.props; build/test remain blocked without the dotnet CLI.",
