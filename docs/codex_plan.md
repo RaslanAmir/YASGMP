@@ -842,3 +842,12 @@ Validation:
 Notes / Decisions:
 - Kept .NET 9 targets (`net9.0-windows10.0.19041.0`) as SDK is available.
 - Did not change DbMigrator default script; invoked with `--script` to run the embeddings migration. Consider a roll‑up script later.
+
+## 2025-10-31 – Attachments soft delete column (runtime fix)
+
+- Observed EF runtime error: Unknown column `a.soft_deleted_at` during `attachments` SELECT in WPF run.
+- Added idempotent SQL migration: `sql/migrations/2025-10-31_add_attachment_soft_delete.sql`
+  - Adds `attachments.soft_deleted_at DATETIME NULL` when missing (guards for views).
+  - Backfills `soft_deleted_at` for rows with `is_deleted=1`.
+  - Ensures unique index `ux_attachments_sha256_size` exists for lookups `(sha256,file_size)`.
+- Applied via DbMigrator; follow-up runs should no longer log the unknown column error.

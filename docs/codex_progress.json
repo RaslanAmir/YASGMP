@@ -74,5 +74,18 @@
         "smoke": "passed 18/18 with RUN_WPF_SMOKE=1, YASGMP_SMOKE=1"
       }
     }
+    ,
+    {
+      "date": "2025-10-31",
+      "type": "db-patch",
+      "changes": [
+        { "file": "sql/migrations/2025-10-31_add_attachment_soft_delete.sql", "action": "new-migration", "details": "Add attachments.soft_deleted_at with guarded backfill; create unique index ux_attachments_sha256_size." }
+      ],
+      "validation": {
+        "restore": "ok",
+        "build": { "wpf": "ok", "maui_win": "ok" },
+        "migration": "applied successfully; EF query no longer fails for soft_deleted_at"
+      }
+    }
   ]
 }
