@@ -77,7 +77,7 @@ namespace YasGMP.Wpf.Services
                     serializer.LayoutSerializationCallback -= OnLayoutSerializationCallback;
                 });
 
-                ApplyGeometry(window, snapshot.Value.Geometry);
+                await window.Dispatcher.InvokeAsync(() => ApplyGeometry(window, snapshot.Value.Geometry));
             }
             catch (Exception ex)
             {
