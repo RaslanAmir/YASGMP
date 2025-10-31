@@ -350,8 +350,14 @@ public partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
 
     private void UpdateExportCommandStates()
     {
-        _exportToPdfCommand.NotifyCanExecuteChanged();
-        _exportToExcelCommand.NotifyCanExecuteChanged();
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(new Action(UpdateExportCommandStates));
+            return;
+        }
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_exportToPdfCommand);
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_exportToExcelCommand);
     }
 
     private void OpenAiSummary()
@@ -380,7 +386,6 @@ public partial class AuditModuleViewModel : DataDrivenModuleDocumentViewModel
         return $"User: {userText}; Entity: {entityText}; Action: {actionText}; Range: {fromText} – {toText}";
     }
 }
-
 
 
 

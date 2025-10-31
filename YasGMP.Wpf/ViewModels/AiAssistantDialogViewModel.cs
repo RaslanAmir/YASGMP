@@ -51,9 +51,8 @@ namespace YasGMP.Wpf.ViewModels
             finally
             {
                 IsBusy = false;
-                (SendCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+                YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(SendCommand);
             }
         }
     }
 }
-

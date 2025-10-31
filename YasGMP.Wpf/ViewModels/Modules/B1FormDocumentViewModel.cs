@@ -239,7 +239,7 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
 
     partial void OnSelectedRecordChanged(ModuleRecord? value)
     {
-        GoldenArrowCommand.NotifyCanExecuteChanged();
+        UiCommandHelper.NotifyCanExecuteOnUi(GoldenArrowCommand);
         if (value is null)
         {
             _shellInteraction.UpdateInspector(new InspectorContext(Title, "No record selected", Array.Empty<InspectorField>()));
@@ -524,6 +524,5 @@ public abstract partial class B1FormDocumentViewModel : DocumentViewModel
         RefreshCommandStates();
     }
 }
-
 
 

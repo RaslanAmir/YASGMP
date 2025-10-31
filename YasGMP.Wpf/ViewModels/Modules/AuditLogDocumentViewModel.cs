@@ -399,13 +399,18 @@ public sealed partial class AuditLogDocumentViewModel : ModuleDocumentViewModel
 
     private void UpdateCommandStates()
     {
-        _applyFilterCommand.NotifyCanExecuteChanged();
-        _refreshCommand.NotifyCanExecuteChanged();
-        _exportCsvCommand.NotifyCanExecuteChanged();
-        _exportXlsxCommand.NotifyCanExecuteChanged();
-        _exportPdfCommand.NotifyCanExecuteChanged();
-        base.RefreshCommand.NotifyCanExecuteChanged();
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(new Action(UpdateCommandStates));
+            return;
+        }
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_applyFilterCommand);
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_refreshCommand);
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_exportCsvCommand);
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_exportXlsxCommand);
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(_exportPdfCommand);
+        YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(base.RefreshCommand);
     }
 }
-
 

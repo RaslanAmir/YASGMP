@@ -99,7 +99,7 @@ public sealed partial class AiModuleViewModel : ModuleDocumentViewModel
         finally
         {
             IsBusy = false;
-            (AskCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+            YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(AskCommand);
         }
     }
 

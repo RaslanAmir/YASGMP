@@ -228,7 +228,7 @@ public sealed class ReportsModuleViewModel : DataDrivenModuleDocumentViewModel
             IsBusy = false;
             _cts?.Dispose();
             _cts = null;
-            (CancelExportCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(CancelExportCommand);
         }
     }
 
@@ -256,14 +256,14 @@ public sealed class ReportsModuleViewModel : DataDrivenModuleDocumentViewModel
         {
             StatusMessage = $"Export failed: {ex.Message}";
         }
-        finally { IsBusy = false; _cts?.Dispose(); _cts = null; (CancelExportCommand as RelayCommand)?.NotifyCanExecuteChanged(); }
+        finally { IsBusy = false; _cts?.Dispose(); _cts = null; YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(CancelExportCommand); }
     }
 
     private void CancelExport()
     {
         try { _cts?.Cancel(); }
         catch { /* ignore */ }
-        finally { (CancelExportCommand as RelayCommand)?.NotifyCanExecuteChanged(); }
+        finally { YasGMP.Wpf.Helpers.UiCommandHelper.NotifyCanExecuteOnUi(CancelExportCommand); }
     }
 
     private static string Escape(string? s)
