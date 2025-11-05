@@ -188,8 +188,6 @@ namespace YasGMP
                 services.AddSingleton<IFilePicker, MauiFilePicker>();
                 services.AddSingleton<IUserSession, MauiUserSession>();
                 services.AddSingleton<AuditService>();
-                services.AddSingleton<AuthService>();
-                services.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<AuthService>());
                 services.AddSingleton<ExportService>();
                 services.AddSingleton<WorkOrderAuditService>();
                 services.AddSingleton<IAttachmentService, AttachmentService>();
@@ -197,9 +195,11 @@ namespace YasGMP
                 services.AddSingleton<BackgroundScheduler>(); // in-app scheduler (PPM/alerts)
                 services.AddSingleton<CodeGeneratorService>(); // NEW
 
-                // RBAC + Users
+                // RBAC + Users (registered before AuthService since AuthService depends on UserService)
                 services.AddSingleton<IRBACService, RBACService>();
                 services.AddSingleton<UserService>();
+                services.AddSingleton<AuthService>();
+                services.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<AuthService>());
 
                 // ViewModels
                 services.AddTransient<LoginViewModel>();
