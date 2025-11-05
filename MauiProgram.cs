@@ -181,13 +181,15 @@ namespace YasGMP
 
                 var services = core.Services;
 
+                // Ensure AuditService is registered only once as singleton (guard against duplicates)
+                YasGmpCoreServiceGuards.EnsureAuditServiceSingleton(services);
+
                 // Core Services
                 services.AddSingleton<IPlatformService, MauiPlatformService>();
                 services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
                 services.AddSingleton<IDialogService, MauiDialogService>();
                 services.AddSingleton<IFilePicker, MauiFilePicker>();
                 services.AddSingleton<IUserSession, MauiUserSession>();
-                services.AddSingleton<AuditService>();
                 services.AddSingleton<ExportService>();
                 services.AddSingleton<WorkOrderAuditService>();
                 services.AddSingleton<IAttachmentService, AttachmentService>();

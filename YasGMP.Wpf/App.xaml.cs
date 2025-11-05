@@ -95,7 +95,10 @@ namespace YasGMP.Wpf
                         var svc = core.Services;
                         svc.AddSingleton(databaseOptions);
                         svc.AddSingleton(TimeProvider.System);
-                        svc.AddSingleton<AuditService>();
+                        
+                        // Ensure AuditService is registered only once as singleton (guard against duplicates)
+                        YasGmpCoreServiceGuards.EnsureAuditServiceSingleton(svc);
+                        
                         svc.AddSingleton<ExportService>();
                         svc.AddSingleton<CodeGeneratorService>();
                         svc.AddSingleton<ICodeGeneratorService, CodeGeneratorServiceAdapter>();
