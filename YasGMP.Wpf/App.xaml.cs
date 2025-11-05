@@ -111,10 +111,6 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IPlatformService, WpfPlatformService>();
                         svc.AddSingleton<WpfAuthContext>();
                         svc.AddSingleton<IAuthContext>(sp => sp.GetRequiredService<WpfAuthContext>());
-                        svc.AddSingleton<UserService>();
-                        svc.AddSingleton<IUserService>(sp => sp.GetRequiredService<UserService>());
-                        svc.AddSingleton<AuthService>();
-                        svc.AddSingleton<IAuthenticator, AuthServiceAuthenticator>();
                         svc.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
                         svc.AddSingleton<IDialogService>(sp =>
                             new WpfDialogService(() => sp.GetRequiredService<UserEditDialogViewModel>()));
@@ -126,7 +122,13 @@ namespace YasGMP.Wpf
                         svc.AddSingleton<IElectronicSignatureDialogService, ElectronicSignatureDialogService>();
                         svc.AddSingleton<ICalibrationCertificateDialogService, CalibrationCertificateDialogService>();
                         svc.AddSingleton<ICflDialogService, CflDialogService>();
+                        // Register IRBACService before UserService (dependency)
                         svc.AddSingleton<IRBACService, RBACService>();
+                        // Register UserService before AuthService (dependency)
+                        svc.AddSingleton<UserService>();
+                        svc.AddSingleton<IUserService>(sp => sp.GetRequiredService<UserService>());
+                        svc.AddSingleton<AuthService>();
+                        svc.AddSingleton<IAuthenticator, AuthServiceAuthenticator>();
                         svc.AddTransient<ICalibrationAuditService, CalibrationAuditServiceAdapter>();
                         svc.AddTransient<IPpmAuditService, PpmAuditServiceAdapter>();
                         svc.AddTransient<PreventiveMaintenanceService>();
